@@ -19,8 +19,8 @@ Ce site web comprend les pages suivantes :
 
 * Introduction à R
     * Présentation de R
-    * [Installation de R]({{%relref "introduction/GuideInstallationR2017.html" %}})
-    * [Concepts de base en R]({{%relref "introduction/BaseR2017.html" %}})
+    * [Installation de R]({{%relref "introduction/installation-r-2017.html" %}})
+    * [Concepts de base en R]({{%relref "introduction/base-r-2017.html" %}})
 * Manipulation de données en R
     * Structure de données en R
     * Lecture et écriture dans des fichiers externes à partir de R
