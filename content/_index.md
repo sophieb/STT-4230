@@ -7,15 +7,22 @@ date = "2017-11-27"
 
 # R pour scientifique
 
-Ce site web contient les notes du cours STT-4230 / STT-6240 : R pour scientifique, offert par le [Département de mathématiques et de statistique](https://www.mat.ulaval.ca/accueil/) de l'[Université Laval](https://www.ulaval.ca/), Québec, Canada.
+Ce site web contient les notes du cours **STT-4230 / STT-6240 R pour scientifique**,  
+offert par le [Département de mathématiques et de statistique](https://www.mat.ulaval.ca/accueil/) de l'[Université Laval](https://www.ulaval.ca/), Québec, Canada.
 
-Selon le [répertoire des cours de l'Université Laval](https://www.ulaval.ca/les-etudes/cours/repertoire/detailsCours/stt-4230-r-pour-scientifique.html), voici la description de ce cours.
+Les notes ont été réalisées par *Sophie Baillargeon*, enseignante du cours à chacune de ses éditions jusqu'à présent (tous les hivers, de 2014 à 2018).
+
+Selon le [répertoire des cours de l'Université Laval](https://www.ulaval.ca/les-etudes/cours/repertoire/detailsCours/stt-4230-r-pour-scientifique.html), le cours STT-4230 / STT-6240 est ainsi décrit :
 
 {{%panel%}}
 Ce cours a pour objectif d'amener l'étudiant à une maîtrise avancée de R, de sorte qu'il puisse utiliser ce langage pour programmer et implanter de nouvelles méthodes de calcul d'une manière efficiente et réutilisable. L'étudiant apprend à : comprendre ce que fait un programme R donné, faire ses propres programmes R (y compris des énoncés conditionnels, des boucles si nécessaire, des calculs vectoriels), créer des fonctions R et savoir les documenter, déboguer un programme R et l'optimiser en termes de temps de calcul.
 {{%/panel%}}
 
-Ce site web comprend les pages suivantes : 
+Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur le site web du cours, dans l'environnement numérique de l'Université Laval «&nbsp;monPortail&nbsp;» : https://monportail.ulaval.ca.
+
+***
+
+#### Ce site web comprend les pages suivantes : 
 
 * Introduction à R
     * Présentation de R
