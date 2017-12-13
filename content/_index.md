@@ -7,10 +7,7 @@ date = "2017-11-27"
 
 # R pour scientifique
 
-Ce site web contient les notes du cours **STT-4230 / STT-6240 R pour scientifique**,  
-offert par le [Département de mathématiques et de statistique](https://www.mat.ulaval.ca/accueil/) de l'[Université Laval](https://www.ulaval.ca/), Québec, Canada.
-
-Les notes ont été réalisées par *Sophie Baillargeon*, enseignante du cours à chacune de ses éditions jusqu'à présent (tous les hivers, de 2014 à 2018).
+Ce site web contient les notes du cours **STT-4230 / STT-6240 R pour scientifique**, offert par le [Département de mathématiques et de statistique](https://www.mat.ulaval.ca/accueil/) de l'[Université Laval](https://www.ulaval.ca/) (Québec, Canada). Ces notes ont été réalisées par *Sophie Baillargeon*, enseignante du cours depuis sa création.
 
 Selon le [répertoire des cours de l'Université Laval](https://www.ulaval.ca/les-etudes/cours/repertoire/detailsCours/stt-4230-r-pour-scientifique.html), le cours STT-4230 / STT-6240 est ainsi décrit :
 
