@@ -48,7 +48,7 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
     * Bonnes pratiques en R
     * Optimisation de temps d'exécution en R
     * Métaprogrammation en R
-* Tutoriel d'étudiants
+* Tutoriels d'étudiants
 
 
 
