@@ -2,7 +2,8 @@
 title = "Notes de cours"
 description = ""
 date = "2017-11-27"
-
+lastmodifierdisplayname = "Sophie Baillargeon"
+lastmodifieremail = "sophie.baillargeon@mat.ulaval.ca"
 +++
 
 # R pour scientifique
