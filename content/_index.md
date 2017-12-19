@@ -1,7 +1,7 @@
 +++
 title = "Notes de cours"
 description = ""
-date = "2017-11-27"
+date = "2017-12-18"
 lastmodifierdisplayname = "Sophie Baillargeon"
 lastmodifieremail = "sophie.baillargeon@mat.ulaval.ca"
 +++
@@ -23,8 +23,8 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
 #### Ce site web comprend les pages suivantes : 
 
 * Introduction à R
-    * [Présentation de R]({{%relref "introduction/presentation_r_2017.html" %}})
-    * [Installation de R]({{%relref "introduction/installation-r-2017.html" %}})
+    * [Présentation de R]({{%relref "introduction/presentation_r_2018.html" %}})
+    * [Installation de R]({{%relref "introduction/installation_r_2018.html" %}})
     * [Concepts de base en R]({{%relref "introduction/base-r-2017.html" %}})
 * Manipulation de données en R
     * Structure de données en R
