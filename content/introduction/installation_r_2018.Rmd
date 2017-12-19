@@ -1,0 +1,301 @@
+---
+title: "Guide d'installation ou de mise à jour de R et RStudio"
+author: "Sophie Baillargeon, Université Laval"
+date: "2017-12-19"
+weight: 2
+slug: "installation_r_rstudio"
+categories: ["cours_2018-01-16"]
+lastmodifierdisplayname : "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+---
+
+***
+
+<!---
+Voici quelques conseils d'installation ou de mise à jour de R.
+-->
+
+# Notes préliminaires
+
+## Système d'exploitation
+
+Cette fiche explique les étapes générales d'installation de [R](https://www.r-project.org/) et [RSutdio](https://www.rstudio.com/) pour tous les systèmes d'exploitation. Des explications plus détaillées sont fournies pour le système d'exploitation Windows. Plus d'informations pour les utilisateurs Mac OS X / OS X / macOS ou Unix / Linux sont données dans les références suivantes&nbsp;:
+
+- https://cran.r-project.org/doc/FAQ/R-FAQ.html#How-can-R-be-installed_003f      
+(documentation officielle du *R core team* concernant l'installation de R);
+- http://socserv.mcmaster.ca/jfox/Courses/R/ICPSR/R-install-instructions.html  
+(bonne source d'information sur l'installation de R, RStudio et de tout le nécessaire à la construction de packages R par John Fox).  
+
+<!---
+Sous Windows
+En démarrant des programmes (.exe) sous certaines versions de Windows, notamment la version 7, Windows pose des questions de sécurité du genre «&nbsp;Voulez-vous autoriser le programme suivant provenant d'un éditeur inconnu à apporter des modifications à cet ordinateur ?&nbsp;» ou  «&nbsp;L'éditeur n'a pas pu être vérifié. Voulez-vous vraiment exécuter ce logiciel ?&nbsp;». Vous n'avez qu'à donner votre autorisation. Vous connaissez la provenance des .exe que vous tentez d'exécuter et vous savez qu'il ne s'agit pas de logiciels malveillants.
+-->
+
+
+## Nécessaire au développement de packages R {#tools}
+
+Afin de développer des packages R, quelques outils supplémentaires au logiciel R sont nécessaires, notamment un compilateur C. 
+
+- Sous Windows, tous les outils requis sont réunis dans les [Rtools](http://cran.r-project.org/bin/windows/Rtools/), qui sont gratuitement distribués sur internet. Ce document explique [comment installer les Rtools](#rtools).
+
+- Sous Mac OS X / OS X / macOS, il faut avoir les « Apple Xcode developer tools », disponible gratuitement sur le « App Store », s'ils ne sont pas déjà installés.
+
+- Sous Unix / Linux, il faut s'assurer d'avoir installé R accompagné des ses « development tools » (`r-base-dev`).
+
+Le package `devtools` comporte une fonction pour tester si tout le nécessaire au développement de package est installé et fonctionne correctement (source: http://r-pkgs.had.co.nz/intro.html#intro-get).
+
+```{r eval = FALSE}
+library(devtools)
+has_devel()
+```
+
+Si la sortie générée par cet appel à la fonction `has_devel` se termine par `TRUE`, alors tout est fonctionnel.
+
+De plus, une des commandes R pour le développement de packages, soit `R CMD check`, a besoin d'une installation de LaTeX pour tester la création de la documentation des packages en format PDF. Pour développer des packages, vous avez donc le choix entre :
+
+- installer LaTeX sur votre ordinateur :
+    + une version gratuite pour Windows est MiKTeX (https://miktex.org/download),
+    + une version gratuite pour Mac OS X / OS X / macOS est MacTeX (http://www.tug.org/mactex/),
+    + les systèmes Unix / Linux viennent habituellement par défaut avec une distribution de LaTeX;
+- omettre la création de la documentation PDF lors de la soumission de la commande `R CMD check` grâce à l'option `--no-manual` (plus d'informations à venir en temps opportun).
+
+
+
+***
+
+# R
+
+Si, lors de l'installation de RStudio, R est déjà présent sur l'ordinateur, son emplacement devrait être détecté automatiquement par RStudio. Il est donc préférable de débuter par l'installation de R.
+
+## Installation
+
+Vous pouvez télécharger la version la plus à jour de R comme suit&nbsp;:
+
+- allez sur le site https://www.r-project.org/;
+- cliquez sur «&nbsp;CRAN&nbsp;» dans le menu à gauche;
+- sélectionnez le site miroir du CRAN le plus près de chez vous;
+- dans la case intitulée «&nbsp;Download and Install R&nbsp;», cliquez sur le lien correspondant à votre système d'exploitation.
+
+### Sous Windows
+
+Cliquez ensuite sur «&nbsp;base&nbsp;», puis sur «&nbsp;Download R x.y.z for Windows&nbsp;» où x.y.z est le numéro de la version la plus à jour de R. Le téléchargement du fichier «&nbsp;R-x.y.z-win.exe&nbsp;» débutera. Il s'agit d'un installateur, soit un programme permettant d'installer R. Il vous suffit ensuite de double-cliquer sur ce fichier et l'installation débutera. *Vous pouvez accepter toutes les options par défaut offertes par l'installateur.*
+
+
+## Mise à jour
+
+Si une version antérieure de R est déjà installée sur votre ordinateur et que vous souhaitez la remplacer par une nouvelle version, *désinstaller l'ancienne version avant d'installer la nouvelle comporte quelques avantages*. Le principal avantage, sous Windows, est que les associations entre des extensions et R demeurent fonctionnelles. C'est le cas, par exemple, pour l'extension `.Rdata`. (L'extension `.R` n'est pas affectée si RStudio est installé, car elle est associée à RStudio plutôt qu'à R). Aussi, les raccourcis sur le Bureau ou le menu démarrer ne sont pas perdus.
+
+Cependant, sachez que plusieurs versions de R peuvent être installées simultanément sur votre ordinateur. Par défaut, chaque version de R est installée dans un sous-dossier portant le numéro de la version. Avoir plus d'une version de R est utile, par exemple, lorsqu'un package utilisé ne fonctionne pas avec la version la plus à jour de R.
+
+
+### Sous Windows {#uninstall}
+
+Pour désinstaller un logiciel sous Windows, une façon simple de procéder est la suivante&nbsp;:
+
+- allez dans «&nbsp;Panneau de configuration > Programmes et fonctionnalités&nbsp;» (ou l'équivalent selon votre version de Windows);
+- sélectionnez «&nbsp;R for Windows u.v.w&nbsp;» où u.v.w est le numéro de la version de R à désinstaller;
+- cliquez sur «&nbsp;Désinstaller&nbsp;».
+
+Vous pouvez aussi aller dans les fichiers d'installation de R (par défaut `"C:/Program Files/R/R-u.v.w"`) et double-cliquer sur `unins000.exe`.
+
+La désinstallation démarrera.
+
+
+## Comment savoir qu'une nouvelle version de R est disponible?
+
+Il y a typiquement entre 4 et 6 mises à jour de R par année. Pour savoir qu'une nouvelle version est disponible, vous pouvez bien sûr visiter souvent le site web de R. Cependant, il est plus pratique de s'abonner à la liste courriel R-announce (https://stat.ethz.ch/mailman/listinfo/r-announce). Les abonnés reçoivent un courriel lors de la mise en ligne d'une nouvelle version de R.
+
+
+<!---
+Détails des informations que l'installateur vous demande avant de procéder à l'installation (pour R version 3.0.2)&nbsp;:
+
+* choix de la langue pour le programme d'installation;
+* acceptation de la licence;
+* choix de l'emplacement de R&nbsp;: par défaut il vous propose `"C:/Program Files/R/R-x.y.z"`;
+* choix des composantes à installer&nbsp;: installation complète par défaut;
+* choix des options de démarrage&nbsp;: interface MDI par défaut plutôt que SDI, format de l'aide HTML par défaut plutôt que texte, accès à internet standard par défaut plutôt qu'avec Internet2 (emploi les paramètres proxy d'Internet Explorer);
+* choix de l'emplacement des raccourcis dans le menu démarrer&nbsp;: par défaut dans un dossier nommé R;
+* choix concernant les tâches supplémentaires&nbsp;:
+  + créer une icône sur le bureau (oui par défaut);
+  + créer une icône dans la barre de lancement rapide (non par défaut);
+  + enregistrer le numéro de version dans le registre (oui par défaut);
+  + associer R avec les fichiers .Rdata (oui par défaut).
+-->
+
+***
+
+
+# RStudio
+
+## Installation
+
+Vous pouvez télécharger la version la plus à jour de RStudio (RStudio Desktop Open Source License) à partir du site web&nbsp;: https://www.rstudio.com/products/rstudio/download/
+
+Dans la liste intitulée «&nbsp;Installers for Supported Platforms&nbsp;», cliquez sur le lien correspondant à votre système d'exploitation. Le téléchargement de l'installateur débutera. 
+
+### Sous Windows
+
+Il suffit de double-cliquer sur le fichier d'installation téléchargé et de répondre aux quelques questions. Encore une fois, *vous pouvez accepter toutes les options par défaut offertes par l'installateur*.
+
+
+### Modification des configurations de RStudio {#config}
+
+Une fois RStudio installé, vous désirerez peut-être modifier quelques-unes de ses configurations. Sous Windows, ces configurations peuvent être changées par le menu «&nbsp;Tools > Global Options...&nbsp;». Par exemple, il peut être intéressant de&nbsp;:
+
+- dans «&nbsp;General&nbsp;», sélectionner «&nbsp;Never&nbsp;» pour l'option «&nbsp;Save workspace to .RData on exit&nbsp;»; 
+- dans «&nbsp;Code > Saving&nbsp;», sélectionner «&nbsp;UTF-8&nbsp;» comme «&nbsp;Default text encoding&nbsp;»;
+- dans «&nbsp;Code > Display&nbsp;», cocher «&nbsp;Show line numbers&nbsp;»;
+- autres selon vos goûts.
+
+<!---
+Aussi, si l'installateur de RStudio n'a pas créé de raccourci sur le bureau, il peut être pratique de s'en créer un. Si vous ne savez pas comment faire, voici un lien qui l'explique&nbsp;: http://support.microsoft.com/kb/140443/fr.
+
+Finalement, on peut vouloir associer RStudio à certaines extensions de fichiers autres que .R, par exemple les fichiers .Rnw. Ainsi, en double-cliquant sur un fichier portant une de ces extensions, il est automatiquement ouvert en RStudio. Si vous ne savez pas comment modifier les associations entre les programmes et les extensions de fichiers, voici un lien qui l'explique&nbsp;: http://support.microsoft.com/kb/307859/fr .
+-->
+
+## Mise à jour
+
+Pour mettre à jour RStudio, il est inutile de désinstaller l'ancienne version comme il est conseillé de le faire pour R. Cette différence vient du fait que la nouvelle version de RStudio porte exactement le même nom que l'ancienne (il n'y a pas de numéro de version dans son nom) et elle est, par défaut, installée exactement dans le même emplacement que l'ancienne version. Les anciens fichiers sont donc remplacés par les nouveaux.
+
+Le menu «&nbsp;Help > Check for Updates&nbsp;» permet de vérifier facilement si une nouvelle version de RStudio est disponible. Si c'est le cas, il suffit de télécharger l'installateur de la nouvelle version et de l'exécuter, comme pour une première installation.
+
+Les configurations de RStudio ne sont pas perdues lors d'une mise à jour.
+
+***
+
+
+# Packages R
+
+## Installation
+
+Pour installer un package à partir du CRAN, il suffit de 
+
+- s'assurer d'être connecté à internet, 
+- démarrer une session R et 
+- lancer la commande suivante en R :
+
+```{r, eval=FALSE}
+install.packages("nomPkg")
+```
+
+Pour installer un package à partir d'un fichier local, il faut plutôt lancer la commande suivante en R&nbsp;:
+
+```{r, eval=FALSE}
+install.packages("cheminAcces/nomPkg_NoVersion.zip", repos = NULL)
+```
+
+Dans cet exemple, l'extension du fichier doit être adaptée selon le système d'exploitation utilisé. L'extension `.zip` est celle d'un package pour Windows, `.tgz` est l'extension d'un package pour Mac OS X / OS X / macOS et `.tar.gz` est l'extension d'un package source, qui est aussi la version requise avec Unix / Linux.
+
+En RStudio, la commande `install.packages` peut être lancée par le menu «&nbsp;Packages > Install&nbsp;», en sélectionnant les options appropriées.
+
+Le répertoire dans lequel les packages R sont installés par défaut est identifié dans le premier élément du vecteur retourné par la commande R suivante&nbsp;:
+
+```{r, eval=FALSE}
+.libPaths()
+```
+
+Les autres éléments de ce vecteur sont d'autres répertoires dans lesquels R peut accéder à des installations de packages.
+
+
+## Mise à jour
+
+Il ne faut pas oublier pas que les packages R sont eux aussi mis à jour périodiquement, tout comme R et RStudio. Pour avoir accès aux dernières corrections et aux derniers ajouts de fonctionnalités des packages que vous utilisez, il est conseillé de vérifier fréquemment si de nouvelles versions sont disponibles et de les installer si c'est le cas.
+
+Une mise à jour d'un package R se fait avec la commande `install.packages`, exactement comme une installation. Il n'y a rien à désinstaller préalablement.
+
+En RStudio, le menu «&nbsp;Packages > Update&nbsp;» permet de facilement vérifier si des mises à jour de packages sont disponibles.
+
+
+## Packages et mise à jour de R
+
+Après une mise à jour de R, il est possible que vous n'ayez plus accès, avec la nouvelle version de R, aux packages que vous aviez installés avec une version antérieure de R. Cela dépend en fait du répertoire d'installation des packages. 
+
+S'ils sont installés directement dans le répertoire d'installation de R, il est certain que vous n'y aurez plus accès avec la nouvelle version de R. C'est que le nom du répertoire d'installation de packages dépend alors du numéro de version de R. Dans ce cas, l'ancien répertoire est `"C:/Program Files/R/R-u.v.w/library"`, mais le nouveau est `"C:/Program Files/R/R-x.y.z/library"`. 
+
+Afin de ne pas forcer l'utilisateur à mettre à jour les packages qu'il utilise à chaque fois qu'il met R à jour, le comportement par défaut de R est maintenant plutôt d'installer les packages dans un répertoire local à l'utilisateur, dont le nom dépend seulement des deux premiers numéros composant le numéro de version. Par exemple, avec mon installation de R sous Windows, les packages que j'installe se retrouvent par défaut dans le répertoire `"C:/Users/Sophie/Documents/R/win-library/u.v"`. Lors d'une mise à jour mineure de R, seul le dernier numéro composant le numéro de version change. Par exemple, le 30 novembre 2017, la version 3.4.3 de R est sortie, améliorant la version 3.4.2 sortie le mois précédent. Le répertoire d'installation de packages par défaut est donc demeuré le même entre les deux versions. Cependant, lorsqu'une mise à jour plus importante de R sortira, pour laquelle le deuxième numéro dans le numéro de version sera incrémenté, alors la mise à jour provoquera une perte d'accès aux packages installés précédemment.
+
+Vous pouvez régler ce problème en&nbsp;:
+
+- réinstallant tous les packages dont vous avez besoin avec la nouvelle version de R, du coup les packages sont mis à jour;
+- ajouter l'ancien répertoire d'installation de packages dans le chemin de recherche de packages avec la commande suivante, en replaçant la chaîne de de caractères par le chemin d'accès approprié :
+
+```{r eval = FALSE}
+.libPaths(c(.libPaths(), "C:/Users/Sophie/Documents/R/win-library/u.v"))
+```
+
+
+***
+
+
+# Rtools (pour Windows seulement) {#rtools}
+
+Comme mentionné dans les [notes préliminaires](#tools), le développement de packages R nécessite des outils non fournis dans l'installation de R. La version pour Windows de ces outils se trouve dans les [Rtools](http://cran.r-project.org/bin/windows/Rtools/). 
+
+## Installation
+
+Vous pouvez vous rendre sur le site de téléchargement des Rtools comme suit&nbsp;:
+
+- allez sur le site http://www.r-project.org/;
+- cliquez sur «&nbsp;CRAN&nbsp;» dans le menu à gauche;
+- sélectionnez le site miroir du CRAN le plus près de chez vous;
+- dans la case intitulée «&nbsp;Download and Install R&nbsp;», cliquez sur «&nbsp;Download R for Windows&nbsp;»;
+- cliquez sur «&nbsp;Rtools&nbsp;».
+
+Ensuite, téléchargez la version la plus à jour qui est compatible avec la version de R installée sur votre ordinateur. Si votre R est à jour, il s'agit de la version dans la première case de la colonne «&nbsp;Download&nbsp;» du tableau. Typiquement, pour cette version, la colonne «&nbsp;Frozen&nbsp;» indique «&nbsp;No&nbsp;». Ce n'est pas un problème.
+
+En cliquant sur le lien, le téléchargement de l'installateur débutera. Il vous suffit ensuite de double-cliquer sur le fichier téléchargé et l'installation débutera. Encore une fois, *vous pouvez accepter toutes les options par défaut offertes par l'installateur*.
+
+
+## Mise à jour
+
+Les Rtools sont mis à jour périodiquement. Je vous conseille de vérifier si une nouvelle version des Rtools est disponible à chaque fois que vous mettez R à jour. Pour ce faire, il faut&nbsp;:
+
+- se rendre sur le site web de téléchargement des Rtools;
+- vérifier le numéro de la version courante des Rtools en cliquant sur le lien «&nbsp;VERSION.txt&nbsp;» au-dessus du tableau de téléchargement;
+- comparer ce numéro au numéro de la version installée sur votre ordinateur, que l'on retrouve dans le dossier d'installation des Rtools (par défaut `"C:/Rtools/VERSION.txt"`);
+- si la version sur votre ordinateur est antérieure à la version disponible sur internet, mettre les Rtools à jour.
+
+Comme pour R, il est conseillé de désinstaller les Rtools avant d'en installer une nouvelle version (des [indications pour la désinstallation de programmes sous Windows sont fournies plus haut](#uninstall)).
+
+
+***
+
+# Résolution de problèmes
+
+En principe, tout devrait fonctionner correctement en suivant ces procédures d'installation. Cependant, un problème est si vite arrivé en informatique. Voici comment régler certains problèmes techniques déjà rencontrés.
+
+#### RStudio ne trouve pas les Rtools alors qu'il sont bel et bien installés sur mon ordinateur.
+
+Dans ce cas, une solution sous Windows est de modifier le PATH de votre ordinateur. Le PATH est une variable d'environnement du système qui indique à l'ordinateur dans quels dossiers rechercher les programmes exécutables. L'installateur de Rtools peut modifier le PATH pour vous. Vous pouvez donc désinstaller les Rtools, puis les réinstaller en sélectionnant l'option de modifier le PATH offerte par l'installateur, mais non sélectionnée par défaut.
+
+#### Les accents s'affichent incorrectement dans RStudio.
+
+RStudio suppose un certain encodage lors de l'ouverture d'un fichier, par exemple d'un programme (aussi nommé script) R. Pour connaître l'encodage supposé par votre installation de RStudio, allez dans le menu «&nbsp;Tools > Global Options... > Code > Saving&nbsp;». On peut lire dans le champ «&nbsp;Default text encoding:&nbsp;» l'encodage par défaut. Les programmes R que vous téléchargerez sur le site web du cours seront toujours en encodage UTF-8.
+
+Pour corriger l'affichage des accents dans un fichier en RStudio, vous pouvez&nbsp;:
+
+- soit rouvrir le fichier avec le bon encodage par le menu «&nbsp;File > Reopen with Encoding...&nbsp;» (et sélectionner «&nbsp;UTF-8&nbsp;» s'il s'agit d'un de mes fichiers),
+- soit modifier la configuration de votre installation de RStudio pour utiliser par défaut l'encodage du fichier. Cette modification peut se faire par menu «&nbsp;File > Reopen with Encoding...&nbsp;» en sélectionnant l'encodage voulu, puis en cochant «&nbsp;Set as default encoding for source files&nbsp;», ou encore par le menu «&nbsp;Tools > Global Options... > Code > Saving&nbsp;», tel que mentionné dans la [section concernant les modifications de configuration de RStudio](#config). 
+
+#### L'explorateur de fichiers Windows n'affiche pas les extensions de certains fichiers.
+
+Ce problème n'est pas en lien avec l'installation de R ou RStudio, mais on me questionne souvent à ce propos. Par défaut, Windows n'affiche pas les extensions des fichiers dont le type a été associé à un programme. Voici une façon de changer cette option avec Windows 10. 
+
+Ouvrez la fenêtre d'«&nbsp;Options des dossiers&nbsp;»&nbsp;. Il est possible d'ouvrir cette fenêtre à partir d'un explorateur de fichiers, par le menu «&nbsp;Fichier > Modifier les options des dossiers et de recherche&nbsp;».
+Ensuite, sous l'onglet Affichage, décochez l'option «&nbsp;Masquer les extensions des fichiers dont le type est connu&nbsp;».
+
+<!--
+#### Je n'arrive pas à installer des packages, car on me dit que je n'ai pas la permission de modifier le contenu du dossier où les packages doivent être installés.
+
+Il existe plusieurs solutions à ce problème. La plus simple est certainement d'installer R dans un emplacement où vous avez la permission de modifier le contenu selon les privilèges associés à votre compte sur votre ordinateur. Sur Windows, installer R dans `"C:/R"` au lieu de l'emplacement par défaut `"C:/Program Files/R"` règle habituellement le problème. Pour ce faire, commencez par désinstaller R, puis réinstallez-le en changeant l'emplacement que vous propose l'installateur.
+-->
