@@ -1,0 +1,720 @@
+---
+title: "Concepts de base en R"
+author: "Sophie Baillargeon, Université Laval"
+date: "2017-12-20"
+weight: 3
+slug: "base_r"
+categories: ["cours_2018-01-16"]
+lastmodifierdisplayname : "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \setlength{\OuterFrameSep}{6pt}
+---
+
+
+
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#r-une-puissante-calculatrice.">R = une puissante calculatrice.</a></li>
+<li><a href="#comment-garder-une-copie-en-memoire-dun-resultat">Comment garder une copie en mémoire d’un résultat ?</a><ul>
+<li><a href="#quels-noms-sont-acceptes-en-r">Quels noms sont acceptés en R ?</a></li>
+</ul></li>
+<li><a href="#comment-acceder-a-un-resultat-garde-en-memoire-dans-un-objet">Comment accéder à un résultat gardé en mémoire dans un objet ?</a><ul>
+<li><a href="#est-ce-le-seul-objet-accessible">Est-ce le seul objet accessible ?</a></li>
+</ul></li>
+<li><a href="#quest-ce-quune-fonction">Qu’est-ce qu’une fonction ?</a><ul>
+<li><a href="#comment-ecrire-un-appel-de-fonction">Comment écrire un appel de fonction ?</a></li>
+<li><a href="#comment-sont-interpretees-les-valeurs-darguments-non-assignees-a-un-nom">Comment sont interprétées les valeurs d’arguments non assignées à un nom ?</a></li>
+<li><a href="#largument-...-et-ses-deux-utilites.">L’argument <code>...</code> et ses deux utilités.</a></li>
+<li><a href="#les-operateurs-sont-aussi-des-fonctions.">Les opérateurs sont aussi des fonctions.</a></li>
+<li><a href="#comment-utiliser-une-fonction-dajustement-de-modele">Comment utiliser une fonction d’ajustement de modèle ?</a></li>
+</ul></li>
+<li><a href="#quest-ce-quun-package">Qu’est-ce qu’un package ?</a><ul>
+<li><a href="#comment-utiliser-un-package">Comment utiliser un package ?</a></li>
+</ul></li>
+<li><a href="#comment-obtenir-de-linformation">Comment obtenir de l’information ?</a><ul>
+<li><a href="#comment-obtenir-de-linformation-sur-une-fonction">Comment obtenir de l’information sur une fonction ?</a></li>
+<li><a href="#comment-denicher-la-fonction-pour-realiser-une-certaine-tache">Comment dénicher la fonction pour réaliser une certaine tâche ?</a></li>
+</ul></li>
+<li><a href="#comment-faire-un-graphique">Comment faire un graphique ?</a></li>
+<li><a href="#est-ce-que-de-la-programmation-orientee-objet-est-possible-en-r">Est-ce que de la programmation orientée objet est possible en R ?</a></li>
+<li><a href="#comment-conserver-une-trace-des-commandes-soumises-au-cours-dune-session-r">Comment conserver une trace des commandes soumises au cours d’une session R ?</a></li>
+<li><a href="#comment-quitter-r">Comment quitter R ?</a></li>
+<li><a href="#quest-ce-que-le-repertoire-courant">Qu’est-ce que le répertoire courant ?</a></li>
+<li><a href="#comment-charger-un-fichier-dextension-.rdata">Comment charger un fichier d’extension <code>.RData</code> ?</a></li>
+<li><a href="#pourquoi-creer-des-programmes-r-plutot-que-de-travailler-directement-dans-la-console">Pourquoi créer des programmes R plutôt que de travailler directement dans la console ?</a><ul>
+<li><a href="#quel-outil-utiliser-pour-editer-un-programme-r">Quel outil utiliser pour éditer un programme R ?</a></li>
+<li><a href="#quelles-sont-les-regles-de-syntaxe-du-langage-r">Quelles sont les règles de syntaxe du langage R ?</a></li>
+</ul></li>
+<li><a href="#comment-connaitre-et-modifier-les-parametres-dune-session-r">Comment connaître et modifier les paramètres d’une session R ?</a></li>
+<li><a href="#ou-trouver-plus-dinformation">Où trouver plus d’information ?</a></li>
+</ul>
+</div>
+
+<hr />
+<div id="r-une-puissante-calculatrice." class="section level2">
+<h2>R = une puissante calculatrice.</h2>
+<p>R est un langage interactif. La console de R est un peu comme une calculatrice.</p>
+<pre class="r"><code>1 + 1</code></pre>
+<pre><code>## [1] 2</code></pre>
+<pre class="r"><code>2*5 + 1</code></pre>
+<pre><code>## [1] 11</code></pre>
+</div>
+<div id="comment-garder-une-copie-en-memoire-dun-resultat" class="section level2">
+<h2>Comment garder une copie en mémoire d’un résultat ?</h2>
+<p>Il faut <strong>assigner</strong> le résultat à un <strong>nom</strong> :</p>
+<pre class="r"><code>a &lt;- 1 + 1</code></pre>
+<ul>
+<li><code>&lt;-</code> est l’opérateur d’assignation,</li>
+<li><code>a</code> est le nom (ou le symbole) référant à l’objet créé en mémoire,</li>
+<li><code>1 + 1</code> est l’expression générant le résultat à enregistrer,</li>
+<li><code>2</code> est la valeur contenue dans l’objet créé.</li>
+</ul>
+<p>Notons que <code>=</code> est aussi un opérateur d’assignation. Cet opérateur est utilisé en R pour assigner une valeur à un argument lors de l’appel d’une fonction. Cependant, pour l’assignation d’une valeur à un nom d’objet, la pratique la plus recommandée en programmation R est d’utiliser <code>&lt;-</code> plutôt que <code>=</code>. J’expliquerai plus tard la différence entre <code>&lt;-</code> et <code>=</code>, qui est trop technique pour un premier cours.</p>
+<div id="quels-noms-sont-acceptes-en-r" class="section level3">
+<h3>Quels noms sont acceptés en R ?</h3>
+<p>Un nom d’objet R doit respecter les règles suivantes<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>.</p>
+<ul>
+<li><p>Le nom d’un objet peut uniquement contenir des lettres, des chiffres, des points ou des barres de soulignement.</p></li>
+<li><p>Il commence obligatoirement par une lettre ou un point et s’il commence par un point, le deuxième caractère ne doit pas être un chiffre.</p></li>
+<li><p>Il ne doit pas être un des mots suivants, qui sont réservés par R<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> : <code>if</code>, <code>else</code>, <code>repeat</code>, <code>while</code>, <code>function</code>, <code>for</code>, <code>in</code>, <code>next</code>, <code>break</code>, <code>TRUE</code>, <code>FALSE</code>, <code>NULL</code>, <code>Inf</code>, <code>NaN</code>, <code>NA</code>, <code>NA_integer_</code>, <code>NA_real_</code>, <code>NA_complex_</code>, <code>NA_character_</code>, <code>...</code> et <code>..1</code>, <code>..2</code>, etc.</p></li>
+</ul>
+<p>Remarques :</p>
+<ul>
+<li><p>Les lettres accentuées sont acceptées, mais il vaut mieux les éviter, car leur transfert d’un système d’exploitation à un autre est souvent problématique.</p></li>
+<li><p>Il n’y a aucune restriction sur la longueur des noms.</p></li>
+</ul>
+</div>
+</div>
+<div id="comment-acceder-a-un-resultat-garde-en-memoire-dans-un-objet" class="section level2">
+<h2>Comment accéder à un résultat gardé en mémoire dans un objet ?</h2>
+<p>Dans la console, il suffit de taper le nom référant à l’objet :</p>
+<pre class="r"><code>a</code></pre>
+<pre><code>## [1] 2</code></pre>
+<p>mais pas :</p>
+<pre class="r"><code>&quot;a&quot;</code></pre>
+<pre><code>## [1] &quot;a&quot;</code></pre>
+<p>car les guillemets servent à créer des chaînes de caractères.</p>
+<p>De plus, il faut <strong>respecter la case</strong> car R différencie les majuscules et les minuscules. Donc <code>A</code> n’est pas le même objet que <code>a</code> en R.</p>
+<p>Soumettre une commande R contenant uniquement le nom d’un objet est équivalent à soumettre un appel à la fonction <code>print</code> en fournissant cet objet comme premier argument. Ainsi, les commandes suivantes sont équivalentes :</p>
+<pre class="r"><code>a</code></pre>
+<pre><code>## [1] 2</code></pre>
+<pre class="r"><code>print(a)</code></pre>
+<pre><code>## [1] 2</code></pre>
+<div id="est-ce-le-seul-objet-accessible" class="section level3">
+<h3>Est-ce le seul objet accessible ?</h3>
+<p>La commande <code>ls()</code> (équivalente à <code>objects()</code>) retourne la liste des noms des objets, dans l’<strong>environnement de travail</strong> (parfois appelé environnement courant ou environnement global). Il s’agit donc de la liste des noms des objets créés depuis le démarrage de la session R.</p>
+<pre class="r"><code>ls()</code></pre>
+<pre><code>## [1] &quot;a&quot;</code></pre>
+<p>Ces noms sont ici entre guillemets, car ils sont affichés par <code>ls</code> en tant que chaînes de caractères.</p>
+<div id="mais-est-ce-vraiment-le-seul-objet-accessible" class="section level4">
+<h4>Mais est-ce vraiment le seul objet accessible ?</h4>
+<p>Non. En plus des objets que vous avez créés, vous avez accès aux objets venant avec l’installation de R. Ils sont simplement rangés ailleurs que dans l’environnement de travail. Voici la liste de tous les <em>groupes</em> d’objets auxquels vous avez accès directement.</p>
+<pre class="r"><code>search()</code></pre>
+<pre><code>## [1] &quot;.GlobalEnv&quot;        &quot;package:methods&quot;   &quot;package:stats&quot;    
+## [4] &quot;package:graphics&quot;  &quot;package:grDevices&quot; &quot;package:utils&quot;    
+## [7] &quot;package:datasets&quot;  &quot;Autoloads&quot;         &quot;package:base&quot;</code></pre>
+<p>Ces groupes d’objets portent le nom d’<strong>environnements</strong>. Il s’agit pour la plupart d’environnements de packages. Le premier environnement de cette liste, nommé <code>&quot;.GlobalEnv&quot;</code>, est votre environnement de travail. La fonction <code>ls</code> affiche par défaut le contenu de cet environnement, mais elle peut afficher le contenu de n’importe quel environnement grâce à l’argument <code>name</code>.</p>
+<pre class="r"><code>ls(name = &quot;package:stats&quot;)</code></pre>
+<pre><code>##  [1] &quot;acf&quot;                  &quot;acf2AR&quot;               &quot;add.scope&quot;           
+##  [4] &quot;add1&quot;                 &quot;addmargins&quot;           &quot;aggregate&quot;           
+##  [7] &quot;aggregate.data.frame&quot; &quot;aggregate.ts&quot;         &quot;AIC&quot;                 
+## [10] &quot;alias&quot;                &quot;anova&quot;                &quot;ansari.test&quot;         
+## [13] &quot;aov&quot;                  &quot;approx&quot;               &quot;approxfun&quot;           
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 432 entries ]</code></pre>
+</div>
+<div id="quelle-est-la-nature-de-tous-ces-objets" class="section level4">
+<h4>Quelle est la nature de tous ces objets ?</h4>
+<p>Il s’agit principalement de fonctions et de jeux de données. Par exemple, dans le package <code>base</code>, il y a la fonction suivante :</p>
+<pre class="r"><code>casefold</code></pre>
+<pre><code>## function (x, upper = FALSE) 
+## if (upper) toupper(x) else tolower(x)
+## &lt;bytecode: 0x0000000016c457b8&gt;
+## &lt;environment: namespace:base&gt;</code></pre>
+<p>Cette fonction sert à convertir la casse de caractères alphabétiques dans une ou plusieurs chaînes de caractères, réunies dans un vecteur. La casse d’un caractère alphabétique, soit d’une lettre, est sa forme majuscule (capitale) ou minuscule. En anglais, les majuscules sont appelées <em>upper case characters</em> et les minuscules <em>lower case characters</em>.</p>
+<p>Aussi, dans le package <code>datasets</code>, il y a le jeu de données suivant :</p>
+<pre class="r"><code>women</code></pre>
+<pre><code>##    height weight
+## 1      58    115
+## 2      59    117
+## 3      60    120
+## 4      61    123
+## 5      62    126
+## 6      63    129
+## 7      64    132
+## 8      65    135
+## 9      66    139
+## 10     67    142
+## 11     68    146
+## 12     69    150
+## 13     70    154
+## 14     71    159
+## 15     72    164</code></pre>
+<p>Il s’agit de valeurs moyennes de grandeur et de poids, calculées en 1975, pour des femmes américaines âgées entre 30 et 39 ans.</p>
+</div>
+<div id="truc" class="section level4">
+<h4>Truc :</h4>
+<p>Utilisez la fonction <code>str</code> pour avoir un aperçu d’un objet plutôt que de l’afficher en entier.</p>
+<pre class="r"><code>str(casefold)</code></pre>
+<pre><code>## function (x, upper = FALSE)</code></pre>
+<pre class="r"><code>str(women)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    15 obs. of  2 variables:
+##  $ height: num  58 59 60 61 62 63 64 65 66 67 ...
+##  $ weight: num  115 117 120 123 126 129 132 135 139 142 ...</code></pre>
+</div>
+</div>
+</div>
+<div id="quest-ce-quune-fonction" class="section level2">
+<h2>Qu’est-ce qu’une fonction ?</h2>
+<p>Une fonction est un bout de code qui produit un certain résultat lorsqu’exécuté. Une fonction prend des valeurs en entrée, nommées <em>arguments</em>. Lorsqu’elle est appelée, la fonction traite les valeurs fournies en entrée dans l’appel. Ensuite, elle retourne un objet en sortie ou encore produit un ou des résultats, comme un graphique ou l’écriture dans un fichier externe.</p>
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-15"></span>
+<img src="fig/Fonction.png" alt="Représentation schématique de l'exécution d'un appel à une fonction" width="80%" />
+<p class="caption">
+Figure 1: Représentation schématique de l’exécution d’un appel à une fonction
+</p>
+</div>
+<p>Un objet R de type fonction est composé des éléments suivants.</p>
+<ul>
+<li>Une liste d’arguments, avec leurs valeurs par défaut s’il y a lieu. Exemple :</li>
+</ul>
+<pre class="r"><code>args(casefold)</code></pre>
+<pre><code>## function (x, upper = FALSE) 
+## NULL</code></pre>
+<p>La fonction <code>casefold</code> possède deux arguments : <code>x</code> et <code>upper</code>. L’argument <code>x</code> n’a pas de valeur par défaut, mais <code>upper</code> a <code>FALSE</code> comme valeur par défaut.</p>
+<ul>
+<li>Le corps de la fonction, soit le code composant la fonction. Exemple :</li>
+</ul>
+<pre class="r"><code>body(casefold)</code></pre>
+<pre><code>## if (upper) toupper(x) else tolower(x)</code></pre>
+<p>Le corps de la fonction <code>casefold</code> est particulièrement court. Le plus souvent, le corps d’une fonction R se compose de plus d’une instruction.</p>
+<p>Pour utiliser une fonction, il faut l’appeler en lui fournissant, au besoin, des valeurs aux arguments. Exemple :</p>
+<pre class="r"><code>casefold(x = c(&quot;Bonjour&quot;, &quot;à&quot;, &quot;tous!&quot;), upper = TRUE)</code></pre>
+<pre><code>## [1] &quot;BONJOUR&quot; &quot;À&quot;       &quot;TOUS!&quot;</code></pre>
+<div id="comment-ecrire-un-appel-de-fonction" class="section level3">
+<h3>Comment écrire un appel de fonction ?</h3>
+<p>Un appel de fonction est une instruction formée des éléments suivants, en respectant cet ordre :</p>
+<ol style="list-style-type: decimal">
+<li>le nom de la fonction à appeler;</li>
+<li>une parenthèse ouvrante <code>(</code>;</li>
+<li>au besoin, des valeurs pour les arguments, spécifiées ainsi :
+<ol style="list-style-type: lower-alpha">
+<li>nom de l’argument, suivi de l’opérateur <code>=</code> (éléments non obligatoires),</li>
+<li>commande générant la valeur à fournir en argument (par exemple simplement le nom d’un objet),</li>
+<li>si plus d’une valeur d’argument est à donner en entrée, il faut les séparer par une virgule;</li>
+</ol></li>
+<li>une parenthèse fermante <code>)</code>.</li>
+</ol>
+<p>Dans l’exemple précédent, c’est-à-dire :</p>
+<pre class="r"><code>casefold(x = c(&quot;Bonjour&quot;, &quot;à&quot;, &quot;tous!&quot;), upper = TRUE)</code></pre>
+<p>deux valeurs d’arguments sont fournies, en spécifiant les noms des arguments. Le résultat suivant est obtenu :</p>
+<pre><code>## [1] &quot;BONJOUR&quot; &quot;À&quot;       &quot;TOUS!&quot;</code></pre>
+<p>Ici, la valeur par défaut de l’argument <code>upper</code> est <code>FALSE</code>. Pour utiliser cette valeur, il n’est pas nécessaire de fournir de valeur à l’argument dans l’appel de fonction.</p>
+<pre class="r"><code>casefold(x = c(&quot;Bonjour&quot;, &quot;à&quot;, &quot;tous!&quot;))</code></pre>
+<pre><code>## [1] &quot;bonjour&quot; &quot;à&quot;       &quot;tous!&quot;</code></pre>
+<p>Cependant, l’argument <code>x</code> n’a pas de valeur par défaut et ne lui fournir aucune valeur génère une erreur.</p>
+<pre class="r"><code>casefold()</code></pre>
+<pre><code>## Error in tolower(x): argument &quot;x&quot; is missing, with no default</code></pre>
+</div>
+<div id="comment-sont-interpretees-les-valeurs-darguments-non-assignees-a-un-nom" class="section level3">
+<h3>Comment sont interprétées les valeurs d’arguments non assignées à un nom ?</h3>
+<p>Si une valeur d’argument est passée en entrée sans être spécifiquement assignée à un nom, la valeur est assignée au premier argument non spécifié, en respectant l’ordre des arguments dans la définition de la fonction. Voici quelques exemples et les résultats obtenus.</p>
+<pre class="r"><code>casefold(c(&quot;Bonjour&quot;, &quot;à&quot;, &quot;tous!&quot;))</code></pre>
+<pre><code>## [1] &quot;bonjour&quot; &quot;à&quot;       &quot;tous!&quot;</code></pre>
+<p>Ici, la valeur <code>c(&quot;Bonjour&quot;, &quot;à&quot;, &quot;tous!&quot;)</code> n’est pas assignée explicitement à un nom par l’utilisateur. R l’assigne implicitement au premier argument, <code>x</code>.</p>
+<p> </p>
+<pre class="r"><code>casefold(c(&quot;Bonjour&quot;, &quot;à&quot;, &quot;tous!&quot;), TRUE)</code></pre>
+<pre><code>## [1] &quot;BONJOUR&quot; &quot;À&quot;       &quot;TOUS!&quot;</code></pre>
+<p>Ici, les deux valeurs fournies en entrée ne sont pas assignées explicitement à des noms par l’utilisateur. Elles sont donc assignées implicitement en respectant l’ordre des arguments : la première valeur fournie, soit <code>&quot;Bonjour&quot;, &quot;à&quot;, &quot;tous!&quot;</code> est assignée au premier argument, soit <code>x</code>; la deuxième valeur fournie, soit <code>TRUE</code> est assignée au deuxième argument, soit <code>upper</code>.</p>
+<p> </p>
+<pre class="r"><code>casefold(FALSE, c(&quot;Bonjour&quot;, &quot;à&quot;, &quot;tous!&quot;))</code></pre>
+<pre><code>## Warning in if (upper) toupper(x) else tolower(x): the condition has length
+## &gt; 1 and only the first element will be used</code></pre>
+<pre><code>## Error in if (upper) toupper(x) else tolower(x): argument is not interpretable as logical</code></pre>
+<p>Ici, l’ordre dans lequel les valeurs sont fournies implique que <code>FALSE</code> est assigné à <code>x</code> et <code>c(&quot;Bonjour&quot;, &quot;à&quot;, &quot;tous!&quot;)</code> est assigné à <code>upper</code>. Cela génère un avertissement et une erreur, car les arguments reçoivent alors des valeurs qui ne sont pas des types attendus.</p>
+<p> </p>
+<pre class="r"><code>casefold(FALSE, x = c(&quot;Bonjour&quot;, &quot;à&quot;, &quot;tous!&quot;))</code></pre>
+<pre><code>## [1] &quot;bonjour&quot; &quot;à&quot;       &quot;tous!&quot;</code></pre>
+<p>Si la valeur <code>c(&quot;Bonjour&quot;, &quot;à&quot;, &quot;tous!&quot;)</code> est explicitement assignée à l’argument <code>x</code>, la valeur <code>FALSE</code> est implicitement assignée à <code>upper</code>, même si elle est fournie en première position, car les assignations explicites ont préséance sur les assignations implicites.</p>
+<div id="truc-1" class="section level4">
+<h4>Truc :</h4>
+<p>Pour éviter les erreurs dans un appel de fonction, il vaut mieux toujours assigner les valeurs passées en entrée à des noms d’arguments. Par contre, dans la pratique, lorsque le premier argument d’une fonction R est un objet contenant les données sur lesquelles appliquer le calcul (ce qui est fréquent en R), il est habituel de ne pas le nommer. Ainsi, dans l’exemple initial, l’appel le plus usuel est le suivant :</p>
+<pre class="r"><code>casefold(c(&quot;Bonjour&quot;, &quot;à&quot;, &quot;tous!&quot;), upper = TRUE)</code></pre>
+</div>
+</div>
+<div id="largument-...-et-ses-deux-utilites." class="section level3">
+<h3>L’argument <code>...</code> et ses deux utilités.</h3>
+<p>Certaines fonctions R possèdent un argument nommé « <code>...</code> ». C’est le cas par exemple de la fonction <code>paste</code>, servant à convertir des valeurs en chaînes de caractères et à concaténer ces valeurs.</p>
+<pre class="r"><code>args(paste)</code></pre>
+<pre><code>## function (..., sep = &quot; &quot;, collapse = NULL) 
+## NULL</code></pre>
+<p>C’est aussi le cas de la fonction <code>apply</code>, servant à appliquer un calcul sur des sous-sections d’un objet.</p>
+<pre class="r"><code>args(apply)</code></pre>
+<pre><code>## function (X, MARGIN, FUN, ...) 
+## NULL</code></pre>
+<p>L’argument <code>...</code> n’a pas la même utilisé dans ces deux fonctions. Je vais utiliser ces deux exemples de fonction pour illustrer les deux utilités potentielles de <code>...</code>.</p>
+<div id="utilite-1-recevoir-un-nombre-indetermine-darguments" class="section level4">
+<h4>Utilité 1 : recevoir un nombre indéterminé d’arguments</h4>
+<p>La première utilité de <code>...</code> est de permettre à une fonction de recevoir en entrée un nombre indéterminé d’arguments. Si <code>...</code> est placé au tout début de la liste des arguments, il a typiquement cette utilité. C’est le cas pour la fonction <code>paste</code>. Cette fonction peut concaténer les valeurs provenant d’autant d’objets que désiré grâce à l’argument <code>...</code>. Voici des exemples.</p>
+<pre class="r"><code>paste(&quot;a&quot;, 1:4, sep = &quot;-&quot;)</code></pre>
+<pre><code>## [1] &quot;a-1&quot; &quot;a-2&quot; &quot;a-3&quot; &quot;a-4&quot;</code></pre>
+<pre class="r"><code>paste(&quot;a&quot;, 1:4, c(TRUE, FALSE), collapse = &quot; &quot;)</code></pre>
+<pre><code>## [1] &quot;a 1 TRUE a 2 FALSE a 3 TRUE a 4 FALSE&quot;</code></pre>
+<p>Les arguments « attrapés » par <code>...</code> peuvent être assignés à des noms, tant que ceux-ci diffèrent des noms des autres arguments de la fonction. Dans un appel à la fonction <code>paste</code>, nommer les arguments attrapés par <code>...</code> n’a aucun impact.</p>
+<pre class="r"><code>paste(lettre = &quot;a&quot;, chiffre = 1:4, sep = &quot;-&quot;)</code></pre>
+<pre><code>## [1] &quot;a-1&quot; &quot;a-2&quot; &quot;a-3&quot; &quot;a-4&quot;</code></pre>
+<p>Cependant, avec d’autres fonctions, de telles assignations ont pour effet de nommer des éléments dans le résultat. Voici un exemple avec la fonction <code>list</code>.</p>
+<pre class="r"><code>list(&quot;a&quot;, 1:4)</code></pre>
+<pre><code>## [[1]]
+## [1] &quot;a&quot;
+## 
+## [[2]]
+## [1] 1 2 3 4</code></pre>
+<pre class="r"><code>list(lettre = &quot;a&quot;, chiffre = 1:4)</code></pre>
+<pre><code>## $lettre
+## [1] &quot;a&quot;
+## 
+## $chiffre
+## [1] 1 2 3 4</code></pre>
+</div>
+<div id="utilite-2-passer-des-arguments-a-une-autre-fonction" class="section level4">
+<h4>Utilité 2 : passer des arguments à une autre fonction</h4>
+<p>La deuxième utilité de l’argument <code>...</code> est de passer des arguments à une autre fonction appelée dans le corps de la première fonction. Si <code>...</code> est placé à la fin de la liste des arguments, il a typiquement cette utilité.</p>
+<p>Considérons par exemple la fonction <code>apply</code>. Supposons que cette fonction soit utilisée pour calculer la moyenne des valeurs par colonne dans le jeu de données <code>women</code>.</p>
+<pre class="r"><code>apply(X = women, MARGIN = 2, FUN = mean)</code></pre>
+<pre><code>##   height   weight 
+##  65.0000 136.7333</code></pre>
+<p>Cet appel à la fonction <code>apply</code> provoque des appels à la fonction fournie comme argument <code>FUN</code>, ici la fonction <code>mean</code>. Pour demander le calcul de moyennes tronquées via l’argument <code>trim</code> de la fonction <code>mean</code>, il suffit d’ajouter cet argument, et sa valeur désirée, dans l’appel à la fonction <code>apply</code>.</p>
+<pre class="r"><code>apply(X = women, MARGIN = 2, FUN = mean, trim = 0.3)</code></pre>
+<pre><code>##   height   weight 
+##  65.0000 135.5714</code></pre>
+<p>Ici, tous les arguments portant des noms autres que <code>X</code>, <code>MARGIN</code> et <code>FUN</code> (les trois arguments nommés dans la liste des arguments de <code>apply</code>) ont été inclus automatiquement dans les sous-appels à la fonction <code>mean</code>.</p>
+<p>Il est possible de passer à la sous-fonction autant d’arguments que désiré. Pour éviter toute erreur, il vaut mieux toujours assigner des noms aux valeurs passées en argument à une sous-fonction via <code>...</code>.</p>
+</div>
+</div>
+<div id="les-operateurs-sont-aussi-des-fonctions." class="section level3">
+<h3>Les opérateurs sont aussi des fonctions.</h3>
+<p>Tous les opérateurs sont aussi des fonctions. Par exemple, l’opérateur mathématique d’addition :</p>
+<pre class="r"><code>1 + 1</code></pre>
+<p>est en fait un raccourci pour la fonction nommée <code>&quot;+&quot;</code> :</p>
+<pre class="r"><code>&quot;+&quot;(1, 1)</code></pre>
+</div>
+<div id="comment-utiliser-une-fonction-dajustement-de-modele" class="section level3">
+<h3>Comment utiliser une fonction d’ajustement de modèle ?</h3>
+<p>Étant donné que R est un langage conçu pour effectuer des calculs statistiques et créer des graphiques, il sert fréquemment à ajuster des modèles statistiques. R possède une classe d’objets particulière dédiée à la spécification de modèles : les <strong>formules</strong>. Comprendre comment utiliser une fonction d’ajustement de modèle en R revient principalement à comprendre comment correctement spécifier une formule R.</p>
+<p>Par exemple, la fonction <code>lm</code> sert à ajuster un modèle de régression. Le premier argument de cette fonction est une formule. Voici un exemple d’ajustement d’une régression linéaire simple sur les données <code>women</code>, en utilisant le poids comme variable réponse et la grandeur comme variable explicative.</p>
+<pre class="r"><code>reg &lt;- lm(weight ~ height, data = women)</code></pre>
+<p>L’objet <code>weight ~ height</code> est une formule.</p>
+<pre class="r"><code>str(weight ~ height)</code></pre>
+<pre><code>## Class &#39;formula&#39;  language weight ~ height
+##   ..- attr(*, &quot;.Environment&quot;)=&lt;environment: R_GlobalEnv&gt;</code></pre>
+<p>La partie de gauche de la formule (à gaude du <code>~</code>) contient la, ou plus rarement les, noms des variables réponse. La partie de droite contient pour sa part le ou les noms des variables explicatives. Ces noms sont accompagnés, au besoin, d’opérateurs et de fonction pour désigner comment former les termes du modèle incluant les variables. Par exemple, voici la formule à utiliser dans l’appel à la fonction <code>lm</code> pour effectuer une régression polynomiale de degré deux avec les données <code>women</code>.</p>
+<pre class="r"><code>reg_poly &lt;- lm(weight ~ height + I(height^2), data = women)</code></pre>
+<p>Je n’irai pas plus loin dans la présentation des formules R ici. L’écriture de formule est un sujet qui sera couvert dans un prochain cours.</p>
+<div id="comment-acceder-aux-resultats-de-la-fonction-dajustement-de-modele" class="section level4">
+<h4>Comment accéder aux résultats de la fonction d’ajustement de modèle ?</h4>
+<p>Un objet obtenu en sortie d’une fonction d’ajustement de modèle contient beaucoup d’informations. Beaucoup plus qu’il ne le laisse paraître à première vue.</p>
+<p>Par exemple, affichons dans la console l’objet <code>reg</code> créé dans le premier exemple d’ajustement de modèle.</p>
+<pre class="r"><code>reg </code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = weight ~ height, data = women)
+## 
+## Coefficients:
+## (Intercept)       height  
+##      -87.52         3.45</code></pre>
+<p>Seul un court extrait des résultats contenus dans <code>reg</code> est imprimé. Un résumé plus complet des résultats est obtenu avec la fonction <code>summary</code>.</p>
+<pre class="r"><code>summary(reg)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = weight ~ height, data = women)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.7333 -1.1333 -0.3833  0.7417  3.1167 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -87.51667    5.93694  -14.74 1.71e-09 ***
+## height        3.45000    0.09114   37.85 1.09e-14 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.525 on 13 degrees of freedom
+## Multiple R-squared:  0.991,  Adjusted R-squared:  0.9903 
+## F-statistic:  1433 on 1 and 13 DF,  p-value: 1.091e-14</code></pre>
+<p>Cependant, en réalité, l’objet <code>reg</code> contient plus d’éléments que ce qui est affiché ci-dessus.</p>
+<p>L’objet <code>reg</code> est une liste de sous-objets contenant les résultats de l’ajustement du modèle :</p>
+<pre class="r"><code>str(reg, max.level = 1, give.attr = FALSE)</code></pre>
+<pre><code>## List of 12
+##  $ coefficients : Named num [1:2] -87.52 3.45
+##  $ residuals    : Named num [1:15] 2.4167 0.9667 0.5167 0.0667 -0.3833 ...
+##  $ effects      : Named num [1:15] -529.566 57.73 -0.058 -0.486 -0.914 ...
+##  $ rank         : int 2
+##  $ fitted.values: Named num [1:15] 113 116 119 123 126 ...
+##  $ assign       : int [1:2] 0 1
+##  $ qr           :List of 5
+##  $ df.residual  : int 13
+##  $ xlevels      : Named list()
+##  $ call         : language lm(formula = weight ~ height, data = women)
+##  $ terms        :Classes &#39;terms&#39;, &#39;formula&#39;  language weight ~ height
+##  $ model        :&#39;data.frame&#39;:   15 obs. of  2 variables:</code></pre>
+<p>Un élément de la liste <code>reg</code> peut être extrait avec l’opérateur <code>$</code> comme suit :</p>
+<pre class="r"><code>reg$coefficients</code></pre>
+<pre><code>## (Intercept)      height 
+##   -87.51667     3.45000</code></pre>
+<p>Cependant, il existe des fonctions servant spécifiquement à extraire des éléments d’une sortie de modèle. Par exemple, la fonction <code>coefficients</code> extrait les coefficients du modèle :</p>
+<pre class="r"><code>coefficients(reg)</code></pre>
+<pre><code>## (Intercept)      height 
+##   -87.51667     3.45000</code></pre>
+<p>La fonction <code>summary</code>, en plus d’afficher un résumé des résultats tel que vu précédemment, retourne en sortie une liste contenant quelques résultats complémentaires à ceux retournés par la fonction d’ajustement du modèle :</p>
+<pre class="r"><code>regSummary &lt;- summary(reg)
+str(regSummary, max.level = 1, give.attr = FALSE)</code></pre>
+<pre><code>## List of 11
+##  $ call         : language lm(formula = weight ~ height, data = women)
+##  $ terms        :Classes &#39;terms&#39;, &#39;formula&#39;  language weight ~ height
+##  $ residuals    : Named num [1:15] 2.4167 0.9667 0.5167 0.0667 -0.3833 ...
+##  $ coefficients : num [1:2, 1:4] -87.5167 3.45 5.9369 0.0911 -14.741 ...
+##  $ aliased      : Named logi [1:2] FALSE FALSE
+##  $ sigma        : num 1.53
+##  $ df           : int [1:3] 2 13 2
+##  $ r.squared    : num 0.991
+##  $ adj.r.squared: num 0.99
+##  $ fstatistic   : Named num [1:3] 1433 1 13
+##  $ cov.unscaled : num [1:2, 1:2] 15.15595 -0.23214 -0.23214 0.00357</code></pre>
+</div>
+</div>
+</div>
+<div id="quest-ce-quun-package" class="section level2">
+<h2>Qu’est-ce qu’un package ?</h2>
+<p>Un package R est un <strong>regroupement de fonctions et/ou de données documentées</strong>. En fait, lors de l’ouverture d’une session R, en supposant que l’environnement de travail est vide, tous les objets accessibles proviennent d’un package.</p>
+<p>L’installation de base de R est composée d’un certain nombre de packages R. Un très grand nombre de packages supplémentaires sont aussi disponibles sur le web. Les packages sont la façon formelle de partager publiquement des fonctions R.</p>
+<p>La majorité des développeurs de packages R les rendent disponibles sur le <strong>CRAN</strong> (<em>Comprehensive R Archive Network</em>) : <a href="http://www.r-project.org/" class="uri">http://www.r-project.org/</a> &gt; « CRAN » dans le menu de gauche.</p>
+<p>Le site web <strong>Bioconductor</strong> (<a href="http://www.bioconductor.org/" class="uri">http://www.bioconductor.org/</a>) propose aussi beaucoup de packages R spécifiques au domaine de la bio-informatique.</p>
+<p>Finalement, certains développeurs distribuent simplement leurs packages R sur leur site web personnel ou sur un site web de gestion de développement de logiciels tel que <strong>GitHub</strong> (<a href="https://github.com/search?utf8=%E2%9C%93&amp;q=language%3AR&amp;type=Repositories&amp;ref=advsearch&amp;l=R&amp;l=">https://github.com/</a>), <strong>Bitbucket</strong> (<a href="https://bitbucket.org/repo/all?name=R&amp;language=r">https://bitbucket.org/</a>) ou <strong>R-Forge</strong> (<a href="https://r-forge.r-project.org/" class="uri">https://r-forge.r-project.org/</a>)</p>
+<div id="comment-utiliser-un-package" class="section level3">
+<h3>Comment utiliser un package ?</h3>
+<p>Pour utiliser un package R, il faut premièrement qu’il soit installé sur notre ordinateur. Installer R provoque l’installation de certains packages. Les packages supplémentaires doivent être installés séparément. La <a href="https://stt4230.rbind.io/introduction/installation_r_rstudio/">fiche sur l’installation de R</a> explique comment procéder à ces installations.</p>
+<p>Ensuite, il faut charger un package dans une session R afin d’avoir accès aux fonctions d’il contient. Le démarrage d’une session R provoque automatiquement le chargement de certains packages. Par défaut, les packages suivants sont chargés automatiquement : <code>base</code>, <code>methods</code>, <code>datasets</code>, <code>utils</code>, <code>grDevices</code>, <code>graphics</code>, <code>stats</code>. Pour charger d’autres packages, il faut utiliser la fonction <code>library</code>, comme dans cet exemple :</p>
+<pre class="r"><code>library(dplyr)</code></pre>
+<!--
+Info sur les packages chargés par défaut trouvée dans le fichier
+"C:\Program Files\R\R-3.4.3\library\base\R\Rprofile"
+-->
+</div>
+</div>
+<div id="comment-obtenir-de-linformation" class="section level2">
+<h2>Comment obtenir de l’information ?</h2>
+<div id="comment-obtenir-de-linformation-sur-une-fonction" class="section level3">
+<h3>Comment obtenir de l’information sur une fonction ?</h3>
+<p>Avant d’utiliser une fonction pour la première fois, il est utile de savoir :</p>
+<ul>
+<li>ce que la fonction fait;</li>
+<li>la signification de ses arguments et les formats d’objets acceptés comme valeur en argument;</li>
+<li>le format du résultat en sortie si la fonction retourne quelque chose.</li>
+</ul>
+<p>Toutes les fonctions ont une fiche d’aide, toujours structurée de la même façon, procurant ces informations. En R, la fonction <code>help</code> (ou l’opérateur <code>?</code>) permet d’accéder à cette fiche d’aide, comme dans cet exemple :</p>
+<pre class="r"><code>help(lm)
+# ou
+?lm</code></pre>
+<p>Notons que pour ouvrir la fiche d’aide d’un opérateur, il faut encadrer son nom de guillemets simples ou doubles dans l’appel a la fonction <code>help</code>, par exemple :</p>
+<pre class="r"><code>help(&quot;+&quot;)</code></pre>
+<p>La majorité des fiches d’aide de fonctions R comportent des exemples d’utilisation de la fonction à la fin. Ces exemples sont souvent très utiles pour comprendre comment utiliser la fonction.</p>
+<p>Aussi, le CRAN comporte une page web pour chaque package R qu’il héberge (<a href="https://cran.r-project.org/web/packages/" class="uri">https://cran.r-project.org/web/packages/</a>). Celle-ci contient la version PDF des fiches d’aide de toutes les fonctions publiques du package (le <em>reference manual</em>). Dans certains cas, cette page comporte un lien vers un site web documentant davantage le package. Elle comporte aussi parfois des guides d’utilisation du package, appelés <em>vignettes</em>, créés par les développeurs du package (par exemple <a href="https://cran.r-project.org/web/packages/dplyr/index.html" class="uri">https://cran.r-project.org/web/packages/dplyr/index.html</a>).</p>
+<p>Les vignettes d’un package sont aussi consultables hors-ligne, à partir de R. Dans le bas d’une fiche d’aide R, il y a toujours un lien vers l’index du package contenant la fonction documentée dans la fiche. Dans la première partie de cet index, il y a un lien vers les vignettes du package, si celui-ci en possède.</p>
+<p>Il n’y a pas que les développeurs de R et de packages R qui fournissent de l’information sur des fonctions R. La communauté R étant très active, il est fréquent de trouver sur le web de l’information à propos d’une fonction R provenant d’utilisateurs de la fonction. Par exemple, lancez la recherche « <code>R function lm</code> » dans Google. Le premier résultat est la version en ligne de la fiche d’aide de la fonction. Les résultats suivants sont des pages web très pertinentes pour apprendre à utiliser la fonction, créées par des utilisateurs.</p>
+</div>
+<div id="comment-denicher-la-fonction-pour-realiser-une-certaine-tache" class="section level3">
+<h3>Comment dénicher la fonction pour réaliser une certaine tâche ?</h3>
+<p>Il est relativement facile d’obtenir de l’information lorsque nous connaissons le nom de la fonction à utiliser. Par contre, il est parfois moins facile de trouver le nom de la fonction qui répond à notre besoin!</p>
+<p>Afin de trouver une fonction R qui effectue une certaine tâche, le premier endroit pour chercher est encore <strong>Google</strong>. En entrant dans la barre de recherche Google « <code>R function</code> », suivi d’une courte description en anglais de la tâche à effectuer, il est fort probable que des résultats pertinents seront retournés. Le web contient vraiment beaucoup d’informations sur la programmation en R, principalement en anglais. Google suggère souvent des pages sur des sites sociaux de questions/réponses tels que <strong>StackOverflow</strong> (<a href="http://stackoverflow.com/questions/tagged/r" class="uri">http://stackoverflow.com/questions/tagged/r</a>) ou <strong>CrossValidated</strong> (<a href="http://stats.stackexchange.com/questions/tagged/r" class="uri">http://stats.stackexchange.com/questions/tagged/r</a>).</p>
+<p>Il existe aussi des outils de recherche spécifiques à R. Tout d’abord, la fonction <code>help.start</code> appelée sans lui fournir d’arguments en entrées :</p>
+<pre class="r"><code>help.start()</code></pre>
+<p>ouvre une table des matières contenant des liens vers la documentation R. Toute cette information est aussi accessible en ligne sur le site web <a href="http://stat.ethz.ch/R-manual/R-patched/doc/html/" class="uri">http://stat.ethz.ch/R-manual/R-patched/doc/html/</a>.</p>
+<p>Aussi, la fonction R <code>help.search</code> permet de rechercher la présence de chaînes de caractères dans les fiches d’aide R, par exemple :</p>
+<pre class="r"><code>help.search(&quot;regression&quot;)</code></pre>
+<p>Cependant, les fonctions <code>help</code>, <code>help.start</code> et <code>help.search</code> donnent uniquement accès à la documentation des packages R installés pour la version de R à partir duquel la commande est soumise. Pour faire une recherche dans les fiches d’aide de tous les packages R sur le CRAN, le site web</p>
+<blockquote>
+<p><a href="http://www.rdocumentation.org/" class="uri">http://www.rdocumentation.org/</a></p>
+</blockquote>
+<p>est un bon outil. Il permet d’effectuer des recherches avancées, par exemple en spécifiant le champ de la fiche d’aide dans lequel restreindre la recherche.</p>
+<p>Le site web <a href="http://rseek.org/" class="uri">http://rseek.org/</a> permet d’élargir la recherche à :</p>
+<ul>
+<li>toute la documentation distribuée par l’équipe de R, incluant les manuels du R core team (<a href="http://cran.r-project.org/manuals.html" class="uri">http://cran.r-project.org/manuals.html</a>);</li>
+<li>les messages publiés sur les listes courriel de R (<a href="http://www.r-project.org/mail.html" class="uri">http://www.r-project.org/mail.html</a>), dont le R-help où les abonnés peuvent poser des questions concernant R;</li>
+<li>le R Journal (<a href="http://journal.r-project.org/" class="uri">http://journal.r-project.org/</a>);</li>
+<li>des blogues et autres sites web consacrés à R, dont R-bloggers (<a href="http://www.r-bloggers.com/" class="uri">http://www.r-bloggers.com/</a>) et Quick-R (<a href="http://www.statmethods.net/" class="uri">http://www.statmethods.net/</a>);</li>
+<li>et même des titres de livres traitant de programmation en R.</li>
+</ul>
+<p>Il existe en fait plusieurs outils de recherche de documentation R. Le site web <a href="http://search.r-project.org/" class="uri">http://search.r-project.org/</a> en répertorie plusieurs.</p>
+</div>
+</div>
+<div id="comment-faire-un-graphique" class="section level2">
+<h2>Comment faire un graphique ?</h2>
+<p>La fonction graphique de base en R est <code>plot</code>.</p>
+<pre class="r"><code>plot(x = women$height, y = women$weight)</code></pre>
+<p><img src="/introduction/base_r_2018_files/figure-html/unnamed-chunk-51-1.png" width="480" style="display: block; margin: auto;" /></p>
+<p>Pour un vecteur de données <code>x</code> et un vecteur de données <code>y</code> fournis en entrée, elle génère un diagramme de dispersion.</p>
+<p>Elle accepte plusieurs autres types d’objets comme premier argument. Par exemple, si on lui donne en entrée un objet créé par la fonction <code>lm</code>, elle génère quelques graphiques de résidus (non affichés ici).</p>
+<pre class="r"><code>plot(reg)</code></pre>
+<p>Un cours sera consacré à ce sujet.</p>
+</div>
+<div id="est-ce-que-de-la-programmation-orientee-objet-est-possible-en-r" class="section level2">
+<h2>Est-ce que de la programmation orientée objet est possible en R ?</h2>
+<p>La fonction <code>plot</code>, mentionnée ci-dessus, a un comportement qui s’adapte à la classe de l’objet assigné à son premier argument. Il s’agit d’une fonction générique <em>polymorphe</em> propre à un langage orienté objet. Ainsi, la programmation orientée objet est possible en R. Il y a même plus d’un système R de programmation orientée objet. La fonction <code>plot</code> du package <code>graphics</code> est une fonction générique issue du système orienté objet S3, le plus simple et encore le plus courant en R.</p>
+<p>Jetons un coup d’oeil au corps de la fonction <code>plot</code>.</p>
+<pre class="r"><code>plot</code></pre>
+<pre><code>## function (x, y, ...) 
+## UseMethod(&quot;plot&quot;)
+## &lt;bytecode: 0x0000000019501b18&gt;
+## &lt;environment: namespace:graphics&gt;</code></pre>
+<p>La fonction <code>plot</code> possède seulement trois arguments : <code>x</code>, <code>y</code> et <code>...</code>. Aussi, le corps de la fonction est un peu particulier. Il est très court. Il contient uniquement un appel à la fonction <code>UseMethod</code>. Cette caractéristique indique que <code>plot</code> est une fonction générique S3.</p>
+<p>À travers l’appel à la fonction <code>UseMethod</code>, la fonction <code>plot</code> appelle une sous-fonction (appelée <em>méthode S3</em>), choisie en fonction de la classe de l’objet fourni en entrée comme premier argument (ici <code>x</code>). Pour énumérer toutes les « versions » d’une fonction générique auxquelles notre installation de R nous donne accès, il faut appeler la fonction <code>methods</code> comme suit.</p>
+<pre class="r"><code>methods(plot)</code></pre>
+<pre><code>##  [1] plot.acf*           plot.data.frame*    plot.decomposed.ts*
+##  [4] plot.default        plot.dendrogram*    plot.density*      
+##  [7] plot.ecdf           plot.factor*        plot.formula*      
+## [10] plot.function       plot.hclust*        plot.histogram*    
+## [13] plot.HoltWinters*   plot.isoreg*        plot.lm*           
+## [16] plot.medpolish*     plot.mlm*           plot.ppr*          
+## [19] plot.prcomp*        plot.princomp*      plot.profile.nls*  
+## [22] plot.raster*        plot.spec*          plot.stepfun       
+## [25] plot.stl*           plot.table*         plot.ts            
+## [28] plot.tskernel*      plot.TukeyHSD*     
+## see &#39;?methods&#39; for accessing help and source code</code></pre>
+<p>Les caractères se trouvant après le point dans le nom d’une méthode S3 représentent une classe d’objets. Par exemple, <code>lm</code> est la classe des objets retournés par la fonction du même nom. C’est la méthode <code>plot.lm</code> qui est appelée lorsque <code>plot</code> reçoit en entrée un objet de classe <code>lm</code>.</p>
+<p>Les méthodes sont souvent documentées, au même titre que les fonctions. Par exemple, la fiche d’aide ouverte par <code>help(plot.lm)</code> fourni de l’information à propos du comportement de la fonction <code>plot</code> avec un objet de classe <code>lm</code>,</p>
+<p>La programmation orientée objet est un sujet technique plutôt avancé, certainement pas un concept de base. Nous reviendrons sur ce concept vers la fin de la session.</p>
+</div>
+<div id="comment-conserver-une-trace-des-commandes-soumises-au-cours-dune-session-r" class="section level2">
+<h2>Comment conserver une trace des commandes soumises au cours d’une session R ?</h2>
+<p>Il est possible de sauver l’<strong>historique des commandes</strong> soumises au cours d’une session R avec la fonction <code>savehistory</code>. Le fichier ainsi créé (d’extension <code>.Rhistory</code> par défaut) contient une énumération de toutes les commandes soumises dans la console depuis l’ouverture de R.</p>
+<p>Il est aussi possible de sauver l’<strong>environnement de travail</strong> avec la fonction <code>save.image</code>. Le fichier ainsi créé (d’extension <code>.RData</code> par défaut) contient tout le contenu de l’environnement de travail, soit tous les objets créés depuis l’ouverture de R.</p>
+<div id="truc-2" class="section level4">
+<h4>Truc :</h4>
+<p>En fait, la console R garde toujours une trace en mémoire des commandes que vous avez soumises. Vous pouvez parcourir cet historique, dans la console, avec les touches « flèche vers le haut » et « flèche vers le bas » de votre clavier. Ainsi, pour soumettre de nouveau une commande, vous pouvez éviter de la retaper en y accédant à l’aide de la touche « flèche vers le haut ».</p>
+</div>
+</div>
+<div id="comment-quitter-r" class="section level2">
+<h2>Comment quitter R ?</h2>
+<p>La commande <code>q()</code> provoque la fin de la session R, tout comme la fermeture de la fenêtre de la console R. R demande alors si nous souhaitons sauvegarder une <strong>image de la session</strong>. Si nous répondons oui, il sauvegarde l’historique des commandes dans un fichier nommé « <code>.Rhistory</code> » et l’environnement de travail dans un fichier nommé « <code>.RData</code> ».</p>
+</div>
+<div id="quest-ce-que-le-repertoire-courant" class="section level2">
+<h2>Qu’est-ce que le répertoire courant ?</h2>
+<p>R a parfois besoin de lire ou d’écrire dans des fichiers externes. Il le fait par exemple :</p>
+<ul>
+<li>lors de l’importation de données provenant d’un fichier externe (lecture dans un fichier);</li>
+<li>lors de l’enregistrement de l’historique des commandes ou de l’environnement de travail (écriture dans un fichier).</li>
+</ul>
+<p>R se définit un emplacement par défaut pour ces fichiers. Cet emplacement se nomme <strong>répertoire courant</strong> (en anglais <em>current working directory</em>). Lorsqu’aucun emplacement n’est spécifié lors d’une communication entre R et un fichier externe, R considérera par défaut que le fichier se trouve dans le répertoire courant.</p>
+<div id="comment-controler-le-repertoire-courant" class="section level4">
+<h4>Comment contrôler le répertoire courant ?</h4>
+<p>La commande suivante permet de connaître le répertoire courant :</p>
+<pre class="r"><code>getwd()</code></pre>
+<p>La suivante permet de le modifier :</p>
+<pre class="r"><code>setwd(&quot;cheminAccesRepertoire&quot;)</code></pre>
+<p>où <code>&quot;cheminAccesRepertoire&quot;</code> est le chemin d’accès d’un répertoire sur votre ordinateur, par exemple <code>&quot;C:/MesDocuments&quot;</code> ou autre.</p>
+</div>
+<div id="attention" class="section level4">
+<h4>Attention :</h4>
+<p>En R, les chemins d’accès contenant le caractère <code>\</code> ne sont pas acceptés. Ce n’est pas très pratique pour ceux qui travaillent sous Windows, car un chemin d’accès copié à partir d’un explorateur de fichiers Windows contient ce caractère. Il faut toujours remplacer les <code>\</code> par <code>/</code> ou <code>\\</code> (ex.: <code>&quot;C:\MesDocuments&quot;</code> devient <code>&quot;C:/MesDocuments&quot;</code> ou <code>&quot;C:\\MesDocuments&quot;</code>).</p>
+</div>
+</div>
+<div id="comment-charger-un-fichier-dextension-.rdata" class="section level2">
+<h2>Comment charger un fichier d’extension <code>.RData</code> ?</h2>
+<p>Les objets sauvegardés dans un fichier d’extension <code>.RData</code> deviennent accessibles en R après que le fichier soit chargé avec la fonction <code>load</code>.</p>
+<div id="attention-1" class="section level4">
+<h4>Attention :</h4>
+<p>Si le répertoire courant de R à son ouverture contient un fichier <code>.RData</code>, les objets contenus dans ce fichier sont automatiquement chargés en R. Dans ce cas, l’environnement de travail n’est pas vide en début de session.</p>
+</div>
+</div>
+<div id="pourquoi-creer-des-programmes-r-plutot-que-de-travailler-directement-dans-la-console" class="section level2">
+<h2>Pourquoi créer des programmes R plutôt que de travailler directement dans la console ?</h2>
+<p>Retrouver, dans un ancien historique, certaines commandes que l’on cherche à réutiliser peut être difficile. Une meilleure méthode de travail que de travailler directement dans la console R consiste à rédiger des <em>programmes R</em>, aussi appelés <em>scripts R</em>.</p>
+<p>Les programmes facilitent la réutilisation du code. Des commentaires peuvent y être insérés pour expliquer ce que font les instructions (en utilisant le symbole <code>#</code>).</p>
+<pre class="r"><code># Exemple de commentaire
+1 + 1 # calcul simple</code></pre>
+<p>Faire rouler un ancien programme recrée tous les objets produits par les commandes dans le programme. Plus besoin d’image de session, sauf si la création de ces objets est longue à rouler.</p>
+<div id="quel-outil-utiliser-pour-editer-un-programme-r" class="section level3">
+<h3>Quel outil utiliser pour éditer un programme R ?</h3>
+<p>Un programme R s’édite dans une fenêtre séparée de la console. Le GUI de la version Windows de R possède un éditeur de code R minimaliste, qui s’ouvre par le menu « Fichier &gt; Nouveau script ». Par convention, l’<strong>extension <code>.R</code></strong> est donnée à un programme R. À partir de cet éditeur, le <strong>raccourci clavier Ctrl-R</strong> permet de soumettre dans la console des lignes de code de l’éditeur.</p>
+<p>Il existe cependant des outils bien plus performants que cet éditeur pour programmer en R. Plusieurs éditeurs de code R ou environnements de développement R (en anglais IDE pour Integrated Development Environment) sont offerts, notamment :</p>
+<ul>
+<li>RStudio (<a href="http://www.rstudio.com/" class="uri">http://www.rstudio.com/</a>),</li>
+<li>Emacs avec ESS (<a href="http://ess.r-project.org/" class="uri">http://ess.r-project.org/</a>),</li>
+<li>Eclipse avec StatET (<a href="http://www.walware.de/goto/statet" class="uri">http://www.walware.de/goto/statet</a>),</li>
+<li>Tinn-R (<a href="http://sourceforge.net/projects/tinn-r/" class="uri">http://sourceforge.net/projects/tinn-r/</a>),</li>
+<li>l’extension NppToR pour Notepad++ (<a href="http://sourceforge.net/projects/npptor/" class="uri">http://sourceforge.net/projects/npptor/</a>),</li>
+<li>le module d’extension R Tools pour Visual Studio (<a href="https://www.visualstudio.com/fr/vs/rtvs/" class="uri">https://www.visualstudio.com/fr/vs/rtvs/</a>)</li>
+<li>etc.</li>
+</ul>
+<p>RStudio est probablement le plus populaire de ces outils. Il s’agit d’un environnement de développement déjà très complet et qui continue d’être activement développé. Une version gratuite du logiciel est offerte (<a href="https://www.rstudio.com/products/rstudio/download/" class="uri">https://www.rstudio.com/products/rstudio/download/</a>, version « Desktop, Open Source License »).</p>
+<p>RStudio facilite le travail en R grâce à :</p>
+<ul>
+<li>un éditeur de code R, notamment pourvu de
+<ul>
+<li>coloration syntaxique,</li>
+<li>complètement automatique,</li>
+<li>pliage de code;</li>
+</ul></li>
+<li>un environnement de travail qui divise la fenêtre en sous-fenêtres, dont une pour l’éditeur R et une autre pour la console R, et qui permet la communication entre les fenêtres (raccourci clavier Ctrl-Enter et autres);</li>
+<li>la possibilité de lancer certaines commandes à partir de menus, notamment :
+<ul>
+<li>des appels aux fonctions courantes <code>setwd</code>, <code>install.packages</code>, <code>help</code>, etc.,</li>
+<li>des commandes de construction de package;</li>
+</ul></li>
+<li>plusieurs autres fonctionnalités permettant de travailler de façon plus productive.</li>
+</ul>
+</div>
+<div id="quelles-sont-les-regles-de-syntaxe-du-langage-r" class="section level3">
+<h3>Quelles sont les règles de syntaxe du langage R ?</h3>
+<p>Lors de l’écriture de code R, il y a quelques règles de syntaxe à respecter. En plus des règles concernant les choix de noms d’objets énumérées précédemment, voici les règles de base du langage R.</p>
+<ul>
+<li>Chaque commande doit se terminer par un retour de chariot ou un point-virgule (moins usuel).</li>
+<li>Une commande peut s’étaler sur plusieurs lignes.</li>
+<li>Il est possible de mettre plusieurs commandes sur une même ligne, à condition de séparer les commandes par des points-virgules.</li>
+<li>Les différents éléments d’une commande peuvent ou non être séparés par un ou plusieurs espaces. C’est uniquement une question de style.</li>
+<li>Dans un nombre réel, la décimale est représentée par un point et non par une virgule.</li>
+<li>Le symbole <code>#</code> sert à insérer des commentaires dans un programme R. Sur une ligne, tout ce qui se trouve après un <code>#</code> est ignoré par R lors de l’exécution d’un programme.</li>
+<li>R fait toujours la distinction entre les majuscules et les minuscules (il respecte la casse des caractères).</li>
+</ul>
+</div>
+</div>
+<div id="comment-connaitre-et-modifier-les-parametres-dune-session-r" class="section level2">
+<h2>Comment connaître et modifier les paramètres d’une session R ?</h2>
+<p>Une session R comporte un certain nombre de paramètres nommés options. La fonction R <code>options</code> permet de connaître les paramètres de notre session, ainsi que de les modifier. Il faut d’abord aller voir la fiche d’aide de la fonction, que l’on peut ouvrir avec la commande <code>help(options)</code>, pour obtenir de l’information sur ces paramètres.</p>
+<p>Par exemple, la façon dont les nombres sont affichés dans la console est notamment contrôlée par les options <code>digits</code> et <code>scipen</code>. Ces options prennent par défaut les valeurs suivantes.</p>
+<pre class="r"><code># Afin de garder une copie des valeurs par défaut avant de les modifier
+optionsDefaut &lt;- options()</code></pre>
+<pre class="r"><code>optionsDefaut$digits</code></pre>
+<pre><code>## [1] 7</code></pre>
+<pre class="r"><code>optionsDefaut$scipen</code></pre>
+<pre><code>## [1] 0</code></pre>
+<p>L’option <code>digits</code> représente le nombre maximal de chiffres affichés, par exemple :</p>
+<pre class="r"><code>print(1.23456789)</code></pre>
+<pre><code>## [1] 1.234568</code></pre>
+<p>ou plus simplement</p>
+<pre class="r"><code>1.23456789</code></pre>
+<pre><code>## [1] 1.234568</code></pre>
+<p>Le nombre est arrondi pour respecter ce nombre maximal de chiffres. Cette option peut être modifiée comme suit.</p>
+<pre class="r"><code>options(digits = 4)
+1.23456789</code></pre>
+<pre><code>## [1] 1.235</code></pre>
+<p>Pour toute nouvelle session R démarrée, la valeur par défaut de <code>digits</code> retombe à 7 (sauf si ce paramètre est modifié dans le fichier de configuration de R). Si nous avons préalablement enregistré les valeurs par défaut des options, il est facile de redonner à <code>digits</code> sa valeur par défaut comme suit.</p>
+<pre class="r"><code>options(digits = optionsDefaut$digits)</code></pre>
+<p>L’option <code>scipen</code> contrôle pour sa part l’affichage en format scientifique. R affiche les très grands nombres dans ce format. Par exemple, par défaut</p>
+<pre class="r"><code>100000</code></pre>
+<pre><code>## [1] 1e+05</code></pre>
+<p>est affiché en format scientifique, mais pas</p>
+<pre class="r"><code>10000</code></pre>
+<pre><code>## [1] 10000</code></pre>
+<p>En modifiant la valeur de <code>scipen</code> comme suit</p>
+<pre class="r"><code>options(scipen = -1)</code></pre>
+<p>10000 sera lui aussi affiché en format scientifique.</p>
+<pre class="r"><code>10000</code></pre>
+<pre><code>## [1] 1e+04</code></pre>
+
+</div>
+<div id="ou-trouver-plus-dinformation" class="section level2">
+<h2>Où trouver plus d’information ?</h2>
+<p>Voici des sources d’information sur l’utilisation de R et la programmation R.</p>
+<p><strong>Documentation de R</strong> : fiches d’aide des fonctions et manuels du R core team :</p>
+<ul>
+<li>accessible à partir de la console au cours d’une session R grâce aux fonctions <code>help.start</code>, <code>help</code> et <code>help.search</code>;</li>
+<li>accessible en ligne :
+<ul>
+<li><a href="http://stat.ethz.ch/R-manual/R-patched/doc/html/" class="uri">http://stat.ethz.ch/R-manual/R-patched/doc/html/</a>,</li>
+<li><a href="https://cran.r-project.org/manuals.html" class="uri">https://cran.r-project.org/manuals.html</a>,</li>
+<li><a href="http://www.r-project.org/" class="uri">http://www.r-project.org/</a> &gt; « Documentation » dans le menu de gauche.</li>
+</ul></li>
+</ul>
+<p>Référence officielle pour le logiciel R et sa documentation :</p>
+<p>R Core Team (2017). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a>.</p>
+<p><strong>Documentation de packages R</strong> qui ne se retrouvent pas dans l’installation de base :</p>
+<ul>
+<li>accessible à partir de la console au cours d’une session R lorsque les packages sont installés grâce aux fonctions <code>help.start</code>, <code>help</code> et <code>help.search</code>;</li>
+<li>accessible en ligne :
+<ul>
+<li><a href="https://cran.r-project.org/web/packages/" class="uri">https://cran.r-project.org/web/packages/</a>,</li>
+<li><a href="http://bioconductor.org/packages" class="uri">http://bioconductor.org/packages</a>;</li>
+</ul></li>
+<li>pour connaître les packages les plus téléchargés dans le dernier mois :
+<ul>
+<li><a href="https://www.rdocumentation.org/trends" class="uri">https://www.rdocumentation.org/trends</a>.</li>
+</ul></li>
+</ul>
+<p><strong>Outils de recherche dans la documentation de R</strong>, notamment :</p>
+<ul>
+<li><a href="http://www.rdocumentation.org/" class="uri">http://www.rdocumentation.org/</a></li>
+<li><a href="http://rseek.org/" class="uri">http://rseek.org/</a></li>
+</ul>
+<p><strong>Outils sociaux de questions/réponses</strong>, notamment :</p>
+<ul>
+<li>StackOverflow (<a href="http://stackoverflow.com/questions/tagged/r" class="uri">http://stackoverflow.com/questions/tagged/r</a>),</li>
+<li>CrossValidated (<a href="http://stats.stackexchange.com/questions/tagged/r" class="uri">http://stats.stackexchange.com/questions/tagged/r</a>),</li>
+<li>la liste courriel R-help (<a href="https://stat.ethz.ch/mailman/listinfo/r-help" class="uri">https://stat.ethz.ch/mailman/listinfo/r-help</a>).</li>
+</ul>
+<p><strong>Blogues et autres sites web à propos de R</strong>, notamment :</p>
+<ul>
+<li><a href="http://www.r-bloggers.com/" class="uri">http://www.r-bloggers.com/</a>,</li>
+<li><a href="http://www.statmethods.net/" class="uri">http://www.statmethods.net/</a>,</li>
+<li><a href="http://www.cookbook-r.com/" class="uri">http://www.cookbook-r.com/</a>,</li>
+<li><a href="http://www.r-graph-gallery.com/" class="uri">http://www.r-graph-gallery.com/</a>.</li>
+</ul>
+<p><strong>Formations ou exercices R</strong>, notamment</p>
+<ul>
+<li><a href="http://r-exercises.com/" class="uri">http://r-exercises.com/</a>,</li>
+<li><a href="http://tryr.codeschool.com/" class="uri">http://tryr.codeschool.com/</a>,</li>
+<li><a href="http://swirlstats.com" class="uri">http://swirlstats.com</a>,</li>
+<li><a href="http://swcarpentry.github.io/r-novice-inflammation/" class="uri">http://swcarpentry.github.io/r-novice-inflammation/</a>,</li>
+<li><a href="http://swcarpentry.github.io/r-novice-gapminder/" class="uri">http://swcarpentry.github.io/r-novice-gapminder/</a>,</li>
+</ul>
+
+<p><strong>Livres et notes de cours</strong></p>
+<p>Référence officielle pour les notes de ce cours :</p>
+<ul>
+<li>Baillargeon, S. (2018). R pour scientifique : notes de cours, STT-4230/STT-6230. Université Laval, Département de mathématiques et de statistique. URL <a href="https://stt4230.rbind.io/" class="uri">https://stt4230.rbind.io/</a></li>
+</ul>
+<p>Livres que j’utilise le plus :</p>
+<ul>
+<li>Matloff, N. (2011). The art of R programming: A tour of statistical software design. No Starch Press.</li>
+<li>Wickham, H. (2014). Advanced R. CRC Press. URL <a href="http://adv-r.had.co.nz/" class="uri">http://adv-r.had.co.nz/</a></li>
+<li>Wickham, H. (2015). R packages. O’Reilly Media, Inc. URL <a href="http://r-pkgs.had.co.nz/" class="uri">http://r-pkgs.had.co.nz/</a></li>
+<li>Grolemund, G. et Wickham, H. (2016). R for Data Science. O’Reilly Media, Inc. URL <a href="http://r4ds.had.co.nz/" class="uri">http://r4ds.had.co.nz/</a></li>
+</ul>
+<p>Autres livres :</p>
+<ul>
+<li>Adler, J. (2010). R in a nutshell: A desktop quick reference. 2e edition. O’Reilly Media, Inc.</li>
+<li>Braun, W. J. et Murdoch, D. (2007). A first Course in Statistical Programming with R. Cambridge University Press.</li>
+<li>Chambers, J. M. (2016). Extending R. Chapman and Hall/CRC.</li>
+<li>Chambers, J. M. (2008). Software for Data Analysis: Programming with R. Springer.</li>
+<li>Cotton, R. (2013). Learning R: A Step-by-Step Function Guide to Data Analysis, O’Reilly Media.</li>
+<li>Davies, T. M. (2016). The Book of R: A First Course in Programming and Statistics. No Starch Press.</li>
+<li>Gillespie, C. et Lovelace, R. (2016). Efficient R Programming: A Practical Guide to Smarter Programming. O’Reilly Media, Inc. version en ligne : <a href="https://csgillespie.github.io/efficientR/" class="uri">https://csgillespie.github.io/efficientR/</a></li>
+<li>Gentleman, R. (2009). R Programming for Bioinformatics. Chapman and Hall/CRC.</li>
+<li>Kabacoff, R. (2015), R in action. 2e édition. Manning Publications.</li>
+<li>Muenchen, R. A. (2011). R for SAS and SPSS Users. Second edition. Springer.</li>
+<li>Teetor, P. (2011). R Cookbook. O’Reilly Media.</li>
+<li>Zumel, N. et Mount, J. (2014). Practical Data Science with R. Manning Publications Co.</li>
+<li>Zuur, A. F., Ieno, E. N. et Meesters, E. H.W.G. (2009). A Beginner’s Guide to R. Springer.</li>
+<li>les livres répertoriés par le R core team : <a href="https://www.r-project.org/doc/bib/R-jabref.html" class="uri">https://www.r-project.org/doc/bib/R-jabref.html</a>.</li>
+</ul>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/make.names.html" class="uri">https://stat.ethz.ch/R-manual/R-devel/library/base/html/make.names.html</a><a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/Reserved.html" class="uri">https://stat.ethz.ch/R-manual/R-devel/library/base/html/Reserved.html</a><a href="#fnref2">↩</a></p></li>
+</ol>
+</div>

@@ -25,7 +25,7 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
 * Introduction à R
     * [Présentation de R]({{%relref "introduction/presentation_r_2018.html" %}})
     * [Installation de R]({{%relref "introduction/installation_r_2018.html" %}})
-    * [Concepts de base en R]({{%relref "introduction/base-r-2017.html" %}})
+    * [Concepts de base en R]({{%relref "introduction/base_r_2018.html" %}})
 * Manipulation de données en R
     * Structure de données en R
     * Lecture et écriture dans des fichiers externes à partir de R
