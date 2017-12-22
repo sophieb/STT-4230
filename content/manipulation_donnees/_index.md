@@ -3,7 +3,7 @@ title = "Manipulation de données en R"
 weight = 2
 +++
 
-{{%children style="h4" %}}
+{{%children%}}
 
 À venir :
 

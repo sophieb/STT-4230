@@ -3,7 +3,7 @@ title = "Packages R"
 weight = 6
 +++
 
-{{%children style="h4" %}}
+{{%children%}}
 
 À venir :
 

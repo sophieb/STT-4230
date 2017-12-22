@@ -3,7 +3,7 @@ title = "Programmation en R"
 weight = 5
 +++
 
-{{%children style="h4" %}}
+{{%children%}}
 
 À venir :
 

@@ -3,7 +3,7 @@ title = "Communication de résultats en R"
 weight = 4
 +++
 
-{{%children style="h4" %}}
+{{%children%}}
 
 À venir :
 

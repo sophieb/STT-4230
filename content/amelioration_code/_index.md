@@ -3,7 +3,7 @@ title = "Amélioration de code R"
 weight = 7
 +++
 
-{{%children style="h4" %}}
+{{%children%}}
 
 À venir :
 
