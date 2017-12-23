@@ -1,0 +1,370 @@
+---
+title: "Produire un diagramme en bâtons avec R et avec le package ggplot2"
+linkTitle: "ggplot2 - Diagramme en bâtons"
+weight: 4
+author: "Bachar Cheaib et Katherine Tanaka"
+date: "2015-04-13"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \setlength{\OuterFrameSep}{6pt}
+---
+
+
+
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction-les-diagrammes-en-batons">Introduction – Les diagrammes en bâtons</a></li>
+<li><a href="#le-jeu-de-donnees-a-letude-conditions-meteorologiques-horaires">Le jeu de données à l’étude: conditions météorologiques horaires</a></li>
+<li><a href="#produire-un-diagramme-a-batons-avec-la-fonction-barplot">Produire un diagramme à bâtons avec la fonction <code>barplot</code></a></li>
+<li><a href="#produire-un-diagramme-a-batons-simple-avec-le-package-ggplot2">Produire un diagramme à bâtons simple avec le package <code>ggplot2</code></a><ul>
+<li><a href="#lobjet-ggplot">L’objet <code>ggplot</code></a></li>
+<li><a href="#rajouter-des-couches">Rajouter des couches</a></li>
+<li><a href="#les-autres-couches">Les autres couches</a></li>
+</ul></li>
+<li><a href="#produire-un-diagramme-a-batons-complexe-avec-le-package-ggplot2">Produire un diagramme à bâtons complexe avec le package <code>ggplot2</code></a><ul>
+<li><a href="#modifier-le-coeur-du-graphique-avec-un-nouvel-objet-ggplot-et-des-arguments-pour-geom_bar">Modifier le coeur du graphique avec un nouvel objet ggplot et des arguments pour geom_bar</a></li>
+<li><a href="#diviser-le-graphique-en-2-panneaux-plus-simple-que-mfrow">Diviser le graphique en 2 panneaux: plus simple que mfrow</a></li>
+<li><a href="#les-derniers-ajouts-guide-theme-et-scale_x_discrete">Les derniers ajouts: <code>guide</code>, <code>theme</code> et <code>scale_x_discrete</code></a></li>
+</ul></li>
+<li><a href="#references-completes">Références complètes</a><ul>
+<li><a href="#references-citees">Références citées</a></li>
+<li><a href="#references-supplementaires">Références supplémentaires</a></li>
+</ul></li>
+</ul>
+</div>
+
+<hr />
+<div id="introduction-les-diagrammes-en-batons" class="section level1">
+<h1>Introduction – Les diagrammes en bâtons</h1>
+<p>Le diagramme à bâtons est une représentation visuellement informative et descriptive d’un jeu de données de variables catégoriques [1]. Ce graphique permet de visualiser, pour chacune de ces variables, une fréquence absolue ou relative qui correspond à la hauteur du bâton. Les barres d’un diagramme en bâtons, contrairement aux barres de l’histogramme, sont disjointes, puisque l’axe d’où elles partent ne représente pas un continuum de valeurs [2].</p>
+<p>R, par le biais de la fonction <code>barplot</code>, ainsi que le populaire <em>package</em> <code>ggplot2</code> permettent tous les deux de produire des diagrammes en bâtons. Voici la marche à suivre pour produire ces graphiques.</p>
+<div id="note" class="section level4">
+<h4>Note:</h4>
+<p>Les exemples du document ont été produits à l’aide des données <em>hour.csv</em> du <em>Bike sharing dataset</em>, disponibles au <em>UCI Machine Learning Repository</em>. Ces données représentent les conditions et le nombre de locations par heure dans un système de prêt de bicyclettes [3].</p>
+</div>
+</div>
+<div id="le-jeu-de-donnees-a-letude-conditions-meteorologiques-horaires" class="section level1">
+<h1>Le jeu de données à l’étude: conditions météorologiques horaires</h1>
+<p>Le jeu de données <em>hour.csv</em>, une fois chargé, a la forme suivante:</p>
+<pre class="r"><code>head(hour.dataset)</code></pre>
+<pre><code>##   instant     dteday season yr mnth hr holiday weekday workingday
+## 1       1 2011-01-01      1  0    1  0       0       6          0
+## 2       2 2011-01-01      1  0    1  1       0       6          0
+## 3       3 2011-01-01      1  0    1  2       0       6          0
+## 4       4 2011-01-01      1  0    1  3       0       6          0
+## 5       5 2011-01-01      1  0    1  4       0       6          0
+## 6       6 2011-01-01      1  0    1  5       0       6          0
+##   weathersit temp  atemp  hum windspeed casual registered cnt
+## 1          1 0.24 0.2879 0.81    0.0000      3         13  16
+## 2          1 0.22 0.2727 0.80    0.0000      8         32  40
+## 3          1 0.22 0.2727 0.80    0.0000      5         27  32
+## 4          1 0.24 0.2879 0.75    0.0000      3         10  13
+## 5          1 0.24 0.2879 0.75    0.0000      0          1   1
+## 6          2 0.24 0.2576 0.75    0.0896      0          1   1</code></pre>
+<p>Ce sont les colonnes <code>season</code> (<em>saison</em>), <code>yr</code> (<em>année</em>) et <code>weathersit</code> (<em>température au site de location</em>) qui seront utilisées pour produire les graphiques. L’information qui en découle est codée sous forme de chiffres, qui peuvent être interprétés par le fichier Lisez-moi (<em>Readme.txt</em>) disponible avec les données téléchargées. En voici un résumé.</p>
+<div id="tableau-1.-signification-des-colonnes-du-jeu-de-donnees" class="section level5">
+<h5><strong>Tableau 1</strong>. Signification des colonnes du jeu de données</h5>
+<table>
+<thead>
+<tr class="header">
+<th>Nom de la colonne</th>
+<th align="center">Valeur numérique</th>
+<th align="left">Descriptif</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>season</code></td>
+<td align="center">2</td>
+<td align="left">Printemps</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td align="center">3</td>
+<td align="left">Été</td>
+</tr>
+<tr class="odd">
+<td> </td>
+<td align="center">4</td>
+<td align="left">Automne</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td align="center">1*</td>
+<td align="left">Hiver</td>
+</tr>
+<tr class="odd">
+<td> </td>
+<td align="center"> </td>
+<td align="left"> </td>
+</tr>
+<tr class="even">
+<td><code>year</code></td>
+<td align="center">0</td>
+<td align="left">2011</td>
+</tr>
+<tr class="odd">
+<td> </td>
+<td align="center">1</td>
+<td align="left">2012</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td align="center"> </td>
+<td align="left"> </td>
+</tr>
+<tr class="odd">
+<td><code>weathersit</code></td>
+<td align="center">1</td>
+<td align="left">Dégagé à partiellement nuageux</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td align="center">2</td>
+<td align="left">Nuageux et brumeux</td>
+</tr>
+<tr class="odd">
+<td> </td>
+<td align="center">3</td>
+<td align="left">Pluie ou neige légère</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td align="center">4</td>
+<td align="left">Orage et fortes précipitations</td>
+</tr>
+</tbody>
+</table>
+<p> </p>
+<p><strong>Source</strong>: Fichier <em>Readme.txt</em> disponible au téléchargement du <em>Bike sharing dataset</em> * Il y a une erreur dans ce ficher, toutes les valeurs de saison sont décalées de 1, selon les dates auxquelles les saisons sont enregistrées.</p>
+<p>Pour nous simplifier la tâche, nous pourrions déjà convertir ces trois colonnes en facteurs, dont les niveaux seront donnés par les descriptifs.</p>
+<pre class="r"><code># Pour la saison
+hour.dataset$season &lt;- factor(hour.dataset$season, labels = c(&quot;Hiver&quot;,
+                                                              &quot;Printemps&quot;, &quot;Été&quot;, 
+                                                              &quot;Automne&quot;))
+# Pour l&#39;année
+hour.dataset$yr &lt;- factor(hour.dataset$yr, labels = c(&quot;2011&quot;, &quot;2012&quot;))
+
+# Pour la température
+hour.dataset$weathersit &lt;- factor(hour.dataset$weathersit, 
+                                  labels = c(&quot;Dégagé&quot;, 
+                                             &quot;Nuage, brume&quot;,
+                                             &quot;Pluie ou neige&quot;,
+                                             &quot;Orage&quot;))
+# Les trois colonnes concernées contiennent maintenant des facteurs
+with(hour.dataset, {
+  str(season)
+  str(yr)
+  str(weathersit)
+})</code></pre>
+<pre><code>##  Factor w/ 4 levels &quot;Hiver&quot;,&quot;Printemps&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  Factor w/ 2 levels &quot;2011&quot;,&quot;2012&quot;: 1 1 1 1 1 1 1 1 1 1 ...
+##  Factor w/ 4 levels &quot;Dégagé&quot;,&quot;Nuage, brume&quot;,..: 1 1 1 1 1 2 1 1 1 1 ...</code></pre>
+<p> </p>
+</div>
+</div>
+<div id="produire-un-diagramme-a-batons-avec-la-fonction-barplot" class="section level1">
+<h1>Produire un diagramme à bâtons avec la fonction <code>barplot</code></h1>
+<blockquote>
+<pre><code>barplot(height, ...)</code></pre>
+</blockquote>
+<p><sup><em>Fonction de base barplot, selon les fiches d’aide R</em></sup></p>
+<p>Cette fonction permet de créer des diagrammes en bâtons, horizontaux ou verticaux. Faisant partie de la famille des fonctions du package <code>graphics</code>, <code>barplot</code> peut utiliser certains arguments communs à toutes les fonctions graphiques (comme <code>main</code>, <code>xlim</code> ou <code>ylab</code>), en plus de certains arguments spécifiques.</p>
+<p>Dans son cas de figure le plus simple, <code>barplot</code> accepte comme paramètre <code>height</code> soit un vecteur, soit une matrice. Dans le cas présent, nous utiliserons un <strong>vecteur</strong>.</p>
+<p>Si <code>height</code> est un vecteur, <code>barplot</code> tracera un diagramme où chaque valeur (numérique) sera représenté par une barre. De plus, si les valeurs sont nommées, <code>barplot</code> ajoutera sous les bâtons le nom des valeurs comme axe des x.</p>
+<p>Cependant, les données dans l’état actuel sont inutilisables. En effet, si on avait produit un diagramme à bâtons sur la température du fichier original, on aurait obtenu ceci, un nombre de barres égalisant le nombre d’heures dans notre jeu de données. C’est là que notre conversion en facteurs s’avère utile…</p>
+<p><img src="/tutoriels_etudiants/hiver_2015/diagramme_batons_ggplot2_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>En effet, avec les fonctions <code>table</code> ou <code>xtabs</code>, nous pouvons désormais créer une table de fréquence de la température et extraire ainsi le nombre d’observations par catégorie. À des fins d’exemple, seules les données de 2011 seront utilisées.</p>
+<pre class="r"><code>t.temperature &lt;- xtabs(~ weathersit, data = hour.dataset, subset = yr == 2011)
+t.temperature</code></pre>
+<pre><code>## weathersit
+##         Dégagé   Nuage, brume Pluie ou neige          Orage 
+##           5645           2218            781              1</code></pre>
+<pre class="r"><code>barplot(t.temperature)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2015/diagramme_batons_ggplot2_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>L’avantage d’avoir converti la colonne <code>weathersit</code> en facteur est que les valeurs des niveaux sont reportées dans la table de fréquence, puis dans le graphique pour devenir le nom des barres. Bien sûr, nous aurions pu rajouter le nom de ces barres avec l’argument <code>names.arg</code> de la façon suivante:</p>
+<pre class="r"><code># Exemple
+barplot(t.temperature, names.arg = c(&quot;Dégagé&quot;, &quot;Nuage, brume&quot;,
+                                     &quot;Pluie ou neige&quot;, &quot;Orage&quot;))</code></pre>
+<p>Certaines informations supplémentaires pourraient être ajoutées pour clarifier ce graphique, à même la commande <code>barplot</code>.</p>
+<ul>
+<li>L’argument <code>ylab</code> sera utile pour nommer l’axe des y.</li>
+<li>L’argument <code>main</code> permettra d’intégrer un titre.</li>
+</ul>
+<pre class="r"><code>barplot(t.temperature, ylab = &quot;fréquence&quot;, main = &quot;Type de température horaire en 2011&quot;)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2015/diagramme_batons_ggplot2_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Voilà qui est beaucoup plus informatif!</p>
+<p>Certains arguments facultatifs permettent de modifier l’apparence d’un diagramme en bâtons produit avec <code>barplot</code>. Ces arguments sont présentés dans le tableau suivant.</p>
+<div id="tableau-2.-arguments-facultatifs-de-barplot" class="section level5">
+<h5><strong>Tableau 2</strong>. Arguments facultatifs de barplot</h5>
+<table>
+<thead>
+<tr class="header">
+<th>Paramètres</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>width</td>
+<td>Permet de produire des barres de largeur variable</td>
+</tr>
+<tr class="even">
+<td>space</td>
+<td>L’espace précédant chaque barre. Peut être variable aussi</td>
+</tr>
+<tr class="odd">
+<td>beside</td>
+<td>Permet d’empiler les barres au lieu de les juxtaposer</td>
+</tr>
+<tr class="even">
+<td>horiz</td>
+<td>Trace un diagramme horizontal ou vertical</td>
+</tr>
+</tbody>
+</table>
+<p> </p>
+<p>L’ensemble des paramètres qui constituent <code>barplot</code> peuvent être visionnées avec <code>help(barplot)</code>.</p>
+</div>
+</div>
+<div id="produire-un-diagramme-a-batons-simple-avec-le-package-ggplot2" class="section level1">
+<h1>Produire un diagramme à bâtons simple avec le package <code>ggplot2</code></h1>
+<p>Ce package, créé par Hadley Wickham, est basé sur une construction systémique des graphiques décrite par Leland Wilkinson dans son livre <em>Grammar of Graphics</em> [4]. Dans cette approche, tous les éléments peuvent être ajoutés au graphique sous forme de couches successives, même les barres ou les points! Pour produire un graphique avec <code>ggplot2</code>, il faut donc faire une <strong>somme</strong> de différents éléments à partir d’un object original, l’objet <code>ggplot</code>.</p>
+<p>La création d’un diagramme en bâtons de base avec <code>ggplot2</code>, puis d’un diagramme avancé nous permettra de visualiser certaines des fonctions de ce package.</p>
+<div id="lobjet-ggplot" class="section level2">
+<h2>L’objet <code>ggplot</code></h2>
+<blockquote>
+<pre><code>ggplot(data, aes(x, y, &lt;other aesthetics&gt;))</code></pre>
+</blockquote>
+<p><sup><em>Une des trois façons d’appeler <code>ggplot</code> selon la documentation associée</em></sup></p>
+<p>Contrairement à la fonction <code>barplot</code> de R, la fonction <code>ggplot</code> ne nous demandera pas de modifier les données avec une table de fréquence, puisque ce sont les fonctions du package qui s’en occuperont. De plus, <code>ggplot</code> prend en entrée un <em>dataframe</em> seulement.</p>
+<p>Le premier objet à créer est donc un <code>ggplot</code> qui contient nos données, ici, un sous-ensemble de hour.dataset à l’année 2011. En assignant l’objet à une variable, nous pourrons rajouter plusieurs ensembles de couches à tout moment.</p>
+<pre class="r"><code># Initiation d&#39;un objet ggplot pour les observations de 2011 seulement
+library(ggplot2)
+a &lt;- ggplot(subset(hour.dataset, yr == 2011), aes(x = weathersit, fill = weathersit))</code></pre>
+<p>À la suite de l’argument <code>data</code>, nous avons aussi ajouté des paramètres esthétiques <code>aes</code> (pour <em>aesthetic</em>). Deux arguments ont été utilisés.</p>
+<ul>
+<li><code>x</code>, qui donne ce qui sera mesuré en axe des x, ici les types de température</li>
+<li><code>fill</code>, qui définit la couleur. Cet argument sera repris plus tard par la fonction qui crée les barres du diagramme (<code>geom_bar</code>). L’avantage d’utiliser <code>fill</code> dans <code>aes</code> est qu’on laisse les différentes fonctions attribuer des couleurs en fonction du nombre de niveaux de weathersit, c’est-à-dire quatre.</li>
+</ul>
+<p>L’argument <code>y</code> ne sera pas utilisé ici, puisque <code>geom_bar</code> va par défaut compter la fréquence absolue pour ce qu’on lui a défini en axe des x.</p>
+</div>
+<div id="rajouter-des-couches" class="section level2">
+<h2>Rajouter des couches</h2>
+<p>La fonction utilisée ici, <code>geom_bar</code>, fait partie des objets géométriques. Ce sont eux qui tracent le coeur du graphique, c’est-à-dire, les lignes, les barres ou les points que nous voulons représenter.</p>
+<p><code>geom_bar</code> va utiliser directement les arguments de <code>aes</code> qui ont été ajoutés à l’objet <code>ggplot</code>. De plus, cette fonction utilise par défaut l’argument <code>stat = &quot;count&quot;</code> qui <strong>compte</strong> le nombre d’éléments par <code>x</code> pour produire les bâtons.</p>
+<p>Les éléments sont simplement ajoutés par sommation <code>+</code>.</p>
+<pre class="r"><code>a + geom_bar(stat = &quot;count&quot;)</code></pre>
+<p>Nous obtenons déjà un graphique semblable au graphique de base produit en R. Cependant, un peu de peaufinage doit être fait. Les noms des axes peuvent être changés, et un titre pourrait être ajouté. De plus, dans ce cas-ci, la légende et le nom de l’axe des x ne fournissent pas d’information pertinente. Nous pourrions donc les enlever. Tous ces aspects seront modifiés par différentes fonctions couches de <code>ggplot</code>.</p>
+<p><img src="/tutoriels_etudiants/hiver_2015/diagramme_batons_ggplot2_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="les-autres-couches" class="section level2">
+<h2>Les autres couches</h2>
+<p>Les fonctions suivantes permettront de compléter le diagramme avec l’information pertinente.</p>
+<ul>
+<li>La fonction <code>theme</code> gouverne plusieurs aspects graphiques (le <strong>contenant</strong>), dont la position de la légende. En quelque sorte, elle ressemble à la fonction <code>par</code> des graphiques de base.</li>
+<li><code>xlab</code> et <code>ylab</code> sont des fonctions qui prennent en entrée le titre des axes respectifs.</li>
+<li><code>ggtitle</code> prend, de la même façon, le titre du graphique</li>
+</ul>
+<pre class="r"><code>a +                     
+  geom_bar(stat = &quot;count&quot;) +                      # Bâtons
+  theme(legend.position = &quot;none&quot;) +               # Enlève la légende
+  xlab(&quot;&quot;) +                                      # Axe des x, non pertinent
+  ylab(&quot;fréquence&quot;) +                             # Axe des y
+  ggtitle(&quot;Type de température horaire en 2011&quot;)  # Titre</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2015/diagramme_batons_ggplot2_files/figure-html/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="produire-un-diagramme-a-batons-complexe-avec-le-package-ggplot2" class="section level1">
+<h1>Produire un diagramme à bâtons complexe avec le package <code>ggplot2</code></h1>
+<p>Jetons d’abord un coup d’oeil au graphique suivant, qui donne une vue d’ensemble sur la température à la location en fonction des saisons et des années.</p>
+<p> </p>
+<p><img src="/tutoriels_etudiants/hiver_2015/diagramme_batons_ggplot2_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Comparé au diagramme de base, ce graphique comporte plusieurs différences:</p>
+<ul>
+<li>Les <strong>deux</strong> années du jeu de données sont présentées, et chaque année a son sous-graphique</li>
+<li>L’axe des x est toujours divisé en température, cependant, les bâtons correspondent maintenant à la fréquence par <strong>saison</strong></li>
+<li>Il y a maintenant une <strong>légende</strong>, accompagnée d’un titre approprié</li>
+<li>Le titre de la figure est en gras</li>
+</ul>
+<p>Produire un graphique de ce type, à partir du graphique de base, va nous demander plusieurs types d’actions.</p>
+<ul>
+<li>Changer les paramètres de l’objet <code>ggplot</code> et de la fonction géométrique <code>geom_bar</code></li>
+<li>Diviser le graphique en 2 panneaux</li>
+<li>Ajouter de l’information à la légende</li>
+<li>S’occuper de divers paramètres de mise en forme: positionnement de la légende, mise en forme des étiquettes de l’axe des x, police du titre.</li>
+</ul>
+<div id="modifier-le-coeur-du-graphique-avec-un-nouvel-objet-ggplot-et-des-arguments-pour-geom_bar" class="section level2">
+<h2>Modifier le coeur du graphique avec un nouvel objet ggplot et des arguments pour geom_bar</h2>
+<p>Puisque le jeu de données est différent, un nouvel objet <code>ggplot</code> doit être créé. C’est aussi l’occasion de modifier les paramètres esthétiques qui seront pris en compte par <code>geom_bar</code>.</p>
+<pre class="r"><code>b &lt;- ggplot(hour.dataset, aes(x = weathersit, fill = season))</code></pre>
+<p>L’axe des x est toujours occupé par la température, mais ce sont les saisons qui créent les barres. C’est pourquoi la colonne <code>season</code> du jeu de données est maintenant passée à l’argument <code>fill</code>.</p>
+<p>Comparons maintenant les exemples suivants:</p>
+<pre class="r"><code># Diagramme de gauche, superposé
+b + geom_bar()
+# Diagramme de droite, juxtaposé
+b + geom_bar(position = &quot;dodge&quot;)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2015/diagramme_batons_ggplot2_files/figure-html/unnamed-chunk-15-1.png" width="336" style="display: block; margin: auto;" /><img src="/tutoriels_etudiants/hiver_2015/diagramme_batons_ggplot2_files/figure-html/unnamed-chunk-15-2.png" width="336" style="display: block; margin: auto;" /></p>
+<p>Utiliser l’argument <code>position</code> permet de changer l’apparence des barres. C’est le paramètre <code>&quot;dodge&quot;</code>, qui supprime l’empilement par variable, qui nous intéresse ici.</p>
+</div>
+<div id="diviser-le-graphique-en-2-panneaux-plus-simple-que-mfrow" class="section level2">
+<h2>Diviser le graphique en 2 panneaux: plus simple que mfrow</h2>
+<p>Un autre type de fonction, les fonctions de “facettes” (<em>faceting</em>) permettent de séparer un graphique en panneaux directement à partir d’une formule.</p>
+<pre class="r"><code>b + geom_bar(position = &quot;dodge&quot;) + facet_grid(~ yr)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2015/diagramme_batons_ggplot2_files/figure-html/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Ici, c’est la fonction facet_grid qui permet de diviser les données représentées en deux panneaux, selon l’année.</p>
+</div>
+<div id="les-derniers-ajouts-guide-theme-et-scale_x_discrete" class="section level2">
+<h2>Les derniers ajouts: <code>guide</code>, <code>theme</code> et <code>scale_x_discrete</code></h2>
+<p>On réutilise la fonction <code>theme</code> pour modifier des éléments de <strong>contenant</strong>:</p>
+<ul>
+<li>L’argument <code>legend.position</code> permet cette fois-ci de déplacer la légende en bas du graphique</li>
+<li>L’argument <code>plot.title</code> demande d’appeler une autre fonction: <code>element_text</code>, qui contrôle les différents paramètres d’un texte (police, taille, couleur, etc.). En utilisant cette combinaison, on demande d’appliquer une police en caractère <strong>gras</strong> au titre</li>
+</ul>
+<p>La fonction <code>guide</code> se situe à l’interface entre l’esthétique, le <strong>contenant</strong> et l’information, le <strong>contenu</strong>. Tout comme <code>theme</code>, elle permet d’appeler d’autres fonctions directement dans ses arguments. Nous l’utilisons ici pour appeler la fonction <code>guide_legend</code>, qui va nous permettre de modifier le titre de la légende.</p>
+<p>Finalement, la fonction <code>scale_x_discrete</code> permet un meilleur contrôle des paramètres de l’axe des x que la fonction <code>xlabs</code>. Dans ce cas, elle va nous permettre d’introduire des retours de chariots dans les étiquettes de l’axe des x de façon à mieux équilibrer les lignes.</p>
+<p>Combiné aux fonctions précédemment couvertes, cela va nous permettre de produire un graphique complet et informatif.</p>
+<pre class="r"><code>b +
+  geom_bar(position = &quot;dodge&quot;) + facet_grid(~ yr) +
+
+  guides(fill = guide_legend(title = &quot;saison&quot;)) +
+  theme(legend.position=&quot;bottom&quot;, plot.title = element_text(face = &quot;bold&quot;)) +
+  
+  scale_x_discrete(&quot;température&quot;, labels = c(&quot;Dégagé&quot; = &quot;Dégagé&quot;,
+                                            &quot;Nuage, brume&quot; = &quot;Nuage,\nbrume&quot;,
+                                            &quot;Pluie ou neige&quot; = &quot;Pluie ou\nneige&quot;,
+                                            &quot;Orage&quot; = &quot;Orage&quot;)) +
+  ylab(&quot;fréquence&quot;) +
+  ggtitle(&quot;Type de température horaire selon l&#39;année et la saison&quot;) </code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2015/diagramme_batons_ggplot2_files/figure-html/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Le package <code>ggplot2</code> permet une production de graphiques complexes pour lesquels il serait impossible de couvrir tous les aspects dans ce seul exemple. Pour une aide ponctuelle et pour l’accès au répertoire des fonctions de ce package, veuillez voir la documentation en ligne de <code>ggplot2</code> à l’adresse suivante <a href="http://docs.ggplot2.org/current/index.html" class="uri">http://docs.ggplot2.org/current/index.html</a>.</p>
+</div>
+</div>
+<div id="references-completes" class="section level1">
+<h1>Références complètes</h1>
+<div id="references-citees" class="section level3">
+<h3>Références citées</h3>
+<p>[1] KOOPMANS, Lambert H. (1987). <em>Introduction to Contemporary Statistical Methods, Second Edition</em>. Duxbury Press, Boston, États-Unis, <strong>ISBN</strong>: 0-87150-073-6, 683 pages.</p>
+<p>[2] RENY-NOLIN, Emmanuelle, MASSÉ, Jean-Claude, VANDAL, Nathalie, BAILLARGEON, Sophie et TALBOT, Denis (2014). <em>STT-1100, Statistiques Descriptives, Notions théoriques</em>, Département de mathématiques et de statistique, Université Laval, Québec, Canada, 91 pages.</p>
+<p>[3] <a href="https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset" class="uri">https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset</a>, consulté le 9 mars 2015.</p>
+<p>[4] CHANG, Winston (2012). <em>R Graphics Cookbook</em>. O’Reilly Media, Sebastopol, États-Unis, <strong>ISBN</strong>: 978-1-449-31695-2, 416 pages.</p>
+</div>
+<div id="references-supplementaires" class="section level3">
+<h3>Références supplémentaires</h3>
+<p><em>R et l’ensemble de sa documentation</em>: R Core Team (2014). <em>R: A Language and Environment for Statistical Computing</em>, R Foundation for Statistical Computing, Vienna, Austria, <a href="http://www.R-project.org" class="uri">http://www.R-project.org</a></p>
+<p><em>la documentation de ggplot2, disponible à</em>: WICKHAM, Hadley. <a href="http://docs.ggplot2.org/current/index.html" class="uri">http://docs.ggplot2.org/current/index.html</a>, consulté le 16 mars 2015.</p>
+<p><em>Les notes du présent cours, pour une introduction rapide à R, et une présentation de ressources avancées</em>: BAILLARGEON, Sophie (2015). <em>Ressources R</em>. <a href="http://archimede.mat.ulaval.ca/dokuwiki/doku.php?id=r" class="uri">http://archimede.mat.ulaval.ca/dokuwiki/doku.php?id=r</a>, consulté le 16 mars 2015.</p>
+<p><em>pour une introduction pratique à ggplot2, avec exemple</em>: Pedro M. (5 mars 2015). <em>Part 3a: Plotting with ggplot2</em>. <a href="http://theanalyticalminds.blogspot.ca/2015/03/part-3a-plotting-with-ggplot2.html" class="uri">http://theanalyticalminds.blogspot.ca/2015/03/part-3a-plotting-with-ggplot2.html</a>, consulté le 14 mars 2015.</p>
+</div>
+</div>

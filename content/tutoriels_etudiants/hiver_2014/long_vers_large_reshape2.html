@@ -1,0 +1,143 @@
+---
+title: "Transformer un jeu de données d'une mise en forme longue vers une mise en forme large en R"
+linkTitle: "reshape2 - Reformater long vers large"
+weight: 2
+author: "par Laurence Desbois-Bédard et Sarah-Anne Savard"
+date: "2014-03-16"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \setlength{\OuterFrameSep}{6pt}
+---
+
+
+
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#differents-formats-de-jeux-de-donnees">Différents formats de jeux de données</a></li>
+<li><a href="#la-fonction-reshape">La fonction <code>reshape</code></a><ul>
+<li><a href="#guide-dutilisation">Guide d’utilisation :</a></li>
+</ul></li>
+<li><a href="#la-fonction-dcast">La fonction <code>dcast</code></a><ul>
+<li><a href="#guide-dutilisation-1">Guide d’utilisation :</a></li>
+</ul></li>
+<li><a href="#comparaison-des-deux-methodes">Comparaison des deux méthodes</a></li>
+<li><a href="#pour-plus-dinformations">Pour plus d’informations</a></li>
+</ul>
+</div>
+
+<hr />
+<p>Cette fiche présente deux fonctions pour changer le format d’un jeu de données d’une mise en forme longue vers une mise en forme large. On y décrit d’abord les particularités de chacune de ces mises en forme à l’aide d’exemples. On utilise ensuite la fonction <code>reshape</code>, qui provient de la librairie standard de <code>R</code>, afin de changer le format du jeu de données. Une option alternative est ensuite présentée pour effectuer la même tâche. Il s’agit de la fonction <code>dcast</code>, qui provient de la librairie <code>reshape2</code>, disponible au <a href="http://cran.r-project.org/web/packages/reshape2/index.html" class="uri">http://cran.r-project.org/web/packages/reshape2/index.html</a>. Enfin, une comparaison des deux méthodes est présentée.</p>
+<p>Afin d’illustrer la différence entre les mises en forme longue et large, on utilise un extrait du jeu de données des iris de Fisher à titre d’exemple. Ce jeu de données compte 150 observations et 5 variables. Chaque observation représente un iris. Quatre variables numériques continues ont été mesurées sur chacune des fleurs : la longueur et largeur d’un sépale (<code>Sepal.Length</code> et <code>Sepal.Width</code>) et la longueur et la largeur d’un pétale (<code>Petal.Length</code> et <code>Petal.Width</code>). De plus, une variable catégorique nominale à trois modalités (<code>Species</code>) donne l’espèce de l’iris, soit setosa, versicolor ou virginica. On a gardé les observations 1, 51 et 101 dans les exemples ci-dessous.</p>
+<div id="differents-formats-de-jeux-de-donnees" class="section level1">
+<h1>Différents formats de jeux de données</h1>
+<p>Pour qu’un jeu de données soit dit de format long, une même observation doit y revenir plusieurs fois. Une variable d’identification permet de reconnaître l’observation. Dans l’exemple ci-dessous, chaque fleur revient à quatre reprises et est identifiée par la variable <code>UnitID</code> :</p>
+<pre><code>##     UnitID    Species   VariableID Value
+## 1        1     setosa Sepal.Length   5.1
+## 51      51 versicolor Sepal.Length   7.0
+## 101    101  virginica Sepal.Length   6.3
+## 151      1     setosa  Sepal.Width   3.5
+## 201     51 versicolor  Sepal.Width   3.2
+## 251    101  virginica  Sepal.Width   3.3
+## 301      1     setosa Petal.Length   1.4
+## 351     51 versicolor Petal.Length   4.7
+## 401    101  virginica Petal.Length   6.0
+## 451      1     setosa  Petal.Width   0.2
+## 501     51 versicolor  Petal.Width   1.4
+## 551    101  virginica  Petal.Width   2.5</code></pre>
+<p>L’information contenue dans la colonne <code>Species</code> est simplement l’espèce de l’iris observé. Elle est répétée à chaque fois que l’observation revient dans le jeu de données. La colonne <code>VariableID</code> donne le nom de la variable pour laquelle on a la valeur dans la colonne <code>Value</code>. Ce format est dit long car il compte davantage de lignes, mais moins de colonnes, qu’un même jeu de données au format large. En effet, on a ici besoin de 600 lignes pour synthétiser l’information obtenue auprès de 150 fleurs, mais de seulement 4 colonnes alors que le jeu de données contient 5 variables.</p>
+<p>Il est important de remarquer dès à présent que les colonnes d’un jeu de données de mise en forme longue ont un rôle particulier. D’une part, certaines colonnes permettent d’identifier l’observation. Il s’agit bien sûr de la colonne donnant le numéro de l’observation, mais aussi de toutes celles qui contiennent directement de l’information au sujet de cette observation. Dans l’exemple, il s’agit des colonnes <code>UnitID</code> et <code>Species</code>. On les appelera <strong>colonnes identifiantes</strong>. D’autre part, on a toujours une colonne qui donne un nom de variable et une autre qui donne la valeur de cette variable pour l’observation. On comprend qu’il s’agit des colonnes <code>VariableID</code> et <code>Value</code> de l’exemple. On les nommera <strong>colonne des variables</strong> et <strong>colonne des valeurs</strong> respectivement.</p>
+<p>Une telle mise en forme est couramment rencontrée dans la pratique statistique lorsque les données étudiées sont appariées et qu’elles proviennent d’une étude longitudinale. On peut penser, par exemple, à des données récoltées à plusieurs moments dans le temps sur un même individu. Dans un tel contexte, certaines variables seront <strong>identifiantes</strong>, comme le nom de la personne et son sexe, et ne varieront pas d’un moment à l’autre de l’étude. D’autres variables, comme la pression artérielle et la température corporelle, peuvent changer. Ces variables ne sont donc pas <strong>identifiantes</strong>. On ajoutera une ligne au jeu de données pour chaque nouvelle mesure prise.</p>
+<p>Il arrive cependant que la mise en forme longue ne soit pas commode et qu’on souhaite changer le format du jeu de données pour le ramener sous la forme large. Ce format est celui qu’on rencontre le plus souvent : une rangée par observation et une colonne par variable.</p>
+<p>Le jeu de données des iris est généralement présenté sous cette forme. Voici le même extrait qu’à l’exemple précédent, mais cette fois-ci sous la forme large :</p>
+<pre><code>##     Sepal.Length Sepal.Width Petal.Length Petal.Width    Species
+## 1            5.1         3.5          1.4         0.2     setosa
+## 51           7.0         3.2          4.7         1.4 versicolor
+## 101          6.3         3.3          6.0         2.5  virginica</code></pre>
+<p>Ce jeu de données compte maintenant 150 lignes et 5 colonnes. On voit que les <strong>colonnes identifiantes</strong> sont toujours présentes d’une certaine manière : la colonne <code>UnitID</code> correspond maintenant au numéro d’observation et la colonne <code>Species</code> est une variable du jeu de données. Chaque mot apparaissant dans la <strong>colonne des variables</strong> dans le format long est devenu le nom d’une variable dans le format large. Enfin, les valeurs de la <strong>colonne des valeurs</strong> ont tout simplement été organisées pour apparaître au bon endroit dans le format large.</p>
+</div>
+<div id="la-fonction-reshape" class="section level1">
+<h1>La fonction <code>reshape</code></h1>
+<p>La fonction <code>reshape</code> permet de changer le format d’un jeu de données en <code>R</code>, que ce soit d’une mise en forme longue vers une mise en forme large ou l’inverse. Pour l’utiliser dans le cas qui nous intéresse, il importe de bien identifier les <strong>colonnes identifiantes</strong> et la <strong>colonne des variables</strong> du jeu de données au format long. Cela simplifie grandement l’utilisation de la fonction.</p>
+<p>Pour transformer un jeu de données d’une mise en forme longue vers une mise en forme large, les arguments les plus utiles sont <code>data</code>, <code>direction</code>, <code>v.names</code>, <code>timevar</code>, <code>idvar</code> et <code>drop</code>. Les arguments <code>new.row.names</code>, <code>sep</code> et <code>split</code> peuvent aussi être utilisés afin de changer les noms des lignes et des colonnes du jeu de données final, mais on recommande plutôt d’effectuer ces modifications par la suite.</p>
+<div id="guide-dutilisation" class="section level3">
+<h3>Guide d’utilisation :</h3>
+<ul>
+<li><code>data</code> = le jeu de données, au format <code>data frame</code></li>
+<li><code>direction</code> = <code>'wide'</code></li>
+<li><code>v.names</code> = les variables dans le jeu de données au format long qui doivent être mises en colonnes dans le format large (optionnel)</li>
+<li><code>timevar</code> = la <strong>colonne des variables</strong></li>
+<li><code>idvar</code> = les <strong>colonnes identifiantes</strong> (un vecteur)</li>
+<li><code>drop</code> = la ou les variables à retirer du jeu de données avant la transformation</li>
+</ul>
+<p>Par exemple, pour passer du format long au format large dans le jeu de donnée des iris, on utilise la fonction ainsi :</p>
+<pre class="r"><code>iris_large1 &lt;- reshape(iris_long,
+                       direction = &quot;wide&quot;,
+                       timevar = &quot;VariableID&quot;,
+                       idvar = c(&quot;Species&quot;,&quot;UnitID&quot;))</code></pre>
+<p>Voici le résultat :</p>
+<pre><code>##     UnitID    Species Value.Sepal.Length Value.Sepal.Width
+## 1        1     setosa                5.1               3.5
+## 51      51 versicolor                7.0               3.2
+## 101    101  virginica                6.3               3.3
+##     Value.Petal.Length Value.Petal.Width
+## 1                  1.4               0.2
+## 51                 4.7               1.4
+## 101                6.0               2.5</code></pre>
+<p>On remarque que la varible <code>UnitID</code> n’est plus utile car elle correspond au numéro d’observation. De plus, les noms des variables de groupes sont maintenant précédés du nom de la <strong>colonne des valeurs</strong> (<code>Value</code>). Pour rendre le résultat semblable à celui présenté plus haut, il suffit de faire quelques opérations simples : extraire, renommer et permuter les colonnes désirées. Par exemple,</p>
+<pre class="r"><code>iris_large1 &lt;- iris_large1[,c(3:6,2)]
+colnames(iris_large1) &lt;- c(&#39;Sepal.Length&#39;,&#39;Sepal.Width&#39;,&#39;Petal.Length&#39;,
+                           &#39;Petal.Width&#39;,&#39;Species&#39;)</code></pre>
+<pre><code>##     Sepal.Length Sepal.Width Petal.Length Petal.Width    Species
+## 1            5.1         3.5          1.4         0.2     setosa
+## 51           7.0         3.2          4.7         1.4 versicolor
+## 101          6.3         3.3          6.0         2.5  virginica</code></pre>
+</div>
+</div>
+<div id="la-fonction-dcast" class="section level1">
+<h1>La fonction <code>dcast</code></h1>
+<p>Comme on l’a déjà mentionné, une alternative à la fonction de base existe dans la librairie <code>reshape2</code>. Il s’agit des fonctions <code>dcast</code> et <code>acast</code>. Les deux permettent de transformer un <code>data frame</code> d’une mise en forme longue vers une mise en forme large, mais la première retourne un <code>data frame</code> alors que la seconde retourne un <code>array</code>. On présente ici la fonction <code>dcast</code>, mais l’utilisation de <code>acast</code> est similaire, dans les cas où l’objet de sortie doit avoir plus de 2 dimensions.</p>
+<div id="guide-dutilisation-1" class="section level3">
+<h3>Guide d’utilisation :</h3>
+<ul>
+<li><code>data</code> = le jeu de données, au format <code>data frame</code></li>
+<li><code>formula</code> = <strong>colonnes identifiantes</strong> ~ <strong>colonne des variables</strong> (il existe d’autres notations pour les formules, voir <code>help(dcast)</code>)</li>
+<li><code>fun.aggregate</code> = fonction à utiliser pour synthétiser l’information s’il y a plus d’une observation par cellule après la transformation (<code>mean</code>, <code>median</code>, <code>sum</code>, etc.)</li>
+<li><code>...</code> = les arguments requis par la fonction précédente, s’il y a lieu</li>
+<li><code>drop</code> = la ou les variables à retirer du jeu de données avant la transformation</li>
+<li><code>value.var</code> = la <strong>colonne des valeurs</strong> (optionnel)</li>
+</ul>
+<p>Il est à noter que si la <strong>colonne des valeurs</strong> n’est pas spécifiée, <code>R</code> peut généralement la trouver par lui-même. De plus, l’ordre des <strong>colonnes identifiantes</strong> est important et une attention particulière doit y être portée. Les <strong>colonnes identifiantes</strong> sont séparées par le symbole <code>+</code> dans une formule standard. D’autres arguments peuvent aussi être utilisés (voir <code>help(dcast)</code>).</p>
+<p>Pour effectuer la transformation du jeu de données des iris, on procède ainsi :</p>
+<pre class="r"><code>library(reshape2) # Chargement de la librairie 
+
+iris_large2 &lt;- dcast(data = iris_long, 
+                     formula = UnitID + Species ~ VariableID,
+                     value.var = &#39;Value&#39;)</code></pre>
+<p>Voici le résultat:</p>
+<pre><code>##     UnitID    Species Sepal.Length Sepal.Width Petal.Length Petal.Width
+## 1        1     setosa          5.1         3.5          1.4         0.2
+## 51      51 versicolor          7.0         3.2          4.7         1.4
+## 101    101  virginica          6.3         3.3          6.0         2.5</code></pre>
+<p>Tout comme avec la fonction <code>reshape</code>, la variable <code>UnitID</code> n’est plus utile. Par contre, les noms des variables ne sont plus précédés du nom de la <strong>colonne des valeurs</strong>. Cela simplifie les opérations pour obtenir un jeu de données tel que celui présenté dans les sections précédentes.</p>
+</div>
+</div>
+<div id="comparaison-des-deux-methodes" class="section level1">
+<h1>Comparaison des deux méthodes</h1>
+<p>Les deux fonctions présentées permettent de transformer un jeu de données du format long vers le format large. Cependant, l’un des problèmes de la fonction <code>reshape</code> est qu’elle permet aussi d’effectuer la transformation inverse, ce qui complexifie sa syntaxe. De plus, ses arguments ont des noms peu intuitifs en dehors du cadre d’une étude longitudinale (<code>timevar</code> par exemple). Ces faiblesses ont été corrigées dans les fonctions de la librairie <code>reshape2</code>. En effet, on y trouve des fonctions différentes pour les deux opérations : <code>melt</code> pour passer du format large au format long et <code>dcast</code> ou <code>acast</code> pour passer du format long au format large. Qui plus est, les arguments sont plus simples à utiliser et la formule ajoute de nombreuses possibilités pour l’utilisateur. Enfin, l’argument <code>fun.aggregate</code> permet de considérer toutes les valeurs du jeu de données au format long, alors qu’avec la fonction <code>reshape</code>, seulement la première occurence est considérée et un avertissement est émis (voir la description de l’argument <code>timevar</code> dans la fiche d’aide de <code>reshape</code>). En somme, les fonctions de la librairie <code>reshape2</code> sont plus faciles à utiliser et ont des fonctionnalités que <code>reshape</code> ne possède pas.</p>
+</div>
+<div id="pour-plus-dinformations" class="section level1">
+<h1>Pour plus d’informations</h1>
+<p>Comme pour toutes les fonctions en <code>R</code>, on peut consulter la fiche d’aide de ces fonctions en tapant <code>help(reshape)</code> ou <code>help(dcast)</code> dans la console de <code>R</code>.</p>
+<p>La <a href="http://www.seananderson.ca/2013/10/19/reshape.html">page</a> de Sean Anderson et cet <a href="http://tgmstat.wordpress.com/2013/10/31/reshape-and-aggregate-data-with-the-r-package-reshape2/">article</a> de Thiago G. Martins offrent une explication vulgarisée de l’utilisation des fonctions de la librairie <code>reshape2</code>.</p>
+</div>

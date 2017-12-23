@@ -1,0 +1,400 @@
+---
+title: "Transformer un jeu de données d'une mise en forme large vers une mise en forme longue"
+linkTitle: "reshape2 - Reformater large vers long"
+weight: 1
+author: "par Mondji Herbert Monwanou et Simon Rioux"
+date: "2014-03-16"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \setlength{\OuterFrameSep}{6pt}
+---
+
+
+
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#methode-1-fonction-reshape-de-r">Méthode 1: fonction <code>reshape</code> de R:</a><ul>
+<li><a href="#description">Description</a></li>
+</ul></li>
+<li><a href="#methode-2-utilisation-du-package-reshape2">Méthode 2: utilisation du package <em>reshape2</em>:</a><ul>
+<li><a href="#presentation-du-package-reshape2">Présentation du package <em>reshape2</em></a></li>
+<li><a href="#description-de-la-fonction-melt">Description de la fonction <code>melt</code></a></li>
+<li><a href="#exemple-dutilisation-de-la-fonction-melt">Exemple d’utilisation de la fonction <code>melt</code></a></li>
+</ul></li>
+<li><a href="#comparaison-des-deux-methodes">Comparaison des deux méthodes</a></li>
+<li><a href="#references">Références</a></li>
+</ul>
+</div>
+
+<hr />
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>L’installation de base de R offre plusieurs fonctions pour la manipulation des jeux de données. Plusieurs <em>packages</em> ont également été créés pour une réalisation plus pratique de tâches spécifiques dans la manipulation des bases de données.</p>
+<p>Le but de cette fiche est de montrer comment modifier un jeu de données de la mise en forme large vers la mise en forme longue en utilisant deux techniques. La première utilise la fonction <code>reshape</code> de R, et la deuxième utilise des fonctions du <em>package</em> <a href="http://cran.r-project.org/web/packages/reshape2/index.html">reshape2</a>.</p>
+<p>Pour des fins d’exemple, nous utiliserons le jeu de données des iris de Fisher ou Anderson, qui est disponible dans R en utilisant la fonction <code>iris</code>. Ce jeu de données donne les mesures en centimètres des variables <em>Sepal.Length</em> (longueur de la sépale), <em>Sepal.Width</em> (largeur de la sépale), <em>Petal.Length</em> (longeur du pétale) et <em>Petal.Width</em> (largeur du pétale) pour une cinquantaine de fleurs de chacune des 3 espèces <em>setosa</em>, <em>versicolor</em> et <em>virginica</em>. Des informations sur ce jeu de données se trouvent sur sa fiche d’aide de R (exécuter le code <code>?iris</code>) et sur sa page <a href="http://en.wikipedia.org/wiki/Iris_flower_data_set">wikipédia</a>.</p>
+<p>En voici un aperçu:</p>
+<pre class="r"><code>head(iris)</code></pre>
+<pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0.2  setosa
+## 4          4.6         3.1          1.5         0.2  setosa
+## 5          5.0         3.6          1.4         0.2  setosa
+## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
+<pre class="r"><code>tail(iris)</code></pre>
+<pre><code>##     Sepal.Length Sepal.Width Petal.Length Petal.Width   Species
+## 145          6.7         3.3          5.7         2.5 virginica
+## 146          6.7         3.0          5.2         2.3 virginica
+## 147          6.3         2.5          5.0         1.9 virginica
+## 148          6.5         3.0          5.2         2.0 virginica
+## 149          6.2         3.4          5.4         2.3 virginica
+## 150          5.9         3.0          5.1         1.8 virginica</code></pre>
+<p>Le jeu de données comporte une ligne par observation, le but sera de le transformer afin qu’il comporte une ligne par donnée. Voici un aperçu du jeu de données que l’on désire:</p>
+<pre><code>##   UnitID Species   VariableID Value
+## 1      1  setosa Sepal.Length   5.1
+## 2      2  setosa Sepal.Length   4.9
+## 3      3  setosa Sepal.Length   4.7
+## 4      4  setosa Sepal.Length   4.6
+## 5      5  setosa Sepal.Length   5.0
+## 6      6  setosa Sepal.Length   5.4</code></pre>
+<pre><code>##     UnitID   Species  VariableID Value
+## 595    145 virginica Petal.Width   2.5
+## 596    146 virginica Petal.Width   2.3
+## 597    147 virginica Petal.Width   1.9
+## 598    148 virginica Petal.Width   2.0
+## 599    149 virginica Petal.Width   2.3
+## 600    150 virginica Petal.Width   1.8</code></pre>
+</div>
+<div id="methode-1-fonction-reshape-de-r" class="section level1">
+<h1>Méthode 1: fonction <code>reshape</code> de R:</h1>
+<div id="description" class="section level2">
+<h2>Description</h2>
+<p>La fonction <code>reshape</code> de R fait partie du package <em>stats</em>. Elle permet de transformer un jeu de données de la mise en forme large (<em>wide</em>) vers la mise en forme longue (<em>long</em>) et vice versa. Cette fonction comporte un grand nombre d’arguments qu’il est possible de spécifier:</p>
+<table>
+<colgroup>
+<col width="16%" />
+<col width="83%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Paramètre</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>data</code></td>
+<td><em>Data frame</em> concerné</td>
+</tr>
+<tr class="even">
+<td><code>varying</code></td>
+<td>Liste de variables de la mise en forme large qui seront “empilées” dans la mise en forme longue pour former une seule ou quelques variable(s). Il s’agit généralement d’une liste de noms de variables, mais ce paramètre peut être une matrice ou un vecteur de noms.</td>
+</tr>
+<tr class="odd">
+<td><code>v.names</code></td>
+<td>On nomme ici la ou les variable(s) créées dans <code>varying</code>.</td>
+</tr>
+<tr class="even">
+<td><code>timevar</code></td>
+<td>Variable du format long permettant de différencier les observations multiples d’un même groupe ou individu. On crée donc une variable qui permettra d’identifier de quelle variable du jeu de données initial la donnée provient.</td>
+</tr>
+<tr class="odd">
+<td><code>idvar</code></td>
+<td>Variables du format long permettant d’identifier les groupes ou individus uniques. On crée donc une ou plusieurs variable(s) qui permettra d’identifier l’observation d’où provient la donnée.</td>
+</tr>
+<tr class="even">
+<td><code>ids</code></td>
+<td>Valeurs utilisées pour la nouvelle variable nommée dans <code>idvar</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>times</code></td>
+<td>Valeurs utilisées pour la nouvelle variable nommée dans <code>timevar</code>.</td>
+</tr>
+<tr class="even">
+<td><code>drop</code></td>
+<td>Vecteur des noms de variables à exclure de la remise en forme.</td>
+</tr>
+<tr class="odd">
+<td><code>direction</code></td>
+<td>Chaîne de caractère indiquant la direction de la mise en forme: <code>&quot;wide&quot;</code> pour un format large, <code>&quot;long&quot;</code> pour un format long.</td>
+</tr>
+<tr class="even">
+<td><code>new.row.names</code></td>
+<td>Valeur logique indiquant s’il faut créer de nouveaux noms de lignes à partir des valeurs de <code>id</code> et de <code>time</code> lorsque l’on passe d’une mise en forme longue à une mise en forme large.</td>
+</tr>
+<tr class="odd">
+<td><code>sep</code></td>
+<td>Ce caractère précise le séparateur utilisé dans les noms de variables du format large quand la fonction <code>reshape</code> tente de déterminer les valeurs de <code>v.names</code> et <code>times</code> lorsque l’on passe d’une mise en forme large à une mise en forme longue.</td>
+</tr>
+<tr class="even">
+<td><code>split</code></td>
+<td>Liste de trois composants: <code>regexp</code>, <code>include</code> et <code>fixed</code> qui fournissent une interface améliorée pour le découpage des noms de variables (voir la fiche d’aide pour plus de détails).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Adapté de:</strong> R l’essentiel, Joseph Adler, édition Pearson Éducation France (2011), page 217</p>
+<p>À titre d’exemple, voici la procédure qui permet de transformer le jeu de données <em>iris</em> de la mise en forme large à la mise en forme longue:</p>
+<pre class="r"><code>iris_long &lt;- reshape(iris, direction = &quot;long&quot;, 
+                     idvar = &quot;UnitID&quot;, 
+                     ids = rownames(iris), 
+                     varying = c(&quot;Sepal.Length&quot;, &quot;Sepal.Width&quot;, 
+                                 &quot;Petal.Length&quot;, &quot;Petal.Width&quot;), 
+                     v.names = &quot;Value&quot;, timevar = &quot;VariableID&quot;, 
+                     times = colnames(iris)[1:4])
+str(iris_long)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    600 obs. of  4 variables:
+##  $ Species   : Factor w/ 3 levels &quot;setosa&quot;,&quot;versicolor&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ VariableID: chr  &quot;Sepal.Length&quot; &quot;Sepal.Length&quot; &quot;Sepal.Length&quot; &quot;Sepal.Length&quot; ...
+##  $ Value     : num  5.1 4.9 4.7 4.6 5 5.4 4.6 5 4.4 4.9 ...
+##  $ UnitID    : chr  &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; ...
+##  - attr(*, &quot;reshapeLong&quot;)=List of 4
+##   ..$ varying:List of 1
+##   .. ..$ Value: chr  &quot;Sepal.Length&quot; &quot;Sepal.Width&quot; &quot;Petal.Length&quot; &quot;Petal.Width&quot;
+##   .. ..- attr(*, &quot;v.names&quot;)= chr &quot;Value&quot;
+##   .. ..- attr(*, &quot;times&quot;)= chr  &quot;Sepal.Length&quot; &quot;Sepal.Width&quot; &quot;Petal.Length&quot; &quot;Petal.Width&quot;
+##   ..$ v.names: chr &quot;Value&quot;
+##   ..$ idvar  : chr &quot;UnitID&quot;
+##   ..$ timevar: chr &quot;VariableID&quot;</code></pre>
+<p>Il est possible de constater, dans la structure interne de iris_long, que les paramètres utilisés lors de la création d’un objet avec <code>reshape</code> sont stockés dans les attributs de l’objet.</p>
+<pre class="r"><code>head(iris_long)</code></pre>
+<pre><code>##                Species   VariableID Value UnitID
+## 1.Sepal.Length  setosa Sepal.Length   5.1      1
+## 2.Sepal.Length  setosa Sepal.Length   4.9      2
+## 3.Sepal.Length  setosa Sepal.Length   4.7      3
+## 4.Sepal.Length  setosa Sepal.Length   4.6      4
+## 5.Sepal.Length  setosa Sepal.Length   5.0      5
+## 6.Sepal.Length  setosa Sepal.Length   5.4      6</code></pre>
+<p>Ce n’est pas tout à fait le jeu de données que l’on désire. Nous allons donc changer l’ordre des colonnes et enlever les noms de lignes:</p>
+<pre class="r"><code>iris_long &lt;- iris_long[, c(4,1,2,3)]
+rownames(iris_long) &lt;- NULL
+head(iris_long)</code></pre>
+<pre><code>##   UnitID Species   VariableID Value
+## 1      1  setosa Sepal.Length   5.1
+## 2      2  setosa Sepal.Length   4.9
+## 3      3  setosa Sepal.Length   4.7
+## 4      4  setosa Sepal.Length   4.6
+## 5      5  setosa Sepal.Length   5.0
+## 6      6  setosa Sepal.Length   5.4</code></pre>
+<pre class="r"><code>tail(iris_long)</code></pre>
+<pre><code>##     UnitID   Species  VariableID Value
+## 595    145 virginica Petal.Width   2.5
+## 596    146 virginica Petal.Width   2.3
+## 597    147 virginica Petal.Width   1.9
+## 598    148 virginica Petal.Width   2.0
+## 599    149 virginica Petal.Width   2.3
+## 600    150 virginica Petal.Width   1.8</code></pre>
+<p>Le jeu de données résultant est sous le format désiré, soit une ligne par donnée. Pour identifier l’observation associée à la donnée, la variable “UnitID” a été créée. Pour identifier la variable du jeu de données initial associée à la donnée du jeu final, la variable “VariableID” a été créée.</p>
+<p>Pour plus de détails sur la fonction <code>reshape</code>, on peut consulter la fiche d’aide de R ou la <a href="http://stat.ethz.ch/R-manual/R-patched/library/stats/html/reshape.html">page web correspondante</a> ou <a href="http://www.r-bloggers.com/converting-a-dataset-from-wide-to-long">ce lien</a>.</p>
+</div>
+</div>
+<div id="methode-2-utilisation-du-package-reshape2" class="section level1">
+<h1>Méthode 2: utilisation du package <em>reshape2</em>:</h1>
+<div id="presentation-du-package-reshape2" class="section level2">
+<h2>Présentation du package <em>reshape2</em></h2>
+<p>Le package R <code>reshape2</code> est une version plus récente du package R <em>reshape</em> développé par Hadley Wickham. Son site officiel est <a href="http://had.co.nz/reshape">le suivant</a>. Il est également possible de consulter <a href="http://www.jstatsoft.org/v21/i12/paper">une publication</a> en lien avec le package <code>reshape</code>, parue en 2007 dans le <em>Journal of Statistical Software</em>. Ce package permet surtout le remodelage des données. Ses deux principales fonctions sont la fonction <code>melt</code>, qui permet le passage d’un jeu de données de la mise en forme large à la mise en forme longue, et la fonction <code>cast</code>, qui permet de réaliser l’inverse. Un truc pour retenir le nom de la fonction <code>melt</code> est de penser à un bloc de métal qui fond et qui s’étire vers le bas.</p>
+</div>
+<div id="description-de-la-fonction-melt" class="section level2">
+<h2>Description de la fonction <code>melt</code></h2>
+<p>L’usage général de cette fonction est:</p>
+<pre class="r"><code>melt(data, ..., na.rm = FALSE, value.name = &quot;value&quot;) </code></pre>
+<p>où data peut être un objet R de type <em>data frame</em>, <em>array</em> ou <em>list</em>. Les variantes de la fonctions correspondant à chacune de ces types d’objet sont respectivement <code>melt.data.frame</code>, <code>melt.array</code> et <code>melt.list</code>. L’appel à la fonction <code>melt</code> permet de réaliser automatiquement les tâches de ces variantes en précisant les arguments appropriés, donc on utilise toujours <code>melt</code>, peu importe le type d’objet que l’on désire transformer.</p>
+<p>Le jeu de données <em>iris</em> est un <em>data frame</em>. Ainsi pour <code>data.frame.melt</code> qui nous concerne ici, on doit préciser à <code>melt</code> : - la ou les variable(s) d’identification (<em>id.vars</em>) - la ou les variable(s) de mesure (<em>measure.vars</em>)</p>
+<p>Si on ne précise qu’un seul de ces deux paramètres, la fonction attribuera le reste des variables du jeu de données à l’autre paramètre.</p>
+<p>Si on ne spécifie aucun de ces paramètres, melt considère les variables de type caractère ou facteur comme des variables d’identification, et les autres comme des variables de mesure.</p>
+<p>L’usage de la fonction <code>melt</code> pour un <em>data frame</em> est donc :</p>
+<pre class="r"><code>melt(data, id.vars = &quot;&quot;, measure.vars = &quot;&quot;, variable.name = &quot;variable&quot;, ..., 
+     na.rm = FALSE, value.name = &quot;value&quot;)</code></pre>
+<p>Les paramètres de <code>melt</code> dans ce cas sont :</p>
+<table>
+<colgroup>
+<col width="16%" />
+<col width="83%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Arguments</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>data</code></td>
+<td>Le <em>data frame</em> à transformer</td>
+</tr>
+<tr class="even">
+<td><code>id.vars</code></td>
+<td>Vecteur de variable(s) d’identification pouvant être de type entier (indiquant la position des variables) ou caractère (noms des variables). Si on ne spécifie rien, R prend toutes les variables non spécifiées dans measure.vars.</td>
+</tr>
+<tr class="odd">
+<td><code>measure.vars</code></td>
+<td>Vecteur de variable(s) de mesure pouvant être de type entier (indiquant la position des variables) ou caractère (noms des variables). Si on ne spécifie rien, R prend toutes les variables non spécifiées dans id.vars. <em>NB: si ni <code>id.vars</code> ni <code>measure.vars</code> ne sont spécifiés, R prend les variables catégoriques comme variables d’identification et les variables numériques comme variables de mesure.</em></td>
+</tr>
+<tr class="even">
+<td><code>variable.name</code></td>
+<td>Nom de la variable devant contenir les noms des variables de mesure</td>
+</tr>
+<tr class="odd">
+<td><code>value.name</code></td>
+<td>Nom de la variable devant contenir les valeurs.</td>
+</tr>
+<tr class="even">
+<td><code>na.rm</code></td>
+<td>Valeur logique permettant de gérer les valeurs manquantes. En mentionnant <code>TRUE</code>, on indique à R de supprimer les valeurs manquantes.</td>
+</tr>
+</tbody>
+</table>
+<p>Source: page d’aide du package <em>reshape2</em>, suivre <a href="http://cran.at.r-project.org/web/packages/reshape2/reshape2.pdf">ce lien</a>. Voir la page 7.</p>
+</div>
+<div id="exemple-dutilisation-de-la-fonction-melt" class="section level2">
+<h2>Exemple d’utilisation de la fonction <code>melt</code></h2>
+<p>Avant toute chose, il faut, si ce n’est déjà fait, installer le package <em>reshape2</em> puis le charger en exécutant le code :</p>
+<pre class="r"><code>install.packages(&quot;reshape2&quot;)
+library(reshape2)</code></pre>
+<p>Utilisons maintenant la fonction <code>melt</code> pour changer la mise en forme du jeu de données <em>iris</em>:</p>
+<pre class="r"><code>iris_long2 &lt;- melt(iris, id.vars = &quot;Species&quot;, 
+                   measure.vars = c(&quot;Sepal.Length&quot;, &quot;Sepal.Width&quot;, 
+                                    &quot;Petal.Length&quot;, &quot;Petal.Width&quot;),
+                   variable.name = &quot;VariableID&quot;, value.name = &quot;Value&quot;)
+str(iris_long2)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    600 obs. of  3 variables:
+##  $ Species   : Factor w/ 3 levels &quot;setosa&quot;,&quot;versicolor&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ VariableID: Factor w/ 4 levels &quot;Sepal.Length&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ Value     : num  5.1 4.9 4.7 4.6 5 5.4 4.6 5 4.4 4.9 ...</code></pre>
+<p>Il est intéressant de remarquer que dans ce cas ci, les paramètres utilisés lors de la création d’un objet avec <code>melt</code> ne sont pas stockés dans les attributs de l’objet.</p>
+<pre class="r"><code>head(iris_long2)</code></pre>
+<pre><code>##   Species   VariableID Value
+## 1  setosa Sepal.Length   5.1
+## 2  setosa Sepal.Length   4.9
+## 3  setosa Sepal.Length   4.7
+## 4  setosa Sepal.Length   4.6
+## 5  setosa Sepal.Length   5.0
+## 6  setosa Sepal.Length   5.4</code></pre>
+<pre class="r"><code>tail(iris_long2)</code></pre>
+<pre><code>##       Species  VariableID Value
+## 595 virginica Petal.Width   2.5
+## 596 virginica Petal.Width   2.3
+## 597 virginica Petal.Width   1.9
+## 598 virginica Petal.Width   2.0
+## 599 virginica Petal.Width   2.3
+## 600 virginica Petal.Width   1.8</code></pre>
+<p>Le résultat obtenu est proche de celui désiré. En effet, les variables présentes ont les bons attributs mais on note l’absence de colonne “id”, ce qui est normal car la seule variable d’identification specifiée est “species”. Pour avoir la colonne “id”, il est possible de la juxtaposer manuellement avec la fonction <code>cbind</code>:</p>
+<pre class="r"><code>iris_long2 &lt;- cbind(UnitID = as.numeric(rep(rownames(iris),4)), iris_long2)
+head(iris_long2)</code></pre>
+<pre><code>##   UnitID Species   VariableID Value
+## 1      1  setosa Sepal.Length   5.1
+## 2      2  setosa Sepal.Length   4.9
+## 3      3  setosa Sepal.Length   4.7
+## 4      4  setosa Sepal.Length   4.6
+## 5      5  setosa Sepal.Length   5.0
+## 6      6  setosa Sepal.Length   5.4</code></pre>
+<p>Une autre option aurait été de la créer dans le jeu de données original et de la spécifier dans <code>id.vars</code> lors de la transformation:</p>
+<pre class="r"><code>iris2 &lt;- cbind(UnitID = as.integer(rownames(iris)), iris)
+head(iris2)</code></pre>
+<pre><code>##   UnitID Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1      1          5.1         3.5          1.4         0.2  setosa
+## 2      2          4.9         3.0          1.4         0.2  setosa
+## 3      3          4.7         3.2          1.3         0.2  setosa
+## 4      4          4.6         3.1          1.5         0.2  setosa
+## 5      5          5.0         3.6          1.4         0.2  setosa
+## 6      6          5.4         3.9          1.7         0.4  setosa</code></pre>
+<pre class="r"><code>iris_long3 &lt;- melt(iris2, id.vars = c(&quot;UnitID&quot;, &quot;Species&quot;), 
+                   measure.vars = c(&quot;Sepal.Length&quot;, &quot;Sepal.Width&quot;, 
+                                    &quot;Petal.Length&quot;, &quot;Petal.Width&quot;),
+                   variable.name = &quot;VariableID&quot;, value.name = &quot;Value&quot;)
+head(iris_long3)</code></pre>
+<pre><code>##   UnitID Species   VariableID Value
+## 1      1  setosa Sepal.Length   5.1
+## 2      2  setosa Sepal.Length   4.9
+## 3      3  setosa Sepal.Length   4.7
+## 4      4  setosa Sepal.Length   4.6
+## 5      5  setosa Sepal.Length   5.0
+## 6      6  setosa Sepal.Length   5.4</code></pre>
+<pre class="r"><code>tail(iris_long3)</code></pre>
+<pre><code>##     UnitID   Species  VariableID Value
+## 595    145 virginica Petal.Width   2.5
+## 596    146 virginica Petal.Width   2.3
+## 597    147 virginica Petal.Width   1.9
+## 598    148 virginica Petal.Width   2.0
+## 599    149 virginica Petal.Width   2.3
+## 600    150 virginica Petal.Width   1.8</code></pre>
+<p>Le jeu de données obtenu est exactement celui désiré.</p>
+<p>Il faut noter qu’il aurait été possible d’omettre l’argument “measure.vars”: la fonction <code>melt</code> aurait pris toutes les variables non mentionnées dans l’argument “id.vars”, ce qui correspond aux quatre variables mentionnées ci dessus. L’inverse est également vrai: il aurait été possible d’omettre l’argument “id.vars”. Avec le jeu de données original <em>iris</em> non modifié, il aurait même été possible de ne spécifier ni l’argument “id.vars” ni l’argument “measure.vars”. Dans ce cas, <code>melt</code> prend les variables catégoriques comme variables d’identification et les variables numériques comme variables de mesure:</p>
+<pre class="r"><code>iris_long2a &lt;- melt(iris, variable.name = &quot;VariableID&quot;, value.name = &quot;Value&quot;)</code></pre>
+<pre><code>## Using Species as id variables</code></pre>
+<pre class="r"><code>head(iris_long2a)</code></pre>
+<pre><code>##   Species   VariableID Value
+## 1  setosa Sepal.Length   5.1
+## 2  setosa Sepal.Length   4.9
+## 3  setosa Sepal.Length   4.7
+## 4  setosa Sepal.Length   4.6
+## 5  setosa Sepal.Length   5.0
+## 6  setosa Sepal.Length   5.4</code></pre>
+<p>Une autre façon d’utiliser la fonction <code>melt</code> aurait été en spécifiant les numéros de colonnes au lieu des noms de variables dans “id.vars” et dans “measure.vars”.</p>
+<pre class="r"><code>iris_long4 &lt;- melt(iris2, id.vars = c(1, 6), measure.vars = c(2:5), 
+                   variable.name = &quot;VariableID&quot;, value.name = &quot;Value&quot;)
+head(iris_long4)</code></pre>
+<pre><code>##   UnitID Species   VariableID Value
+## 1      1  setosa Sepal.Length   5.1
+## 2      2  setosa Sepal.Length   4.9
+## 3      3  setosa Sepal.Length   4.7
+## 4      4  setosa Sepal.Length   4.6
+## 5      5  setosa Sepal.Length   5.0
+## 6      6  setosa Sepal.Length   5.4</code></pre>
+<p>On se retrouve avec le même résultat.</p>
+<p>Il est possible d’en apprendre plus sur le package <em>reshape2</em> et sur la fonction <code>melt</code> en consultant <a href="http://www.seananderson.ca/2013/10/19/reshape.html">cette page web</a> et <a href="https://wiki.cmbi.ru.nl/index.php/Introductory-R-Course/reshape2">cette page web</a>.</p>
+</div>
+</div>
+<div id="comparaison-des-deux-methodes" class="section level1">
+<h1>Comparaison des deux méthodes</h1>
+<p>Pour faciliter la comparaison, voici les deux programmes permettant de transformer le jeu de données <em>iris</em> de la mise en forme large vers la mise en forme longue:</p>
+<pre class="r"><code>iris_long &lt;- reshape(iris, direction = &quot;long&quot;, idvar = &quot;UnitID&quot;, 
+                     ids = rownames(iris), 
+                     varying = c(&quot;Sepal.Length&quot;, &quot;Sepal.Width&quot;, 
+                                 &quot;Petal.Length&quot;, &quot;Petal.Width&quot;), 
+                     v.names = &quot;Value&quot;, timevar = &quot;VariableID&quot;, 
+                     times = colnames(iris)[1:4])
+iris_long &lt;- iris_long[, c(4,1,2,3)]
+rownames(iris_long) &lt;- NULL</code></pre>
+<pre class="r"><code>iris_long2 &lt;- melt(iris, id.vars = &quot;Species&quot;, 
+                   measure.vars = c(&quot;Sepal.Length&quot;, &quot;Sepal.Width&quot;, 
+                                    &quot;Petal.Length&quot;, &quot;Petal.Width&quot;),
+                   variable.name = &quot;VariableID&quot;, value.name = &quot;Value&quot;)
+iris_long2 &lt;- cbind(UnitID = as.numeric(rep(rownames(iris),4)), iris_long2)</code></pre>
+<p>Il faut d’abord noter qu’aucune des deux fonctions ne permet d’obtenir directement le résultat désiré avec le <em>data frame</em> d’origine. La fonction <code>reshape</code> permet de créer automatiquement en dernière position une colonne d’identification constituée des numéros des lignes du jeu de données original. Il faut ensuite réorganiser l’ordre des colonnes et renommer les lignes pour obtenir le résultat désiré. La fonction <code>melt</code> s’en tient à la variable d’identification spécifiée et ne crée pas de colonne supplémentaire, il faut alors la créer manuellement avant ou après la transformation.</p>
+<p>Le <em>data frame</em> obtenu avec <code>melt</code> est un <em>data frame</em> ordinaire alors que celui obtenu avec <code>reshape</code> a plusieurs attributs supplémentaires (paramètres utilisés pour la transformation).</p>
+<p>Selon nous, les arguments de la fonction <code>melt</code> sont nommés de façon plus explicite, ce qui rend cette fonction plus facile à utiliser. Par exemple, les arguments pour nommer les variables que l’on crée lors de la transformation sont nommés “variable.name” et “value.name”.</p>
+<p>De plus, il y a moins d’arguments à spécifier pour la fonction <code>melt</code>. Cela est peut-être dû au fait que cette fonction sert uniquement à transformer un jeu de données de la mise en forme large vers la mise en forme longue, tandis que la fonction <code>reshape</code> permet également la transformation inverse. Le fait qu’il y ait moins d’arguments à spécifier rend également la fonction plus facile à utiliser et diminue le risque de commettre une erreur.</p>
+<p>En conclusion, nous croyons qu’il est préférable d’utiliser la fonction <code>melt</code> pour transformer un jeu de données de la mise en forme large vers la mise en forme longue étant donné sa plus grande facilité d’utilisation et le risque d’erreur plus faible.</p>
+</div>
+<div id="references" class="section level1">
+<h1>Références</h1>
+<p><strong>Note</strong>: les pages web référées dans cette fiche ont été archivées avec <a href="http://www.webcitation.org/">webcite</a> le 11 mars 2014. Si un lien fourni dans cette fiche ne fonctionne plus, il est possible de consulter les pages web en suivant les liens suivants (placés en ordre de référence):</p>
+<ul>
+<li>Informations sur le package <em>reshape2</em>: <a href="http://www.webcitation.org/6O0BdGGUj" class="uri">http://www.webcitation.org/6O0BdGGUj</a><br />
+</li>
+<li>Page wikipédia du jeu de données <em>iris</em>: <a href="http://www.webcitation.org/6O0Bi5TLS" class="uri">http://www.webcitation.org/6O0Bi5TLS</a><br />
+</li>
+<li>Fiche d’aide de la fonction <code>reshape</code>: <a href="http://www.webcitation.org/6O0BlfGCO" class="uri">http://www.webcitation.org/6O0BlfGCO</a></li>
+<li>Page d’informations sur la fonction <code>reshape</code>: <a href="http://www.webcitation.org/6O4W1UZdy" class="uri">http://www.webcitation.org/6O4W1UZdy</a><br />
+</li>
+<li>Site web du package <em>reshape2</em>: <a href="http://www.webcitation.org/6O0Bpg0XC" class="uri">http://www.webcitation.org/6O0Bpg0XC</a><br />
+</li>
+<li>Publication sur le package <em>reshape</em>: <a href="http://www.webcitation.org/6O0Bt8R9O" class="uri">http://www.webcitation.org/6O0Bt8R9O</a><br />
+</li>
+<li>Page d’aide du package <em>reshape2</em>: <a href="http://www.webcitation.org/6O0BwYEGK" class="uri">http://www.webcitation.org/6O0BwYEGK</a><br />
+</li>
+<li>Informations sur le package <em>reshape2</em>: <a href="http://www.webcitation.org/6O0C26eJ6" class="uri">http://www.webcitation.org/6O0C26eJ6</a> et <a href="http://www.webcitation.org/6O0C3aast" class="uri">http://www.webcitation.org/6O0C3aast</a></li>
+</ul>
+</div>

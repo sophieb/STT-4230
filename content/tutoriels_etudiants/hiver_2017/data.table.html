@@ -1,0 +1,260 @@
+---
+title: "Fonctionnalités de l'opérateur \"[\" du package data.table"
+linkTitle: "data.table - Opérateur \"[\""
+weight: 1
+author: "par Mamadou YAUCK et Oumaima ELKHOUDAOUI"
+date: "2017-04-18"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \setlength{\OuterFrameSep}{6pt}
+---
+
+
+
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#possibilites-de-linstallation-de-base-data.frame">Possibilités de l’installation de base : <code>data.frame</code></a><ul>
+<li><a href="#selection-de-donnees"><strong>Sélection de données</strong></a></li>
+<li><a href="#aggregation-de-donnees"><strong>Aggrégation de données</strong></a></li>
+</ul></li>
+<li><a href="#package-integre-data.table">Package intégré : <code>data.table</code></a><ul>
+<li><a href="#selection-de-donnees-1"><strong>Sélection de données</strong></a></li>
+<li><a href="#aggregation-de-donnees-1"><strong>Aggrégation de données</strong></a></li>
+</ul></li>
+<li><a href="#analyse-comparative-data.frame-et-data.table">Analyse comparative <code>data.frame</code> et <code>data.table</code></a></li>
+<li><a href="#references-bibliographiques">Références bibliographiques</a></li>
+</ul>
+</div>
+
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Le logiciel <code>R</code> offre différentes structures de données telles que les vecteurs, les listes, les matrices, les data frames. Cette dernière structure, le data frame, offre une manière compréhensible d’organiser, de visualiser et d’accéder aux données. La sélection d’observations et de variables requiert la connaissances des différents éléments de la structure. Par ailleurs, l’aggrégation de l’information statistique contenue dans un objet de la classe <code>data.frame</code> fait appel à un minimum de connaissances de fonctions d’aggrégation telles que <code>tapply</code>, <code>table</code>, <code>aggregate</code>. Idéalement, il serait beaucoup plus intéressant de disposer d’objets de structures similaires au data frame qui effectuent le travail de manipulation de jeu de données de manière beaucoup plus <strong>simple</strong>.</p>
+<p>La présente fiche s’intéresse à <code>data.table</code>, <span class="math inline">\(9^e\)</span> package le plus téléchargé dans <code>R</code> en date du 18 avril 2017 (consulter <a href="https://www.rdocumentation.org/trends" class="uri">https://www.rdocumentation.org/trends</a>) . Introduit en <span class="math inline">\(2006\)</span> par Matt Dowle, le package est une version avancée de la fonction <code>data.frame</code> issue des fonctionnalités de base de <code>R</code> offrant des manipulations simples de jeux de données. En particulier, la fiche décrit les différentes possibilités de l’opérateur <code>[</code>. De façon spécifique, la fiche décrira les fonctionnalités suivantes:</p>
+<ul>
+<li><p>Sélection d’un sous-échantillon d’une base de données (lignes, colonnes)</p></li>
+<li><p>Aggrégation d’information</p></li>
+</ul>
+<p>La présentation se fera sous une approche comparative à travers le jeu de données <code>iris</code>, qui a la structure interne ainsi décrite.</p>
+<pre class="r"><code>str(iris)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    150 obs. of  5 variables:
+##  $ Sepal.Length: num  5.1 4.9 4.7 4.6 5 5.4 4.6 5 4.4 4.9 ...
+##  $ Sepal.Width : num  3.5 3 3.2 3.1 3.6 3.9 3.4 3.4 2.9 3.1 ...
+##  $ Petal.Length: num  1.4 1.4 1.3 1.5 1.4 1.7 1.4 1.5 1.4 1.5 ...
+##  $ Petal.Width : num  0.2 0.2 0.2 0.2 0.2 0.4 0.3 0.2 0.2 0.1 ...
+##  $ Species     : Factor w/ 3 levels &quot;setosa&quot;,&quot;versicolor&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...</code></pre>
+<p>Ce jeu de données contient des informations sur trois espèces de plantes de la famille des iridacées (setosa, virginica et versicolor). Pour chacune de ces espèces, des informations sur la longueur et la largeur du pétale et du sépale ont été extraites à partir d’un échantillon de 50 plants. Un aperçu du jeu de données est ainsi présenté.</p>
+<pre class="r"><code>head(iris,5)</code></pre>
+<pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0.2  setosa
+## 4          4.6         3.1          1.5         0.2  setosa
+## 5          5.0         3.6          1.4         0.2  setosa</code></pre>
+<pre class="r"><code>tail(iris,5)</code></pre>
+<pre><code>##     Sepal.Length Sepal.Width Petal.Length Petal.Width   Species
+## 146          6.7         3.0          5.2         2.3 virginica
+## 147          6.3         2.5          5.0         1.9 virginica
+## 148          6.5         3.0          5.2         2.0 virginica
+## 149          6.2         3.4          5.4         2.3 virginica
+## 150          5.9         3.0          5.1         1.8 virginica</code></pre>
+</div>
+<div id="possibilites-de-linstallation-de-base-data.frame" class="section level2">
+<h2>Possibilités de l’installation de base : <code>data.frame</code></h2>
+<p>Les jeux de données qu’on a eu à manipuler dans le cours de <code>R</code> pour Scientifique sont de la classe <code>data.frame</code>. Le jeu de données <code>iris</code> n’est pas une exception.</p>
+<pre class="r"><code>DF&lt;-iris
+class(DF)</code></pre>
+<pre><code>## [1] &quot;data.frame&quot;</code></pre>
+<p>La syntaxe de manipulation de l’objet <code>DF</code> de la classe <code>data.frame</code> est <span class="math inline">\(DF [i,j]\)</span>, avec</p>
+<ul>
+<li><code>i</code> : l’indexation de la ligne du jeu de données</li>
+<li><code>j</code> : l’indexation de la colonne du jeu de données</li>
+</ul>
+<p>Sur un objet de la classe <code>data.frame</code>, plusieurs manipulations sont possibles: sélection de lignes, de colonnes, aggrégations d’informations, ordonnancement de variables, etc.</p>
+<div id="selection-de-donnees" class="section level3">
+<h3><strong>Sélection de données</strong></h3>
+<p>Il est ainsi possible d’effectuer les manipulations usuelles sur un jeu de données. Par exemple, pour sélectionner les deux premières observations du jeu de données <code>iris</code>, la commande suivante est exécutée.</p>
+<pre class="r"><code>DF[1:2,]</code></pre>
+<pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa</code></pre>
+<p>Si nous voulons sélectionner les deux premières observations des variables <code>Sepal.Length</code> et <code>Sepal.Width</code>, la commande suivante est exécutée.</p>
+<pre class="r"><code>DF[1:2,c(1,2)]</code></pre>
+<pre><code>##   Sepal.Length Sepal.Width
+## 1          5.1         3.5
+## 2          4.9         3.0</code></pre>
+<p>ou</p>
+<pre class="r"><code>DF[1:2, c(&quot;Sepal.Length&quot;,&quot;Sepal.Width&quot;)]</code></pre>
+<pre><code>##   Sepal.Length Sepal.Width
+## 1          5.1         3.5
+## 2          4.9         3.0</code></pre>
+<p>Si nous voulons sélectionner les lignes (ou observations) pour lesquelles <code>Sepal.Width</code> est strictement supérieur à 4, la commande suivante est exécutée.</p>
+<pre class="r"><code>DF[DF$Sepal.Width&gt;4,]</code></pre>
+<pre><code>##    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 16          5.7         4.4          1.5         0.4  setosa
+## 33          5.2         4.1          1.5         0.1  setosa
+## 34          5.5         4.2          1.4         0.2  setosa</code></pre>
+</div>
+<div id="aggregation-de-donnees" class="section level3">
+<h3><strong>Aggrégation de données</strong></h3>
+<p>Lorsqu’on manipule un objet de classe <code>data.frame</code>, l’aggrégation des données fait appel à des fonctions telles que <code>apply</code>, <code>tapply</code>, <code>aggregate</code>, <code>table</code>… Supposons que l’on veuille obtenir la moyenne de <code>Sepal.Width</code> selon la variable <code>Species</code>.</p>
+<pre class="r"><code>tapply(DF$Sepal.Width, INDEX = DF$Species, FUN = mean)</code></pre>
+<pre><code>##     setosa versicolor  virginica 
+##      3.428      2.770      2.974</code></pre>
+<p>Si on veut obtenir les moyennes de <code>Sepal.Width</code> et <code>Sepal.Length</code> selon la variable <code>Species</code>, la commande suivante est exécutée.</p>
+<pre class="r"><code>aggregate(DF[, c(&quot;Sepal.Width&quot;, &quot;Sepal.Length&quot;)], by = list(Species=DF$Species), FUN = mean)</code></pre>
+<pre><code>##      Species Sepal.Width Sepal.Length
+## 1     setosa       3.428        5.006
+## 2 versicolor       2.770        5.936
+## 3  virginica       2.974        6.588</code></pre>
+<p>Supposons que l’on s’intéresse au nombre d’observations par espèces d’iridacées, la commande suivante est exécutée.</p>
+<pre class="r"><code>table(DF$Species)</code></pre>
+<pre><code>## 
+##     setosa versicolor  virginica 
+##         50         50         50</code></pre>
+<p>Les manipulations importantes effectuées sur des objets de la classe <code>data.frame</code> requièrent donc une connaissance minimale de fonctions d’aggrégations. Est-il possible d’interroger les données sans connaitre les fonctions décrites plus haut ? La réponse est affirmative ! Le package <code>data.table</code> offre une alternative remarquable dans la manipulation de jeux de données.</p>
+</div>
+</div>
+<div id="package-integre-data.table" class="section level2">
+<h2>Package intégré : <code>data.table</code></h2>
+<p>L’utilisation des fonctionnalités des objets de la classe <code>data.table</code> passe par le chargement du package <code>data.table</code>.</p>
+<pre class="r"><code>library(data.table)</code></pre>
+<p>La création d’un objet de la classe <code>data.table</code> s’effectue exactement de la même façon qu’un objet de la classe <code>data.frame</code>. Par exemple, supposons que l’on veuille créer le jeu de données de lanceurs vu en classe. Nous allons le faire avec les deux fonctions.</p>
+<pre class="r"><code>desPlus &lt;- data.frame(de1=1:10,de2=10:19, lanceur = rep(c(&quot;Luc&quot;, &quot;Kim&quot;), each = 5))
+class(desPlus)</code></pre>
+<pre><code>## [1] &quot;data.frame&quot;</code></pre>
+<pre class="r"><code>desPlus &lt;- data.table(de1=1:10,de2=10:19, lanceur = rep(c(&quot;Luc&quot;, &quot;Kim&quot;), each = 5))
+class(desPlus)</code></pre>
+<pre><code>## [1] &quot;data.table&quot; &quot;data.frame&quot;</code></pre>
+<p>Un fait intéressant est qu’un objet de la classe <code>data.table</code> est également un objet de la classe <code>data.frame</code>. Cela implique que les manipulations effectuées sur un objet de la classe <code>data.frame</code> sont aussi valables avec un objet de la classe <code>data.table</code>. <strong>La réciproque n’est pas valable !</strong></p>
+<p>Dans la suite de la présentation, nous allons travailler avec le jeu de données <code>iris</code> en prenant soin de créer un objet <code>data.table</code> avec la commande suivante.</p>
+<pre class="r"><code>DT&lt;-data.table(DF)
+str(DT)</code></pre>
+<pre><code>## Classes &#39;data.table&#39; and &#39;data.frame&#39;:   150 obs. of  5 variables:
+##  $ Sepal.Length: num  5.1 4.9 4.7 4.6 5 5.4 4.6 5 4.4 4.9 ...
+##  $ Sepal.Width : num  3.5 3 3.2 3.1 3.6 3.9 3.4 3.4 2.9 3.1 ...
+##  $ Petal.Length: num  1.4 1.4 1.3 1.5 1.4 1.7 1.4 1.5 1.4 1.5 ...
+##  $ Petal.Width : num  0.2 0.2 0.2 0.2 0.2 0.4 0.3 0.2 0.2 0.1 ...
+##  $ Species     : Factor w/ 3 levels &quot;setosa&quot;,&quot;versicolor&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  - attr(*, &quot;.internal.selfref&quot;)=&lt;externalptr&gt;</code></pre>
+<p>La syntaxe de manipulation de l’objet <code>DT</code> de la classe <code>data.table</code> est parfaitement décrite par le schéma.</p>
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-15"></span>
+<img src="fig/dt.PNG" alt="Forme générale de la syntaxe data.table " width="70%" />
+<p class="caption">
+Figure 1: Forme générale de la syntaxe data.table
+</p>
+</div>
+<ul>
+<li><code>i</code> : l’indexation de la ligne du jeu de données</li>
+<li><code>j</code> : ce qu’il faut faire sur la colonne du jeu de données</li>
+<li><code>by</code> : indique comme regrouper le résultat</li>
+</ul>
+<p>Les manipulations sur l’objet <code>DF</code> de la classe <code>data.frame</code> sont également valables avec l’objet <code>DT</code> de la classe <code>data.table</code> pour les raisons d’identité décrites un peu plus haut.</p>
+<div id="selection-de-donnees-1" class="section level3">
+<h3><strong>Sélection de données</strong></h3>
+<p>Pour sélectionner les deux premières observations du jeu de données <code>DT</code>, la commande suivante est exécutée.</p>
+<pre class="r"><code>DT[1:2,,]</code></pre>
+<pre><code>##    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1:          5.1         3.5          1.4         0.2  setosa
+## 2:          4.9         3.0          1.4         0.2  setosa</code></pre>
+<p>Mieux encore, il est possible de n’indiquer que les lignes selectionnées, sans mettre les virgules.</p>
+<pre class="r"><code>DT[1:2]</code></pre>
+<pre><code>##    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1:          5.1         3.5          1.4         0.2  setosa
+## 2:          4.9         3.0          1.4         0.2  setosa</code></pre>
+<p>Quand il s’agit de sélectionner une colonne du jeu de données, il suffit de placer une virgule avant d’indiquer la variable. Supposons que l’on veuille afficher les cinq premières observations de la variable <code>Sepal.Length</code>.</p>
+<pre class="r"><code>DT[1:5,c(Sepal.Length)]</code></pre>
+<pre><code>## [1] 5.1 4.9 4.7 4.6 5.0</code></pre>
+<p>Nous remarquons que le résultat voulu n’est pas obtenu ! Dans un objet de classe <code>data.table</code>, le symbole <code>c()</code> offre en sortie un vecteur. Pour avoir un tableau de valeurs en sortie, il faut utiliser le symbole <code>.()</code> ou <code>list()</code>.</p>
+<pre class="r"><code>DT[1:5,.(Sepal.Length)]</code></pre>
+<pre><code>##    Sepal.Length
+## 1:          5.1
+## 2:          4.9
+## 3:          4.7
+## 4:          4.6
+## 5:          5.0</code></pre>
+<p>Si nous voulons sélectionner les deux premières observations des variables <code>Sepal.Length</code> et <code>Sepal.Width</code>, la commande suivante est exécutée.</p>
+<pre class="r"><code>DT[1:2,list(Sepal.Length,Sepal.Width)]</code></pre>
+<pre><code>##    Sepal.Length Sepal.Width
+## 1:          5.1         3.5
+## 2:          4.9         3.0</code></pre>
+<p>Si nous voulons sélectionner les lignes (ou observations) pour lesquelles <code>Sepal.Width</code> est strictement supérieur à 4, la commande suivante est appropriée.</p>
+<pre class="r"><code>DT[Sepal.Width&gt;4]</code></pre>
+<pre><code>##    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1:          5.7         4.4          1.5         0.4  setosa
+## 2:          5.2         4.1          1.5         0.1  setosa
+## 3:          5.5         4.2          1.4         0.2  setosa</code></pre>
+</div>
+<div id="aggregation-de-donnees-1" class="section level3">
+<h3><strong>Aggrégation de données</strong></h3>
+<p>L’une des différences les plus remarquables dans la manipulation des deux types d’objets se trouve dans l’aggrégation des données. En effet, pour les objets de la classe <code>data.frame</code>, il faut faire appel à des fonctions telles que <code>tapply</code> ou <code>table</code> afin de résumer l’information. Cependant, pour les objets de la classe <code>data.table</code>, tout le travail se fait entre les <code>[</code> ; il n’est donc pas nécessaire de se préoccuper de l’utilisation des fonctions <code>tapply</code> ou <code>table</code> ! Supposons que l’on veuille calculer la moyenne de <code>Sepal.Width</code>.</p>
+<pre class="r"><code>DT[,mean(Sepal.Width)]</code></pre>
+<pre><code>## [1] 3.057333</code></pre>
+<p>Maintenant, supposons que l’on veuille obtenir la moyenne de <code>Sepal.Width</code> selon la variable <code>Species</code>.</p>
+<pre class="r"><code>DT[,mean(Sepal.Width),by=Species]</code></pre>
+<pre><code>##       Species    V1
+## 1:     setosa 3.428
+## 2: versicolor 2.770
+## 3:  virginica 2.974</code></pre>
+<p>Il est possible de labelliser la variable de sortie (V1) par le label <code>Moyenne</code></p>
+<pre class="r"><code>DT[,.(Moyenne=mean(Sepal.Width)),by=Species]</code></pre>
+<pre><code>##       Species Moyenne
+## 1:     setosa   3.428
+## 2: versicolor   2.770
+## 3:  virginica   2.974</code></pre>
+<p>Il est possible d’obtenir les moyennes <code>Sepal.Width</code> et <code>Sepal.Length</code> selon la variable <code>Species</code> de façon très simple.</p>
+<pre class="r"><code>DT[,.(Moy_Width=mean(Sepal.Width),Moy_Length=mean(Sepal.Length)),by=Species]</code></pre>
+<pre><code>##       Species Moy_Width Moy_Length
+## 1:     setosa     3.428      5.006
+## 2: versicolor     2.770      5.936
+## 3:  virginica     2.974      6.588</code></pre>
+<p>Pour aller un peu plus loin dans le résumé de l’information, nous allons mettre le focus sur la tabulation des données. Pour les objets de la classe <code>data.frame</code>, la fonction <code>table</code> compte les fréquences. Dans le cas des objets de la classe <code>data.table</code>, il est inutile de se préoccuper de la fonction précédente. Dans un <code>data.table</code>, il y’a une variable spéciale <code>.N</code> qui s’occupe de compter le nombre de lignes. Si l’argument <code>by=</code> est utilisé, la variable représente alors le nombre de lignes correspondant à la variable de regroupement.</p>
+<p>D’abord, supposons que l’on veuille faire le décompte du nombre d’observations dans le jeu de données. La commande suivante est exécutée.</p>
+<pre class="r"><code>DT[,.N]</code></pre>
+<pre><code>## [1] 150</code></pre>
+<p>Supposons que l’on s’intéresse au nombre d’observations par espèces d’iridacées, la commande suivante est exécutée.</p>
+<pre class="r"><code>DT[,.N,by=Species]</code></pre>
+<pre><code>##       Species  N
+## 1:     setosa 50
+## 2: versicolor 50
+## 3:  virginica 50</code></pre>
+<p>Maintenant on s’intéresse, pour chaque espèce, au nombre d’observations pour lesquelles <code>Sepal.Width</code> est strictement supérieur à 3. Le travail est effectué de façon simple.</p>
+<pre class="r"><code>DT[Sepal.Width&gt;3,.N,by=Species]</code></pre>
+<pre><code>##       Species  N
+## 1:     setosa 42
+## 2: versicolor  8
+## 3:  virginica 17</code></pre>
+<p>La variable <code>.N</code> fait partie d’un ensemble communément appelé symboles spéciaux. Cette possibilité permet une rapidité dans l’exécution des commandes et une flexibilité dans la manipulation des jeux de données.</p>
+</div>
+</div>
+<div id="analyse-comparative-data.frame-et-data.table" class="section level2">
+<h2>Analyse comparative <code>data.frame</code> et <code>data.table</code></h2>
+<p>Après avoir parcouru les principales options offertes par les deux types d’objets, il convient de relever les points suivants :</p>
+<ul>
+<li><p>Dans un objet de classe <code>data.table</code>, on se passe de syntaxes de la forme <code>DF$nom_de_la_variable</code> très souvent utilisées lorsqu’on travaille avec un objet de classe <code>data.frame</code> ; cela nous évite des codes longs, illisibles et facilement entachés d’erreurs ;</p></li>
+<li><p>La manipulation d’un objet de classe <code>data.table</code> est beaucoup plus intuitive dans l’utilisation des arguments. De manière caricaturale, il s’agit de <strong>prendre le jeu de données DT, choisir les observations <span class="math inline">\(i\)</span>, ensuite calculer <span class="math inline">\(j\)</span> suivant le groupe <span class="math inline">\(by\)</span></strong> .</p></li>
+</ul>
+<p>Par ailleurs, l’un des avantages majeurs du package <code>data.table</code> est la <strong>rapidité d’exécution</strong>. Bien que ce point ne soit pas illustré dans la présente fiche, il convient de souligner que l’utilisation d’un objet de classe <code>data.table</code> - lorsque l’on manipule de gros jeux de données - , offre un avantage considérable du point de vue du temps d’exécution. Ces remarques sont parfaitement résumées dans ce qu’il convient d’appeler la philosphie de <code>data.table</code>: <strong>des commandes concises, directes, rapides et efficientes en mémoire</strong>.</p>
+<p>Certains auteurs ont relevé des faiblesses du package <code>data.table</code> au regard des fonctions d’aggrégation. Toutefois, ils soulèvent que ces manquements sont bien balancés par la puissance du package. Il est possible d’en apprendre un peu plus en suivant le lien <a href="https://www.r-bloggers.com/efficient-aggregation-and-more-using-data-table/" class="uri">https://www.r-bloggers.com/efficient-aggregation-and-more-using-data-table/</a> .</p>
+</div>
+<div id="references-bibliographiques" class="section level2">
+<h2>Références bibliographiques</h2>
+<p><a href="https://cran.r-project.org/web/packages/data.table/data.table.pdf" class="uri">https://cran.r-project.org/web/packages/data.table/data.table.pdf</a></p>
+<p><a href="http://datatable.r-forge.r-project.org/datatable-intro.pdf" class="uri">http://datatable.r-forge.r-project.org/datatable-intro.pdf</a></p>
+<p><a href="https://github.com/Rdatatable/data.table/wiki" class="uri">https://github.com/Rdatatable/data.table/wiki</a></p>
+<p><a href="https://s3.amazonaws.com/assets.datacamp.com/img/blog/data+table+cheat+sheet.pdf" class="uri">https://s3.amazonaws.com/assets.datacamp.com/img/blog/data+table+cheat+sheet.pdf</a></p>
+<p><a href="http://user2014.stat.ucla.edu/files/tutorial_Matt.pdf" class="uri">http://user2014.stat.ucla.edu/files/tutorial_Matt.pdf</a></p>
+<p><a href="https://www.r-bloggers.com/intro-to-the-data-table-package/" class="uri">https://www.r-bloggers.com/intro-to-the-data-table-package/</a></p>
+</div>

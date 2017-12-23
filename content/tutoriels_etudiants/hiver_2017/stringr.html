@@ -1,0 +1,456 @@
+---
+title: "Faciliter la manipulation de chaînes de caractères avec le package stringr"
+linkTitle: "stringr"
+weight: 2
+author: "Isabelle Truchon"
+date: "2017-04-19"
+output:
+  pdf_document:
+    toc: yes
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \setlength{\OuterFrameSep}{6pt}
+---
+
+
+
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#installation-du-package-stringr">Installation du package <code>stringr</code></a><ul>
+<li><a href="#jeux-de-donnees-inclus-avec-stringr">Jeux de données inclus avec <code>stringr</code></a></li>
+</ul></li>
+<li><a href="#fonctionnalites-du-package-stringr">Fonctionnalités du package <code>stringr</code></a><ul>
+<li><a href="#str_c"><code>str_c()</code></a></li>
+<li><a href="#str_dup"><code>str_dup()</code></a></li>
+<li><a href="#str_length"><code>str_length()</code></a></li>
+<li><a href="#str_order-str_sort"><code>str_order()</code> / <code>str_sort()</code></a></li>
+<li><a href="#str_pad"><code>str_pad()</code></a></li>
+<li><a href="#str_sub"><code>str_sub()</code></a></li>
+<li><a href="#str_to_lower-str_to_upper"><code>str_to_lower()</code> / <code>str_to_upper()</code></a></li>
+<li><a href="#str_trim"><code>str_trim()</code></a></li>
+<li><a href="#str_trunc"><code>str_trunc()</code></a></li>
+<li><a href="#str_wrap"><code>str_wrap()</code></a></li>
+<li><a href="#word"><code>word()</code></a></li>
+</ul></li>
+<li><a href="#avantages-et-inconvenients-du-package-stringr">Avantages et inconvénients du package <code>stringr</code></a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+<li><a href="#references-et-hyperliens">Références et hyperliens</a></li>
+</ul>
+</div>
+
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Le package <code>stringr</code>, développé par Hadley Wickham, a été conçu pour agir comme une simple ‘enveloppe’ permettant de rendre les fonctionnalités de R applicables aux chaînes de caractères plus cohérentes, simples et faciles à utiliser. Le package de base de R offre tout de même de bonnes fonctions destinées à la manipulation de chaînes de caractères, mais celles-ci peuvent se montrer parfois incohérentes (étant donné le nombre grandissant de fonctions disponibles au fil des années) et un peu difficiles à utiliser.</p>
+<p><code>stringr</code> a été construit à partir du package <code>stringi</code>, qui lui utilise la librairie C/C++ de la ICU (International Components for Unicode), fournissant des implémentations rapides et robustes couvrant pratiquement toutes les manipulations de chaînes de caractères imaginables. Cette particularité permet au package <code>stringr</code> d’offrir des fonctions qui gèrent convenablement les valeurs manquantes <code>NA</code> ainsi que les caractères de longueur nulle, en plus d’assurer une cohérence au niveau des noms de fonction et d’argument. Finalement, toutes les fonctionnalités de <code>stringr</code> retournent des structures de données en sortie qui correspondent à celles reçues en entrée par les autres fonctions du package. Cette dernière caractéristique simplifie de beaucoup l’utilisation du résultat d’une fonction comme argument en entrée d’une autre fonction.</p>
+</div>
+<div id="installation-du-package-stringr" class="section level2">
+<h2>Installation du package <code>stringr</code></h2>
+<p>Pour utiliser le package <code>stringr</code>, il faut en premier lieu procéder à son installation puis le charger :</p>
+<pre class="r"><code># Installation du package
+install.packages(&quot;stringr&quot;)
+
+# Chargement du package
+library(stringr)</code></pre>
+<div id="jeux-de-donnees-inclus-avec-stringr" class="section level3">
+<h3>Jeux de données inclus avec <code>stringr</code></h3>
+<p>Trois jeux de données sont inclus dans le package <code>stringr</code>, soit <code>fruit</code>, <code>words</code> et <code>sentences</code>.</p>
+<p><code>fruit</code> et <code>words</code> sont deux jeux de données qui proviennent du package <code>rcorpora</code>. Les données qu’ils contiennent sont disponibles au lien suivant: <a href="https://github.com/dariusk/corpora" class="uri">https://github.com/dariusk/corpora</a>.</p>
+<p><code>sentences</code> constitue une collection de phrases utilisées dans le cadre de tests de voix standardisés effectués à l’Université Harvard.</p>
+<p>Ces jeux de données seront utilisés dans cette fiche pour la présentation des exemples.</p>
+</div>
+</div>
+<div id="fonctionnalites-du-package-stringr" class="section level2">
+<h2>Fonctionnalités du package <code>stringr</code></h2>
+<p>Le package <code>stringr</code> comprend des fonctions permettant la manipulation des chaînes de caractères pour des opérations de base de même que pour des opérations d’expressions régulières. La présente fiche ne traite cependant que des fonctions pour les manipulations de base. Les expressions régulières n’y sont pas abordées. Le lien qui suit donne tous les détails sur l’ensemble des fonctionnalités du package <code>stringr</code>: <a href="http://cran.r-project.org/web/packages/stringr/index.html" class="uri">http://cran.r-project.org/web/packages/stringr/index.html</a>.</p>
+<p>Le tableau suivant présente les fonctions de <code>stringr</code> qui concernent les manipulations de base, une brève description de la tâche qu’elles accomplissent, ainsi que la fonction du package de base correspondante :</p>
+<table>
+<thead>
+<tr class="header">
+<th>Fonction</th>
+<th>Description</th>
+<th>Similaire</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>str_c()</code></td>
+<td>Concaténer des chaînes de caractères</td>
+<td><code>paste0()</code></td>
+</tr>
+<tr class="even">
+<td><code>str_dup()</code></td>
+<td>Dupliquer des chaînes de caractères</td>
+<td><em>aucune</em></td>
+</tr>
+<tr class="odd">
+<td><code>str_length()</code></td>
+<td>Calculer le nombre de caractères</td>
+<td><code>nchar()</code></td>
+</tr>
+<tr class="even">
+<td><code>str_order()</code></td>
+<td>Ordonner une chaîne de caractères</td>
+<td><code>order()</code></td>
+</tr>
+<tr class="odd">
+<td><code>str_sort()</code></td>
+<td>Ordonner une chaîne de caractères</td>
+<td><code>sort()</code></td>
+</tr>
+<tr class="even">
+<td><code>str_pad()</code></td>
+<td>Compléter une chaîne de caractères par les extrémités</td>
+<td><code>formatC()</code></td>
+</tr>
+<tr class="odd">
+<td><code>str_sub()</code></td>
+<td>Extraire/remplacer une sous-chaîne de caractères</td>
+<td><code>substring()</code></td>
+</tr>
+<tr class="even">
+<td><code>str_to_lower()</code></td>
+<td>Convertir une chaîne de caractères en minuscules</td>
+<td><code>tolower()</code></td>
+</tr>
+<tr class="odd">
+<td><code>str_to_upper()</code></td>
+<td>Convertir une chaîne de caractères en majuscules</td>
+<td><code>toupper()</code></td>
+</tr>
+<tr class="even">
+<td><code>str_trim()</code></td>
+<td>Supprimer des espaces en début et fin</td>
+<td><em>aucune</em></td>
+</tr>
+<tr class="odd">
+<td><code>str_trunc()</code></td>
+<td>Tronquer une chaîne de caractères</td>
+<td><em>aucune</em></td>
+</tr>
+<tr class="even">
+<td><code>str_wrap()</code></td>
+<td>Présenter une chaîne de caractères en paragraphe</td>
+<td><code>strwrap()</code></td>
+</tr>
+<tr class="odd">
+<td><code>word()</code></td>
+<td>Extraire un mot d’une phrase</td>
+<td><em>aucune</em></td>
+</tr>
+</tbody>
+</table>
+<p>Tel que présenté dans le tableau ci-dessus, pratiquement toutes les fonctions de manipulations de base des chaînes de caractères dans <code>stringr</code> débutent par <code>str_</code>, suivi d’un terme associé directement à leur rôle. De plus, toutes les fonctions du package <code>stringr</code> prennent en entrée un vecteur de chaînes de caractères comme premier argument.</p>
+<p>Les descriptions détaillées de ces fonctions, accompagnées d’exemples, permettent de constater que certaines d’entre elles offrent une alternative beaucoup plus simple et efficace aux fonctions existantes du package de base.</p>
+<div id="str_c" class="section level3">
+<h3><code>str_c()</code></h3>
+<p>La fonction <code>str_c()</code> du package <code>stringr</code> est équivalente à la fonction <code>paste0()</code> du package de base de R. Les deux fonctions concatènent des chaînes de caractères en utilisant la chaîne vide <code>&quot;&quot;</code> comme séparateur par défaut. L’exemple qui suit produit le même résultat avec les deux fonctions.</p>
+<pre class="r"><code># Exemple avec la fonction paste0() de l&#39;installation de base R
+paste0(&quot;Ceci&quot;,&quot;est&quot;,&quot;un&quot;,&quot;exemple&quot;,&quot;de&quot;,&quot;concaténation&quot;)</code></pre>
+<pre><code>## [1] &quot;Ceciestunexempledeconcaténation&quot;</code></pre>
+<pre class="r"><code># Exemple avec la fonction str_c() du package stringr
+str_c(&quot;Ceci&quot;,&quot;est&quot;,&quot;un&quot;,&quot;exemple&quot;,&quot;de&quot;,&quot;concaténation&quot;)</code></pre>
+<pre><code>## [1] &quot;Ceciestunexempledeconcaténation&quot;</code></pre>
+<hr />
+<p>Les différences entre les deux fonctions concernent les valeurs manquantes <code>NA</code> ainsi que les arguments de longueur nulle.</p>
+<p>Les arguments de longueur nulle sont enlevés lors de la concaténation avec la fonction <code>str_c()</code>. Dans le cas de la fonction <code>paste0()</code>, les arguments de longueur nulle sont plutôt recyclés en chaîne vide <code>&quot;&quot;</code>.</p>
+<p>La fonction <code>str_c()</code> du package <code>stringr</code> respecte l’absence de valeur en présence de <code>NA</code>, tandis que la fonction <code>paste0()</code> traite les valeurs manquantes comme des chaînes de caractères <code>&quot;NA&quot;</code>. Cependant, le fait que <code>str_c()</code> traite convenablement les valeurs manquantes amène le problème commun à la plupart des fonctions de R : une valeur manquante combinée avec une autre chaîne de caractères résulte toujours en une valeur manquante.</p>
+<pre class="r"><code>fruits &lt;- fruit[1:4]
+FRUITS &lt;- str_to_upper(fruits)
+
+fruits[c(1,4)] &lt;- NA
+print(fruits)</code></pre>
+<pre><code>## [1] NA        &quot;apricot&quot; &quot;avocado&quot; NA</code></pre>
+<pre class="r"><code>FRUITS[c(1,3)] &lt;- NA
+print(FRUITS)</code></pre>
+<pre><code>## [1] NA        &quot;APRICOT&quot; NA        &quot;BANANA&quot;</code></pre>
+<pre class="r"><code># Traitement convenable des valeurs manquantes NA par la fonction str_c()
+# Si une valeur est manquante dans une seule des chaînes de caractères, 
+# str_c() retourne une valeur manquante
+str_c(fruits, FRUITS)</code></pre>
+<pre><code>## [1] NA               &quot;apricotAPRICOT&quot; NA               NA</code></pre>
+<pre class="r"><code># Traitement des valeurs manquantes NA comme des chaînes de caractères &quot;NA&quot; par la fonction paste0()
+paste0(fruits, FRUITS)</code></pre>
+<pre><code>## [1] &quot;NANA&quot;           &quot;apricotAPRICOT&quot; &quot;avocadoNA&quot;      &quot;NABANANA&quot;</code></pre>
+<hr />
+<p>Contrairement à la fonction <code>paste0()</code>, <code>str_c()</code> affiche l’avertissement usuel concernant la règle de recyclage lorsque les arguments en entrée ont des longueurs différentes et ne sont pas des multiples exacts l’un de l’autre.</p>
+<pre class="r"><code>deuxMots &lt;- words[c(1,2)]
+print(deuxMots)</code></pre>
+<pre><code>## [1] &quot;a&quot;    &quot;able&quot;</code></pre>
+<pre class="r"><code>cinqMots &lt;- words[100:104]
+print(cinqMots)</code></pre>
+<pre><code>## [1] &quot;board&quot; &quot;boat&quot;  &quot;body&quot;  &quot;book&quot;  &quot;both&quot;</code></pre>
+<pre class="r"><code># Concaténation de deux objets de longueur différente avec paste0(): aucun avertissement
+paste0(deuxMots, cinqMots)</code></pre>
+<pre><code>## [1] &quot;aboard&quot;   &quot;ableboat&quot; &quot;abody&quot;    &quot;ablebook&quot; &quot;aboth&quot;</code></pre>
+<pre class="r"><code># Concaténation de deux objets de longueur différente avec str_c(): affichage de l&#39;avertissement
+str_c(deuxMots, cinqMots)</code></pre>
+<pre><code>## Warning in stri_c(..., sep = sep, collapse = collapse, ignore_null = TRUE):
+## longer object length is not a multiple of shorter object length</code></pre>
+<pre><code>## [1] &quot;aboard&quot;   &quot;ableboat&quot; &quot;abody&quot;    &quot;ablebook&quot; &quot;aboth&quot;</code></pre>
+</div>
+<div id="str_dup" class="section level3">
+<h3><code>str_dup()</code></h3>
+<p>Le package de base de R n’offre pas de fonction permettant de dupliquer des chaînes de caractères; ce que le package <code>stringr</code> offre avec la fonction <code>str_dup()</code>. Cette fonction prend en entrée deux arguments, soit une chaîne de caractères et le nombre de fois qu’on souhaite la dupliquer. Une fois dupliquées, les chaînes de caractères sont concaténées (sans espace). Seul bémol, cette fonction ne permet pas de modifier le séparateur qui est appliqué lors de l’étape de la concaténation.</p>
+<pre class="r"><code>fruitsC &lt;- fruit[17:20]
+print(fruitsC)</code></pre>
+<pre><code>## [1] &quot;chili pepper&quot; &quot;clementine&quot;   &quot;cloudberry&quot;   &quot;coconut&quot;</code></pre>
+<pre class="r"><code># Dupliquer 2 fois le vecteur contenant 4 noms de fruit
+str_dup(fruitsC,2)</code></pre>
+<pre><code>## [1] &quot;chili pepperchili pepper&quot; &quot;clementineclementine&quot;    
+## [3] &quot;cloudberrycloudberry&quot;     &quot;coconutcoconut&quot;</code></pre>
+<pre class="r"><code># Dupliquer de 1 à 4 fois le vecteur contenant 4 noms de fruit
+str_dup(fruitsC, 1:4)</code></pre>
+<pre><code>## [1] &quot;chili pepper&quot;                   &quot;clementineclementine&quot;          
+## [3] &quot;cloudberrycloudberrycloudberry&quot; &quot;coconutcoconutcoconutcoconut&quot;</code></pre>
+</div>
+<div id="str_length" class="section level3">
+<h3><code>str_length()</code></h3>
+<p>La fonction <code>str_length()</code> qu’offre le package <code>stringr</code> est équivalente à la fonction <code>nchar()</code> du package de base. Les deux fonctions retournent le nombre de caractères dans une chaîne. Cependant, contrairement à <code>str_length()</code>, la fonction <code>nchar()</code> du package de base n’accepte pas en entrée des facteurs. La fonction <code>str_length()</code> converti les facteurs en caractères et peut ainsi retourner le nombre de caractères que contient une chaîne, tel que souhaité.</p>
+<pre class="r"><code>motsFacteurs &lt;- factor(words[500:504])
+print(motsFacteurs)</code></pre>
+<pre><code>## [1] make   man    manage many   mark  
+## Levels: make man manage many mark</code></pre>
+<pre class="r"><code># La fonction str_length() accepte les facteurs en entrée et les convertis en caractères
+str_length(motsFacteurs)</code></pre>
+<pre><code>## [1] 4 3 6 4 4</code></pre>
+<pre class="r"><code># La fonction nchar() ne prend pas les facteurs en arguments
+nchar(motsFacteurs)</code></pre>
+<pre class="r"><code>## Error in nchar(motsFacteurs) : &#39;nchar()&#39; requires a character vector</code></pre>
+</div>
+<div id="str_order-str_sort" class="section level3">
+<h3><code>str_order()</code> / <code>str_sort()</code></h3>
+<p>Les fonctions <code>str_order()</code> / <code>str_sort()</code> permettent d’ordonner des chaînes de caractères, tout comme le font les fonctions <code>order()</code> / <code>sort()</code> du package de base de R.</p>
+<p>Par contre, les fonctions de base <code>order()</code> et <code>sort()</code> ordonnent les chaînes en utilisant uniquement la langue locale courante. Ainsi, ces fonctions du package de base de R ne permettent pas de modifier la langue et cela peut résulter en un ordonnancement erroné.</p>
+<p>Pour éviter ce problème et construire du code plus robuste, <code>stringr</code> offre les fonctions <code>str_order()</code> et <code>str_sort()</code> qui prennent toutes deux un argument additionnel appelé <code>locale</code> permettant de modifier la langue.</p>
+<p>La langue locale est représentée par une abréviation de deux ou trois lettres, tel que spécifié dans le code des langues ISO 639 <a href="https://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-1" class="uri">https://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-1</a>.</p>
+<p>Par exemple, les éléments d’un vecteur de chaînes de caractères seront ordonnés différemment en langue hawaïenne versus en langue anglaise.</p>
+<pre class="r"><code>fruitsSort &lt;- fruit[c(1,4,28)]
+print(fruitsSort)</code></pre>
+<pre><code>## [1] &quot;apple&quot;    &quot;banana&quot;   &quot;eggplant&quot;</code></pre>
+<pre class="r"><code># Ordonner avec la fonction de base selon la langue locale
+sort(fruitsSort)</code></pre>
+<pre><code>## [1] &quot;apple&quot;    &quot;banana&quot;   &quot;eggplant&quot;</code></pre>
+<pre class="r"><code># Ordonner avec la fonction du package &#39;stringr&#39; en langue anglaise
+str_sort(fruitsSort, locale = &quot;en&quot;)</code></pre>
+<pre><code>## [1] &quot;apple&quot;    &quot;banana&quot;   &quot;eggplant&quot;</code></pre>
+<pre class="r"><code># Ordonner avec la fonction str_sort() en langue hawaiienne
+str_sort(fruitsSort, locale = &quot;haw&quot;)</code></pre>
+<pre><code>## [1] &quot;apple&quot;    &quot;eggplant&quot; &quot;banana&quot;</code></pre>
+</div>
+<div id="str_pad" class="section level3">
+<h3><code>str_pad()</code></h3>
+<p>La fonction <code>str_pad()</code> du package <code>stringr</code> prend en entrée une chaîne de caractères et ajoute des caractères aux extrémités de la chaîne, pour atteindre la longueur spécifiée par l’argument <code>width</code>. Les caractères à ajouter sont définis par l’argument <code>pad</code> qui utilise par défaut l’espace <code>&quot; &quot;</code>. Les caractères peuvent être ajoutés à gauche, à droite ou des deux côtés de la chaîne. Par défaut, cette fonction utilise <code>side = &quot;left&quot;</code>, ce qui retourne la chaîne de caractères en donnant l’impression d’être alignée à droite.</p>
+<p>Advenant le cas que la chaîne de caractères fournit en entrée est plus longue que la longueur <code>width</code> demandée, la chaîne est retournée inchangée.</p>
+<pre class="r"><code>unMot &lt;- words[350]
+print(unMot)</code></pre>
+<pre><code>## [1] &quot;future&quot;</code></pre>
+<pre class="r"><code># Utilisation avec les arguments par défaut pour &#39;side = &quot;left&quot;&#39; et &#39;pad = &quot; &quot;&#39;
+# &#39;unMot&#39; possède 6 caractères, auxquels sont ajoutés 3 espaces à gauche pour obtenir la largeur 9
+str_pad(unMot, width = 9)</code></pre>
+<pre><code>## [1] &quot;   future&quot;</code></pre>
+<pre class="r"><code># On souhaite ajouter un + de chaque côté du mot
+str_pad(unMot, width = 8, side = &quot;both&quot;, pad = &quot;+&quot;)</code></pre>
+<pre><code>## [1] &quot;+future+&quot;</code></pre>
+<hr />
+<p>Le package de base de R offre une fonction similaire à <code>str_pad()</code>, soit <code>formatC()</code>, mais cette dernière est nettement moins performante en terme de vitesse. Voici un petit test de comparaison des performances de ces deux fonctions:<br />
+(voir le lien <a href="http://stackoverflow.com/questions/14409084/pad-with-leading-zeros-to-common-width" class="uri">http://stackoverflow.com/questions/14409084/pad-with-leading-zeros-to-common-width</a> pour plus de détails)</p>
+<pre class="r"><code># FORMATC &lt;- formatC(string, width = 2,flag = 0)
+# STR_PAD &lt;- str_pad(string, width = 2, side = &quot;left&quot;, pad = &quot;0&quot;)</code></pre>
+<p>Unités: millisecondes</p>
+<table>
+<thead>
+<tr class="header">
+<th>Fonction</th>
+<th>min</th>
+<th>q1</th>
+<th>médiane</th>
+<th>q3</th>
+<th>max</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>FORMATC</td>
+<td>623.53785</td>
+<td>629.69005</td>
+<td>638.78667</td>
+<td>671.22769</td>
+<td>679.8790</td>
+</tr>
+<tr class="even">
+<td>STR_PAD</td>
+<td>116.54969</td>
+<td>118.41944</td>
+<td>118.97363</td>
+<td>120.05729</td>
+<td>163.9664</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="str_sub" class="section level3">
+<h3><code>str_sub()</code></h3>
+<p>Pour extraire ou remplacer une sous-chaîne d’un vecteur de caractères, le package <code>stringr</code> offre la fonction <code>str_sub()</code> équivalente à la fonction de base <code>substring()</code>. Les trois arguments que prend en entrée <code>str_sub()</code> sont un vecteur de caractères, une valeur de départ <code>start</code> indiquant la position du premier caractère à inclure dans la sous-chaîne, de même qu’une valeur <code>end</code> indiquant la position du dernier caractère.</p>
+<pre class="r"><code>phrase &lt;- sentences[6]
+print(phrase)</code></pre>
+<pre><code>## [1] &quot;The juice of lemons makes fine punch.&quot;</code></pre>
+<pre class="r"><code># Extraction d&#39;une sous-chaîne avec la fonction str_sub()
+str_sub(phrase, start = 5, end = 9)</code></pre>
+<pre><code>## [1] &quot;juice&quot;</code></pre>
+<pre class="r"><code># Extraction d&#39;une sous-chaîne avec la fonction de base substring(): 
+# le résultat est le même avec les deux fonctions
+substring(phrase, first = 5, last = 9)</code></pre>
+<pre><code>## [1] &quot;juice&quot;</code></pre>
+<pre class="r"><code># Les valeurs par défaut de &#39;start&#39; et &#39;end&#39; sont respectivement le premier et dernier caractère
+# L&#39;exemple suivant utilise l&#39;argument &#39;end&#39; par défaut
+str_sub(&quot;juice&quot;, start = 1:3)</code></pre>
+<pre><code>## [1] &quot;juice&quot; &quot;uice&quot;  &quot;ice&quot;</code></pre>
+<pre class="r"><code># Remplacements multiples d&#39;une sous-chaîne de caractères
+str_sub(phrase, start = c(14,27), end = c(19,30)) &lt;- c(&quot;oranges&quot;, &quot;good&quot;)
+print(phrase)</code></pre>
+<pre><code>## [1] &quot;The juice of oranges makes fine punch.&quot;
+## [2] &quot;The juice of lemons makes good punch.&quot;</code></pre>
+<hr />
+<p>Une des fonctionnalités intéressantes de <code>str_sub()</code> est sa capacité à travailler avec des indices négatifs donnés en argument à <code>start</code> et <code>end</code>. Lorsqu’on fournit une position négative, <code>str_sub()</code> compte à rebours, à partir du dernier caractère de la chaîne. En comparaison, la fonction <code>substring()</code> du package de base ignore les indices négatifs et ne retourne que des chaînes vides.</p>
+<pre class="r"><code>desMots &lt;- words[587:592]
+print(desMots)</code></pre>
+<pre><code>## [1] &quot;other&quot;     &quot;otherwise&quot; &quot;ought&quot;     &quot;out&quot;       &quot;over&quot;      &quot;own&quot;</code></pre>
+<pre class="r"><code># str_sub() utilisée avec des positions négatives: les deux derniers caractères sont extraits
+str_sub(desMots, start = -2, end = -1)</code></pre>
+<pre><code>## [1] &quot;er&quot; &quot;se&quot; &quot;ht&quot; &quot;ut&quot; &quot;er&quot; &quot;wn&quot;</code></pre>
+<pre class="r"><code># Utilisation des positions négatives avec substring(): retourne des chaînes vides
+substring(desMots, first = -2, last = -1)</code></pre>
+<pre><code>## [1] &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot; &quot;&quot;</code></pre>
+<pre class="r"><code>phrase2 &lt;- sentences[16]
+print(phrase2)</code></pre>
+<pre><code>## [1] &quot;A pot of tea helps to pass the evening.&quot;</code></pre>
+<pre class="r"><code># Remplacement d&#39;une sous-chaîne de caractères en utilisant des positions négatives
+str_sub(phrase2, start = -8, end = -2) &lt;- &quot;night&quot;
+print(phrase2)</code></pre>
+<pre><code>## [1] &quot;A pot of tea helps to pass the night.&quot;</code></pre>
+</div>
+<div id="str_to_lower-str_to_upper" class="section level3">
+<h3><code>str_to_lower()</code> / <code>str_to_upper()</code></h3>
+<p>Les fonctions <code>str_to_lower()</code> et <code>str_to_upper()</code> du package <code>stringr</code> permettent de convertir la casse d’une chaîne de caractères, comme le font les fonctions du package de base <code>tolower()</code> et <code>toupper()</code>. Cependant, les fonctions de <code>stringr</code> offrent la possibilité de modifier la langue à utiliser pour la conversion avec l’argument <code>locale</code>. En effet, certaines langues utilisent des règles différentes de conversion de casse.</p>
+<p>C’est le cas du Turc qui possède deux ‘i’ différents, un sans le point et un autre avec le point. La règle de conversion de la casse sera donc différente de celle utilisée pour l’Anglais par exemple.</p>
+<pre class="r"><code># Convertir la lettre &#39;i&#39; en majuscule dans la langue courante par défaut avec str_to_upper()
+str_to_upper(&quot;i&quot;)</code></pre>
+<pre><code>## [1] &quot;I&quot;</code></pre>
+<pre class="r"><code># Convertir la lettre &#39;i&#39; en majuscule dans la langue courante par défaut avec la fonction toupper()
+# Le résultat est le même avec les deux fonctions
+toupper(&quot;i&quot;)</code></pre>
+<pre><code>## [1] &quot;I&quot;</code></pre>
+<pre class="r"><code># Convertir la lettre &#39;i&#39; en majuscule dans la langue turque
+# Dans cet exemple, la lettre &#39;i&#39; majuscule en Turc s&#39;écrit aussi avec un point
+str_to_upper(&quot;i&quot;, locale = &quot;tr&quot;)</code></pre>
+<pre class="r"><code>## [1] &quot;İ&quot;</code></pre>
+</div>
+<div id="str_trim" class="section level3">
+<h3><code>str_trim()</code></h3>
+<p>La fonction <code>str_trim()</code> de <code>stringr</code> permet d’enlever les espaces aux extrémités d’une chaîne de caractères. Deux arguments sont à fournir en entrée, soit le vecteur de caractères et l’extrémité de la chaîne dont on veut enlever des espaces. Par défaut, l’argument <code>side</code> prend la valeur <code>&quot;both&quot;</code>.</p>
+<pre class="r"><code>desFruits &lt;- c(&quot;  lychee &quot;, &quot;mandarine   &quot;, &quot;  mango &quot;)
+
+# Enlever les espaces à gauche
+str_trim(desFruits, side = &quot;left&quot;)</code></pre>
+<pre><code>## [1] &quot;lychee &quot;      &quot;mandarine   &quot; &quot;mango &quot;</code></pre>
+<pre class="r"><code># Enlever les espaces des deux côtés (par défaut)
+str_trim(desFruits)</code></pre>
+<pre><code>## [1] &quot;lychee&quot;    &quot;mandarine&quot; &quot;mango&quot;</code></pre>
+</div>
+<div id="str_trunc" class="section level3">
+<h3><code>str_trunc()</code></h3>
+<p>Cette fonction du package <code>stringr</code> permet de tronquer des chaînes de caractères en spécifiant en entrée la longueur maximale à conserver, à partir de quel côté la troncature doit être faite, de même que les caractères à utiliser pour indiquer à partir de quelle position la chaîne a été tronquée.</p>
+<pre class="r"><code>phrase3 &lt;- sentences[29]
+print(phrase3)</code></pre>
+<pre><code>## [1] &quot;It snowed, rained, and hailed the same morning.&quot;</code></pre>
+<pre class="r"><code># Utilisation de str_trunc() avec l&#39;argument &#39;ellipsis&#39; par défaut (...)
+str_trunc(phrase3, 20, side = &quot;right&quot;)</code></pre>
+<pre><code>## [1] &quot;It snowed, rained...&quot;</code></pre>
+</div>
+<div id="str_wrap" class="section level3">
+<h3><code>str_wrap()</code></h3>
+<p>La fonction <code>str_wrap()</code> du package <code>stringr</code> est similaire à la fonction de base <code>strwrap()</code>, utilisée pour formater en paragraphe une longue chaîne de caractères. La fonction <code>str_wrap()</code> permet tout d’abord de séparer la longue chaîne de caractères selon une largeur spécifiée de paragraphe (<code>width =</code>). Ensuite, cette fonction permet de définir un espacement pour la première ligne du paragraphe (<code>indent =</code>) et pour les lignes suivantes (<code>extend =</code>). Les valeurs par défaut sont de 80 pour l’argument <code>width</code> et 0 pour les arguments <code>indent</code> et <code>exdent</code>.</p>
+<p>La différence entre les deux fonctions <code>str_wrap()</code> et <code>strwrap()</code> se situe au niveau de la performance en terme de vitesse. En effet, étant donné que la fonction <code>str_wrap()</code> appelle <code>stri_wrap</code> du package <code>stringi</code> (construit en C/C++), sa performance sera meilleure que celle de <code>strwrap()</code>.</p>
+<pre class="r"><code>texte &lt;- str_c(sentences[603],sentences[609],sentences[64], sep = &quot; &quot;)
+print(texte)</code></pre>
+<pre><code>## [1] &quot;There is a strong chance it will happen once more. A six comes up more often than a ten. The clock struck to mark the third period.&quot;</code></pre>
+<pre class="r"><code># Affichage du texte sous forme d&#39;un paragraphe avec largeur de colonne de 30
+cat(str_wrap(texte, width = 30))</code></pre>
+<pre><code>## There is a strong chance it
+## will happen once more. A six
+## comes up more often than a
+## ten. The clock struck to mark
+## the third period.</code></pre>
+<pre class="r"><code># Affichage du texte avec espacement de la première ligne
+cat(str_wrap(texte, width = 30, indent = 3))</code></pre>
+<pre><code>##    There is a strong chance it
+## will happen once more. A six
+## comes up more often than a
+## ten. The clock struck to mark
+## the third period.</code></pre>
+<pre class="r"><code># Affichage du texte avec espacement des lignes suivantes
+cat(str_wrap(texte, width = 30, exdent = 3))</code></pre>
+<pre><code>## There is a strong chance it
+##    will happen once more. A six
+##    comes up more often than a
+##    ten. The clock struck to mark
+##    the third period.</code></pre>
+</div>
+<div id="word" class="section level3">
+<h3><code>word()</code></h3>
+<p>La fonction <code>word()</code> de <code>stringr</code> a été conçue pour extraire des mots d’une phrase. Cette fonction prend en arguments une chaîne de caractères, puis une position de départ <code>start</code> et de fin <code>end</code> spécifiant le premier et le dernier mot à extraire de la chaîne de caractères. Les arguments par défaut pour <code>start</code> et <code>end</code> sont dans les deux cas le premier mot et le séparateur <code>sep</code> est un espace simple <code>&quot; &quot;</code>. Les indices des positions peuvent aussi être négatifs.</p>
+<pre class="r"><code>phrases &lt;- c(sentences[680], sentences[679])
+print(phrases)</code></pre>
+<pre><code>## [1] &quot;Dig deep in the earth for pirate&#39;s gold.&quot;
+## [2] &quot;No doubt about the way the wind blows.&quot;</code></pre>
+<pre class="r"><code># Extraction du premier mot de chaque phrase avec la valeur par défaut pour l&#39;argument &#39;end&#39;
+word(phrases, start = 1)</code></pre>
+<pre><code>## [1] &quot;Dig&quot; &quot;No&quot;</code></pre>
+<pre class="r"><code># Extraction de l&#39;avant-dernier mot de chaque phrase
+word(phrases, start = -2)</code></pre>
+<pre><code>## [1] &quot;pirate&#39;s&quot; &quot;wind&quot;</code></pre>
+<pre class="r"><code># Extraction de tous les mots sauf les trois premiers
+word(phrases, start = 4, end = -1)</code></pre>
+<pre><code>## [1] &quot;the earth for pirate&#39;s gold.&quot; &quot;the way the wind blows.&quot;</code></pre>
+</div>
+</div>
+<div id="avantages-et-inconvenients-du-package-stringr" class="section level2">
+<h2>Avantages et inconvénients du package <code>stringr</code></h2>
+<p>Selon la description officielle du package <code>stringr</code> (<a href="https://CRAN.R-project.org/package=stringr" class="uri">https://CRAN.R-project.org/package=stringr</a>), ses avantages majeurs sont les suivants:</p>
+<ul>
+<li><p>Assure une cohérence au niveau des noms de fonction et d’argument</p></li>
+<li><p>Offre des fonctions qui gèrent convenablement les valeurs manquantes <code>NA</code> ainsi que les caractères de longueur nulle</p></li>
+<li><p>Toutes les fonctionnalités de <code>stringr</code> permettent l’utilisation du résultat d’une fonction comme argument en entrée d’une autre fonction</p></li>
+</ul>
+<p>À la lumière de ce qui a été testé dans cette fiche sur les fonctions de <code>stringr</code>, il appert que ce package présente des avantages notables par rapport aux fonctions de base pour les opérations sur des chaînes de caractères. Non seulement il offre des fonctionnalités inexistantes dans le package de base (par exemple <code>str_trunc()</code> ou <code>word()</code>), mais en plus, il offre des possibilités additionnelles pour certaines fonctions de base. C’est le cas notamment de la fonction <code>str_sub()</code> qui permet de donner en argument des indices de position négatifs, contrairement à <code>substring()</code> du package de base qui ne les reconnaît pas.</p>
+<p>Il semble difficile d’identifier un inconvénient à utiliser le package <code>stringr</code> pour effectuer des opérations sur des chaînes de caractères. En effet, <code>stringr</code> ne présente que des avantages par rapport au package de base de R. Bien sûr, certaines de ses fonctions utilisées dans des cas simples peuvent ne présenter aucune différence significative en comparaison avec la fonction de base équivalente. Mais il y aura tout de même toujours un léger avantage en terme de performance, bien que pas nécessairement visible pour l’utilisateur. Ainsi, outre le fait de devoir l’installer et le charger dans notre programme, il n’y a aucun inconvénient à utiliser les fonctionnalités du package <code>stringr</code>.</p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>En comparaison avec les fonctions du package de base de R pour la manipulation des chaînes de caractères, <code>stringr</code> constitue un package recommandé pour sa cohérence et la simplicité d’utilisation de ses fonctionnalités. De plus, la performance qu’il offre en terme de vitesse peut s’avérer très avantageuse dans certaines situations, particulièrement dans le cadre de travaux effectués sur une grande quantité de données.</p>
+<p>Selon les données fournies par CRAN (Comprehensive R Archive Network) et compilées sur le blogue R-Statistics (<a href="https://www.r-statistics.com/2013/06/top-100-r-packages-for-2013-jan-may/" class="uri">https://www.r-statistics.com/2013/06/top-100-r-packages-for-2013-jan-may/</a>), le package <code>stringr</code>, développé par Hadley Wickham, a été désigné comme étant le cinquième package de R le plus téléchargé en 2013. Avec quelques milliers de packages maintenant disponibles, <code>stringr</code> constitue encore aujourd’hui un des quatre packages destinés à la manipulation de données les plus recommandés par l’équipe de support de RStudio (<a href="https://support.rstudio.com/hc/en-us/articles/201057987-Quick-list-of-useful-R-packages" class="uri">https://support.rstudio.com/hc/en-us/articles/201057987-Quick-list-of-useful-R-packages</a>).</p>
+</div>
+<div id="references-et-hyperliens" class="section level2">
+<h2>Références et hyperliens</h2>
+<ol style="list-style-type: decimal">
+<li><p>Wickham, Hadley (2010). <em>The R Journal Vol.2/2 : stringr: modern, consistent string processing</em>, p.38-40. Référence web: <a href="https://journal.r-project.org/archive/2010-2/RJournal_2010-2_Wickham.pdf" class="uri">https://journal.r-project.org/archive/2010-2/RJournal_2010-2_Wickham.pdf</a></p></li>
+<li><p>Wickham H., Grolemund G. (2016). <em>R for Data Science: Import, Tidy, Transform, Visualize, and Model Data</em>, O’Reilly Media, Inc., 520 pages. Référence web: <a href="http://r4ds.had.co.nz/" class="uri">http://r4ds.had.co.nz/</a></p></li>
+<li><p>Sanchez, G. (2013). <em>Handling and Processing Strings in R</em>, Trowchez Editions, Berkeley. Référence web: <a href="http://www.gastonsanchez.com/Handling_and_Processing_Strings_in_R.pdf" class="uri">http://www.gastonsanchez.com/Handling_and_Processing_Strings_in_R.pdf</a></p></li>
+<li><p><a href="http://stringr.tidyverse.org" class="uri">http://stringr.tidyverse.org</a></p></li>
+<li><p><a href="https://www.rdocumentation.org/packages/stringr/versions/1.1.0/topics/str_c" class="uri">https://www.rdocumentation.org/packages/stringr/versions/1.1.0/topics/str_c</a></p></li>
+<li><p><a href="http://stackoverflow.com/questions/14409084/pad-with-leading-zeros-to-common-width" class="uri">http://stackoverflow.com/questions/14409084/pad-with-leading-zeros-to-common-width</a></p></li>
+<li><p>Galili, Tal (2013). <em>R-statistics blog, Statistics with R, and open source stuff (software, data, community) : Top 100 R packages for 2013 (Jan-May)!</em>. Référence web: <a href="https://www.r-statistics.com/2013/06/top-100-r-packages-for-2013-jan-may/" class="uri">https://www.r-statistics.com/2013/06/top-100-r-packages-for-2013-jan-may/</a></p></li>
+<li><p>Grolemund G. (2017). <em>Quick list of useful R packages: Recommended Packages: To manipulate data</em>, RStudio Support. Référence web: <a href="https://support.rstudio.com/hc/en-us/articles/201057987-Quick-list-of-useful-R-packages" class="uri">https://support.rstudio.com/hc/en-us/articles/201057987-Quick-list-of-useful-R-packages</a></p></li>
+<li><p>Wickham, Hadley (2017). <em>stringr: Simple, Consistent Wrappers for Common String Operations</em>. Référence web: <a href="https://CRAN.R-project.org/package=stringr" class="uri">https://CRAN.R-project.org/package=stringr</a></p></li>
+<li><p><a href="https://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-1" class="uri">https://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-1</a></p></li>
+</ol>
+</div>

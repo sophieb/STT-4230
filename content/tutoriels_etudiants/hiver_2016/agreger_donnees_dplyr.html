@@ -1,0 +1,532 @@
+---
+title: "Création d'un jeu de données agrégées en calculant des statistiques descriptives pour une variable selon les niveaux d'une autre variable"
+linkTitle: "dplyr - Agréger des données"
+weight: 2
+author: "par Chedzer-Clarc Clément et Claude-Alla Joseph"
+date: "2016-05-07"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \setlength{\OuterFrameSep}{6pt}
+---
+
+
+
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction">1. Introduction</a></li>
+<li><a href="#objectifs-du-travail">2. Objectifs du travail</a><ul>
+<li><a href="#objectif-general">2.1. Objectif général</a></li>
+<li><a href="#objectifs-specifiques">2.2. Objectifs spécifiques</a></li>
+</ul></li>
+<li><a href="#methodologie">3. Méthodologie</a><ul>
+<li><a href="#presentation-du-jeu-de-donnees-wimbledon.men.2013">3.1. Présentation du jeu de données <code>Wimbledon.men.2013</code></a></li>
+<li><a href="#calcul-sur-le-jeu-de-donnees">3.2. Calcul sur le jeu de données</a></li>
+</ul></li>
+<li><a href="#methode-de-base-en-r-fonction-aggregate">4. Méthode de base en R: Fonction <code>aggregate</code></a><ul>
+<li><a href="#presentation-de-la-fonction-aggregate">4.1. Présentation de la fonction <code>aggregate</code></a></li>
+<li><a href="#utilisation-de-aggregate-sur-wimbledon.men.2013">4.2. Utilisation de <code>aggregate</code> sur Wimbledon.men.2013</a><ul>
+<li><a href="#calcul-du-nombre-de-matchs-a-3-sets">4.2.1. Calcul du nombre de matchs à 3 sets</a></li>
+<li><a href="#calcul-du-nombre-de-matchs-a-4-sets">4.2.2. Calcul du nombre de matchs à 4 sets</a></li>
+<li><a href="#calcul-du-nombre-de-matchs-a-5-sets">4.2.3. Calcul du nombre de matchs à 5 sets</a></li>
+<li><a href="#calcul-du-nombre-moyen-de-sets-par-match">4.2.4. Calcul du nombre moyen de sets par match</a></li>
+<li><a href="#fusion-des-jeux-de-donnees-obtenus">4.2.5. Fusion des jeux de données obtenus</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#methode-alternative-package-dplyr">5. Méthode alternative: <code>Package dplyr</code></a><ul>
+<li><a href="#presentation-du-package-dplyr">5.1. Présentation du Package <code>dplyr</code></a></li>
+<li><a href="#fonction-mutate">5.2. Fonction <code>mutate</code></a></li>
+<li><a href="#fonction-select-et-slice">5.3. Fonction <code>select</code> et <code>slice</code></a></li>
+<li><a href="#fonction-group_by-et-summarise">5.4. Fonction <code>group_by</code> et <code>summarise</code></a></li>
+<li><a href="#utilisation-conjointe-de-group_by-et-summarise">5.5. Utilisation conjointe de <code>group_by</code> et <code>summarise</code></a></li>
+</ul></li>
+<li><a href="#comparaison-des-deux-methodes">6. Comparaison des deux méthodes</a><ul>
+<li><a href="#avantages-et-inconvenients-de-la-methode-de-base-aggregate">6.1. Avantages et inconvénients de la méthode de base (<code>aggregate</code>)</a></li>
+<li><a href="#avantages-et-inconvenients-de-la-methode-alternative">6.2. Avantages et inconvénients de la méthode alternative</a></li>
+</ul></li>
+<li><a href="#references-bibliographiques">7. Références bibliographiques</a></li>
+</ul>
+</div>
+
+<hr />
+<div id="introduction" class="section level1">
+<h1>1. Introduction</h1>
+<p>Dans nos calculs quotidiens, on a souvent recours à la subdivision d’un jeu de données en sous-ensembles afin d’effectuer des calculs statistiques sur les sous-ensembles obtenus. Cette façon de faire permet de tirer le maximum d’informations possibles sur le jeu de données en question. Les packages de base en R permettent de faire une telle opération. Par exemple, si dans un jeu de données, on veut calculer des statistiques descriptives pour une variable selon les niveaux d’une autre variable, les packages de base en R offrent la fonction <em>aggregate</em> qui permet d’effectuer cette tâche. Il existe aussi d’autres packages alternatifs en R qui, une fois installés, permettent d’agréger un jeu de données. Le package <em>dplyr</em> est l’un des plus courants. Cette fiche a pour but d’expliquer comment calculer des statistiques descriptives en R dans le but d’obtenir un jeu de données agrégées. À cet effet, deux méthodes seront utilisées pour illustrer le calcul des statistiques. La première méthode utilisera des fonctions de R de base et la deuxième méthode n’utilisera que des fonctions du package alternatif <em>dplyr</em>.</p>
+</div>
+<div id="objectifs-du-travail" class="section level1">
+<h1>2. Objectifs du travail</h1>
+<div id="objectif-general" class="section level2">
+<h2>2.1. Objectif général</h2>
+<blockquote>
+<p>Créer un jeu de données agrégées en calculant des statistiques descriptives pour une variable selon les niveaux d’une autre variable.</p>
+</blockquote>
+</div>
+<div id="objectifs-specifiques" class="section level2">
+<h2>2.2. Objectifs spécifiques</h2>
+<ul>
+<li>Calculer les statistiques descriptives du jeu de données par la méthode de base</li>
+<li>Agréger le jeu de données par la méthode alternative (utilisation du package <em>dplyr</em>)</li>
+<li>Comparer les deux méthodes d’agrégation</li>
+</ul>
+</div>
+</div>
+<div id="methodologie" class="section level1">
+<h1>3. Méthodologie</h1>
+<div id="presentation-du-jeu-de-donnees-wimbledon.men.2013" class="section level2">
+<h2>3.1. Présentation du jeu de données <code>Wimbledon.men.2013</code></h2>
+<p>Pour effectuer la comparaison entre les deux méthodes, un jeu de données concernant tous les matchs de tennis en simple masculin ayant eu lieu lors du tournoi de Wimbledon en 2013 sera utilisé pour faire les démontrations. Ce jeu de données contient des informations telles que: les adversaires du matchs (les variables <code>player1</code> et <code>player2</code>), la ronde de la compétition à laquelle les joueurs se sont affrontés (variable <code>Round</code>), le nombre de sets gagnés par les deux joueurs (variables <code>FNL.1</code> et <code>FNL.2</code>) etc. Pour télécharger et obtenir plus d’informations sur le jeu de donnée, allez à l’adresse suivante:</p>
+<p><a href="https://archive.ics.uci.edu/ml/machine-learning-databases/00300/" class="uri">https://archive.ics.uci.edu/ml/machine-learning-databases/00300/</a></p>
+<p>Pour importer le jeu de données dans R, on procède comme suit:</p>
+<pre class="r"><code>Wimbledon.men.2013 &lt;- read.csv(&quot;Wimbledon-men-2013.csv&quot;)   </code></pre>
+<p>Pour visualiser le jeu de données sous forme de tableau, on tape dans la console:</p>
+<pre class="r"><code>View(Wimbledon.men.2013)    </code></pre>
+<p>Et pour visualiser les dix premières lignes (seulement 5 variables selectionnées)</p>
+<pre class="r"><code>head(Wimbledon.men.2013[,c(&quot;Player1&quot;,&quot;Player2&quot;,&quot;Round&quot;,&quot;FNL.1&quot;,&quot;FNL.2&quot;)],10)   </code></pre>
+<pre><code>##          Player1         Player2 Round FNL.1 FNL.2
+## 1       B.Becker        A.Murray     1     0     3
+## 2         J.Ward          Y-H.Lu     1     1     3
+## 3        N.Mahut         J.Hajek     1     3     0
+## 4      T.Robredo A.Bogomolov Jr.     1     3     0
+## 5        R.Haase       M.Youzhny     1     0     3
+## 6      M.Gicquel      V.Pospisil     1     0     3
+## 7    A.Kuznetsov      A.Montanes     1     3     1
+## 8   J.Tipsarevic       V.Troicki     1     0     3
+## 9    M.Baghdatis         M.Cilic     1     0     3
+## 10 K.De Schepper       P.Lorenzi     1     3     0</code></pre>
+<p>De plus, pour connaitre la structure interne du jeu de données, il suffit d’entrer le code suivant dans la console R:</p>
+<pre class="r"><code>str(Wimbledon.men.2013)   </code></pre>
+<pre><code>## &#39;data.frame&#39;:    114 obs. of  42 variables:
+##  $ Player1: Factor w/ 77 levels &quot;A.Haider-Maurer&quot;,..: 7 40 58 72 65 50 2 39 49 42 ...
+##  $ Player2: Factor w/ 75 levels &quot;A.Bedene&quot;,&quot;A.Bogomolov Jr.&quot;,..: 8 74 33 2 52 71 7 72 46 57 ...
+##  $ Round  : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ Result : int  0 0 1 1 0 0 1 0 0 1 ...
+##  $ FNL.1  : int  0 1 3 3 0 0 3 0 0 3 ...
+##  $ FNL.2  : int  3 3 0 0 3 3 1 3 3 0 ...
+##  $ FSP.1  : int  59 62 72 77 68 59 63 61 61 67 ...
+##  $ FSW.1  : int  29 77 44 40 61 41 56 47 31 56 ...
+##  $ SSP.1  : int  41 38 28 23 32 41 37 39 39 33 ...
+##  $ SSW.1  : int  14 35 10 12 15 27 21 21 16 21 ...
+##  $ ACE.1  : int  5 18 17 6 7 7 21 3 4 22 ...
+##  $ DBF.1  : int  1 4 3 0 2 6 3 1 5 6 ...
+##  $ WNR.1  : int  26 60 41 25 32 22 56 28 20 61 ...
+##  $ UFE.1  : int  18 28 18 11 29 28 32 16 18 29 ...
+##  $ BPC.1  : int  5 13 8 14 2 6 16 4 1 8 ...
+##  $ BPW.1  : int  1 1 5 5 0 1 4 0 1 3 ...
+##  $ NPA.1  : int  28 27 26 14 29 11 21 33 14 47 ...
+##  $ NPW.1  : int  19 19 17 11 20 6 15 24 9 35 ...
+##  $ TPW.1  : logi  NA NA NA NA NA NA ...
+##  $ ST1.1  : int  4 7 6 6 4 3 6 3 3 7 ...
+##  $ ST2.1  : int  3 4 6 6 5 2 6 4 4 6 ...
+##  $ ST3.1  : int  2 6 6 6 5 6 3 6 4 6 ...
+##  $ ST4.1  : int  NA 6 NA NA NA NA 6 NA NA NA ...
+##  $ ST5.1  : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ FSP.2  : int  57 67 70 79 67 70 73 71 70 54 ...
+##  $ FSW.2  : int  39 85 34 35 53 56 59 55 45 40 ...
+##  $ SSP.2  : int  43 33 30 21 33 30 27 29 30 46 ...
+##  $ SSW.2  : int  20 31 14 8 17 11 14 16 16 22 ...
+##  $ ACE.2  : int  11 12 4 1 9 25 7 15 16 4 ...
+##  $ DBF.2  : int  2 3 0 4 3 3 8 2 2 2 ...
+##  $ WNR.2  : int  38 57 24 16 40 53 33 40 41 22 ...
+##  $ UFE.2  : int  16 32 13 27 26 30 28 26 19 15 ...
+##  $ BPC.2  : int  10 15 1 0 21 12 9 10 6 6 ...
+##  $ BPW.2  : int  5 2 0 0 3 4 2 2 4 0 ...
+##  $ NPA.2  : int  23 46 19 22 44 33 11 38 11 23 ...
+##  $ NPW.2  : int  17 39 12 13 30 26 10 27 8 15 ...
+##  $ TPW.2  : logi  NA NA NA NA NA NA ...
+##  $ ST1.2  : int  6 6 2 2 6 6 3 6 6 6 ...
+##  $ ST2.2  : int  6 6 4 2 7 6 4 6 6 4 ...
+##  $ ST3.2  : int  6 7 3 4 7 7 6 7 6 2 ...
+##  $ ST4.2  : int  NA 7 NA NA NA NA 3 NA NA NA ...
+##  $ ST5.2  : int  NA NA NA NA NA NA NA NA NA NA ...</code></pre>
+<p>Il s’agit donc d’un dataframe à 114 observations de 42 variables. Ses éléments sont des sous-objets de type vecteur. Parmi ces sous-objets de type vecteur, 2 sont de type facteur, 2 sont des vecteurs logiques et 38 sont numériques.</p>
+</div>
+<div id="calcul-sur-le-jeu-de-donnees" class="section level2">
+<h2>3.2. Calcul sur le jeu de données</h2>
+<p>À ce jeu de données, on ajoutera une nouvelle variable qui contiendra le nombre de sets dans chacun des matchs puis pour démontrer la création du jeu de données agrégées, on calculera par <strong>Ronde</strong> (Variable <code>Round</code>):</p>
+<ol style="list-style-type: decimal">
+<li>le nombre de matchs à 3 sets,</li>
+<li>le nombre de matchs à 4 sets,</li>
+<li>le nombre de matchs à 5 sets et</li>
+<li>le nombre moyen de sets par match;</li>
+</ol>
+<p>de façon à obtenir le résultat suivant:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="right">Round</th>
+<th align="right">N3ST</th>
+<th align="right">N4ST</th>
+<th align="right">N5ST</th>
+<th align="right">MeanNST</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">41</td>
+<td align="right">13</td>
+<td align="right">10</td>
+<td align="right">3.515625</td>
+</tr>
+<tr class="even">
+<td align="right">2</td>
+<td align="right">15</td>
+<td align="right">6</td>
+<td align="right">2</td>
+<td align="right">3.434783</td>
+</tr>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">6</td>
+<td align="right">4</td>
+<td align="right">2</td>
+<td align="right">3.666667</td>
+</tr>
+<tr class="even">
+<td align="right">4</td>
+<td align="right">4</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">3.750000</td>
+</tr>
+<tr class="odd">
+<td align="right">5</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">3.500000</td>
+</tr>
+<tr class="even">
+<td align="right">6</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">4.500000</td>
+</tr>
+<tr class="odd">
+<td align="right">7</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">3.000000</td>
+</tr>
+</tbody>
+</table>
+<p>Ces calculs seront réalisés dans un premier temps par la méthode de base en utilisant la fonction <code>aggregate</code> pour agréger le jeu de données. Dans un second temps, on utilisera la méthode alternative avec le package <code>dplyr</code> pour effectuer ces mêmes calculs. Enfin, on effectuera une comparaison entre les deux méthodes.</p>
+</div>
+</div>
+<div id="methode-de-base-en-r-fonction-aggregate" class="section level1">
+<h1>4. Méthode de base en R: Fonction <code>aggregate</code></h1>
+<div id="presentation-de-la-fonction-aggregate" class="section level2">
+<h2>4.1. Présentation de la fonction <code>aggregate</code></h2>
+<p>Dans R la fonction <code>aggregate</code> se trouve dans le package <code>stats</code>, l’un des pakages de R de base. Elle permet de subdiviser un jeu de données en sous-ensembles en calculant des statistiques descriptives pour chaque sous-ensemble d’observations.</p>
+<p>La forme générale de cette fonction est: <code>aggregate(x,by,FUN)</code> où <code>x</code>, <code>by</code> et <code>FUN</code> sont les arguments principaux. D’autres options peuvent être aussi ajoutées comme <code>na.rm</code> si on désire enlever ou non les valeurs manquantes du calcul de la statistiques descriptive et que la fonction fournie à l’argument <code>FUN</code> accepte l’argument <code>na.rm</code> en entrée. L’argument <code>by</code> permet d’inclure les combinaisons des modalités des variables qui détermineront les sous-ensembles d’observations.</p>
+<p>L’argument <code>FUN</code> permet d’appeler la fonction qui calculera la statistique descriptive. Dans notre cas, les statistiques seront calculés par la fonction <code>mean</code> pour calculer la moyenne des sets et la fonction créée <code>getNmatchs</code> pour calculer le nombre de matchs contenant un certain nombre de sets. Celle-ci s’écrit comme suit:</p>
+<pre class="r"><code>getNmatchs &lt;- function(y, set = 3){ sum(y == set) }</code></pre>
+<p>Dans cette fonction, l’argument <code>y</code> est un vecteur de valeurs numériques (contenant des nombres de sets pour des matchs de tennis) et l’argument <code>set</code> est un paramètre pour spécifier le nombre de sets qui nous intéresse.</p>
+</div>
+<div id="utilisation-de-aggregate-sur-wimbledon.men.2013" class="section level2">
+<h2>4.2. Utilisation de <code>aggregate</code> sur Wimbledon.men.2013</h2>
+<p>Avant de commencer à utiliser <code>aggregate</code>, on doit d’abord ajouter une nouvelle variable à notre jeu de données. Cette variable contiendra le nombre de sets dans chacun des matchs (somme des variables FNL.1 et FNL.2) et sera nommée <code>NST</code>.</p>
+<pre class="r"><code>Wimbledon.men.2013$NST&lt;-Wimbledon.men.2013$FNL.1+Wimbledon.men.2013$FNL.2   </code></pre>
+<p>On visualise maintenant une partie du jeu de données avec la nouvelle variable ajoutée:</p>
+<pre class="r"><code>head(Wimbledon.men.2013[,c(&quot;Player1&quot;,&quot;Player2&quot;,&quot;Round&quot;,&quot;FNL.1&quot;,&quot;FNL.2&quot;,&quot;NST&quot;)],10)   </code></pre>
+<pre><code>##          Player1         Player2 Round FNL.1 FNL.2 NST
+## 1       B.Becker        A.Murray     1     0     3   3
+## 2         J.Ward          Y-H.Lu     1     1     3   4
+## 3        N.Mahut         J.Hajek     1     3     0   3
+## 4      T.Robredo A.Bogomolov Jr.     1     3     0   3
+## 5        R.Haase       M.Youzhny     1     0     3   3
+## 6      M.Gicquel      V.Pospisil     1     0     3   3
+## 7    A.Kuznetsov      A.Montanes     1     3     1   4
+## 8   J.Tipsarevic       V.Troicki     1     0     3   3
+## 9    M.Baghdatis         M.Cilic     1     0     3   3
+## 10 K.De Schepper       P.Lorenzi     1     3     0   3</code></pre>
+<p>On veut calculer le nombre de matchs respectivement à 3, 4 et 5 sets ainsi que le nombre moyen de sets par match en fonction de la ronde de la compétition. En faisant la correspondance à chaque argument de <code>aggregate</code>:</p>
+<ul>
+<li><p><code>x</code> est la nouvelle variable créée <code>NST</code></p></li>
+<li><p><code>by</code> est la variable <code>Round</code> pour déterminer les sous-ensembles d’observations</p></li>
+<li><p><code>FUN</code> est la fonction permettant de faire les calculs (<code>getNmatchs &lt;- function(y, set = 3){ sum(y == set) }</code>et <code>mean</code>)</p></li>
+</ul>
+<div id="calcul-du-nombre-de-matchs-a-3-sets" class="section level3">
+<h3>4.2.1. Calcul du nombre de matchs à 3 sets</h3>
+<p>Pour calculer le nombre de matchs à 3 sets, on fera appel à la fonction créée <code>getNmatchs</code> dans l’argument <code>FUN</code> de <code>aggregate</code>. L’argument <code>set</code> de <code>getNmatchs</code> sera dans ce cas égal à 3.</p>
+<pre class="r"><code>N3ST&lt;-aggregate(Wimbledon.men.2013$NST,by=list(Wimbledon.men.2013$Round),
+                FUN=getNmatchs, set=3)   </code></pre>
+<p>Pour afficher le résultat, on fait:</p>
+<pre class="r"><code>print(N3ST)   </code></pre>
+<pre><code>##   Group.1  x
+## 1       1 41
+## 2       2 15
+## 3       3  6
+## 4       4  4
+## 5       5  3
+## 6       6  0
+## 7       7  1</code></pre>
+<p>On constate que les noms des colonnes (variables) ne sont pas ceux qu’on voulait. Par défaut, la fonction <code>aggregate</code> donne des noms aux colonnes du jeu de données. Toutefois,on peut la forcer à nommer les colonnes comme on le désire.</p>
+<pre class="r"><code>N3ST&lt;-aggregate(list(N3ST=Wimbledon.men.2013$NST),by=list(Round=Wimbledon.men.2013$Round),
+                FUN=getNmatchs, set=3)</code></pre>
+<pre class="r"><code>#Nombre de matchs à 3 sets par ronde
+print(N3ST)</code></pre>
+<pre><code>##   Round N3ST
+## 1     1   41
+## 2     2   15
+## 3     3    6
+## 4     4    4
+## 5     5    3
+## 6     6    0
+## 7     7    1</code></pre>
+<p>L’ajout de la fonction <code>list</code> permet de nommer la variable de l’argument <code>x</code>. Sans cet ajout, il ne serait pas possible de nommer cette variable dans <code>aggregate</code>.</p>
+</div>
+<div id="calcul-du-nombre-de-matchs-a-4-sets" class="section level3">
+<h3>4.2.2. Calcul du nombre de matchs à 4 sets</h3>
+<p>Dans ce cas, l’argument <code>set</code> de <code>getNmatchs</code> prend la valeur 4. Ainsi, on obtient:</p>
+<pre class="r"><code>N4ST&lt;-aggregate(list(N4ST=Wimbledon.men.2013$NST),by=list(Round=Wimbledon.men.2013$Round),
+                FUN=getNmatchs, set=4)</code></pre>
+<pre class="r"><code>#Nombre de matchs à 4 sets par ronde
+print(N4ST)</code></pre>
+<pre><code>##   Round N4ST
+## 1     1   13
+## 2     2    6
+## 3     3    4
+## 4     4    2
+## 5     5    0
+## 6     6    1
+## 7     7    0</code></pre>
+</div>
+<div id="calcul-du-nombre-de-matchs-a-5-sets" class="section level3">
+<h3>4.2.3. Calcul du nombre de matchs à 5 sets</h3>
+<p>Dans ce cas, l’argument <code>set</code> de <code>getNmatchs</code> prend la valeur 5.</p>
+<pre class="r"><code>N5ST&lt;-aggregate(list(N5ST=Wimbledon.men.2013$NST),by=list(Round=Wimbledon.men.2013$Round),
+                FUN=getNmatchs, set=5)</code></pre>
+<pre class="r"><code>#Nombre de matchs à 5 sets par ronde
+print(N5ST)</code></pre>
+<pre><code>##   Round N5ST
+## 1     1   10
+## 2     2    2
+## 3     3    2
+## 4     4    2
+## 5     5    1
+## 6     6    1
+## 7     7    0</code></pre>
+</div>
+<div id="calcul-du-nombre-moyen-de-sets-par-match" class="section level3">
+<h3>4.2.4. Calcul du nombre moyen de sets par match</h3>
+<p>Dans ce cas, l’argument <code>FUN</code> de <code>aggregate</code> est égal à la fonction <code>mean</code>.</p>
+<pre class="r"><code>MeanNST&lt;-aggregate(list(MeanNST=Wimbledon.men.2013$NST),by=list(Round=Wimbledon.men.2013$Round),
+                FUN=mean)</code></pre>
+<pre class="r"><code>#Nombre moyen de sets par match par ronde
+print(MeanNST)</code></pre>
+<pre><code>##   Round  MeanNST
+## 1     1 3.515625
+## 2     2 3.434783
+## 3     3 3.666667
+## 4     4 3.750000
+## 5     5 3.500000
+## 6     6 4.500000
+## 7     7 3.000000</code></pre>
+<pre class="r"><code>#Structure des nouveaux jeux de données obtenus
+str(N3ST)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    7 obs. of  2 variables:
+##  $ Round: int  1 2 3 4 5 6 7
+##  $ N3ST : int  41 15 6 4 3 0 1</code></pre>
+<pre class="r"><code>str(N4ST)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    7 obs. of  2 variables:
+##  $ Round: int  1 2 3 4 5 6 7
+##  $ N4ST : int  13 6 4 2 0 1 0</code></pre>
+<pre class="r"><code>str(N5ST)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    7 obs. of  2 variables:
+##  $ Round: int  1 2 3 4 5 6 7
+##  $ N5ST : int  10 2 2 2 1 1 0</code></pre>
+<pre class="r"><code>str(MeanNST)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    7 obs. of  2 variables:
+##  $ Round  : int  1 2 3 4 5 6 7
+##  $ MeanNST: num  3.52 3.43 3.67 3.75 3.5 ...</code></pre>
+<p>Avec la fonction <code>aggregate</code>, on a obtenu 4 dataframes à 7 observations de 2 variables, contenant des sous-objets de type vecteur numérique.</p>
+</div>
+<div id="fusion-des-jeux-de-donnees-obtenus" class="section level3">
+<h3>4.2.5. Fusion des jeux de données obtenus</h3>
+<p>Pour avoir exactement le même résultat que celui recherché, il nous faut fusionner les 4 jeux de données obtenus en fonction de la variable commune <code>Round</code> de façon à avoir un jeu de données unique contenant les 4 statistiques calculées par <code>Round</code>. Pour ce faire, on va utiliser la fonction <code>merge</code> qui est conçue pour ne prendre que deux objets en arguments. Pour cela, il faudra imbriquer deux <code>merge</code> dans un autre <code>merge</code>.</p>
+<pre class="r"><code>#Fusion des jeux de données obtenus 
+merge(N3ST,merge(N4ST,merge(N5ST,MeanNST,by=&quot;Round&quot;),by=&quot;Round&quot;),by=&quot;Round&quot;)</code></pre>
+<pre><code>##   Round N3ST N4ST N5ST  MeanNST
+## 1     1   41   13   10 3.515625
+## 2     2   15    6    2 3.434783
+## 3     3    6    4    2 3.666667
+## 4     4    4    2    2 3.750000
+## 5     5    3    0    1 3.500000
+## 6     6    0    1    1 4.500000
+## 7     7    1    0    0 3.000000</code></pre>
+<p>Pour avoir plus d’informations sur la fonction <code>merge</code>, tapez <code>help(merge)</code>dans la console R.</p>
+<p>Il faut noter qu’il aurait été possible d’obtenir les 4 statistiques désirées dans un seul appel de la fonction <code>aggregate</code>. En effet, on aurait pu donner en entrée à l’argument <code>FUN</code> une fonction créée qui calcule toutes les statistiques.</p>
+<pre class="r"><code>getNmatchs &lt;- function(y, set = 3){ sum(y == set) }
+aggregate(Wimbledon.men.2013$NST,by=list(Round=Wimbledon.men.2013$Round),
+          FUN=function(y) c(N3ST=getNmatchs(y,3),N4ST=getNmatchs(y,4),
+                            N5ST=getNmatchs(y,5),MeanNST=mean(y)))</code></pre>
+<pre><code>##   Round    x.N3ST    x.N4ST    x.N5ST x.MeanNST
+## 1     1 41.000000 13.000000 10.000000  3.515625
+## 2     2 15.000000  6.000000  2.000000  3.434783
+## 3     3  6.000000  4.000000  2.000000  3.666667
+## 4     4  4.000000  2.000000  2.000000  3.750000
+## 5     5  3.000000  0.000000  1.000000  3.500000
+## 6     6  0.000000  1.000000  1.000000  4.500000
+## 7     7  1.000000  0.000000  0.000000  3.000000</code></pre>
+<p>Le résultat obtenu n’a cependant pas l’allure souhaitée. Les noms des colonnes des statistiques calculées ne correspondent pas et le jeu de données est uniformisé à 6 chiffres après la virgule. Il aurait fallu une mise en forme pour obtenir le résultat tel que souhaité.</p>
+</div>
+</div>
+</div>
+<div id="methode-alternative-package-dplyr" class="section level1">
+<h1>5. Méthode alternative: <code>Package dplyr</code></h1>
+<div id="presentation-du-package-dplyr" class="section level2">
+<h2>5.1. Présentation du Package <code>dplyr</code></h2>
+<p><code>dplyr</code> est un package créé par Hadley Whickam et qui permet de manipuler facilement des données. D’où son surnom “A grammar of data manipulation” (Réf: <a href="https://cran.r-project.org/web/packages/dplyr/dplyr.pdf" class="uri">https://cran.r-project.org/web/packages/dplyr/dplyr.pdf</a>).<br />
+Pour utiliser <code>dplyr</code>, il faut d’abord l’installer dans R. L’installation de <code>dplyr</code> se fait de la manière suivante:</p>
+<pre class="r"><code>#Installation de dplyr 
+install.packages(&quot;dplyr&quot;)</code></pre>
+<p>Il faut ensuite charger le package dans la session de travail. Pour le faire, on écrit la commande suivante:</p>
+<pre class="r"><code>library(&quot;dplyr&quot;)</code></pre>
+<p><code>dplyr</code> fournit une fonction pour chaque manipulation de base des données. Parmi les fonctions de manipulation de base, on peut retenir:</p>
+<ul>
+<li><code>filter()</code> et <code>slice()</code> qui permettent de sélectionner un sous-ensemble de lignes dans un jeu de données;</li>
+<li><code>mutate()</code> pour ajouter de nouvelles colonnes en fonction de colonnes existantes;</li>
+<li><code>select()</code> permet de sélectionner les colonnes qui nous interessent dans un jeu de données;</li>
+<li><code>summarise()</code> transforme un jeu de données en une seule rangée;</li>
+<li><code>distinct()</code> retourne les valeurs uniques dans un tableau de données;</li>
+<li>Etc.</li>
+</ul>
+<p>Pour plus d’informations sur les fonctions du package <code>dplyr</code> , consultez l’aide de R en faisant:</p>
+<pre class="r"><code>help(dplyr)</code></pre>
+<p>ou visitez le manuel de référence sur <a href="https://cran.r-project.org/web/packages/dplyr/dplyr.pdf" class="uri">https://cran.r-project.org/web/packages/dplyr/dplyr.pdf</a>.<br />
+A noter que pour calculer les statistiques descriptives en fonction d’un sous-ensemble d’observations, les fonctions <code>mutate</code>, <code>group_by</code>, <code>select</code>, <code>summarize</code> seront utilisées.</p>
+</div>
+<div id="fonction-mutate" class="section level2">
+<h2>5.2. Fonction <code>mutate</code></h2>
+<p>Pour bien illustrer l’utilisation de <code>dplyr</code>, on va importer de nouveau le fichier de données en R et on l’appellera <code>Wimbledon</code>.</p>
+<pre class="r"><code>Wimbledon &lt;- read.csv(&quot;Wimbledon-men-2013.csv&quot;)   </code></pre>
+<p>La fonction <code>mutate</code> permet d’ajouter de nouvelles colonnes dans un jeu de données en fonction des colonnes existantes. La forme générale de cette fonction est <code>mutate(.data, ...)</code>, où:</p>
+<ul>
+<li><code>.data</code> est le jeu de données auquel on veut ajouter les nouvelles colonnes;</li>
+<li><code>...</code> correspond aux colonnes que l’on veut ajouter. Le prochain exemple permettra de mieux comprendre.</li>
+</ul>
+<p>On l’utilisera donc pour ajouter la nouvelle variable <code>NST</code> qui est fonction des variables <code>FNL.1</code> et <code>FNL.2</code> (<code>NST=FNL.1+FNL.2</code> ).</p>
+<pre class="r"><code>Wimbledon&lt;-mutate(Wimbledon,NST=FNL.1+FNL.2)</code></pre>
+</div>
+<div id="fonction-select-et-slice" class="section level2">
+<h2>5.3. Fonction <code>select</code> et <code>slice</code></h2>
+<p>Pour afficher les 10 premières lignes d’un groupe de colonnes sélectionnées du jeu de données <code>Wimbledon</code> modifié, on utilisera les fonctions <code>select</code> et <code>slice</code>.<br />
+<code>select</code> permettra de séléctionner les colonnes qu’on veut visualiser et <code>slice</code> nous permettra de séléctionner la position des lignes qui nous intéressent.</p>
+<pre class="r"><code>select(slice(Wimbledon,1:10),Player1,Player2,Round,FNL.1,FNL.2,NST)</code></pre>
+<pre><code>## # A tibble: 10 x 6
+##          Player1         Player2 Round FNL.1 FNL.2   NST
+##           &lt;fctr&gt;          &lt;fctr&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+##  1      B.Becker        A.Murray     1     0     3     3
+##  2        J.Ward          Y-H.Lu     1     1     3     4
+##  3       N.Mahut         J.Hajek     1     3     0     3
+##  4     T.Robredo A.Bogomolov Jr.     1     3     0     3
+##  5       R.Haase       M.Youzhny     1     0     3     3
+##  6     M.Gicquel      V.Pospisil     1     0     3     3
+##  7   A.Kuznetsov      A.Montanes     1     3     1     4
+##  8  J.Tipsarevic       V.Troicki     1     0     3     3
+##  9   M.Baghdatis         M.Cilic     1     0     3     3
+## 10 K.De Schepper       P.Lorenzi     1     3     0     3</code></pre>
+</div>
+<div id="fonction-group_by-et-summarise" class="section level2">
+<h2>5.4. Fonction <code>group_by</code> et <code>summarise</code></h2>
+<p><code>group_by</code> permet de subdiviser un jeu de données en sous-ensembles. Elle est de la forme <code>group_by(.data,by_vars)</code>, où:</p>
+<ul>
+<li><code>.data</code> est le fichier de données que l’on veut grouper;</li>
+<li><code>by_vars</code> correspond à la variable en fonction de laquelle on veut grouper le jeu de données. Noter qu’il peut s’agir d’une ou de plusieurs variables.</li>
+</ul>
+<p>La fonction <code>summarise</code> permet de calculer des statistques sur l’ensemble des observations d’un jeu de données. Elle est de la forme: <code>summarise(.data,...)</code>, avec:</p>
+<ul>
+<li><p><code>.data</code> est le jeu de données pour lequel on veut calculer les statistiques;</p></li>
+<li><p><code>...</code> correspond aux variables que l’on désire obtenir. A titre d’exemple, on aurait <strong>Minimum=min(NST)</strong>.</p></li>
+</ul>
+<p>Voici un exemple d’utilisation de la fonction <code>summarise</code>.</p>
+<pre class="r"><code>essai&lt;-summarise (Wimbledon, N3ST=getNmatchs(NST,3),N4ST=getNmatchs(NST,4),
+           N5ST=getNmatchs(NST,5), MeanNST=mean(NST))
+str(essai)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    1 obs. of  4 variables:
+##  $ N3ST   : int 70
+##  $ N4ST   : int 26
+##  $ N5ST   : int 18
+##  $ MeanNST: num 3.54</code></pre>
+<p><code>summarise</code> retourne un <em>dataframe</em> avec une seule observation et 4 variables, soit une variable par statistique calculée. Cette fonction permet donc de calculer plusieurs statistiques lors d’un seul appel de fonction et de nommer chacune des variables. Cependant, on ne peut pas l’appliquer sur des sous-ensembles d’un jeu de données. Pour contourner cet obstacle, <code>dplyr</code> permet d’utiliser conjointement les fonctions <code>group_by</code> et <code>summarise</code>.</p>
+</div>
+<div id="utilisation-conjointe-de-group_by-et-summarise" class="section level2">
+<h2>5.5. Utilisation conjointe de <code>group_by</code> et <code>summarise</code></h2>
+<p>Dans cette conjonction, la fonction <code>group_by</code> subdivise le jeu de données en sous-ensembles et la fonction <code>summarise</code> calcule les statistiques pour chaque sous-ensemble obtenu avec <code>group_by</code>. <em>Quel beau travail d’équipe!!</em></p>
+<p>Appliquons conjointement ces deux fonctions sur notre jeu de données pour calculer les statistiques qu’on nommera N3ST, N4ST, N5ST et MeanNST respectivement nombre de matchs à 3 sets, à 4 sets, à 5 sets et nombre moyen de sets par match par ronde.</p>
+<pre class="r"><code>groupe&lt;-group_by(Wimbledon,Round)# On groupe le jeu de données en fonction de la ronde de la compétition
+selection&lt;-select(groupe,Round,NST)#On sélectionne les variables qui nous intéressent
+result&lt;-summarise(selection,
+              N3ST=getNmatchs(NST,3),
+              N4ST=getNmatchs(NST,4),
+              N5ST=getNmatchs(NST,5),
+              MeanNST=mean(NST,na.rm=TRUE)) # On calcule les statistiques
+print(result)</code></pre>
+<pre><code>## # A tibble: 7 x 5
+##   Round  N3ST  N4ST  N5ST  MeanNST
+##   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;
+## 1     1    41    13    10 3.515625
+## 2     2    15     6     2 3.434783
+## 3     3     6     4     2 3.666667
+## 4     4     4     2     2 3.750000
+## 5     5     3     0     1 3.500000
+## 6     6     0     1     1 4.500000
+## 7     7     1     0     0 3.000000</code></pre>
+<p>Si on ne souhaite pas stocker les résultats intermédiaires, on peut imbriquer les fonctions les unes dans les autres. Dans ce cas, le nouveau code s’écrit:</p>
+<pre class="r"><code>summarise(
+  select(
+    group_by(Wimbledon,Round),
+    Round,NST
+  ),
+  N3ST=getNmatchs(NST,3),
+  N4ST=getNmatchs(NST,4),
+  N5ST=getNmatchs(NST,5),
+  MeanNST=mean(NST,na.rm=TRUE))</code></pre>
+<pre><code>## # A tibble: 7 x 5
+##   Round  N3ST  N4ST  N5ST  MeanNST
+##   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;
+## 1     1    41    13    10 3.515625
+## 2     2    15     6     2 3.434783
+## 3     3     6     4     2 3.666667
+## 4     4     4     2     2 3.750000
+## 5     5     3     0     1 3.500000
+## 6     6     0     1     1 4.500000
+## 7     7     1     0     0 3.000000</code></pre>
+</div>
+</div>
+<div id="comparaison-des-deux-methodes" class="section level1">
+<h1>6. Comparaison des deux méthodes</h1>
+<p>En résumé, les deux méthodes (la méthode de base avec <code>aggregate</code> et la méthode alternative avec les fonctions <code>group_by</code> et <code>summarise</code> de <code>dplyr</code>) permettent de calculer le nombre de matchs à 3 sets, le nombre de matchs à 4 sets, le nombre de matchs à sets et le nombre de moyen de sets par match en fonction de la ronde (<code>Round</code>) de la compétition de tennis Wimbledon en 2013. Toutefois, il existe des avantages et des inconvénients pour chacune des méthodes.</p>
+<div id="avantages-et-inconvenients-de-la-methode-de-base-aggregate" class="section level2">
+<h2>6.1. Avantages et inconvénients de la méthode de base (<code>aggregate</code>)</h2>
+<p>L’utilisation de <code>aggregate</code> présente l’avantage de ne pas exiger l’installation préalable de packages vu que cette fonction est issue du R de base. De plus, son utilisation pour calculer des statistiques pour des sous-ensembles d’un jeu de données ne requiert pas de conjonction avec une autre fonction comme c’est le cas de <code>summarise</code> qui nécessite <code>group_by</code>.<br />
+Toutefois, il n’est pas possible d’effectuer le calcul des statistiques et de nommer chacune des variables en un seul appel de fonction. Il faut autant d’appels de fonctions que de statistiques à calculer pour accomplir une telle tâche. Ce qui a pour conséquence l’utilisation de <code>merge</code> pour combiner les résultats obtenus. Ce qui n’est pas pratique dans le cas où on aurait un grand nombre de statistiques à calculer sur un jeu de données.</p>
+</div>
+<div id="avantages-et-inconvenients-de-la-methode-alternative" class="section level2">
+<h2>6.2. Avantages et inconvénients de la méthode alternative</h2>
+<p>L’utilisation conjointe de <code>group_by</code> et de <code>summarise</code> permet d’effectuer les calculs en un seul appel de fonction et de nommer les variables issues des calculs statistiques. De plus, le résultat est obtenu sous forme d’un tableau de données sans avoir besoin d’utiliser <code>merge</code>. Ce qui est pratique dans le cas d’un grand nombre de statistiques à calculer.</p>
+<p>Toutefois, cette méthode n’est pas sans inconvénients. Elle exige l’installation préalable du package <code>dplyr</code> et la combinaison de <code>summarise</code> et <code>group_by</code> pour pouvoir calculer des statistiques sur des sous-ensembles d’observations.</p>
+<p>De plus, l’affichage du tableau des résultats contient des informations supplémentaires sur le type des sous-objets du tableau. Cela peut être considéré comme un avantage ou un inconvénient selon l’angle sous lequel on l’analyse.</p>
+</div>
+</div>
+<div id="references-bibliographiques" class="section level1">
+<h1>7. Références bibliographiques</h1>
+<ul>
+<li>Aide intéractive de R</li>
+<li>Introduction to dplyr: <a href="https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html" class="uri">https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html</a></li>
+<li>Informations sur le jeu de données Wimbledon.men.2013:<a href="https://archive.ics.uci.edu/ml/datasets/Tennis+Major+Tournament+Match+Statistics" class="uri">https://archive.ics.uci.edu/ml/datasets/Tennis+Major+Tournament+Match+Statistics</a></li>
+</ul>
+</div>

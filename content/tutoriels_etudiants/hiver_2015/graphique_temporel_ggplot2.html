@@ -1,0 +1,356 @@
+---
+title: "Graphique de série temporelle"
+linkTitle : "ggplot2 - Graphique temporel"
+weight: 2
+author: "Astrid Deschênes"
+date: "2015-04-13"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \setlength{\OuterFrameSep}{6pt}
+---
+
+
+
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#definition-dune-serie-temporelle">Définition d’une série temporelle</a></li>
+<li><a href="#exemple-dune-serie-temporelle">Exemple d’une série temporelle</a></li>
+<li><a href="#graphique-de-serie-temporelle">Graphique de série temporelle</a><ul>
+<li><a href="#graphique-genere-en-utilisant-les-fonctions-graphiques-de-base">Graphique généré en utilisant les fonctions graphiques de base</a></li>
+<li><a href="#graphique-genere-en-utilisant-les-fonctions-du-package-ggplot2">Graphique généré en utilisant les fonctions du package <code>ggplot2</code></a></li>
+<li><a href="#graphique-genere-en-utilisant-les-fonctions-avancees-du-package-ggplot2">Graphique généré en utilisant les fonctions avancées du package <code>ggplot2</code></a></li>
+</ul></li>
+<li><a href="#conclusion">Conclusion</a></li>
+<li><a href="#references">Références</a><ul>
+<li><a href="#references-sur-les-graphiques-de-series-temporelles-en-r">Références sur les graphiques de séries temporelles en R</a></li>
+<li><a href="#references-sur-le-package-ggplot2-et-ses-fonctions">Références sur le package <code>ggplot2</code> et ses fonctions</a></li>
+<li><a href="#references-sur-les-packages-utilises">Références sur les packages utilisés</a></li>
+<li><a href="#references-sur-le-jeu-de-donnees">Références sur le jeu de données</a></li>
+</ul></li>
+</ul>
+</div>
+
+<hr />
+<p>L’objectif de cette fiche est d’expliquer, à l’aide d’un jeu de données, comment utiliser les librairies R afin de générer des graphiques de séries temporelles. L’utilisation de fonctions graphiques de base en R sera comparée à l’utilisation de fonctions provenant du package <a href="http://ggplot2.org/">ggplot2</a>.</p>
+<div id="definition-dune-serie-temporelle" class="section level2">
+<h2>Définition d’une série temporelle</h2>
+<p>Une série temporelle (aussi appelée série chronologique) est une suite d’observations chiffrées d’un même phénomène, ordonnées dans le temps. Ce type de série permet de décrire l’évolution d’un phénomène au cours du temps. Dans certaines situations, elle permet même d’expliquer, ainsi que de prévoir, ce phénomène à court ou à long terme. L’économie, la météorologie ainsi que l’épidémiologie sont quelques exemples de domaines où les séries temporelles sont souvent utilisées.</p>
+</div>
+<div id="exemple-dune-serie-temporelle" class="section level2">
+<h2>Exemple d’une série temporelle</h2>
+<p>À titre d’exemple, le jeu de données provenant d’un système de location de vélos dans la ville de Washington D.C., aux États-Unis, sera utilisé. Ce jeu de données contient le nombre de locations de vélos par heure pour les années 2011 et 2012. De plus amples informations concernant ce jeu de données sont disponibles sur le site web <a href="https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset">Bike Sharing Dataset Data Set</a>.</p>
+<p>Le jeu de données initial est chargé à partir du fichier <em>hour.csv</em> disponible sur le site web mentionné plus haut. Voici un aperçu d’une sous-section des données :</p>
+<pre class="r"><code># Charger le package permettant l&#39;affichage des données
+library(knitr)
+# Charger le fichier hour.csv qui contient les données
+hour &lt;- read.csv(file = &quot;hour.csv&quot;, sep = &quot;,&quot;, header = TRUE)</code></pre>
+<pre class="r"><code># Afficher une sous-section des données
+kable(hour[1:5,c(&quot;dteday&quot;, &quot;season&quot;, &quot;yr&quot;, &quot;hr&quot;, &quot;weathersit&quot;, &quot;cnt&quot;)], 
+      caption = &quot;Sous-section du jeu de données initial&quot;)</code></pre>
+<table>
+<caption><span id="tab:showData">Table 1: </span>Sous-section du jeu de données initial</caption>
+<thead>
+<tr class="header">
+<th align="left">dteday</th>
+<th align="right">season</th>
+<th align="right">yr</th>
+<th align="right">hr</th>
+<th align="right">weathersit</th>
+<th align="right">cnt</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">2011-01-01</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">16</td>
+</tr>
+<tr class="even">
+<td align="left">2011-01-01</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">40</td>
+</tr>
+<tr class="odd">
+<td align="left">2011-01-01</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">32</td>
+</tr>
+<tr class="even">
+<td align="left">2011-01-01</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">1</td>
+<td align="right">13</td>
+</tr>
+<tr class="odd">
+<td align="left">2011-01-01</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">4</td>
+<td align="right">1</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+<p>Ce jeu de données contient 17379 observations et 17 variables. Voici une brève description des variables utilisées dans les exemples qui suivront :</p>
+<ul>
+<li><code>dteday</code> : un facteur représentant la date de la prise de données</li>
+<li><code>season</code> : un entier représentant la saison (1 : printemps, 2 : été, 3 : automne, 4 : hiver)</li>
+<li><code>yr</code> : un entier représentant l’année (0 : 2011, 1 : 2012)</li>
+<li><code>hr</code> : un entier représentant l’heure (entre 0 et 23)</li>
+<li><code>weathersit</code> : un entier représentant les conditions atmosphériques au moment de la prise de données
+<ul>
+<li>1 : Ciel clair, Quelques nuages, Partiellement nuageux</li>
+<li>2 : Brume + Nuageux, Brume + Nuages fragmentés, Brume + Quelques nuages, Brume</li>
+<li>3 : Faible neige, Faible pluie + Orage + Nuages épars, Faible pluie + Nuages épars</li>
+<li>4 : Forte pluie + Grésil + Orage + Brume, Neige + Brouillard</li>
+</ul></li>
+<li><code>cnt</code> : un entier représentant le nombre total de vélos loués</li>
+</ul>
+<p>Les données utilisées dans les exemples de cette fiche sont le résultat de l’agrégation du jeu de données initial. Cette agrégation, effectuée à l’aide du package <a href="https://github.com/hadley/dplyr">dplyr</a> permet d’obtenir la moyenne et son erreur type pour chaque heure du jour (variable <code>hr</code>) en fonction de l’année (variable <code>yr</code>) et des conditions atmosphériques (variable <code>weathersit</code>). Les conditions atmosphériques extrêmes (<code>weathersit</code> = 4) sont éliminées du jeu de données final.</p>
+<pre class="r"><code># Charger le package permettant l&#39;agrégation des données
+library(dplyr)
+# Grouper les données en fonction de l&#39;heure, des conditions atmosphériques et de l&#39;année
+hour_group &lt;- group_by(.data = hour, hr, weathersit, yr)
+# Calculer la moyenne ainsi que l&#39;écart-type
+hour_agg &lt;- summarise(.data = hour_group, mean = mean(cnt, na.rm = TRUE), # moyenne
+              n = sum(!is.na(cnt)),se = sd(cnt)/sqrt(n)) # se = erreur type de la moyenne
+hour_agg &lt;- subset(hour_agg, 
+                   weathersit != 4) # pour enlever les lignes avec weathersit == 4
+# Afficher les premières lignes du jeu de données agrégées
+kable(hour_agg[1:5,], caption = &quot;Jeu de données agrégées&quot;) </code></pre>
+<table>
+<caption><span id="tab:preparationDonnees">Table 2: </span>Jeu de données agrégées</caption>
+<thead>
+<tr class="header">
+<th align="right">hr</th>
+<th align="right">weathersit</th>
+<th align="right">yr</th>
+<th align="right">mean</th>
+<th align="right">n</th>
+<th align="right">se</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">47.44400</td>
+<td align="right">250</td>
+<td align="right">2.241871</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">71.41841</td>
+<td align="right">239</td>
+<td align="right">3.074518</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">36.33721</td>
+<td align="right">86</td>
+<td align="right">3.110136</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">56.69697</td>
+<td align="right">99</td>
+<td align="right">4.495364</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">22.16000</td>
+<td align="right">25</td>
+<td align="right">4.528311</td>
+</tr>
+</tbody>
+</table>
+<p>Ce jeu de données agrégées contient 144 observations et 6 variables.</p>
+</div>
+<div id="graphique-de-serie-temporelle" class="section level2">
+<h2>Graphique de série temporelle</h2>
+<div id="graphique-genere-en-utilisant-les-fonctions-graphiques-de-base" class="section level3">
+<h3>Graphique généré en utilisant les fonctions graphiques de base</h3>
+<p>La librairie <code>stats</code> offre des fonctionnalités de base permettant de manipuler les séries temporelles. La fonction <code>ts()</code> permet de convertir un vecteur numérique (objet <code>vector</code>) en objet <code>time-series</code>. Les objets <code>time-series</code> ont l’avantage d’être reconnus par la fonction graphique <code>plot()</code> et d’ainsi être affichés graphiquement dans un format standard aux séries temporelles.</p>
+<p>Les paramètres de la fonction <code>ts(data, start=, end=, frequency=)</code> sont, dans l’ordre, l’objet contenant les données temporelles de la série (un object <code>vector</code> ou <code>matrix</code>), le temps de la première observation, le temps de la dernière observation ainsi que le nombre de fréquences par unités de temps.</p>
+<p>Dans l’exemple qui suit, la librairie de base <code>stats</code> sera utilisée pour générer un graphique montrant l’évolution du nombre moyen de locations par heure en 2011 par temps dégagé. La fonction <code>ts</code> est donc utilisée sur le jeu de données agrégé en s’assurant de n’utiliser que les données liées à l’année 2011 (<code>yr</code> == 0) et qu’au temps dégagé (<code>weathersit</code> == 1). L’objet <code>time-series</code> est passé en paramètre à la fonction <code>plot()</code> dont les paramètres par défaut assurent un affichage standard pour les séries temporelles. Seuls les paramètres des axes (paramètres <code>xlab</code> et <code>ylab</code>) ainsi que du titre (paramètre <code>main</code>) ont besoin d’être personnalisés.</p>
+<pre class="r"><code># Créer un objet time-series qui utilise uniquement les données de l&#39;année 
+# 2011 (yr == 0) en temps dégagé (weathersit == 1)
+# La variable d&#39;intérêt est le nombre moyen de locations par heure (mean)
+time_serie &lt;- ts(hour_agg[hour_agg$weathersit==1 &amp; hour_agg$yr==0, c(&quot;mean&quot;)], 
+                 start = 0, frequency = 1)
+# Afficher le graphique en utilisant la fonction de base plot()
+# en personnalisant le titre (main), l&#39;axe des y (ylab) ainsi que l&#39;axe des x (xlab)
+plot(time_serie, ylab=&quot;nombre moyen\nde locations&quot;, xlab=&quot;heure&quot;, 
+     main=&quot;Évolution du nombre moyen de locations par heure \nen 2011 par temps dégagé&quot;)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2015/graphique_temporel_ggplot2_files/figure-html/donneesTempsDegage-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="graphique-genere-en-utilisant-les-fonctions-du-package-ggplot2" class="section level3">
+<h3>Graphique généré en utilisant les fonctions du package <code>ggplot2</code></h3>
+<p>Le package <a href="http://ggplot2.org/">ggplot2</a> est un package élaboré par Hadley Wickham pour la conception des graphiques avancés qui utilise une “grammaire graphique” spécifique. Cette grammaire est formée d’un ensemble de composants indépendants qui peuvent être assemblés d’une multitude de façons, d’où la grande flexibilité du package.</p>
+<p>Le package <code>ggplot2</code> ne fait pas partie des packages de base, il doit donc être chargé afin de pouvoir l’utiliser.</p>
+<pre class="r"><code># Charger le package ggplot2
+library(ggplot2)</code></pre>
+<p>Dans le package <code>ggplot2</code>, la fonction <code>qplot()</code> est la fonction graphique qui permet de créer des graphiques de séries temporelles ressemblant à ceux générés à l’aide des packages de base. Les paramètres importants de la fonction <code>qplot(x=, y=, data=, geom=)</code> sont, dans l’ordre, le nom de la colonne du <code>data.frame</code> qui contient les valeurs des <code>x</code>, le nom de la colonne du <code>data.frame</code> qui contient les valeurs des <code>y</code>, l’objet de type <code>data.frame</code> qui contient les valeurs <code>x</code> et <code>y</code>, un vecteur contenant le ou les noms des types de graphiques qui seront produits. Dans le cas des séries temporelles, le paramètre <code>geom</code> prend la valeur de <code>line</code>, ce qui indique que les observations doivent être connectées par une ligne, selon l’ordre des <code>x</code>. Les fonctions <code>ggtitle</code>, <code>xlab</code> et <code>ylab</code> sont des fonctions qui viennent se greffer à la fonction <code>qplot()</code> et qui permettent la paramétrisation du titre, de nom de l’axe des <code>x</code> ainsi que du nom de l’axe des <code>y</code>.</p>
+<pre class="r"><code># Créer un graphique de série temporelle qui utilise uniquement les données de 
+# l&#39;année 2011 (hour_agg$yr==0) en temps dégagé (hour_agg$weathersit==1)
+# La variable d&#39;intérêt est le nombre moyen de locations par heure (mean)
+# L&#39;axe des x représente l&#39;heure de la journée (hr)
+# Les observations doivent être connectées par une ligne (geom = &quot;line&quot;)
+qplot(hr, mean, data = hour_agg[hour_agg$weathersit==1 &amp; hour_agg$yr==0,], 
+  geom = &quot;line&quot;) + 
+  ggtitle(&quot;Évolution du nombre moyen de locations par heure \nen 2011 par temps dégagé&quot;) +
+  xlab(&quot;heure&quot;) + ylab(&quot;nombre moyen de locations&quot;)  # nom des axes</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2015/graphique_temporel_ggplot2_files/figure-html/graphe_ggplot2-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="graphique-genere-en-utilisant-les-fonctions-avancees-du-package-ggplot2" class="section level3">
+<h3>Graphique généré en utilisant les fonctions avancées du package <code>ggplot2</code></h3>
+<p>Le package <a href="http://ggplot2.org/">ggplot2</a> permet aussi de générer des graphiques beaucoup plus complexes que ceux de base pour les séries temporelles. Comme exemple, un graphique contenant un sous-panneau par année et une courbe par type de conditions atmosphériques sera créé à partir du même jeu de données agrégées.</p>
+<p>Cependant, afin de permettre l’affichage du nom des années dans chacun des sous-panneaux qui seront créés, il est nécessaire d’ajouter, au jeu de données agrégées, une colonne contenant le nom de l’année tel que nous désirons qu’il apparaisse sur le panneau.</p>
+<pre class="r"><code># Ajouter une colonne qui contient le nom de l&#39;année au jeu de données agrégées
+hour_agg$year&lt;-factor(hour_agg$yr, labels=c(&quot;2011&quot;, &quot;2012&quot;))
+# Afficher les premières lignes
+kable(hour_agg[1:5,], 
+      caption = &quot;Jeu de données agrégées contenant une nouvelle colonne&quot;) </code></pre>
+<table>
+<caption>(#tab:preparation_graphe_avance_ggplot2)Jeu de données agrégées contenant une nouvelle colonne</caption>
+<thead>
+<tr class="header">
+<th align="right">hr</th>
+<th align="right">weathersit</th>
+<th align="right">yr</th>
+<th align="right">mean</th>
+<th align="right">n</th>
+<th align="right">se</th>
+<th align="left">year</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">47.44400</td>
+<td align="right">250</td>
+<td align="right">2.241871</td>
+<td align="left">2011</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">71.41841</td>
+<td align="right">239</td>
+<td align="right">3.074518</td>
+<td align="left">2012</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">36.33721</td>
+<td align="right">86</td>
+<td align="right">3.110136</td>
+<td align="left">2011</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">56.69697</td>
+<td align="right">99</td>
+<td align="right">4.495364</td>
+<td align="left">2012</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">22.16000</td>
+<td align="right">25</td>
+<td align="right">4.528311</td>
+<td align="left">2011</td>
+</tr>
+</tbody>
+</table>
+<p>Comme pour les graphiques plus simples, c’est la fonction <code>qplot()</code> qui est utilisée pour générer les graphiques complexes. La complexité est ajoutée par l’utilisation de paramètres ainsi que par la greffe de fonctions plus avancées. Pour l’exemple qui suit, les paramètres utilisés de la fonction <code>qplot(x=, y=, data=, geom=, color=)</code> sont identiques à l’exemple précédent à l’exception du dernier paramètre qui représente la variable dont les niveaux seront associés à une ligne de couleur différente sur le graphique. Le graphique généré contiendra donc autant de lignes que de niveaux présents dans la variable.</p>
+<p>Trois nouvelles fonctions viennent se greffer à l’ensemble : <code>facet_grid()</code>, <code>geom_errorbar()</code> et <code>scale_colour_hue()</code>. La première fonction <code>facet_grid()</code> permet de partitionner un graphique en une matrice de panneaux selon la variable passée en argument et de personnaliser les noms donnés à chacun des panneaux. La fonction <code>geom_errorbar()</code> permet d’ajouter une barre d’erreur à chacune des observations du graphique. Les valeurs maximales et minimales que prennent ces barres sont assignées par les paramètres <code>ymax</code> et <code>ymin</code>. La fonction <code>scale_colour_hue()</code> permet de personnaliser la légende ainsi que les couleurs des niveaux présents dans le graphique.</p>
+<pre class="r"><code># Créer un graphique de série temporelle contenant 1 panneau pour chaque année
+# (facet_grid(yr ~ .)) et une courbe de couleur différente par type de condition 
+# atmosphérique (colour=as.character(weathersit))
+# La variable d&#39;intérêt est le nombre moyen de locations par heure (mean)
+# L&#39;axe des x représente l&#39;heure de la journée (hr)
+# Les observations sont connectées par une ligne (geom = &quot;line&quot;)
+qplot(hr, mean, data = hour_agg, geom = &quot;line&quot;, colour=as.character(weathersit)) +
+    facet_grid(year ~ .,             # génère 1 panneau par année avec nom exact 
+        labeller = label_parsed ) +  # de l&#39;année comme identifiant                                         
+    geom_errorbar(aes(ymin=mean - 1.96*se, ymax=mean + 1.96*se), 
+        width=0) + # ajoute une barre d&#39;erreur à chaque observation 
+    scale_colour_hue(&quot;Température&quot;,  # légende avec description personnalisée des niveaux
+        labels = c(&quot;Dégagé&quot;, &quot;Nuage, brume&quot;, &quot;Pluie, neige&quot;)) +
+    ggtitle(&#39;Évolution du nombre moyen de locations par heure&#39;) +  # titre
+    xlab(&quot;heure&quot;) + ylab(&quot;nombre moyen de locations&quot;)   # nom des axes</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2015/graphique_temporel_ggplot2_files/figure-html/graphe_avance_ggplot2-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>Les séries temporelles sont utilisées dans plusieurs domaines scientifiques. En R, l’utilisation de l’objet <code>times-series</code>, par le biais de la fonction <code>ts()</code>, permet de faire afficher les graphiques de séries temporelles selon un format standard prédéfini en utilisant la fonction <code>plot()</code>. La fonction <code>plot()</code> est, en effet, polymorphique, c’est-à-dire que son comportement est spécifique à l’objet passé en paramètre à celle-ci.</p>
+<p>Le package <a href="http://ggplot2.org/">ggplot2</a>, élaboré par Hadley Wickham, permet lui aussi de générer des graphiques de séries temporelles par le biais de la fonction <code>qplot()</code>. De par sa flexibilité, ce package permet de recréer des graphiques ressemblant à ceux générés par les packages de base mais aussi de créer des graphiques beaucoup plus complexes.</p>
+<p>Il existe donc une diversité d’options permettant de générer les graphiques de séries temporelles. Libre à vous d’utiliser celles qui correspondent le mieux à vos besoins.</p>
+</div>
+<div id="references" class="section level2">
+<h2>Références</h2>
+<div id="references-sur-les-graphiques-de-series-temporelles-en-r" class="section level3">
+<h3>Références sur les graphiques de séries temporelles en R</h3>
+<p><a href="http://www.r-bloggers.com/ce-que-je-sais-sur-les-series-temporelles-15/">R-Bloggers : Ce que je sais sur les séries temporelles</a></p>
+</div>
+<div id="references-sur-le-package-ggplot2-et-ses-fonctions" class="section level3">
+<h3>Références sur le package <code>ggplot2</code> et ses fonctions</h3>
+<p>Wickham, H. ggplot2: elegant graphics for data analysis. Springer New York, 2009.</p>
+<p><a href="http://www.sthda.com/french/wiki/ggplot2-facet-diviser-un-graphique-en-plusieurs-panneaux-logiciel-r-et-visualisation-de-donnees">ggplot2 - Diviser un graphique en plusieurs panneaux avec facet_grid()</a></p>
+<p><a href="http://www.statmethods.net/advgraphs/ggplot2.html">ggplot2 - Utilisation de qplot() (en anglais)</a></p>
+<p><a href="http://www.inside-r.org/packages/cran/ggplot2/docs/scale_colour_hue">ggplot2 - Utilisation de la fonction scale_colour_hue() (en anglais)</a></p>
+</div>
+<div id="references-sur-les-packages-utilises" class="section level3">
+<h3>Références sur les packages utilisés</h3>
+<p>Wickham, H et Francois, R (2015). dplyr: A Grammar of Data Manipulation. R package version 0.4.1. <a href="http://CRAN.R-project.org/package=dplyr" class="uri">http://CRAN.R-project.org/package=dplyr</a></p>
+<p>Yihui, X. (2015). knitr: A General-Purpose Package for Dynamic Report Generation in R. R package version 1.9.</p>
+<p>Yihui, X. (2014). knitr: A Comprehensive Tool for Reproducible Research in R. In Victoria Stodden, Friedrich Leisch and Roger D. Peng, editors, Implementing Reproducible Computational Research. Chapman and Hall/CRC. ISBN 978-1466561595</p>
+<p>Yihui, X. (2013). Dynamic Documents with R and knitr. Chapman and Hall/CRC. ISBN 978-1482203530</p>
+</div>
+<div id="references-sur-le-jeu-de-donnees" class="section level3">
+<h3>Références sur le jeu de données</h3>
+<p>Fanaee-T, Hadi, and Gama, Joao (2013). Event labeling combining ensemble detectors and background knowledge. Progress in Artificial Intelligence (2013): pp. 1-15, Springer Berlin Heidelberg, <a href="doi:10.1007/s13748-013-0040-3" class="uri">doi:10.1007/s13748-013-0040-3</a>.</p>
+</div>
+</div>

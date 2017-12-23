@@ -1,0 +1,219 @@
+---
+title: "Manipulations de base sur un jeu de données"
+linkTitle: "dplyr - Manipuler des données"
+weight: 1
+author: "Pascale Aubin et Pierre Gagnon"
+date: "2016-04-07"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \setlength{\OuterFrameSep}{6pt}
+---
+
+
+
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#presentation-des-taches-a-effectuer-et-du-jeu-de-donnees-utilise">Présentation des tâches à effectuer et du jeu de données utilisé</a></li>
+<li><a href="#methodes-de-base-en-r">Méthodes de base en R</a><ul>
+<li><a href="#ajout-de-variables">Ajout de variables</a></li>
+<li><a href="#selection-dobservations">Sélection d’observations</a></li>
+<li><a href="#selection-de-variables">Sélection de variables</a></li>
+</ul></li>
+<li><a href="#alternative-package-dplyr">Alternative: Package <code>dplyr</code></a><ul>
+<li><a href="#fonction-mutate-ajout-de-variables">Fonction mutate : ajout de variables</a></li>
+<li><a href="#fonction-filter-selection-dobservations">Fonction filter: sélection d’observations</a></li>
+<li><a href="#fonction-select-selection-de-variables">Fonction select: sélection de variables</a></li>
+<li><a href="#comparaison-entre-les-methodes-de-base-et-les-fonctions-de-dplyr">Comparaison entre les méthodes de base et les fonctions de <code>dplyr</code></a></li>
+</ul></li>
+</ul>
+</div>
+
+<hr />
+<div id="presentation-des-taches-a-effectuer-et-du-jeu-de-donnees-utilise" class="section level3">
+<h3>Présentation des tâches à effectuer et du jeu de données utilisé</h3>
+<p>Cette fiche a pour but de montrer comment faire des manipulations de base sur un jeu de données en R. Lorsqu’on parle de manipulations de base, ce sont les manipulations qui sont courramment effectuées afin de bien analyser l’information d’un jeu de données comme :</p>
+<ul>
+<li><p>l’ajout de variables</p></li>
+<li><p>la sélection d’observations</p></li>
+<li><p>la sélection de variables</p></li>
+</ul>
+<p>Il existe évidemment des outils dans le package <code>base</code> de R, qui seront présentés dans un premier temps, pour effectuer ces manipulations. Cette fiche détaillera aussi dans un deuxième temps l’utilisation de certaines fonctions du package <code>dplyr</code> qui permettent d’effectuer les mêmes manipulations.</p>
+<p>Afin d’illustrer les différentes manipulations possibles, un même jeu de données sera utilisé tout au long de cette fiche. Il s’agit d’un jeu qui contient toutes les parties de tennis en simple masculin ayant eu lieu lors du tournoi de Wimbledon en 2013. Chaque observation représente une partie. Pour chaque partie, on possède les noms des joueurs qui s’affrontent, les résultats des différents sets et plusieurs statistiques de jeu. Voici les 2 premières observations:</p>
+<pre class="r"><code>head(tennis, n=2)</code></pre>
+<pre><code>##    Player1  Player2 Round Result FNL.1 FNL.2 FSP.1 FSW.1 SSP.1 SSW.1 ACE.1
+## 1 B.Becker A.Murray     1      0     0     3    59    29    41    14     5
+## 2   J.Ward   Y-H.Lu     1      0     1     3    62    77    38    35    18
+##   DBF.1 WNR.1 UFE.1 BPC.1 BPW.1 NPA.1 NPW.1 TPW.1 ST1.1 ST2.1 ST3.1 ST4.1
+## 1     1    26    18     5     1    28    19    NA     4     3     2    NA
+## 2     4    60    28    13     1    27    19    NA     7     4     6     6
+##   ST5.1 FSP.2 FSW.2 SSP.2 SSW.2 ACE.2 DBF.2 WNR.2 UFE.2 BPC.2 BPW.2 NPA.2
+## 1    NA    57    39    43    20    11     2    38    16    10     5    23
+## 2    NA    67    85    33    31    12     3    57    32    15     2    46
+##   NPW.2 TPW.2 ST1.2 ST2.2 ST3.2 ST4.2 ST5.2
+## 1    17    NA     6     6     6    NA    NA
+## 2    39    NA     6     6     7     7    NA</code></pre>
+<blockquote>
+<p>Ce jeu de données possède 114 observations et 42 variables. Les descriptions détaillées des différentes variables du jeu de données se trouvent sur le site: <a href="https://archive.ics.uci.edu/ml/datasets/Tennis+Major+Tournament+Match+Statistics">Tennis Major Tournament Match Statistics Data Set</a></p>
+</blockquote>
+</div>
+<div id="methodes-de-base-en-r" class="section level2">
+<h2>Méthodes de base en R</h2>
+<div id="ajout-de-variables" class="section level3">
+<h3>Ajout de variables</h3>
+<p>Pour ajouter une nouvelle variable dans un <em>data.frame</em>, on peut d’abord penser à utiliser la fonction <code>cbind</code>. Elle permet de reprendre un jeu de données existant et d’y ajouter une ou plusieurs colonnes. On peut aussi simplement réutiliser la fonction <code>data.frame</code> et combiner le <em>data.frame</em> existant et la variable désirée. Par exemple, on veut créer une variable <em>Winner</em> qui contient le nom du gagnant pour chaque partie et l’ajouter au jeu de données «tennis». On ajoute alors une colonne qui contient le nom du gagnant au jeu de données «tennis». Ici, on doit d’abord réaliser une étape intermédiaire à l’aide d’un <code>ifelse</code> pour identifier correctement le gagnant à partir du résultat de la partie contenu dans la variable <em>Result</em>. Si la valeur de <em>Result</em> est 1, le joueur 1 (<em>Player1</em>) a gagné la partie. Les variables <em>Player1</em> et <em>Player2</em> sont converties en format caractère pour éviter d’obtenir des résultats inatendus, puisque ces deux variables sont des facteurs avec des niveaux différents.</p>
+<pre class="r"><code>gagnant &lt;- ifelse(tennis$Result==1,as.character(tennis$Player1),as.character(tennis$Player2))</code></pre>
+<pre class="r"><code>tennis &lt;- cbind(tennis,Winner= gagnant)</code></pre>
+<p>Qui est équivalent à :</p>
+<pre class="r"><code>tennis &lt;- data.frame(tennis,Winner=gagnant)</code></pre>
+<p>Voici l’extraction des variables d’intérêt pour les 5 premières parties:</p>
+<pre class="r"><code>head(tennis[,c(1:4,43)], n=5)</code></pre>
+<pre><code>##     Player1         Player2 Round Result    Winner
+## 1  B.Becker        A.Murray     1      0  A.Murray
+## 2    J.Ward          Y-H.Lu     1      0    Y-H.Lu
+## 3   N.Mahut         J.Hajek     1      1   N.Mahut
+## 4 T.Robredo A.Bogomolov Jr.     1      1 T.Robredo
+## 5   R.Haase       M.Youzhny     1      0 M.Youzhny</code></pre>
+<p>Une autre façon d’ajouter une variable est d’utiliser l’opérateur <code>$</code>. Il suffit d’indiquer avant cet opérateur le nom du <em>data.frame</em> auquel la variable sera ajoutée et après, le nom de la nouvelle variable. Il ne reste qu’à assigner des valeurs à la nouvelle variable ainsi créée.</p>
+<pre class="r"><code>tennis$Winner &lt;- gagnant</code></pre>
+<pre class="r"><code>head(tennis[,c(1:4,43)], n=5)</code></pre>
+<pre><code>##     Player1         Player2 Round Result    Winner
+## 1  B.Becker        A.Murray     1      0  A.Murray
+## 2    J.Ward          Y-H.Lu     1      0    Y-H.Lu
+## 3   N.Mahut         J.Hajek     1      1   N.Mahut
+## 4 T.Robredo A.Bogomolov Jr.     1      1 T.Robredo
+## 5   R.Haase       M.Youzhny     1      0 M.Youzhny</code></pre>
+</div>
+<div id="selection-dobservations" class="section level3">
+<h3>Sélection d’observations</h3>
+<p>On s’intéresse souvent à la conservation des observations pour lesquelles certaines variables prennent des valeurs spécifiques. Il est possible de faire une telle sélection avec des conditions logiques en R. Dans l’exemple du tennis, on s’intéresse aux trois dernières rondes du tournoi, soit les rondes 5, 6 et 7. Cette sélection nécessite l’utilisation de la variable <em>Round</em> qui indique la ronde du tournoi. On peut d’abord extraire du <em>data.frame</em> de départ les observations qui respectent cette condition. L’opérateur <code>%in%</code> permet de vérifier si la valeur d’une variable est comprise dans un ensemble de valeurs. Autrement dit, cela est équivalent à utiliser l’opérateur <code>|</code> (ou logique) en énumérant toutes les égalités possibles désirées. Pour conserver le résultat, on va l’assigner à un nouveau <em>data.frame</em>, ici appelé tennis2.</p>
+<pre class="r"><code>tennis2 &lt;- tennis[tennis$Round==5|tennis$Round==6|tennis$Round==7,]</code></pre>
+<p>qui est équivalent à :</p>
+<pre class="r"><code>tennis2 &lt;- tennis[tennis$Round %in% c(5,6,7),]</code></pre>
+<p>Il est aussi possible d’effectuer cette opération avec la fonction <code>subset</code> qui permet de spéficier une expression de sélection pour un jeu de données.</p>
+<pre class="r"><code>tennis2 &lt;- subset(tennis, subset=Round&gt;=5 )</code></pre>
+</div>
+<div id="selection-de-variables" class="section level3">
+<h3>Sélection de variables</h3>
+<p>Lorsqu’on présente des données, il est préférable de n’inclure que les variables nécessaires. Pour sélectionner les variables désirées, on peut directement énumérer les numéros correspondants aux colonnes voulues. Il est aussi possible d’extraire des colonnes en les nommant dans un vecteur entre les crochets <code>[,]</code> au niveau de la dimension 2 (pour faire référence aux colonnes). Le jeu de données dit final est contenu dans tennis3 :</p>
+<pre class="r"><code>tennis3 &lt;- tennis2[,c(1:3,20:24,38:43)]</code></pre>
+<p>équivalent à :</p>
+<pre class="r"><code>tennis3 &lt;- tennis2[,c(&quot;Player1&quot;, &quot;Player2&quot;, &quot;Round&quot;, &quot;ST1.1&quot;, &quot;ST1.2&quot;, &quot;ST2.1&quot;, &quot;ST2.2&quot;, &quot;ST3.1&quot;, &quot;ST3.2&quot;, &quot;ST4.1&quot;, &quot;ST4.2&quot;, &quot;ST5.1&quot;,&quot;ST5.2&quot;,&quot;Winner&quot;)]</code></pre>
+<p>Voici les observations du jeu final :</p>
+<pre class="r"><code>tennis3</code></pre>
+<pre><code>##        Player1     Player2 Round ST1.1 ST1.2 ST2.1 ST2.2 ST3.1 ST3.2 ST4.1
+## 108 F.Verdasco    A.Murray     5     6     4     6     3     1     6     4
+## 109    L.Kubot  J.Janowicz     5     5     7     4     6     4     6    NA
+## 110   D.Ferrer J.Del Potro     5     2     6     4     6     6     7    NA
+## 111 N.Djokovic   T.Berdych     5     7     6     6     4     6     3    NA
+## 112 J.Janowicz    A.Murray     6     7     6     4     6     4     6     3
+## 113 N.Djokovic J.Del Potro     6     7     5     4     6     7     6     6
+## 114 N.Djokovic    A.Murray     7     4     6     5     7     4     6    NA
+##     ST4.2 ST5.1 ST5.2      Winner
+## 108     6     5     7    A.Murray
+## 109    NA    NA    NA  J.Janowicz
+## 110    NA    NA    NA J.Del Potro
+## 111    NA    NA    NA  N.Djokovic
+## 112     6    NA    NA    A.Murray
+## 113     7     6     3  N.Djokovic
+## 114    NA    NA    NA    A.Murray</code></pre>
+<blockquote>
+<p>Le jeu contient alors 14 des 42 variables et 7 des 114 observations de départ.</p>
+</blockquote>
+</div>
+</div>
+<div id="alternative-package-dplyr" class="section level2">
+<h2>Alternative: Package <code>dplyr</code></h2>
+<p>Les fonctions du package <code>dplyr</code> ont été conçues pour simplifier les manipulations les plus communes que l’on doit appliquer sur un jeu de données. Il s’agit d’une suite du package <code>plyr</code> pour les <strong>data.frame</strong>, d’où le <strong>d</strong>. L’auteur est Hadley Wickham. Pour l’utiliser, il suffit de lancer les commandes suivantes:</p>
+<pre class="r"><code>install.packages(&quot;dplyr&quot;)
+library(dplyr)</code></pre>
+<div id="fonction-mutate-ajout-de-variables" class="section level3">
+<h3>Fonction mutate : ajout de variables</h3>
+<p>La fonction <code>mutate</code> de <code>dplyr</code> permet d’ajouter de nouvelles colonnes qui peuvent être fonction de colonnes déjà existantes. La syntaxe est <code>mutate(.data, ...)</code>.</p>
+<ul>
+<li><code>.data</code> est une table</li>
+<li><code>...</code> sont les expressions désirées pour créer les nouvelles variables</li>
+</ul>
+<p>S’il y a plusieurs expressions qui créent des variables, il est possible de réutiliser les premières variables créées dans les expressions ultérieures. Dans l’exemple, on veut simplement créer la variable <em>Winner</em> donc on peut utiliser la fonction comme ceci (<em>gagnant</em> est le vecteur contenant le nom des gagnants créé précédement) et conserver le résultat dans le jeu tennis2<strong>d</strong> pour <strong>dplyr</strong>:</p>
+<pre class="r"><code>tennis2d &lt;- mutate(tennis,Winner=gagnant)</code></pre>
+<pre class="r"><code>head(tennis2d, n=2)</code></pre>
+<pre><code>##    Player1  Player2 Round Result FNL.1 FNL.2 FSP.1 FSW.1 SSP.1 SSW.1 ACE.1
+## 1 B.Becker A.Murray     1      0     0     3    59    29    41    14     5
+## 2   J.Ward   Y-H.Lu     1      0     1     3    62    77    38    35    18
+##   DBF.1 WNR.1 UFE.1 BPC.1 BPW.1 NPA.1 NPW.1 TPW.1 ST1.1 ST2.1 ST3.1 ST4.1
+## 1     1    26    18     5     1    28    19    NA     4     3     2    NA
+## 2     4    60    28    13     1    27    19    NA     7     4     6     6
+##   ST5.1 FSP.2 FSW.2 SSP.2 SSW.2 ACE.2 DBF.2 WNR.2 UFE.2 BPC.2 BPW.2 NPA.2
+## 1    NA    57    39    43    20    11     2    38    16    10     5    23
+## 2    NA    67    85    33    31    12     3    57    32    15     2    46
+##   NPW.2 TPW.2 ST1.2 ST2.2 ST3.2 ST4.2 ST5.2   Winner
+## 1    17    NA     6     6     6    NA    NA A.Murray
+## 2    39    NA     6     6     7     7    NA   Y-H.Lu</code></pre>
+<p>L’objet R obtenu avec la fonction <code>mutate</code> est de même classe que l’argument <code>.data</code>.</p>
+<pre class="r"><code>class(tennis)==class(tennis2d)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+</div>
+<div id="fonction-filter-selection-dobservations" class="section level3">
+<h3>Fonction filter: sélection d’observations</h3>
+<p>La fonction <code>filter</code> du package <code>dplyr</code> permet de sélectionner des observations (lignes) d’un objet R. La synthaxe de cette fonction est <code>filter(.data, ...)</code>.</p>
+<ul>
+<li><code>.data</code> est une table</li>
+<li><code>...</code> sont les expressions logiques qui permettent de faire la sélection des observations dans la table</li>
+</ul>
+<p>Il s’agit d’une fonction similaire à la fonction <code>subset</code> utilisée plus haut. Par contre, avec la fonction <code>filter</code>, on peut indiquer plusieurs expressions de sélection séparées par des virgules. Pour qu’un observation soit sélectionnée, elle doit répondre à toutes les conditions listées dans <code>...</code>.</p>
+<pre class="r"><code>tennis3d&lt;-filter(tennis2d, Round&gt;=5)</code></pre>
+<p><strong>Attention</strong> : Il y a une fonction <code>filter</code> qui existe déjà dans le package <code>base</code>. Or, le chemin de recherche commence par les packages chargés avec <code>library</code>, donc la fonction utilisée est celle du package <code>dplyr</code>.</p>
+</div>
+<div id="fonction-select-selection-de-variables" class="section level3">
+<h3>Fonction select: sélection de variables</h3>
+<p>La fonction <code>select</code> de <code>dplyr</code> permet de sélectionner les variables d’intérêt. Lorsqu’une variable n’est pas explicitement écrite, la fonction <code>select</code> ne la conserve pas. La synthaxe est <code>select(.data, ...)</code>:</p>
+<ul>
+<li><code>.data</code> est une table</li>
+<li><code>...</code> noms des variables à conserver séparées par des virgules</li>
+</ul>
+<p>De plus, pour conserver toutes les variables excepté une en particulier, on peut utiliser l’opérateur de soustraction <code>-</code> devant la variable à laisser tomber.</p>
+<pre class="r"><code>tennis4d&lt;-select(tennis3d, Player1, Player2, Round, ST1.1, ST1.2, ST2.1, ST2.2, ST3.1, ST3.2, ST4.1, ST4.2, ST5.1,ST5.2, Winner)</code></pre>
+<blockquote>
+<p>Le jeu contient alors 14 variables et 7 observations .</p>
+</blockquote>
+<p>Il existe plusieurs options afin d’alléger l’écriture de la sélection des variables. Ces quelques options supplémentaires sont des arguments compris dans les <code>...</code></p>
+<ul>
+<li><p><code>:</code> pour sélectionner toutes les variables entre 2 variables nommées de part et d’autre du <code>:</code></p></li>
+<li><p>La fonction starts_with() pour sélectionner les variables qui débutent avec la chaîne de caractère mentionnée dans la fonction</p></li>
+<li><p>contains() pour sélectionner les colonnes qui contiennent une chaîne de caractère particulière dans le nom de la variable</p></li>
+<li><p>matches() pour sélectionner les colonnes qui correspondent à une expression</p></li>
+<li><p>one_of() pour sélectionner des colonnes qui sont dans un groupe de noms.</p></li>
+</ul>
+<p>Voici une illustration de certaines de ces options pour alléger ce qui a été écrit plus haut:</p>
+<pre class="r"><code>tennis4d&lt;-select(tennis3d, Player1, Player2, Round,starts_with(&quot;ST&quot;), Winner)</code></pre>
+<pre class="r"><code>tennis4d&lt;-select(tennis3d, Player1, Player2, Round,contains(&quot;ST&quot;), Winner)</code></pre>
+<pre class="r"><code>tennis4d&lt;-select(tennis3d, Player1, Player2, Round,ST1.1:ST5.1, ST1.2:ST5.2, Winner)</code></pre>
+<blockquote>
+<p>Ces trois jeux contiennent tous 14 variables et 7 observations.</p>
+</blockquote>
+</div>
+<div id="comparaison-entre-les-methodes-de-base-et-les-fonctions-de-dplyr" class="section level3">
+<h3>Comparaison entre les méthodes de base et les fonctions de <code>dplyr</code></h3>
+<p>Lorsque les manipulations ne concernent que très peu de conditions ou expressions pour sélectionner les observations ou variables, les deux méthodes sont comparables. Lorsque l’on veut sélectionner des observations selon plusieurs expressions, les fonctions du package <code>dplyr</code> permettent d’alléger l’écriture. Par exemple, l’énumération des conditions de sélection d’observations avec la fonction <code>filter</code> par son utilisation des virgules est moins lourde que l’enchaînement des conditions logiques dans les opérateurs <code>[,]</code> ou dans la fonction subset.</p>
+<p>Lorsqu’on crée plus d’une variable, la fonction <code>mutate</code> nous permet d’écrire toutes les expressions les unes à la suite des autres dans un seul appel. Cette fonction permet aussi d’utiliser les variables créées en premier pour définir les dernières, contrairement à <code>$</code> et <code>cbind</code>. En effet, l’opérateur <code>$</code> nécéssite une assignation pour chacune des variables à créer et <code>cbind</code> ne permet pas d’utiliser les premières variables créées pour définir celles qui sont ultérieures.</p>
+<p>De plus, lors de la sélection des variables, les nombreuses options de la fonction <code>select</code> ne nécessitent pas de spécifier parfaitement les noms de variables à conserver comme lors de l’utilisation des crochets <code>[,]</code>. Bref, les fonctions du package <code>dplyr</code> sont plus légères à écrire et à réviser, car leurs syntaxes ressemblent à une phrase et cela peut permettre à l’utilisateur d’être plus efficace qu’en utilisant les outils du package <code>base</code>. Il faut simplement penser à l’utiliser!</p>
+<div id="bibliographie" class="section level4">
+<h4>Bibliographie</h4>
+<ul>
+<li>Référence pour information générale package <code>dplyr</code> (site web de l’auteur): <a href="http://hadley.nz/index.html" class="uri">http://hadley.nz/index.html</a></li>
+<li>Référence fonction du package <code>dplyr</code>: <a href="https://cran.r-project.org/web/packages/dplyr/dplyr.pdf" class="uri">https://cran.r-project.org/web/packages/dplyr/dplyr.pdf</a></li>
+<li>Références pour les options supplémentaires de la fonction <code>select</code>: <a href="http://genomicsclass.github.io/book/pages/dplyr_tutorial.html" class="uri">http://genomicsclass.github.io/book/pages/dplyr_tutorial.html</a></li>
+</ul>
+</div>
+</div>
+</div>

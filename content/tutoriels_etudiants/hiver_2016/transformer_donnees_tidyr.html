@@ -1,0 +1,317 @@
+---
+title: "Réorganisation des données par concaténation et séparation d'observations"
+linkTitle: "tidyr - Transformer des données"
+weight: 3
+author: "Mohammed Amine Ennajeh et Anas Koubaa"
+date: "2016-05-08"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \setlength{\OuterFrameSep}{6pt}
+---
+
+
+
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#description-du-jeu-de-donnees-utilise">Description du jeu de données utilisé</a></li>
+<li><a href="#concatenationseparation-avec-les-fonctions-de-base-r">Concaténation/séparation avec les fonctions de base R</a><ul>
+<li><a href="#concatenation">Concaténation</a></li>
+<li><a href="#separation">Séparation</a></li>
+</ul></li>
+<li><a href="#le-package-tidyr">Le package {tidyr}</a><ul>
+<li><a href="#concatenationseparation-avec-tidyr">Concaténation/séparation avec {tidyr}</a></li>
+</ul></li>
+<li><a href="#comparaison-des-deux-approches">Comparaison des deux approches</a></li>
+<li><a href="#note-concernant-loperateur">Note concernant l’opérateur <code>%&gt;%</code></a></li>
+<li><a href="#references">Références</a></li>
+</ul>
+</div>
+
+<hr />
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>La concaténation et la séparation d’observations de variables sont deux manipulations courantes dans la réorganisation des données, servant à refaçonner les jeux de données afin de mieux les exploiter.<br />
+La concaténation consiste à rattacher les observations de plusieurs variables, généralement des chaînes de caractères, et les regrouper en une seule variable.<br />
+La séparation consiste par contre à “détacher” l’information contenue dans une variable pour la répartir sur plusieurs autres variables.<br />
+Ces deux manipulations peuvent être réalisées sous R suivant différentes approches. On présentera dans cette fiche deux manières de concaténer/séparer des observations dans un jeu de données :</p>
+<ul>
+<li>Fonctions de base R<br />
+</li>
+<li>Package {tidyr}</li>
+</ul>
+</div>
+<div id="description-du-jeu-de-donnees-utilise" class="section level2">
+<h2>Description du jeu de données utilisé</h2>
+<p>Le jeu de données utilisé est un tableau de détails concernant 114 matchs de tennis en simple masculin du tournoi de Wimbledon 2013, dans lequel on trouve, entre autres, les variables suivantes :</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Variable</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Player1</td>
+<td align="left">Nom du premier joueur</td>
+</tr>
+<tr class="even">
+<td align="left">Player2</td>
+<td align="left">Nom du second joueur</td>
+</tr>
+<tr class="odd">
+<td align="left">Result</td>
+<td align="left">Résultat du match (1 pour la victoire du premier joueur, 0 pour sa défaite)</td>
+</tr>
+<tr class="even">
+<td align="left">STx.1</td>
+<td align="left">Nombre de jeux remportés au set x (1,2,3,4,5) par le premier joueur</td>
+</tr>
+<tr class="odd">
+<td align="left">STx.2</td>
+<td align="left">Nombre de jeux remportés au set x (1,2,3,4,5) par le second joueur</td>
+</tr>
+</tbody>
+</table>
+<p>On commence par importer le jeu de données dans la variable <code>tennis</code> :</p>
+<pre class="r"><code>tennis = read.csv2(file = &quot;Wimbledon-men-2013.csv&quot;, header = TRUE, sep = &quot;,&quot;)</code></pre>
+<p>Puis on crée une nouvelle variable <code>Score</code> à partir de notre jeu de données <code>tennis</code>, contenant la série des scores de sets de chaque match, en commençant par ceux du joueur gagnant :</p>
+<pre class="r"><code>for (i in 1:5){
+  ss &lt;- ifelse(is.na(tennis[[paste0(&quot;ST&quot;, i, &quot;.1&quot;)]]), NA,
+               ifelse(tennis$Result,
+                      paste0(tennis[[paste0(&quot;ST&quot;, i, &quot;.1&quot;)]], &quot;-&quot;, tennis[[paste0(&quot;ST&quot;, i, &quot;.2&quot;)]]),
+                      paste0(tennis[[paste0(&quot;ST&quot;, i, &quot;.2&quot;)]], &quot;-&quot;, tennis[[paste0(&quot;ST&quot;, i, &quot;.1&quot;)]])))
+  Score &lt;- if (i == 1) ss else ifelse(is.na(ss), Score, paste0(Score, &quot;, &quot;, ss))
+}</code></pre>
+<p>Voici quelques observations de nos variables d’interêt :</p>
+<pre><code>##     Player1         Player2 Result ST1.1 ST2.1 ST3.1 ST4.1 ST5.1 ST1.2
+## 1  B.Becker        A.Murray      0     4     3     2    NA    NA     6
+## 2    J.Ward          Y-H.Lu      0     7     4     6     6    NA     6
+## 3   N.Mahut         J.Hajek      1     6     6     6    NA    NA     2
+## 4 T.Robredo A.Bogomolov Jr.      1     6     6     6    NA    NA     2
+## 5   R.Haase       M.Youzhny      0     4     5     5    NA    NA     6
+## 6 M.Gicquel      V.Pospisil      0     3     2     6    NA    NA     6
+##   ST2.2 ST3.2 ST4.2 ST5.2              Score
+## 1     6     6    NA    NA      6-4, 6-3, 6-2
+## 2     6     7     7    NA 6-7, 6-4, 7-6, 7-6
+## 3     4     3    NA    NA      6-2, 6-4, 6-3
+## 4     2     4    NA    NA      6-2, 6-2, 6-4
+## 5     7     7    NA    NA      6-4, 7-5, 7-5
+## 6     6     7    NA    NA      6-3, 6-2, 7-6</code></pre>
+</div>
+<div id="concatenationseparation-avec-les-fonctions-de-base-r" class="section level2">
+<h2>Concaténation/séparation avec les fonctions de base R</h2>
+<div id="concatenation" class="section level3">
+<h3>Concaténation</h3>
+<p>Pour concaténer les éléments de deux vecteurs en un seul, on peut utiliser les fonctions <code>paste</code> ou <code>paste0</code>, qui sont les deux fonctions de base R les plus courantes pour cette action.<br />
+La fonction <code>paste</code> permet de concaténer deux vecteurs (élément par élément), en intercalant une chaîne de caractères passée en argument <code>sep</code> entre chaque deux éléments de même position.<br />
+La fonction <code>paste0</code> est une variante de <code>paste</code>, permettant de concaténer directement deux vecteurs, sans aucun séparateur. Voici des spécifications des deux fonctions inspirées de la documentation R :</p>
+<pre class="r"><code>paste(..., sep, collapse)
+paste0(..., collapse)
+
+# Arguments :  
+# ... : Les objets à concaténer   
+# sep : La chaîne de caractères qui séparera les termes concaténés   
+# collapse : La chaîne de caractères séparant les résultats de concaténation terme à terme, le tout regroupé dans une seule chaîne de caractères (optionnel)</code></pre>
+<p>On voudrait par exemple créer à partir de notre jeu de données <code>tennis</code> un nouveau vecteur <code>opponents</code>, qui contiendra les noms des deux joueurs de chaque match en une seule chaîne de caractères, séparés par un <code>&quot; vs &quot;</code>. La fonction <code>paste</code> pourrait être utilisée à cet effet :</p>
+<pre><code>##     Player1         Player2
+## 1  B.Becker        A.Murray
+## 2    J.Ward          Y-H.Lu
+## 3   N.Mahut         J.Hajek
+## 4 T.Robredo A.Bogomolov Jr.
+## 5   R.Haase       M.Youzhny
+## 6 M.Gicquel      V.Pospisil</code></pre>
+<pre class="r"><code>opponents = paste(tennis$Player1, tennis$Player2, sep = &quot; vs &quot;)</code></pre>
+<p>Le vecteur <code>opponents</code> contiendra donc les noms des deux joueurs du match. En voici un extrait :</p>
+<pre><code>## [1] &quot;B.Becker vs A.Murray&quot;         &quot;J.Ward vs Y-H.Lu&quot;            
+## [3] &quot;N.Mahut vs J.Hajek&quot;           &quot;T.Robredo vs A.Bogomolov Jr.&quot;
+## [5] &quot;R.Haase vs M.Youzhny&quot;         &quot;M.Gicquel vs V.Pospisil&quot;</code></pre>
+</div>
+<div id="separation" class="section level3">
+<h3>Séparation</h3>
+<p>La fonction la plus courante pour la séparation d’un élément en plusieurs sous-éléments est la fonction <code>strsplit</code>, qui ne tient compte que des vecteurs de type caractère.<br />
+Cette fonction permet de séparer les éléments des chaînes de caractères d’un vecteur suivant un ou plusieurs caractères entrés en argument <code>split</code>, et retourne une liste de toutes les sous-chaînes obtenues. En voici quelques spécifications inspirées aussi de la documentation R :</p>
+<pre class="r"><code>strsplit(x, split, fixed, perl, useBytes)
+
+# Arguments :
+# x : Chaîne de caractères à séparer
+# split : Caractères à utiliser pour séparer la chaîne x
+# fixed : Si FALSE, split est interprété comme une expression régulière
+# perl : Si TRUE, split est interprété comme une expression régulière compatible avec perl
+# useBytes : Si TRUE, l&#39;association est effectuée bit par bit plutôt que caractère par caractère</code></pre>
+<p>On veut maintenant séparer chaque série de scores selon cinq vecteurs, lesquels contiendront les scores des sets et, pour les matchs n’ayant pas abouti à cinq sets, des valeurs manquantes pour les sets non disputés.<br />
+On utilise donc la fonction <code>strsplit</code>, en prenant en compte la séparation par virgule entre chaque paire de scores consécutifs.</p>
+<pre class="r"><code>Score_split = strsplit(x = Score, split = &quot;, &quot;)</code></pre>
+<p>On obtient la liste de sous-chaînes des scores de chaque set par match. En voici un extrait :</p>
+<pre><code>## [[1]]
+## [1] &quot;6-4&quot; &quot;6-3&quot; &quot;6-2&quot;
+## 
+## [[2]]
+## [1] &quot;6-7&quot; &quot;6-4&quot; &quot;7-6&quot; &quot;7-6&quot;
+## 
+## [[3]]
+## [1] &quot;6-2&quot; &quot;6-4&quot; &quot;6-3&quot;
+## 
+## [[4]]
+## [1] &quot;6-2&quot; &quot;6-2&quot; &quot;6-4&quot;
+## 
+## [[5]]
+## [1] &quot;6-4&quot; &quot;7-5&quot; &quot;7-5&quot;
+## 
+## [[6]]
+## [1] &quot;6-3&quot; &quot;6-2&quot; &quot;7-6&quot;</code></pre>
+<p>Le problème qui se pose maintenant est que l’on ne peut pas directement affecter nos résultats à des vecteurs de scores par set, car il faudra d’abord compléter les sets non disputés de chaque élément de la liste des matchs par des valeurs manquantes, puis extraire les scores de chaque match (114 vecteurs de longueur 5) aux cinq vecteurs de sets.<br />
+Une manière de contourner ce blocage est de recourir à la fonction <code>mapply</code>, qui permet d’appliquer à la fois une fonction aux éléments d’une ou plusieurs listes.<br />
+On utilisera donc <code>mapply</code> pour completer les sets non disputés par des valeurs manquantes dans un premier temps, et pour concaténer le résultat à la liste <code>Score_split</code> :</p>
+<pre class="r"><code>Score_split_completed = mapply(FUN = c, 
+                               Score_split,
+                               mapply(NA, FUN = rep, 5 - mapply(Score_split, FUN = length)),
+                               SIMPLIFY = FALSE)</code></pre>
+<p>On termine notre manipulation par un regroupement des scores dans un data frame représentant les résultats de chaque set :</p>
+<pre class="r"><code>Score_set = data.frame(matrix(unlist(Score_split_completed), nrow = length(Score_split), byrow = TRUE))
+names(Score_set) = paste0(&quot;ST&quot;, 1:5)</code></pre>
+<p>Voici un aperçu sur la variable <code>Score_set</code> résultante :</p>
+<pre><code>##   ST1 ST2 ST3  ST4  ST5
+## 1 6-4 6-3 6-2 &lt;NA&gt; &lt;NA&gt;
+## 2 6-7 6-4 7-6  7-6 &lt;NA&gt;
+## 3 6-2 6-4 6-3 &lt;NA&gt; &lt;NA&gt;
+## 4 6-2 6-2 6-4 &lt;NA&gt; &lt;NA&gt;
+## 5 6-4 7-5 7-5 &lt;NA&gt; &lt;NA&gt;
+## 6 6-3 6-2 7-6 &lt;NA&gt; &lt;NA&gt;</code></pre>
+<p>Une manière plus simple aurait été d’utiliser la fonction <code>str_split_fixed</code> du package {stringr}. Ce package contient un nombre de fonctions permettant la manipulation simple des chaînes de caractères.<br />
+On aurait donc pu séparer la variable <code>Score</code> comme suit :</p>
+<pre class="r"><code>library(stringr)
+Score_split_stringr = str_split_fixed(string = Score, pattern = &quot;, &quot;, n = 5)
+Score_split_stringr[Score_split_stringr == &quot;&quot;] = NA
+colnames(Score_split_stringr) = paste0(&quot;ST&quot;, 1:5)</code></pre>
+<pre><code>##      ST1   ST2   ST3   ST4   ST5
+## [1,] &quot;6-4&quot; &quot;6-3&quot; &quot;6-2&quot; NA    NA 
+## [2,] &quot;6-7&quot; &quot;6-4&quot; &quot;7-6&quot; &quot;7-6&quot; NA 
+## [3,] &quot;6-2&quot; &quot;6-4&quot; &quot;6-3&quot; NA    NA 
+## [4,] &quot;6-2&quot; &quot;6-2&quot; &quot;6-4&quot; NA    NA 
+## [5,] &quot;6-4&quot; &quot;7-5&quot; &quot;7-5&quot; NA    NA 
+## [6,] &quot;6-3&quot; &quot;6-2&quot; &quot;7-6&quot; NA    NA</code></pre>
+</div>
+</div>
+<div id="le-package-tidyr" class="section level2">
+<h2>Le package {tidyr}</h2>
+<p>Le package a été créé par Hadley Wickham, la première fois en juillet 2014, et a subi plusieurs modifications depuis. La dernière version 0.4.1 de ce package est disponible sur le site <a href="https://cran.r-project.org/web/packages/tidyr/index.html" class="uri">https://cran.r-project.org/web/packages/tidyr/index.html</a></p>
+<div id="concatenationseparation-avec-tidyr" class="section level3">
+<h3>Concaténation/séparation avec {tidyr}</h3>
+<p>Les manipulations faites auparavant peuvent être effectuées à l’aide des fonctions offertes par le package <code>tidyr</code> de R. Ce package contient plusieurs fonctions utiles et pratiques pour arranger un jeu de données, afin de faciliter aussi bien la réorganisation et le remaniement des données en changeant la disposition des ces dernières, que la fusion et l’extraction d’observations.</p>
+<p>Les deux propriétés importantes des jeux de données ordonnés sont :</p>
+<ul>
+<li>Chaque colonne est une variable.<br />
+</li>
+<li>Chaque ligne est une observation.</li>
+</ul>
+<p>Pour l’installation du dit package il faut soumettre l’instruction suivante:</p>
+<pre class="r"><code>install.packages(&quot;tidyr&quot;)</code></pre>
+<p>Pour appeler le package :</p>
+<pre class="r"><code>library(tidyr)</code></pre>
+<div id="la-fonction-unite" class="section level4">
+<h4>La fonction <code>unite</code></h4>
+<p>La fonction qui nous interesse est <code>unite</code>, cette dernière permet de concaténer plusieurs colonnes d’un jeu de données en une seule colonne, ce qui s’avére très pratique en termes de lecture et d’affichage de données.</p>
+<pre class="r"><code>unite(data, col, ..., sep, remove)</code></pre>
+<p>On trouve dans la documentation R les détails de ces arguments :</p>
+<pre class="r"><code>#  data   : Le data frame qui contient les colonnes qu&#39;on veut concaténer.
+#   col   : Le nom de la nouvelle colonne à créer.
+#   ...   : Les noms des colonnes à concaténer.  
+#   sep   : Le séparateur à utliser entre le contenu des variables à concaténer.
+#  remove : Si TRUE, les colonnes concaténées n&#39;apparaissent pas dans notre data frame.</code></pre>
+<p>Voici un exemple de l’utilisation de la fonction <code>unite</code> : on va concaténer les deux premières colonnes <code>Player1</code> et <code>Player2</code> du jeu de données <code>tennis</code> en utilisant le séparateur <code>&quot; vs &quot;</code>.</p>
+<pre class="r"><code>opponents = unite(tennis, opponents, 1:2, sep=&quot; vs &quot;, remove=FALSE)</code></pre>
+<p>On peut affecter d’autres fonctions à l’argument …, à savoir les fonctions <code>num_range</code> ou <code>matches</code> du package dplyr (à charger préalablement) :</p>
+<pre class="r"><code>library(dplyr)
+
+opponents = unite(tennis, opponents, num_range(&quot;Player&quot;, 1:2), sep = &quot; vs &quot;)
+# num_range : permet de sélectionner une plage de variables à la fois.
+  
+opponents = unite(tennis, opponents, matches(&quot;Player&quot;), sep = &quot; vs &quot;)
+# matches(&quot;Player&quot;) : selectionne toutes les variables dont le nom contient l&#39;expression &quot;Player&quot;.</code></pre>
+<p>Pour davantage d’informations sur l’utilisation de ces options, une documentation plus détaillée sur la fonction <code>select</code> du package {dplyr} figure dans la documentation R.</p>
+<pre class="r"><code>help(select)</code></pre>
+</div>
+<div id="la-fonction-separate" class="section level4">
+<h4>La fonction <code>separate</code></h4>
+<p>La fonction <code>separate</code> permet de diviser une colonne en plusieurs colonnes. Cette fonction, à l’inverse des manœuvres avec fonctions de base R, permet d’effectuer cette tâche en une seule étape sans avoir recours à un traitement préalable. Ainsi on s’apercoit de l’utilité de cette fonction qui nous permet de manipuler les jeux de données avec subtilité.</p>
+<pre class="r"><code>separate(data, col, into, sep, remove, convert, extra, fill)</code></pre>
+<p>Les détails des arguments, inspiré de la documentation R, sont les suivants:</p>
+<pre class="r"><code># data    : data frame.
+# col     : la colonne à séparer.
+# into    : les noms de nouvelles colonnes éclatées crées.
+# sep     : la chaîne de caractères de séparation ou le nombre représentant la position dans laquelle la séparation sera effectuée. La valeur par défaut est  &quot;_&quot;.
+# remove  : Si TRUE alors on supprime la colonne à séparer du jeu de données.  
+# convert : Si TRUE alors elle transformera automatiquement les valeurs en un type logique, numerique, complexe ou facteur selon ce qui a été spécifié.
+# extra   : Si le contenu de la variable à séparer est plus grand que le nombre des nouvelles colonnes crées.
+#     Elle prend trois valeurs possibles : 
+#     -&quot;warn&quot;( valeur par défault) : émet un message d&#39;alerte et omet les valeurs en extra
+#     -&quot;drop&quot; : omet les valeurs en extra sans émettre de message d&#39;alerte.
+#     -&quot;merge&quot; : sépare au plus length(into) fois.
+# fill    : Si le contenu de la variable à séparer ne suffit pas pour remplir les champs des colonnes crées. 
+#     Elle prend trois valeurs possibles : 
+#     -&quot;warn&quot;(valeur par défault) : émet un message d&#39;alerte et remplit les colonnes partant de droite.
+#     -&quot;right&quot; : complète l&#39;insuffisance avec des valeurs manquantes en partant de droite.
+#     -&quot;left&quot; : complète l&#39;insuffisance avec des valeurs manquantes en partant de gauche.</code></pre>
+<p>Ainsi, dans notre cas, on va séparer la variable <code>Score</code> en cinq variables contenant chacune le résultat d’un set, en complétant les valeurs manquantes par des <code>NA</code> grâce à l’argument <code>fill</code>. Voici un aperçu des variables d’intérêt du nouveau jeu de données :</p>
+<pre class="r"><code>Tennis = separate(cbind(tennis,Score), col = Score, into = sprintf(&quot;ST%d&quot;,1:5), 
+                  sep=&#39;, &#39;, fill = &quot;right&quot;, remove = FALSE)
+head(Tennis)[c(&quot;Score&quot;, paste0(&quot;ST&quot;,1:5))]</code></pre>
+<pre><code>##                Score ST1 ST2 ST3  ST4  ST5
+## 1      6-4, 6-3, 6-2 6-4 6-3 6-2 &lt;NA&gt; &lt;NA&gt;
+## 2 6-7, 6-4, 7-6, 7-6 6-7 6-4 7-6  7-6 &lt;NA&gt;
+## 3      6-2, 6-4, 6-3 6-2 6-4 6-3 &lt;NA&gt; &lt;NA&gt;
+## 4      6-2, 6-2, 6-4 6-2 6-2 6-4 &lt;NA&gt; &lt;NA&gt;
+## 5      6-4, 7-5, 7-5 6-4 7-5 7-5 &lt;NA&gt; &lt;NA&gt;
+## 6      6-3, 6-2, 7-6 6-3 6-2 7-6 &lt;NA&gt; &lt;NA&gt;</code></pre>
+</div>
+</div>
+</div>
+<div id="comparaison-des-deux-approches" class="section level2">
+<h2>Comparaison des deux approches</h2>
+<p>Les fonctions de base R, dont on a présenté quelques unes dans cette fiche, sont généralement suffisantes pour réaliser des concaténations ou des séparations de données. Toutefois, les manipulations utilisant les fonctions de base R présentent des difficultés en termes d’efficience et de lisibilité du code.<br />
+La motivation derrière la création du package {tidyr} a été de rendre le réarrangement de données plus rapide et efficace, en particulier pour la création de nouvelles variables à partir de données concaténées ou séparées.<br />
+Comme on a vu dans la présente fiche, les deux fonctions <code>unite</code> et <code>separate</code> se sont montrées d’une grande utilité, puisqu’on a aboutit au résultat voulu avec un traitement moindre (pratiquement une ligne de code par manipulation). En effet on peut, en plus de la concaténation / séparation, à la fois désigner les nouvelles variables à créer, choisir de garder ou non la/les variable(s) source, de convertir ou non les données réarrangées, et déterminer quels objets remplaceront les valeurs manquantes, ce qui aurait coûté un traitement supplémentaire avec les fonctions de base R.<br />
+Le seul incovéniant par rapport aux fonctions de base R, qu’on reprocherait d’ailleurs à toute fonction n’appartenant pas à ce dernier, est l’indisponibilité par défaut sur R ou RStudio ; si par malheur on se retrouve quelque part sans connexion internet pour télécharger le package…</p>
+</div>
+<div id="note-concernant-loperateur" class="section level2">
+<h2>Note concernant l’opérateur <code>%&gt;%</code></h2>
+<p>L’opérateur <code>%&gt;%</code> passe l’objet se trouvant à gauche comme premier argument de la fonction se trouvant à droite, cet opérateur permet d’économiser du temps et de rendre le code plus lisible quand il s’agit d’imbriquer des fonctions dans d’autres.<br />
+Pour illustrer l’utilité de cet opérateur, on va essayer de séparer notre variable <code>Score</code>, puis d’extraire ces variables éclatées et afficher les trois premières lignes en appliquant simultanément les fonctions <code>separate</code>, <code>select</code> et <code>head</code>.<br />
+Avant d’appliquer la fonction <code>select</code> il faut d’abord faire appel au package {dplyr}.<br />
+L’utilisation de cet opérateur dans notre cas se fait de la manière suivante :</p>
+<pre class="r"><code>library(dplyr)
+
+cbind(tennis,Score) %&gt;% 
+  separate(Score, into = sprintf(&quot;ST%d&quot;,1:5), sep=&#39;, &#39;, fill=&quot;right&quot; ,remove=FALSE) %&gt;%
+  select(num_range(&quot;ST&quot;,1:5)) %&gt;%
+  head(3)</code></pre>
+<pre><code>##   ST1 ST2 ST3  ST4  ST5
+## 1 6-4 6-3 6-2 &lt;NA&gt; &lt;NA&gt;
+## 2 6-7 6-4 7-6  7-6 &lt;NA&gt;
+## 3 6-2 6-4 6-3 &lt;NA&gt; &lt;NA&gt;</code></pre>
+</div>
+<div id="references" class="section level2">
+<h2>Références</h2>
+<ul>
+<li><p>Documentation sur les fonctions <code>paste</code> et <code>paste0</code>: <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/paste.html" class="uri">https://stat.ethz.ch/R-manual/R-devel/library/base/html/paste.html</a></p></li>
+<li><p>Package {stringr} : <a href="https://cran.r-project.org/web/packages/stringr/stringr.pdf" class="uri">https://cran.r-project.org/web/packages/stringr/stringr.pdf</a></p></li>
+<li><p>Documentation officielle du package {tidyr} <a href="https://cran.r-project.org/web/packages/tidyr/tidyr.pdf" class="uri">https://cran.r-project.org/web/packages/tidyr/tidyr.pdf</a></p></li>
+<li><p>Documentation plus détaillée : <a href="https://rpubs.com/bradleyboehmke/data_wrangling" class="uri">https://rpubs.com/bradleyboehmke/data_wrangling</a></p></li>
+<li><p>Pour les fans des vidéos : <a href="https://www.rstudio.com/resources/webinars/data-wrangling-with-r-and-rstudio/" class="uri">https://www.rstudio.com/resources/webinars/data-wrangling-with-r-and-rstudio/</a></p></li>
+<li><p>Une fiche résumée des fonctions de {dplyr} et {tidyr} : <a href="https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf" class="uri">https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf</a></p></li>
+<li><p>La fonction <code>select</code> : <a href="http://www.rdocumentation.org/packages/dplyr/functions/select" class="uri">http://www.rdocumentation.org/packages/dplyr/functions/select</a></p></li>
+</ul>
+</div>

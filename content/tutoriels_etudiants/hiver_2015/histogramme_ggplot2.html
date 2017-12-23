@@ -1,0 +1,247 @@
+---
+title: "Histogramme et courbe de densité de Kernel"
+linkTitle: "ggplot2 - Histogramme et densité Kernel"
+weight: 3
+author: "Megbe Karamoko et Ibrahima Ousmane Ida"
+date: "2015-04-13"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \setlength{\OuterFrameSep}{6pt}
+---
+
+
+
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#presentation-de-type-de-graphique">1. Présentation de type de graphique</a><ul>
+<li><a href="#histogramme">1.1. Histogramme</a></li>
+<li><a href="#courbe-de-densite-de-kernel">1.2. Courbe de densité de Kernel</a></li>
+<li><a href="#application-aux-donnees">1.3. Application aux données</a></li>
+<li><a href="#presentation-des-donnees">1.4. Présentation des données</a></li>
+</ul></li>
+<li><a href="#histogramme-et-courbe-de-densite-avec-des-fonctions-r-de-base">2. Histogramme et Courbe de densité avec des fonctions R de base</a><ul>
+<li><a href="#histogramme-avec-des-fonctions-r-de-base">2.1 Histogramme avec des fonctions R de base</a></li>
+<li><a href="#courbe-de-densite-avec-des-fonctions-r-de-base">2.2 Courbe de densité avec des fonctions R de base</a></li>
+<li><a href="#surperposition-de-lhistogramme-et-la-densite-de-kernel">2.3 Surperposition de l’histogramme et la densité de kernel</a></li>
+</ul></li>
+<li><a href="#histogramme-et-courbe-de-densite-avec-le-package-ggplot2">3. Histogramme et courbe de densité avec le package ggplot2</a><ul>
+<li><a href="#histogramme-avec-la-fonction-ggplot">3.1 Histogramme avec la fonction ggplot</a></li>
+<li><a href="#courbe-de-densite-avec-la-fonction-ggplot">3.2 Courbe de densité avec la fonction ggplot</a></li>
+</ul></li>
+<li><a href="#graphique-avance-avec-ggplot2">4. Graphique avancé avec ggplot2</a></li>
+<li><a href="#references">Références:</a></li>
+</ul>
+</div>
+
+<hr />
+<div id="presentation-de-type-de-graphique" class="section level2">
+<h2>1. Présentation de type de graphique</h2>
+<div id="histogramme" class="section level3">
+<h3>1.1. Histogramme</h3>
+<p>En analyse des données, il est opportun de faire des représentations graphiques des données. Cela nous donne une idée de la forme des distributions, des statistiques de localisation (moyenne, écart-type, …), des valeurs aberrantes, etc. L’une des représentations courantes est l’histogramme. C’est un outil d’exploration qui montre la distribution des données groupées en un ensemble de rectangles (ou intervalles). Chaque rectangle de l’histogramme représente une classe de données et sa base correspond à la longueur de l’intervalle et la surface du rectangle traduit la fréquence de la classe pour une représentation avec fréquence en ordonnée ou la proportion pour une représentation avec la probabilité en ordonnée. Le nombre de classes a un impact important sur le graphique de l’histogramme des données. Ce nombre peut se calculer selon des règles. Les plus utilisées sont: règle de Sturges, règle de Scott et règle de Freedman-Diaconis. Les logiciels statistiques utilisent par défaut la règle de Sturges.</p>
+</div>
+<div id="courbe-de-densite-de-kernel" class="section level3">
+<h3>1.2. Courbe de densité de Kernel</h3>
+<p>En statistique, l’estimation par noyau (ou encore courbe de densité de Kernel) est une méthode non paramétrique d’estimation de la densité de probabilité d’une variable aléatoire. Elle est relative à l’histogramme; elle permet de représenter un ensemble de données. En effet, la densité de Kernel offre une possibilité d’estimer la distribution sur des données. En d’autres termes, elle estime la fréquence sur ces données.<br />
+La courbe de densité de Kernel constitue alors la représentation en forme de ligne lisse de cette distribution estimée sur les données. La forme de la courbe dépend fortement du paramètre de lissage (appelé en anglais bandwidth ou window width) ou encore le type du noyau. Parmi les types du noyau, nous pouvons citer entre autres le noyau Epanechnikov, le noyau Gaussien, le noyau triangulaire, le noyau rectangulaire ou uniforme, etc. La plupart des logiciels statistiques ont par défaut le noyau gaussien. C’est ce noyau que nous allons utiliser par la suite pour l’estimation de la densité.</p>
+</div>
+<div id="application-aux-donnees" class="section level3">
+<h3>1.3. Application aux données</h3>
+<p>Notre démonstration va consister à produire d’abord un graphique simple en utilisant des fonctions graphiques de base en R accompagné d’explications, ensuite un graphique simple avec des fonctions du package ggplot2 accompagné d’explications et finalement un graphique avancé en utilisant des fonctions du package ggplot2 accompagné d’explications.</p>
+</div>
+<div id="presentation-des-donnees" class="section level3">
+<h3>1.4. Présentation des données</h3>
+<p>Nous allons utiliser les données du fichier hour.csv de Bike Sharing Dataset téléchargeable sur le UCI Machine Learning Repository à l’adresse suivante : <a href="https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset" class="uri">https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset</a>. Il s’agit de données concernant des nombres de locations de vélos par heure provenant d’un système de location de vélos dans la ville de Washington D.C. aux États-Unis. Plus précisément, nous nous intéressons aux données sur le nombre de locations effectuées entre 17h et 18h en 2011 et 2012.</p>
+<pre class="r"><code># Manipulation des données 
+# 1. Lecture du fichier de la table &quot;hour.csv&quot; des données
+ data_base &lt;- read.csv(&quot;hour.csv&quot;, header = TRUE, sep = &quot;,&quot;) </code></pre>
+<pre class="r"><code># 2. Extraction de la partie des données pour le travail,
+# c&#39;est à dire les données sur le nombre de locations entre 17h et 18h en 2011 et 2012.
+données &lt;- data_base[which(data_base$hr == 17), ]
+# 3. Structure des données.Cela permet de voir le type des variables d&#39;interêt  
+str(données) </code></pre>
+<pre><code>## &#39;data.frame&#39;:    730 obs. of  17 variables:
+##  $ instant   : int  18 41 63 86 109 132 155 179 203 227 ...
+##  $ dteday    : Factor w/ 731 levels &quot;2011-01-01&quot;,&quot;2011-01-02&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
+##  $ season    : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ yr        : int  0 0 0 0 0 0 0 0 0 0 ...
+##  $ mnth      : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ hr        : int  17 17 17 17 17 17 17 17 17 17 ...
+##  $ holiday   : int  0 0 0 0 0 0 0 0 0 0 ...
+##  $ weekday   : int  6 0 1 2 3 4 5 6 0 1 ...
+##  $ workingday: int  0 0 1 1 1 1 1 0 0 1 ...
+##  $ weathersit: int  2 1 1 1 1 1 2 1 1 1 ...
+##  $ temp      : num  0.44 0.34 0.24 0.28 0.24 0.22 0.2 0.16 0.18 0.2 ...
+##  $ atemp     : num  0.439 0.333 0.227 0.273 0.227 ...
+##  $ hum       : num  0.82 0.57 0.3 0.48 0.38 0.51 0.37 0.37 0.37 0.4 ...
+##  $ windspeed : num  0.284 0.194 0.224 0.224 0.194 ...
+##  $ casual    : int  15 7 11 10 4 9 9 5 3 4 ...
+##  $ registered: int  52 58 146 202 186 163 178 64 59 174 ...
+##  $ cnt       : int  67 65 157 212 190 172 187 69 62 178 ...</code></pre>
+<p>Nos variables d’interêt sont <code>cnt</code>, <code>yr</code>, <code>hr</code> et <code>weathersit</code>. La variable <code>yr</code> concerne les années. Elle est de type entier et prend la valeur 0 pour 2011 et 1 pour 2012. Nous allons la rendre en facteur avec les niveaux <code>2011</code> et <code>2012</code>.</p>
+<pre class="r"><code>données$yr &lt;- as.factor(données$yr)
+levels(données$yr) &lt;- c(&quot;2011&quot;, &quot;2012&quot;)</code></pre>
+<p>La variable <code>weathersit</code> contient les climats. Nous allons la renommer <code>Température</code>; elle est de type entier et prend les valeurs; 1: clair, partiellement nuageux, 2: brume + nuageux, brume + Peu de nuages, 3: neige légère, Pluie + orage + Peu de nuages, pluie + Éclaircies.</p>
+<p>Nous allons la rendre en facteur avec les niveaux respectifs <code>Dégagé</code>, <code>Nuage, brume</code>, <code>Pluie, neige</code>.</p>
+<pre class="r"><code>colnames(données)[which(colnames(données) == &quot;weathersit&quot;)] &lt;- &quot;Température&quot;
+données$Température &lt;- as.factor(données$Température)
+levels(données$Température) &lt;- c(&quot;Dégagé&quot;, &quot;Nuage, brume&quot;, &quot;Pluie, neige&quot;)</code></pre>
+<p>À ce stade, nos données sont prêtes pour être exploitées adéquatement selon nos besoins.</p>
+<pre class="r"><code>str(données)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    730 obs. of  17 variables:
+##  $ instant    : int  18 41 63 86 109 132 155 179 203 227 ...
+##  $ dteday     : Factor w/ 731 levels &quot;2011-01-01&quot;,&quot;2011-01-02&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
+##  $ season     : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ yr         : Factor w/ 2 levels &quot;2011&quot;,&quot;2012&quot;: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ mnth       : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ hr         : int  17 17 17 17 17 17 17 17 17 17 ...
+##  $ holiday    : int  0 0 0 0 0 0 0 0 0 0 ...
+##  $ weekday    : int  6 0 1 2 3 4 5 6 0 1 ...
+##  $ workingday : int  0 0 1 1 1 1 1 0 0 1 ...
+##  $ Température: Factor w/ 3 levels &quot;Dégagé&quot;,&quot;Nuage, brume&quot;,..: 2 1 1 1 1 1 2 1 1 1 ...
+##  $ temp       : num  0.44 0.34 0.24 0.28 0.24 0.22 0.2 0.16 0.18 0.2 ...
+##  $ atemp      : num  0.439 0.333 0.227 0.273 0.227 ...
+##  $ hum        : num  0.82 0.57 0.3 0.48 0.38 0.51 0.37 0.37 0.37 0.4 ...
+##  $ windspeed  : num  0.284 0.194 0.224 0.224 0.194 ...
+##  $ casual     : int  15 7 11 10 4 9 9 5 3 4 ...
+##  $ registered : int  52 58 146 202 186 163 178 64 59 174 ...
+##  $ cnt        : int  67 65 157 212 190 172 187 69 62 178 ...</code></pre>
+</div>
+</div>
+<div id="histogramme-et-courbe-de-densite-avec-des-fonctions-r-de-base" class="section level2">
+<h2>2. Histogramme et Courbe de densité avec des fonctions R de base</h2>
+<div id="histogramme-avec-des-fonctions-r-de-base" class="section level3">
+<h3>2.1 Histogramme avec des fonctions R de base</h3>
+<p>La principale fonction de base permettant de construire l’histogramme d’un vecteur d’observations en R est la fonction <code>hist</code>. Elle comporte plusieurs arguments permettant d’ajouter des détails à l’histogramme ou spécifier le type de fréquences (simples ou relatives) qui seront utilisées. Parmi ceux-ci, il y a notamment les arguments: <code>breaks</code> pour le nombre de classes, <code>freq</code> pour une représentation de fréquence en ordonnée,<code>probability</code> pour une représentation de probabilité en ordonnée, <code>main</code> pour le titre, <code>xlab</code> pour le nom de l’axe des abscisses, <code>ylab</code> pour le nom de l’axe des ordonnées, etc.</p>
+<p>La commande ci-dessous permet de représenter l’histogramme de la distribution du nombre de locations effectuées entre 17 h et 18 h en 2011 pour le climat dégagé.</p>
+<pre class="r"><code>hist(données[données$yr == &quot;2011&quot; &amp; données$Température == &quot;Dégagé&quot;, &quot;cnt&quot;])</code></pre>
+<p>Nous allons ajouter progressivement les arguments <code>freq</code>, <code>main</code>, <code>xlab</code>, <code>ylab</code> à l’histogramme.</p>
+<p>On peut choisir de construire l’histogramme avec des fréquences relatives au lieu des fréquences simples grâce à l’argument <code>freq</code>.</p>
+<pre class="r"><code>hist(données[données$yr == &quot;2011&quot; &amp; données$Température == &quot;Dégagé&quot;, &quot;cnt&quot;], breaks = 13,
+     freq = FALSE)</code></pre>
+<p>Pour donner un titre à l’histogramme et nommer les axes, nous allons utiliser les arguments <code>main</code>, <code>xlab</code> et <code>ylab</code>.</p>
+<pre class="r"><code>hist(données[données$yr == &quot;2011&quot; &amp; données$Température == &quot;Dégagé&quot;, &quot;cnt&quot;],
+     breaks = 13, freq = FALSE, main = &quot;Densité empirique du nombre de 
+     locations entre 17h et 18h en 2011 par temps dégagé&quot;, 
+ xlab = &quot;nombre de locations entre 17h et 18h&quot;, ylab = &quot;densité&quot;)</code></pre>
+</div>
+<div id="courbe-de-densite-avec-des-fonctions-r-de-base" class="section level3">
+<h3>2.2 Courbe de densité avec des fonctions R de base</h3>
+<p>La fonction <code>density</code> de R de base permet de calculer la densité de Kernel pour estimer la distribution sur des données.</p>
+<p>Pour illustrer cela, nous allons calculer la densité du nombre de locations en 2011 par climat dégagé par la commande suivante:</p>
+<pre class="r"><code>densite &lt;- density(données[données$yr == &quot;2011&quot; &amp; données$Température == &quot;Dégagé&quot;, &quot;cnt&quot;])
+plot(densite)</code></pre>
+</div>
+<div id="surperposition-de-lhistogramme-et-la-densite-de-kernel" class="section level3">
+<h3>2.3 Surperposition de l’histogramme et la densité de kernel</h3>
+<p>Représentons sur le même graphique l’histogramme et la courbe de densité à l’aide de la fonction <code>lines</code>.</p>
+<pre class="r"><code>hist(données[données$yr == &quot;2011&quot; &amp; données$Température == &quot;Dégagé&quot;, &quot;cnt&quot;], breaks = 13,
+     freq = FALSE, main = &quot;Densité empirique du nombre de locations entre 17h et 18h en
+     2011 par temps dégagé&quot;, 
+     xlab = &quot;nombre de locations entre 17h et 18h&quot;, ylab = &quot;densité&quot;)
+densite &lt;- density(données[données$yr == &quot;2011&quot; &amp; données$Température == &quot;Dégagé&quot;, &quot;cnt&quot;])
+lines(densite)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2015/histogramme_ggplot2_files/figure-html/unnamed-chunk-11-1.png" width="864" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="histogramme-et-courbe-de-densite-avec-le-package-ggplot2" class="section level2">
+<h2>3. Histogramme et courbe de densité avec le package ggplot2</h2>
+<p>L’histogramme et la courbe de densité représentés précédemment peuvent facilement être reproduits en utilisant des fonctions du package ggplot2. Cette reproduction peut être scindée en deux étapes: une première étape pour dessiner l’histogramme et la seconde pour représenter la courbe de densité. Dans ggplot2, nous retenons deux méthodes pour représenter les graphiques notamment avec les fonctions <code>qplot</code> et <code>ggplot</code>. Ces fonctions définissent les parcelles dédiées à la représentation graphique. La méthode avec qplot offre une rapidité de programmation et une utilisation interactive. Cependant, la fonction ggplot est plus complète en syntaxe. Elle est plus facile à utiliser pour les personnes déjà familières avec les fonctions graphiques R de base. Pour illustrer, les commandes suivantes permettent de produire deux histogrammes, l’un avec la fonction <code>qplot</code> et l’autre avec la fonction <code>ggplot</code>:</p>
+<pre class="r"><code># Il faut tout d&#39;abord charger le package ggplot2
+library(ggplot2)
+qplot(cnt, data = données, geom = &quot;histogram&quot;)</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2015/histogramme_ggplot2_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(données, aes(x = cnt)) + geom_histogram()</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2015/histogramme_ggplot2_files/figure-html/unnamed-chunk-12-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Les deux histogrammes précédents sont produits avec les paramètres par défaut de ggplot2. Ils permettent simplement de montrer le résultat que donnent les fonctions <code>qplot</code> et <code>ggplot</code>. Mais, dans la suite du travail, toutes représentations graphiques seront faites avec la fonction <code>ggplot</code>.</p>
+<div id="histogramme-avec-la-fonction-ggplot" class="section level3">
+<h3>3.1 Histogramme avec la fonction ggplot</h3>
+<p>La fonction <code>ggplot</code> du package ggplot2 permet de produire une zone graphique à laquelle on peut ajouter des couches graphiques. La fonction qui sert à ajouter une couche d’histogramme est la fonction <code>geom_histogram</code>. Cette dernière comprend des arguments tels que <code>stat</code>, <code>fill</code>, <code>position</code>, <code>linetype</code>, <code>size</code>, <code>colour</code>, etc. qui permettent de définir les caractéristiques de l’histogramme et de lui ajouter des détails pour l’améliorer.</p>
+<p>Créons la zone graphique avec la fonction <code>ggplot</code> et ses deux arguments <code>data</code> et <code>aes</code> permettent de préciser les données qui seront utilisées et la variable à représenter.</p>
+<pre class="r"><code># Création de la zone graphique. 
+zone &lt;- ggplot(données[données$yr == &quot;2011&quot; &amp; données$Température == &quot;Dégagé&quot;, ], 
+               aes(x = cnt)) </code></pre>
+<p>Nous allons ajouter la couche de l’histogramme avec la fonction <code>geom_histogram</code>. L’argument <code>colour</code> donne la possibilité de choisir la couleur des lignes des rectangles de l’histogramme, <code>fill</code> la couleur de remplissage et <code>binwidth</code> la largeur des rectangles. L’argument <code>aes</code> spécifie le type de fréquences utilisées.</p>
+<p><strong>Note</strong>: La fonction <code>theme_classic()</code> permet d’obtenir un fond graphique classique, c’est-à-dire un fond blanc sans quadrillage.</p>
+<pre class="r"><code>zone &lt;- ggplot(données[données$yr == &quot;2011&quot;&amp;données$Température == &quot;Dégagé&quot;, ],
+               aes(x = cnt)) 
+zone + geom_histogram(aes(y = ..density..), colour = &quot;black&quot;, fill = &quot;white&quot;, 
+                      binwidth = 50) + theme_classic()</code></pre>
+<p>Nous allons maintenant ajouter un titre au graphique et nommer les axes avec la fonction <code>labs</code>.</p>
+<pre class="r"><code>zone &lt;- ggplot(données[données$yr == &quot;2011&quot; &amp; données$Température == &quot;Dégagé&quot;, ],
+               aes(x = cnt)) 
+zone + geom_histogram(aes(y = ..density..), colour = &quot;black&quot;, fill = &quot;white&quot;,
+                      binwidth = 50) + theme_classic() + 
+labs(list(title = &quot;Densité empirique du nombre de locations entre 
+          17h et 18h en 2011 par temps dégagé&quot;,
+     x = &quot;nombre de locations entre 17h et 18h&quot;, y = &quot;densité&quot;))    </code></pre>
+</div>
+<div id="courbe-de-densite-avec-la-fonction-ggplot" class="section level3">
+<h3>3.2 Courbe de densité avec la fonction ggplot</h3>
+<p>Pour compléter le graphique, nous allons ajouter la courbe de densité. Pour ce faire, utilisons la fonction <code>geom_density</code>:</p>
+<pre class="r"><code>zone &lt;- ggplot(données[données$yr == &quot;2011&quot; &amp; données$Température == &quot;Dégagé&quot;, ], 
+               aes(x = cnt)) 
+zone + geom_histogram(aes(y = ..density..), colour = &quot;black&quot;, fill = &quot;white&quot;, 
+                      binwidth = 50) + theme_classic() + 
+  labs(list(title = &quot;Densité empirique du nombre de locations entre 17h et
+                 18h en 2011 par temps dégagé&quot;, x = &quot;nombre de locations entre
+            17h et 18h&quot;, y = &quot;densité&quot;)) + geom_density() + xlim(0, 750)  </code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2015/histogramme_ggplot2_files/figure-html/unnamed-chunk-16-1.png" width="864" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="graphique-avance-avec-ggplot2" class="section level2">
+<h2>4. Graphique avancé avec ggplot2</h2>
+<p>La fonction <code>ggplot</code> permet également de produire des graphiques juxtaposés comprenant plusieurs représentations de densité de Kernel. Pour ce faire, lorsqu’on utilise la fonction ggplot, il faut lui joindre les fonctions <code>geom_density</code> et <code>facet_grid</code>. La fonction <code>facet_grid</code> permet de juxtaposer les graphiques soit verticalement, soit horizontalement. L’argument <code>fill</code>, de la sous-fonction <code>aes</code> contenue par <code>geom_density</code>, permet de représenter plusieurs courbes sur le même graphique.</p>
+<p>La commande suivante permet de produire deux graphiques côte à côte sur le nombre de locations réalisées en 2011 et 2012.</p>
+<pre class="r"><code>zone &lt;- ggplot(données, aes(cnt)) 
+zone +  geom_density(aes( fill = Température),alpha = 0.7) + xlim(0, 1000) +
+  facet_grid(. ~ yr) </code></pre>
+<p>L’argument <code>fill</code> permet de distinguer les courbes selon la température qu’il fait. La fonction <code>facet_grid</code> et l’argument <code>. ~</code> permettent de spécifier et de juxtaposer verticalement les graphiques en fonction des années. Il faut noter que l’argument <code>alpha</code> de la fonction <code>geom_density</code> permet de définir le niveau de transparence de remplissage des aires sous les courbes de densité. La fonction <code>xlim</code>, quant à elle, définit l’étendue de l’axe des abscisses.</p>
+<p>Nous pouvons nous servir des fonctions <code>ggtitle</code> pour ajouter un titre, <code>xlab</code> et <code>ylab</code> pour nommer les axes et <code>guides</code> pour ajouter la légende. Il faut noter que la fonction <code>theme</code> avec l’argument <code>legend.position</code> permet de préciser où la légende sera placée.</p>
+<pre class="r"><code>zone &lt;- ggplot(données, aes(cnt)) 
+zone +  geom_density(aes( fill = Température),alpha = 0.7) + xlim(0, 1000) + 
+        facet_grid(. ~ yr) + 
+  ggtitle(&quot;Densité empirique du nombre de locations entre 17h et 18h en 2011 par 
+          temps dégagé&quot;) + 
+  xlab(&quot;nombre de locations entre 17h et 18h&quot;) + 
+  ylab(&quot;densité de Kernel&quot;) + guides(fill=guide_legend(
+    title.position=&quot;left&quot;,label.position=&quot;right&quot;,label.hjust=0.5,
+    direction=&quot;horizontal&quot;)) + theme(legend.position=&quot;bottom&quot;)  </code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2015/histogramme_ggplot2_files/figure-html/unnamed-chunk-18-1.png" width="864" style="display: block; margin: auto;" /></p>
+</div>
+<div id="references" class="section level2">
+<h2>Références:</h2>
+<ul>
+<li>Hadley WICKHAM (2009). <em>ggplot2: Elegant Graphics for Data Analysis</em>. Éditions : Springer, New-York.</li>
+<li>Hadley WICKHAM (2010). A layered grammar of graphics. <em>Journal of Computational and Graphical Statistics</em>, vol. 19, no 1, p. 3-28.<br />
+</li>
+<li>Yadolah DODGE (2007). Statistique: Dictionnaire encyclopédique. Éditions : Springer, Paris.<br />
+</li>
+<li>Joseph ADLER (2011). R, l’essentiel. Éditions: Peason, Paris.<br />
+</li>
+<li><a href="http://www.duclert.org/Aide-memoire-R/Graphiques/Histogrammes.php" class="uri">http://www.duclert.org/Aide-memoire-R/Graphiques/Histogrammes.php</a><br />
+</li>
+<li><a href="http://bioinfo-fr.net/guide-de-demarrage-pour-ggplot2-un-package-graphique-pour-r" class="uri">http://bioinfo-fr.net/guide-de-demarrage-pour-ggplot2-un-package-graphique-pour-r</a><br />
+</li>
+<li><a href="http://www.cookbook-r.com/Graphs/Plotting_distributions_(ggplot2)/#histogram-and-density-plots" class="uri">http://www.cookbook-r.com/Graphs/Plotting_distributions_(ggplot2)/#histogram-and-density-plots</a><br />
+</li>
+<li><a href="http://www.ceb-institute.org/bbs/wp-content/uploads/2011/09/handout_ggplot2.pdf" class="uri">http://www.ceb-institute.org/bbs/wp-content/uploads/2011/09/handout_ggplot2.pdf</a><br />
+</li>
+<li><a href="http://fr.wikipedia.org/wiki/Histogramme" class="uri">http://fr.wikipedia.org/wiki/Histogramme</a><br />
+</li>
+<li><a href="http://fr.wikipedia.org/wiki/Estimation_par_noyau" class="uri">http://fr.wikipedia.org/wiki/Estimation_par_noyau</a></li>
+</ul>
+</div>
