@@ -24,7 +24,7 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
 
 * Introduction à R
     * [Présentation de R]({{%relref "introduction/presentation_r_2018.html" %}})
-    * [Installation de R]({{%relref "introduction/installation_r_2018.html" %}})
+    * [Installation de R et RStudio]({{%relref "introduction/installation_r_2018.html" %}})
     * [Concepts de base en R]({{%relref "introduction/base_r_2018.html" %}})
 * Manipulation de données en R
     * Structure de données en R
@@ -48,7 +48,7 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
     * Bonnes pratiques en R
     * Optimisation de temps d'exécution en R
     * Métaprogrammation en R
-* Tutoriels d'étudiants
+* [Tutoriels d'étudiants]({{%relref "tutoriels_etudiants" %}})
 
 
 
