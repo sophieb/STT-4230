@@ -7,6 +7,5 @@ weight = 2
 
 À venir :
 
-* Lecture et écriture dans des fichiers externes à partir de R
 * Prétraitement de données en R
     
