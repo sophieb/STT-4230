@@ -7,6 +7,5 @@ weight = 3
 
 À venir :
 
-* Calculs de base en R
 * Calculs statistiques et mathématiques plus avancés en R
     
