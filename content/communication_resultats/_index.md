@@ -7,6 +7,5 @@ weight = 4
 
 À venir :
 
-* Graphiques en R
 * Rédaction de documents en R Markdown
     
