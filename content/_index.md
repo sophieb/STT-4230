@@ -45,7 +45,7 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
     * Utilisation de packages R
     * Développement de packages R
 * Amélioration de code R
-    * Bonnes pratiques en R
+    * [Bonnes pratiques en R]({{%relref "amelioration_code/bonnes_pratiques_r_2018.html" %}})
     * Optimisation de temps d'exécution en R
     * Métaprogrammation en R
 * [Tutoriels d'étudiants]({{%relref "tutoriels_etudiants" %}})

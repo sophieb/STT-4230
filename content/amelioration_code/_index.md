@@ -7,7 +7,6 @@ weight = 7
 
 À venir :
 
-* Bonnes pratiques en R
 * Optimisation de temps d'exécution en R
 * Métaprogrammation en R
     
