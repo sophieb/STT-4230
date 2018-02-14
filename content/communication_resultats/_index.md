@@ -4,8 +4,4 @@ weight = 4
 +++
 
 {{%children%}}
-
-À venir :
-
-* Rédaction de documents en R Markdown
     
