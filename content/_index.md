@@ -50,6 +50,8 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
     * Optimisation de temps d'exécution en R
     * Métaprogrammation en R
 * [Tutoriels d'étudiants]({{%relref "tutoriels_etudiants" %}})
+* Autre matériel
+    * [Calcul en parallèle sur CPU avec R]({{%relref "autre_materiel/calcul_parallele_r_2017.html" %}})
 
 
 
