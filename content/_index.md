@@ -38,7 +38,7 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
     * [Rédaction de documents en R Markdown]({{%relref "communication_resultats/redaction_r_markdown_2018.html" %}})
 * Programmation en R
     * [Informations techniques concernant R]({{%relref "programmation/info_techniques_r_2018.html" %}})
-    * Structure de contrôle en R
+    * [Structure de contrôle en R]({{%relref "programmation/struct_controle_r_2018.html" %}})
     * Fonctions en R
     * Programmation orientée objet en R
     * Tests et exceptions en R
