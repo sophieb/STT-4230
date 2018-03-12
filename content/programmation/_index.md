@@ -7,7 +7,6 @@ weight = 5
 
 À venir :
 
-* Fonctions en R
 * Programmation orientée objet en R
 * Tests et exceptions en R
     
