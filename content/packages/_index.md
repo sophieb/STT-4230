@@ -7,6 +7,5 @@ weight = 6
 
 À venir :
 
-* Utilisation de packages R
 * Développement de packages R
     
