@@ -51,6 +51,7 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
     * Métaprogrammation en R
 * [Tutoriels d'étudiants]({{%relref "tutoriels_etudiants" %}})
 * Autre matériel
+    * [Atelier sur la visualisation de données en R]({{%relref "autre_materiel/atelier_visualisation_donnees_r_2017.html" %}})
     * [Calcul en parallèle sur CPU avec R]({{%relref "autre_materiel/calcul_parallele_r_2017.html" %}})
 
 
