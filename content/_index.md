@@ -40,7 +40,7 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
     * [Informations techniques concernant R]({{%relref "programmation/info_techniques_r_2018.html" %}})
     * [Structure de contrôle en R]({{%relref "programmation/struct_controle_r_2018.html" %}})
     * [Fonctions en R]({{%relref "programmation/fonctions_r_2018.html" %}})
-    * [Programmation orientée objet en R]({{%relref "programmation/poo_r_2018.html" %}})
+    * [Programmation orientée objet en R]({{%relref "programmation/oop_r_2018.html" %}})
     * [Tests et exceptions en R]({{%relref "programmation/tests_exceptions_r_2018.html" %}})
 * Packages R
     * [Utilisation de packages R]({{%relref "packages/utilisation_packages_r_2018.html" %}})

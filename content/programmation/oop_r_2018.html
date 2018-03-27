@@ -3,7 +3,7 @@ title: "Programmation orienté objet en R"
 author: "Sophie Baillargeon, Université Laval"
 date: "2018-03-19"
 weight: 4
-slug: "poo_r"
+slug: "oop_r"
 categories: ["cours_2018-03-27"]
 categories_weight: 1
 lastmodifierdisplayname : "Sophie Baillargeon"
@@ -63,7 +63,7 @@ editor_options:
 <pre class="r"><code>print</code></pre>
 <pre><code>## function (x, ...) 
 ## UseMethod(&quot;print&quot;)
-## &lt;bytecode: 0x0000000016d69f60&gt;
+## &lt;bytecode: 0x0000000016d7cef8&gt;
 ## &lt;environment: namespace:base&gt;</code></pre>
 <p>Il n’y a qu’une seule instruction dans le corps de cette fonction : un appel à la fonction <code>UseMethod</code>. La fonction <code>UseMethod</code> vérifie d’abord la classe des objets fournis aux arguments nommés dans la définition de la fonction générique, ici uniquement <code>x</code>. Ensuite, elle appelle la méthode correspondant à la classe obtenue, si elle existe, en lui fournissant en entrée les arguments qui ont été fournis dans l’appel à la fonction générique.</p>
 <p>Par exemple, considérons le data frame suivant (il s’agit d’un jeu de données du package <code>datasets</code>).</p>
@@ -122,7 +122,7 @@ editor_options:
 ##     }
 ##     invisible(x)
 ## }
-## &lt;bytecode: 0x0000000019877b20&gt;
+## &lt;bytecode: 0x00000000198867f8&gt;
 ## &lt;environment: namespace:base&gt;</code></pre>
 <p>R va donc finalement appeler cette fonction.</p>
 <p>Donc, la commande</p>
@@ -256,10 +256,10 @@ x_factor</code></pre>
 <p>Pour assigner une classe à un objet R, il suffit de l’encadrer d’un appel à la fonction <code>class</code>, suivi d’un opérateur d’assignation et du nom de la classe. Voici un exemple.</p>
 <pre class="r"><code>unObjet &lt;- rnorm(5)
 print(unObjet)</code></pre>
-<pre><code>## [1] -1.3280679 -0.6051661 -0.2896901  1.3263366 -0.6336879</code></pre>
+<pre><code>## [1]  1.5882282 -1.1881035 -0.4950846  0.7727254  0.1367574</code></pre>
 <pre class="r"><code>class(unObjet) &lt;- &quot;nouveauVecteur&quot;
 print(unObjet)</code></pre>
-<pre><code>## [1] -1.3280679 -0.6051661 -0.2896901  1.3263366 -0.6336879
+<pre><code>## [1]  1.5882282 -1.1881035 -0.4950846  0.7727254  0.1367574
 ## attr(,&quot;class&quot;)
 ## [1] &quot;nouveauVecteur&quot;</code></pre>
 <p>Maintenant, pour créer une méthode associée à une fonction générique existante pour un objet d’une nouvelle classe, il faut créer une fonction nommée : <code>nomFonctionGenerique.nomClasse</code>. Cette fonction comporte typiquement les arguments suivants :</p>
@@ -278,18 +278,18 @@ print(unObjet)</code></pre>
 }</code></pre>
 <pre class="r"><code>print(unObjet)</code></pre>
 <pre><code>## Voici le vecteur :
-## [1] -1.3280679 -0.6051661 -0.2896901  1.3263366 -0.6336879</code></pre>
+## [1]  1.5882282 -1.1881035 -0.4950846  0.7727254  0.1367574</code></pre>
 <pre class="r"><code>print(unObjet, intro = FALSE)</code></pre>
-<pre><code>## [1] -1.3280679 -0.6051661 -0.2896901  1.3263366 -0.6336879</code></pre>
+<pre><code>## [1]  1.5882282 -1.1881035 -0.4950846  0.7727254  0.1367574</code></pre>
 <p>Il est courant pour une méthode <code>print</code> de terminer par la commande <code>invisible(x)</code>. La fonction <code>invisible</code> provoque le retour d’une valeur par la fonction, tout comme la fonction <code>return</code>. Cependant, contrairement à <code>return</code>, <code>invisible</code> ne provoque pas un affichage lorsque l’appel de la fonction n’est pas assigné à un nom, évitant ainsi un affichage double suite à une commande comme la suivante :</p>
 <pre class="r"><code>sortie &lt;- print(unObjet)</code></pre>
 <pre><code>## Voici le vecteur :
-## [1] -1.3280679 -0.6051661 -0.2896901  1.3263366 -0.6336879</code></pre>
+## [1]  1.5882282 -1.1881035 -0.4950846  0.7727254  0.1367574</code></pre>
 <p>Tentons maintenant de créer une méthode <code>plot</code> pour un objet de cette classe. La fonction générique <code>plot</code> a deux arguments :</p>
 <pre class="r"><code>plot</code></pre>
 <pre><code>## function (x, y, ...) 
 ## UseMethod(&quot;plot&quot;)
-## &lt;bytecode: 0x0000000016c07c98&gt;
+## &lt;bytecode: 0x0000000016c17ac8&gt;
 ## &lt;environment: namespace:graphics&gt;</code></pre>
 <p>mais notre méthode ne possédera qu’un seul argument. Elle générera un histogramme.</p>
 <pre class="r"><code>plot.nouveauVecteur &lt;- function(x, ..., main = &quot;Nouveau vecteur&quot;){
@@ -301,16 +301,16 @@ print(unObjet)</code></pre>
 ## see &#39;?methods&#39; for accessing help and source code</code></pre>
 <p>La méthode pour la fonction générique <code>plot</code> produit le résultat suivant.</p>
 <pre class="r"><code>plot(unObjet)</code></pre>
-<p><img src="/programmation/poo_r_2018_files/figure-html/unnamed-chunk-31-1.png" width="65%" style="display: block; margin: auto;" /></p>
+<p><img src="/programmation/oop_r_2018_files/figure-html/unnamed-chunk-31-1.png" width="65%" style="display: block; margin: auto;" /></p>
 <p>Si <code>unObjet</code> n’était pas de classe <code>nouveauVecteur</code>, nous obtiendrions plutôt ce graphique.</p>
 <pre class="r"><code>unObjet &lt;- unclass(unObjet)
 plot(unObjet)</code></pre>
-<p><img src="/programmation/poo_r_2018_files/figure-html/unnamed-chunk-32-1.png" width="65%" style="display: block; margin: auto;" /></p>
+<p><img src="/programmation/oop_r_2018_files/figure-html/unnamed-chunk-32-1.png" width="65%" style="display: block; margin: auto;" /></p>
 <p>Cet exemple illustre le fait qu’une méthode ne doit pas obligatoirement posséder les mêmes arguments que la fonction générique associée. De plus, les arguments supplémentaires ne doivent pas être forcément après l’argument <code>...</code> . Par exemple, la fonction générique <code>aggregate</code> :</p>
 <pre class="r"><code>aggregate</code></pre>
 <pre><code>## function (x, ...) 
 ## UseMethod(&quot;aggregate&quot;)
-## &lt;bytecode: 0x0000000019c9f020&gt;
+## &lt;bytecode: 0x0000000019cadc88&gt;
 ## &lt;environment: namespace:stats&gt;</code></pre>
 <p>possède 4 méthodes :</p>
 <pre class="r"><code>methods(aggregate)</code></pre>
@@ -453,7 +453,7 @@ S</code></pre>
 ## 
 ## function (obj, ...) 
 ## standardGeneric(&quot;coordinates&quot;)
-## &lt;environment: 0x0000000019a4d240&gt;
+## &lt;environment: 0x0000000019a2e8e0&gt;
 ## Methods may be defined for arguments: obj
 ## Use  showMethods(&quot;coordinates&quot;)  for currently available ones.</code></pre>
 <p>La méthode <code>coordinates</code> pour un objet de classe <code>&quot;SpatialPoints&quot;</code> extrait l’élément de l’objet <code>S</code> nommé <code>coords</code>.</p>
@@ -500,9 +500,9 @@ S</code></pre>
 <p>Ainsi, utiliser des classes S4 est simple. Il suffit de d’abord bien identifier qu’il s’agit d’un objet de classe S4. Le texte <code>Formal class</code> dans la sortie de <code>str</code> nous l’indique. La fonction <code>isS4</code> peut aussi nous le confirmer. Ensuite, nous pouvons manipuler les objets avec les fonctions génériques possédants des méthodes pour cette classe et nous pouvons extraire des éléments des objets avec l’opérateur <code>@</code> ou la fonction <code>slot</code>.</p>
 <p>Notons qu’un des intérêts du package <code>sp</code> est la production facilitée de graphiques représentant des données spatiales, par exemple des coordonnées géographiques, en s’assurant d’utiliser des axes sur la même échelle.</p>
 <pre class="r"><code>plot(S, main = &quot;Axes sur la même échelle&quot;, axes=TRUE)</code></pre>
-<p><img src="/programmation/poo_r_2018_files/figure-html/unnamed-chunk-51-1.png" width="65%" style="display: block; margin: auto;" /></p>
+<p><img src="/programmation/oop_r_2018_files/figure-html/unnamed-chunk-51-1.png" width="65%" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>plot(x, y, main = &quot;Axes non contrôlés&quot;)</code></pre>
-<p><img src="/programmation/poo_r_2018_files/figure-html/unnamed-chunk-51-2.png" width="65%" style="display: block; margin: auto;" /></p>
+<p><img src="/programmation/oop_r_2018_files/figure-html/unnamed-chunk-51-2.png" width="65%" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 </div>
