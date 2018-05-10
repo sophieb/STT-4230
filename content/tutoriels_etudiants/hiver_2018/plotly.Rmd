@@ -1,0 +1,363 @@
+---
+title: "Création de graphiques en R avec le package plotly"
+linkTitle: "plotly - graphiques interactifs"
+weight: 1
+author: "Pier-Luc Plante & Adrien Pierre"
+date: "2018-05-10"
+output:
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+---
+
+<style>
+  body {
+    text-align: justify
+    }
+</style>
+
+`r knitr::opts_chunk$set(echo = TRUE, results = 'markup', fig.align = 'center')`
+
+
+# Introduction
+
+Le package `plotly` permet de réaliser des graphiques interactifs 2D et 3D et de les afficher dans un navigateur web. Il permet aussi d'inclure une version statique des graphiques dans des documents (word ou pdf) à partir de code `R`. Avec `plotly`, il est possible de réaliser des graphiques classiques tel que de diagrammes de dispersion, des histogrammes, des diagrammes bâton et des cartes géographiques. La librairie est offerte gratuitement pour la production de graphiques hors-ligne mais un système d'abonnement permet d'héberger, de partager et de modifier des graphiques en ligne sur le [site web de Plotly](https://plot.ly/).
+
+La compagnie Plotly, qui est à l'origine du package, est basée à Montréal (Qc, Canada) et la première version du package R de `plotly` date de 2015. Par ailleurs, le développement de plotly.js, la librairie java.scipt derrière le code `R`, a débuté en 2012 [^1]. La compagnie se spécialise dans le développement de librairies et d'outils d'analyse et de visualisation de données via des navigateurs web pour plusieurs langages de programmation tels que R, Python, MatLab et Javascript. Leurs principaux produits sont `plotly` et [dash](https://plot.ly/products/dash/).
+
+Un des avantages de `plotly` est de permettre la création de graphiques similaires dans plusieurs langages de programmation utilisés pour les analyses de données. De plus, le package `R` permet de rendre interactif la majorité des graphiques produits avec `ggplot2`.
+
+[^1]: https://github.com/plotly/plotly.js/pulse
+
+# Installation et chargement
+
+L'installation du package `plotly` dans votre librarie R s'effectue avec la commande suivante :
+
+```{r eval = FALSE, results = FALSE}
+install.packages("plotly")
+```
+
+Par ailleurs, la commande `packageVersion` permet de connaître la version du package `plotly` en cours d'utilisation.
+
+```{r}
+packageVersion("plotly")
+```
+Le package est mis à jour régulièrement pour intégrer de nouveaux types de graphiques.
+
+
+Pour charger le package `plotly` dans l'environnement de travail R, il suffit d'utiliser la fonction `library`:
+
+```{r message=FALSE}
+library(plotly)
+```
+
+# La barre d'interaction
+Tel que mentionné précédemment, une des particularités de `plotly` est l'interaction avec les graphiques. Cette interactivité est favorisée par la barre d'outils disponible dans le coin supérieur droit des graphiques affichés dans un navigateur. Voici un agrandissement de la barre d'outils et une description des différents outils:
+
+
+![](fig/barre_interactive.png)
+
+
+|Numéro|Fonction|
+|:-:|:----------------------------------------------|
+|1|Capture .PNG du graphique dans son état actuel|
+|2|Zoom d'une région en utilisant le pointeur|
+|3|Déplacement sur les axes|
+|4|Boîte de sélection pour mettre une partie des données en évidence|
+|5|Lasso de sélection pour mettre une partie des données en évidence|
+|6|Zoom vers le centre du graphique|
+|7|Recule d'un niveau de zoom|
+|8|Ajustement automatique des axes|
+|9|Retour à la version originale du graphique|
+|10|Affichage des lignes qui indiquent la position d'un point sur l'axe|
+|11|Affichage de l'information du point le plus près du pointeur|
+|12|Affichage de plusieurs valeurs en fonction de la position du pointeur pour les comparer|
+|13|Envoie du graphique sur https://plot.ly/ pour permettre la collaboration et le partage|
+|14|Liens vers https://plot.ly/ |
+
+Il est aussi possible d'effectuer les interactions suivantes:
+
+* Inclure/Exclure un groupe de points en les sélectionnant dans la légende
+* Remettre le zoom à sa valeur par défaut en double-cliquant sur le graphique.
+* Zoomer sur un seul axe en glissant le pointeur dans une seule direction.
+
+Il est à noter que certaines fonctionnalités ne sont pas disponibles sur tous les types de graphique.
+
+# Les bases de la production de graphiques
+Afin de montrer l'utilisation du package, nous utiliserons le dataset `quakes` et lui ajouter 2 facteurs.
+```{r}
+head(quakes, n = 5)
+# Création du 1er facteur "magFactor" qui catégorise la magnitude des séismes
+quakes$magFactor <- factor(floor(quakes$mag))
+
+# Création du second facteur "region" qui catégorise la région géographique des séismes (Est/Ouest)
+quakes$region <- factor(quakes$long >= 175, labels = c("Ouest", "Est"))
+
+head(quakes, n = 5)
+```
+
+## Premier exemple: un diagramme de dispersion simple
+La fonction principale de `plotly` est `plot_ly`. C'est la fonction à appeler pour produire la majorité des graphiques de base.
+
+Pour créer un diagramme de dispersion, nous devons donner minimalement en argument à la fonction `plot_ly` les éléments suivants:
+
+* `x`: Un vecteur de valeurs des points pour l'axe X.
+* `y`: Un vecteur de valeurs des points pour l'axe Y.
+
+Les arguments suivants sont aussi fortement conseillés pour obtenir le résultat espéré:
+
+* `type`: Le type de graphique à produire (ex: `scatter`, `box`, `histogram`, `heatmap`).
+* `mode`: Le type d'affichage à utiliser pour la série de données: `markers`, `lines` ou `lines+markers`.
+* `data`: L'objet duquel extraire les données pour `x` et `y`. S'il est utilisé, il est nécessaire d'ajouter l'opérateur `~` lors de la définition des valeurs de `x` et `y`. 
+
+```{r message = FALSE}
+plot_ly(data = quakes, x = ~ long, y = ~ lat, type = 'scatter', mode = 'markers')
+```
+
+<br/>
+En absence des arguments `type` et `mode`, `plotly` essaie de trouver la meilleure représentation possible en fonction des données et des paramètres par défaut pour le type de graphique. Pour plus d'informations sur la fonction `plot_ly`, veuillez vous référer à la [documentation](https://www.rdocumentation.org/packages/plotly/versions/4.7.1/topics/plot_ly).
+
+
+
+## Graphique plus avancé
+`plotly` a été concu afin de construire les figures graphiques de façon séquentielle. Pour ce faire, le résultat d'une opération est passé à la suivante. Il est possible de créer des variables temporaires et de les passer aux fonctions suivantes, mais nous recommandons l'utilisation de l'opérateur `%>%`.
+
+
+C'est donc en passant les résultats d'une fonction à l'autre qu'il est possible de produire des graphiques plus complexes. Par exemple, il est possible de mettre plusieurs jeux de données sur le même graphique avec `add_trace` ou de modifier l'apparence du graphique avec `layout`.
+
+La fonction `add_trace` s'utilise exactement de la même façon que la fonction `plot_ly`, mais requiert comme premier argument un objet (une liste) préalablement créé.
+La fonction `layout` sert à modifier la mise en page du graphique. Elle prend comme premier argument un objet créé par `plotly` sur lequel elle appliquera les modifications demandées. Dans l'exemple ci-bas, on l'utilise pour spécifier le titre du graphique et des axes.
+
+```{r}
+p_scatter <- plot_ly(data = quakes[quakes$region == "Est",], x = ~ long, y = ~ lat,  
+                     name = 'Est', type = 'scatter', mode = 'markers')
+
+p_scatter <- add_trace(p_scatter, data=quakes[quakes$region == "Ouest",], x = ~ long, y= ~ lat,  
+                       name = 'Ouest', type = 'scatter', mode = 'markers')
+
+p_scatter <- layout(p_scatter,
+                    title = "Longitude et latitude de séismes près de Fidji depuis 1984",
+                    xaxis = list(title = "Longitude"),
+                    yaxis = list(title = "Latitude", scaleanchor = "x"))
+
+p_scatter
+```
+
+<br/>
+<br/>
+L'exemple précédent crée une nouvelles variable, `p_scatter`, et l'utilise pour garder en mémoire les données nécessaires à la production du graphique. L'exemple suivant est identique au précédent, mais ne crée pas de variable dans l'environnemnt de travail et utilise l'opérateur `%>%` afin de passer l'information d'une fonction à l'autre.
+
+
+```{r}
+plot_ly(data = quakes[quakes$region == "Est",], x = ~ long, y = ~ lat,  
+        name = 'Est', type = 'scatter', mode = 'markers') %>% 
+  add_trace(data=quakes[quakes$region == "Ouest",], x = ~ long, y= ~ lat,  
+            name = 'Ouest', type = 'scatter', mode = 'markers') %>%
+  layout(title = "Longitude et latitude de séismes près de Fidji depuis 1984",
+         xaxis = list(title = "Longitude"),
+         yaxis = list(title = "Latitude", scaleanchor = "x"))
+```
+
+
+## Deuxième exemple: un histogramme
+
+Pour créer un histrogamme, l'argument 'type' doit recevoir la valeur `histogram`.
+```{r}
+plot_ly(x = quakes$mag, type = "histogram") %>% 
+  layout(title = "Magnitude des séismes")
+```
+On remarquera que l'argument `data` n'est pas utilisé dans cet exemple mais les données ont été fournies à `x` directement. Voici une liste des arguments utiles pour parfaire un histogramme:
+
+* `histnorm` *(=probability)* permet de normer l'axe des ordonnées afin de visualiser les pourcentages des données (par défaut, histnorm = count)
+* `y`, pour un histogramme horizontal. On ne donne pas de valeurs à `x` dans ce cas
+* `barmode` *(= overlay ou stack)* pour superposer plusieurs histogrammes
+* `autotick` *(= TRUE)* pour pouvoir gérer soi-même les éléments graphiques (couleurs, épaisseurs des traits, quadrillage)
+
+Nous allons réaliser un histogramme plus complet avec plusieurs jeux de données en superposant les jeux de données sur l'histogramme, en ajoutant une légende claire avec `layout` et en créant un axe des abscisses sur mesure.
+
+```{r}
+axe_x <- list(
+  autotick = FALSE,              # pour contrôler le pas de l'axe des abscisses
+  ticks = "outside",             # ou "inside"
+  dtick = 20,                    # le nombre d'intervalles
+  ticklen = 10,                  # la longueur des indicateurs
+  tickwidth = 2,                 # la largeur des indicateurs
+  tickcolor = toRGB("blue"),     # la couleur
+  zeroline = TRUE,
+  showline = TRUE,
+  zerolinecolor = toRGB("red"),  # pour mettre en exergue la droite 'x = 0'
+  zerolinewidth = 3,
+  linecolor = toRGB("black"),
+  linewidth = 2
+  )
+# axe_y <- list()   # On pourrait faire de même avec l'axe des ordonnées
+plot_ly(alpha = 0.8, histnorm = "probability", xlim = c()) %>% 
+  add_histogram(x = quakes$long, name = "Longitudes") %>% 
+  add_histogram(x = quakes$stations, name = "Nombre de stations") %>%
+  add_histogram(x = quakes$lat, name = "Latitudes") %>%
+  layout(title = "Distribution empirique de trois variables décrivant les séismes", 
+         barmode = "overlay", xaxis = axe_x)
+```
+
+
+## Modification des propriétés graphiques avec la fonction `layout` 
+
+`layout`, qui signifie *mise en page* en français, permet de manipuler la mise en page d'un graphique en modifiant certaines caractéristiques comme la police et la couleur du titre, les axes, la légende, les marges, etc.
+
+Nous allons apprendre comment ajouter des éléments à un graphique, sur l'exemple du boxplot ci-dessous réalisé à l'aide de `plot_ly`.
+
+```{r}
+plot_ly(y = ~ depth, data = quakes, type = "box", name = "Profondeur en mètres") %>%
+  layout(
+    title = "Statistiques des profondeurs de séismes\nprès de Fidji depuis 1984",  # ajoute un titre
+    yaxis = list(title = ""),  # précise les noms de l'axe des ordonnées
+    titlefont = list(
+      family = "sans serif",   # plusieurs polices de caractère en Word sont acceptées par family
+      size = 14,               # comme "Courier New", "Arial", "Comic sans MS", "monospace", etc.
+      color = '#ad42f4'),      # modifie la police
+    paper_bgcolor = "white",   # modifie la couleur de fond 
+    plot_bgcolor = "white",    # modifie la couleur en arrière du graphique
+    showlegend = FALSE,        # affiche ou non la légende
+    dragmode = "pan",          # choix du curseur d'interaction (pan, lasso, select, zoom (défaut))
+    hovermode = "closest"      # affiche les labels (x, y, closest ou FALSE)
+)
+```
+
+Les arguments à la fonction `layout` sont nombreux. Parmi les plus courants, on peut citer : `direction`, `orientation`, `width`, `height`, `margin`, `legend`, `autosize`.
+Pour la liste complète des arguments et leur utilisation, veuillez vous référer à la page web suivante : <https://plot.ly/r/reference/#layout>.
+
+
+
+# La fonction `ggplotly`
+
+`ggplotly` est une fonction du package `plotly` qui permet de tranformer un graphique réalisé avec `ggplot2` en un graphique de type `plotly` afin de le rendre interactif. Voyons un exemple sur les données `quakes` : nous créons, dans un premier temps, le graphique avec `ggplot2`.
+
+```{r message = FALSE}
+library(ggplot2)
+gg_quakes <- qplot(long, lat, data = quakes, color = region) + coord_quickmap()
+gg_quakes
+```
+
+<br/>
+Nous avons produit un graphique `ggplot` classique, non-interactif. Pour le rendre interactif, il suffit d'appliquer la fonction `ggplotly` ainsi:
+
+```{r message = FALSE}
+ggplotly(gg_quakes)
+```
+<br/>
+
+On peut remarquer que `ggplotly` modifie certains éléments ; l'échelle relative des axes est perdu, ainsi que le quadrillage secondaire, et les points sont plus gros. Par contre, le graphique est maintenant interactif. L'utilisateur peut parcourir le graphique avec sa souris pour consulter les données sur le graphiques. 
+
+La fonction `ggploly` a deux paramètres intéressants dignes de mention:
+
+* `width` : définit la largeur de l'image en pixels (valeur par défaut : 700)
+* `height` : définit la hauteur de l'image en pixels (valeur par défaut : 450)
+
+La documentation de la fonction `ggplotly` est disponible sur la page web suivante:  
+<https://www.rdocumentation.org/packages/plotly/versions/4.7.1/topics/ggplotly>.
+
+
+# Multi-graphique avec `subplot`
+Pour faire une figure contenant plusieurs graphiques dans la même fenêtre, on doit utiliser la fonction `subplot`.
+Les principaux paramètres de cette dernière sont:
+
+  * `...`: Une série de graphiques `plotly` ou `ggplot2`
+  * `nrows`: Le nombre de rangés sur lesquelles distribuer les graphiques
+  * `shareX`/`shareY`: Partager l'axe X / Y
+
+```{r}
+# Graphique 1 : p_scatter, créé précédemment
+
+# Graphique 2 :
+p_box <-
+  plot_ly(data = quakes[quakes$region == "Est",], x = ~ mag, type = "box", name = "Est") %>%
+  add_trace(data = quakes[quakes$region == "Ouest",], x = ~ mag, name = "Ouest")
+
+# Multi-graphique :
+subplot(p_scatter, p_box, nrows = 1, shareX = FALSE, shareY = FALSE, margin = 0.05) %>%
+  layout(title = "Longitude, latitude et magnitude des tremblements de terre",
+         xaxis = list(title = "Longitude"),
+         yaxis = list(title = "Latitude", scaleanchor = "x"),
+         xaxis2 = list(title = "Magnitude"))
+```
+<br/>
+
+Pour une liste complète, vous pouvez consulter la [page de référence](https://www.rdocumentation.org/packages/plotly/versions/4.7.1/topics/subplot) de `subplot`.
+Il est aussi possible d'utilise `subplot` pour des graphiques à trois dimensions tel que montré sur cette page: <https://plot.ly/r/3d-subplots/>.
+Il est à noter que la fonction `subplot` ne fonctionne pas très bien avec certains types de graphique, notamment les graphiques en pointe de tarte (`pie`) pour lesquels on doit utiliser l'attribut `domain` dans la fonction `plot_ly` [^2]. Pour plus de détails, consulter les pages suivantes:
+
+ * https://plot.ly/javascript/reference/#pie-domain
+ * https://plot.ly/r/pie-charts/#basic-pie-chart--subplots
+
+[^2]: https://community.plot.ly/t/multiple-plotly-pie-charts-in-one-row/1650
+
+# Une multitude de possibilité
+`plotly` est une librairie graphique très complète. Voici quelques exemples de fonctions avancées disponibles dans la librairie.
+
+## Graphiques 3D
+Tel que mentionné précédemment, `plotly` permet de produire des graphiques en trois dimensions. La syntaxe est identique à celle utilisée pour produire un graphique à deux dimensions dans le cas d'un graphique de dispersion, mais on doit lui ajouter un argument `z` contenant les valeurs de la troisième dimension.
+
+Voici un exemple de graphique de dispersion tridimensionnel:
+```{r warning = FALSE}
+plot_ly(quakes, x = ~ long, y = ~ lat, z = ~ depth, color = ~ region, 
+        type = "scatter3d", mode = "markers", marker = list(size = 3)) %>%
+  layout(title="Longitude, latitude et profondeur des tremblements de terre")
+```
+
+
+Ici, nous avons utilisé l'attribut `region` afin de colorier les points sans produire deux séries de données différentes. De plus, l'argument `type` serait optionel, car `plotly` produirait par défaut un graphique de dispersion lorsque `x`, `y` et `z`sont des vecteurs de valeurs.
+
+Pour d'autres exemples de graphiques 3D, il y a quelques exemples sur la [page officielle](https://plot.ly/r/3d-charts/).
+
+## Cartes géographiques
+Avec un peu de motivation et quelques recherches, il est possible de produire des cartes géographiques directement avec `plotly`. Afin d'en montrer un exemple, nous avons positionné les tremblements de terre de `quakes` sur une carte et avons colorié les points en fonction de la profondeur.
+
+On peut remarquer que la création d'une carte utilise la fonction `plot_geo` qui possède sa propre série d'arguments (`long` et `lat`) et un type `scattergeo`. De plus, la fonction `layout` prend dans ce cas, un argument spécial: `geo`. Ce dernier est une liste de paramètres à considérer lors du rendu de la carte.
+```{r}
+params <- list(
+  scope = 'world',
+  projection = list(type = 'equirectangular', 
+                    rotation = list(lon = 120)),  # Rotation de la carte pour voir 
+  showland = TRUE,                                # une section au milieu
+  showocean = TRUE,
+  oceancolor = "#a5c7ff",
+  landcolor = "#d6d6d6",
+  lonaxis = list(range = c(120, 200)),  # Étendu sur la longitude
+  lataxis = list(range = c(-80, 10))    # Étendu sur la latitude
+)
+
+plot_geo(data = quakes, lat = ~ lat, lon = ~ long, 
+         type = "scattergeo", mode = "markers", color = ~ depth, marker = list(size = 3)) %>%
+  layout(title = 'Position et profondeur des tremblements de terre', geo = params)
+```
+
+Les pages suivantes contiennent plus d'information et d'exemples quant à la production de carte géographiques:
+
+ * https://plot.ly/r/maps/
+ * https://moderndata.plot.ly/county-level-choropleth-in-plotly-and-r/  
+ * https://plotly-book.cpsievert.me/maps.html
+
+
+## WebGL
+Pour améliorer la fluidité d'un graphique contenant beaucoup de valeurs à afficher, `plotly` permet l'utilisation de la technologie WebGL. WebGL est une librairie JavaScript qui utilise la puissance des processeurs graphiques (GPU) afin d'accélérer le traitement des images et graphiques d'une page web [^3]. Dans `plotly`, WebGL sert notamment à produire des graphiques de dispersion contenant des milliers, voire des millions, de points tout en gardant les interactions fluides. Pour utiliser la technologie WebGL, on doit simplement spécifier `type="scattergl"` en argument à la fonction `plot_ly`.
+
+[^3]: https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API
+
+
+Un exemple montrant l'incroyable gain de performance obtenu grace à l'utilisation de `scattergl` est disponible [ici](https://plot.ly/r/compare-webgl-svg/).
+
+# Références supplémentaires
+ * Le site officiel de `plotly` regorge d'exemple en tout genre et est un bon point de départ pour ceux désirant s'initier à `plotly`: https://plot.ly/r/
+
+ * CPSIEVERT a produit un livre web pour permettre à tous de démarrer avec `plotly` dans `R`. Le site contient des exemples plus diversifiés que le site officiel de `plotly` et s'adresse autant aux utilisateurs débutants qu'avancés. Il est disponible à cette adresse: https://plotly-book.cpsievert.me/index.html .
+
+
+# Conclusion
+
+En conclusion, le package `plotly` permet aux utilisateurs de créer des graphiques présentant davantage d'informations et ainsi d'accéder aux informations en interagissant. `plotly` permet donc de créer des graphiques complexes et difficiles à réaliser avec d'autres packages, comme des cartographies. `plotly` permet aussi l'utilisation de la technologie WebGL qui n'est habituellement pas prise en charge par les librairies graphiques. Cela donne à `plotly` un avantage lorsqu'il est question de produire un graphique contenant des milliers de points. De plus, les graphiques produits sont hautement interactifs, ce qui facilite l'exploration des données.
+
+Cependant, malgré la pluralité des exemples disponibles dans la documentation officielle, celle-ci est souvent peu claire quant aux explications et aux possibilités ; il convient alors de se reporter sur d'autres pages web proposant des exemples différents et complémentaires, parfois même dans d'autres langages de programmation.
+
