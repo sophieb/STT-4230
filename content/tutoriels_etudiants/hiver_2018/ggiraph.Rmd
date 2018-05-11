@@ -1,0 +1,358 @@
+---
+title: "Fonctionnalités du package ggiraph"
+linkTitle: "ggiraph - graphiques interactifs"
+weight: 4
+author: "Audrey-Maude Chiasson et Nicolas Larrouy"
+date: "2018-05-11"
+output:
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+---
+
+***
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.show = "hold", results = "hold", fig.align = 'center')
+```
+
+# Introduction
+
+Le logiciel R est un logiciel complet offrant un grand nombre de fonctions et de packages permettant, entre autres, de manipuler et d'analyser des données statistiques. L'utilisation de graphiques est parfois indispensable pour l'interprétation de certains résultats et, en ce sens, le package `ggplot2`, que nous avons déjà vu, est un outil très intéressant pour la production de tels graphiques.
+
+Dans les faits, le package `ggplot2` est un outil bien connu qui permet à son utilisateur de créer de jolis graphiques et ainsi de permettre la visualisation de données statiques. 
+
+Toutefois, dans certains cas, il est serait préférable d'obtenir un graphique interactif plutôt qu'un simple graphique statique. C'est l'idée qu'à voulu amener David Gohel en développant l'extension `ggiraph` du package `ggplot2`.
+
+# Définition 
+
+Le package `ggiraph` est en fait un outil permettant d'animer un graphique existant, que ce soit un diagramme à barres, un graphique de dispersion, un diagramme en boite à moustache, ou tout autre type de graphique. 
+
+En utilisant les fonctions `geom()`, `ggiraph` permet de produire trois types d'animation, à partir des arguments suivants : 
+
+* `tooltip`: permet l'ajout d'infobulles qui s'affichent lorsque l'utilisateur glisse la souris sur un élément du graphique.  
+* `onclick`: effectue une action javascript (ouvrir une page internet, par exemple) lorsque l'utilisateur clique sur un un élément du graphique.  
+* `data_id`: Permet de mettre en surbrillance des données du graphique lorsque l'utilisateur passe le curseur sur ces données.
+
+
+# Utilisation du package ggiraph
+
+Évidemment, puisque le package `ggiraph` est, comme mentionné, une extension du package `ggplot2`, il est impératif de télécharger les librairies suivante :
+
+```{r eval=TRUE, warning = FALSE}
+library(`ggplot2`)
+#install.packages("ggiraph")
+library(ggiraph)
+```
+
+Le package `ggiraph` permet de créer des graphiques interactifs à partir de graphiques de `ggplot2`. L'utilisateur n'a qu'à créer son graphique, y ajouter une fonction `geom` et initialiser l'interactivité par la fonction `ggiraph()`. 
+
+Comme mentionné, l'utilisation des différentes fonctions `geom` sont primordiale pour activer l'interaction des graphiques à partir de la fonction `ggiraph()`. L'utilisation de fonction `geom` dépend en fait du type de graphique que l'utilisateur souhaite animer. Voici les différentes fonctions `geom` avec leurs graphiques associés:
+
+* `geom_bar_interactive()` pour les diagrammes en barre  
+* `geom_boxplot_interactive()` pour les diagrammes en boîte à moustaches  
+* `geom_histogram_interactive()`  pour les histogrammes  
+
+Et d'autre pour des graphiques moins usuels, tels :
+
+* `geom_line_interactive()`  
+* `geom_map_interactive()`  
+* `geom_path_interactive()`  
+* `geom_point_interactive()`  
+* `geom_polygon_interactive()`  
+* `geom_rect_interactive()`  
+* `geom_segment_interactive()`  
+* `geom_text_interactive()`  
+* `geom_tile_interactive()`  
+
+Afin d'illustrer les différents résultats possible par le package étudié, nous utiliserons le jeu de données `quakes2` qui est en fait les 500 premières lignes du jeu `quakes`, provenant du package `datasets`. Comme ce jeu de données se prête bien aux graphiques de type nuage de points, nous utiliserons la fonction `geom_point_interactive()`et nous présenterons différentes animations que propose le package `ggiraph` à partir d'un seul et même graphique. Nous présenterons par la suite quelques exemples similaires avec d'autres types de graphiques afin d'illustrer les effets intéressants que peut amener un travail avec `ggiraph`. 
+
+Débutons donc par d'abord importer le jeu de données sur lequel nous travaillerons :
+
+```{r}
+# Création d'un facteur à partir de la variable mag
+quakes$magFactor <- factor(floor(quakes$mag))
+# Création d'un deuxième facteur à partir des variables lat et long 
+quakes$region <- factor(quakes$long >= 175, labels = c("Ouest", "Est"))
+
+quakes2 <- quakes[1:500,]
+# Pour des soucis de clarté, nous n'utilisons que les 500 premières lignes de quakes.
+str(quakes2)
+``` 
+
+Ce jeu de données contient des mesures décrivant des tremblements de terres survenus près des Îles Fidji depuis 1964. 
+
+# 1. Infobulle (tooltip)
+
+## 1.1. Fonction générale
+
+Voyons donc la première animation possible avec `ggiraph`; l'infobulle. Cette animation permet à l'utilisateur de voir une "bulle" apparaître lorsqu'il passe le curseur sur un point du graphique. Cette bulle peut contenir toute sorte d'information qui permettrait à l'utilisateur de mieux comprendre le point qu'il est en train d'observer, comme les coordonnées x et y exactes, entre autres.
+
+Prenons un exemple :
+
+```{r}
+library(`ggplot2`)
+g <- ggplot(quakes2, aes(x = long, y = lat, color = depth)) + 
+  coord_quickmap() # coord_quickmap() permet d'avoir des axes sur la même échelle
+# On crée basiquement le cadre du graphique avec la fonction ggplot() de `ggplot2`.
+```
+
+Il est bien de préciser que l'on pourrait ajouter tous les éléments pertinents à un graphique, mais pour le bien de l'exemple, nous allons garder celui-ci le plus simple possible, avec le nom des variables pour nom d'axes.
+
+```{r, warning = FALSE}
+my_gg <- g + geom_point_interactive(aes(tooltip = stations), size = 2)
+# Voir la description de cette ligne de commande juste en dessous du graphique.
+ggiraph(code = print(my_gg))
+# Cette ligne de commande va "activer" l'animation. Sans elle, le graphe est inerte.
+``` 
+
+`geom_point_interactive()` est une fonction de `ggiraph`. C'est cette fonction qui va pouvoir dire à R le type d'animation que l'utilisateur veut appliquer sur un graphique. Comme on peut le voir, elle fonctionne comme un "calque" qui s'ajoute par dessus le graphique créé par la fonction `ggplot()`.
+
+C'est en donnant l'argument `tooltip` à la fonction `geom_point_interactive()` que l'on initie l'animation de l'infobulle. La valeur donnée à cet argument sera la valeur qui sera affichée dans les infobulles.
+
+Au présent exemple, en appelant `tooltip = station`, les infobulles affichent le nombre de stations ayant rapporté le séisme pour chaque point. 
+
+## 1.2. Options supplémentaires de tooltip
+
+Par défaut, l'infobulle est carré, de couleur noir opaque et l'information quelle partage est écrite en blanc. Certaines options sont modifiables à partir de la fonction `ggiraph()`. Voici quelques exemples d'options pouvant être modifiées :
+
+* La position de la bulle (`tooltip_offx` et `tooltip_offy`)
+
+* Le style de la bulle (`tooltip_extra_css`)
+    + Forme de la bulle (`border-radius`)
+    + Dimensions de la bulle (`padding`)
+    + Couleur de fond de la bulle (`background-color`)
+    + Type d'écriture (`font-style`)
+    + Couleur de l'écriture (`color`)
+    
+* L'opacité de la bulle (`tooltip_opacity`)
+
+
+Voici un exemple combinant quelques options mentionnées pour `tooltip` :
+```{r}
+my_gg <- g + geom_point_interactive(aes(tooltip = stations), size = 2)
+
+ggiraph(code = print(my_gg), 
+        tooltip_extra_css = "background-color:gray;color:white;font-style:italic;padding:10px;border-radius:10px 20px 10px 20px;",
+        tooltip_opacity = 0.75)
+
+``` 
+
+
+# 2. Surbrillance (data_id) 
+
+## 2.1. Fonction générale 
+
+Une autre animation intéressante que propose le package `ggiraph` consiste à mettre les éléments d'un graphique (dans notre cas, les points d'un nuage de dispersion) en surbrillance lorsque le curseur est placé dessus. 
+
+```{r}
+my_gg <- g + geom_point_interactive(aes(data_id = stations), size = 2)
+ggiraph(code = print(my_gg))
+```
+
+Il est bien de remarquer qu'ici, ce n'est pas `tooltip` qui est donné comme argument à `geom_point_interactive()` mais `data_id`. C'est parce que l'animation désirée n'est plus l'infobulle mais bien la surbrillance, et cette animation est initiée par l'argument data_id.
+
+## 2.2. Options supplémentaires de data_id
+
+Il est possible d'ajouter un argument à la fonction `ggiraph()` afin de modifier le style de surbrillance utilisé. Cet argument est `hover_css` et il prend par défaut les valeurs `fill:orange;stroke:gray`, qui affiche une surbrillance orangée ayant un contour gris. 
+
+Voici quelques options disponible pour l'argument `hover_css` :
+
+* Type de pointeur (`cursor`)  
+* Couleur de la surbrillance (`fill`)  
+* Couleur de la bordure (`stroke`)  
+* Épaisseur de la bordure (`stroke-width`)  
+* Opacité de la surbrillance (`fill-opacity`)  
+* Grosseur de la surbrillance (`r`)  
+
+Il est toutefois à noter que la grosseur de la surbrillance n'a aucun effet lorsque Firefox est le navigateur utilisé.
+
+Voici un exemple afin d'illustrer le tout :
+
+```{r}
+my_gg <- g + geom_point_interactive(aes(data_id = stations), size = 2)
+ggiraph(code = print(my_gg), hover_css = "cursor:pointer;fill:red;stroke:gray;stroke-width:2pt;")
+```
+
+
+# 3. Ouverture de page (onclick) 
+
+La dernière fonctionnalité du package `ggiraph` que nous présenterons consiste en l'ouverture de fenêtres Internet par un simple clic sur un élément du graphique (encore une fois, dans notre exemple, sur un point du graphique de dispersion). 
+
+Bien que l'on puisse amener l'utilisateur à ouvrir n'importe quelle page Internet en un simple clic, l'insertion d'une telle interaction sur un graphique doit ajouter une plus-value aux résultats présentés, sans quoi son utilisation serait quelque peu banale et anodine. Dans le jeu de données `quakes`, par exemple, on présente l'information concernant la latitude et la longitude de certains séismes. Il nous est alors possible d'ouvrir la page de Google Maps correspondant à ces données de localisation afin que l'utilisateur puisse situer l'emplacement de ces séismes sur une carte du Monde en cliquant sur un point.
+
+Voyons cela de plus près :
+
+```{r}
+quakes2$position <- paste0(quakes2$lat, ",", quakes2$long,  ",5z")
+# On crée une chaîne de caractères, qui correspond à la fin de l'URL de Google Maps
+# pour des données de latitude et longitude. Le 5z correspond à l'altitude.
+
+quakes2$Instruclick <- sprintf("window.open(\"%s%s\")",
+        "https://www.google.ca/maps/search/map/@", as.character(quakes2$position))
+# On crée une nouvelle colonne dans le data_frame quakes2 intitulée "Instruclick".
+# Quand l'utilisateur cliquera sur un point du graphe, R ira chercher l'instruction à suivre dans cette colonne.
+
+g <- ggplot(quakes2, aes( x = long, y = lat, color = depth)) + coord_quickmap()
+# On recrée une base du plot.
+```
+
+```{r}
+my_gg <- g + geom_point_interactive(aes(onclick = Instruclick), size = 2)
+ggiraph(code = print(my_gg))
+```
+
+Pour effectuer cette opération, on attribut l'argument `onclick` à la fonction `geom_pont_interactive()`.  On lui assigne alors l'instruction à effectuer. Ici, c'est dans la colonne `Instruclick` qu'il la trouve. Elle lui indique d'ouvrir une page à l'URL suivant : https://www.google.ca/maps/search/map/@<i>"Latitude","Longitude",5z</i>
+
+__ATTENTION__ : Il faut que le graphique soit visualisé depuis un navigateur Internet pour que l'animation onclick fonctionne ! En fait, avec cette commande, R tente d'ouvrir une page depuis sa fenêtre active. Si l'utilisateur tente d'ouvrir une page Internet, soit une URL, a partir de R, cela ne fonctionnera forcément pas. Toutefois, si le graphique est visualisé depuis un navigateur Web (Explorer, Chrome ou Firefox par exemple), l'argument `onclick` permettra d'ouvrir une page Internet à partir d'une nouvelle fenêtre du navigateur utilisé et le résultat souhaité s'affichera. 
+
+
+# 4. Combinaison d'arguments 
+
+Maintenant que nous avons vu les trois possibilités qu'offrait le package `ggiraph`, sachez qu'il est tout à fait possible et pertinent de les utiliser en même temps. En effet, la combinaison des trois types d'information interactive complète parfaitement un graphique.
+
+```{r}
+my_gg <- g + geom_point_interactive(aes(tooltip = stations,
+                                        data_id = stations,
+                                        onclick = Instruclick), size = 2)
+
+# Option des arguments
+options_tooltip <- "background-color:gray;color:white;font-style:italic;padding:7pt"
+options_hover_css <- "fill:pink;stroke:gray;"
+ggiraph(code = print(my_gg), 
+        tooltip_extra_css=options_tooltip, 
+        tooltip_opacity = 0.75, 
+        hover_css=options_hover_css)
+```
+
+
+# 5. Argument zoom
+
+Il est bien de mentionner l'argument "zoom" qui est un argument supplémentaire utilisable dans la fonction `ggiraph()`. En effet, cet outil permet à l'utilisateur du graphique interactif de zoomer afin d'obtenir un focus précis sur les données qui l'intéressent.
+
+L'argument `zoom` est simple à utiliser. Voilà donc un exemple : 
+```{r}
+my_gg <- g + geom_point_interactive(aes(data_id = stations), size = 2)
+# Prenons pour exemple un graphique simple faisant intervenir la surbrillance 
+# (facultative à l'option zoom)
+```
+
+```{r}
+# Voici donc comment utiliser l'argument zoom
+ggiraph(code = print(my_gg), zoom_max = 5)
+```
+
+Comme on peut le constater, trois icônes apparaissent au-dessus du graphique, ce qui nous permet d'utiliser le zoom, de le retirer ou de naviguer à travers le graphique en conservant un focus sur certaines données. Il s'agit d'une option facultative qui amène toutefois à l'utilisateur l'option d'explorer le graphique de façon plus agréable, spécialement lorsqu'il s'agit de nuages de points ou d'histogrammes contenants un grand nombre de données.
+
+
+# 6. Application dans d'autres types de graphiques
+
+Comme mentionné, le package `ggiraph` s'applique à plusieurs types de graphique, par l'entremise des fonctions `geom()` précédemment listées. Dans le but de faciliter l'explication du package étudié, nous avons jusqu'ici utilisé le même graphique de dispersion pour chacun de nos exemples. 
+
+Maintenant, afin d'illustrer le tout, nous présenterons dans cette section quelques exemples supplémentaires d'utilisation de la fonction `ggiraph()` avec d'autres types de graphiques, soit les suivants: 
+
+* Diagramme à bandes (`geom_bar_interactive()`)  
+
+```{r}
+g_bar <- ggplot(quakes2, 
+                aes(x = magFactor,
+                    tooltip = region,
+                    fill = magFactor,
+                    data_id = magFactor)) + 
+  geom_bar_interactive()
+ggiraph(code = print(g_bar))
+```
+
+Le graphique ci-dessus permet de bien exploiter les outils `tooltip` et `data_id`. Toutefois, il est impossible d'y mettre l'argument `onclick` permettant d'ajouter un lien interactif vers une page Web.
+
+* Diagramme en boîte à moustaches (`geom_boxplot_interactive()`)  
+
+```{r}
+p <- ggplot(quakes2, 
+            aes(x = region,
+                y = mag,
+                tooltip = mag,
+                fill=region)) +
+  geom_boxplot_interactive() +
+  xlab("Région") +
+  ylab("Magnitude") +
+  theme(legend.position="none")
+ggiraph(code = print(p))
+```
+
+Le diagramme en boîte à moustaches, quant à lui, permet uniquement d'ajouter l'option d'infobulle. De plus, dans notre exemple, comme l'argument assigné à `tooltip` est la magnitude, seuls les points en dehors des boîtes ont une infobulle assignée.
+
+* Diagramme en lignes (`geom_line_interactive()`)  
+
+```{r}
+Line_graph <- ggplot(quakes2, 
+                     aes(x = stations, y=mag,
+                         group = region,
+                         colour = region,
+                         tooltip = region,
+                         data_id=region)) +
+  geom_line_interactive() + 
+  xlab("Nombre de stations") +
+  ylab("Magnitude") +
+  theme(legend.position="none")
+ggiraph(code = print(Line_graph) )
+```
+
+
+Le diagramme en lignes des nombres de stations en fonction de la magnitude a pour options les arguments `tooltip` et `data_id`. `tooltip` permet de distinguer la région de chacune des lignes tandis que la surbrillance permet de mieux les visualiser. Par ailleurs, comme pour les graphiques créés par les fonctions `geom_bar_interactive()` et `geom_boxplot_interactive()`, l'histogramme en question ne permet pas l'ajout de l'option `onclick`. 
+
+
+# 7. Avis personnel
+
+
+## 7.1. Appréciation générale du package
+
+De façon générale, `ggiraph` est un package très intéressant qui permet au concepteur d'un graphique d'amener plusieurs éléments d'information supplémentaires à son travail. Le développeur de ce package à su combler un certain manque que présentait le package `ggplot2`. Effectivement, l'interactivité des graphiques permet, lorsque bien utilisé, d'ajouter une plus-value qui aurait autrement pu être remplacée par un texte ou un second graphique statique. Voyons donc les points positifs et négatifs de chacun des outils présentés dans cette fiche:
+
+
+### 7.1.1. Avis sur l'infobulle (tooltip)
+
+L'infobulle est un ajout extrêmement pertinent lorsque bien utilisé, dans un graphique qui nécessite cet élément supplémentaire. 
+
+Par exemple, dans le cas d'un graphique de dispersion, l'infobulle amène un élément à combler puisque l'utilisateur n'a pas toujours la possibilité d'aller chercher l'information concernant chacun des points, dans notre exemple, le nombre de stations ayant rapporté le séisme. Rappelons que, si le jeu de données nous l'avait permis, nous aurions pu afficher un identifiant du séisme.
+
+Toutefois, certains graphiques ont par défaut une légende, des étiquettes ou des couleurs qui identifient chacune des variables d'intérêt. Considérant ces cas, l'infobulle est parfois facultative, voir inintéressante. Il en va de même pour la surbrillance. L'ajout d'effet visuels interactif n'est donc pas toujours pertinent, mais le cas échéant, `ggiraph` est un très bon outil pour y parvenir.
+
+La facilité d'utilisation de l'argument `tooltip` est également très apprécié. La fonction est effectivement conviviale et son utilisation est plutôt instinctive. Ses options le sont également, ce qui la rend d'autant plus plaisante à exploiter. 
+
+
+### 7.1.2. Avis sur la surbrillance (data_id)
+
+L'argument `data_id` est très intéressante puisqu'il permet à l'utilisateur de mieux visualiser certains éléments du graphique. En effet, dans le cas d'une présentation, par exemple, un conférencier pourrait utiliser la fonction en question pour permettre à son auditoire de mieux visualiser les données dont il traite. Surtout dans le cas de graphiques traitants d'un grand nombre de variables, la surbrillance amène un aspect de facilité de visualisation à l'utilisateur. 
+
+De façon générale, l'utilisation de `data_id` et de ses options est également très facile. Le seul point négatif de cette fonction nous semble être le fait que l'option de la grosseur de la surbrillance ne s'affiche pas dans le navigateur Firefox. Outre cette petite lacune, la fonction est très utile ce qui la rend très appréciée.
+
+
+### 7.1.3. Avis sur l'ajout de page Internet (onclick)
+
+L'ajout de "lien hypergraphique" est une possibilité très intéressante offerte par ce package. Sur certains graphiques, son utilisation peut se révéler très pertinente, en renvoyant vers des informations complémentaires qui ne pourraient apparaître sur le graphique. Nous avons par ailleurs été surpris de la présence de cet outil, car il amène un niveau de complexité auquel nous n'aurions pas pensé.
+
+Cependant, l'outil en question présente quelques imperfections. Les possibilités ouvertes avec `onclick` sont assez floues et difficiles d'utilisation. Notre illustration permet d'ouvrir une page Internet (ce qui au passage n'est pas pertinent pour tout les types de données), mais nous ne savons pas quelles sont les autres possibilités et il est difficile de tester cela car nous ne savons pas quelles types de commandes seront correctement interprétées par R. Également, quand bien même nous n'aurions pu qu'ouvrir des pages Internet, il aurait été intéressant de pouvoir les ouvrir directement depuis R, sans avoir à passer par la page html.
+
+Ceci rend cet outil peu convivial à utiliser, avec un intérêt limité.
+
+
+## 7.2. Ergonomie du package 
+
+De manière générale, le package est plutôt simple à prendre en main. Il faut simplement choisir la fonction à utiliser en fonction du graphique que l'on souhaite animer, puis choisir les arguments à donner selon l'animation désirée.
+
+Certaines animations sont peut-être plus difficiles à rendre pertinentes, comme l'ajout d'un lien Internet, qui ne s'applique pas forcément à tous les jeux de données.
+
+Mais la surbrillance permet vraiment de discerner les points les uns des autres dans le cas d'un nuage de point un peu trop chargé et l'infobulle est juste extraordinaire dans le sens où elle peut donner des informations très utiles pour chacun des points observés, ce qui aiderait à faire une analyse de qualité du graphique.
+
+<center> ![](fig/ggiraph_logo.png) </center> 
+
+# Références 
+
+* <https://www.r-bloggers.com/make-ggplot-graphics2-interactive-with-ggiraph/>
+* <https://davidgohel.github.io/ggiraph/articles/offcran/using_ggiraph.html>
+* <https://cran.r-project.org/web/packages/ggiraph/ggiraph.pdf>
+* <http://davidgohel.github.io/ggiraph/>
