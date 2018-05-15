@@ -1,0 +1,310 @@
+---
+title: "Package googleVis"
+linkTitle: "googleVis - graphiques interactifs"
+weight: 2
+author: "Alexandre Angers et Maxime Lacroix"
+date: "2018-05-15"
+output:
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+---
+
+***
+
+<style>
+body {
+text-align: justify}
+</style>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center')
+```
+
+
+
+## 1. Introduction
+
+L’objectif de cette fiche est de présenter un éventail de fonctionnalités qui peuvent être exécutées à l’aide du package ```googleVis```. Ce dernier sert principalement à générer divers graphiques interactifs dont la sortie est sous forme d’une page web. L’outil Google Charts API de Google permet en fait de créer un lien entre des données stockées en R et la visualisation de graphiques dans une page web.
+
+Plusieurs fonctions graphiques sont intégrées dans ce package et sont présentées sous la forme suivante dans cette fiche: graphiques de base, graphiques intermédiaires et graphiques avancés. Une dernière section est dédiée à la création de table de données interactive.
+
+Pour pouvoir utiliser le package ```googleVis```, il faut tout d'abord l'installer et ensuite l'importer dans l'environnement R. C'est ce que les commandes suivantes effectuent.
+```{r message=FALSE, eval=FALSE}
+install.packages(googleVis) #Installation
+library(googleVis) #Importation
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+library(googleVis) #Importation
+``` 
+ 
+ 
+```{r echo = FALSE}
+op <- options(gvis.plot.tag='chart')
+```
+
+
+
+## 2. Données utilisées dans les exemples
+
+À titre indicatif, les exemples présentés dans cette fiche utilisent les données du data frame ```quakes``` du package ```datasets``` de l’installation de base de R. Ce jeu de données porte sur la localisation de 1000 évènements sismiques dont la magnitude est plus grande que 4 dans la région de Fidji, et ce, depuis 1964.
+
+Créons d'abord l'objet ```seismes``` qui contiendra ces données. La fonction ```head``` nous permet de visualiser les 6 premières observations de ce jeu de données
+```{r}
+seismes <- quakes
+head(seismes)
+```
+Avec la fonction ```str```, on constate que le jeu de données contient 5 variables ainsi que 1000 observations.
+```{r}
+str(seismes)
+```
+Dans quelques exemples, trois nouvelles variables seront nécessaires et sont créées comme suit :
+```{r}
+# Première nouvelle variable "magFactor"
+seismes$magFactor <- factor(floor(seismes$mag))
+
+# Deuxième nouvelle variable "region"
+seismes$region <- factor(seismes$long>= 175,labels=c("Ouest","Est"))
+
+# Troisième nouvelle variable "latlong"
+seismes$latlong <- paste(seismes$lat,seismes$long,sep=":")
+
+```
+La première variable ```magFactor``` est créée à partir de la variable ```mag``` à l’aide de la fonction ```floor``` qui lui prend sa partie entière et qui crée ainsi une variable catégorique à trois modalités (magnitude = 4, 5 ou 6). La deuxième variable, créée à partir de la variable ```long```, est ```region```. Celle-ci est une variable catégorique à deux modalités (région = ouest ou est). La dernière variable créée  ```latlong``` est une concaténation de la latitude et de la longitude à l'aide de la fonction ```paste```.
+
+
+
+## 3. Fonctions graphiques
+Dans cette section, plusieurs fonctions graphiques sont présentées à l’aide d’exemples et selon leur degré de complexité. À noter que plusieurs autres fonctions graphiques ne sont pas discutées dans cette fiche dans le but de plutôt dresser une synthèse des fonctionnalités disponibles avec ```googleVis``` et non pas une liste exhaustive de toutes les fonctions. Dans ce package, la syntaxe de création de graphique est fort simple et ressemble à la suivante :
+
+```{r eval=FALSE}
+Objet_graphique <- fonctionGraphique(data=...,options=list(...))
+plot(Objet_graphique)
+```
+Un objet graphique est créé à l'aide d'une fonction graphique, et il est affiché avec la fonction ```plot```. Il est bien de noter que les options doivent être inscrites dans une liste. 
+
+
+### 3.1. Graphiques de bases
+
+#### Diagramme à bandes (Bar Chart)
+
+Le diagramme à bande permet de comparer différentes modalités d'une variable catégorique. Les options de la fonction ```gvisBarChart``` sont relativement simples. On peut y choisir les limites et les titres des axes, les couleurs du graphique, et le titre du graphique (option ```title=```). Dans cet exemple, nous avons créé un tableau de fréquence selon ```magFactor``` et ```region```. Le package ```googleVis``` offre une palette de couleur de base qui peut être modifiée selon les besoins de l'utilisateur. L'option ```colors=``` prend en argument un nom de couleur sous forme de texte ou une couleur en format hexadécimal. Un placement du curseur sur les différentes bandes permet de voir la valeur de la variable numérique en fonction des modalités des variables catégoriques.
+
+
+```{r results='asis'}
+tab_freq <- table(seismes$magFactor,seismes$region)
+table <- data.frame(Mag=row.names(tab_freq),Ouest=tab_freq[,1],Est=tab_freq[,2])
+Bar <- gvisBarChart(table,options=
+                      list(title="Nombre de tremblements de terre par region et par magnitude",
+                           colors="['#A9CCE3','blue']"))
+plot(Bar)
+```
+
+#### Graphique en pointes de tarte (Pie Chart)
+
+Le graphique en pointes de tarte créé avec la fonction ```gvisPieChart``` permet de visualiser les proportions des différentes modalités d'une variable catégorique. Comme pour le diagramme à bandes, ses options sont relativement simples. L'exemple suivant utilise un tableau de fréquences relatives de la variable ```magFactor```, qu'on assigne à l'objet ```table_tarte```. Un placement du curseur sur les différentes pointes de tarte permet de voir la proportion.
+
+```{r results='asis'}
+table_tarte <- data.frame(prop.table(table(seismes$magFactor)))
+Pie <- gvisPieChart(table_tarte,options=list(title="Proportion des différentes magnitudes"))
+plot(Pie)
+
+```
+
+
+#### Graphique de dispersion (Scatter Chart)
+
+Le graphique de dispersion créé avec la fonction ```gvisScatterChart``` permet de regarder le lien entre deux variables numériques. Plusieurs options sont possibles, notamment de donner un titre aux axes avec ```vAxis=``` et ```hAxis=```, ou encore de choisir la largeur ```width=``` et la hauteur ```heigth=``` du graphique. Les options ```lineWidth=``` et ```pointSize=``` permettent de personnaliser la largeur de la ligne et la grosseur des points. Aussi, il est possible de modifier le format de la légende avec l'option ```legend=```. Dans cet exemple, le lien entre  le nombre de stations en fonction de la profondeur du séisme est dressé. Un placement du curseur sur les différents points permet de connaître les coordonnées en abscisse et en ordonnée.
+```{r results='asis'}
+
+seismes <- seismes[order(seismes$depth),]
+Scatter <- gvisScatterChart(seismes[,c("depth","stations")],
+                            options=list(
+                              legend="none",
+                              lineWidth=0,pointSize=1,
+                              title="Nombre de stations en fonction de la profondeur", 
+                              vAxis="{title:'nombre de stations'}",
+                              hAxis="{title:'depth'}", 
+                              width=1000,height=300))
+plot(Scatter)
+
+```
+
+#### Histogramme
+
+L'histogramme créé avec la fonction ```gvisHistogram``` permet d'afficher les fréquences d'une variable numérique. Les options sont semblables aux graphiques précédents. Le paramètre ```position``` dans l'option ```legend=``` permet de choisir à quel endroit placer la légende. Dans cet exemple, le jeu de données ```datHist``` est créé pour différencier les trois niveaux de magnitude. La fonction graphique comprend qu'il s'agit de différents facteurs et assigne une couleur de base à chacun. Un placement du curseur sur les différentes bandes permet de voir la fréquence.
+
+```{r results='asis' }
+datHist <- data.frame(mag4=seismes[seismes$magFactor==4,]$mag[1:1000],
+                      mag5= seismes[seismes$magFactor==5,]$mag[1:1000],
+                      mag6= seismes[seismes$magFactor==6,]$mag[1:1000])
+
+Hist <- gvisHistogram(datHist,options=list(width=1000, 
+                                           legend="{position:'top'}",
+                                           title="Histogramme de la magnitude"))
+plot(Hist)
+
+```
+
+
+### 3.2. Graphiques intermédiaires
+#### Graphique en bulles (Bubble Chart)
+Le graphique en bulles créé avec la fonction ```gvisBubbleChart``` permet de dresser un lien entre plusieurs variables. Les arguments ```xvar=``` et ```yvar=``` assignent les variables souhaitées en abscisse et en ordonnée respectivement. L'étiquette de chacune des bulles est contrôlée par la variable assignée à l'argument ```idvar=```. L'argument ```colorvar=``` utilise une variable catégorique et assigne une couleur selon chacune de ses modalités. Pour modifier la dimension de chaque bulle, il faut attribuer une variable à l'argument ```sizevar=```. Dans cet exemple, on représente la latitude en fonction de la longitude selon la magnitude, le nombre de stations et la profondeur du séisme. À noter que le jeu de données en entrée de la fonction graphique ne comporte que 13 observations pour simplifier la lecture du graphique. Un placement du curseur sur les différents points permet d'obtenir les coordonnées de toutes les variables en argument.
+```{r results='asis'}
+Bubble <- gvisBubbleChart(seismes[c(50,100,150,200,250,300,350,400,450,500,550,600,650),],   
+                          idvar="depth",xvar="long",yvar="lat", 
+                          colorvar="magFactor",sizevar="stations",
+                          options=list(vAxis="{title:'latitude',ticks:[-35,-30,-25,-20,-15]}",
+                                       hAxis="{title:'longitude',ticks:[170,175,180,185,190]}",
+                                       title="Graphique un bulles selon la longitude et la latitude par la profondeur, la 
+                                       magnitude et le nombre de stations"))
+plot(Bubble)
+```
+
+#### Diagramme de Sankey (Sankey Chart)
+
+Le diagramme de Sankey créé avec la fonction ```gvisSankey``` est en fait un digramme de flux. Il permet de faire un lien entre deux variables catégoriques à l'aide d'une variable de poids. L'argument ```from=``` permet d'attribuer la variable de gauche et ```to=``` assigne la variable de droite, tandis que l'argument ```weight``` affecte la largeur des bandes. Dans cet exemple, nous modélisons le lien entre ```region``` et ```magFactor``` par la profondeur moyenne des séismes. Ces moyennes sont calculées à l'aide de la fonction ```aggregate``` et stockées dans l'objet ```dataSankey```. On remarque que plus la profondeur moyenne est élevée, plus la bande est large. Un placement du curseur sur les différentes bandes permet de voir la valeur numérique de la variable de poids entre les deux variables catégoriques.
+
+```{r results='asis'}
+
+dataSankey <- aggregate(seismes$depth,by=list(seismes$region,seismes$magFactor),FUN=mean,na.rm=T)
+dataSankey$Group.2 <- paste0("Magnitude ",dataSankey$Group.2)
+colnames(dataSankey) <- c("Région","Magnitude","Profondeur")
+Sankey <- gvisSankey(dataSankey,from="Région",to="Magnitude",weight="Profondeur",
+                     options=list(width=400,height=300))
+plot(Sankey)
+
+
+```
+
+#### Juxtaposition de graphique
+
+La fonction ```gvisMerge``` permet de juxtaposer deux graphiques ensemble sur la même page web. Dans cet exemple, l'histogramme et le diagramme en pointes de tarte créés précédemment sont juxtaposés. L'argument ```horizontal=``` permet de décider si les graphiques seront côte à côte ou un sur l'autre.
+
+```{r results='asis'}
+
+Merge <- gvisMerge(Hist,Pie,horizontal = FALSE)
+plot(Merge)
+
+
+```
+```{r results='asis',echo=FALSE}
+table_tarte = data.frame(prop.table(table(seismes$magFactor)))
+
+Pie <- gvisPieChart(table_tarte,options=list(title="Proportion des différentes magnitudes"))
+datHist <- data.frame(mag4=seismes[seismes$magFactor==4,]$mag[1:1000],
+                      mag5= seismes[seismes$magFactor==5,]$mag[1:1000],
+                      mag6= seismes[seismes$magFactor==6,]$mag[1:1000])
+
+Hist <- gvisHistogram(datHist,options=list(width=1000, 
+                                           legend="{position:'top',maxLines:2}",
+                                           title="Histogramme de la magnitude"))
+Merge <- gvisMerge(Hist,Pie)
+plot(Merge)
+
+
+```
+
+### 3.3. Graphiques avancés
+#### Geo Chart
+
+Dans un jeu de données comme ```quakes```, il peut être pertinent de regarder les données géographiquement. La fonction ```gvisGeoChart``` permet de visualiser les données à l'aide de cercles selon deux variables d'intensité contrôlant leur taille (```sizevar=```) et leur couleur (```colorvar=```). Dans cet exemple, on peut localiser les séismes à l'aide de la variable ```latlong```. La taille des cercles représente la profondeur, tandis que le ton de la couleur représente la magnitude. Pour se concentrer sur une région du monde en particulier, il est possible de la sélectionner avec l'option ```region=```. Il est possible de zoomer sur une partie de cette région en sélectionnant un amas de cercles. Chaque cercle est cliquable pour obtenir de l'information sur le séisme. 
+
+```{r results='asis'}
+GeoMarker <- gvisGeoChart(seismes,locationvar="latlong", 
+                          sizevar="depth",
+                          colorvar="mag",options=list(region="053"))
+plot(GeoMarker)
+
+```
+
+#### Google Maps
+La fonction ```gvisMap``` est semblable à la fonction ```gvisGeoChart```. La principale différence est que ```gvisMap``` permet d'afficher les données dans une carte Google Maps. Les options sont principalement en lien avec les paramètres d'utilisation de Google Maps. Dans cet exemple, les 100 premières observations du jeu de données ```seismes``` sont utilisées afin de ne pas engorger la visualisation. Les arguments ```locationvar=``` et ```tipvar=``` définissent les variables de localisation et de boîte de texte, respectivement. L'option ```showTip=``` permet d'ajouter cette boîte de texte cliquable à chacun des points, créée à partir de la nouvelle variable ```depth_affichage```. Les trois dernières options permettent de contrôler différents paramètres reliés à Google Maps.
+```{r results='asis'}
+
+seismes$depth_affichage <- paste("Profondeur du tremblement de terre (en km) ",seismes$depth,sep=" : ")
+
+seismesMap <- gvisMap(seismes[1:100,],locationvar="latlong",tipvar="depth_affichage", 
+                     options=list(showTip=TRUE, 
+                                  enableScrollWheel=TRUE,
+                                  mapType='terrain', 
+                                  useMapTypeControl=TRUE))
+plot(seismesMap)
+```
+
+#### Graphique d'intensité (Gauge)
+Le graphique d’intensité créé à partir de ```gvisGauge``` permet la visualisation d'une variable numérique sous forme de jauges. Dans cet exemple, les moyennes par région de la variable ```stations``` sont utilisées comme jeu de données d'entrée. L'argument ```labelvar=``` crée une jauge par modalité de la variable assignée. La position de l'aiguille est déterminée par la variable de l'argument ```numvar=```. Les options mentionnées dans l'exemple contrôlent l'échelle des jauges. Ce graphique est le seul dans cette fiche qui n'est pas interactif.
+```{r results='asis'}
+dataGauge <- aggregate(seismes$stations,by=list(seismes$region),FUN=mean)
+
+Gauge <- gvisGauge(dataGauge,labelvar="Group.1",numvar="x",
+                   options=list(min=0,max=40,greenFrom=35,greenTo=40, 
+                                yellowFrom=15,yellowTo=35,redFrom=0,redTo=15))
+plot(Gauge)
+```
+  
+  
+  
+## 4. Table de données
+En plus des graphiques interactifs présentés ci-haut, le package ```googleVis``` permet également de créer des tables de données interactives. La fonction ```gvisTable``` crée une table à plusieurs pages qu’on peut manuellement trier selon une variable souhaitée. L'option ```page=``` donne la possibilité d'avoir plusieurs pages, tandis que l'option ```pageSize=``` dicte le nombre d'observations qui doit être affiché par page.
+```{r results='asis'}
+Table <- gvisTable(seismes[1:50,],options=list(page='enable',pageSize=10))
+plot(Table)
+
+
+```
+
+
+
+## 5. Observations et conclusion
+Le package ```googleVis```  est un outil fort intéressant à capacité multiple. Divers types de graphiques interactifs afin de combler divers besoins sont disponibles dans ce package. 
+L’un des points forts de ce package est évidemment l’aspect interactif qui permet à un destinataire qui n’est pas familier avec la programmation R de pouvoir analyser davantage des résultats, contrairement à un graphique ou une table de données statique. De plus, le fait que la sortie soit en HTML permet à l’utilisateur de partager facilement le contenu de ses sorties.
+
+Un autre aspect intéressant de ce package est la grande variété d’options qui existent pour chacune des fonctions graphiques, ce qui permet le rassemblement d'une grande quantité d'information dans un seul graphique. Elles sont d'ailleurs particulièrement intuitives par leurs noms facilement reconnaissables. Par ailleurs, une connaissance de base de R suffit amplement pour effectuer tous les graphiques présentés dans cette fiche.
+
+La principale difficulté du package est son intégration avec ```R Markdown```. En effet, plusieurs paramètres et options ont dû être ajoutés au travers du code de la présente fiche pour la rendre lisible. C'est un aspect qui pourrait être amélioré au cours des prochaines mises à jours du package. De plus, le package ne peut être utilisé sans une connexion internet, ce qui restreint quelque peu son utilisation.
+
+Somme toute, il reste que le package est relativement simple à utiliser et offre beaucoup d'avantages par son interactivité et l'aspect visuel de ses graphiques.
+
+## 6. Références
+### Références sur le jeu de données
+[Jeu de données ```quakes```](https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/quakes.html)
+
+### Références sur l'utilisation du package ```googleVis```
+[Introduction au package](https://cran.r-project.org/web/packages/googleVis/vignettes/googleVis.pdf)
+
+[gvisBarChart](https://www.rdocumentation.org/packages/googleVis/versions/0.6.0/topics/gvisBarChart)
+
+[gvisPieChart](https://www.rdocumentation.org/packages/googleVis/versions/0.6.0/topics/gvisPieChart)
+
+[gvisScatterChart](https://www.rdocumentation.org/packages/googleVis/versions/0.6.0/topics/gvisScatterChart)
+
+[gvisHistogram](https://www.rdocumentation.org/packages/googleVis/versions/0.6.0/topics/gvisHistogram)
+
+[gvisBubbleChart](https://www.rdocumentation.org/packages/googleVis/versions/0.6.0/topics/gvisBubbleChart)
+
+[gvisSankey](https://www.rdocumentation.org/packages/googleVis/versions/0.6.0/topics/gvisSankey)
+
+[gvisMerge](https://www.rdocumentation.org/packages/googleVis/versions/0.6.0/topics/gvisMerge)
+
+[gvisGeoChart](https://www.rdocumentation.org/packages/googleVis/versions/0.6.0/topics/gvisGeoChart)
+
+[gvisMap](https://www.rdocumentation.org/packages/googleVis/versions/0.6.0/topics/gvisMap)
+
+[gvisGauge](https://www.rdocumentation.org/packages/googleVis/versions/0.6.0/topics/gvisGauge)
+
+[gvisTable](https://www.rdocumentation.org/packages/googleVis/versions/0.6.0/topics/gvisTable)
+
+### Autres références
+[Choix de couleurs](https://htmlcolorcodes.com/fr/)
+
+[Codes de régions](https://developers.google.com/chart/interactive/docs/gallery/geochart#Continent_Hierarchy)
+  
+```{r echo = FALSE}
+options(op)
+```
