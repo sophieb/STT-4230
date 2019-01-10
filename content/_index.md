@@ -23,9 +23,9 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
 #### Ce site web comprend les pages suivantes : 
 
 * Introduction à R
-    * [Présentation de R]({{%relref "introduction/presentation_r_2018.html" %}})
+    * [Présentation de R]({{%relref "introduction/presentation_r_2019.html" %}})
     * [Installation de R et RStudio]({{%relref "introduction/installation_r_2018.html" %}})
-    * [Concepts de base en R]({{%relref "introduction/base_r_2018.html" %}})
+    * [Concepts de base en R]({{%relref "introduction/base_r_2019.html" %}})
 * Manipulation de données en R
     * [Structure de données en R]({{%relref "manipulation_donnees/structures_donnees_r_2018.html" %}})
     * [Lecture et écriture dans des fichiers externes à partir de R]({{%relref "manipulation_donnees/lecture_ecriture_r_2018.html" %}})
