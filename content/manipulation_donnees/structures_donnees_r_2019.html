@@ -1,10 +1,10 @@
 ---
 title: "Structures de données en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2018-01-15"
+date: "2018-01-14"
 weight: 1
 slug: "structures_r"
-categories: ["cours_2018-01-23"]
+categories: ["cours_2018-01-22"]
 categories_weight: 1
 lastmodifierdisplayname : "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
@@ -56,6 +56,7 @@ header-includes:
 <li><a href="#fonctions-de-creation-dun-vecteur">Fonctions de création d’un vecteur</a><ul>
 <li><a href="#fonction-c">Fonction <code>c</code></a></li>
 <li><a href="#fonction-vector">Fonction <code>vector</code></a></li>
+<li><a href="#fonction-as.vector">Fonction <code>as.vector</code></a></li>
 <li><a href="#fonction-rep">Fonction <code>rep</code></a></li>
 <li><a href="#la-creation-de-sequences-avec-loperateur-ou-la-fonction-seq">La création de séquences avec l’opérateur <code>':'</code> ou la fonction <code>seq</code></a></li>
 </ul></li>
@@ -65,16 +66,19 @@ header-includes:
 </ul></li>
 <li><a href="#ajout-de-metadonnees-dans-un-vecteur">Ajout de métadonnées dans un vecteur</a></li>
 <li><a href="#extraction-de-donnees-dans-un-vecteur">Extraction de données dans un vecteur</a></li>
-<li><a href="#les-vecteurs-de-chaines-de-caracteres">Les vecteurs de chaînes de caractères</a></li>
+<li><a href="#les-vecteurs-de-chaines-de-caracteres">Les vecteurs de chaînes de caractères</a><ul>
+<li><a href="#les-fonctions-paste-et-paste0">Les fonctions <code>paste</code> et <code>paste0</code></a></li>
+</ul></li>
 </ul></li>
 <li><a href="#la-matrice">La matrice</a><ul>
 <li><a href="#obtention-dinformations-sur-une-matrice">Obtention d’informations sur une matrice</a></li>
 <li><a href="#fonctions-de-creation-dune-matrice">Fonctions de création d’une matrice</a><ul>
 <li><a href="#fonction-matrix">Fonction <code>matrix</code></a></li>
-<li><a href="#les-fonctions-rbind-et-cbind">Les fonctions <code>rbind</code> et <code>cbind</code></a></li>
+<li><a href="#fonction-as.matrix">Fonction <code>as.matrix</code></a></li>
+<li><a href="#fonctions-rbind-et-cbind">Fonctions <code>rbind</code> et <code>cbind</code></a></li>
 </ul></li>
 <li><a href="#fonctions-de-concatenation-de-matrices">Fonctions de concaténation de matrices</a><ul>
-<li><a href="#les-fonctions-rbind-et-cbind-1">Les fonctions <code>rbind</code> et <code>cbind</code></a></li>
+<li><a href="#fonctions-rbind-et-cbind-1">Fonctions <code>rbind</code> et <code>cbind</code></a></li>
 </ul></li>
 <li><a href="#ajout-de-metadonnees-dans-une-matrice">Ajout de métadonnées dans une matrice</a></li>
 <li><a href="#extraction-de-donnees-dans-une-matrice">Extraction de données dans une matrice</a></li>
@@ -83,6 +87,7 @@ header-includes:
 <li><a href="#obtention-dinformations-sur-un-array">Obtention d’informations sur un array</a></li>
 <li><a href="#fonction-de-creation-dun-array">Fonction de création d’un array</a><ul>
 <li><a href="#fonction-array">Fonction <code>array</code></a></li>
+<li><a href="#fonction-as.array">Fonction <code>as.array</code></a></li>
 </ul></li>
 <li><a href="#ajout-de-metadonnees-dans-un-array">Ajout de métadonnées dans un array</a></li>
 <li><a href="#extraction-de-donnees-dans-un-array">Extraction de données dans un array</a></li>
@@ -91,6 +96,7 @@ header-includes:
 <li><a href="#obtention-dinformations-sur-une-liste">Obtention d’informations sur une liste</a></li>
 <li><a href="#fonctions-de-creation-dune-liste">Fonctions de création d’une liste</a><ul>
 <li><a href="#fonction-list">Fonction <code>list</code></a></li>
+<li><a href="#fonction-as.list">Fonction <code>as.list</code></a></li>
 <li><a href="#fonction-vector-1">Fonction <code>vector</code></a></li>
 </ul></li>
 <li><a href="#fonction-de-concatenation-de-listes">Fonction de concaténation de listes</a><ul>
@@ -107,10 +113,11 @@ header-includes:
 <li><a href="#obtention-dinformations-sur-un-data-frame">Obtention d’informations sur un data frame</a></li>
 <li><a href="#fonction-de-creation-dun-data-frame">Fonction de création d’un data frame</a><ul>
 <li><a href="#fonction-data.frame">Fonction <code>data.frame</code></a></li>
+<li><a href="#fonction-as.data.frame">Fonction <code>as.data.frame</code></a></li>
 </ul></li>
 <li><a href="#fonctions-de-concatenation-de-data-frame">Fonctions de concaténation de data frame</a><ul>
 <li><a href="#fonction-data.frame-1">Fonction <code>data.frame</code></a></li>
-<li><a href="#fonction-cbind">Fonction <code>cbind</code></a></li>
+<li><a href="#fonctions-rbind-et-cbind-2">Fonctions <code>rbind</code> et <code>cbind</code></a></li>
 </ul></li>
 <li><a href="#ajout-de-metadonnees-dans-un-data-frame">Ajout de métadonnées dans un data frame</a></li>
 <li><a href="#extraction-delements-dun-data-frame">Extraction d’éléments d’un data frame</a></li>
@@ -122,7 +129,7 @@ header-includes:
 <li><a href="#le-facteur">Le facteur</a><ul>
 <li><a href="#obtention-dinformations-sur-un-facteur.">Obtention d’informations sur un facteur.</a></li>
 <li><a href="#fonction-de-creation-dun-facteur">Fonction de création d’un facteur</a><ul>
-<li><a href="#fonction-factor">Fonction <code>factor</code></a></li>
+<li><a href="#fonctions-factor-et-as.factor">Fonctions <code>factor</code> et <code>as.factor</code></a></li>
 </ul></li>
 <li><a href="#fonction-de-modification-dun-facteur">Fonction de modification d’un facteur</a><ul>
 <li><a href="#fonction-levels">Fonction <code>levels</code></a></li>
@@ -131,7 +138,8 @@ header-includes:
 <li><a href="#extraction-delements-dun-facteur">Extraction d’éléments d’un facteur</a></li>
 <li><a href="#les-facteurs-ordonnes">Les facteurs ordonnés</a></li>
 </ul></li>
-<li><a href="#conversions-de-type-de-donnees">Conversions de type de données</a></li>
+<li><a href="#conversions">Conversions de type de données</a></li>
+<li><a href="#synthese">Synthèse</a></li>
 <li><a href="#references-pertinentes">Références pertinentes</a></li>
 </ul>
 </div>
@@ -271,7 +279,7 @@ header-includes:
 </div>
 <div id="exemple-de-data-frame" class="section level3">
 <h3>Exemple de data frame</h3>
-<p>Le data frame est en quelque sorte un type particulier de liste, mais il partage aussi des caractéristiques avec les matrices, étant réputé posséder 2 dimensions (des lignes et des colonnes). Ses éléments sont des objets, mais ces objets doivent être tous de même longueur. Les éléments sont typiquement des vecteurs ou des facteurs, formant les colonnes du data frame. Les éléments d’un data frame peuvent aussi être des listes, mais cette possibilité n’est pas fréquemment exploitée. Voici un exemple de data frame.</p>
+<p>Le data frame est en quelque sorte un type particulier de liste, mais il partage aussi des caractéristiques avec les matrices, étant réputé posséder 2 dimensions (des lignes et des colonnes). Ses éléments sont des objets contraints d’être de dimensions concordantes. Dans la grande majorité des cas, les éléments sont des vecteurs ou des facteurs de même longueur, formant les colonnes du data frame. Voici un exemple de data frame.</p>
 <pre class="r"><code>dat</code></pre>
 <pre><code>##    V1         V2    V3
 ## 1 3.5      matin  TRUE
@@ -284,7 +292,7 @@ header-includes:
 ##  $ V2: chr  &quot;matin&quot; &quot;après-midi&quot; &quot;soir&quot; &quot;nuit&quot;
 ##  $ V3: logi  TRUE TRUE FALSE TRUE</code></pre>
 <p>Il pourrait être illustré comme suit : <img src="fig/DataFrame.png" />.</p>
-<p>La première dimension d’un data frame est la longueur commune des objets qu’il contient (dans l’exemple 4) et sa deuxième dimension est le nombre d’objets qu’il contient (dans l’exemple, le data frame contient 3 vecteurs).</p>
+<p>La première dimension d’un data frame typique est la longueur commune des objets qu’il contient (4 dans l’exemple) et sa deuxième dimension est le nombre d’objets qu’il contient (dans l’exemple, le data frame contient 3 vecteurs).</p>
 <p>Les data frames ont été créés spécialement pour l’analyse statistique de données. Ils représentent des tableaux de données dans lesquels les lignes sont des observations et les colonnes des variables (des variables au sens statistique et non au sens informatique). Le data frame fait donc penser à une matrice. Ses dimensions sont vues comme un nombre de lignes ou d’observations et un nombre de colonnes ou de variables. Cependant, contrairement à une matrice, les données dans les différentes colonnes d’un data frame n’ont pas à être du même type.</p>
 </div>
 <div id="exemple-de-facteur" class="section level3">
@@ -340,7 +348,7 @@ header-includes:
 <p>Il est cependant toujours possible d’ajouter des attributs à un objet, portant le nom de notre choix. Les fonctions qui retournent les valeurs d’attributs peuvent aussi servir à initialiser ou remplacer les valeurs des attributs. Pour ce faire, il suffit d’accompagner la commande d’extraction de l’attribut d’un opérateur d’assignation (<code>&lt;-</code>) suivi de la valeur souhaitée, comme dans l’exemple ci-dessus.</p>
 <pre class="r"><code>attr(vec, &quot;description&quot;) &lt;- &quot;exemple de vecteur&quot;
 str(vec)</code></pre>
-<pre><code>##  atomic [1:4] 3.5 7.8 9.9 5.7
+<pre><code>##  num [1:4] 3.5 7.8 9.9 5.7
 ##  - attr(*, &quot;description&quot;)= chr &quot;exemple de vecteur&quot;</code></pre>
 <p>Pour retirer un attribut, il faut lui assigner la valeur spécial <code>NULL</code>.</p>
 <pre class="r"><code>attr(vec, &quot;description&quot;) &lt;- NULL
@@ -389,7 +397,7 @@ en</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 <pre class="r"><code>is.double(en)</code></pre>
 <pre><code>## [1] FALSE</code></pre>
-<p>Sans ce caractère <code>L</code>, la majorité de fonctions en R traite par défaut les nombres comme des réels.</p>
+<p>Sans ce caractère <code>L</code>, la majorité des fonctions en R traite par défaut les nombres comme des réels.</p>
 <pre class="r"><code>un &lt;- 1
 un</code></pre>
 <pre><code>## [1] 1</code></pre>
@@ -434,10 +442,10 @@ lo</code></pre>
 </div>
 <div id="donnees-manquantes" class="section level3">
 <h3>Données manquantes</h3>
-<p>Peu importe le type de données, une donnée manquante est représentée en R par la constante <code>NA</code> (pour “Not Available”).</p>
+<p>Peu importe le type de données, une donnée manquante est représentée en R par la constante <code>NA</code> (pour « Not Available »).</p>
 <pre class="r"><code>NA</code></pre>
 <pre><code>## [1] NA</code></pre>
-<p>Ce n’est pas la même chose que <code>NaN</code> qui signifie plutôt “Not a Number”.</p>
+<p>Ce n’est pas la même chose que <code>NaN</code> qui signifie plutôt « Not a Number ».</p>
 <pre class="r"><code>0/0</code></pre>
 <pre><code>## [1] NaN</code></pre>
 <p>L’existence d’une constante pour représenter les données manquantes est une autre particularité du langage R spécifique à l’analyse de données.</p>
@@ -506,6 +514,7 @@ extrait_mat</code></pre>
 <pre><code>## [1] FALSE</code></pre>
 <pre class="r"><code>attributes(extrait_mat)</code></pre>
 <pre><code>## NULL</code></pre>
+<p> </p>
 </div>
 <div id="extractions-delements-dans-un-objet-a-plusieurs-dimensions" class="section level4">
 <h4>Extractions d’éléments dans un objet à plusieurs dimensions</h4>
@@ -548,14 +557,14 @@ extrait_mat</code></pre>
 <h4>Identification du ou des éléments à extraire avec l’opérateur <code>[</code></h4>
 <p>Étant donné que l’opérateur <code>[</code> permet l’extraction de plusieurs éléments, il accepte une plus grande variété de types de valeurs. Voici les valeurs qu’il accepte en argument pour identifier les éléments à extraire :</p>
 <ul>
-<li>un ou des nombres positifs, dont les valeurs sont entre 1 et la longueur de la dimension concernée :<br />
+<li>un ou des nombres positifs, dont les valeurs sont entre 1 et la taille de la dimension concernée :<br />
 <em>positions des éléments à conserver</em>;</li>
-<li>un ou des nombres négatifs, dont les valeurs sont entre 1 et la longueur de la dimension concernée :<br />
-<em><strong>-</strong> positions des éléments à éliminer</em>;</li>
+<li>un ou des nombres négatifs, dont les valeurs sont entre 1 et la taille de la dimension concernée :<br />
+<em><strong>-</strong> positions des éléments à exclure</em>;</li>
 <li>un ou des chaînes de caractères (possible seulement si les éléments sont nommés) :<br />
 <em>noms des éléments à conserver</em>;</li>
 <li>vecteur de logiques (doit être de la même longueur que la dimension concernée) :<br />
-<code>TRUE</code> <em>pour les éléments à conserver,</em> <code>FALSE</code> <em>pour ceux à éliminer</em>;</li>
+<code>TRUE</code> <em>pour les éléments à conserver,</em> <code>FALSE</code> <em>pour ceux à exclure</em>;</li>
 <li>rien : utile par exemple pour extraire une ligne d’une matrice ou d’un data frame en conservant toutes les colonnes.</li>
 </ul>
 <p>Voici quelques exemples :</p>
@@ -565,7 +574,7 @@ extrait_mat</code></pre>
 <pre class="r"><code>vec[c(1, 3)]</code></pre>
 <pre><code>## [1] 3.5 9.9</code></pre>
 <ul>
-<li>extraction d’éléments par identification d’éléments à laisser tomber,</li>
+<li>extraction d’éléments par identification d’éléments à exclure,</li>
 </ul>
 <pre class="r"><code>vec[-c(2, 4)]</code></pre>
 <pre><code>## [1] 3.5 9.9</code></pre>
@@ -603,7 +612,7 @@ extrait_mat</code></pre>
 </div>
 <div id="argument-drop-de-loperateur" class="section level4">
 <h4>Argument <code>drop</code> de l’opérateur <code>[</code></h4>
-<p>L’opérateur <code>[</code> préserve la structure des objets, sauf dans quelques cas particuliers. Un de ces cas est l’extraction d’une colonne, complète ou partielle, d’un data frame. Le résultat de l’extraction est alors un vecteur ou un facteur, et nom un autre data frame, comme dans cet exemple.</p>
+<p>L’opérateur <code>[</code> préserve la structure des objets, sauf dans quelques cas particuliers. Un de ces cas est l’extraction d’une colonne, complète ou partielle, d’un data frame. Le résultat de l’extraction est alors un vecteur ou un facteur, et non un autre data frame, comme dans cet exemple.</p>
 <pre class="r"><code>str(dat)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    4 obs. of  3 variables:
 ##  $ V1: num  3.5 7.8 9.9 5.7
@@ -663,11 +672,11 @@ extrait_mat</code></pre>
 ## [1,] TRUE
 ## [2,] TRUE</code></pre>
 <p>Lorsque le premier argument fourni en entrée à la fonction <code>subset</code> est un data frame, il est possible de référer aux colonnes de celui-ci directement par leurs noms dans les arguments <code>subset</code> et <code>select</code>. Il est aussi possible de retirer une colonne en utilisant l’opérateur <code>-</code> avant le nom de la colonne à retirer dans la valeur fournie à l’argument <code>select</code>.</p>
-<pre class="r"><code>subset(dat, subset = V1 &gt; 5, select = - V2)</code></pre>
-<pre><code>##    V1    V3
-## 2 7.8  TRUE
-## 3 9.9 FALSE
-## 4 5.7  TRUE</code></pre>
+<pre class="r"><code>subset(dat, subset = c(TRUE, FALSE, TRUE, TRUE), select = - V3)</code></pre>
+<pre><code>##    V1    V2
+## 1 3.5 matin
+## 3 9.9  soir
+## 4 5.7  nuit</code></pre>
 </div>
 </div>
 </div>
@@ -702,7 +711,7 @@ vec</code></pre>
 <pre class="r"><code>vec[1:4] &lt;- c(0.1, 0.2)
 vec</code></pre>
 <pre><code>## [1] 0.1 0.2 0.1 0.2</code></pre>
-<p>Si la longueur du vecteur le plus court n’est pas un multiple de la longueur du vecteur le plus long, ça fonctionne encore, mais un avertissement est émis, comme dans cet exemple.</p>
+<p>Si la longueur du vecteur le plus long n’est pas un multiple de la longueur du vecteur le plus court, ça fonctionne encore, mais un avertissement est émis, comme dans cet exemple.</p>
 <pre class="r"><code>vec[1:3] &lt;- c(2.0, 4.9)</code></pre>
 <pre><code>## Warning in vec[1:3] &lt;- c(2, 4.9): number of items to replace is not a
 ## multiple of replacement length</code></pre>
@@ -760,12 +769,19 @@ ve</code></pre>
 <pre><code>## [1] 5 0 0</code></pre>
 <p>Cette fonction sera utile pour initialiser des vecteurs servant à contenir des valeurs créées itérativement dans une boucle.</p>
 </div>
+<div id="fonction-as.vector" class="section level3">
+<h3>Fonction <code>as.vector</code></h3>
+<p>La fonction <code>as.vector</code> sert quant à elle à transformer un objet en vecteur. Tous les attributs de l’objets sont retirés lors de l’opération. Voici un exemple.</p>
+<pre class="r"><code>as.vector(mat)</code></pre>
+<pre><code>##  [1]  TRUE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE FALSE FALSE  TRUE
+## [12]  TRUE</code></pre>
+</div>
 <div id="fonction-rep" class="section level3">
 <h3>Fonction <code>rep</code></h3>
 <p>Si un vecteur doit contenir des données qui se répètent, la fonction <code>rep</code> est utile. Ainsi, plutôt que de créer, par exemple, un vecteur contenant cinq 1 suivis de cinq 2 avec la fonction <code>c</code> comme suit</p>
 <pre class="r"><code>c(1, 1, 1, 1, 1, 2, 2, 2, 2, 2)</code></pre>
 <pre><code>##  [1] 1 1 1 1 1 2 2 2 2 2</code></pre>
-<p>il est plus succinct de le créer en utilisant conjointement les fonctions <code>rep</code> et<code>c</code> comme suit</p>
+<p>il est plus succinct de le créer en utilisant conjointement les fonctions <code>rep</code> et <code>c</code> comme suit</p>
 <pre class="r"><code>rep(c(1, 2), each = 5)</code></pre>
 <pre><code>##  [1] 1 1 1 1 1 2 2 2 2 2</code></pre>
 <p>L’utilisation de l’argument <code>each</code> de <code>rep</code> produit des répétitions consécutives élément par élément. Si la fonction <code>rep</code> est appelée sans attribuer explicitement les valeurs fournies en entrée à des arguments, alors la deuxième valeur fournie sera assignée à l’argument <code>times</code> et non <code>each</code>. Dans ce cas, un unique entier positif fourni en deuxième position provoque la répétition du vecteur entier fourni en première position un certain nombre de fois, comme dans cet exemple.</p>
@@ -811,8 +827,10 @@ ve</code></pre>
 </div>
 <div id="ajout-de-metadonnees-dans-un-vecteur" class="section level2">
 <h2>Ajout de métadonnées dans un vecteur</h2>
-<p>Supposons que l’objet <code>de</code> contient les résultats de 10 lancers d’un dé : 2, 3, 4, 1, 2, 3, 5, 6, 5, 4. Dans cet objet, nous pourrions identifier à quel lancer chaque résultat fait référence en ajoutant des noms aux éléments du vecteur.</p>
-<pre class="r"><code>names(de) &lt;- paste(&quot;l&quot;, 1:10, sep = &quot;&quot;)</code></pre>
+<p>Supposons que l’objet <code>de</code> contienne les résultats de 10 lancers d’un dé : 2, 3, 4, 1, 2, 3, 5, 6, 5, 4. Dans cet objet, nous pourrions identifier à quel lancer chaque résultat fait référence en ajoutant des noms aux éléments du vecteur.</p>
+<pre class="r"><code>names(de) &lt;- c(&quot;l1&quot;, &quot;l2&quot;, &quot;l3&quot;, &quot;l4&quot;, &quot;l5&quot;, &quot;l6&quot;, &quot;l7&quot;, &quot;l8&quot;, &quot;l9&quot;, &quot;l10&quot;)
+# nous apprendrons bientôt à créer plus succinctement ce vecteur avec l&#39;instruction
+# paste0(&quot;l&quot;, 1:10)</code></pre>
 <p>Voyons de quoi a l’air l’objet <code>de</code> suite à cet ajout.</p>
 <pre class="r"><code>de</code></pre>
 <pre><code>##  l1  l2  l3  l4  l5  l6  l7  l8  l9 l10 
@@ -825,7 +843,7 @@ ve</code></pre>
 # ou</code></pre>
 <pre class="r"><code>names(de)</code></pre>
 <pre><code>##  [1] &quot;l1&quot;  &quot;l2&quot;  &quot;l3&quot;  &quot;l4&quot;  &quot;l5&quot;  &quot;l6&quot;  &quot;l7&quot;  &quot;l8&quot;  &quot;l9&quot;  &quot;l10&quot;</code></pre>
-<p>Cet attribut est un exemple de métadonnées. Il s’agit de données sur les données.</p>
+<p>Cet attribut est un exemple de métadonnées. Il s’agit de données à propos des données.</p>
 <p> </p>
 <p>Nous avons déjà vu que tout attribut peut être retiré en lui assignant la valeur spéciale <code>NULL</code>. Pour retirer les noms que nous venons d’ajouter, nous pourrions donc faire comme ceci.</p>
 <pre class="r"><code>names(de) &lt;- NULL
@@ -836,7 +854,7 @@ de</code></pre>
 <p>Dans le cas d’un vecteur, il est également possible d’effacer d’un coup tous les attributs avec <code>as.vector</code> comme suit.</p>
 <pre class="r"><code>de &lt;- as.vector(de)</code></pre>
 <p>Redonnons maintenant des noms aux éléments de <code>de</code>, car ils seront utiles dans les prochains exemples.</p>
-<pre class="r"><code>names(de) &lt;- paste(&quot;l&quot;, 1:10, sep = &quot;&quot;)</code></pre>
+<pre class="r"><code>names(de) &lt;- c(&quot;l1&quot;, &quot;l2&quot;, &quot;l3&quot;, &quot;l4&quot;, &quot;l5&quot;, &quot;l6&quot;, &quot;l7&quot;, &quot;l8&quot;, &quot;l9&quot;, &quot;l10&quot;)</code></pre>
 </div>
 <div id="extraction-de-donnees-dans-un-vecteur" class="section level2">
 <h2>Extraction de données dans un vecteur</h2>
@@ -848,7 +866,7 @@ de</code></pre>
 ##  2</code></pre>
 <pre class="r"><code>de[[1]]</code></pre>
 <pre><code>## [1] 2</code></pre>
-<p>Remarquons que l’opérateur <code>[</code> préserve l’attribut nom, alors que l’opérateur <code>[[</code> ne le conserve pas, ce qui concorde avec les propriétés de ces opérateurs vues précédemment.</p>
+<p>Remarquons que l’opérateur <code>[</code> préserve le nom de l’élément (l’attribut <code>names</code>), alors que l’opérateur <code>[[</code> ne le conserve pas, ce qui concorde avec les propriétés de ces opérateurs vues précédemment.</p>
 <p>Un élément peut aussi être extrait en l’identifiant par son nom.</p>
 <pre class="r"><code>de[&quot;l1&quot;]   </code></pre>
 <pre><code>## l1 
@@ -889,17 +907,14 @@ de[posObs]
 </div>
 <div id="identifiants-caracteres" class="section level5">
 <h5>- Identifiants caractères</h5>
-<p>Dans ces exemples, des chaînes de caractères contenant les noms des éléments à extraire sont utilisées.</p>
+<p>Dans cet exemple, des chaînes de caractères contenant les noms des éléments à extraire sont utilisées.</p>
 <pre class="r"><code>de[c(&quot;l3&quot;,&quot;l6&quot;,&quot;l7&quot;)]</code></pre>
 <pre><code>## l3 l6 l7 
 ##  4  3  5</code></pre>
-<pre class="r"><code>de[paste(&quot;l&quot;, seq(2, 10, by = 2), sep = &quot;&quot;)]</code></pre>
-<pre><code>##  l2  l4  l6  l8 l10 
-##   3   1   3   6   4</code></pre>
 </div>
 <div id="identifiants-logiques" class="section level5">
 <h5>- Identifiants logiques</h5>
-<p>Voici un exemple de vecteur logique permettant d’identifier des éléments à extraire. Ce vecteur servira à extraire des éléments du vecteur <code>de</code>. Il doit donc être de longueur 10, tout comme <code>de</code>. Le vecteur contient la valeur <code>TRUE</code> aux positions des éléments à extraire et <code>FALSE</code> aux positions des éléments à omettre.</p>
+<p>Voici un exemple de vecteur logique permettant d’identifier des éléments à extraire. Ce vecteur servira à extraire des éléments du vecteur <code>de</code>. Il doit donc être de longueur 10, tout comme <code>de</code>. Le vecteur contient la valeur <code>TRUE</code> aux positions des éléments à extraire et <code>FALSE</code> aux positions des éléments à exclure.</p>
 <pre class="r"><code>index.logic &lt;- c(TRUE, rep(FALSE, 8), TRUE)
 index.logic</code></pre>
 <pre><code>##  [1]  TRUE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE</code></pre>
@@ -908,6 +923,7 @@ index.logic</code></pre>
 <pre><code>##  l1 l10 
 ##   2   4</code></pre>
 <p>Nous verrons plus tard comment utiliser des opérateurs logiques pour créer des vecteurs d’identifiants logiques. Avec ces opérateurs, il sera facile d’extraire par exemple toutes les valeurs tombant dans un certain ensemble de valeurs acceptées.</p>
+
 </div>
 </div>
 <div id="extraction-par-exclusion" class="section level4">
@@ -926,7 +942,7 @@ de</code></pre>
 de</code></pre>
 <pre><code>## l1 l2 l3 l4 l5                
 ##  2  3  4  1  2 NA NA NA NA NA</code></pre>
-<p>R ne sachant pas quelles données mettre dans les positions supplémentaires, il utilise sa constante pour les données manquantes <code>NA</code>.</p>
+<p>R ne sachant pas quelles données mettre dans les positions supplémentaires, il introduit sa constante pour les données manquantes <code>NA</code>.</p>
 </div>
 </div>
 <div id="les-vecteurs-de-chaines-de-caracteres" class="section level2">
@@ -953,24 +969,28 @@ de</code></pre>
 <pre><code>## [1] 1</code></pre>
 <pre class="r"><code>nchar(&quot;January&quot;)</code></pre>
 <pre><code>## [1] 7</code></pre>
+<div id="les-fonctions-paste-et-paste0" class="section level3">
+<h3>Les fonctions <code>paste</code> et <code>paste0</code></h3>
 <p>Une fonction très utile pour créer des vecteurs de chaînes de caractères est la fonction <code>paste</code>. Comme son nom l’indique, elle permet de coller ensemble des chaînes de caractères. Par exemple, l’appel à la fonction <code>paste</code> suivant combine <code>&quot;Hello&quot;</code> et <code>&quot;world&quot;</code> dans une seule chaîne de caractères.</p>
 <pre class="r"><code>paste(&quot;Hello&quot;, &quot;world&quot;, sep = &quot; &quot;)</code></pre>
 <pre><code>## [1] &quot;Hello world&quot;</code></pre>
-<p>Avec l’argument <code>sep = &quot; &quot;</code> indique à <code>paste</code> de séparer les chaînes de caractères par un espace lors de la combinaison.</p>
+<p>L’argument <code>sep = &quot; &quot;</code> indique à <code>paste</code> de séparer les chaînes de caractères par un espace lors de la combinaison.</p>
+<p>Il exsite une fonctions raccourcie pour l’utilisation de la fonction <code>paste</code> avec <code>sep = &quot;&quot;</code> (aucun caratère pour séparer les chaînes de caractères) : la fonction <code>paste0</code>.</p>
+<pre class="r"><code>paste0(&quot;Hello&quot;, &quot;world&quot;)</code></pre>
+<pre><code>## [1] &quot;Helloworld&quot;</code></pre>
 <p>En comparaison, la combinaison de ces deux chaînes de caractères avec la fonction <code>c</code> aurait créé un vecteur de longueur 2.</p>
 <pre class="r"><code>tentative &lt;- c(&quot;Hello&quot;, &quot;world&quot;)
-tentative</code></pre>
-<pre><code>## [1] &quot;Hello&quot; &quot;world&quot;</code></pre>
-<pre class="r"><code>str(tentative)</code></pre>
+str(tentative)</code></pre>
 <pre><code>##  chr [1:2] &quot;Hello&quot; &quot;world&quot;</code></pre>
-<p>La fonction <code>paste</code> travaille, tout comme <code>nchar</code>, de façon vectorielle. Si elle reçoit en entrée des vecteurs, elle les combine élément par élément et retourne un vecteur de même longueur que ceux fournis.</p>
+<p>Les fonctions <code>paste</code> et <code>paste0</code> travaillent, tout comme <code>nchar</code>, de façon vectorielle. Si elles reçoivent en entrée des vecteurs, elles les combinent élément par élément et retournent un vecteur de même longueur que ceux fournis.</p>
 <pre class="r"><code>paste(LETTERS, letters, sep = &quot;-&quot;)</code></pre>
 <pre><code>##  [1] &quot;A-a&quot; &quot;B-b&quot; &quot;C-c&quot; &quot;D-d&quot; &quot;E-e&quot; &quot;F-f&quot; &quot;G-g&quot; &quot;H-h&quot; &quot;I-i&quot; &quot;J-j&quot; &quot;K-k&quot; &quot;L-l&quot; &quot;M-m&quot;
 ## [14] &quot;N-n&quot; &quot;O-o&quot; &quot;P-p&quot; &quot;Q-q&quot; &quot;R-r&quot; &quot;S-s&quot; &quot;T-t&quot; &quot;U-u&quot; &quot;V-v&quot; &quot;W-w&quot; &quot;X-x&quot; &quot;Y-y&quot; &quot;Z-z&quot;</code></pre>
-<p>La fonction <code>paste</code> permet aussi de combiner dans une seule chaîne de caractères les chaînes de caractères comprises dans un vecteur grâce à son argument <code>collapse</code>.</p>
+<p>Les fonctions <code>paste</code> et <code>paste0</code> permettent aussi de combiner dans une seule chaîne de caractères les chaînes de caractères comprises dans un vecteur grâce à leur argument <code>collapse</code>.</p>
 <pre class="r"><code>paste(LETTERS, collapse = &quot;,&quot;)</code></pre>
 <pre><code>## [1] &quot;A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z&quot;</code></pre>
 <hr />
+</div>
 </div>
 </div>
 <div id="la-matrice" class="section level1">
@@ -978,7 +998,7 @@ tentative</code></pre>
 <p>Une matrice est un objet atomique à deux dimensions. Elle possède des lignes et des colonnes. Toutes les données qu’elle contient sont du même type.</p>
 <div id="obtention-dinformations-sur-une-matrice" class="section level2">
 <h2>Obtention d’informations sur une matrice</h2>
-<p>Observons le vecteur <code>mat</code> présenté précédemment.</p>
+<p>Observons la matrice <code>mat</code> présentée précédemment.</p>
 <pre class="r"><code>mat</code></pre>
 <pre><code>##       [,1]  [,2]  [,3]
 ## [1,]  TRUE FALSE FALSE
@@ -994,10 +1014,10 @@ tentative</code></pre>
 <p>Il possède deux dimensions.</p>
 <pre class="r"><code>nrow(mat)</code></pre>
 <pre><code>## [1] 4</code></pre>
-<p>La taille de sa première dimension est vue comme un nombre de lignes. Il en a 4.</p>
+<p>La taille de sa première dimension est vue comme un nombre de lignes. Il y en a 4.</p>
 <pre class="r"><code>ncol(mat)</code></pre>
 <pre><code>## [1] 3</code></pre>
-<p>La taille de sa deuxième dimension est vue comme un nombre de colonnes. Il en a 3.</p>
+<p>La taille de sa deuxième dimension est vue comme un nombre de colonnes. Il y en a 3.</p>
 <pre class="r"><code>length(mat)</code></pre>
 <pre><code>## [1] 12</code></pre>
 <p>La longueur d’une matrice est son nombre total d’éléments, soit 12 dans cet exemple.</p>
@@ -1006,14 +1026,25 @@ tentative</code></pre>
 <h2>Fonctions de création d’une matrice</h2>
 <div id="fonction-matrix" class="section level3">
 <h3>Fonction <code>matrix</code></h3>
-<p>La fonction <code>matrix</code> permet de créer un objet de type matrice comme suit.</p>
+<p>La fonction <code>matrix</code> permet de créer un objet de type matrice à partir d’un vecteur contenant les éléments à mettre dans la matrice.</p>
 <pre class="r"><code>mat &lt;- matrix(c(TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE), 
               ncol = 3, nrow = 4, byrow = FALSE)</code></pre>
 <p>L’objet obtenu est celui que nous venons d’observer.</p>
 <p>La fonction <code>matrix</code> attend comme premier argument un vecteur d’éléments, ensuite un nombre de colonnes (argument <code>ncol</code>) et/ou un nombre de lignes (argument <code>nrow</code>). L’argument <code>byrow</code> permet de spécifier si les éléments du vecteur fourni comme premier argument doivent être placés dans la matrice ligne par ligne ou colonne par colonne (ce qui est fait par défaut).</p>
 </div>
-<div id="les-fonctions-rbind-et-cbind" class="section level3">
-<h3>Les fonctions <code>rbind</code> et <code>cbind</code></h3>
+<div id="fonction-as.matrix" class="section level3">
+<h3>Fonction <code>as.matrix</code></h3>
+<p>Pour tenter de convertir en matrice un objet d’un autre type, la fonction <code>as.matrix</code> est utile. Par exemple, convertissons en matrice la data frame <code>dat</code> créé précédemment.</p>
+<pre class="r"><code>as.matrix(dat)</code></pre>
+<pre><code>##      V1    V2           V3     
+## [1,] &quot;3.5&quot; &quot;matin&quot;      NA     
+## [2,] &quot;7.8&quot; &quot;après-midi&quot; &quot;FALSE&quot;
+## [3,] &quot;9.9&quot; &quot;soir&quot;       &quot;FALSE&quot;
+## [4,] &quot;5.7&quot; &quot;nuit&quot;       &quot; TRUE&quot;</code></pre>
+<p>Étant donné qu’une matrice est un objet atomique, tous ses éléments doivent être des données du même type. Ici, toutes les données ont donc été converties en chaînes de caractères. Nous reviendrons plus loin sur les <a href="#conversions">conversions de types de données</a>.</p>
+</div>
+<div id="fonctions-rbind-et-cbind" class="section level3">
+<h3>Fonctions <code>rbind</code> et <code>cbind</code></h3>
 <p>Nous allons maintenant étendre notre exemple de données provenant de 10 lancers d’un dé à des données provenant de 10 lancers de 2 dés. Supposons donc qu’en plus des résultats du dé 1 (2, 3, 4, 1, 2, 3, 5, 6, 5, 4), nous avons les résultats du dé 2 : 1, 4, 2, 3, 5, 4, 6, 2, 5, 3.</p>
 <p>Les fonctions <code>rbind</code> et <code>cbind</code> permettent de créer des matrices à partir d’une série de vecteurs de même longueur, comme dans cet exemple.</p>
 <pre class="r"><code>de1 &lt;- c(2, 3, 4, 1, 2, 3, 5, 6, 5, 4)
@@ -1023,8 +1054,8 @@ des_lignes</code></pre>
 <pre><code>##     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
 ## de1    2    3    4    1    2    3    5    6    5     4
 ## de2    1    4    2    3    5    4    6    2    5     3</code></pre>
-<p>Le <code>r</code> dans le nom <code>rbind</code> indique que la fonction combine des vecteurs par lignes (en anglais <em>rows</em>), dans le sens que chacun des vecteurs devient une ligne de la matrice produite.</p>
-<p>Pour les données de lancers de dés, il serait plus approprié de combiner les vecteurs par colonnes, afin que les lignes de la matrice obtenue représentent des observations et les colonnes des variables. Nous utiliserons donc plutôt <code>cbind</code>.</p>
+<p>Le <code>r</code> dans le nom <code>rbind</code> indique que la fonction combine des vecteurs par <em>rows</em> en anglais ou lignes en français, dans le sens que chacun des vecteurs devient une ligne de la matrice produite.</p>
+<p>Pour les données de lancers de dés, il serait plus approprié de combiner les vecteurs par colonnes, afin que les lignes de la matrice obtenue représentent des observations et les colonnes des variables. Nous utiliserons donc plutôt <code>cbind</code> (<code>c</code> pour <em>columns</em> en anglais ou colonnes en français)</p>
 <pre class="r"><code>des &lt;- cbind(de1, de2)
 des</code></pre>
 <pre><code>##       de1 de2
@@ -1042,8 +1073,8 @@ des</code></pre>
 </div>
 <div id="fonctions-de-concatenation-de-matrices" class="section level2">
 <h2>Fonctions de concaténation de matrices</h2>
-<div id="les-fonctions-rbind-et-cbind-1" class="section level3">
-<h3>Les fonctions <code>rbind</code> et <code>cbind</code></h3>
+<div id="fonctions-rbind-et-cbind-1" class="section level3">
+<h3>Fonctions <code>rbind</code> et <code>cbind</code></h3>
 <p>Les fonctions <code>rbind</code> et <code>cbind</code> acceptent aussi en entrée des matrices, qu’elles concatènent, comme dans cet exemple.</p>
 <pre class="r"><code>rbind(des_lignes, des_lignes)</code></pre>
 <pre><code>##     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
@@ -1057,14 +1088,13 @@ des</code></pre>
 <div id="ajout-de-metadonnees-dans-une-matrice" class="section level2">
 <h2>Ajout de métadonnées dans une matrice</h2>
 <p>Les lignes et colonnes d’une matrice peuvent être nommées.</p>
-<pre class="r"><code>rownames(des) &lt;- paste(&quot;l&quot;, 1:10, sep = &quot;&quot;)
+<pre class="r"><code>rownames(des) &lt;- paste0(&quot;l&quot;, 1:10)
 colnames(des) &lt;- paste0(&quot;de&quot;, 1:2)
 str(des)</code></pre>
 <pre><code>##  num [1:10, 1:2] 2 3 4 1 2 3 5 6 5 4 ...
 ##  - attr(*, &quot;dimnames&quot;)=List of 2
 ##   ..$ : chr [1:10] &quot;l1&quot; &quot;l2&quot; &quot;l3&quot; &quot;l4&quot; ...
 ##   ..$ : chr [1:2] &quot;de1&quot; &quot;de2&quot;</code></pre>
-<p>Notons que la fonction <code>paste0</code> fait la même chose que la fonction <code>paste</code> avec l’argument <code>sep = &quot;&quot;</code>.</p>
 <p>Les noms des lignes et colonnes d’une matrice R sont des attributs de l’objet, tout comme ses dimensions.</p>
 <pre class="r"><code>attributes(des)</code></pre>
 <pre><code>## $dim
@@ -1175,6 +1205,21 @@ collection</code></pre>
 ## [2,]   10   12</code></pre>
 <p>Les arrays sont utiles, notamment, pour ranger dans une même structure plusieurs matrices de même taille.</p>
 </div>
+<div id="fonction-as.array" class="section level3">
+<h3>Fonction <code>as.array</code></h3>
+<p>Il est aussi possible de tenter de créer un array à partir d’un objet R quelconque avec <code>as.array</code>. Par exemple, les vecteurs ne sont pas considérés comme des types particuliers d’arrays.</p>
+<pre class="r"><code>vec</code></pre>
+<pre><code>## [1] 2.0 4.9 2.0 0.2</code></pre>
+<pre class="r"><code>is.array(vec)</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<p>Cependant, un vecteur peut être transformé en array comme suit.</p>
+<pre class="r"><code>array_vec &lt;- as.array(vec)
+array_vec</code></pre>
+<pre><code>## [1] 2.0 4.9 2.0 0.2</code></pre>
+<pre class="r"><code>is.array(array_vec)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<p>Même si les affichages des objets <code>vec</code> et <code>array_vec</code> sont identiques, les deux objets ne sont pas du même type.</p>
+</div>
 </div>
 <div id="ajout-de-metadonnees-dans-un-array" class="section level2">
 <h2>Ajout de métadonnées dans un array</h2>
@@ -1272,6 +1317,26 @@ noms</code></pre>
 ## [1] &quot;matrice1&quot; &quot;matrice2&quot; &quot;matrice3&quot;</code></pre>
 <p>Pour utiliser cette fonction, il suffit de lui donner en entrée tous les objets à inclure dans la liste, dans l’ordre souhaité.</p>
 </div>
+<div id="fonction-as.list" class="section level3">
+<h3>Fonction <code>as.list</code></h3>
+<p>La fonction <code>as.list</code> permet quant à elle de transformer n’importe quel objet R en liste. Par exemple, en appliquant la fonction <code>as.list</code> sur un vecteur, elle crée une liste pour laquelle chaque élément du vecteur est devenu un vecteur de longueur 1 en élément de la liste.</p>
+<pre class="r"><code>as.list(vec)</code></pre>
+<pre><code>## [[1]]
+## [1] 2
+## 
+## [[2]]
+## [1] 4.9
+## 
+## [[3]]
+## [1] 2
+## 
+## [[4]]
+## [1] 0.2</code></pre>
+<p>Pour obtenir plutôt une liste de longueur 1 comportant le vecteur comme seul élément, il aurait plutôt fallu utiliser la fonction <code>list</code> comme suit.</p>
+<pre class="r"><code>list(vec)</code></pre>
+<pre><code>## [[1]]
+## [1] 2.0 4.9 2.0 0.2</code></pre>
+</div>
 <div id="fonction-vector-1" class="section level3">
 <h3>Fonction <code>vector</code></h3>
 <p>La fonction <code>vector</code> permet aussi de créer des listes (rappelons qu’une liste est considérée être un vecteur récursif).</p>
@@ -1357,7 +1422,7 @@ exemple</code></pre>
 ## $fct
 ## function (x, upper = FALSE) 
 ## if (upper) toupper(x) else tolower(x)
-## &lt;bytecode: 0x0000000016715470&gt;
+## &lt;bytecode: 0x000000001907dda0&gt;
 ## &lt;environment: namespace:base&gt;
 ## 
 ## $liste
@@ -1522,12 +1587,23 @@ str(desPlus)</code></pre>
 <pre class="r"><code>options(stringsAsFactors = FALSE)</code></pre>
 <p>Cependant, cette commande provoque un changement global qui affecte toutes les fonctions ayant un argument <code>stringsAsFactors</code> (la fonction <code>data.frame</code> n’est pas la seule à avoir cet argument).</p>
 </div>
+<div id="fonction-as.data.frame" class="section level3">
+<h3>Fonction <code>as.data.frame</code></h3>
+<p>Pour transformer, si possible, un objet R en data frame, il faut utiliser la fonction <code>as.data.frame</code>. Par exemple, transformons la matrice <code>mat</code> en data frame.</p>
+<pre class="r"><code>df_mat &lt;- as.data.frame(mat)
+df_mat</code></pre>
+<pre><code>##      V1    V2    V3
+## 1  TRUE FALSE FALSE
+## 2  TRUE  TRUE FALSE
+## 3 FALSE  TRUE  TRUE
+## 4  TRUE  TRUE  TRUE</code></pre>
+</div>
 </div>
 <div id="fonctions-de-concatenation-de-data-frame" class="section level2">
 <h2>Fonctions de concaténation de data frame</h2>
 <div id="fonction-data.frame-1" class="section level3">
 <h3>Fonction <code>data.frame</code></h3>
-<p>En plus de servir à créer des data frames, la fonction <code>data.frame</code> permet d’en combiner.</p>
+<p>En plus de servir à créer des data frames, la fonction <code>data.frame</code> permet d’en combiner par concaténation de colonnes.</p>
 <pre class="r"><code>jour &lt;- data.frame(jour = rep(1,10))
 str(jour)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    10 obs. of  1 variable:
@@ -1540,9 +1616,30 @@ str(autre)</code></pre>
 ##  $ lanceur: chr  &quot;Luc&quot; &quot;Luc&quot; &quot;Luc&quot; &quot;Luc&quot; ...
 ##  $ jour   : num  1 1 1 1 1 1 1 1 1 1</code></pre>
 </div>
-<div id="fonction-cbind" class="section level3">
-<h3>Fonction <code>cbind</code></h3>
-<p>Une concaténation de data frames peut aussi s’effectuer avec la fonction <code>cbind</code>.</p>
+<div id="fonctions-rbind-et-cbind-2" class="section level3">
+<h3>Fonctions <code>rbind</code> et <code>cbind</code></h3>
+<p>Une concaténation de data frames peut aussi s’effectuer avec les fonctions <code>rbind</code> et <code>cbind</code>. Comme avec une matrice, <code>rbind</code> effectue une concaténation en lignes et <code>cbind</code> en colonnes.</p>
+<p>La fonction <code>rbind</code> permet donc de mettre en commun les observations de plusieurs data frames, comme dans cet exemple.</p>
+<pre class="r"><code>desPlus_Exp2 &lt;- data.frame(de1 = c(3,5), de2 = c(4,2), lanceur = &quot;Paul&quot;)
+desPlus_Exp3 &lt;- data.frame(de1 = c(6,1), de2 = c(2,5), lanceur = &quot;Paul&quot;)
+rbind(desPlus, desPlus_Exp2, desPlus_Exp3)</code></pre>
+<pre><code>##     de1 de2 lanceur
+## l1    2   1     Luc
+## l2    3   4     Luc
+## l3    4   2     Luc
+## l4    1   3     Luc
+## l5    2   5     Luc
+## l6    3   4     Kim
+## l7    5   6     Kim
+## l8    6   2     Kim
+## l9    5   5     Kim
+## l10   4   3     Kim
+## 1     3   4    Paul
+## 2     5   2    Paul
+## 11    6   2    Paul
+## 21    1   5    Paul</code></pre>
+<p>Pour que la concaténation fonctionne, les noms des variables (colonnes) dans les data frames doivent concorder.</p>
+<p>Une concaténation de data frames avec <code>cbind</code> est quant à elle similaire à une concaténation avec <code>data.frame</code> : des variables sont rassemblées dans un seul data frame.</p>
 <pre class="r"><code>cbind(desPlus, jour)</code></pre>
 <pre><code>##     de1 de2 lanceur jour
 ## l1    2   1     Luc    1
@@ -1555,6 +1652,7 @@ str(autre)</code></pre>
 ## l8    6   2     Kim    1
 ## l9    5   5     Kim    1
 ## l10   4   3     Kim    1</code></pre>
+<p>Cette fois, les noms des observations (lignes) n’ont pas besoin de concorder entre les data frames, mais les nombres d’observations doivent être égaux.</p>
 </div>
 </div>
 <div id="ajout-de-metadonnees-dans-un-data-frame" class="section level2">
@@ -1572,11 +1670,11 @@ essai</code></pre>
 <pre><code>## $names
 ## [1] &quot;X1.5&quot;         &quot;letters.1.5.&quot;
 ## 
-## $row.names
-## [1] 1 2 3 4 5
-## 
 ## $class
-## [1] &quot;data.frame&quot;</code></pre>
+## [1] &quot;data.frame&quot;
+## 
+## $row.names
+## [1] 1 2 3 4 5</code></pre>
 <p>Les noms par défaut des colonnes ne sont pas toujours pertinents. Il vaut donc mieux nommer les colonnes lors de la création, directement dans l’appel à la fonction <code>data.frame</code>. Pour ce faire, il suffit de précéder les éléments à combiner d’un nom et de l’opérateur <code>=</code>, comme dans cet exemple.</p>
 <pre class="r"><code>data.frame(chiffre = 1:5, lettre = letters[1:5])</code></pre>
 <pre><code>##   chiffre lettre
@@ -1658,17 +1756,17 @@ desPlus_tibble &lt;- tibble(de1 = c(2, 3, 4, 1, 2, 3, 5, 6, 5, 4),
 desPlus_tibble</code></pre>
 <pre><code>## # A tibble: 10 x 3
 ##      de1   de2 lanceur
-##    &lt;dbl&gt; &lt;dbl&gt;   &lt;chr&gt;
-##  1     2     1     Luc
-##  2     3     4     Luc
-##  3     4     2     Luc
-##  4     1     3     Luc
-##  5     2     5     Luc
-##  6     3     4     Kim
-##  7     5     6     Kim
-##  8     6     2     Kim
-##  9     5     5     Kim
-## 10     4     3     Kim</code></pre>
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  
+##  1     2     1 Luc    
+##  2     3     4 Luc    
+##  3     4     2 Luc    
+##  4     1     3 Luc    
+##  5     2     5 Luc    
+##  6     3     4 Kim    
+##  7     5     6 Kim    
+##  8     6     2 Kim    
+##  9     5     5 Kim    
+## 10     4     3 Kim</code></pre>
 <pre class="r"><code>str(desPlus_tibble)</code></pre>
 <pre><code>## Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:    10 obs. of  3 variables:
 ##  $ de1    : num  2 3 4 1 2 3 5 6 5 4
@@ -1720,7 +1818,7 @@ desPlus_data.table</code></pre>
 ##  - attr(*, &quot;.internal.selfref&quot;)=&lt;externalptr&gt;</code></pre>
 <p>Nous remarquons tout d’abord les différences suivantes avec le data frame :</p>
 <ul>
-<li>les colonnes contenant des données de type caractère ne sont pas transformées en facteurs par défaut (valeur par défaut de l’argument <code>stringsAsFactors</code> est <code>FALSE</code>);</li>
+<li>les colonnes contenant des données de type caractère ne sont pas transformées en facteurs par défaut (la valeur par défaut de l’argument <code>stringsAsFactors</code> est <code>FALSE</code>);</li>
 <li>l’affichage des noms des lignes est un peu différent.</li>
 </ul>
 <p>Au-delà de ces distinctions mineures, la vraie force du data table est la rapidité d’exécution des manipulations et la possibilité d’en faire beaucoup plus avec l’opérateur <code>[</code> comparativement au data frame. Pour illustrer ce dernier point, voici un exemple de calcul de statistiques descriptives avec l’opérateur <code>[</code>.</p>
@@ -1775,8 +1873,8 @@ desPlus_data.table</code></pre>
 </div>
 <div id="fonction-de-creation-dun-facteur" class="section level2">
 <h2>Fonction de création d’un facteur</h2>
-<div id="fonction-factor" class="section level3">
-<h3>Fonction <code>factor</code></h3>
+<div id="fonctions-factor-et-as.factor" class="section level3">
+<h3>Fonctions <code>factor</code> et <code>as.factor</code></h3>
 <p>Pour créer un facteur de toutes pièces, il faut faire appel à la fonction <code>factor</code> ou <code>as.factor</code>.</p>
 <pre class="r"><code>reponses &lt;- factor(rep(c(&quot;roche&quot;, &quot;papier&quot;, &quot;ciseau&quot;), 3))
 reponses</code></pre>
@@ -1793,6 +1891,7 @@ reponses</code></pre>
 <pre class="r"><code>str(reponses)</code></pre>
 <pre><code>##  Factor w/ 3 levels &quot;roche&quot;,&quot;papier&quot;,..: 1 2 3 1 2 3 1 2 3</code></pre>
 <p>Il est utile de contrôler l’ordre des niveaux d’un facteur, car dans des sorties ou graphiques produits avec un facteur, l’ordre de ses niveaux est respecté.</p>
+<p>La fonction <code>as.factor</code> agit comme la fonction <code>factor</code>, mais elle ne possède pas d’arguments supplémentaires au vecteur à transformer.</p>
 </div>
 </div>
 <div id="fonction-de-modification-dun-facteur" class="section level2">
@@ -1858,7 +1957,7 @@ satisfaction</code></pre>
 <hr />
 </div>
 </div>
-<div id="conversions-de-type-de-donnees" class="section level1">
+<div id="conversions" class="section level1">
 <h1>Conversions de type de données</h1>
 <p>Rappelons-nous que tous les éléments d’un objet atomique doivent être du même type. Que se passe-t-il alors si nous tentons de modifier un élément d’un vecteur pour le remplacer par une donnée d’un type différent du type des éléments d’origine dans le vecteur?</p>
 <pre class="r"><code>de &lt;- c(2, 3, 4, 1, 2, 3, 5, 6, 5, 4)
@@ -1930,6 +2029,312 @@ as.numeric(vect6)  </code></pre>
 <pre><code>## [1] NA NA NA</code></pre>
 <pre class="r"><code>type.convert(vect6, na.strings = &quot;-&quot;, dec = &quot;,&quot;)</code></pre>
 <pre><code>## [1] 3.5 4.6  NA</code></pre>
+<hr />
+</div>
+</div>
+<div id="synthese" class="section level1">
+<h1>Synthèse</h1>
+<div id="contenant-versus-contenu" class="section level4">
+<h4>Contenant versus contenu</h4>
+<p><strong>Objet</strong> R servant de structure de données</p>
+<p><span class="math inline">\(\qquad =\)</span> CONTENANT</p>
+<p><strong>Éléments</strong> stockés dans cet objet</p>
+<p><span class="math inline">\(\qquad =\)</span> CONTENU :</p>
+<ul>
+<li><strong>données</strong> : valeurs observées de variables aléatoires, valeurs de résultats de calculs (ex.: statistiques descriptives, coefficients d’une modèle), etc.</li>
+<li><strong>métadonnées = attributs</strong> (souvent facultatives) :<br />
+nom des éléments (par dimension), nombre d’éléments par dimension pour les matrices et arrays, niveaux d’un facteur, etc.</li>
+</ul>
+</div>
+<div id="caracteristiques-des-structures-de-donnees-en-r" class="section level4">
+<h4>Caractéristiques des structures de données en R</h4>
+<ul>
+<li>Type de l’objet : <code>is.</code>(<code>atomic</code>/<code>recursive</code>), <code>is.</code>(<code>vector</code>/<code>matrix</code>/<code>array</code>/<code>list</code>/<code>data.frame</code>/<code>factor</code>)</li>
+<li>Type des données en éléments : <code>typeof</code>, <code>is.</code>(<code>numeric</code>/<code>character</code>/<code>logical</code>/…)
+<ul>
+<li>valeurs numériques (<code>numeric</code>):<br />
+entières (<code>integer</code>) ou réelles (<code>double</code>)</li>
+<li>chaînes de caractères (<code>character</code>)</li>
+<li>valeurs logiques (<code>logical</code>)</li>
+<li>types moins communs de valeurs :<br />
+nombres complexes (<code>complex</code>), bits (<code>raw</code>), etc.</li>
+<li>si éléments = sous-objets (par exemple pour une liste ou un data frame), <code>typeof</code> retourne la valeur <code>&quot;list&quot;</code></li>
+</ul></li>
+<li>Nombre total d’éléments : <code>length</code></li>
+</ul>
+</div>
+<div id="types-de-structures-de-donnees-en-r" class="section level4">
+<h4>Types de structures de données en R</h4>
+<table>
+<thead>
+<tr class="header">
+<th>Nombre de dimensions</th>
+<th>Objets atomiques</th>
+<th>Objets récursifs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><strong>vecteur</strong></td>
+<td><strong>liste</strong></td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><strong>matrice</strong></td>
+<td><strong>data frame</strong></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\vdots\)</span></td>
+<td><span class="math inline">\(\vdots\)</span></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>n</td>
+<td><strong>array</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Objets atomiques : Éléments = données toutes du même type</li>
+<li>Objets récursifs : Éléments = objets de types quelconques</li>
+</ul>
+<p><strong>facteur</strong> = une généralisation du vecteur pour stocker les observations d’une variable catégorique</p>
+
+</div>
+<div id="attributs-selon-le-type-dobjet" class="section level4">
+<h4>Attributs selon le type d’objet</h4>
+<p>Fonctions pour extraire des attributs : <code>attributes</code> (tous les attributs), <code>attr</code> (un seul attribut), <code>names</code>, <code>dimnames</code>, <code>colnames</code>, <code>rownames</code>, <code>dim</code>, <code>nrow</code>, <code>ncol</code>, <code>class</code>, <code>levels</code>, etc.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Type d’objet</th>
+<th>names</th>
+<th>dimnames</th>
+<th>dim</th>
+<th>class</th>
+<th>levels</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>vecteur</td>
+<td>(<span class="math inline">\(\checkmark\)</span>)</td>
+<td>-</td>
+<td>-</td>
+<td><span class="math inline">\(\bullet\)</span></td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>matrice ou array</td>
+<td>-</td>
+<td>(<span class="math inline">\(\checkmark\)</span>)</td>
+<td><span class="math inline">\(\checkmark\)</span></td>
+<td><span class="math inline">\(\bullet\)</span></td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>liste</td>
+<td>(<span class="math inline">\(\checkmark\)</span>)</td>
+<td>-</td>
+<td>-</td>
+<td><span class="math inline">\(\bullet\)</span></td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>data frame</td>
+<td>(<span class="math inline">\(\checkmark\)</span>)</td>
+<td>(<span class="math inline">\(\checkmark\)</span>, <span class="math inline">\(\bullet\)</span>)</td>
+<td><span class="math inline">\(\bullet\)</span></td>
+<td><span class="math inline">\(\checkmark\)</span></td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>facteur</td>
+<td>(<span class="math inline">\(\checkmark\)</span>)</td>
+<td>-</td>
+<td>-</td>
+<td><span class="math inline">\(\checkmark\)</span></td>
+<td><span class="math inline">\(\checkmark\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>Légende :<br />
+« - » = attribut non existant pour ce type d’objet<br />
+« <span class="math inline">\(\checkmark\)</span> » = attribut existe (non obligatoire si encadré de parenthèses)<br />
+« <span class="math inline">\(\bullet\)</span> » = métadonnée existante, mais pas dans les attributs obtenus avec la fonction <code>attributes</code></p>
+</div>
+<div id="extraction-delements-1" class="section level4">
+<h4>Extraction d’éléments</h4>
+<ul>
+<li>Opérateurs d’indiçage :
+<ul>
+<li><code>[</code> : extrait un ou plusieurs éléments, préserve la structure de l’objet, sauf si une simplification est possible et <code>drop = TRUE</code> (<code>TRUE</code> est la valeur par défaut du paramètre);</li>
+<li><code>[[</code> et <code>$</code> : extrait un seul élément, laisse tomber des attributs d’un objet atomique, sort de la structure d’un objet récursif<br />
+(<code>$</code> s’utilise seulement avec des objets récursifs);<br />
+</li>
+</ul></li>
+<li>Fonctions : <code>head</code>, <code>tail</code>, <code>subset</code>.</li>
+</ul>
+<p>Différentes façons d’identifier les éléments à extraire avec <code>[</code> :</p>
+<ul>
+<li>entier(s) positif(s) (entre 1 et la longueur de la dimension concernée) : <em>positions des éléments à conserver</em>,</li>
+<li>entier(s) négatif(s) (entre 1 et la longueur de la dimension concernée) : <em>- positions des éléments à éliminer</em>,</li>
+<li>chaîne(s) de caractères (possible seulement si les éléments sont nommés) : <em>noms des éléments à conserver</em>,</li>
+<li>vecteur de logiques (doit être de la même longueur que celle de la dimension concernée) : <code>TRUE</code> <em>pour les éléments à conserver,</em> <code>FALSE</code> <em>pour ceux à éliminer.</em></li>
+</ul>
+</div>
+<div id="remplacement-delements-dans-un-objet" class="section level4">
+<h4>Remplacement d’éléments dans un objet</h4>
+<p>Afin de modifier des éléments dans un objet, il faut soumettre une commande contenant les 3 composantes suivantes :</p>
+<ol style="list-style-type: decimal">
+<li>une extraction avec l’opérateur <code>[</code>, <code>[[</code> ou <code>$</code> pour identifier les éléments à remplacer (ou simplement le nom de l’objet s’il doit être remplacé dans son entièreté),</li>
+<li>un opérateur d’assignation (<code>&lt;-</code>),</li>
+<li>les valeurs de remplacement, dans une structure correspondant à la section à remplacer dans l’objet, <em>par exemple :</em></li>
+</ol>
+<pre class="r"><code>matriceA[1:2,3] &lt;- c(3,5)</code></pre>
+<div id="regle-de-recyclage" class="section level5">
+<h5>Règle de recyclage</h5>
+<p>Lors d’une assignation ou de toute opération faisant intervenir 2 vecteurs de longueurs différentes, les éléments du vecteur le plus court sont répétés de façon à ce que ce vecteur devienne de la même longueur que le vecteur le plus long.</p>
+</div>
+</div>
+<div id="conversions-de-types-de-donnees" class="section level4">
+<h4>Conversions de types de données</h4>
+<p>Les types de données communs, du moins contraignant au plus contraignant :</p>
+<ul>
+<li>caractères &gt; réels &gt; entiers &gt; logiques</li>
+</ul>
+<p>R fait automatiquement des <strong>conversions implicites</strong> en respectant cet ordonnancement des types de données</p>
+<p>Fonctions R pour effectuer des <strong>conversions explicites</strong> :<br />
+<code>as.</code>(<code>character</code>/<code>double</code>/<code>integer</code>/<code>logical</code>), <code>type.convert</code></p>
+<div id="donnee-manquante" class="section level5">
+<h5>Donnée manquante</h5>
+<p>Peu importe le type, une <strong>donnée manquante</strong> est toujours représentée en R par <code>NA</code>.</p>
+</div>
+</div>
+<div id="le-vecteur-1" class="section level4">
+<h4>Le vecteur</h4>
+<p>Simple objet atomique de dimension 1</p>
+<ul>
+<li>fonctions de création :
+<ul>
+<li><code>c</code>, <code>vector</code>, <code>as.vector</code>;</li>
+<li>valeurs répétées : <code>rep</code>;</li>
+<li>séquences régulières : <code>:</code>, <code>seq</code>;</li>
+<li>chaînes de caractères : <code>paste</code>, <code>paste0</code>, constantes (<code>letters</code>, <code>LETTERS</code>, <code>month.name</code>, etc.).</li>
+</ul></li>
+<li>fonctions d’ajout de valeurs :
+<ul>
+<li>par concaténation d’un autre vecteur : <code>c</code>;</li>
+<li><code>append</code>;</li>
+</ul></li>
+<li>comment réaliser une extraction avec un opérateur :
+<ul>
+<li><code>[</code> ou <code>[[</code> avec un seul argument.</li>
+</ul></li>
+</ul>
+</div>
+<div id="la-matrice-1" class="section level4">
+<h4>La matrice</h4>
+<p>Généralisation du vecteur à 2 dimensions</p>
+<ul>
+<li>fonctions de création :
+<ul>
+<li><code>matrix</code>, <code>as.matrix</code>;</li>
+<li>en combinant des vecteurs par lignes : <code>rbind</code>;</li>
+<li>en combinant des vecteurs par colonnes : <code>cbind</code>;</li>
+</ul></li>
+<li>fonctions d’ajout de valeurs :
+<ul>
+<li>par concaténation d’une autre matrice ou d’un vecteur :<br />
+<code>rbind</code>, <code>cbind</code>;</li>
+</ul></li>
+<li>comment réaliser une extraction avec un opérateur :
+<ul>
+<li><code>[</code> ou <code>[[</code> avec deux arguments, soit un par dimension (ne pas fournir de valeur pour les dimensions à conserver complètes).</li>
+</ul></li>
+</ul>
+</div>
+<div id="le-array" class="section level4">
+<h4>Le array</h4>
+<p>Généralisation du vecteur ou de la matrice à une dimension quelconque</p>
+<ul>
+<li>fonctions de création :
+<ul>
+<li><code>array</code>, <code>as.array</code>;</li>
+</ul></li>
+<li>fonctions d’ajout de valeurs :
+<ul>
+<li>par concaténation d’un autre array :<br />
+<code>abind</code> du package <code>abind</code> (pas vu dans le cours);</li>
+</ul></li>
+<li>comment réaliser une extraction avec un opérateur :
+<ul>
+<li><code>[</code> ou <code>[[</code> avec autant d’arguments qu’il y a de dimensions (ne pas fournir de valeur pour les dimensions à conserver complètes).</li>
+</ul></li>
+</ul>
+</div>
+<div id="la-liste-1" class="section level4">
+<h4>La liste</h4>
+<p>Objet récursif de dimension 1</p>
+<ul>
+<li>fonctions de création :
+<ul>
+<li><code>list</code>, <code>as.list</code>, <code>vector</code>;</li>
+</ul></li>
+<li>fonctions d’ajout de valeurs :
+<ul>
+<li>par concaténation avec <code>c</code>;</li>
+</ul></li>
+<li>comment réaliser une extraction avec un opérateur :
+<ul>
+<li><code>[</code> ou <code>[[</code> avec un seul argument,</li>
+<li>ou encore $ pour extraire un élément nommée.</li>
+</ul></li>
+</ul>
+</div>
+<div id="le-data-frame-1" class="section level4">
+<h4>Le data frame</h4>
+<p>Objet récursif de dimension 2 conçu pour stocker</p>
+<ul>
+<li>des jeux de données (ligne = observation, colonne = variable)
+<ul>
+<li><span class="math inline">\(\approx\)</span> liste de vecteurs ou facteurs de même longueur,</li>
+<li><span class="math inline">\(\approx\)</span> matrice avec valeurs de types pouvant varier entre colonnes;</li>
+</ul></li>
+<li>fonctions de création :
+<ul>
+<li><code>data.frame</code>, <code>as.data.frame</code>;</li>
+</ul></li>
+<li>fonctions d’ajout de valeurs :
+<ul>
+<li>par concaténation avec : <code>data.frame</code>, <code>cbind</code>, <code>rbind</code>;</li>
+</ul></li>
+<li>comment réaliser une extraction avec un opérateur :
+<ul>
+<li><code>[</code> ou <code>[[</code> avec 2 arguments, soit un par dimension,<br />
+</li>
+<li>ou encore $ pour extraire une colonne nommée.</li>
+</ul></li>
+</ul>
+</div>
+<div id="le-facteur-1" class="section level4">
+<h4>Le facteur</h4>
+<p>Généralisation du vecteur conçu pour stocker les valeurs observées d’une variable catégorique.</p>
+<ul>
+<li>fonctions de création : <code>factor</code>, <code>as.factor</code>;</li>
+<li>fonctions en lien avec les niveaux du facteur :
+<ul>
+<li>pour extraire (ou modifier lorsqu’accompagné d’une assignation de valeurs) les niveaux : <code>levels</code>,</li>
+<li>retourne le nombre de niveaux : <code>nlevels</code>,</li>
+<li>pour éliminer des niveaux non présents : <code>droplevels</code>;</li>
+</ul></li>
+<li>comment réaliser une extraction avec un opérateur :
+<ul>
+<li><code>[</code> ou <code>[[</code> avec un seul argument.</li>
+</ul></li>
+</ul>
 <hr />
 </div>
 </div>

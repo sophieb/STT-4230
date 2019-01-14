@@ -1,10 +1,10 @@
 ---
 title: "Structures de données en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2018-01-15"
+date: "2018-01-14"
 weight: 1
 slug: "structures_r"
-categories: ["cours_2018-01-23"]
+categories: ["cours_2018-01-22"]
 categories_weight: 1
 lastmodifierdisplayname : "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
@@ -115,7 +115,7 @@ Les éléments d'une liste (séparés par une ligne pointillée dans la figure) 
 
 ### Exemple de data frame
 
-Le data frame est en quelque sorte un type particulier de liste, mais il partage aussi des caractéristiques avec les matrices, étant réputé posséder 2 dimensions (des lignes et des colonnes). Ses éléments sont des objets, mais ces objets doivent être tous de même longueur. Les éléments sont typiquement des vecteurs ou des facteurs, formant les colonnes du data frame. Les éléments d'un data frame peuvent aussi être des listes, mais cette possibilité n'est pas fréquemment exploitée. Voici un exemple de data frame.
+Le data frame est en quelque sorte un type particulier de liste, mais il partage aussi des caractéristiques avec les matrices, étant réputé posséder 2 dimensions (des lignes et des colonnes). Ses éléments sont des objets contraints d'être de dimensions concordantes. Dans la grande majorité des cas, les éléments sont des vecteurs ou des facteurs de même longueur, formant les colonnes du data frame. Voici un exemple de data frame.
 
 ```{r, echo = FALSE}
 dat <- data.frame(V1 = c(3.5, 7.8, 9.9, 5.7),
@@ -130,7 +130,7 @@ str(dat)
 
 Il pourrait être illustré comme suit : ![](fig/DataFrame.png).
 
-La première dimension d'un data frame est la longueur commune des objets qu'il contient (dans l'exemple 4) et sa deuxième dimension est le nombre d'objets qu'il contient (dans l'exemple, le data frame contient 3 vecteurs).
+La première dimension d'un data frame typique est la longueur commune des objets qu'il contient (4 dans l'exemple) et sa deuxième dimension est le nombre d'objets qu'il contient (dans l'exemple, le data frame contient 3 vecteurs).
 
 Les data frames ont été créés spécialement pour l'analyse statistique de données. Ils représentent des tableaux de données dans lesquels les lignes sont des observations et les colonnes des variables (des variables au sens statistique et non au sens informatique). Le data frame fait donc penser à une matrice. Ses dimensions sont vues comme un nombre de lignes ou d'observations et un nombre de colonnes ou de variables. Cependant, contrairement à une matrice, les données dans les différentes colonnes d'un data frame n'ont pas à être du même type.
 
@@ -274,7 +274,7 @@ is.integer(en)
 is.double(en)
 ```
 
-Sans ce caractère `L`, la majorité de fonctions en R traite par défaut les nombres comme des réels.
+Sans ce caractère `L`, la majorité des fonctions en R traite par défaut les nombres comme des réels.
 
 ```{r}
 un <- 1
@@ -324,13 +324,13 @@ str("TRUE")
 
 ### Données manquantes
 
-Peu importe le type de données, une donnée manquante est représentée en R par la constante `NA` (pour "Not Available"). 
+Peu importe le type de données, une donnée manquante est représentée en R par la constante `NA` (pour «&nbsp;Not Available&nbsp;»). 
 
 ```{r}
 NA
 ```
 
-Ce n'est pas la même chose que `NaN` qui signifie plutôt "Not a Number".
+Ce n'est pas la même chose que `NaN` qui signifie plutôt «&nbsp;Not a Number&nbsp;».
 
 ```{r}
 0/0
@@ -392,6 +392,7 @@ extrait_mat
 attributes(extrait_mat)
 ```
 
+&nbsp;
 
 #### Extractions d'éléments dans un objet à plusieurs dimensions 
 
@@ -438,14 +439,14 @@ vec[[2.6]]
 
 Étant donné que l'opérateur `[` permet l'extraction de plusieurs éléments, il accepte une plus grande variété de types de valeurs. Voici les valeurs qu'il accepte en argument pour identifier les éléments à extraire :
 
-- un ou des nombres positifs, dont les valeurs sont entre 1 et la longueur de la dimension concernée :  
+- un ou des nombres positifs, dont les valeurs sont entre 1 et la taille de la dimension concernée :  
 *positions des éléments à conserver*;
-- un ou des nombres négatifs, dont les valeurs sont entre 1 et la longueur de la dimension concernée :  
-*__-__ positions des éléments à éliminer*;
+- un ou des nombres négatifs, dont les valeurs sont entre 1 et la taille de la dimension concernée :  
+*__-__ positions des éléments à exclure*;
 - un ou des chaînes de caractères (possible seulement si les éléments sont nommés) :  
 *noms des éléments à conserver*;
 - vecteur de logiques (doit être de la même longueur que la dimension concernée) :  
-`TRUE` *pour les éléments à conserver,* `FALSE` *pour ceux à éliminer*;
+`TRUE` *pour les éléments à conserver,* `FALSE` *pour ceux à exclure*;
 - rien : utile par exemple pour extraire une ligne d'une matrice ou d'un data frame en conservant toutes les colonnes.
 
 Voici quelques exemples :
@@ -455,7 +456,7 @@ Voici quelques exemples :
 vec[c(1, 3)]
 ```
 
-- extraction d'éléments par identification d'éléments à laisser tomber,
+- extraction d'éléments par identification d'éléments à exclure,
 ```{r}
 vec[-c(2, 4)]
 ```
@@ -490,7 +491,7 @@ Les sections suivantes proposent plusieurs autres exemples d'extraction de donn�
 #### Argument `drop` de l'opérateur `[`
 
 L'opérateur `[` préserve la structure des objets, sauf dans quelques cas particuliers.
-Un de ces cas est l'extraction d'une colonne, complète ou partielle, d'un data frame. Le résultat de l'extraction est alors un vecteur ou un facteur, et nom un autre data frame, comme dans cet exemple.
+Un de ces cas est l'extraction d'une colonne, complète ou partielle, d'un data frame. Le résultat de l'extraction est alors un vecteur ou un facteur, et non un autre data frame, comme dans cet exemple.
 
 ```{r}
 str(dat)
@@ -562,7 +563,7 @@ subset(mat, subset = c(FALSE, TRUE, FALSE, TRUE), select = 1)
 Lorsque le premier argument fourni en entrée à la fonction `subset` est un data frame, il est possible de référer aux colonnes de celui-ci directement par leurs noms dans les arguments `subset` et `select`. Il est aussi possible de retirer une colonne en utilisant l'opérateur `-` avant le nom de la colonne à retirer dans la valeur fournie à l'argument `select`.
 
 ```{r}
-subset(dat, subset = V1 > 5, select = - V2)
+subset(dat, subset = c(TRUE, FALSE, TRUE, TRUE), select = - V3)
 ```
 
 
@@ -601,7 +602,7 @@ vec[1:4] <- c(0.1, 0.2)
 vec
 ```
 
-Si la longueur du vecteur le plus court n'est pas un multiple de la longueur du vecteur le plus long, ça fonctionne encore, mais un avertissement est émis, comme dans cet exemple.
+Si la longueur du vecteur le plus long n'est pas un multiple de la longueur du vecteur le plus court, ça fonctionne encore, mais un avertissement est émis, comme dans cet exemple.
 
 ```{r}
 vec[1:3] <- c(2.0, 4.9)
@@ -683,6 +684,15 @@ ve
 
 Cette fonction sera utile pour initialiser des vecteurs servant à contenir des valeurs créées itérativement dans une boucle.
 
+### Fonction `as.vector`
+
+La fonction `as.vector` sert quant à elle à transformer un objet en vecteur. Tous les attributs de l'objets sont retirés lors de l'opération. Voici un exemple.
+
+```{r}
+as.vector(mat)
+```
+
+
 ### Fonction `rep`
 
 Si un vecteur doit contenir des données qui se répètent, la fonction `rep` est utile. Ainsi, plutôt que de créer, par exemple, un vecteur contenant cinq 1 suivis de cinq 2 avec la fonction `c` comme suit
@@ -691,7 +701,7 @@ Si un vecteur doit contenir des données qui se répètent, la fonction `rep` es
 c(1, 1, 1, 1, 1, 2, 2, 2, 2, 2)
 ```
 
-il est plus succinct de le créer en utilisant conjointement les fonctions `rep` et`c` comme suit
+il est plus succinct de le créer en utilisant conjointement les fonctions `rep` et `c` comme suit
 
 ```{r}
 rep(c(1, 2), each = 5)
@@ -758,10 +768,12 @@ append(de, ve, after = 3)
 
 ## Ajout de métadonnées dans un vecteur
 
-Supposons que l'objet `de` contient les résultats de 10 lancers d'un dé : 2, 3, 4, 1, 2, 3, 5, 6, 5, 4. Dans cet objet, nous pourrions identifier à quel lancer chaque résultat fait référence en ajoutant des noms aux éléments du vecteur.
+Supposons que l'objet `de` contienne les résultats de 10 lancers d'un dé : 2, 3, 4, 1, 2, 3, 5, 6, 5, 4. Dans cet objet, nous pourrions identifier à quel lancer chaque résultat fait référence en ajoutant des noms aux éléments du vecteur.
 
 ```{r}
-names(de) <- paste("l", 1:10, sep = "")
+names(de) <- c("l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9", "l10")
+# nous apprendrons bientôt à créer plus succinctement ce vecteur avec l'instruction
+# paste0("l", 1:10)
 ```
 
 Voyons de quoi a l'air l'objet `de` suite à cet ajout.
@@ -782,7 +794,7 @@ attr(de, which = "names")
 names(de)
 ```
 
-Cet attribut est un exemple de métadonnées. Il s'agit de données sur les données.
+Cet attribut est un exemple de métadonnées. Il s'agit de données à propos des données.
 
 &nbsp;
 
@@ -808,7 +820,7 @@ de <- as.vector(de)
 Redonnons maintenant des noms aux éléments de `de`, car ils seront utiles dans les prochains exemples.
 
 ```{r}
-names(de) <- paste("l", 1:10, sep = "")
+names(de) <- c("l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9", "l10")
 ```
 
 
@@ -823,7 +835,7 @@ de[1]
 de[[1]]
 ```
 
-Remarquons que l'opérateur `[` préserve l'attribut nom, alors que l'opérateur `[[` ne le conserve pas, ce qui concorde avec les propriétés de ces opérateurs vues précédemment.
+Remarquons que l'opérateur `[` préserve le nom de l'élément (l'attribut `names`), alors que l'opérateur `[[` ne le conserve pas, ce qui concorde avec les propriétés de ces opérateurs vues précédemment.
 
 Un élément peut aussi être extrait en l'identifiant par son nom.
 
@@ -881,17 +893,16 @@ de[seq(from = 2, to = 10, by = 2)]
 
 ##### - Identifiants caractères 
 
-Dans ces exemples, des chaînes de caractères contenant les noms des éléments à extraire sont utilisées.
+Dans cet exemple, des chaînes de caractères contenant les noms des éléments à extraire sont utilisées.
 
 ```{r}
 de[c("l3","l6","l7")]
-de[paste("l", seq(2, 10, by = 2), sep = "")]
 ```
 
 
 ##### - Identifiants logiques 
 
-Voici un exemple de vecteur logique permettant d'identifier des éléments à extraire. Ce vecteur servira à extraire des éléments du vecteur `de`. Il doit donc être de longueur 10, tout comme `de`. Le vecteur contient la valeur `TRUE` aux positions des éléments à extraire et `FALSE` aux positions des éléments à omettre.
+Voici un exemple de vecteur logique permettant d'identifier des éléments à extraire. Ce vecteur servira à extraire des éléments du vecteur `de`. Il doit donc être de longueur 10, tout comme `de`. Le vecteur contient la valeur `TRUE` aux positions des éléments à extraire et `FALSE` aux positions des éléments à exclure.
 
 ```{r}
 index.logic <- c(TRUE, rep(FALSE, 8), TRUE)
@@ -906,6 +917,7 @@ de[index.logic]
 
 Nous verrons plus tard comment utiliser des opérateurs logiques pour créer des vecteurs d'identifiants logiques. Avec ces opérateurs, il sera facile d'extraire par exemple toutes les valeurs tombant dans un certain ensemble de valeurs acceptées.
 
+\newpage
 
 #### Extraction par exclusion
 
@@ -929,7 +941,7 @@ length(de) <- 10
 de
 ```
 
-R ne sachant pas quelles données mettre dans les positions supplémentaires, il utilise sa constante pour les données manquantes `NA`.
+R ne sachant pas quelles données mettre dans les positions supplémentaires, il introduit sa constante pour les données manquantes `NA`.
 
 
 
@@ -969,6 +981,7 @@ length("January")
 nchar("January")
 ```
 
+### Les fonctions `paste` et `paste0`
 
 Une fonction très utile pour créer des vecteurs de chaînes de caractères est la fonction `paste`. Comme son nom l'indique, elle permet de coller ensemble des chaînes de caractères. Par exemple, l'appel à la fonction `paste` suivant combine `"Hello"` et `"world"` dans une seule chaîne de caractères.
 
@@ -976,23 +989,28 @@ Une fonction très utile pour créer des vecteurs de chaînes de caractères est
 paste("Hello", "world", sep = " ")
 ```
 
-Avec l'argument `sep = " "` indique à `paste` de séparer les chaînes de caractères par un espace lors de la combinaison.
+L'argument `sep = " "` indique à `paste` de séparer les chaînes de caractères par un espace lors de la combinaison.
+
+Il exsite une fonctions raccourcie pour l'utilisation de la fonction `paste` avec `sep = ""` (aucun caratère pour séparer les chaînes de caractères) : la fonction `paste0`. 
+
+```{r}
+paste0("Hello", "world")
+```
 
 En comparaison, la combinaison de ces deux chaînes de caractères avec la fonction `c` aurait créé un vecteur de longueur 2.
 
 ```{r}
 tentative <- c("Hello", "world")
-tentative
 str(tentative)
 ```
 
-La fonction `paste` travaille, tout comme `nchar`, de façon vectorielle. Si elle reçoit en entrée des vecteurs, elle les combine élément par élément et retourne un vecteur de même longueur que ceux fournis. 
+Les fonctions `paste` et `paste0` travaillent, tout comme `nchar`, de façon vectorielle. Si elles reçoivent en entrée des vecteurs, elles les combinent élément par élément et retournent un vecteur de même longueur que ceux fournis. 
 
 ```{r R.options = list(width = 85)}
 paste(LETTERS, letters, sep = "-")
 ```
 
-La fonction `paste` permet aussi de combiner dans une seule chaîne de caractères les chaînes de caractères comprises dans un vecteur grâce à son argument `collapse`.
+Les fonctions `paste` et `paste0` permettent aussi de combiner dans une seule chaîne de caractères les chaînes de caractères comprises dans un vecteur grâce à leur argument `collapse`.
 
 ```{r}
 paste(LETTERS, collapse = ",")
@@ -1008,7 +1026,7 @@ Une matrice est un objet atomique à deux dimensions. Elle possède des lignes e
 
 ## Obtention d’informations sur une matrice
 
-Observons le vecteur `mat` présenté précédemment. 
+Observons la matrice `mat` présentée précédemment. 
 ```{r}
 mat
 ```
@@ -1024,11 +1042,11 @@ Il possède deux dimensions.
 ```{r}
 nrow(mat)
 ```
-La taille de sa première dimension est vue comme un nombre de lignes. Il en a `r nrow(mat)`.
+La taille de sa première dimension est vue comme un nombre de lignes. Il y en a `r nrow(mat)`.
 ```{r}
 ncol(mat)
 ```
-La taille de sa deuxième dimension est vue comme un nombre de colonnes. Il en a `r ncol(mat)`.
+La taille de sa deuxième dimension est vue comme un nombre de colonnes. Il y en a `r ncol(mat)`.
 ```{r}
 length(mat)
 ```
@@ -1039,7 +1057,7 @@ La longueur d'une matrice est son nombre total d'éléments, soit `r length(mat)
 
 ### Fonction `matrix`
 
-La fonction `matrix` permet de créer un objet de type matrice comme suit.
+La fonction `matrix` permet de créer un objet de type matrice à partir d'un vecteur contenant les éléments à mettre dans la matrice.
 
 ```{r}
 mat <- matrix(c(TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE), 
@@ -1050,8 +1068,18 @@ L'objet obtenu est celui que nous venons d'observer.
 
 La fonction `matrix` attend comme premier argument un vecteur d'éléments, ensuite un nombre de colonnes (argument `ncol`) et/ou un nombre de lignes (argument `nrow`). L'argument `byrow` permet de spécifier si les éléments du vecteur fourni comme premier argument doivent être placés dans la matrice ligne par ligne ou colonne par colonne (ce qui est fait par défaut).
 
+### Fonction `as.matrix`
 
-### Les fonctions `rbind` et `cbind`
+Pour tenter de convertir en matrice un objet d'un autre type, la fonction `as.matrix` est utile. Par exemple, convertissons en matrice la data frame `dat` créé précédemment.
+
+```{r}
+as.matrix(dat)
+```
+
+Étant donné qu'une matrice est un objet atomique, tous ses éléments doivent être des données du même type. Ici, toutes les données ont donc été converties en chaînes de caractères. Nous reviendrons plus loin sur les [conversions de types de données](#conversions).
+
+
+### Fonctions `rbind` et `cbind`
 
 Nous allons maintenant étendre notre exemple de données provenant de 10 lancers d'un dé à des données provenant de 10 lancers de 2 dés. Supposons donc qu'en plus des résultats du dé 1 (2, 3, 4, 1, 2, 3, 5, 6, 5, 4), nous avons les résultats du dé 2 : 1, 4, 2, 3, 5, 4, 6, 2, 5, 3.
 
@@ -1067,9 +1095,9 @@ des_lignes <- rbind(de1, de2)
 des_lignes
 ```
 
-Le `r` dans le nom `rbind` indique que la fonction combine des vecteurs par lignes (en anglais *rows*), dans le sens que chacun des vecteurs devient une ligne de la matrice produite.
+Le `r` dans le nom `rbind` indique que la fonction combine des vecteurs par *rows* en anglais ou lignes en français, dans le sens que chacun des vecteurs devient une ligne de la matrice produite.
 
-Pour les données de lancers de dés, il serait plus approprié de combiner les vecteurs par colonnes, afin que les lignes de la matrice obtenue représentent des observations et les colonnes des variables. Nous utiliserons donc plutôt `cbind`.
+Pour les données de lancers de dés, il serait plus approprié de combiner les vecteurs par colonnes, afin que les lignes de la matrice obtenue représentent des observations et les colonnes des variables. Nous utiliserons donc plutôt `cbind` (`c` pour *columns* en anglais ou colonnes en français)
 
 ```{r}
 des <- cbind(de1, de2)
@@ -1078,7 +1106,7 @@ des
 
 ## Fonctions de concaténation de matrices
 
-### Les fonctions `rbind` et `cbind`
+### Fonctions `rbind` et `cbind`
 
 Les fonctions `rbind` et `cbind` acceptent aussi en entrée des matrices, qu'elles concatènent, comme dans cet exemple.
 
@@ -1094,12 +1122,10 @@ Des matrices concaténées en lignes doivent avoir le même nombre de colonnes e
 Les lignes et colonnes d'une matrice peuvent être nommées.
 
 ```{r}
-rownames(des) <- paste("l", 1:10, sep = "")
+rownames(des) <- paste0("l", 1:10)
 colnames(des) <- paste0("de", 1:2)
 str(des)
 ```
-
-Notons que la fonction `paste0` fait la même  chose que la fonction `paste` avec l'argument `sep = ""`.
 
 Les noms des lignes et colonnes d'une matrice R sont des attributs de l'objet, tout comme ses dimensions.
 
@@ -1215,6 +1241,25 @@ collection
 
 Les arrays sont utiles, notamment, pour ranger dans une même structure plusieurs matrices de même taille.
 
+### Fonction `as.array`
+
+Il est aussi possible de tenter de créer un array à partir d'un objet R quelconque avec `as.array`. Par exemple, les vecteurs ne sont pas considérés comme des types particuliers d'arrays.
+
+```{r}
+vec
+is.array(vec)
+```
+
+Cependant, un vecteur peut être transformé en array comme suit.
+
+```{r}
+array_vec <- as.array(vec)
+array_vec
+is.array(array_vec)
+```
+
+Même si les affichages des objets `vec` et `array_vec` sont identiques, les deux objets ne sont pas du même type.
+
 
 ## Ajout de métadonnées dans un array
 
@@ -1283,6 +1328,22 @@ noms
 ```
 
 Pour utiliser cette fonction, il suffit de lui donner en entrée tous les objets à inclure dans la liste, dans l'ordre souhaité.
+
+
+### Fonction `as.list`
+
+La fonction `as.list` permet quant à elle de transformer n'importe quel objet R en liste. Par exemple, en appliquant la fonction `as.list` sur un vecteur, elle crée une liste pour laquelle chaque élément du vecteur est devenu un vecteur de longueur 1 en élément de la liste.
+
+```{r}
+as.list(vec)
+```
+
+Pour obtenir plutôt une liste de longueur 1 comportant le vecteur comme seul élément, il aurait plutôt fallu utiliser la fonction `list` comme suit.
+
+```{r}
+list(vec)
+```
+
 
 ### Fonction `vector`
 
@@ -1511,11 +1572,20 @@ options(stringsAsFactors = FALSE)
 
 Cependant, cette commande provoque un changement global qui affecte toutes les fonctions ayant un argument `stringsAsFactors` (la fonction `data.frame` n'est pas la seule à avoir cet argument).
 
+### Fonction `as.data.frame`
+
+Pour transformer, si possible, un objet R en data frame, il faut utiliser la fonction `as.data.frame`. Par exemple, transformons la matrice `mat` en data frame.
+
+```{r}
+df_mat <- as.data.frame(mat)
+df_mat
+```
+
 ## Fonctions de concaténation de data frame
 
 ### Fonction `data.frame`
 
-En plus de servir à créer des data frames, la fonction `data.frame` permet d'en combiner.
+En plus de servir à créer des data frames, la fonction `data.frame` permet d'en combiner par concaténation de colonnes.
 
 ```{r}
 jour <- data.frame(jour = rep(1,10))
@@ -1524,13 +1594,27 @@ autre <- data.frame(desPlus, jour)
 str(autre)
 ```
 
-### Fonction `cbind`
+### Fonctions `rbind` et `cbind`
 
-Une concaténation de data frames peut aussi s'effectuer avec la fonction `cbind`.
+Une concaténation de data frames peut aussi s'effectuer avec les fonctions `rbind` et `cbind`. Comme avec une matrice, `rbind` effectue une concaténation en lignes et `cbind` en colonnes.
+
+La fonction `rbind` permet donc de mettre en commun les observations de plusieurs data frames, comme dans cet exemple.
+
+```{r}
+desPlus_Exp2 <- data.frame(de1 = c(3,5), de2 = c(4,2), lanceur = "Paul")
+desPlus_Exp3 <- data.frame(de1 = c(6,1), de2 = c(2,5), lanceur = "Paul")
+rbind(desPlus, desPlus_Exp2, desPlus_Exp3)
+```
+
+Pour que la concaténation fonctionne, les noms des variables (colonnes) dans les data frames doivent concorder.
+
+Une concaténation de data frames avec `cbind` est quant à elle similaire à une concaténation avec `data.frame` : des variables sont rassemblées dans un seul data frame.
 
 ```{r}
 cbind(desPlus, jour)
 ```
+
+Cette fois, les noms des observations (lignes) n'ont pas besoin de concorder entre les data frames, mais les nombres d'observations doivent être égaux.
 
 
 ## Ajout de métadonnées dans un data frame
@@ -1650,7 +1734,7 @@ str(desPlus_data.table)
 
 Nous remarquons tout d'abord les différences suivantes avec le data frame :
 
-- les colonnes contenant des données de type caractère ne sont pas transformées en facteurs par défaut (valeur par défaut de l'argument `stringsAsFactors` est `FALSE`);
+- les colonnes contenant des données de type caractère ne sont pas transformées en facteurs par défaut (la valeur par défaut de l'argument `stringsAsFactors` est `FALSE`);
 - l'affichage des noms des lignes est un peu différent.
 
 Au-delà de ces distinctions mineures, la vraie force du data table est la rapidité d'exécution des manipulations et la possibilité d'en faire beaucoup plus avec l'opérateur `[` comparativement au data frame. Pour illustrer ce dernier point, voici un exemple de calcul de statistiques descriptives avec l'opérateur `[`.
@@ -1717,7 +1801,7 @@ Cependant, les niveaux, ou modalités, du facteur sont stockés sous forme de ca
 
 ## Fonction de création d'un facteur
 
-### Fonction `factor`
+### Fonctions `factor` et `as.factor`
 
 Pour créer un facteur de toutes pièces, il faut faire appel à la fonction `factor` ou `as.factor`.
 
@@ -1737,6 +1821,8 @@ str(reponses)
 ```
 
 Il est utile de contrôler l'ordre des niveaux d'un facteur, car dans des sorties ou graphiques produits avec un facteur, l'ordre de ses niveaux est respecté.
+
+La fonction `as.factor` agit comme la fonction `factor`, mais elle ne possède pas d'arguments supplémentaires au vecteur à transformer.
 
 
 ## Fonction de modification d'un facteur
@@ -1805,7 +1891,7 @@ Grâce à l'argument `ordered = TRUE`, l'objet obtenu est plus qu'un facteur. Il
 
 ***
 
-# Conversions de type de données
+# Conversions de type de données {#conversions}
 
 Rappelons-nous que tous les éléments d'un objet atomique doivent être du même type. Que se passe-t-il alors si nous tentons de modifier un élément d'un vecteur pour le remplacer par une donnée d'un type différent du type des éléments d'origine dans le vecteur?
 
@@ -1897,7 +1983,210 @@ type.convert(vect6, na.strings = "-", dec = ",")
 
 ***
 
-# Références pertinentes 
+# Synthèse
+
+#### Contenant versus contenu
+
+**Objet** R servant de structure de données  
+
+$\qquad =$ CONTENANT
+
+**Éléments** stockés dans cet objet  
+
+$\qquad =$ CONTENU :
+
+- **données** : valeurs observées de variables aléatoires, valeurs de résultats de calculs (ex.: statistiques descriptives, coefficients d'une modèle), etc.
+- **métadonnées = attributs** (souvent facultatives) :  
+nom des éléments (par dimension), nombre d'éléments par dimension pour les matrices et arrays, niveaux d'un facteur, etc.
+
+
+#### Caractéristiques des structures de données en R
+
+- Type de l'objet : `is.`(`atomic`/`recursive`), `is.`(`vector`/`matrix`/`array`/`list`/`data.frame`/`factor`)
+- Type des données en éléments : `typeof`, `is.`(`numeric`/`character`/`logical`/...)
+    + valeurs numériques (`numeric`):  
+    entières (`integer`) ou réelles (`double`)
+    + chaînes de caractères (`character`)
+    + valeurs logiques (`logical`)
+    + types moins communs de valeurs :  
+    nombres complexes (`complex`), bits (`raw`), etc.
+    + si éléments = sous-objets (par exemple pour une liste ou un data frame), `typeof` retourne la valeur `"list"`
+- Nombre total d'éléments : `length`
+
+#### Types de structures de données en R
+
+Nombre de dimensions | Objets atomiques | Objets récursifs
+--------------- | --------------------- | -----------------------------
+1 | **vecteur** | **liste**
+2 | **matrice** | **data frame**
+$\vdots$ | $\vdots$ |
+n | **array**   |
+
+- Objets atomiques : Éléments = données toutes du même type
+- Objets récursifs : Éléments = objets de types quelconques
+
+**facteur** = une généralisation du vecteur pour stocker les observations d'une variable catégorique
+
+\newpage
+
+#### Attributs selon le type d'objet
+
+Fonctions pour extraire des attributs : `attributes` (tous les attributs), `attr` (un seul attribut), `names`, `dimnames`, `colnames`, `rownames`, `dim`, `nrow`, `ncol`, `class`, `levels`, etc.
+
+Type d'objet | names | dimnames | dim | class | levels
+-------------|-------|----------|-----|-------|-------
+vecteur | ($\checkmark$) | - | - | $\bullet$ | - 
+matrice ou array | - | ($\checkmark$) | $\checkmark$ | $\bullet$ | - 
+liste | ($\checkmark$) | - | - | $\bullet$ | - 
+data frame | ($\checkmark$) | ($\checkmark$, $\bullet$) | $\bullet$ | $\checkmark$ | - 
+facteur | ($\checkmark$) | - | - | $\checkmark$ | $\checkmark$ 
+
+Légende :  
+« - » = attribut non existant pour ce type d'objet  
+« $\checkmark$ » = attribut existe (non obligatoire si encadré de parenthèses)  
+« $\bullet$ » = métadonnée existante, mais pas dans les attributs obtenus avec la fonction `attributes`
+
+
+#### Extraction d'éléments
+
+- Opérateurs d'indiçage : 
+    + `[` : extrait un ou plusieurs éléments, préserve la structure de l'objet, sauf si une simplification est possible et `drop = TRUE` (`TRUE` est la valeur par défaut du paramètre);
+    + `[[` et `$` : extrait un seul élément, laisse tomber des attributs d'un objet atomique, sort de la structure d'un objet récursif  
+    (`$` s'utilise seulement avec des objets récursifs);  
+- Fonctions : `head`, `tail`, `subset`. 
+
+Différentes façons d'identifier les éléments à extraire avec `[` :
+
+
+- entier(s) positif(s) (entre 1 et la longueur de la dimension concernée) : *positions des éléments à conserver*,
+- entier(s) négatif(s) (entre 1 et la longueur de la dimension concernée) : *- positions des éléments à éliminer*,
+- chaîne(s) de caractères (possible seulement si les éléments sont nommés) : *noms des éléments à conserver*,
+- vecteur de logiques (doit être de la même longueur que celle de la dimension concernée) : `TRUE` *pour les éléments à conserver,* `FALSE` *pour ceux à éliminer.*
+
+
+#### Remplacement d'éléments dans un objet
+
+Afin de modifier des éléments dans un objet, il faut soumettre une commande contenant les 3 composantes suivantes :
+
+1. une extraction avec l'opérateur `[`, `[[` ou `$` pour identifier les éléments à remplacer (ou simplement le nom de l'objet s'il doit être remplacé dans son entièreté),
+2. un opérateur d'assignation (`<-`),
+3. les valeurs de remplacement, dans une structure correspondant à la section à remplacer dans l'objet, *par exemple :*
+
+```{r, eval = FALSE}
+matriceA[1:2,3] <- c(3,5)
+```
+
+
+##### Règle de recyclage
+
+Lors d'une assignation ou de toute opération faisant intervenir 2 vecteurs de longueurs différentes, les éléments du vecteur le plus court sont répétés de façon à ce que ce vecteur devienne de la même longueur que le vecteur le plus long. 
+
+
+#### Conversions de types de données
+
+Les types de données communs, du moins contraignant au plus contraignant :
+
+- caractères > réels > entiers > logiques
+
+R fait automatiquement des **conversions implicites** en respectant cet ordonnancement des types de données
+
+Fonctions R pour effectuer des **conversions explicites** :  
+`as.`(`character`/`double`/`integer`/`logical`), `type.convert`
+
+##### Donnée manquante
+
+Peu importe le type, une **donnée manquante** est toujours représentée en R par `NA`.
+
+
+#### Le vecteur
+
+Simple objet atomique de dimension 1
+
+- fonctions de création : 
+    + `c`, `vector`, `as.vector`;
+    + valeurs répétées : `rep`;
+    + séquences régulières : `:`, `seq`;
+    + chaînes de caractères : `paste`, `paste0`, constantes (`letters`, `LETTERS`, `month.name`, etc.).
+- fonctions d'ajout de valeurs :
+    + par concaténation d'un autre vecteur : `c`;
+    + `append`;
+- comment réaliser une extraction avec un opérateur :
+    + `[` ou `[[` avec un seul argument.
+
+#### La matrice
+
+Généralisation du vecteur à 2 dimensions
+
+- fonctions de création : 
+    + `matrix`, `as.matrix`;
+    + en combinant des vecteurs par lignes : `rbind`;
+    + en combinant des vecteurs par colonnes : `cbind`;
+- fonctions d'ajout de valeurs :
+    + par concaténation d'une autre matrice ou d'un vecteur :  
+    `rbind`, `cbind`;
+- comment réaliser une extraction avec un opérateur :
+    + `[` ou `[[` avec deux arguments, soit un par dimension (ne pas fournir de valeur pour les dimensions à conserver complètes).
+
+
+#### Le array
+
+Généralisation du vecteur ou de la matrice à une dimension quelconque 
+
+- fonctions de création : 
+    + `array`, `as.array`;
+- fonctions d'ajout de valeurs :
+    + par concaténation d'un autre array :  
+    `abind` du package `abind` (pas vu dans le cours);
+- comment réaliser une extraction avec un opérateur :
+    + `[` ou `[[` avec autant d'arguments qu'il y a de dimensions (ne pas fournir de valeur pour les dimensions à conserver complètes).
+
+
+#### La liste
+
+Objet récursif de dimension 1
+
+- fonctions de création : 
+    + `list`, `as.list`, `vector`;
+- fonctions d'ajout de valeurs : 
+    + par concaténation avec `c`;
+- comment réaliser une extraction avec un opérateur :
+    + `[` ou `[[` avec un seul argument,
+    + ou encore $ pour extraire un élément nommée.
+
+#### Le data frame
+
+Objet récursif de dimension 2 conçu pour stocker    
+
+- des jeux de données (ligne = observation, colonne = variable)
+    + $\approx$ liste de vecteurs ou facteurs de même longueur,
+    + $\approx$ matrice avec valeurs de types pouvant varier entre colonnes;
+
+- fonctions de création : 
+    + `data.frame`, `as.data.frame`;
+- fonctions d'ajout de valeurs : 
+    + par concaténation avec : `data.frame`, `cbind`, `rbind`;
+- comment réaliser une extraction avec un opérateur :
+    + `[` ou `[[` avec 2 arguments, soit un par dimension,  
+    + ou encore $ pour extraire une colonne nommée.
+
+
+#### Le facteur
+
+Généralisation du vecteur conçu pour stocker les valeurs observées d’une variable catégorique.
+
+- fonctions de création : `factor`, `as.factor`;
+- fonctions en lien avec les niveaux du facteur : 
+    + pour extraire (ou modifier lorsqu’accompagné d'une assignation de valeurs) les niveaux : `levels`,
+    + retourne le nombre de niveaux : `nlevels`,
+    + pour éliminer des niveaux non présents : `droplevels`;
+- comment réaliser une extraction avec un opérateur :
+    + `[` ou `[[` avec un seul argument.
+
+
+
+***
+
+# Références pertinentes
 
 - R Core Team (2016). An Introduction to R.  
 https://cran.r-project.org/doc/manuals/r-release/R-intro.html
