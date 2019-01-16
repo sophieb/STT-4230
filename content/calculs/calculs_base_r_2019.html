@@ -1,10 +1,10 @@
 ---
 title: "Calculs de base en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2018-01-20"
+date: "2019-01-16"
 weight: 1
 slug: "calculs_base_r"
-categories: ["cours_2018-01-30"]
+categories: ["cours_2019-01-29"]
 categories_weight: 1
 lastmodifierdisplayname : "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
@@ -30,7 +30,7 @@ header-includes:
 <li><a href="#fonctions-et-operateurs-pour-des-calculs-mathematiques">Fonctions et opérateurs pour des calculs mathématiques</a><ul>
 <li><a href="#operateurs-mathematiques">Opérateurs mathématiques</a><ul>
 <li><a href="#operateurs-arithmetiques">Opérateurs arithmétiques</a></li>
-<li><a href="#operateurs-de-comparaison">opérateurs de comparaison</a></li>
+<li><a href="#operateurs-de-comparaison">Opérateurs de comparaison</a></li>
 <li><a href="#operateurs-logiques">Opérateurs logiques</a></li>
 </ul></li>
 <li><a href="#fonctions-mathematiques-agissant-de-facon-vectorielle">Fonctions mathématiques agissant de façon vectorielle</a></li>
@@ -53,12 +53,12 @@ header-includes:
 </ul></li>
 <li><a href="#fonctions-lapply-sapply-et-mapply">Fonctions <code>lapply</code>, <code>sapply</code> et <code>mapply</code></a></li>
 <li><a href="#fonctions-tapply-by-et-aggregate">Fonctions <code>tapply</code>, <code>by</code> et <code>aggregate</code></a></li>
-<li><a href="#synthese-des-informations-sur-les-fonctions-de-la-famille-des-apply">Synthèse des informations sur les fonctions de la famille des <code>apply</code></a></li>
 </ul></li>
 <li><a href="#ecriture-de-conditions-logiques">Écriture de conditions logiques</a><ul>
 <li><a href="#operateurs-et-fonctions-retournant-toujours-un-logique-de-longueur-1">Opérateurs et fonctions retournant toujours un logique de longueur 1</a></li>
 </ul></li>
 <li><a href="#comparaison-de-deux-objets-r">Comparaison de deux objets R</a></li>
+<li><a href="#synthese">Synthèse</a></li>
 <li><a href="#references">Références</a></li>
 </ul>
 </div>
@@ -70,16 +70,10 @@ header-includes:
 <li>effectuer une transformation mathématique de variables dans un jeu de données,</li>
 <li>calculer des statistiques descriptives, par exemple dans le cadre d’une analyse exploratoire de données.</li>
 </ul>
-<p>Voici d’emblée une vue d’ensemble de plusieurs des fonctions présentées ici.</p>
-<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-1"></span>
-<img src="fig/SyntheseFctOpMathStat.png" alt="Vue d'ensemble de plusieurs fonctions et opérateurs mathématiques et statistiques en R" width="90%" />
-<p class="caption">
-Figure 1: Vue d’ensemble de plusieurs fonctions et opérateurs mathématiques et statistiques en R
-</p>
-</div>
 <div id="fonctionnement-vectoriel-et-regle-de-recyclage" class="section level1">
 <h1>Fonctionnement vectoriel et règle de recyclage</h1>
 <p>Tous les opérateurs et plusieurs des fonctions qui sont présentées dans cette fiche agissent de façon vectorielle. Ils appliquent un calcul terme à terme entre deux objets atomiques (vecteurs, matrices ou arrays) ou data frames contenant uniquement des éléments numériques.</p>
+<p>Par exemple, si les deux matrices suivantes sont additionnées avec l’opérateur <code>+</code>,</p>
 <pre class="r"><code>matrix(1:6 , nrow = 2, ncol = 3)</code></pre>
 <pre><code>##      [,1] [,2] [,3]
 ## [1,]    1    3    5
@@ -88,14 +82,16 @@ Figure 1: Vue d’ensemble de plusieurs fonctions et opérateurs mathématiques 
 <pre><code>##      [,1] [,2] [,3]
 ## [1,]    6    4    2
 ## [2,]    5    3    1</code></pre>
+<p>l’élément en position (i,j) dans la première matrice sera additionné à l’élément à la même position dans la deuxième matrice, et ce, pour toutes les positions. Le résultats cette addition terme à terme est donc le suivant :</p>
 <pre class="r"><code>matrix(1:6 , nrow = 2, ncol = 3) + matrix(6:1 , nrow = 2, ncol = 3)</code></pre>
 <pre><code>##      [,1] [,2] [,3]
 ## [1,]    7    7    7
 ## [2,]    7    7    7</code></pre>
+<p> </p>
 <p>Si les deux objets intervenant dans l’opération ne sont pas de mêmes dimensions, la <strong>règle de recyclage</strong> s’applique. Cette règle avait déjà été mentionnée dans les notes sur les <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#remplacement-delements">structures de données en R</a>. Étant donné son importance, revoyons-là plus en profondeur ici.</p>
 <pre class="r"><code>c(5, 6) + c(2, 5, 3, 1)</code></pre>
 <pre><code>## [1]  7 11  8  7</code></pre>
-<p>La commande précédente effectue 4 additions, une pour chacun des 4 éléments du plus long des deux vecteurs dans l’opération, soit ici le deuxième. Le premier vecteur est plutôt de longueur 2. R répète donc ses éléments pour créer un vecteur aussi long que le deuxième</p>
+<p>L’instruction précédente effectue 4 additions, une pour chacun des 4 éléments du plus long des deux vecteurs dans l’opération, soit ici le deuxième. Le premier vecteur est plutôt de longueur 2. R répète donc ses éléments pour créer un vecteur aussi long que le deuxième</p>
 <pre class="r"><code>rep(c(5, 6), 4/2)</code></pre>
 <pre><code>## [1] 5 6 5 6</code></pre>
 <p>et effectue en réalité l’opération suivante :</p>
@@ -104,7 +100,7 @@ Figure 1: Vue d’ensemble de plusieurs fonctions et opérateurs mathématiques 
 <p>Cette règle de recyclage est exploitée, souvent sans que l’utilisateur en soit pleinement conscient, lorsque l’un des deux vecteurs impliqués dans une opération est de longueur 1. Par exemple, la commande suivante impliquant un exposant,</p>
 <pre class="r"><code>c(2, 5, 3, 1)^2</code></pre>
 <pre><code>## [1]  4 25  9  1</code></pre>
-<p>est en fait traduite par R en la commande suivante.</p>
+<p>est en fait traduite par R en la commande suivante :</p>
 <pre class="r"><code>c(2, 5, 3, 1)^rep(2, 4)</code></pre>
 <pre><code>## [1]  4 25  9  1</code></pre>
 <div id="regle-de-recyclage-avec-des-objets-a-plus-dune-dimension" class="section level4">
@@ -134,9 +130,9 @@ Figure 1: Vue d’ensemble de plusieurs fonctions et opérateurs mathématiques 
 ## [3,]    1    1    1    1</code></pre>
 <p>Une règle de recyclage utilisée pour former une matrice de dimension appropriée va donc remplir la matrice une colonne à la fois, comme le fait la fonction <code>matrix</code> par défaut.</p>
 </div>
-<div id="regle-de-recyclage-lorsque-la-longueur-de-lobjet-le-plus-court-nest-pas-multiple-de-la-longueur-de-lobjet-le-plus-long" class="section level4">
-<h4>Règle de recyclage lorsque la longueur de l’objet le plus court n’est pas multiple de la longueur de l’objet le plus long</h4>
-<p>Lorsque la longueur de l’objet le plus court n’est pas multiple de la longueur de l’objet le plus long, la règle de recyclage fonctionne quand même. R recycle l’objet le plus court assez de fois pour arriver à un objet de longueur égale ou supérieure à l’objet le plus long. Ensuite, si l’objet recyclé est plus long que l’autre objet, il est tronqué de façon à ce que les deux objets aient la même longueur.</p>
+<div id="regle-de-recyclage-lorsque-la-longueur-de-lobjet-le-plus-long-nest-pas-multiple-de-la-longueur-de-lobjet-le-plus-court" class="section level4">
+<h4>Règle de recyclage lorsque la longueur de l’objet le plus long n’est pas multiple de la longueur de l’objet le plus court</h4>
+<p>Lorsque la longueur de l’objet le plus long n’est pas multiple de la longueur de l’objet le plus court, la règle de recyclage fonctionne quand même. R recycle l’objet le plus court assez de fois pour arriver à un objet de longueur égale ou supérieure à l’objet le plus long. Ensuite, si l’objet recyclé est plus long que l’autre objet, il est tronqué de façon à ce que les deux objets aient la même longueur.</p>
 <p>Supposons par exemple que la commande suivante soit soumise en R.</p>
 <pre class="r"><code>1:12 + 5:1</code></pre>
 <p>L’objet de gauche dans l’addition est de longueur 12 et l’objet de droite de longueur 5. L’objet de droite sera donc recyclé 3 fois,</p>
@@ -189,7 +185,7 @@ objet_recycle</code></pre>
 </div>
 </div>
 <div id="operateurs-de-comparaison" class="section level3">
-<h3>opérateurs de comparaison</h3>
+<h3>Opérateurs de comparaison</h3>
 <p>Les opérateurs de comparaison permettent de comparer des valeurs. Ils retournent <code>TRUE</code> ou <code>FALSE</code>. Il s’agit des opérateurs suivants :</p>
 <ul>
 <li><code>==</code> : égalité,</li>
@@ -215,22 +211,40 @@ b &lt;- c(3, 5, 6, 4)</code></pre>
 <pre class="r"><code>FALSE &lt; TRUE </code></pre>
 <pre><code>## [1] TRUE</code></pre>
 <p>Quant aux caractères, les opérateurs de comparaison utilisent l’ordre de classement des caractères pour déterminer, entre deux valeurs, celle qui est inférieure. Cet ordre dépend des paramètres régionaux de la session R. D’une langue à l’autre, cet ordre peut varier.</p>
-<p>Pour connaître l’ordre utilisé dans une session R, la commande suivante est utile :</p>
-<pre class="r"><code>paste(sort(
-  c(0:9, 
-    letters, LETTERS, &quot;à&quot;, &quot;â&quot;, &quot;é&quot;, &quot;è&quot;, &quot;ê&quot;, &quot;ë&quot;, &quot;ï&quot;, &quot;î&quot;, &quot;ô&quot;, &quot;ù&quot;, &quot;ü&quot;, &quot;û&quot;, &quot;ç&quot;,
-    &quot;!&quot;, &quot;\&quot;&quot;, &quot;#&quot;, &quot;$&quot;, &quot;%&quot;, &quot;&amp;&quot;, &quot;&#39;&quot;, &quot;(&quot;, &quot;)&quot;, &quot;*&quot;, &quot;+&quot;, &quot;,&quot;, &quot;-&quot;, &quot;.&quot;, &quot;/&quot;, &quot;:&quot;,
-    &quot;;&quot;, &quot;&lt;&quot;, &quot;=&quot;,&quot;&gt;&quot;, &quot;?&quot;, &quot;@&quot;, &quot;[&quot;, &quot;\\&quot;, &quot;]&quot;, &quot;^&quot;, &quot;_&quot;, &quot;{&quot;, &quot;|&quot;, &quot;}&quot;, &quot;~&quot;)), 
-  collapse = &quot;&quot;)</code></pre>
+<p>Pour connaître l’ordre utilisé dans une session R, les instructions suivantes sont utiles :</p>
+<pre class="r"><code>caracteres_speciaux &lt;- 
+  c(&quot;!&quot;, &quot;\&quot;&quot;, &quot;#&quot;, &quot;$&quot;, &quot;%&quot;, &quot;&amp;&quot;, &quot;&#39;&quot;, &quot;(&quot;, &quot;)&quot;, &quot;*&quot;, &quot;+&quot;, &quot;,&quot;, &quot;-&quot;, &quot;.&quot;, &quot;/&quot;, &quot;:&quot;, &quot;;&quot;, 
+    &quot;&lt;&quot;, &quot;=&quot;,&quot;&gt;&quot;, &quot;?&quot;, &quot;@&quot;, &quot;[&quot;, &quot;\\&quot;, &quot;]&quot;, &quot;^&quot;, &quot;_&quot;, &quot;{&quot;, &quot;|&quot;, &quot;}&quot;, &quot;~&quot;)
+lettres_accentuees &lt;- c(&quot;à&quot;, &quot;â&quot;, &quot;é&quot;, &quot;è&quot;, &quot;ê&quot;, &quot;ë&quot;, &quot;ï&quot;, &quot;î&quot;, &quot;ô&quot;, &quot;ù&quot;, &quot;ü&quot;, &quot;û&quot;, &quot;ç&quot;)
+catacteres_ordonnes &lt;- sort(c(caracteres_speciaux, 0:9, letters, LETTERS, 
+                              lettres_accentuees, toupper(lettres_accentuees))) 
+paste(catacteres_ordonnes, collapse = &quot;&quot;)</code></pre>
 <p>J’ai obtenu le résultat suivant, qui sera peut-être différent sur votre ordinateur si vous n’avez pas les mêmes paramètres régionaux que moi.</p>
-<pre><code>&#39;-!&quot;#$%&amp;()*,./:;?@[\]^_{|}~+&lt;=&gt;0123456789aAàâbBcCçdDeEéèêëfFgGhHiIîïjJkKlLmMnNoOôpPqQrRsS
-tTuUùûüvVwWxXyYzZ</code></pre>
-<p>Ainsi, dans ma session R, les caractères spéciaux sont inférieurs aux chiffres et aux lettres, les chiffres sont inférieurs aux lettres et les lettres minuscules sont inférieures aux lettres majuscules.</p>
-<p>Aussi en cas d’inégalité dans le nombre de caractères, les chaînes contenant moins de caractères sont considérées inférieures aux chaînes en contenant plus, comme l’illustre ces exemples.</p>
-<pre class="r"><code>&quot;1&quot; &lt; &quot;100&quot;</code></pre>
+<pre><code>&quot;&#39;-!\&quot;#$%&amp;()*,./:;?@[\\]^_{|}~+&lt;=&gt;0123456789aAàÀâÂbBcCçÇdDeEéÉèÈêÊëËfFgGhHiIîÎïÏjJkKlLmM
+nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
+<p>Ainsi, dans ma session R :</p>
+<ul>
+<li>les caractères spéciaux sont inférieurs aux chiffres et aux lettres,</li>
+<li>les chiffres sont inférieurs aux lettres,</li>
+<li>les lettres sont classées en ordre aphabétique et
+<ul>
+<li>les lettres minuscules sont inférieures aux lettres majuscules,</li>
+<li>les lettres non accentuées sont inférieures aux lettres accentuées.</li>
+</ul></li>
+</ul>
+<p>Pour des chaînes à plus d’un caractère, la comparaison s’effectue caractère par caractère (premiers caractères comparés entre eux, puis deuxièmes en cas d’égalité, puis troisièmes en cas d’égalités aux deux premières positions, etc.).</p>
+<pre class="r"><code>&quot;arborescence&quot; &lt; &quot;arbre&quot; </code></pre>
 <pre><code>## [1] TRUE</code></pre>
+<p>Aussi, l’absence de caractères vaut moins que la présence.</p>
 <pre class="r"><code>&quot;a&quot; &lt; &quot;aa&quot;</code></pre>
 <pre><code>## [1] TRUE</code></pre>
+<p> </p>
+<p><strong>Remarque</strong> : Afin de correctement ordonner des nombres, il faut s’assurer de les stocker sous un format numérique.</p>
+<pre class="r"><code>2 &lt; 10</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<p>S’ils sont stockés sous forme de chaînes de caractères, les résultats obtenus ne seront pas toujours ceux attendus.</p>
+<pre class="r"><code>&quot;2&quot; &lt; &quot;10&quot;</code></pre>
+<pre><code>## [1] FALSE</code></pre>
 </div>
 </div>
 <div id="operateurs-logiques" class="section level3">
@@ -241,7 +255,7 @@ tTuUùûüvVwWxXyYzZ</code></pre>
 <li><code>|</code> et <code>||</code> : ou,</li>
 <li><code>&amp;</code> et <code>&amp;&amp;</code> : et.</li>
 </ul>
-<p>De plus, le ou exclusif est implémenté par la fonction <code>xor</code>.</p>
+<p>De plus, le « ou » exclusif est implémenté par la fonction <code>xor</code>.</p>
 <p>L’opérateur <code>!</code> n’a qu’un seul argument, alors que les autres opérateurs logiques en ont deux. Il effectue une négation. Il transforme les <code>TRUE</code> en <code>FALSE</code> et les <code>FALSE</code> en <code>TRUE</code>.</p>
 <pre class="r"><code>! c(TRUE, FALSE)</code></pre>
 <pre><code>## [1] FALSE  TRUE</code></pre>
@@ -306,28 +320,29 @@ xMat</code></pre>
 <li>différences entre des éléments : <code>diff</code>.</li>
 </ul>
 <p>Voici quelques exemples.</p>
-<pre class="r"><code>mat &lt;- matrix(1:12, nrow = 3, ncol = 4, byrow = TRUE)
+<pre class="r"><code>mat &lt;- matrix(c(2,5,3,4,6,5,4,3,1,2,9,8), nrow = 3, ncol = 4)
 mat</code></pre>
 <pre><code>##      [,1] [,2] [,3] [,4]
-## [1,]    1    2    3    4
-## [2,]    5    6    7    8
-## [3,]    9   10   11   12</code></pre>
+## [1,]    2    4    4    2
+## [2,]    5    6    3    9
+## [3,]    3    5    1    8</code></pre>
 <pre class="r"><code>prod(mat)</code></pre>
-<pre><code>## [1] 479001600</code></pre>
+<pre><code>## [1] 6220800</code></pre>
 <pre class="r"><code>cumsum(mat)</code></pre>
-<pre><code>##  [1]  1  6 15 17 23 33 36 43 54 58 66 78</code></pre>
+<pre><code>##  [1]  2  7 10 14 20 25 29 32 33 35 44 52</code></pre>
 <div id="fonction-diff" class="section level4">
 <h4>Fonction <code>diff</code></h4>
 <p>Pour une matrice, <code>diff</code> calcule les différences terme à terme des éléments composant les lignes. Par défaut, il compare une ligne à la ligne en dessous.</p>
+
 <pre class="r"><code>diff(mat)</code></pre>
 <pre><code>##      [,1] [,2] [,3] [,4]
-## [1,]    4    4    4    4
-## [2,]    4    4    4    4</code></pre>
+## [1,]    3    2   -1    7
+## [2,]   -2   -1   -2   -1</code></pre>
 <p>La commande suivante retourne donc le même résultat que la précédente.</p>
 <pre class="r"><code>mat[-1, ] - mat[-nrow(mat), ]</code></pre>
 <pre><code>##      [,1] [,2] [,3] [,4]
-## [1,]    4    4    4    4
-## [2,]    4    4    4    4</code></pre>
+## [1,]    3    2   -1    7
+## [2,]   -2   -1   -2   -1</code></pre>
 <p>Pour un vecteur, la fonction <code>diff</code> retourne les différences entre un terme et le terme précédent.</p>
 <pre class="r"><code>diff(c(2,5,3,4))</code></pre>
 <pre><code>## [1]  3 -2  1</code></pre>
@@ -358,6 +373,7 @@ y &lt;- c(&quot;M&quot;, &quot;A&quot;, &quot;H&quot;, &quot;B&quot;)</code></pr
 <p>Identification des éléments de <code>x</code> ne se retrouvant pas dans <code>y</code>, en retirant les doublons :</p>
 <pre class="r"><code>setdiff(x, y)</code></pre>
 <pre><code>## [1] &quot;S&quot; &quot;F&quot;</code></pre>
+
 <p>Test sur l’égalité entre les ensembles <code>x</code> et <code>y</code> :</p>
 <pre class="r"><code>setequal(x,y)</code></pre>
 <pre><code>## [1] FALSE</code></pre>
@@ -416,7 +432,7 @@ y &lt;- c(&quot;M&quot;, &quot;A&quot;, &quot;H&quot;, &quot;B&quot;)</code></pr
 </div>
 <div id="traitement-des-observations-manquantes-et-argument-na.rm" class="section level3">
 <h3>Traitement des observations manquantes et argument <code>na.rm</code></h3>
-<p>Les fonctions <code>min</code>, <code>max</code>, <code>mean</code>, <code>median</code> et <code>sd</code>, ainsi que quelques autres fonctions qui seront vues dans les sous-sections suivantes, ont un argument en commun nommé <code>na.rm</code>. Cet argument spécifie le comportement de la fonction en présence de données manquantes (<code>NA</code>). Par défaut, <code>na.rm</code> prend la valeur <code>FALSE</code> pour ces fonctions. Cette valeur signifie que les données manquantes ne doivent pas être retirées avant d’effectuer le calcul. Cependant, en présence de données manquantes, ces fonctions ne sont pas en mesure de calculer des statistiques. Par exemple, supposons que nous voulions calculer la médiane des données dans le vecteur suivant.</p>
+<p>Les fonctions <code>min</code>, <code>max</code>, <code>mean</code>, <code>median</code> et <code>sd</code>, ainsi que quelques autres fonctions vues dans ces notes, ont un argument en commun nommé <code>na.rm</code>. Cet argument spécifie le comportement de la fonction en présence de données manquantes (<code>NA</code>). Par défaut, <code>na.rm</code> prend la valeur <code>FALSE</code> pour ces fonctions. Cette valeur signifie que les données manquantes ne doivent pas être retirées avant d’effectuer le calcul. Cependant, en présence de données manquantes, ces fonctions ne sont pas en mesure de calculer des statistiques. Par exemple, supposons que nous voulions calculer la médiane des données dans le vecteur suivant.</p>
 <pre class="r"><code>x &lt;- c(3, 6, NA, 8, 11, 15, 23)</code></pre>
 <p>Si nous ne retirons pas la donnée manquante, nous obtenons le résultat suivant.</p>
 <pre class="r"><code>median(x)</code></pre>
@@ -478,7 +494,7 @@ exJeu</code></pre>
 <pre class="r"><code>quantile(cars$speed, probs = c(0.1,0.9))</code></pre>
 <pre><code>##  10%  90% 
 ##  8.9 23.1</code></pre>
-<p><strong>Remarque</strong> : Il existe plusieurs façons de calculer des quantiles. La fonction <code>quantile</code> implémente 9 algorithmes de calcul de quantiles (voir <code>help(quantile</code>).</p>
+<p><strong>Remarque</strong> : Il existe plusieurs façons de calculer des quantiles. La fonction <code>quantile</code> implémente 9 algorithmes de calcul de quantiles (voir <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html"><code>help(quantile)</code></a>).</p>
 </div>
 <div id="fonction-summary" class="section level4">
 <h4>Fonction <code>summary</code></h4>
@@ -549,7 +565,7 @@ exJeu</code></pre>
 <p>Les fonctions <code>pmin</code> et <code>pmax</code> calculent le minimum et le maximum élément par élément, entre des vecteurs.</p>
 <pre class="r"><code>pmax(x, 1:7)</code></pre>
 <pre><code>## [1] 1 4 3 4 7 6 7</code></pre>
-<p>Elle est utile pour tronquer des valeurs. Par exemple, pour tronquer à zéro des valeurs, on peut procéder comme suit.</p>
+<p>Elle est utile pour tronquer des valeurs. Par exemple, l’instruction suivante permet de tronquer à zéro les valeurs dans le vecteur <code>x</code>.</p>
 <pre class="r"><code>pmax(x, 0)</code></pre>
 <pre><code>## [1] 0 4 0 4 7 0 0</code></pre>
 </div>
@@ -639,6 +655,7 @@ sondage</code></pre>
 <div id="autres-fonctions-relatives-au-calcul-de-frequences" class="section level4">
 <h4>Autres fonctions relatives au calcul de fréquences</h4>
 <p>Les fonctions <code>margin.table</code>, <code>addmargins</code> et <code>prop.table</code> permettent de calculer des fréquences marginales ou relatives à partir d’un tableau de fréquences.</p>
+
 <p>Voici quelques exemples avec le tableau de fréquences suivant.</p>
 <pre class="r"><code>freq &lt;- table(sondage$yeux, sondage$cheveux)
 freq</code></pre>
@@ -771,7 +788,7 @@ freq</code></pre>
 <p>Les fonctions de la famille des <code>apply</code> sont utiles pour :</p>
 <ul>
 <li>les calculs sur les marges d’une matrice ou d’un array,</li>
-<li>la manipulation simultanée des éléments d’une liste,</li>
+<li>appliquer le même traitement à tous les éléments d’une liste,</li>
 <li>le calcul de statistiques descriptives selon les niveaux de facteurs,</li>
 <li>les calculs en parallèle (nous y reviendrons plus tard),</li>
 <li>etc.</li>
@@ -779,7 +796,7 @@ freq</code></pre>
 <p>Nous verrons ici les fonctions : <code>apply</code>, <code>lapply</code>, <code>sapply</code>, <code>mapply</code>, <code>tapply</code>, <code>by</code> et <code>aggregate</code>.</p>
 <div id="fonction-apply" class="section level2">
 <h2>Fonction <code>apply</code></h2>
-<p>La fonction <code>apply</code> applique une fonction sur toutes les lignes ou toutes les colonnes d’une matrice.</p>
+<p>La fonction <code>apply</code> applique une fonction sur toutes les lignes ou toutes les colonnes d’un array (souvent une matrice).</p>
 <p>Voici un exemple.</p>
 <pre class="r"><code>mat &lt;- matrix(1:12, nrow = 3, ncol = 4, byrow = TRUE)
 mat[2,3] &lt;- NA
@@ -830,10 +847,10 @@ arr</code></pre>
 ## [2,]   10   14   18</code></pre>
 <div id="fonctions-raccourcies-rowsums-colsums-rowmeans-et-colmeans" class="section level3">
 <h3>Fonctions raccourcies : <code>rowSums</code>, <code>colSums</code>, <code>rowMeans</code> et <code>colMeans</code></h3>
-<p>Pour le calcul de sommes et de moyennes, il existe des fonctions raccourcies plus rapides qu’un appel à la fonction <code>apply</code> : <code>rowSums</code>, <code>colSums</code>, <code>rowMeans</code>, <code>colMeans</code>. Par exemple</p>
+<p>Pour le calcul de sommes et de moyennes, il existe des fonctions raccourcies un peu plus rapides qu’un appel à la fonction <code>apply</code> : <code>rowSums</code>, <code>colSums</code>, <code>rowMeans</code>, <code>colMeans</code>. Par exemple :</p>
 <pre class="r"><code>rowMeans(mat, na.rm = TRUE)</code></pre>
 <pre><code>## [1]  2.500000  6.333333 10.500000</code></pre>
-<p>est équivalent à <code>apply(mat, 1, mean, na.rm = TRUE)</code>,</p>
+<p>est équivalent à <code>apply(mat, 1, mean, na.rm = TRUE)</code> et</p>
 <pre class="r"><code>colSums(mat, na.rm = TRUE)</code></pre>
 <pre><code>## [1] 15 18 14 24</code></pre>
 <p>est équivalent à <code>apply(mat, 2, sum, na.rm = TRUE)</code>.</p>
@@ -862,9 +879,26 @@ dernier_mot</code></pre>
 <pre><code>## [1] &quot;neige&quot;</code></pre>
 <p>séparément pour tous les éléments (fait pour l’élément 1 seulement dans la commande ci-dessus), puis que nous avions rassemblé les résultats.</p>
 </div>
+<div id="utilisation-dun-operateur-comme-valeur-de-largument-fun" class="section level4">
+<h4>Utilisation d’un opérateur comme valeur de l’argument <code>FUN</code> :</h4>
+<p>Si nous cherchions plutôt à isoler le deuxième mot de chaque phrase dans la liste <code>phrases</code>, nous pourrions réaliser cette extraction avec la commande suivante.</p>
+<pre class="r"><code>sapply(phrases, FUN = &#39;[&#39;, 2)</code></pre>
+<pre><code>## phrase1 phrase2 phrase3 
+##    &quot;la&quot; &quot;skier&quot;    &quot;il&quot;</code></pre>
+<p>Dans cet exemple, la fonction à appliquer est en fait l’opérateur d’extraction du crochet simple. Rappelons que les opérateurs sont en fait des fonctions. Donc, pour un vecteur quelconque, disons</p>
+<pre class="r"><code>x &lt;- phrases[[1]]</code></pre>
+<p>les commandes suivantes sont équivalentes.</p>
+<pre class="r"><code>x[2]</code></pre>
+<pre><code>## [1] &quot;la&quot;</code></pre>
+<pre class="r"><code>&#39;[&#39;(x, 2)</code></pre>
+<pre><code>## [1] &quot;la&quot;</code></pre>
+<p>Ainsi, l’objet duquel nous voulons extraire est le premier argument à fournir à l’opérateur <code>[</code>. L’identifiant de l’élément à extraire (ici un entier représentant une position) est le deuxième argument à fournir à l’opérateur <code>[</code>. Si l’objet avait plus d’une dimension, il suffirait d’ajouter des arguments.</p>
+<p>Lorsque l’argument <code>FUN</code> d’une fonction de la famille des <code>apply</code> est un opérateur, il faut toujours l’encadrer de guillemets (simples ou doubles).</p>
+</div>
 <div id="fonction-lapply" class="section level4">
 <h4>Fonction <code>lapply</code> :</h4>
 <p>La fonction <code>lapply</code> fait exactement le même calcul que la fonction <code>sapply</code>, mais retourne le résultat sous la forme d’une liste plutôt que sous une forme simplifiée.</p>
+
 <pre class="r"><code>reslapply &lt;- lapply(phrases, FUN = tail, n = 1)
 reslapply</code></pre>
 <pre><code>## $phrase1
@@ -876,25 +910,9 @@ reslapply</code></pre>
 ## $phrase3
 ## [1] &quot;froid&quot;</code></pre>
 </div>
-<div id="utilisation-dun-operateur-comme-valeur-de-largument-fun" class="section level4">
-<h4>Utilisation d’un opérateur comme valeur de l’argument <code>FUN</code> :</h4>
-<p>Si nous cherchions plutôt à isoler le deuxième mot de chaque phrase dans la liste <code>phrases</code>, nous pourrions réaliser cette extraction avec la commande suivante.</p>
-<pre class="r"><code>sapply(phrases, FUN = &quot;[&quot;, 2)</code></pre>
-<pre><code>## phrase1 phrase2 phrase3 
-##    &quot;la&quot; &quot;skier&quot;    &quot;il&quot;</code></pre>
-<p>Dans cet exemple, la fonction à appliquer est en fait l’opérateur d’extraction du crochet simple. Rappelons que les opérateurs sont en fait des fonctions. Donc, pour un vecteur quelconque, disons</p>
-<pre class="r"><code>x &lt;- phrases[[1]]</code></pre>
-<p>les commandes suivantes sont équivalentes.</p>
-<pre class="r"><code>x[2]</code></pre>
-<pre><code>## [1] &quot;la&quot;</code></pre>
-<pre class="r"><code>&quot;[&quot;(x, 2)</code></pre>
-<pre><code>## [1] &quot;la&quot;</code></pre>
-<p>Ainsi, l’objet duquel nous voulons extraire est le premier argument à fournir à l’opérateur <code>[</code>. L’identifiant de l’élément à extraire (ici un entier représentant une position) est le deuxième argument à fournir à l’opérateur <code>[</code>. Si l’objet avait plus d’une dimension, il suffirait d’ajouter des arguments.</p>
-<p>Lorsque l’argument <code>FUN</code> d’une fonction de la famille des <code>apply</code> est un opérateur, il faut toujours l’encadrer de guillemets (simples ou doubles).</p>
-</div>
 <div id="fonction-mapply" class="section level4">
 <h4>Fonction <code>mapply</code> :</h4>
-<p>Il aurait aussi été possible de solutionner le problème de l’extraction des derniers mots des phrases dans <code>phrases</code> en utilisant la fonction <code>mapply</code>. La différence entre cette fonction et les fonctions <code>sapply</code> et <code>lapply</code> est qu’elle peut fournir à fonction la <code>FUN</code> des arguments supplémentaires prenant des valeurs qui diffèrent selon les sous-objets.</p>
+<p>Il aurait aussi été possible de solutionner le problème de l’extraction des derniers mots des phrases dans <code>phrases</code> en utilisant la fonction <code>mapply</code>. La différence entre cette fonction et les fonctions <code>sapply</code> et <code>lapply</code> est qu’elle peut fournir à la fonction <code>FUN</code> des arguments supplémentaires prenant des valeurs qui diffèrent selon les sous-objets.</p>
 <p>Par exemple, nous pourrions extraire les derniers mots en appliquant l’opérateur <code>[</code> à chaque élément de la liste <code>phrases</code>, mais en spécifiant comme argument pour l’opérateur d’extraction la position du dernier élément. Cette position diffère un peu d’un élément à l’autre. Elle est égale à la longueur de l’élément.</p>
 <p>Nous pourrions donc, dans un premier temps, calculer la longueur de chaque élément de <code>phrases</code> comme suit :</p>
 <pre class="r"><code>longueurs_phrases &lt;- sapply(phrases, length)
@@ -905,7 +923,7 @@ longueurs_phrases</code></pre>
 <pre class="r"><code>mapply(FUN = &quot;[&quot;, phrases, longueurs_phrases)</code></pre>
 <pre><code>## phrase1 phrase2 phrase3 
 ## &quot;neige&quot; &quot;skier&quot; &quot;froid&quot;</code></pre>
-<p>La boucle cachée derrière à cet appel à la fonction <code>mapply</code> est la suivante : pour <code>i</code> allant de 1 à 3, soit le nombre total d’éléments dans la liste <code>phrases</code>, l’extraction suivante est effectuée.</p>
+<p>La boucle cachée derrière cet appel à la fonction <code>mapply</code> est la suivante : pour <code>i</code> allant de 1 à 3, soit le nombre total d’éléments dans la liste <code>phrases</code>, l’extraction suivante est effectuée.</p>
 <pre class="r"><code>&quot;[&quot;(phrases[[i]], longueurs_phrases[[i]])</code></pre>
 </div>
 </div>
@@ -913,6 +931,7 @@ longueurs_phrases</code></pre>
 <h2>Fonctions <code>tapply</code>, <code>by</code> et <code>aggregate</code></h2>
 <p>Ces fonctions appliquent encore la même fonction à plusieurs sous-objets. Ce qui les distingue des autres fonctions de la famille des <code>apply</code> est la formation des sous-objets selon les niveaux de facteurs.</p>
 <p>Nous allons utiliser le jeu de données <code>Puromycin</code> du data frame <code>datasets</code> pour illustrer l’utilisation de ces fonctions.</p>
+
 <pre class="r"><code>str(Puromycin)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    23 obs. of  3 variables:
 ##  $ conc : num  0.02 0.02 0.06 0.06 0.11 0.11 0.22 0.22 0.56 0.56 ...
@@ -935,7 +954,7 @@ longueurs_phrases</code></pre>
 ##   0.22   155.5     127.5
 ##   0.56   196.0     151.0
 ##   1.1    203.5     160.0</code></pre>
-<p>Dans l’exemple ci-dessous, nous avons fourni à <code>INDEX</code> un data frame, mais rappelons-nous que les data frame sont des sortes de listes. De plus, un élément de ce data frame n’est pas un facteur. Il s’agit de la variable <code>conc</code>. Cela n’a pas posé problème parce que <code>lapply</code> est arrivé à transformer l’élément en facteur.</p>
+<p>Dans l’exemple ci-dessous, nous avons fourni à <code>INDEX</code> un data frame, mais rappelons-nous que les data frames sont des cas particulier de listes. De plus, un élément de ce data frame n’est pas un facteur. Il s’agit de la variable <code>conc</code>. Cela n’a pas posé problème parce que <code>lapply</code> est arrivé à transformer l’élément en facteur.</p>
 </div>
 <div id="fonction-by" class="section level4">
 <h4>Fonction <code>by</code> :</h4>
@@ -1012,100 +1031,14 @@ Puromycin</code></pre>
 ## 21 0.56  144 untreated       151.0
 ## 22 0.56  158 untreated       151.0
 ## 23 1.10  160 untreated       160.0</code></pre>
-</div>
-</div>
-<div id="synthese-des-informations-sur-les-fonctions-de-la-famille-des-apply" class="section level2">
-<h2>Synthèse des informations sur les fonctions de la famille des <code>apply</code></h2>
-<p>Voici un tableau synthèse des fonctions présentées dans cette section.</p>
-<table>
-<caption>Synthèse des spécifications des fonctions de la famille des <code>apply</code></caption>
-<colgroup>
-<col width="21%" />
-<col width="22%" />
-<col width="33%" />
-<col width="23%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Fonction</th>
-<th>Objet en entrée</th>
-<th>Formation des sous-objets</th>
-<th>Format de la sortie</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>apply</code></td>
-<td>array (matrice)</td>
-<td>selon une ou des dimensions</td>
-<td>vecteur, array ou liste</td>
-</tr>
-<tr class="even">
-<td>————————–</td>
-<td>—————————</td>
-<td>—————————————–</td>
-<td>—————————–</td>
-</tr>
-<tr class="odd">
-<td><code>lapply</code></td>
-<td>liste ou data frame</td>
-<td>chaque élément de la liste</td>
-<td>liste</td>
-</tr>
-<tr class="even">
-<td><code>sapply</code> et <code>mapply</code></td>
-<td>liste ou data frame</td>
-<td>chaque élément de la liste</td>
-<td>simplifié par défaut</td>
-</tr>
-<tr class="odd">
-<td>————————–</td>
-<td>—————————</td>
-<td>—————————————–</td>
-<td>—————————–</td>
-</tr>
-<tr class="even">
-<td><code>tapply</code></td>
-<td>vecteur</td>
-<td>selon les niveaux de facteurs</td>
-<td>array ou liste</td>
-</tr>
-<tr class="odd">
-<td><code>by</code></td>
-<td>data frame</td>
-<td>selon les niveaux de facteurs</td>
-<td>array ou liste</td>
-</tr>
-<tr class="even">
-<td><code>aggregate</code></td>
-<td>data frame</td>
-<td>selon les niveaux de facteurs</td>
-<td>data frame</td>
-</tr>
-<tr class="odd">
-<td> </td>
-<td></td>
-<td>et par colonne du data frame</td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<p><code>mapply</code> permet de passer des arguments de <code>FUN</code> différents selon les sous-objets, alors que ces arguments ne peuvent pas varier avec <code>sapply</code>.</p>
-<p>Voici la description des arguments à donner en entrée à ces fonctions :</p>
-<ul>
-<li><p>1<sup>e</sup> argument (sauf pour <code>mapply</code>) : objet à séparer et sur lequel appliquer la fonction;</p></li>
-<li><p>argument suivant : information pour spécifier comment séparer l’objet en sous-objets (sauf pour les fonctions prenant en entrée une liste, car dans ce cas les sous-objets sont les éléments de la liste);</p></li>
-<li><p>argument suivant (celui nommé <code>FUN</code>) : la fonction à appliquer (les sous-objets lui seront fournis comme premier argument);</p></li>
-<li><p><code>...</code> : il est possible de passer des arguments supplémentaires à la fonction à appliquer simplement en les donnant en argument à la fonction de la famille des <code>apply</code> grâce aux <code>...</code> (rappel : il s’agit de la deuxième utilité de l’argument <code>...</code> mentionnée dans les notes sur les <a href="https://stt4230.rbind.io/introduction/base_r/#largument-...-et-ses-deux-utilites.">concepts de base en R</a>).</p></li>
-</ul>
-<p>Note : La fonction <code>aggregate</code> accepte aussi une formule en entrée.</p>
 <hr />
+</div>
 </div>
 </div>
 <div id="ecriture-de-conditions-logiques" class="section level1">
 <h1>Écriture de conditions logiques</h1>
 <p>Lors d’une analyse de données, il est fréquent de devoir extraire les observations respectant une certaine condition logique. Cette action est parfois appelée « filtrer » les observations. Pour ce faire, il faut savoir écrire des conditions logiques en R. L’écriture de conditions logiques sera aussi utile pour composer des structures conditionnelles, ce qui sera couvert plus tard.</p>
-<p>Les opérateurs de comparaison <code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code> et <code>&lt;=</code>sont utiles pour écrire des conditions logiques. Par exemple, reprenons le vecteur de lancés d’un dé créé dans le cours sur les <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#fonction-c">structures de données en R</a>.</p>
+<p>Les opérateurs de comparaison <code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code> et <code>&lt;=</code> sont utiles pour écrire des conditions logiques. Par exemple, reprenons le vecteur de lancés d’un dé créé dans le cours sur les <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#fonction-c">structures de données en R</a>.</p>
 <pre class="r"><code>de &lt;- c(2, 3, 4, 1, 2, 3, 5, 6, 5, 4)</code></pre>
 <p>La condition logique suivante permet d’identifier les valeurs supérieures à 4 dans ce vecteur.</p>
 <pre class="r"><code>de &gt; 4</code></pre>
@@ -1119,7 +1052,7 @@ Puromycin</code></pre>
 <p>Des vecteurs logiques peuvent être combinés avec <code>|</code> (ou) ou <code>&amp;</code> (et). Par exemple, la commande suivante identifie les éléments de <code>de</code> égaux à 1, 4 ou 6.</p>
 <pre class="r"><code>de == 1 | de == 4 | de == 6</code></pre>
 <pre><code>##  [1] FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE FALSE  TRUE</code></pre>
-<p>L’opérateur <code>%in%</code> est cependant plus rapide pour créer ce vecteur logique. Il compare les éléments d’un vecteur (placé avant l’opérateur) aux éléments d’un ensemble présenté sous la forme d’un vecteur (placé après). Il retourne <code>TRUE</code> pour un élément égal à n’importe lequel des éléments de l’ensemble, <code>FALSE</code> sinon.</p>
+<p>L’opérateur <code>%in%</code> est cependant plus convivial pour créer ce vecteur logique. Il compare les éléments d’un vecteur (placé avant l’opérateur) aux éléments d’un ensemble présenté sous la forme d’un vecteur (placé après). Il retourne <code>TRUE</code> pour un élément égal à n’importe lequel des éléments de l’ensemble, <code>FALSE</code> sinon.</p>
 <pre class="r"><code>de %in% c(1,4,6)</code></pre>
 <pre><code>##  [1] FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE FALSE  TRUE</code></pre>
 <p>Combiné à un opérateur de négation <code>!</code>, l’opérateur <code>%in%</code> permet de tester si les valeurs dans un vecteur sont différentes des valeurs d’un ensemble.</p>
@@ -1131,13 +1064,6 @@ Puromycin</code></pre>
 <p>Il faut plutôt utiliser la fonction <code>is.na</code>, <code>is.nan</code> ou <code>is.infinite</code>.</p>
 <pre class="r"><code>is.na(c(1, 2, NA, 4, 5))</code></pre>
 <pre><code>## [1] FALSE FALSE  TRUE FALSE FALSE</code></pre>
-<p>Pour résumer, les opérateurs et fonctions R utiles à l’écriture de conditions logiques sont les suivants :</p>
-<ul>
-<li>opérateurs de comparaison : <code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code> et <code>&lt;=</code>;</li>
-<li>opérateur de comparaison à un ensemble de valeurs : <code>%in%</code>;</li>
-<li>fonctions de comparaison pour caractères spéciaux : <code>is.na, is.nan, is.infinite</code>;</li>
-<li>opérateurs logiques : <code>!</code> (négation), <code>|</code> (ou) et <code>&amp;</code> (et).</li>
-</ul>
 <div id="operateurs-et-fonctions-retournant-toujours-un-logique-de-longueur-1" class="section level2">
 <h2>Opérateurs et fonctions retournant toujours un logique de longueur 1</h2>
 <p>Lors de l’écriture d’une condition logique, il faut parfois s’assurer de retourner un vecteur logique de longueur 1. C’est le cas lors de l’écriture d’une condition logique dans une structure de contrôle conditionnelle <code>if...else</code> (que nous verrons plus loin). La condition dans un <code>if</code> doit être obligatoirement de longueur 1. Les opérateurs <code>||</code> et <code>&amp;&amp;</code> sont conçus pour écrire de telles conditions logiques. Avec <code>||</code> et <code>&amp;&amp;</code>, il est certain que le résultat est de longueur 1.</p>
@@ -1152,14 +1078,7 @@ Puromycin</code></pre>
 <p>La fonction <code>any</code> indique si au moins un élément d’un vecteur logique est <code>TRUE</code>.</p>
 <pre class="r"><code>any(v1)</code></pre>
 <pre><code>## [1] TRUE</code></pre>
-<p>Finalement, les fonctions <code>is.numeric</code>, <code>is.character</code>, <code>is.logical</code>, <code>is.vector</code>, <code>is.matrix</code>, <code>is.data.frame</code>, <code>is.factor</code>, <code>is.null</code>, <code>is.function</code>, etc., testent une condition et retournent toujours un logique de longueur 1.</p>
-<p>Pour résumer, les opérateurs et fonctions suivantes retournent toujours un logique de longueur 1 :</p>
-<ul>
-<li>opérateurs logiques (qui utilisent seulement le premier élément des vecteurs) : <code>||</code> (ou), <code>&amp;&amp;</code> (et);</li>
-<li>fonctions qui condensent un vecteur logique en une seule valeur logique : <code>all, any</code>;</li>
-<li>fonctions de vérification de type :<br />
-<code>is.</code>(<code>numeric</code>/<code>character</code>/<code>logical</code>/<code>vector</code>/<code>matrix</code>/<code>array</code>/<code>list</code>/<code>data.frame</code>/<code>factor</code>/<code>null</code>/…) (il en existe beaucoup!).</li>
-</ul>
+<p>Finalement, les fonctions <code>is.numeric</code>, <code>is.character</code>, <code>is.logical</code>, <code>is.vector</code>, <code>is.matrix</code>, <code>is.data.frame</code>, <code>is.factor</code>, <code>is.null</code>, <code>is.function</code>, etc., testent une condition et retournent toujours un logique de longueur unitaire.</p>
 <hr />
 </div>
 </div>
@@ -1242,6 +1161,153 @@ x</code></pre>
 <p>L’option <code>digits</code> est remise à sa valeur par défaut comme suit.</p>
 <pre class="r"><code>options(digits = optionsDefaut$digits)</code></pre>
 <hr />
+
+</div>
+</div>
+<div id="synthese" class="section level1">
+<h1>Synthèse</h1>
+<div id="fonctions-et-operateurs-de-base-pour-le-calcul-mathematique-ou-de-statistiques-descriptives" class="section level4">
+<h4>Fonctions et opérateurs de base pour le calcul mathématique ou de statistiques descriptives</h4>
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-128"></span>
+<img src="fig/SyntheseFctOpMathStat.png" alt="Vue d'ensemble de plusieurs fonctions et opérateurs mathématiques et statistiques en R" width="95%" />
+<p class="caption">
+Figure 1: Vue d’ensemble de plusieurs fonctions et opérateurs mathématiques et statistiques en R
+</p>
+</div>
+<div id="calculs-mathematiques" class="section level5">
+<h5>Calculs mathématiques :</h5>
+<ul>
+<li>fonctionnement vectoriel et règle de recyclage : calculs terme à terme entre deux objets atomiques;</li>
+<li>mots-clés mathématiques : <code>pi</code>, <code>Inf</code>, <code>NaN</code>;</li>
+<li>opérations sur des ensembles : <code>union</code>, <code>intersect</code>, <code>setdiff</code>, <code>setequal</code>, <code>is.element</code>.</li>
+</ul>
+</div>
+<div id="calcul-de-statistiques-descriptives" class="section level5">
+<h5>Calcul de statistiques descriptives :</h5>
+<ul>
+<li>argument <code>na.rm</code> : spécifie le comportement de la fonction en présence de valeurs manquantes;</li>
+<li>traitement des observations dupliquées : <code>duplicated</code>, <code>unique</code>.</li>
+</ul>
+</div>
+</div>
+<div id="fonctions-r-de-la-famille-des-apply" class="section level4">
+<h4>Fonctions R de la famille des <code>apply</code></h4>
+<p>Principe de base derrière ces fonctions (qui cachent des boucles) :</p>
+<ul>
+<li>séparer un objet en sous-objets;</li>
+<li>appeler une fonction en lui donnant comme premier argument tous les sous-objets, un à la fois;</li>
+<li>combiner les résultats obtenus.</li>
+</ul>
+
+<table>
+<caption>Synthèse du fonctionnement des principales fonctions de la famille des <code>apply</code></caption>
+<colgroup>
+<col width="21%" />
+<col width="22%" />
+<col width="33%" />
+<col width="23%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Fonction</th>
+<th>Objet en entrée</th>
+<th>Formation des sous-objets</th>
+<th>Format de la sortie</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>apply</code></td>
+<td>matrice ou array</td>
+<td>selon une ou des dimensions</td>
+<td>vecteur, array ou liste</td>
+</tr>
+<tr class="even">
+<td>————————–</td>
+<td>—————————</td>
+<td>—————————————–</td>
+<td>—————————–</td>
+</tr>
+<tr class="odd">
+<td><code>lapply</code></td>
+<td>liste ou data frame</td>
+<td>chaque élément de la liste</td>
+<td>liste</td>
+</tr>
+<tr class="even">
+<td><code>sapply</code> et <code>mapply</code></td>
+<td>liste ou data frame</td>
+<td>chaque élément de la liste</td>
+<td>simplifié par défaut</td>
+</tr>
+<tr class="odd">
+<td>————————–</td>
+<td>—————————</td>
+<td>—————————————–</td>
+<td>—————————–</td>
+</tr>
+<tr class="even">
+<td><code>tapply</code></td>
+<td>vecteur</td>
+<td>selon les niveaux de facteurs</td>
+<td>array ou liste</td>
+</tr>
+<tr class="odd">
+<td><code>by</code></td>
+<td>data frame</td>
+<td>selon les niveaux de facteurs</td>
+<td>array ou liste</td>
+</tr>
+<tr class="even">
+<td><code>aggregate</code></td>
+<td>data frame</td>
+<td>selon les niveaux de facteurs</td>
+<td>data frame</td>
+</tr>
+<tr class="odd">
+<td> </td>
+<td></td>
+<td>et par colonne du data frame</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><code>mapply</code> permet de passer des arguments de <code>FUN</code> différents selon les sous-objets, alors que ces arguments ne peuvent pas varier avec <code>sapply</code>.</p>
+<p>Description des arguments à donner en entrée à ces fonctions :</p>
+<ul>
+<li><p>1<sup>e</sup> argument (sauf pour <code>mapply</code>) : objet à séparer et sur lequel appliquer la fonction;</p></li>
+<li><p>argument suivant : information pour spécifier comment séparer l’objet en sous-objets (sauf pour les fonctions prenant en entrée une liste, soit pour <code>lapply</code>, <code>sapply</code> et <code>mapply</code>, car dans ce cas les sous-objets sont les éléments de la liste);</p></li>
+<li><p>argument suivant (celui nommé <code>FUN</code>) : la fonction à appliquer (les sous-objets lui seront fournis comme premier argument);</p></li>
+<li><p><code>...</code> : il est possible de passer des arguments supplémentaires à la fonction à appliquer (<code>FUN</code>) simplement en les donnant en argument à la fonction de la famille des <code>apply</code> grâce aux <code>...</code> (rappel : il s’agit de la deuxième utilité de l’argument <code>...</code> mentionnée dans les notes sur les <a href="https://stt4230.rbind.io/introduction/base_r/#largument-...-et-ses-deux-utilites.">concepts de base en R</a>).</p></li>
+</ul>
+<p>Note : La fonction <code>aggregate</code> accepte aussi une formule en entrée.</p>
+</div>
+<div id="ecriture-de-conditions-logiques-1" class="section level4">
+<h4>Écriture de conditions logiques</h4>
+<p>Fonctions opérant de façon vectorielle :</p>
+<ul>
+<li>Opérateurs de comparaison : <code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&gt;=</code> , <code>&lt;</code>, <code>&lt;=</code>.</li>
+<li>Opérateur de comparaison à un ensemble de valeurs : <code>%in%</code>.</li>
+<li>Fonctions de comparaison pour caractères spéciaux : <code>is.na</code>, <code>is.nan</code>, <code>is.infinite</code>.</li>
+<li>Opérateurs logiques : <code>!</code> (négation), <code>|</code> (ou), <code>&amp;</code> (et).</li>
+</ul>
+<p>Fonctions retournant toujours un logique de longueur 1 :</p>
+<ul>
+<li>Opérateurs logiques (qui utilisent seulement le premier élément des vecteurs) : <code>||</code> (ou), <code>&amp;&amp;</code> (et).</li>
+<li>Fonctions qui condensent un vecteur logique en une seule valeur logique : <code>all</code>, <code>any</code>.</li>
+<li>Fonctions de vérification de type :<br />
+<code>is.</code>(<code>numeric</code>/<code>character</code>/<code>logical</code>/<code>vector</code>/<code>matrix</code>/<code>array</code>/<code>list</code>/<code>data.frame</code>/<code>factor</code>/<code>null</code>/…)<br />
+(il en existe beaucoup!).</li>
+</ul>
+</div>
+<div id="comparaison-de-deux-objets-r-1" class="section level4">
+<h4>Comparaison de deux objets R</h4>
+<ul>
+<li>Pour comparer uniquement les valeurs, pas les attributs : <code>all(x == y)</code>.</li>
+<li>Pour comparer les objets dans leur totalité (valeurs, attributs, type de l’objet ou des éléments) : <code>identical(x, y)</code>.</li>
+<li>Pour comparer les valeurs et les attributs, en acceptant des différences dans les valeurs numériques selon une certaine tolérance : <code>all.equal(x, y)</code>.</li>
+</ul>
+<hr />
 </div>
 </div>
 <div id="references" class="section level1">
@@ -1255,7 +1321,7 @@ x</code></pre>
 </ul>
 <div id="pour-aller-plus-loin" class="section level4">
 <h4>Pour aller plus loin</h4>
-<p>Le package <a href="https://CRAN.R-project.org/package=dplyr"><code>dplyr</code></a> offre des fonctions permettant de réaliser quelques-unes des manipulations de données vues dans ce cours ainsi que le cours précédent, par exemple :</p>
+<p>Le package <a href="https://dplyr.tidyverse.org/"><code>dplyr</code></a> offre des fonctions permettant de réaliser quelques-unes des manipulations de données vues dans ce cours ainsi que le cours précédent, par exemple :</p>
 <ul>
 <li>alternatives à <code>[</code> ou <code>subset</code> :
 <ul>

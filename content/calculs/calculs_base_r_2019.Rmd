@@ -1,10 +1,10 @@
 ---
 title: "Calculs de base en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2018-01-20"
+date: "2019-01-16"
 weight: 1
 slug: "calculs_base_r"
-categories: ["cours_2018-01-30"]
+categories: ["cours_2019-01-29"]
 categories_weight: 1
 lastmodifierdisplayname : "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
@@ -29,23 +29,25 @@ R est un environnement spécialisé dans les calculs statistiques. Voyons commen
 - effectuer une transformation mathématique de variables dans un jeu de données,
 - calculer des statistiques descriptives, par exemple dans le cadre d'une analyse exploratoire de données.
 
-Voici d'emblée une vue d'ensemble de plusieurs des fonctions présentées ici.
-
-```{r echo = FALSE, out.width = "90%", fig.pos = 'h', fig.align = 'center', fig.cap = "Vue d'ensemble de plusieurs fonctions et opérateurs mathématiques et statistiques en R"}
-knitr::include_graphics("fig/SyntheseFctOpMathStat.png")
-```
-
 
 # Fonctionnement vectoriel et règle de recyclage
 
 Tous les opérateurs et plusieurs des fonctions qui sont présentées dans cette fiche agissent de façon vectorielle. Ils appliquent un calcul terme à terme entre deux objets atomiques (vecteurs, matrices ou arrays) ou data frames contenant uniquement des éléments numériques.
 
+Par exemple, si les deux matrices suivantes sont additionnées avec l'opérateur `+`,
+
 ```{r}
 matrix(1:6 , nrow = 2, ncol = 3)
 matrix(6:1 , nrow = 2, ncol = 3)
+```
+
+l'élément en position (i,j) dans la première matrice sera additionné à l'élément à la même position dans la deuxième matrice, et ce, pour toutes les positions. Le résultats cette addition terme à terme est donc le suivant :
+
+```{r}
 matrix(1:6 , nrow = 2, ncol = 3) + matrix(6:1 , nrow = 2, ncol = 3)
 ```
 
+&nbsp;
 
 Si les deux objets intervenant dans l'opération ne sont pas de mêmes dimensions, la **règle de recyclage** s'applique. Cette règle avait déjà été mentionnée dans les notes sur les [structures de données en R](https://stt4230.rbind.io/manipulation_donnees/structures_r/#remplacement-delements). Étant donné son importance, revoyons-là plus en profondeur ici.
 
@@ -53,7 +55,7 @@ Si les deux objets intervenant dans l'opération ne sont pas de mêmes dimension
 c(5, 6) + c(2, 5, 3, 1)
 ```
 
-La commande précédente effectue 4 additions, une pour chacun des 4 éléments du plus long des deux vecteurs dans l'opération, soit ici le deuxième. Le premier vecteur est plutôt de longueur 2. R répète donc ses éléments pour créer un vecteur aussi long que le deuxième
+L'instruction précédente effectue 4 additions, une pour chacun des 4 éléments du plus long des deux vecteurs dans l'opération, soit ici le deuxième. Le premier vecteur est plutôt de longueur 2. R répète donc ses éléments pour créer un vecteur aussi long que le deuxième
 
 ```{r}
 rep(c(5, 6), 4/2)
@@ -69,7 +71,7 @@ Cette règle de recyclage est exploitée, souvent sans que l'utilisateur en soit
 ```{r}
 c(2, 5, 3, 1)^2
 ```
-est en fait traduite par R en la commande suivante.
+est en fait traduite par R en la commande suivante :
 ```{r}
 c(2, 5, 3, 1)^rep(2, 4)
 ```
@@ -98,9 +100,9 @@ matrix(rep(3:1, 4), nrow = 3, ncol = 4)
 ```
 Une règle de recyclage utilisée pour former une matrice de dimension appropriée va donc remplir la matrice une colonne à la fois, comme le fait la fonction `matrix` par défaut.
 
-#### Règle de recyclage lorsque la longueur de l'objet le plus court n'est pas multiple de la longueur de l'objet le plus long
+#### Règle de recyclage lorsque la longueur de l'objet le plus long n'est pas multiple de la longueur de l'objet le plus court
 
-Lorsque la longueur de l'objet le plus court n'est pas multiple de la longueur de l'objet le plus long, la règle de recyclage fonctionne quand même. R recycle l'objet le plus court assez de fois pour arriver à un objet de longueur égale ou supérieure à l'objet le plus long. Ensuite, si l'objet recyclé est plus long que l'autre objet, il est tronqué de façon à ce que les deux objets aient la même longueur.
+Lorsque la longueur de l'objet le plus long n'est pas multiple de la longueur de l'objet le plus court, la règle de recyclage fonctionne quand même. R recycle l'objet le plus court assez de fois pour arriver à un objet de longueur égale ou supérieure à l'objet le plus long. Ensuite, si l'objet recyclé est plus long que l'autre objet, il est tronqué de façon à ce que les deux objets aient la même longueur.
 
 Supposons par exemple que la commande suivante soit soumise en R.
 
@@ -172,7 +174,7 @@ L'opérateur modulo `%%` retourne le reste de la division entière. Dans l'exemp
 **Astuces** : Cet opérateur est pratique pour tester si des nombres sont pairs ou impairs. Les nombres pairs sont des multiples de 2. Alors `x %% 2` retourne 0 pour les nombres pairs et 1 pour les nombres impairs. L'opérateur modulo peut aussi servir à tester si un nombre stocké sous le type `double` est en réalité un entier. S'il s'agit d'un entier, `x %% 1` retournera 0.  
 
 
-### opérateurs de comparaison
+### Opérateurs de comparaison
 
 Les opérateurs de comparaison permettent de comparer des valeurs. Ils retournent `TRUE` ou `FALSE`. Il s'agit des opérateurs suivants :
  
@@ -214,32 +216,60 @@ FALSE < TRUE
 
 Quant aux caractères, les opérateurs de comparaison utilisent l'ordre de classement des caractères pour déterminer, entre deux valeurs, celle qui est inférieure. Cet ordre dépend des paramètres régionaux de la session R. D'une langue à l'autre, cet ordre peut varier.
 
-Pour connaître l'ordre utilisé dans une session R, la commande suivante est utile :
+Pour connaître l'ordre utilisé dans une session R, les instructions suivantes sont utiles :
 
 ```{r eval = FALSE}
-paste(sort(
-  c(0:9, 
-    letters, LETTERS, "à", "â", "é", "è", "ê", "ë", "ï", "î", "ô", "ù", "ü", "û", "ç",
-    "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/", ":",
-    ";", "<", "=",">", "?", "@", "[", "\\", "]", "^", "_", "{", "|", "}", "~")), 
-  collapse = "")
+caracteres_speciaux <- 
+  c("!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/", ":", ";", 
+    "<", "=",">", "?", "@", "[", "\\", "]", "^", "_", "{", "|", "}", "~")
+lettres_accentuees <- c("à", "â", "é", "è", "ê", "ë", "ï", "î", "ô", "ù", "ü", "û", "ç")
+catacteres_ordonnes <- sort(c(caracteres_speciaux, 0:9, letters, LETTERS, 
+                              lettres_accentuees, toupper(lettres_accentuees))) 
+paste(catacteres_ordonnes, collapse = "")
 ```
 
 J'ai obtenu le résultat suivant, qui sera peut-être différent sur votre ordinateur si vous n'avez pas les mêmes paramètres régionaux que moi.
 
 ```
-'-!"#$%&()*,./:;?@[\]^_{|}~+<=>0123456789aAàâbBcCçdDeEéèêëfFgGhHiIîïjJkKlLmMnNoOôpPqQrRsS
-tTuUùûüvVwWxXyYzZ
+"'-!\"#$%&()*,./:;?@[\\]^_{|}~+<=>0123456789aAàÀâÂbBcCçÇdDeEéÉèÈêÊëËfFgGhHiIîÎïÏjJkKlLmM
+nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ"
 ```
 
-Ainsi, dans ma session R, les caractères spéciaux sont inférieurs aux chiffres et aux lettres, les chiffres sont inférieurs aux lettres et les lettres minuscules sont inférieures aux lettres majuscules.
+Ainsi, dans ma session R :
 
-Aussi en cas d'inégalité dans le nombre de caractères, les chaînes contenant moins de caractères sont considérées inférieures aux chaînes en contenant plus, comme l'illustre ces exemples.
+- les caractères spéciaux sont inférieurs aux chiffres et aux lettres, 
+- les chiffres sont inférieurs aux lettres,
+- les lettres sont classées en ordre aphabétique et
+    + les lettres minuscules sont inférieures aux lettres majuscules,
+    + les lettres non accentuées sont inférieures aux lettres accentuées.
+
+Pour des chaînes à plus d'un caractère, la comparaison s'effectue caractère par caractère (premiers caractères comparés entre eux, puis deuxièmes en cas d’égalité, puis troisièmes en cas d'égalités aux deux premières positions, etc.). 
 
 ```{r}
-"1" < "100"
+"arborescence" < "arbre" 
+```
+
+Aussi, l’absence de caractères vaut moins que la présence.
+
+```{r}
 "a" < "aa"
 ```
+
+&nbsp;
+
+**Remarque** : Afin de correctement ordonner des nombres, il faut s'assurer de les stocker sous un format numérique. 
+
+```{r}
+2 < 10
+```
+
+S'ils sont stockés sous forme de chaînes de caractères, les résultats obtenus ne seront pas toujours ceux attendus.   
+
+```{r}
+"2" < "10"
+```
+
+
 
 
 ### Opérateurs logiques
@@ -250,7 +280,7 @@ Les opérateurs logiques prennent en entrée un ou deux vecteurs de logiques et 
 - `|` et `||` : ou, 
 - `&` et `&&` : et.
 
-De plus, le ou exclusif est implémenté par la fonction `xor`.
+De plus, le «&nbsp;ou&nbsp;» exclusif est implémenté par la fonction `xor`.
 
 L'opérateur `!` n'a qu'un seul argument, alors que les autres opérateurs logiques en ont deux. Il effectue une négation. Il transforme les `TRUE` en `FALSE` et les `FALSE` en `TRUE`.
 ```{r}
@@ -320,7 +350,7 @@ Certaines fonctions mathématiques en R effectuent des calculs faisant interveni
 
 Voici quelques exemples.
 ```{r}
-mat <- matrix(1:12, nrow = 3, ncol = 4, byrow = TRUE)
+mat <- matrix(c(2,5,3,4,6,5,4,3,1,2,9,8), nrow = 3, ncol = 4)
 mat
 prod(mat)
 cumsum(mat)
@@ -328,7 +358,10 @@ cumsum(mat)
 
 #### Fonction `diff`
 
-Pour une matrice, `diff` calcule les différences terme à terme des éléments composant les lignes. Par défaut, il compare une ligne à la ligne en dessous. 
+Pour une matrice, `diff` calcule les différences terme à terme des éléments composant les lignes. Par défaut, il compare une ligne à la ligne en dessous.
+
+\newpage
+
 ```{r diff}
 diff(mat)
 ```
@@ -347,7 +380,6 @@ diff(c(2,5,3,4), lag = 2)
 
 
 ## Fonctions d'opérations sur des ensembles
-
 
 Les fonctions R d'opération sur des ensembles sont les suivantes : 
 
@@ -381,6 +413,8 @@ Identification des éléments de `x` ne se retrouvant pas dans `y`, en retirant 
 ```{r}
 setdiff(x, y)
 ```
+
+\newpage
 
 Test sur l'égalité entre les ensembles `x` et `y` :
 
@@ -460,7 +494,7 @@ cars[which.max(cars$dist), ]
 
 ### Traitement des observations manquantes et argument `na.rm`
 
-Les fonctions `min`, `max`, `mean`, `median` et `sd`, ainsi que quelques autres fonctions qui seront vues dans les sous-sections suivantes, ont un argument en commun nommé `na.rm`. Cet argument spécifie le comportement de la fonction en présence de données manquantes (`NA`). Par défaut, `na.rm` prend la valeur `FALSE` pour ces fonctions. Cette valeur signifie que les données manquantes ne doivent pas être retirées avant d'effectuer le calcul. Cependant, en présence de données manquantes, ces fonctions ne sont pas en mesure de calculer des statistiques. Par exemple, supposons que nous voulions calculer la médiane des données dans le vecteur suivant.
+Les fonctions `min`, `max`, `mean`, `median` et `sd`, ainsi que quelques autres fonctions vues dans ces notes, ont un argument en commun nommé `na.rm`. Cet argument spécifie le comportement de la fonction en présence de données manquantes (`NA`). Par défaut, `na.rm` prend la valeur `FALSE` pour ces fonctions. Cette valeur signifie que les données manquantes ne doivent pas être retirées avant d'effectuer le calcul. Cependant, en présence de données manquantes, ces fonctions ne sont pas en mesure de calculer des statistiques. Par exemple, supposons que nous voulions calculer la médiane des données dans le vecteur suivant.
 
 ```{r}
 x <- c(3, 6, NA, 8, 11, 15, 23)
@@ -529,7 +563,7 @@ L'argument `probs` permet de demander n'importe quels quantiles.
 quantile(cars$speed, probs = c(0.1,0.9))
 ```
 
-**Remarque** : Il existe plusieurs façons de calculer des quantiles. La fonction `quantile` implémente 9 algorithmes de calcul de quantiles (voir `help(quantile`).
+**Remarque** : Il existe plusieurs façons de calculer des quantiles. La fonction `quantile` implémente 9 algorithmes de calcul de quantiles (voir [`help(quantile)`](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html)).
 
 #### Fonction `summary`
 
@@ -605,7 +639,7 @@ Les fonctions `pmin` et `pmax` calculent le minimum et le maximum élément par 
 ```{r}
 pmax(x, 1:7)
 ```
-Elle est utile pour tronquer des valeurs. Par exemple, pour tronquer à zéro des valeurs, on peut procéder comme suit.
+Elle est utile pour tronquer des valeurs. Par exemple, l'instruction suivante permet de tronquer à zéro les valeurs dans le vecteur `x`.
 ```{r}
 pmax(x, 0)
 ```
@@ -664,6 +698,8 @@ ftable(sondage)
 #### Autres fonctions relatives au calcul de fréquences
 
 Les fonctions `margin.table`, `addmargins` et `prop.table` permettent de calculer des fréquences marginales ou relatives à partir d'un tableau de fréquences.
+
+\newpage
 
 Voici quelques exemples avec le tableau de fréquences suivant.
 
@@ -758,7 +794,7 @@ Ces fonctions cachent en fait une boucle, mais avec une syntaxe allégée.
 Les fonctions de la famille des `apply` sont utiles pour :
 
 - les calculs sur les marges d'une matrice ou d'un array,
-- la manipulation simultanée des éléments d'une liste, 
+- appliquer le même traitement à tous les éléments d'une liste, 
 - le calcul de statistiques descriptives selon les niveaux de facteurs,
 - les calculs en parallèle (nous y reviendrons plus tard),
 - etc.
@@ -767,7 +803,7 @@ Nous verrons ici les fonctions : `apply`, `lapply`, `sapply`, `mapply`, `tapply`
 
 ## Fonction `apply`
 
-La fonction `apply` applique une fonction sur toutes les lignes ou toutes les colonnes d'une matrice. 
+La fonction `apply` applique une fonction sur toutes les lignes ou toutes les colonnes d'un array (souvent une matrice). 
 
 Voici un exemple.
 ```{r}
@@ -804,12 +840,12 @@ apply(arr, MARGIN = c(1, 2), FUN = sum)
 
 ### Fonctions raccourcies : `rowSums`, `colSums`, `rowMeans` et `colMeans`
 
-Pour le calcul de sommes et de moyennes, il existe des fonctions raccourcies plus rapides qu'un appel à la fonction `apply` : `rowSums`, `colSums`, `rowMeans`, `colMeans`. Par exemple
+Pour le calcul de sommes et de moyennes, il existe des fonctions raccourcies un peu plus rapides qu'un appel à la fonction `apply` : `rowSums`, `colSums`, `rowMeans`, `colMeans`. Par exemple :
 
 ```{r}
 rowMeans(mat, na.rm = TRUE)
 ```
-est équivalent à `apply(mat, 1, mean, na.rm = TRUE)`,
+est équivalent à `apply(mat, 1, mean, na.rm = TRUE)` et
 ```{r}
 colSums(mat, na.rm = TRUE)
 ```
@@ -852,20 +888,12 @@ tail(phrases[[1]], n = 1)
 
 séparément pour tous les éléments (fait pour l'élément 1 seulement dans la commande ci-dessus), puis que nous avions rassemblé les résultats.
 
-#### Fonction `lapply` :
-
-La fonction `lapply` fait exactement le même calcul que la fonction `sapply`, mais retourne le résultat sous la forme d'une liste plutôt que sous une forme simplifiée.
-
-```{r}
-reslapply <- lapply(phrases, FUN = tail, n = 1)
-reslapply
-```
 
 #### Utilisation d'un opérateur comme valeur de l'argument `FUN` :
 
 Si nous cherchions plutôt à isoler le deuxième mot de chaque phrase dans la liste `phrases`, nous pourrions réaliser cette extraction avec la commande suivante.
 ```{r}
-sapply(phrases, FUN = "[", 2)
+sapply(phrases, FUN = '[', 2)
 ```
 Dans cet exemple, la fonction à appliquer est en fait l'opérateur d'extraction du crochet simple. Rappelons que les opérateurs sont en fait des fonctions. Donc, pour un vecteur quelconque, disons
 ```{r}
@@ -874,15 +902,26 @@ x <- phrases[[1]]
 les commandes suivantes sont équivalentes.
 ```{r}
 x[2]
-"["(x, 2)
+'['(x, 2)
 ```
 Ainsi, l'objet duquel nous voulons extraire est le premier argument à fournir à l'opérateur `[`. L'identifiant de l'élément à extraire (ici un entier représentant une position) est le deuxième argument à fournir à l'opérateur `[`. Si l'objet avait plus d'une dimension, il suffirait d'ajouter des arguments.
 
 Lorsque l'argument `FUN` d'une fonction de la famille des `apply` est un opérateur, il faut toujours l'encadrer de guillemets (simples ou doubles).
 
+#### Fonction `lapply` :
+
+La fonction `lapply` fait exactement le même calcul que la fonction `sapply`, mais retourne le résultat sous la forme d'une liste plutôt que sous une forme simplifiée.
+
+\newpage
+
+```{r}
+reslapply <- lapply(phrases, FUN = tail, n = 1)
+reslapply
+```
+
 #### Fonction `mapply` :
 
-Il aurait aussi été possible de solutionner le problème de l'extraction des derniers mots des phrases dans `phrases` en utilisant la fonction `mapply`. La différence entre cette fonction et les fonctions `sapply` et `lapply` est qu'elle peut fournir à fonction la `FUN` des arguments supplémentaires prenant des valeurs qui diffèrent selon les sous-objets.
+Il aurait aussi été possible de solutionner le problème de l'extraction des derniers mots des phrases dans `phrases` en utilisant la fonction `mapply`. La différence entre cette fonction et les fonctions `sapply` et `lapply` est qu'elle peut fournir à la fonction `FUN` des arguments supplémentaires prenant des valeurs qui diffèrent selon les sous-objets.
 
 Par exemple, nous pourrions extraire les derniers mots en appliquant l'opérateur `[` à chaque élément de la liste `phrases`, mais en spécifiant comme argument pour l'opérateur d'extraction la position du dernier élément. Cette position diffère un peu d'un élément à l'autre. Elle est égale à la longueur de l'élément.
 
@@ -899,7 +938,7 @@ Ayant en main un vecteur contenant les longueurs, le vecteur `longueurs_phrases`
 mapply(FUN = "[", phrases, longueurs_phrases)
 ```
 
-La boucle cachée derrière à cet appel à la fonction `mapply` est la suivante : pour `i` allant de 1 à `r length(phrases)`, soit le nombre total d'éléments dans la liste `phrases`, l'extraction suivante est effectuée.
+La boucle cachée derrière cet appel à la fonction `mapply` est la suivante : pour `i` allant de 1 à `r length(phrases)`, soit le nombre total d'éléments dans la liste `phrases`, l'extraction suivante est effectuée.
 
 ```{r, eval = FALSE}
 "["(phrases[[i]], longueurs_phrases[[i]])
@@ -911,6 +950,8 @@ La boucle cachée derrière à cet appel à la fonction `mapply` est la suivante
 Ces fonctions appliquent encore la même fonction à plusieurs sous-objets. Ce qui les distingue des autres fonctions de la famille des `apply` est la formation des sous-objets selon les niveaux de facteurs.
 
 Nous allons utiliser le jeu de données `Puromycin` du data frame `datasets` pour illustrer l'utilisation de ces fonctions.
+
+\newpage
 
 ```{r}
 str(Puromycin)
@@ -926,7 +967,7 @@ L'argument `INDEX` pourrait être une liste de plusieurs facteurs.
 ```{r}
 tapply(Puromycin$rate, INDEX = Puromycin[, c("conc", "state")], FUN = mean)
 ```
-Dans l'exemple ci-dessous, nous avons fourni à `INDEX` un data frame, mais rappelons-nous que les data frame sont des sortes de listes. De plus, un élément de ce data frame n'est pas un facteur. Il s'agit de la variable `conc`. Cela n'a pas posé problème parce que `lapply` est arrivé à transformer l'élément en facteur.
+Dans l'exemple ci-dessous, nous avons fourni à `INDEX` un data frame, mais rappelons-nous que les data frames sont des cas particulier de listes. De plus, un élément de ce data frame n'est pas un facteur. Il s'agit de la variable `conc`. Cela n'a pas posé problème parce que `lapply` est arrivé à transformer l'élément en facteur.
 
 #### Fonction `by` :
 
@@ -962,48 +1003,13 @@ Puromycin$median_rate <- ave(Puromycin$rate, Puromycin$state, Puromycin$conc, FU
 Puromycin
 ```
 
-## Synthèse des informations sur les fonctions de la famille des `apply`
-
-Voici un tableau synthèse des fonctions présentées dans cette section.
-
-: Synthèse des spécifications des fonctions de la famille des `apply`
-
-Fonction | Objet en entrée     | Formation des sous-objets  | Format de la sortie 
---------------------------|---------------------------|-----------------------------------------|-----------------------------
-`apply`  | array (matrice) | selon une ou des dimensions        | vecteur, array ou liste
---------------------------|---------------------------|-----------------------------------------|-----------------------------
-`lapply` | liste ou data frame              | chaque élément de la liste | liste
-`sapply` et `mapply` | liste ou data frame               | chaque élément de la liste | simplifié par défaut
---------------------------|---------------------------|-----------------------------------------|-----------------------------
-`tapply` | vecteur | selon les niveaux de facteurs | array ou liste
-`by` | data frame | selon les niveaux de facteurs | array ou liste
-`aggregate` | data frame | selon les niveaux de facteurs | data frame  
-&nbsp;  |  | et par colonne du data frame | 
-
-`mapply` permet de passer des arguments de `FUN` différents selon les sous-objets, alors que ces arguments ne peuvent pas varier avec `sapply`.
-
-
-Voici la description des arguments à donner en entrée à ces fonctions :
-
-- 1^e^ argument (sauf pour `mapply`) : objet à séparer et sur lequel appliquer la fonction;
-
-- argument suivant : information pour spécifier comment séparer l'objet en sous-objets (sauf pour les fonctions prenant en entrée une liste, car dans ce cas les sous-objets sont les éléments de la liste);
-
-- argument suivant (celui nommé `FUN`) : la fonction à appliquer (les sous-objets lui seront fournis comme premier argument);
-
-- `...` : il est possible de passer des arguments supplémentaires à la fonction à appliquer simplement en les donnant en argument à la fonction de la famille des `apply` grâce aux `...` (rappel : il s'agit de la deuxième utilité de l'argument `...` mentionnée dans les notes sur les [concepts de base en R](https://stt4230.rbind.io/introduction/base_r/#largument-...-et-ses-deux-utilites.)).
-
-
-Note : La fonction `aggregate` accepte aussi une formule en entrée.
-
-
 ***
 
 # Écriture de conditions logiques
 
 Lors d'une analyse de données, il est fréquent de devoir extraire les observations respectant une certaine condition logique. Cette action est parfois appelée « filtrer » les observations. Pour ce faire, il faut savoir écrire des conditions logiques en R. L'écriture de conditions logiques sera aussi utile pour composer des structures conditionnelles, ce qui sera couvert plus tard.
 
-Les opérateurs de comparaison `==`, `!=`, `>`, `>=`, `<` et `<=`sont utiles pour écrire des conditions logiques. Par exemple, reprenons le vecteur de lancés d'un dé créé dans le cours sur les [structures de données en R](https://stt4230.rbind.io/manipulation_donnees/structures_r/#fonction-c).
+Les opérateurs de comparaison `==`, `!=`, `>`, `>=`, `<` et `<=` sont utiles pour écrire des conditions logiques. Par exemple, reprenons le vecteur de lancés d'un dé créé dans le cours sur les [structures de données en R](https://stt4230.rbind.io/manipulation_donnees/structures_r/#fonction-c).
 
 ```{r}
 de <- c(2, 3, 4, 1, 2, 3, 5, 6, 5, 4)
@@ -1033,7 +1039,7 @@ Des vecteurs logiques peuvent être combinés avec `|` (ou) ou `&` (et). Par exe
 de == 1 | de == 4 | de == 6
 ```
 
-L'opérateur `%in%` est cependant plus rapide pour créer ce vecteur logique. Il compare les éléments d'un vecteur (placé avant l'opérateur) aux éléments d'un ensemble présenté sous la forme d'un vecteur (placé après). Il retourne `TRUE` pour un élément égal à n'importe lequel des éléments de l'ensemble, `FALSE` sinon. 
+L'opérateur `%in%` est cependant plus convivial pour créer ce vecteur logique. Il compare les éléments d'un vecteur (placé avant l'opérateur) aux éléments d'un ensemble présenté sous la forme d'un vecteur (placé après). Il retourne `TRUE` pour un élément égal à n'importe lequel des éléments de l'ensemble, `FALSE` sinon. 
 
 ```{r}
 de %in% c(1,4,6)
@@ -1057,13 +1063,6 @@ Il faut plutôt utiliser la fonction `is.na`, `is.nan` ou `is.infinite`.
 is.na(c(1, 2, NA, 4, 5))
 ```
 
-Pour résumer, les opérateurs et fonctions R utiles à l'écriture de conditions logiques sont les suivants :
-
-- opérateurs de comparaison : `==`, `!=`, `>`, `>=`, `<` et `<=`;
-- opérateur de comparaison à un ensemble de valeurs : `%in%`; 
-- fonctions de comparaison pour caractères spéciaux : `is.na, is.nan, is.infinite`;
-- opérateurs logiques : `!` (négation), `|` (ou) et `&` (et).
-
 
 ## Opérateurs et fonctions retournant toujours un logique de longueur 1
 
@@ -1085,14 +1084,8 @@ La fonction `any` indique si au moins un élément d'un vecteur logique est `TRU
 any(v1)
 ```
 
-Finalement, les fonctions `is.numeric`, `is.character`, `is.logical`, `is.vector`, `is.matrix`, `is.data.frame`, `is.factor`, `is.null`, `is.function`, etc., testent une condition et retournent toujours un logique de longueur 1.
+Finalement, les fonctions `is.numeric`, `is.character`, `is.logical`, `is.vector`, `is.matrix`, `is.data.frame`, `is.factor`, `is.null`, `is.function`, etc., testent une condition et retournent toujours un logique de longueur unitaire.
 
-Pour résumer, les opérateurs et fonctions suivantes retournent toujours un logique de longueur 1 :
-
-- opérateurs logiques (qui utilisent seulement le premier élément des vecteurs) : `||` (ou), `&&` (et);
-- fonctions qui condensent un vecteur logique en une seule valeur logique : `all, any`;
-- fonctions de vérification de type :  
-`is.`(`numeric`/`character`/`logical`/`vector`/`matrix`/`array`/`list`/`data.frame`/`factor`/`null`/...) (il en existe beaucoup!).
 
 
 ***
@@ -1166,6 +1159,106 @@ L'option `digits` est remise à sa valeur par défaut comme suit.
 options(digits = optionsDefaut$digits)
 ```
 
+***
+
+\newpage
+
+# Synthèse
+
+#### Fonctions et opérateurs de base pour le calcul mathématique ou de statistiques descriptives
+
+```{r echo = FALSE, out.width = "95%", fig.pos = 'h', fig.align = 'center', fig.cap = "Vue d'ensemble de plusieurs fonctions et opérateurs mathématiques et statistiques en R"}
+knitr::include_graphics("fig/SyntheseFctOpMathStat.png")
+```
+
+##### Calculs mathématiques :
+
+- fonctionnement vectoriel et règle de recyclage : calculs terme à terme entre deux objets atomiques;
+- mots-clés mathématiques : `pi`, `Inf`, `NaN`;
+- opérations sur des ensembles : `union`, `intersect`, `setdiff`, `setequal`, `is.element`.
+
+##### Calcul de statistiques descriptives :
+
+- argument `na.rm` : spécifie le comportement de la fonction en présence de valeurs manquantes;
+- traitement des observations dupliquées : `duplicated`, `unique`.
+  
+
+#### Fonctions R de la famille des `apply`
+
+Principe de base derrière ces fonctions (qui cachent des boucles) :
+
+- séparer un objet en sous-objets;
+- appeler une fonction en lui donnant comme premier argument tous les
+  sous-objets, un à la fois;
+- combiner les résultats obtenus.
+
+\newpage
+
+: Synthèse du fonctionnement des principales fonctions de la famille des `apply`
+
+Fonction | Objet en entrée     | Formation des sous-objets  | Format de la sortie 
+--------------------------|---------------------------|-----------------------------------------|-----------------------------
+`apply`  | matrice ou array | selon une ou des dimensions        | vecteur, array ou liste
+--------------------------|---------------------------|-----------------------------------------|-----------------------------
+`lapply` | liste ou data frame              | chaque élément de la liste | liste
+`sapply` et `mapply` | liste ou data frame               | chaque élément de la liste | simplifié par défaut
+--------------------------|---------------------------|-----------------------------------------|-----------------------------
+`tapply` | vecteur | selon les niveaux de facteurs | array ou liste
+`by` | data frame | selon les niveaux de facteurs | array ou liste
+`aggregate` | data frame | selon les niveaux de facteurs | data frame  
+&nbsp;  |  | et par colonne du data frame | 
+
+`mapply` permet de passer des arguments de `FUN` différents selon les sous-objets, alors que ces arguments ne peuvent pas varier avec `sapply`.
+
+
+Description des arguments à donner en entrée à ces fonctions :
+
+- 1^e^ argument (sauf pour `mapply`) : objet à séparer et sur lequel appliquer la fonction;
+
+- argument suivant : information pour spécifier comment séparer l'objet en sous-objets (sauf pour les fonctions prenant en entrée une liste, soit pour `lapply`, `sapply` et
+  `mapply`, car dans ce cas les sous-objets sont les éléments de la liste);
+
+- argument suivant (celui nommé `FUN`) : la fonction à appliquer (les sous-objets lui seront fournis comme premier argument);
+
+- `...` : il est possible de passer des arguments supplémentaires à la fonction à appliquer (`FUN`) simplement en les donnant en argument à la fonction de la famille des `apply` grâce aux `...` (rappel : il s'agit de la deuxième utilité de l'argument `...` mentionnée dans les notes sur les [concepts de base en R](https://stt4230.rbind.io/introduction/base_r/#largument-...-et-ses-deux-utilites.)).
+
+
+Note : La fonction `aggregate` accepte aussi une formule en entrée.
+
+
+#### Écriture de conditions logiques
+
+Fonctions opérant de façon vectorielle :
+
+- Opérateurs de comparaison :
+	`==`, `!=`, `>`, `>=` , `<`, `<=`.
+- Opérateur de comparaison à un ensemble de valeurs : `%in%`.
+- Fonctions de comparaison pour caractères spéciaux :
+	`is.na`, `is.nan`, `is.infinite`.
+- Opérateurs logiques : `!` (négation), `|` (ou),
+	`&` (et).
+
+Fonctions retournant toujours un logique de longueur 1 :
+
+- Opérateurs logiques (qui utilisent seulement le premier élément des
+	vecteurs) : `||` (ou), `&&` (et).
+- Fonctions qui condensent un vecteur logique en une seule valeur
+	logique : `all`, `any`.
+- Fonctions de vérification de type :  
+`is.`(`numeric`/`character`/`logical`/`vector`/`matrix`/`array`/`list`/`data.frame`/`factor`/`null`/...)  
+(il en existe beaucoup!).
+
+
+#### Comparaison de deux objets R
+
+- Pour comparer uniquement les valeurs, pas les attributs :
+`all(x == y)`.
+- Pour comparer les objets dans leur totalité (valeurs, attributs, type
+de l'objet ou des éléments) : `identical(x, y)`.
+- Pour comparer les valeurs et les attributs, en acceptant des
+différences dans les valeurs numériques selon une certaine tolérance :
+`all.equal(x, y)`.
+
 
 ***
 
@@ -1180,7 +1273,7 @@ options(digits = optionsDefaut$digits)
 
 #### Pour aller plus loin
 
-Le package [`dplyr`](https://CRAN.R-project.org/package=dplyr) offre des fonctions permettant de réaliser quelques-unes des manipulations de données vues dans ce cours ainsi que le cours précédent, par exemple :
+Le package [`dplyr`](https://dplyr.tidyverse.org/) offre des fonctions permettant de réaliser quelques-unes des manipulations de données vues dans ce cours ainsi que le cours précédent, par exemple :
 
 - alternatives à `[` ou `subset` : 
     + sélectionner des lignes avec `filter`; 
