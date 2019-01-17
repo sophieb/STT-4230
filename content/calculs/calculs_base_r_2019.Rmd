@@ -15,6 +15,7 @@ output:
   blogdown::html_page:
     toc: true
 header-includes:
+- \usepackage{float}
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
 - \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
@@ -516,6 +517,8 @@ median(x, na.rm = TRUE)
 
 Notons que la fonction `na.omit` permet de retirer les observations manquantes d'un objet R. Si l'objet est un vecteur, les éléments contenant `NA` sont retirés.
 
+\newpage
+
 ```{r}
 na.omit(x)
 ```
@@ -677,6 +680,11 @@ table(sondage$yeux)
 Elle produit un tableau de fréquences à une variable si elle reçoit les observations d'une seule variable. Elle peut aussi produire des tableaux de fréquences croisées à deux variables ou plus.
 ```{r}
 table(sondage$yeux, sondage$cheveux)
+```
+
+\newpage
+
+```{r}
 table(sondage)
 ```
 
@@ -838,6 +846,9 @@ arr
 apply(arr, MARGIN = c(1, 2), FUN = sum)
 ```
 
+Si elle reçoit en entrée un data frame, elle le transformera en matrice avant d'effectuer les calculs.
+
+
 ### Fonctions raccourcies : `rowSums`, `colSums`, `rowMeans` et `colMeans`
 
 Pour le calcul de sommes et de moyennes, il existe des fonctions raccourcies un peu plus rapides qu'un appel à la fonction `apply` : `rowSums`, `colSums`, `rowMeans`, `colMeans`. Par exemple :
@@ -856,7 +867,7 @@ Ces fonctions spécialisées ont été optimisées en termes de temps d'exécuti
 
 ## Fonctions `lapply`, `sapply` et `mapply`
 
-Les fonctions `lapply`, `sapply` et `mapply` prennent en entrée une liste ou un data.frame. Elles appliquent une fonction sur chaque élément dans la liste, ou chaque colonne du data frame.
+Les fonctions `lapply`, `sapply` et `mapply` prennent en entrée un vecteur ou une liste (qui peut aussi être un data frame). Elles appliquent une fonction sur chaque élément du vecteur ou de la liste (ou chaque colonne du data frame).
 
 Voici une liste qui sera utilisée pour illustrer l'emploi de ces fonctions. Cette liste contient les mots formant trois courtes phrases (ponctuation omise).
 
@@ -921,7 +932,7 @@ reslapply
 
 #### Fonction `mapply` :
 
-Il aurait aussi été possible de solutionner le problème de l'extraction des derniers mots des phrases dans `phrases` en utilisant la fonction `mapply`. La différence entre cette fonction et les fonctions `sapply` et `lapply` est qu'elle peut fournir à la fonction `FUN` des arguments supplémentaires prenant des valeurs qui diffèrent selon les sous-objets.
+Il aurait aussi été possible de solutionner le problème de l'extraction des derniers mots des phrases dans `phrases` en utilisant la fonction `mapply`. La différence entre cette fonction et les fonctions `sapply` et `lapply` est qu'elle peut fournir à la fonction `FUN` plusieurs (ou de multiples, d'où le `m` dans `mapply`) arguments qui sont des vecteurs ou des listes.
 
 Par exemple, nous pourrions extraire les derniers mots en appliquant l'opérateur `[` à chaque élément de la liste `phrases`, mais en spécifiant comme argument pour l'opérateur d'extraction la position du dernier élément. Cette position diffère un peu d'un élément à l'autre. Elle est égale à la longueur de l'élément.
 
@@ -1003,6 +1014,39 @@ Puromycin$median_rate <- ave(Puromycin$rate, Puromycin$state, Puromycin$conc, FU
 Puromycin
 ```
 
+
+## Choix de la fonction de la famille des `apply` à utiliser
+
+Les fonctions de la famille des `apply` servent à appliquer un même calcul sur différentes parties (sous-objets) d'une structure de données R (objet principal).
+
+La structure de données peut être brisée en sous-objets de différentes façons. Par exemple, s'il s'agit d'une matrice, elle peut être séparée en lignes ou en colonnes. S'il s'agit d'une liste, elle peut être séparée en éléments. Il est aussi possible de briser un vecteur ou un data frame en blocs d'observations référant à différents niveaux de facteurs. Dans ces notes, les fonctions de la famille des `apply` ont été séparées en 3 catégories selon la façon de former les sous-objets.
+
+Le format de la sortie retournée varie aussi d'une fonction à l'autre.
+
+Quand vient le temps de choisir une fonction de la famille des `apply` à utiliser, il faut donc se demander :
+
+- Quel est le type de l'objet sur lequel appliquer les calculs?
+- Comment les sous-objets doivent-ils être formés?
+- Quel format de sortie est le plus approprié?
+
+Le tableau suivant permet de facilement comparer les fonctions de la famille des `apply` présentées en fournissant les réponses aux questions précédentes.
+
+Fonction | Objet typique en entrée | Formation des sous-objets  | Format de la sortie 
+---------------|------------------------------------|---------------------------------------|--------------------------
+`apply`  | array (matrice) | selon une ou des dimensions | vecteur, array, liste
+---------------|------------------------------------|---------------------------------------|--------------------------
+`lapply` | vecteur, liste (data frame) | éléments de l'objet en entrée | liste
+`sapply` | vecteur, liste (data frame) | éléments de l'objet en entrée | simplifié par défaut
+`mapply` | vecteurs, listes (data frames) | éléments des objets en entrée | simplifié par défaut
+---------------|------------------------------------|---------------------------------------|--------------------------
+`tapply` | vecteur | selon les niveaux de facteurs | array ou liste
+`by` | data frame | selon les niveaux de facteurs | array ou liste
+`aggregate` | data frame | selon les niveaux de facteurs | data frame  
+&nbsp;  |  | et par colonne du data frame | 
+
+
+
+
 ***
 
 # Écriture de conditions logiques
@@ -1058,6 +1102,8 @@ c(1, 2, NA, 4, 5) == NA
 ```
 
 Il faut plutôt utiliser la fonction `is.na`, `is.nan` ou `is.infinite`.
+
+\newpage
 
 ```{r}
 is.na(c(1, 2, NA, 4, 5))
@@ -1167,7 +1213,7 @@ options(digits = optionsDefaut$digits)
 
 #### Fonctions et opérateurs de base pour le calcul mathématique ou de statistiques descriptives
 
-```{r echo = FALSE, out.width = "95%", fig.pos = 'h', fig.align = 'center', fig.cap = "Vue d'ensemble de plusieurs fonctions et opérateurs mathématiques et statistiques en R"}
+```{r echo = FALSE, out.width = "95%", fig.pos = 'H', fig.align = 'center', fig.cap = "Vue d'ensemble de plusieurs fonctions et opérateurs mathématiques et statistiques en R"}
 knitr::include_graphics("fig/SyntheseFctOpMathStat.png")
 ```
 
@@ -1194,21 +1240,20 @@ Principe de base derrière ces fonctions (qui cachent des boucles) :
 
 \newpage
 
-: Synthèse du fonctionnement des principales fonctions de la famille des `apply`
+Résumé du fonctionnement des fonctions présentées :
 
-Fonction | Objet en entrée     | Formation des sous-objets  | Format de la sortie 
---------------------------|---------------------------|-----------------------------------------|-----------------------------
-`apply`  | matrice ou array | selon une ou des dimensions        | vecteur, array ou liste
---------------------------|---------------------------|-----------------------------------------|-----------------------------
-`lapply` | liste ou data frame              | chaque élément de la liste | liste
-`sapply` et `mapply` | liste ou data frame               | chaque élément de la liste | simplifié par défaut
---------------------------|---------------------------|-----------------------------------------|-----------------------------
+Fonction | Objet typique en entrée | Formation des sous-objets  | Format de la sortie 
+---------------|------------------------------------|---------------------------------------|--------------------------
+`apply`  | array (matrice) | selon une ou des dimensions | vecteur, array, liste
+---------------|------------------------------------|---------------------------------------|--------------------------
+`lapply` | vecteur, liste (data frame) | éléments de l'objet en entrée | liste
+`sapply` | vecteur, liste (data frame) | éléments de l'objet en entrée | simplifié par défaut
+`mapply` | vecteurs, listes (data frames) | éléments des objets en entrée | simplifié par défaut
+---------------|------------------------------------|---------------------------------------|--------------------------
 `tapply` | vecteur | selon les niveaux de facteurs | array ou liste
 `by` | data frame | selon les niveaux de facteurs | array ou liste
 `aggregate` | data frame | selon les niveaux de facteurs | data frame  
 &nbsp;  |  | et par colonne du data frame | 
-
-`mapply` permet de passer des arguments de `FUN` différents selon les sous-objets, alors que ces arguments ne peuvent pas varier avec `sapply`.
 
 
 Description des arguments à donner en entrée à ces fonctions :
@@ -1270,6 +1315,11 @@ différences dans les valeurs numériques selon une certaine tolérance :
 - Muenchen, R. A. (2011). R for SAS and SPSS Users. Second edition. Springer.
 - Zumel, N. et Mount, J. (2014). Practical Data Science with R. Manning Publications Co.
 - Zuur, A. F., Ieno, E. N. et Meesters, E. H.W.G. (2009). A Beginner's Guide to R. Springer.
+
+#### Pour mieux comprendre les fonctions de la famille des `apply`
+
+- https://www.datacamp.com/community/tutorials/r-tutorial-apply-family
+
 
 #### Pour aller plus loin
 

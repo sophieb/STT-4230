@@ -15,10 +15,12 @@ output:
   blogdown::html_page:
     toc: true
 header-includes:
+- \usepackage{float}
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
 - \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
 ---
+
 
 
 
@@ -53,6 +55,7 @@ header-includes:
 </ul></li>
 <li><a href="#fonctions-lapply-sapply-et-mapply">Fonctions <code>lapply</code>, <code>sapply</code> et <code>mapply</code></a></li>
 <li><a href="#fonctions-tapply-by-et-aggregate">Fonctions <code>tapply</code>, <code>by</code> et <code>aggregate</code></a></li>
+<li><a href="#choix-de-la-fonction-de-la-famille-des-apply-a-utiliser">Choix de la fonction de la famille des <code>apply</code> à utiliser</a></li>
 </ul></li>
 <li><a href="#ecriture-de-conditions-logiques">Écriture de conditions logiques</a><ul>
 <li><a href="#operateurs-et-fonctions-retournant-toujours-un-logique-de-longueur-1">Opérateurs et fonctions retournant toujours un logique de longueur 1</a></li>
@@ -442,6 +445,7 @@ y &lt;- c(&quot;M&quot;, &quot;A&quot;, &quot;H&quot;, &quot;B&quot;)</code></pr
 <pre class="r"><code>median(x, na.rm = TRUE)</code></pre>
 <pre><code>## [1] 9.5</code></pre>
 <p>Notons que la fonction <code>na.omit</code> permet de retirer les observations manquantes d’un objet R. Si l’objet est un vecteur, les éléments contenant <code>NA</code> sont retirés.</p>
+
 <pre class="r"><code>na.omit(x)</code></pre>
 <pre><code>## [1]  3  6  8 11 15 23
 ## attr(,&quot;na.action&quot;)
@@ -609,6 +613,7 @@ sondage</code></pre>
 ##   bleu     1    1    0
 ##   brun     1    2    1
 ##   vert     0    1    0</code></pre>
+
 <pre class="r"><code>table(sondage)</code></pre>
 <pre><code>## , , sexe = F
 ## 
@@ -845,6 +850,7 @@ arr</code></pre>
 <pre><code>##      [,1] [,2] [,3]
 ## [1,]    8   12   16
 ## [2,]   10   14   18</code></pre>
+<p>Si elle reçoit en entrée un data frame, elle le transformera en matrice avant d’effectuer les calculs.</p>
 <div id="fonctions-raccourcies-rowsums-colsums-rowmeans-et-colmeans" class="section level3">
 <h3>Fonctions raccourcies : <code>rowSums</code>, <code>colSums</code>, <code>rowMeans</code> et <code>colMeans</code></h3>
 <p>Pour le calcul de sommes et de moyennes, il existe des fonctions raccourcies un peu plus rapides qu’un appel à la fonction <code>apply</code> : <code>rowSums</code>, <code>colSums</code>, <code>rowMeans</code>, <code>colMeans</code>. Par exemple :</p>
@@ -859,7 +865,7 @@ arr</code></pre>
 </div>
 <div id="fonctions-lapply-sapply-et-mapply" class="section level2">
 <h2>Fonctions <code>lapply</code>, <code>sapply</code> et <code>mapply</code></h2>
-<p>Les fonctions <code>lapply</code>, <code>sapply</code> et <code>mapply</code> prennent en entrée une liste ou un data.frame. Elles appliquent une fonction sur chaque élément dans la liste, ou chaque colonne du data frame.</p>
+<p>Les fonctions <code>lapply</code>, <code>sapply</code> et <code>mapply</code> prennent en entrée un vecteur ou une liste (qui peut aussi être un data frame). Elles appliquent une fonction sur chaque élément du vecteur ou de la liste (ou chaque colonne du data frame).</p>
 <p>Voici une liste qui sera utilisée pour illustrer l’emploi de ces fonctions. Cette liste contient les mots formant trois courtes phrases (ponctuation omise).</p>
 <pre class="r"><code>phrases &lt;- list(
   phrase1 = c(&quot;regarde&quot;, &quot;la&quot;, &quot;belle&quot;, &quot;neige&quot;),
@@ -912,7 +918,7 @@ reslapply</code></pre>
 </div>
 <div id="fonction-mapply" class="section level4">
 <h4>Fonction <code>mapply</code> :</h4>
-<p>Il aurait aussi été possible de solutionner le problème de l’extraction des derniers mots des phrases dans <code>phrases</code> en utilisant la fonction <code>mapply</code>. La différence entre cette fonction et les fonctions <code>sapply</code> et <code>lapply</code> est qu’elle peut fournir à la fonction <code>FUN</code> des arguments supplémentaires prenant des valeurs qui diffèrent selon les sous-objets.</p>
+<p>Il aurait aussi été possible de solutionner le problème de l’extraction des derniers mots des phrases dans <code>phrases</code> en utilisant la fonction <code>mapply</code>. La différence entre cette fonction et les fonctions <code>sapply</code> et <code>lapply</code> est qu’elle peut fournir à la fonction <code>FUN</code> plusieurs (ou de multiples, d’où le <code>m</code> dans <code>mapply</code>) arguments qui sont des vecteurs ou des listes.</p>
 <p>Par exemple, nous pourrions extraire les derniers mots en appliquant l’opérateur <code>[</code> à chaque élément de la liste <code>phrases</code>, mais en spécifiant comme argument pour l’opérateur d’extraction la position du dernier élément. Cette position diffère un peu d’un élément à l’autre. Elle est égale à la longueur de l’élément.</p>
 <p>Nous pourrions donc, dans un premier temps, calculer la longueur de chaque élément de <code>phrases</code> comme suit :</p>
 <pre class="r"><code>longueurs_phrases &lt;- sapply(phrases, length)
@@ -1031,8 +1037,99 @@ Puromycin</code></pre>
 ## 21 0.56  144 untreated       151.0
 ## 22 0.56  158 untreated       151.0
 ## 23 1.10  160 untreated       160.0</code></pre>
-<hr />
 </div>
+</div>
+<div id="choix-de-la-fonction-de-la-famille-des-apply-a-utiliser" class="section level2">
+<h2>Choix de la fonction de la famille des <code>apply</code> à utiliser</h2>
+<p>Les fonctions de la famille des <code>apply</code> servent à appliquer un même calcul sur différentes parties (sous-objets) d’une structure de données R (objet principal).</p>
+<p>La structure de données peut être brisée en sous-objets de différentes façons. Par exemple, s’il s’agit d’une matrice, elle peut être séparée en lignes ou en colonnes. S’il s’agit d’une liste, elle peut être séparée en éléments. Il est aussi possible de briser un vecteur ou un data frame en blocs d’observations référant à différents niveaux de facteurs. Dans ces notes, les fonctions de la famille des <code>apply</code> ont été séparées en 3 catégories selon la façon de former les sous-objets.</p>
+<p>Le format de la sortie retournée varie aussi d’une fonction à l’autre.</p>
+<p>Quand vient le temps de choisir une fonction de la famille des <code>apply</code> à utiliser, il faut donc se demander :</p>
+<ul>
+<li>Quel est le type de l’objet sur lequel appliquer les calculs?</li>
+<li>Comment les sous-objets doivent-ils être formés?</li>
+<li>Quel format de sortie est le plus approprié?</li>
+</ul>
+<p>Le tableau suivant permet de facilement comparer les fonctions de la famille des <code>apply</code> présentées en fournissant les réponses aux questions précédentes.</p>
+<table>
+<colgroup>
+<col width="13%" />
+<col width="30%" />
+<col width="33%" />
+<col width="22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Fonction</th>
+<th>Objet typique en entrée</th>
+<th>Formation des sous-objets</th>
+<th>Format de la sortie</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>apply</code></td>
+<td>array (matrice)</td>
+<td>selon une ou des dimensions</td>
+<td>vecteur, array, liste</td>
+</tr>
+<tr class="even">
+<td>—————</td>
+<td>————————————</td>
+<td>—————————————</td>
+<td>————————–</td>
+</tr>
+<tr class="odd">
+<td><code>lapply</code></td>
+<td>vecteur, liste (data frame)</td>
+<td>éléments de l’objet en entrée</td>
+<td>liste</td>
+</tr>
+<tr class="even">
+<td><code>sapply</code></td>
+<td>vecteur, liste (data frame)</td>
+<td>éléments de l’objet en entrée</td>
+<td>simplifié par défaut</td>
+</tr>
+<tr class="odd">
+<td><code>mapply</code></td>
+<td>vecteurs, listes (data frames)</td>
+<td>éléments des objets en entrée</td>
+<td>simplifié par défaut</td>
+</tr>
+<tr class="even">
+<td>—————</td>
+<td>————————————</td>
+<td>—————————————</td>
+<td>————————–</td>
+</tr>
+<tr class="odd">
+<td><code>tapply</code></td>
+<td>vecteur</td>
+<td>selon les niveaux de facteurs</td>
+<td>array ou liste</td>
+</tr>
+<tr class="even">
+<td><code>by</code></td>
+<td>data frame</td>
+<td>selon les niveaux de facteurs</td>
+<td>array ou liste</td>
+</tr>
+<tr class="odd">
+<td><code>aggregate</code></td>
+<td>data frame</td>
+<td>selon les niveaux de facteurs</td>
+<td>data frame</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td></td>
+<td>et par colonne du data frame</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
 </div>
 </div>
 <div id="ecriture-de-conditions-logiques" class="section level1">
@@ -1062,6 +1159,7 @@ Puromycin</code></pre>
 <pre class="r"><code>c(1, 2, NA, 4, 5) == NA</code></pre>
 <pre><code>## [1] NA NA NA NA NA</code></pre>
 <p>Il faut plutôt utiliser la fonction <code>is.na</code>, <code>is.nan</code> ou <code>is.infinite</code>.</p>
+
 <pre class="r"><code>is.na(c(1, 2, NA, 4, 5))</code></pre>
 <pre><code>## [1] FALSE FALSE  TRUE FALSE FALSE</code></pre>
 <div id="operateurs-et-fonctions-retournant-toujours-un-logique-de-longueur-1" class="section level2">
@@ -1168,7 +1266,7 @@ x</code></pre>
 <h1>Synthèse</h1>
 <div id="fonctions-et-operateurs-de-base-pour-le-calcul-mathematique-ou-de-statistiques-descriptives" class="section level4">
 <h4>Fonctions et opérateurs de base pour le calcul mathématique ou de statistiques descriptives</h4>
-<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-128"></span>
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-129"></span>
 <img src="fig/SyntheseFctOpMathStat.png" alt="Vue d'ensemble de plusieurs fonctions et opérateurs mathématiques et statistiques en R" width="95%" />
 <p class="caption">
 Figure 1: Vue d’ensemble de plusieurs fonctions et opérateurs mathématiques et statistiques en R
@@ -1199,18 +1297,18 @@ Figure 1: Vue d’ensemble de plusieurs fonctions et opérateurs mathématiques 
 <li>combiner les résultats obtenus.</li>
 </ul>
 
+<p>Résumé du fonctionnement des fonctions présentées :</p>
 <table>
-<caption>Synthèse du fonctionnement des principales fonctions de la famille des <code>apply</code></caption>
 <colgroup>
-<col width="21%" />
-<col width="22%" />
+<col width="13%" />
+<col width="30%" />
 <col width="33%" />
-<col width="23%" />
+<col width="22%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th>Fonction</th>
-<th>Objet en entrée</th>
+<th>Objet typique en entrée</th>
 <th>Formation des sous-objets</th>
 <th>Format de la sortie</th>
 </tr>
@@ -1218,53 +1316,59 @@ Figure 1: Vue d’ensemble de plusieurs fonctions et opérateurs mathématiques 
 <tbody>
 <tr class="odd">
 <td><code>apply</code></td>
-<td>matrice ou array</td>
+<td>array (matrice)</td>
 <td>selon une ou des dimensions</td>
-<td>vecteur, array ou liste</td>
+<td>vecteur, array, liste</td>
 </tr>
 <tr class="even">
+<td>—————</td>
+<td>————————————</td>
+<td>—————————————</td>
 <td>————————–</td>
-<td>—————————</td>
-<td>—————————————–</td>
-<td>—————————–</td>
 </tr>
 <tr class="odd">
 <td><code>lapply</code></td>
-<td>liste ou data frame</td>
-<td>chaque élément de la liste</td>
+<td>vecteur, liste (data frame)</td>
+<td>éléments de l’objet en entrée</td>
 <td>liste</td>
 </tr>
 <tr class="even">
-<td><code>sapply</code> et <code>mapply</code></td>
-<td>liste ou data frame</td>
-<td>chaque élément de la liste</td>
+<td><code>sapply</code></td>
+<td>vecteur, liste (data frame)</td>
+<td>éléments de l’objet en entrée</td>
 <td>simplifié par défaut</td>
 </tr>
 <tr class="odd">
-<td>————————–</td>
-<td>—————————</td>
-<td>—————————————–</td>
-<td>—————————–</td>
+<td><code>mapply</code></td>
+<td>vecteurs, listes (data frames)</td>
+<td>éléments des objets en entrée</td>
+<td>simplifié par défaut</td>
 </tr>
 <tr class="even">
+<td>—————</td>
+<td>————————————</td>
+<td>—————————————</td>
+<td>————————–</td>
+</tr>
+<tr class="odd">
 <td><code>tapply</code></td>
 <td>vecteur</td>
 <td>selon les niveaux de facteurs</td>
 <td>array ou liste</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>by</code></td>
 <td>data frame</td>
 <td>selon les niveaux de facteurs</td>
 <td>array ou liste</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>aggregate</code></td>
 <td>data frame</td>
 <td>selon les niveaux de facteurs</td>
 <td>data frame</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td> </td>
 <td></td>
 <td>et par colonne du data frame</td>
@@ -1272,7 +1376,6 @@ Figure 1: Vue d’ensemble de plusieurs fonctions et opérateurs mathématiques 
 </tr>
 </tbody>
 </table>
-<p><code>mapply</code> permet de passer des arguments de <code>FUN</code> différents selon les sous-objets, alors que ces arguments ne peuvent pas varier avec <code>sapply</code>.</p>
 <p>Description des arguments à donner en entrée à ces fonctions :</p>
 <ul>
 <li><p>1<sup>e</sup> argument (sauf pour <code>mapply</code>) : objet à séparer et sur lequel appliquer la fonction;</p></li>
@@ -1319,6 +1422,12 @@ Figure 1: Vue d’ensemble de plusieurs fonctions et opérateurs mathématiques 
 <li>Zumel, N. et Mount, J. (2014). Practical Data Science with R. Manning Publications Co.</li>
 <li>Zuur, A. F., Ieno, E. N. et Meesters, E. H.W.G. (2009). A Beginner’s Guide to R. Springer.</li>
 </ul>
+<div id="pour-mieux-comprendre-les-fonctions-de-la-famille-des-apply" class="section level4">
+<h4>Pour mieux comprendre les fonctions de la famille des <code>apply</code></h4>
+<ul>
+<li><a href="https://www.datacamp.com/community/tutorials/r-tutorial-apply-family" class="uri">https://www.datacamp.com/community/tutorials/r-tutorial-apply-family</a></li>
+</ul>
+</div>
 <div id="pour-aller-plus-loin" class="section level4">
 <h4>Pour aller plus loin</h4>
 <p>Le package <a href="https://dplyr.tidyverse.org/"><code>dplyr</code></a> offre des fonctions permettant de réaliser quelques-unes des manipulations de données vues dans ce cours ainsi que le cours précédent, par exemple :</p>
