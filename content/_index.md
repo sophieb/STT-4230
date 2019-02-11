@@ -35,7 +35,7 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
     * [Calculs statistiques et mathématiques plus avancés en R]({{%relref "calculs/calculs_stat_math_r_2018.html" %}})
 * Communication de résultats en R
     * [Graphiques en R]({{%relref "communication_resultats/graphiques_r_2019.html" %}})
-    * [Rédaction de documents en R Markdown]({{%relref "communication_resultats/redaction_r_markdown_2018.html" %}})
+    * [Rédaction de documents en R Markdown]({{%relref "communication_resultats/redaction_r_markdown_2019.html" %}})
 * Programmation en R
     * [Informations techniques concernant R]({{%relref "programmation/info_techniques_r_2018.html" %}})
     * [Structure de contrôle en R]({{%relref "programmation/struct_controle_r_2018.html" %}})
