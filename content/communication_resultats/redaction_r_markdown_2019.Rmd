@@ -387,11 +387,50 @@ produit le résultat suivant :
 
 Il n'est cependant pas possible de contrôler la taille de l'image avec cette syntaxe. Si nous travaillons dans un document R Markdown plutôt que simplement Markdown, il existe une autre façon d'intégrer une figure provenant d'un fichier image qui permet un meilleur contrôle sur la figure produite. Pour ce faire, il faut créer un bloc de code R dans lequel la fonction `include_graphic` du package `knitr` est appelée. En voici un exemple suivi du résultat produit.
 
-`r knitr::opts_chunk$set(echo = TRUE)`
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+# Afin d'afficher des blocs de code tels qu'ils aparaissent
+# dans un document R Markdown
+knitr::knit_hooks$set(source = function(x, options){
+  if (!is.null(options$verbatim) && options$verbatim){
+    opts = gsub(",\\s*verbatim\\s*=\\s*TRUE\\s*", "", options$params.src)
+    bef = sprintf('\n\n    ```{r echo = FALSE, %s}\n', opts, "\n")
+    stringr::str_c(
+      bef, 
+      knitr:::indent_block(paste(x, collapse = '\n'), "    "), 
+      "\n    ```\n"
+    )
+  } else {
+    stringr::str_c("\n\n```", tolower(options$engine), "\n", 
+      paste(x, collapse = '\n'), "\n```\n\n"
+    )
+  }
+})
+```
+
 ```{r, out.width = "45%", fig.align = 'center', fig.cap = "Autre exemple de figure", verbatim = TRUE}
 knitr::include_graphics("fig/WYSIWYM.png")
 ```
 
+```{r echo = FALSE}
+# Afin d'afficher des blocs de code tels qu'ils aparaissent
+# dans un document R Markdown
+knitr::knit_hooks$set(source = function(x, options){
+  if (!is.null(options$verbatim) && options$verbatim){
+    opts = gsub(",\\s*verbatim\\s*=\\s*TRUE\\s*", "", options$params.src)
+    bef = sprintf('\n\n    ```{r %s}\n', opts, "\n")
+    stringr::str_c(
+      bef, 
+      knitr:::indent_block(paste(x, collapse = '\n'), "    "), 
+      "\n    ```\n"
+    )
+  } else {
+    stringr::str_c("\n\n```", tolower(options$engine), "\n", 
+      paste(x, collapse = '\n'), "\n```\n\n"
+    )
+  }
+})
+```
 
 Les options `out.height` et `out.width` permettent de contrôler les dimensions de la figure, `fig.align` contrôle son alignement et `fig.cap` permet d'ajouter un titre.
 
