@@ -1,0 +1,337 @@
+---
+title: "Informations techniques concernant R"
+linkTitle: "Infos techniques R"
+author: "Sophie Baillargeon, Université Laval"
+date: "2019-03-04"
+weight: 1
+slug: "infos_techniques_r"
+categories: ["cours_2018-03-12"]
+categories_weight: 2
+lastmodifierdisplayname : "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#imprecision-numerique">Imprécision numérique</a><ul>
+<li><a href="#nombres-decimaux">Nombres décimaux</a><ul>
+<li><a href="#differences-de-comportement-entre-unique-versus-table-ou-factor">Différences de comportement entre <code>unique</code> versus <code>table</code> ou <code>factor</code></a></li>
+</ul></li>
+<li><a href="#grands-nombres-en-valeur-absolue">Grands nombres en valeur absolue</a></li>
+</ul></li>
+<li><a href="#evaluation-dexpressions-en-r-et-environnements">Évaluation d’expressions en R et environnements</a><ul>
+<li><a href="#evaluation-du-corps-dune-fonction">Évaluation du corps d’une fonction</a></li>
+<li><a href="#evaluation-dexpressions-dans-une-formule-ou-dans-un-appel-a-la-fonction-subset-ou-transform">Évaluation d’expressions dans une formule ou dans un appel à la fonction <code>subset</code> ou <code>transform</code></a></li>
+<li><a href="#les-fonctions-with-et-within">Les fonctions <code>with</code> et <code>within</code></a></li>
+<li><a href="#la-fonction-attach">La fonction <code>attach</code></a></li>
+<li><a href="#loperateur">L’opérateur <code>::</code></a></li>
+</ul></li>
+<li><a href="#completement-automatique">Complètement automatique</a></li>
+<li><a href="#synthese">Synthèse</a></li>
+<li><a href="#references">Références</a></li>
+</ul>
+</div>
+
+<div id="imprecision-numerique" class="section level1">
+<h1>Imprécision numérique</h1>
+<p><strong>Attention</strong>, R ne garde pas en mémoire de façon tout à fait exacte :</p>
+<ul>
+<li>certains nombres décimaux et</li>
+<li>les nombres plus grands, en valeur absolue, qu’une certaine limite.</li>
+</ul>
+<p>Ces imprécisions numériques sont dues à la représentation en <a href="http://fr.wikipedia.org/wiki/Virgule_flottante">virgules flottantes</a> utilisée par R pour stocker en mémoire les nombres réels (voir <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/double.html"><code>help(double)</code></a>).</p>
+<div id="nombres-decimaux" class="section level2">
+<h2>Nombres décimaux</h2>
+<p>Voici quelques exemples de tours que l’imprécision numérique en R sur des nombre décimaux peut nous jouer, tirés de Burns, P. (2011). The R inferno, chapitre 1. <a href="http://www.burns-stat.com/pages/Tutor/R_inferno.pdf" class="uri">http://www.burns-stat.com/pages/Tutor/R_inferno.pdf</a>.</p>
+<p>Pourquoi la commande suivante ne retourne-t-elle pas <code>TRUE</code>?</p>
+<pre class="r"><code>.1 == .3/3</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<p>Pourquoi le 4<sup>e</sup> élément du vecteur suivant n’est-il pas <code>TRUE</code>?</p>
+<pre class="r"><code>seq(0,1,0.1) == .3</code></pre>
+<pre><code>##  [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE</code></pre>
+
+<p>Pourquoi la longueur de cet objet n’est-elle pas 1?</p>
+<pre class="r"><code>unique(c(.3, .4 - .1, .5 - .2, .6 - .3, .7 - .4))</code></pre>
+<pre><code>## [1] 0.3 0.3 0.3</code></pre>
+<p>Parce R a une précision limitée pour garder des nombres en mémoire. Nous sommes portés à croire que 0.1 en R est réellement le nombre 0.1, soit un dixième (1/10), mais en fait R a stocké en mémoire la valeur suivante :</p>
+<pre class="r"><code>print(.1, digits = 20)</code></pre>
+<pre><code>## [1] 0.10000000000000001</code></pre>
+<p>alors que .3/3 a été stocké en mémoire comme suit :</p>
+<pre class="r"><code>print(.3/3, digits = 20)</code></pre>
+<pre><code>## [1] 0.099999999999999992</code></pre>
+<p>donc ces deux nombres ne sont pas exactement égaux! Par contre, ils sont approximativement égaux. D’où l’intérêt d’être « tolérant » dans nos comparaisons entre deux nombres réels.</p>
+<pre class="r"><code>all.equal(.1, .3/3)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<div id="differences-de-comportement-entre-unique-versus-table-ou-factor" class="section level3">
+<h3>Différences de comportement entre <code>unique</code> versus <code>table</code> ou <code>factor</code></h3>
+<p>La fonction <code>table</code> (ainsi que <code>xtabs</code> ou <code>ftable</code>), qui calcule des fréquences, commence par trouver les valeurs uniques dans les vecteurs reçus en entrée, puis elle compte combien de fois chacune des combinaisons de valeurs uniques sont répétées dans les vecteurs. Cependant, l’exemple suivant nous montre qu’elle ne trouve pas toujours les mêmes valeurs uniques que la fonction <code>unique</code>.</p>
+<pre class="r"><code>x &lt;- c(.3, .4 - .1, .5 - .2, .6 - .3, .7 - .4) 
+x # même vecteur que précédemment</code></pre>
+<pre><code>## [1] 0.3 0.3 0.3 0.3 0.3</code></pre>
+<pre class="r"><code>print(x, digits = 20)</code></pre>
+<pre><code>## [1] 0.29999999999999999 0.30000000000000004 0.29999999999999999 0.29999999999999999
+## [5] 0.29999999999999993</code></pre>
+<pre class="r"><code>table(x)</code></pre>
+<pre><code>## x
+## 0.3 
+##   5</code></pre>
+<pre class="r"><code>unique(x)</code></pre>
+<pre><code>## [1] 0.3 0.3 0.3</code></pre>
+<pre class="r"><code>print(unique(x), digits = 20)</code></pre>
+<pre><code>## [1] 0.29999999999999999 0.30000000000000004 0.29999999999999993</code></pre>
+<p>Ici, <code>table</code> considère que <code>x</code> contient une seule valeur distincte (répétée 5 fois), alors que <code>unique</code> trouve 3 valeurs distinctes.</p>
+<p>La fonction <code>factor</code> (ou <code>as.factor</code>) doit aussi trouver les valeurs uniques dans un vecteur avant de pouvoir le transformer en facteur (chaque valeur unique devient un niveau du facteur). Cependant, elle non plus ne trouve pas toujours les mêmes valeurs uniques que la fonction <code>unique</code>.</p>
+<pre class="r"><code>factor(x)</code></pre>
+<pre><code>## [1] 0.3 0.3 0.3 0.3 0.3
+## Levels: 0.3</code></pre>
+<pre class="r"><code>nlevels(factor(x))</code></pre>
+<pre><code>## [1] 1</code></pre>
+<p>Il semble donc que <code>table</code> (ainsi que <code>xtabs</code> et <code>ftable</code>) et <code>factor</code> (ou <code>as.factor</code>) comparent les valeurs en ne tenant pas compte de différences vraiment minimes, alors que <code>unique</code> en tient compte.</p>
+<div id="conseils" class="section level4">
+<h4>Conseils :</h4>
+<p>Lors de comparaison de nombres en R, il faut garder en tête que <code>==</code>, <code>identical</code> et <code>unique</code> sont affectés par les imprécisions numériques, car ils font des comparaisons exactes. Cependant, <code>all.equal</code>, <code>table</code> (ainsi que les autres fonctions de calcul de fréquences du R de base) et <code>factor</code> (ou <code>as.factor</code>) ne se préoccupent pas de différences inférieures à une certaine tolérance.</p>
+<p>Aussi, l’imprécision numérique sur des nombres décimaux implique que R n’arrive pas à garder en mémoire des nombres vraiment très petits en valeur absolue. Ces nombres sont stockés comme s’ils étaient des zéros. Lorsque nous travaillons avec de tels nombres, il est bon de les changer d’échelle afin de les éloigner de 0. Typiquement, c’est une transformation logarithmique qui est utilisée pour arriver à ça. Par exemple, en statistique, il est plus facile de travailler numériquement avec une log-vraisemblance qu’avec une <a href="https://en.wikipedia.org/wiki/Likelihood_function">vraisemblance</a>.</p>
+</div>
+</div>
+</div>
+<div id="grands-nombres-en-valeur-absolue" class="section level2">
+<h2>Grands nombres en valeur absolue</h2>
+<p>Il faut aussi se méfier lorsque nous manipulons en R de grands nombres en valeur absolue.</p>
+<pre class="r"><code>100000000000000 + 1 == 100000000000000  # Ces deux nombres sont bel et bien différents.</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code>1e14 + 1 == 1e14  # Même comparaison, en notation scientifique.</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code>2^53 == 2^53 - 1  # Nous obtenons encore le résultat attendu.</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code>2^53 == 2^53 + 1  # Oups, c&#39;est à partir d&#39;ici que ça ne marche plus!</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<p>Le plus grand nombre entier positif représentable en R 64 bits sur mon ordinateur est 2^53. Quel est ce nombre ?</p>
+<pre class="r"><code>2^53</code></pre>
+<pre><code>## [1] 9.007199e+15</code></pre>
+<p>pour le voir en notation fixe plutôt que scientifique :</p>
+<pre class="r"><code>options(scipen= 10)
+2^53</code></pre>
+<pre><code>## [1] 9007199254740992</code></pre>
+<p>Maintenant, observons un phénomène étonnant. Demandons à R d’afficher le nombre 2^53 + 1, soit 9007199254740993.</p>
+<pre class="r"><code>9007199254740993</code></pre>
+<pre><code>## [1] 9007199254740992</code></pre>
+<p>R affiche plutôt le nombre 2^53, soit 9007199254740992. Pourtant, ceci est correct :</p>
+<pre class="r"><code>9007199254740994</code></pre>
+<pre><code>## [1] 9007199254740994</code></pre>
+<p>Mais pas ceci :</p>
+<pre class="r"><code>9007199254740995</code></pre>
+<pre><code>## [1] 9007199254740996</code></pre>
+<p>L’explication à cela est que les nombres sont stockés sur la mémoire d’un ordinateur sous forme de <a href="https://fr.wikipedia.org/wiki/Bit">bits</a>. Cependant, le nombre de bits pouvant être utilisé pour stocker un nombre possède une limite maximale. Si le nombre à stocker requière plus de bits pour être représenté dans son intégralité que le nombre maximum de bits utilisables, il est légèrement arrondi.</p>
+<p>La limite dans le nombre de bits utilisables en R pour stocker un nombre dépend du <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#differents-types-de-donnees">type de données</a> utilisé pour le stocker (réel versus entier), du nombre de bits de la version de R utilisée (32 versus 64) ainsi que des spécifications de l’ordinateur utilisé. R 32 bits utilise moins de bits que R 64 bits.</p>
+<p>Notez que la plus grande valeur représentable de 2^53 sur mon installation de R 64 bits s’applique à des nombres entiers d’un point de vue mathématique, mais stockés sous le type réel en R. Le type entier ne permet pas de représenter des nombres supérieurs en valeur absolue à l’objet R <code>.Machine$integer.max</code> (= 2147483647 sur mon installation de R 64 bits).</p>
+<pre class="r"><code>as.integer(-2147483647)</code></pre>
+<pre><code>## [1] -2147483647</code></pre>
+<pre class="r"><code>as.integer(-2147483647-1)</code></pre>
+<pre><code>## Warning: NAs introduced by coercion to integer range</code></pre>
+<pre><code>## [1] NA</code></pre>
+<hr />
+</div>
+</div>
+<div id="evaluation-dexpressions-en-r-et-environnements" class="section level1">
+<h1>Évaluation d’expressions en R et environnements</h1>
+<p>Lorsque nous soumettons des instructions dans la console, R doit chercher la valeur des objets nommés dans ces instructions. Ces objets peuvent être de n’importe quel type : des fonctions, des vecteurs, des listes, etc. La façon dont R s’y prend pour trouver les valeurs de ces objets est plutôt complexe. Je ne vais pas expliquer ce point en détail. Une excellente référence pour en apprendre plus sur le sujet est le blogue suivant :<br />
+<a href="http://blog.obeautifulcode.com/R/How-R-Searches-And-Finds-Stuff/" class="uri">http://blog.obeautifulcode.com/R/How-R-Searches-And-Finds-Stuff/</a></p>
+<p>Je vais tout de même expliquer le principe général simplifié derrière l’évaluation d’expressions en R. À l’ouverture d’une session R, certains packages sont automatiquement chargés. Le contenu de chaque package chargé est placé dans ce qui est appelé un <em>environnement</em>. Les objets R que nous créons pendant une session R sont aussi conservés dans un environnement : l’environnement de travail (aussi appelé environnement courant ou environnement global). Lorsque R a besoin d’évaluer un objet apparaissant dans une expression soumise dans la console, il démarre une recherche de cet objet dans les environnements ouverts. La recherche débute dans l’environnement de travail. Si l’objet recherché n’est pas trouvé dans cet environnement, la recherche se poursuit dans les environnements des packages chargés, en commençant par les packages les plus récemment chargés.</p>
+<p>La figure 1 illustre le chemin de recherche parcouru par R pour évaluer les expressions soumises dans la console. La recherche part de l’environnement du haut et descend dans les environnements en dessous, jusqu’à ce que l’objet recherché soit trouvé. C’est le nom d’un objet qui permet de l’identifier.</p>
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-16"></span>
+<img src="fig/chemin.png" alt="Chemin de recherche parcouru par R pour évaluer les expressions soumises dans la console" width="25%" />
+<p class="caption">
+Figure 1: Chemin de recherche parcouru par R pour évaluer les expressions soumises dans la console
+</p>
+</div>
+<p>Il existe quelques exceptions à cette façon de rechercher la valeur d’expressions en R. Les points suivants décrivent quelques-unes de ces exceptions.</p>
+<div id="evaluation-du-corps-dune-fonction" class="section level2">
+<h2>Évaluation du corps d’une fonction</h2>
+<p>Lors de l’évaluation du corps d’une fonction (code composant la fonction), des environnements s’ajoutent au début du chemin de recherche décrit ci-dessous, uniquement le temps de l’évaluation de la fonction. Tous les détails seront fournis au prochain cours.</p>
+</div>
+<div id="evaluation-dexpressions-dans-une-formule-ou-dans-un-appel-a-la-fonction-subset-ou-transform" class="section level2">
+<h2>Évaluation d’expressions dans une formule ou dans un appel à la fonction <code>subset</code> ou <code>transform</code></h2>
+<p>Les fonctions R prenant en entrée une formule, prennent aussi toutes en entrée un argument <code>data</code>. Si un data frame est donné à cet argument, ce data frame devient un environnement de plus, qui s’ajoute à la liste des environnements parcourus lors de la recherche de la valeur d’un objet R. Cet environnement vient en premier dans la liste, la recherche débute donc par lui. Dans une formule, les noms des colonnes de <code>data</code> deviennent donc des objets directement accessibles (plus besoin d’utiliser la syntaxe <code>data$nomColonne</code>). Il en est de même dans l’expression fournie à l’argument <code>subset</code> souvent présent dans les fonctions prenant en entrée une formule.</p>
+<p>Les fonctions <code>subset</code> et <code>transform</code>, que nous avons déjà vues, ont le même genre de comportement. Le data frame donné au premier argument devient l’environnement d’où part la recherche des valeurs associées aux noms d’objets dans les expressions fournies aux arguments suivants. Ainsi, si nous voulons par exemple extraire du jeu de données <code>iris</code> les observations de <code>Petal.Length</code> et <code>Petal.Width</code> pour lesquelles <code>Sepal.Width</code> est supérieure à 4, nous pouvons utiliser la commande</p>
+<pre class="r"><code>subset(iris, subset = Sepal.Width &gt; 4, select = c(Petal.Length, Petal.Width))</code></pre>
+<pre><code>##    Petal.Length Petal.Width
+## 16          1.5         0.4
+## 33          1.5         0.1
+## 34          1.4         0.2</code></pre>
+<p>plutôt que</p>
+<pre class="r"><code>subset(iris, subset = iris$Sepal.Width &gt; 4, select = c(&quot;Petal.Length&quot;, &quot;Petal.Width&quot;))</code></pre>
+<p>ou</p>
+<pre class="r"><code>iris[iris$Sepal.Width &gt; 4, c(&quot;Petal.Length&quot;, &quot;Petal.Width&quot;)]</code></pre>
+<p>La commande suivante ne fonctionne pas</p>
+<pre class="r"><code>iris[Sepal.Width &gt; 4, c(Petal.Length, Petal.Width)]</code></pre>
+<pre><code>## Error in `[.data.frame`(iris, Sepal.Width &gt; 4, c(Petal.Length, Petal.Width)) : 
+##   object &#39;Petal.Length&#39; not found</code></pre>
+<p>parce que <code>Sepal.Width</code>, <code>Petal.Length</code> et <code>Petal.Width</code> sont des noms d’objets dont R doit trouver les valeurs. Le chemin de recherche parcouru par R pour trouver ces valeurs débute dans l’environnement de travail et se poursuit dans les environnements des packages chargés, en commençant par les packages les plus récemment chargés. R retourne une erreur, car il ne trouve nulle part ces objets. Il y a bien des colonnes du data frame <code>iris</code> qui portent les noms de ses objets, mais il ne s’agit pas d’objets directement accessibles. Ce sont des éléments dans un objet.</p>
+<p>Dans la commande <code>subset(iris, subset = Sepal.Width &gt; 4, select = c(Petal.Length, Petal.Width))</code>, R doit aussi trouver la valeur des objets <code>Sepal.Width</code>, <code>Petal.Length</code> et <code>Petal.Width</code>. Il trouve cette fois ces objets, car la fonction <code>subset</code> modifie le chemin de recherche de R (mais uniquement le temps de l’évaluation de l’appel à cette fonction). Elle ajoute au tout début du chemin de recherche un environnement, contenant les colonnes du data frame fourni comme premier argument. Dans l’exemple, l’environnement ajouté au chemin de recherche contient donc des vecteurs nommés <code>&quot;Sepal.Length&quot;</code>, <code>&quot;Sepal.Width&quot;</code>, <code>&quot;Petal.Length&quot;</code>, <code>&quot;Petal.Width&quot;</code> et <code>&quot;Species&quot;</code>, soit les colonnes de <code>iris</code>.</p>
+<p>Le chemin de recherche utilisé par R pour évaluer les expressions données à <code>subset</code> dans cet exemple est illustré dans la figure 2.</p>
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-21"></span>
+<img src="fig/chemin_with.png" alt="Chemin de recherche parcouru par R pour évaluer les expressions données en argument à la fonction subset dans l'exemple" width="25%" />
+<p class="caption">
+Figure 2: Chemin de recherche parcouru par R pour évaluer les expressions données en argument à la fonction subset dans l’exemple
+</p>
+</div>
+</div>
+<div id="les-fonctions-with-et-within" class="section level2">
+<h2>Les fonctions <code>with</code> et <code>within</code></h2>
+<p>Les fonctions <code>with</code> et <code>within</code> permettent d’étendre la possibilité d’ajouter un data frame au début de la liste des environnements dans le chemin de recherche à n’importe quelles instructions R. Elles s’emploient avec la syntaxe suivante :<br />
+<code>with(data = nom_data_frame, exp = expression)</code><br />
+où <code>expression</code> est une commande R, ou encore plusieurs commandes R encadrées de crochets.</p>
+<p>Par exemple, les deux bouts de code suivants retournent le même résultat.</p>
+<pre class="r"><code>var_catego &lt;- cut(iris$Sepal.Length, right = FALSE,
+                  breaks = c(-Inf, quantile(iris$Sepal.Length, probs = c(1/3, 2/3)), Inf))
+table(var_catego, iris$Species)
+
+# équivalent à :
+
+with(iris, {
+  var_catego &lt;- cut(Sepal.Length, right = FALSE,
+                    breaks = c(-Inf, quantile(Sepal.Length, probs = c(1/3, 2/3)), Inf))
+  table(var_catego, Species)
+})</code></pre>
+<pre><code>##             Species
+## var_catego   setosa versicolor virginica
+##   [-Inf,5.4)     40          5         1
+##   [5.4,6.3)      10         31        12
+##   [6.3, Inf)      0         14        37</code></pre>
+<p> </p>
+<p>Avec <code>with</code>, les préfixes <code>nom_data_frame$</code> ne sont plus requis.</p>
+<p>La fonction <code>within</code> est pour sa part une sorte d’alternative à la fonction <code>transform</code>. Les expressions fournies en entrée vont modifier le data frame ou la liste donné comme premier argument. La fonction retourne une copie modifiée de cet objet. Voici un exemple.</p>
+<pre class="r"><code>head(women)</code></pre>
+<pre><code>##   height weight
+## 1     58    115
+## 2     59    117
+## 3     60    120
+## 4     61    123
+## 5     62    126
+## 6     63    129</code></pre>
+<pre class="r"><code>women2 &lt;- 
+  within(women, {
+    height &lt;- height / 12
+    weight2 &lt;- weight^2
+  })
+head(women2)</code></pre>
+<pre><code>##     height weight weight2
+## 1 4.833333    115   13225
+## 2 4.916667    117   13689
+## 3 5.000000    120   14400
+## 4 5.083333    123   15129
+## 5 5.166667    126   15876
+## 6 5.250000    129   16641</code></pre>
+
+</div>
+<div id="la-fonction-attach" class="section level2">
+<h2>La fonction <code>attach</code></h2>
+<p>Certains d’entre vous connaissent peut-être la fonction <code>attach</code>. Cette fonction permet d’ajouter un data frame dans le chemin de recherche, juste <strong>en dessous</strong> de l’environnement de travail. Par exemple, la commande</p>
+<pre class="r"><code>attach(iris)</code></pre>
+<p>modifie le chemin suivant <img src="fig/chemin.png" width="25%" style="display: block; margin: auto;" /><img src="fig/par.png" width="25%" style="display: block; margin: auto;" /><img src="fig/chemin_attach.png" width="25%" style="display: block; margin: auto;" /></p>
+<p>Je ne recommande pas l’utilisation de <code>attach</code>, car si l’environnement de travail contient déjà un objet portant le même nom qu’une colonne du data frame attaché, c’est l’objet dans l’environnement de travail qui sera retourné plutôt que la colonne du data frame si nous utilisons ce nom dans nos instructions. Ce comportement s’explique par le fait que l’environnement de travail demeure le point de départ du chemin de recherche avec <code>attach</code>, alors qu’avec <code>with</code> c’est le data frame qui est le point de départ du chemin de recherche.</p>
+<p>Pour retirer du chemin de recherche un data frame attaché, il faut utiliser la fonction <code>detach</code>.</p>
+<pre class="r"><code>detach(iris)</code></pre>
+</div>
+<div id="loperateur" class="section level2">
+<h2>L’opérateur <code>::</code></h2>
+<p>Plutôt que de laisser R parcourir tout son chemin de recherche pour retrouver un objet dans un environnement associé à un package, il est possible d’indiquer à R dans quel environnement chercher un objet avec l’opérateur <code>::</code> (double deux-points). Cet opérateur est utile lorsque des fonctions sont masquées par un nouveau package chargé.</p>
+<p>Par exemple, le package <code>dplyr</code> contient des fonctions portant le même nom que des fonctions des packages <code>stats</code> et <code>base</code>.</p>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<p>Le chargement d’un nouveau package ajoute un environnement dans le chemin de recherche, juste en dessous de l’environnement de travail. Ainsi, la commande <code>library(dplyr)</code> a modifié le chemin suivant <img src="fig/chemin.png" width="25%" style="display: block; margin: auto;" /><img src="fig/par.png" width="25%" style="display: block; margin: auto;" /><img src="fig/chemin_library.png" width="25%" style="display: block; margin: auto;" /></p>
+<p>Un appel à un des noms de fonction en double, par exemple à <code>union</code>, va utiliser par défaut la fonction <code>union</code> du package <code>dplyr</code> puisque l’environnement de ce package est plus haut dans le chemin de recherche que l’environnement du package <code>base</code>.</p>
+<pre class="r"><code>union  # remarquez le nom de l&#39;environnement de provenant de la fonction</code></pre>
+<pre><code>## function (x, y, ...) 
+## UseMethod(&quot;union&quot;)
+## &lt;bytecode: 0x000000001227a1c8&gt;
+## &lt;environment: namespace:dplyr&gt;</code></pre>
+<p>Pour accéder à la fonction <code>union</code> du package <code>base</code> avec ce chemin d’accès, il faut utiliser l’opérateur <code>::</code> comme suit.</p>
+<pre class="r"><code>base::union  # remarquez le nom de l&#39;environnement de provenant de la fonction</code></pre>
+<pre><code>## function (x, y) 
+## unique(c(as.vector(x), as.vector(y)))
+## &lt;bytecode: 0x0000000014460228&gt;
+## &lt;environment: namespace:base&gt;</code></pre>
+<p>Notez que l’auteur du package <code>dplyr</code> a délibérément repris des noms de fonctions du R de base. Il s’agit de versions de ces fonctions qu’il juge meilleures.</p>
+<p>Un package peut être retiré du chemin de recherche avec la fonction <code>detach</code> comme suit :</p>
+<pre class="r"><code>detach(&quot;package:dplyr&quot;)</code></pre>
+</div>
+</div>
+<div id="completement-automatique" class="section level1">
+<h1>Complètement automatique</h1>
+<p>Ceux qui utilisent <code>attach</code>, mentionné précédemment, le font souvent pour que le code soit moins long à taper. Si c’est votre cas, vous pourriez aimer utiliser les capacités de <a href="https://fr.wikipedia.org/wiki/Compl%C3%A8tement">complètement automatique</a> (en anglais <em>completion</em> ou <em>autocompletion</em>) d’un éditeur de code R. Cette fonctionnalité a justement pour but d’aider l’utilisateur à programmer plus rapidement, tout en diminuant les risques d’erreur de frappe.</p>
+<p>Par exemple, en RStudio, lorsque l’utilisateur saisit une commande dans un script R ou dans la console R, une fenêtre de complètement automatique s’ouvrent souvent automatiquement pour suggérer des suites à la commande. Par exemple, si nous tapons le nom d’un data frame suivi de <code>$</code>, la fenêtre de complètement automatique contient tous les noms des colonnes du data frame. Il suffit de sélectionner la colonne désirée avec les flèches, puis d’enfoncer la touche Enter ou Tab, pour que R s’occupe de compléter notre commande.</p>
+<p>Les fenêtres de complètement automatique peuvent aussi être ouvertes avec la touche Tab. S’il y a seulement une possibilité de complètement, la touche Tab ne fait pas qu’ouvrir la fenêtre, elle complète aussi la commande.</p>
+<p>Plus d’informations sur les capacités de complètement automatique de R Studio peuvent être trouvées sur la page web suivante : <a href="https://support.rstudio.com/hc/en-us/articles/205273297-Code-Completion" class="uri">https://support.rstudio.com/hc/en-us/articles/205273297-Code-Completion</a></p>
+<hr />
+</div>
+<div id="synthese" class="section level1">
+<h1>Synthèse</h1>
+<div id="imprecision-numerique-1" class="section level4">
+<h4>Imprécision numérique</h4>
+<p>R ne garde pas en mémoire de façon tout à fait exacte :</p>
+<ul>
+<li>les nombres avec une partie décimale et</li>
+<li>les nombres entiers supérieurs à 2^53.</li>
+</ul>
+<p><span class="math inline">\(\longrightarrow\)</span> Attention aux comparaison avec <code>==</code>, <code>identical</code> ou <code>unique</code> : elles sont exactes.</p>
+<p>Les comparaison avec <code>all.equal</code>, <code>table</code> et <code>factor</code> sont plus souples.</p>
+</div>
+<div id="evaluation-dexpressions-en-r-et-environnements-1" class="section level4">
+<h4>Évaluation d’expressions en R et environnements</h4>
+<p>Chemin de recherche parcouru par R pour évaluer les expressions soumises dans la console :</p>
+<p><img src="fig/chemin.png" width="30%" style="display: block; margin: auto;" /></p>
+<p>Groupe d’objets = environnement</p>
+<p>Ajouter un jeu de données <strong>au début</strong> du chemin de recherche :</p>
+<ul>
+<li>argument <code>data</code> venant avec un argument <code>formula</code>,</li>
+<li>fonctions <code>subset</code> et <code>transform</code> (déjà vues),</li>
+<li>fonction <code>with</code> et <code>within</code>.</li>
+</ul>
+<p>Ajouter un environnement provenant d’un package dans le chemin de recherche (en d’autres mots, charger un package) : <code>library</code>.</p>
+<ul>
+<li>L’environnement du package est ajouté en 2<sup>e</sup> position, soit sous l’environnement de travail.</li>
+</ul>
+<p><code>::</code> = opérateur pour identifier l’environnement où aller chercher un objet plutôt que de laisser R effectuer une recherche dans tous les environnements ouverts.</p>
+<hr />
+</div>
+</div>
+<div id="references" class="section level1">
+<h1>Références</h1>
+<ul>
+<li>Imprécision numérique en R : Burns, P. (2011). The R inferno, chapitre 1. URL :<br />
+<a href="http://www.burns-stat.com/pages/Tutor/R_inferno.pdf" class="uri">http://www.burns-stat.com/pages/Tutor/R_inferno.pdf</a></li>
+<li>Représentation en virgules flottantes:
+<ul>
+<li><a href="http://fr.wikipedia.org/wiki/Virgule_flottante" class="uri">http://fr.wikipedia.org/wiki/Virgule_flottante</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format" class="uri">https://en.wikipedia.org/wiki/Double-precision_floating-point_format</a></li>
+</ul></li>
+<li>Évaluation d’expressions en R : <a href="http://blog.obeautifulcode.com/R/How-R-Searches-And-Finds-Stuff/" class="uri">http://blog.obeautifulcode.com/R/How-R-Searches-And-Finds-Stuff/</a></li>
+<li>Environnements : Wickham, H. (2014). Advanced R. CRC Press. Chapitre 8. <a href="http://adv-r.had.co.nz/Environments.html" class="uri">http://adv-r.had.co.nz/Environments.html</a></li>
+<li>R Core Team (2018). The R Language Definition.<br />
+<a href="https://cran.r-project.org/doc/manuals/r-release/R-lang.html" class="uri">https://cran.r-project.org/doc/manuals/r-release/R-lang.html</a></li>
+</ul>
+</div>
