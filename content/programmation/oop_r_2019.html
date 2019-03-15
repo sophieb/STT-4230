@@ -1,0 +1,706 @@
+---
+title: "Programmation orientée objet en R"
+author: "Sophie Baillargeon, Université Laval"
+date: "2019-03-15"
+weight: 4
+slug: "oop_r"
+categories: ["cours_2019-03-26"]
+categories_weight: 1
+lastmodifierdisplayname : "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#systeme-s3">Système S3</a><ul>
+<li><a href="#fonctionnement-du-systeme-s3">Fonctionnement du système S3</a><ul>
+<li><a href="#situation-particuliere-1-lobjet-assigne-au-premier-argument-na-pas-dattribut-class">Situation particulière 1 : l’objet assigné au premier argument n’a pas d’attribut <code>&quot;class&quot;</code></a></li>
+<li><a href="#situation-particuliere-2-la-methode-nomfonctiongenerique.nomclasse-nexiste-pas">Situation particulière 2 : la méthode <code>nomFonctionGenerique.nomClasse</code> n’existe pas</a></li>
+<li><a href="#situation-particuliere-3-class-retourne-plus-dune-classe">Situation particulière 3 : <code>class</code> retourne plus d’une classe</a></li>
+<li><a href="#situation-particuliere-4-la-fonction-generique-possede-plus-dun-argument">Situation particulière 4 : la fonction générique possède plus d’un argument</a></li>
+</ul></li>
+<li><a href="#creation-de-classes-et-de-methodes-de-type-s3">Création de classes et de méthodes de type S3</a><ul>
+<li><a href="#assignation-dune-nouvelle-classe-a-un-objet">Assignation d’une nouvelle classe à un objet</a></li>
+<li><a href="#conception-de-la-methode-pour-la-nouvelle-classe">Conception de la méthode pour la nouvelle classe</a></li>
+<li><a href="#methode-print-pour-formater-laffichage-des-sorties-de-nos-fonctions">Méthode <code>print</code> pour formater l’affichage des sorties de nos fonctions</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#systeme-s4">Système S4</a><ul>
+<li><a href="#manipulation-dobjets-dont-la-classe-est-de-type-s4">Manipulation d’objets dont la classe est de type S4</a></li>
+</ul></li>
+<li><a href="#synthese">Synthèse</a></li>
+<li><a href="#references">Références</a></li>
+</ul>
+</div>
+
+<hr />
+<p>La programmation orientée objet est un paradigme de programmation basé sur le concept d’objets, qui peuvent contenir des données et métadonnées (attributs), et qui sont associés à des procédures, souvent appelées méthodes. R propose plusieurs systèmes orientés objet en R :</p>
+<ul>
+<li><strong>S3</strong> : Il s’agit du système le moins formel, mais le plus utilisé, en particulier dans les packages <code>base</code> et <code>stats</code>. Ces notes traitent principalement de ce système.</li>
+<li><strong>S4</strong> : Ce système fonctionne de façon similaire au système S3, mais il est plus formel. La majorité des packages sur <a href="https://www.bioconductor.org/">Bioconductor</a> utilisent ce système. Nous verrons ici comment manipuler des objets dont la classe est de type S4, mais pas comment en créer.</li>
+<li>Autres : Parmi les autres systèmes orientés objet en R, il y a eu <a href="http://adv-r.had.co.nz/R5.html"><strong>RC</strong> (aussi nommé <strong>R5</strong>), le système « Reference Classes »</a>. Celui-ci n’a cependant jamais été très utilisé. Récemment, le <a href="https://adv-r.hadley.nz/r6.html">système <strong>R6</strong></a> a vu le jour, afin de remplacer le système RC. Comparativement aux systèmes S3 et S4, ce système se rapproche davantage du paradigme orienté objet des langages informatiques Python et Java notamment. Comparativement au système RC, il est plus simple et plus rapide. Ces autres systèmes ne seront pas approfondis dans ce cours.</li>
+</ul>
+<div id="systeme-s3" class="section level1">
+<h1>Système S3</h1>
+<p>À chaque fois que nous avons effleuré le sujet de la programmation orientée objet dans ce cours, nous parlions toujours du système S3. Nous l’avons mentionné dans les notes sur :</p>
+<ul>
+<li><a href="https://stt4230.rbind.io/introduction/base_r/#est-ce-que-de-la-programmation-orientee-objet-est-possible-en-r">les concepts de base</a>;</li>
+<li><a href="https://stt4230.rbind.io/communication_resultats/graphiques_r/#fonction-generique-plot">les graphiques</a>;</li>
+<li><a href="https://stt4230.rbind.io/calculs/calculs_stat_math_r/#manipulation-de-la-sortie-dune-fonction-dajustement-de-modele">les calculs statistiques et mathématiques en R</a>.</li>
+</ul>
+<p>Le fonctionnement de ce système est très simple. Il est possible d’attribuer des <em>classes</em> de type S3 aux objets R. Ces classes déterminent comment les <em>fonctions génériques</em> se comportent en recevant en entrée un certain objet. Une fonction générique est dite <em>polymorphe</em>. Elle possède plusieurs définitions, appelées <em>méthodes</em>, pour des objets de différentes classes. Techniquement, une fonction générique R ne fait que rediriger les arguments qui lui sont fournis en entrée vers la méthode associée à la classe de l’objet assigné à son premier argument.</p>
+<p>Voyons plus en détails le fonctionnement du système S3, puis apprenons comment créer une nouvelle méthode pour une fonction générique existante. Nous ne verrons pas comment créer de nouvelles fonctions génériques.</p>
+<div id="fonctionnement-du-systeme-s3" class="section level2">
+<h2>Fonctionnement du système S3</h2>
+<p>Nous avons déjà mentionné que les fonctions suivantes sont génériques : <code>plot</code>, <code>print</code>, <code>summary</code>, <code>coef</code> et plusieurs autres fonctions d’extraction d’informations de la sortie d’une fonction d’ajustement de modèle. La fonction <code>print</code> est probablement la fonction de cette liste que nous utilisons le plus souvent, puisqu’elle est appelée à chaque fois que nous affichons un objet dans la console. La définition de cette fonction est la suivante :</p>
+<pre class="r"><code>print</code></pre>
+<pre><code>## function (x, ...) 
+## UseMethod(&quot;print&quot;)
+## &lt;bytecode: 0x00000000140f1af8&gt;
+## &lt;environment: namespace:base&gt;</code></pre>
+<p>Il n’y a qu’une seule instruction dans le corps de cette fonction : un appel à la fonction <code>UseMethod</code>. Toutes les fonctions génériques ont cette forme. De plus, la plupart d’entre elles possèdent un argument <code>...</code>.</p>
+<p>Lorsqu’une fonction générique est appelée, la fonction <code>UseMethod</code> vérifie d’abord la classe de l’objet fourni au premier argument, ici <code>x</code>. Ensuite, elle appelle la méthode correspondant à la classe obtenue, si elle existe, en lui fournissant en entrée les arguments qui ont été fournis dans l’appel à la fonction générique.</p>
+<p>Par exemple, considérons le data frame suivant (il s’agit d’un jeu de données du package <code>datasets</code>).</p>
+<pre class="r"><code>str(women)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    15 obs. of  2 variables:
+##  $ height: num  58 59 60 61 62 63 64 65 66 67 ...
+##  $ weight: num  115 117 120 123 126 129 132 135 139 142 ...</code></pre>
+<p>Les data frames possèdent un attribut <code>class</code>.</p>
+<pre class="r"><code>attributes(women)</code></pre>
+<pre><code>## $names
+## [1] &quot;height&quot; &quot;weight&quot;
+## 
+## $class
+## [1] &quot;data.frame&quot;
+## 
+## $row.names
+##  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15</code></pre>
+<p>Lors de l’évaluation de l’appel à la fonction <code>print</code> suivant :</p>
+<pre class="r"><code>print(women)</code></pre>
+<p>R va d’abord vérifier la classe de l’objet assigné au premier argument dans l’appel de la fonction :</p>
+<pre class="r"><code>class(women)</code></pre>
+<pre><code>## [1] &quot;data.frame&quot;</code></pre>
+<p>Puis R va vérifier si une méthode <code>print</code> est définie pour cette classe. La fonction <code>methods</code> nous permet de connaître toutes les méthodes définies pour une fonction générique.</p>
+<pre class="r"><code>methods(print)</code></pre>
+<p>Le résultat n’est pas affiché en entier, car le nombre de méthodes pour la fonction générique <code>print</code> est trop grand. Voici cependant un extrait de la sortie obtenue.</p>
+<pre><code>## . . .
+## [67] print.condition                                    print.connection  
+## [69] print.CRAN_package_reverse_dependencies_and_views* print.data.frame
+## [71] print.Date                                         print.default
+## [73] print.dendrogram*                                  print.density* 
+## . . .
+## see &#39;?methods&#39; for accessing help and source code</code></pre>
+<p>Pour une classe spécifique, une méthode de type S3 portera le nom : <code>nomFonctionGenerique.nomClasse</code>. Nous voyons ici que la méthode <code>print.data.frame</code> existe. Celle-ci est une fonction, dont la définition est la suivante :</p>
+<pre class="r"><code>print.data.frame</code></pre>
+<pre><code>## function (x, ..., digits = NULL, quote = FALSE, right = TRUE, 
+##     row.names = TRUE, max = NULL) 
+## {
+##     n &lt;- length(row.names(x))
+##     if (length(x) == 0L) {
+##         cat(sprintf(ngettext(n, &quot;data frame with 0 columns and %d row&quot;, 
+##             &quot;data frame with 0 columns and %d rows&quot;), n), &quot;\n&quot;, 
+##             sep = &quot;&quot;)
+##     }
+##     else if (n == 0L) {
+##         print.default(names(x), quote = FALSE)
+##         cat(gettext(&quot;&lt;0 rows&gt; (or 0-length row.names)\n&quot;))
+##     }
+##     else {
+##         if (is.null(max)) 
+##             max &lt;- getOption(&quot;max.print&quot;, 99999L)
+##         if (!is.finite(max)) 
+##             stop(&quot;invalid &#39;max&#39; / getOption(\&quot;max.print\&quot;): &quot;, 
+##                 max)
+##         omit &lt;- (n0 &lt;- max%/%length(x)) &lt; n
+##         m &lt;- as.matrix(format.data.frame(if (omit) 
+##             x[seq_len(n0), , drop = FALSE]
+##         else x, digits = digits, na.encode = FALSE))
+##         if (!isTRUE(row.names)) 
+##             dimnames(m)[[1L]] &lt;- if (isFALSE(row.names)) 
+##                 rep.int(&quot;&quot;, if (omit) 
+##                   n0
+##                 else n)
+##             else row.names
+##         print(m, ..., quote = quote, right = right, max = max)
+##         if (omit) 
+##             cat(&quot; [ reached &#39;max&#39; / getOption(\&quot;max.print\&quot;) -- omitted&quot;, 
+##                 n - n0, &quot;rows ]\n&quot;)
+##     }
+##     invisible(x)
+## }
+## &lt;bytecode: 0x0000000015d30df0&gt;
+## &lt;environment: namespace:base&gt;</code></pre>
+<p>R va donc finalement appeler cette fonction.</p>
+<p>Donc, la commande</p>
+<pre class="r"><code>women</code></pre>
+<p>qui revient en fait à la commande</p>
+<pre class="r"><code>print(women)</code></pre>
+<p>cache l’évaluation de la commande suivante</p>
+<pre class="r"><code>print.data.frame(women)</code></pre>
+<p>qui produit le résultat suivant.</p>
+<pre><code>##    height weight
+## 1      58    115
+## 2      59    117
+## 3      60    120
+## 4      61    123
+## 5      62    126
+## 6      63    129
+## 7      64    132
+## 8      65    135
+## 9      66    139
+## 10     67    142
+## 11     68    146
+## 12     69    150
+## 13     70    154
+## 14     71    159
+## 15     72    164</code></pre>
+<div id="situation-particuliere-1-lobjet-assigne-au-premier-argument-na-pas-dattribut-class" class="section level3">
+<h3>Situation particulière 1 : l’objet assigné au premier argument n’a pas d’attribut <code>&quot;class&quot;</code></h3>
+<p>Dans l’exemple précédent, l’objet fourni en entrée au premier argument de la fonction générique possédait un argument nommé <code>&quot;class&quot;</code>.</p>
+<pre class="r"><code>attr(women, which = &quot;class&quot;)</code></pre>
+<pre><code>## [1] &quot;data.frame&quot;</code></pre>
+<p>Qu’arrive-t-il si l’objet assigné au premier argument n’a pas d’attribut <code>&quot;class&quot;</code> ?</p>
+<p>En toute circonstance, la fonction <code>class</code> doit retourner une classe pour permettre en système S3 de bien fonctionner. Alors les objets R ont tous une classe implicite.</p>
+<p>Par exemple, créons une copie de <code>women</code> pour laquelle nous allons retirer l’attribut <code>class</code> avec la fonction <code>unclass</code>.</p>
+<pre class="r"><code>women2 &lt;- unclass(women)
+attr(women2, which = &quot;class&quot;)</code></pre>
+<pre><code>## NULL</code></pre>
+<p>L’objet <code>women2</code> n’a pas d’attribut <code>class</code>, mais il possède tout de même une classe implicite.</p>
+<pre class="r"><code>class(women2)</code></pre>
+<pre><code>## [1] &quot;list&quot;</code></pre>
+<p>L’objet <code>women2</code> possède la classe implicite <code>&quot;list&quot;</code>. Ce résultat est cohérent avec le fait qu’un data frame est un type particulier de liste.</p>
+<p>Bref, la fonction <code>class</code> fonctionne comme suit. Elle vérifie d’abord si l’objet qu’elle reçoit en entrée possède une classe explicite, soit un attribut nommé <code>&quot;class&quot;</code>. Si c’est le cas, elle retourne cet attribut. Sinon, elle retourne la classe implicite de l’objet.</p>
+<div id="remarque" class="section level4">
+<h4>Remarque</h4>
+<p>Notons que, alors que les listes ont la classe implicite <code>list</code>, les arrays ont la classe implicite <code>array</code>, les matrices ont la classe implicite <code>matrix</code> et les vecteurs ont une classe implicite correspondant au type de données qu’ils contiennent, par exemple :</p>
+<pre class="r"><code>x &lt;- 1:5
+x</code></pre>
+<pre><code>## [1] 1 2 3 4 5</code></pre>
+<pre class="r"><code>class(x)</code></pre>
+<pre><code>## [1] &quot;integer&quot;</code></pre>
+<p>Les facteurs, pour leur part, ont un attribut <code>class</code>, tout comme les data frames.</p>
+<pre class="r"><code>x_factor &lt;- factor(x)
+x_factor</code></pre>
+<pre><code>## [1] 1 2 3 4 5
+## Levels: 1 2 3 4 5</code></pre>
+<pre class="r"><code>attributes(x_factor)</code></pre>
+<pre><code>## $levels
+## [1] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; &quot;5&quot;
+## 
+## $class
+## [1] &quot;factor&quot;</code></pre>
+<pre class="r"><code>class(x_factor)</code></pre>
+<pre><code>## [1] &quot;factor&quot;</code></pre>
+</div>
+</div>
+<div id="situation-particuliere-2-la-methode-nomfonctiongenerique.nomclasse-nexiste-pas" class="section level3">
+<h3>Situation particulière 2 : la méthode <code>nomFonctionGenerique.nomClasse</code> n’existe pas</h3>
+<p>Qu’arrive-t-il si la fonction générique <code>nomFonctionGenerique</code> reçoit comme premier argument en entrée un objet de classe <code>nomClasse</code>, mais que la méthode <code>nomFonctionGenerique.nomClasse</code> n’existe pas ?</p>
+<p>Dans ce cas, R utilise la méthode <code>nomFonctionGenerique.default</code>, si elle existe, sinon il retourne une erreur.</p>
+<p>Par exemple, reprenons l’objet <code>women2</code> de classe implicite <code>&quot;list&quot;</code>. Comment agit la fonction générique <code>print</code> avec cet objet ?</p>
+<pre class="r"><code>print(women2)</code></pre>
+<pre><code>## $height
+##  [1] 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72
+## 
+## $weight
+##  [1] 115 117 120 123 126 129 132 135 139 142 146 150 154 159 164
+## 
+## attr(,&quot;row.names&quot;)
+##  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15</code></pre>
+<p>Lors de l’évaluation de la commande <code>print(women2)</code>, R cherche d’abord à appler la méthode <code>print.list</code>, mais celle-ci n’existe pas.</p>
+<pre class="r"><code>any(methods(print) == &quot;print.list&quot;)</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<p>Il se rabat donc sur la méthode <code>print</code> par défaut et évalue l’appel de fonction suivant :</p>
+<pre class="r"><code>print.default(women2)</code></pre>
+<pre><code>## $height
+##  [1] 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72
+## 
+## $weight
+##  [1] 115 117 120 123 126 129 132 135 139 142 146 150 154 159 164
+## 
+## attr(,&quot;row.names&quot;)
+##  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15</code></pre>
+<p>Cependant, certaines fonctions génériques ne possèdent pas de méthode par défaut. Par exemple, c’est le cas de la fonction générique <code>anova</code>.</p>
+<pre class="r"><code>methods(anova)</code></pre>
+<pre><code>## [1] anova.glm*     anova.glmlist* anova.lm*      anova.lmlist*  anova.loess*  
+## [6] anova.mlm*     anova.nls*    
+## see &#39;?methods&#39; for accessing help and source code</code></pre>
+<p>Si nous donnons en entrée à la fonction <code>anova</code> un objet qui n’est pas de classe <code>glm</code>, <code>glmlist</code>, <code>lm</code>, <code>lmlist</code>, <code>loess</code>, <code>mlm</code> ou <code>nls</code>, une erreur est retournée.</p>
+<pre class="r"><code>anova(women2)</code></pre>
+<pre><code>## Error in UseMethod(&quot;anova&quot;) : 
+##   no applicable method for &#39;anova&#39; applied to an object of class &quot;list&quot;</code></pre>
+<div id="remarque-1" class="section level4">
+<h4>Remarque</h4>
+<p>Notons que la fonction <code>methods</code> permet aussi d’énumérer toutes les fonctions génériques possédant une méthode associée à une classe en particulier, par exemple :</p>
+<pre class="r"><code>methods(class = &quot;lm&quot;)</code></pre>
+<pre><code>##  [1] add1           alias          anova          case.names     coerce        
+##  [6] confint        cooks.distance deviance       dfbeta         dfbetas       
+## [11] drop1          dummy.coef     effects        extractAIC     family        
+## [16] formula        hatvalues      influence      initialize     kappa         
+## [21] labels         logLik         model.frame    model.matrix   nobs          
+## [26] plot           predict        print          proj           qr            
+## [31] residuals      rstandard      rstudent       show           simulate      
+## [36] slotsFromS3    summary        variable.names vcov          
+## see &#39;?methods&#39; for accessing help and source code</code></pre>
+</div>
+</div>
+<div id="situation-particuliere-3-class-retourne-plus-dune-classe" class="section level3">
+<h3>Situation particulière 3 : <code>class</code> retourne plus d’une classe</h3>
+<p>Les objets R peuvent posséder plus d’une classe. Par exemple, les objets R retournés par la fonction <code>aov</code> ont deux classes : <code>aov</code> et <code>lm</code>.</p>
+<pre class="r"><code>model &lt;- aov(Sepal.Length ~ Species, data = iris)
+class(model)</code></pre>
+<pre><code>## [1] &quot;aov&quot; &quot;lm&quot;</code></pre>
+<p>Qu’arrive-t-il lorsque <code>class</code> retourne plus d’une classe ?</p>
+<p>Si un objet possédant plus d’une classe est fourni en entrée à une fonction générique, R cherche d’abord à utiliser la méthode associée à la première classe de la liste. Si celle-ci n’existe pas, R utilise la méthode associée à le seconde classe. Si celle-ci n’existe pas, R continue à parcourir le vecteur des noms de classe jusqu’à ce qu’il trouve une méthode pour une classe. S’il n’existe de méthode pour aucune classe de la liste, c’est la méthode par défaut qui est employée. Et, comme nous venons de le voir, s’il n’y a même pas de méthode par défaut, alors une erreur est générée.</p>
+</div>
+<div id="situation-particuliere-4-la-fonction-generique-possede-plus-dun-argument" class="section level3">
+<h3>Situation particulière 4 : la fonction générique possède plus d’un argument</h3>
+<p>Certaines fonctions génériques, telle que la fonction <code>plot</code>, possède plus d’un argument.</p>
+<pre class="r"><code>plot</code></pre>
+<pre><code>## function (x, y, ...) 
+## UseMethod(&quot;plot&quot;)
+## &lt;bytecode: 0x00000000143a3a88&gt;
+## &lt;environment: namespace:graphics&gt;</code></pre>
+<p>Quel impact ont ces autres arguments sur le choix de la méthode à utilisée ?</p>
+<p>Ils n’ont aucun impact sur le choix de la méthode. Cette méthode peut cependant utiliser ces autres arguments pour déterminer ce qu’elle va faire. Par exemple, le corps de la méthode <code>plot.factor</code> contient une série de <code>if</code> .. <code>else</code> qui servent à sélectionner la fonction graphique à appeler en fonction des caractéristiques de l’objet assigné au deuxième argument, soit <code>y</code>.</p>
+<pre class="r"><code>graphics:::plot.factor</code></pre>
+<pre><code>## function (x, y, legend.text = NULL, ...) 
+## {
+##     if (missing(y) || is.factor(y)) {
+##         dargs &lt;- list(...)
+##         axisnames &lt;- if (!is.null(dargs$axes)) 
+##             dargs$axes
+##         else if (!is.null(dargs$xaxt)) 
+##             dargs$xaxt != &quot;n&quot;
+##         else TRUE
+##     }
+##     if (missing(y)) {
+##         barplot(table(x), axisnames = axisnames, ...)
+##     }
+##     else if (is.factor(y)) {
+##         if (is.null(legend.text)) 
+##             spineplot(x, y, ...)
+##         else {
+##             args &lt;- c(list(x = x, y = y), list(...))
+##             args$yaxlabels &lt;- legend.text
+##             do.call(&quot;spineplot&quot;, args)
+##         }
+##     }
+##     else if (is.numeric(y)) 
+##         boxplot(y ~ x, ...)
+##     else NextMethod(&quot;plot&quot;)
+## }
+## &lt;bytecode: 0x000000001abc67e8&gt;
+## &lt;environment: namespace:graphics&gt;</code></pre>
+</div>
+</div>
+<div id="creation-de-classes-et-de-methodes-de-type-s3" class="section level2">
+<h2>Création de classes et de méthodes de type S3</h2>
+<p>Il est facile de créer de nouvelles méthodes pour des fonctions génériques existantes, telles que <code>print</code>, <code>plot</code> et <code>summary</code>. Par exemple, supposons que nous voulons modifier l’affichage de l’objet suivant.</p>
+<pre class="r"><code>valeurs_aleatoires &lt;- rnorm(5)
+print(valeurs_aleatoires)</code></pre>
+<pre><code>## [1]  0.42122780 -0.09274178 -1.45746937 -1.31128051 -0.61076493</code></pre>
+<p>Cet objet a la classe implicite suivante.</p>
+<pre class="r"><code>class(valeurs_aleatoires)</code></pre>
+<pre><code>## [1] &quot;numeric&quot;</code></pre>
+<p>Est-ce qu’une méthode de la fonction générique <code>print</code> existe pour cette classe ?</p>
+<pre class="r"><code>methods(class = &quot;numeric&quot;)</code></pre>
+<pre><code>## [1] all.equal     as.data.frame as.Date       as.POSIXct    as.POSIXlt   
+## [6] as.raster     coerce        Ops          
+## see &#39;?methods&#39; for accessing help and source code</code></pre>
+<p>Non. Ainsi, l’affichage produit par la commande <code>print(valeurs_aleatoires)</code> provient d’un appel à la méthode <code>print.default</code>.</p>
+<p>Pour modifier l’affichage de l’objet <code>valeurs_aleatoires</code>, nous pourrions créer une méthode <code>print</code> pour la classe <code>&quot;numeric&quot;</code>. Cette façon de faire fonctionnerait, mais est-ce une bonne idée ?</p>
+<p>Non. Procéder de cette façon aurait un désavantage majeur : l’affichage de tous les objets de classe <code>&quot;numeric&quot;</code> serait modifié. Nous ne souhaitons pas changer le comportement général de R avec les objets de classe <code>&quot;numeric&quot;</code>. Nous souhaitons changer l’affichage d’un seul objet : <code>valeurs_aleatoires</code>.</p>
+<p>Il est donc préférable d’assigner une toute nouvelle classe à l’objet <code>valeurs_aleatoires</code>, puis d’écrire une méthode <code>print</code> pour cette classe.</p>
+<div id="assignation-dune-nouvelle-classe-a-un-objet" class="section level3">
+<h3>Assignation d’une nouvelle classe à un objet</h3>
+<p>Pour assigner une classe à un objet R, il suffit de l’encadrer d’un appel à la fonction <code>class</code>, suivi d’un opérateur d’assignation et du nom de la classe sous forme de chaîne de caractère. Un nom de classe ne doit pas comporter d’espaces. Voici un exemple avec l’objet <code>valeurs_aleatoires</code>.</p>
+<pre class="r"><code>class(valeurs_aleatoires) &lt;- &quot;mon_vecteur&quot;
+print(valeurs_aleatoires)</code></pre>
+<pre><code>## [1]  0.42122780 -0.09274178 -1.45746937 -1.31128051 -0.61076493
+## attr(,&quot;class&quot;)
+## [1] &quot;mon_vecteur&quot;</code></pre>
+</div>
+<div id="conception-de-la-methode-pour-la-nouvelle-classe" class="section level3">
+<h3>Conception de la méthode pour la nouvelle classe</h3>
+<p>Les méthodes sont des fonctions. Alors créer une méthode signifie simplement créer une fonction. C’est le nom d’une fonction qui détermine si elle est une simple fonction ou une méthode associée à une fonction générique.</p>
+<p>Une fonction dont le nom est de la forme <code>nomFonctionGenerique.nomClasse</code> est une méthode associée à la fonction générique nommée <code>nomFonctionGenerique</code>, pour la classe nommée <code>nomClasse</code>. Il faut évidemment que <code>nomFonctionGenerique</code> soit le nom d’une fonction générique. La fonction <code>data.frame</code> n’est pas une méthode associée à la fonction générique <code>data</code> pour la classe <code>frame</code>. Alors la simple présence d’un point dans le nom d’une fonction n’implique pas nécessairement qu’il s’agisse d’une méthode de type S3.</p>
+<p>Une méthode comporte typiquement les arguments suivants :</p>
+<ul>
+<li>même premier argument que la fonction générique (portant idéalement le même nom)</li>
+<li>autres arguments de la fonction générique, au besoin;</li>
+<li>arguments supplémentaires, au besoin;</li>
+<li>l’argument <code>...</code> (même s’il n’est pas utilisé).</li>
+</ul>
+<p>Il est important que le premier argument de la méthode concorde avec le premier argument de la fonction générique, car lorsque la fonction générique appelera la méthode, elle assignera comme valeur à son premier argument ce qu’elle a reçu comme valeur pour son propre premier argument.</p>
+<p>L’ordre des autres arguments n’est cependant pas tellement important. Par exemple, la fonction générique <code>aggregate</code> possède 2 arguments : <code>x</code> et <code>...</code> :</p>
+<pre class="r"><code>aggregate</code></pre>
+<pre><code>## function (x, ...) 
+## UseMethod(&quot;aggregate&quot;)
+## &lt;bytecode: 0x00000000138183d0&gt;
+## &lt;environment: namespace:stats&gt;</code></pre>
+<p>Il existe 4 méthodes pour cette fonction générique dans l’installation de base de R :</p>
+<pre class="r"><code>methods(aggregate)</code></pre>
+<pre><code>## [1] aggregate.data.frame aggregate.default*   aggregate.formula*   aggregate.ts        
+## see &#39;?methods&#39; for accessing help and source code</code></pre>
+<p>Ces méthodes possèdent les arguments suivants :</p>
+<pre class="r"><code>args(aggregate.data.frame)</code></pre>
+<pre><code>## function (x, by, FUN, ..., simplify = TRUE, drop = TRUE) 
+## NULL</code></pre>
+<pre class="r"><code>args(getS3method(&quot;aggregate&quot;, &quot;default&quot;))</code></pre>
+<pre><code>## function (x, ...) 
+## NULL</code></pre>
+<pre class="r"><code>args(getS3method(&quot;aggregate&quot;, &quot;formula&quot;))</code></pre>
+<pre><code>## function (formula, data, FUN, ..., subset, na.action = na.omit) 
+## NULL</code></pre>
+<pre class="r"><code>args(aggregate.ts)</code></pre>
+<pre><code>## function (x, nfrequency = 1, FUN = sum, ndeltat = 1, ts.eps = getOption(&quot;ts.eps&quot;), 
+##     ...) 
+## NULL</code></pre>
+<p>L’argument <code>...</code> est toujours présent, mais il n’est pas toujours placé en dernier. La méthode <code>aggregate.formula</code> ne possède pas d’arguments supplémentaires, contrairement aux autes méthodes. De plus, une de ces méthodes (<code>aggregate.formula</code>) ne possède même pas d’argument nommé <code>x</code>.</p>
+
+<div id="exemple-avec-la-methode-generique-print" class="section level4">
+<h4>Exemple avec la méthode générique <code>print</code></h4>
+<p>Créons une méthode <code>print</code> pour la classe <code>mon_vecteur</code>.</p>
+<pre class="r"><code>print.mon_vecteur &lt;- function(x, ..., intro = TRUE){
+  if (intro) {
+    cat(&quot;Voici le vecteur :\n&quot;)
+  }
+  print(unclass(x), ...)
+  invisible(x)
+}</code></pre>
+<p>Voyons l’affichage produit par notre nouvelle méthode.</p>
+<pre class="r"><code>print(valeurs_aleatoires)</code></pre>
+<pre><code>## Voici le vecteur :
+## [1]  0.42122780 -0.09274178 -1.45746937 -1.31128051 -0.61076493</code></pre>
+<pre class="r"><code>print(valeurs_aleatoires, intro = FALSE)</code></pre>
+<pre><code>## [1]  0.42122780 -0.09274178 -1.45746937 -1.31128051 -0.61076493</code></pre>
+<div id="utilite-de-lappel-a-la-fonction-unclass" class="section level5">
+<h5>Utilité de l’appel à la fonction <code>unclass</code></h5>
+<p>Vous remarquerez que le corps de la méthode <code>print.mon_vecteur</code> comporte un appel à la fonction <code>unclass</code> dans l’instruction <code>print(unclass(x), ...)</code>. L’appel à <code>unclass</code> est important. Sans lui, une boucle sans fin serait exécutée lors de l’appel de la fonction <code>print</code> en lui donnant un objet de classe <code>mon_vecteur</code> en entrée : la fonction générique <code>print</code> appelerait la méthode <code>print.mon_vecteur</code>, qui appellerait la fonction générique <code>print</code>, qui appelerait la méthode <code>print.mon_vecteur</code> et ainsi de suite.</p>
+<p>L’appel à la fonction <code>unclass</code> dans <code>print(unclass(x), ...)</code> permet de fournir en entrée à <code>print</code> l’objet <code>x</code> sans sont attribut <code>&quot;class&quot;</code>. Ainsi, <code>print</code> appelera le méthode correspondant à la classe implicite de <code>x</code>.</p>
+</div>
+<div id="impact-du-positionnement-de-largument-..." class="section level5">
+<h5>Impact du positionnement de l’argument <code>...</code></h5>
+<p>Dans cet exemple, nous avons placé l’argument <code>...</code> avant les arguments supplémentaires dans la déclaration de la méthode. Dans le corps de la fonction, nous avons passé l’argument <code>...</code> à un appel à la fonction <code>print</code>. En conséquence, si nous appelons <code>print.mon_vecteur</code> (via <code>print</code> ou non) en passant une deuxième valeur sans l’assigner à un nom d’argument, cette valeur sera automatiquement assignée au deuxième argument de la méthode <code>print</code> appelée et non à l’argument <code>intro</code> de la méthode <code>print.mon_vecteur</code>.</p>
+<p>Voici un exemple.</p>
+<pre class="r"><code>print(valeurs_aleatoires, FALSE)</code></pre>
+<pre><code>## Voici le vecteur :
+## [1]  0 -0 -1 -1 -1</code></pre>
+<p>Ici, <code>print</code> appelle sa méthode <code>print.mon_vecteur</code>, qui appelle de nouveau la méthode <code>print</code>, qui chsoisit d’appeler sa méthode <code>print.default</code> (car <code>class(unclass(valeurs_aleatoires)) == &quot;numeric&quot;</code>). Le deuxième argument de <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/print.default.html"><code>print.default</code></a> est <code>digits</code>. Il reçoit la valeur <code>FALSE</code>, qui est alors transformée la valeur numérique 0, et les nombre affichés sont arrondis à l’unité près.</p>
+</div>
+<div id="utilite-de-lappel-a-la-fonction-invisible" class="section level5">
+<h5>Utilité de l’appel à la fonction invisible</h5>
+<p>Il est courant pour une méthode <code>print</code> de terminer par la commande <code>invisible(x)</code>. La fonction <code>invisible</code> provoque le retour d’une valeur par la fonction, tout comme la fonction <code>return</code>. Cependant, contrairement à <code>return</code>, <code>invisible</code> ne provoque pas un affichage lorsque l’appel de la fonction n’est pas assigné à un nom, évitant ainsi un affichage double suite à une commande comme la suivante :</p>
+<pre class="r"><code>sortie &lt;- print(valeurs_aleatoires)</code></pre>
+<pre><code>## Voici le vecteur :
+## [1]  0.42122780 -0.09274178 -1.45746937 -1.31128051 -0.61076493</code></pre>
+</div>
+</div>
+<div id="exemple-avec-la-methode-generique-plot" class="section level4">
+<h4>Exemple avec la méthode générique <code>plot</code></h4>
+<p>Tentons maintenant de créer une méthode <code>plot</code> pour un objet de la classe <code>mon_vecteur</code>. La fonction générique <code>plot</code> a deux arguments, mais notre méthode reprendra uniquement son premier argument, auquel un argument supplémentaire sera ajouté. Elle générera un histogramme.</p>
+<pre class="r"><code>plot.mon_vecteur &lt;- function(x, main = &quot;Nouveau vecteur&quot;, ...){
+  hist(x, main = main)
+}</code></pre>
+<p>Nous avons maintenant défini deux méthodes pour la classe <code>mon_vecteur</code>.</p>
+<pre class="r"><code>methods(class = &quot;mon_vecteur&quot;)</code></pre>
+<pre><code>## [1] plot  print
+## see &#39;?methods&#39; for accessing help and source code</code></pre>
+<p>La méthode pour la fonction générique <code>plot</code> produit le résultat suivant.</p>
+<pre class="r"><code>plot(valeurs_aleatoires)</code></pre>
+<p><img src="/programmation/oop_r_2019_files/figure-html/unnamed-chunk-39-1.png" width="65%" style="display: block; margin: auto;" /></p>
+<p>Si <code>valeurs_aleatoires</code> n’était pas de classe <code>mon_vecteur</code>, nous obtiendrions plutôt ce graphique.</p>
+<pre class="r"><code>valeurs_aleatoires &lt;- unclass(valeurs_aleatoires)
+plot(valeurs_aleatoires)</code></pre>
+<p><img src="/programmation/oop_r_2019_files/figure-html/unnamed-chunk-40-1.png" width="65%" style="display: block; margin: auto;" /></p>
+<p>Cet exemple illustre le fait qu’une méthode ne doit pas obligatoirement reprendre tous les arguments de la fonction générique associée.</p>
+</div>
+</div>
+<div id="methode-print-pour-formater-laffichage-des-sorties-de-nos-fonctions" class="section level3">
+<h3>Méthode <code>print</code> pour formater l’affichage des sorties de nos fonctions</h3>
+<p>Il est souvent utile de créer des méthodes <code>print</code> pour formater l’affichage des sorties de nos fonctions. Pour ce faire, il suffit de compléter les deux étapes suivantes.</p>
+<ol style="list-style-type: decimal">
+<li>D’abord, dans le corps de la fonction, il <strong>faut attribuer une nouvelle classe</strong>, avec la fonction <code>class</code>, à l’objet retourné en sortie.</li>
+</ol>
+<p>Il est pratique courante en R d’utiliser comme nom de la classe de l’objet retourné en sortie d’une fonction le nom de la fonction. C’est que ce fait par exemple la fonction <code>lm</code>. Ce n’est cependant pas obligatoire de reprendre le nom de la fonction. Le nom de la classe peut être quelconque, pourvu qu’il ne soit pas déjà utilisé par d’autres fonctions dans un package chargé afin d’éviter de modifier l’affichage d’autres objets.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Il faut ensuite créer une fonction nommée : <code>print.nomClasse</code>.</li>
+</ol>
+<p>Pour illustrer ces étapes, créons une méthode <code>print</code> pour un objet retourné par la fonction <code>statDesc</code> créée dans le notes de cours sur les <a href="https://stt4230.rbind.io/programmation/fonctions_r">fonctions</a>. Tout d’abord, attribuons une nouvelle classe à la sortie de <code>statDesc</code>.</p>
+<pre class="r"><code>statDesc &lt;- function (x, formatSortie = c(&quot;vecteur&quot;, &quot;matrice&quot;, &quot;liste&quot;), ...) {
+  # Calcul
+  if (is.numeric(x)) {
+    stats &lt;- c(min = min(x, ...), moy = mean(x, ...), max = max(x, ...))
+  } else if (is.character(x) || is.factor(x)) {
+    stats &lt;- table(x)
+  } else {
+    stats &lt;- NA
+  }
+  # Production de la sortie
+  formatSortie &lt;- match.arg(formatSortie)
+  if (formatSortie == &quot;matrice&quot;){
+    stats &lt;- as.matrix(stats)
+    colnames(stats) &lt;- if (is.character(x) || is.factor(x)) &quot;frequence&quot; else &quot;stat&quot;
+  } else if (formatSortie == &quot;liste&quot;) {
+    stats &lt;- as.list(stats)
+  }
+  out &lt;- list(stats = stats)
+  class(out) &lt;- &quot;statDesc&quot;
+  out
+}</code></pre>
+<p>Dans cet exemple, en plus de l’instruction <code>class(out) &lt;- &quot;statDesc&quot;</code> ajoutée pour attribuer une classe à la sortie de la fonction, l’objet retourné en sortie a été formaté en liste contenant tout ce qu’il y a à retourner (ici un seul objet). Il n’est pas obligatoire qu’une sortie de fonction qui possède une classe soit une liste, mais c’est une pratique très courante.</p>
+<p>Notons que les instructions</p>
+<pre class="r"><code>  out &lt;- list(stats = stats)
+  class(out) &lt;- &quot;statDesc&quot;
+  out</code></pre>
+<p>auraient pu être remplacées par</p>
+<pre class="r"><code>  structure(list(stats = stats),  class = &quot;statDesc&quot;)</code></pre>
+<p>Maintenant, écrivons le code de notre nouvelle méthode <code>print</code>, pour un objet de classe <code>statDesc</code>.</p>
+<pre class="r"><code>print.statDesc &lt;- function(x, ...){
+  cat(&quot;Statistiques descriptives :\n&quot;)
+  print(x$stats, ...)
+  invisible(x)
+}</code></pre>
+<p>Si la méthode <code>print.statDesc</code> est appelée par <code>print</code>, c’est que l’objet donné comme premier argument à <code>print</code> est assurément de classe <code>statDesc</code>. Ainsi, dans le corps de la méthode <code>print.statDesc</code>, nous pouvons exploiter les caractéristiques des objets de cette classe. Nous savons qu’un objet de cette classe est une liste comportant un élément nommé <code>stats</code>. L’instruction <code>print(x$stats, ...)</code> exploite cette caractéristique.</p>
+<p>Mais pourquoi cette instruction ne comporte-t-elle pas d’appel à la fonction <code>unclass</code> comme dans le corps de la méthode <code>print.mon_vecteur</code> ? Cette instruction ne provoquera-t-elle pas un appel en boucle à la méthode <code>print.statDesc</code> ?</p>
+<p>Non, parce que dans le corps de la méthode <code>print.statDesc</code> l’objet <code>x</code> possède la classe <code>print.statDesc</code>, mais pas le sous-objet <code>stats</code> dans <code>x</code>.</p>
+<p>Pour une fonction qui retourne une très longue liste, attribuer une classe à sa sortie et écrire une méthode <code>print</code> pour cette classe permet d’éviter l’affichage dans la console de la liste entière retournée en sortie.</p>
+<p>Voici un exemple d’affichage produit par la méthode <code>print.statDesc</code>.</p>
+<pre class="r"><code>statDesc(x = iris$Species, formatSortie = &quot;matrice&quot;)</code></pre>
+<pre><code>## Statistiques descriptives :
+##            frequence
+## setosa            50
+## versicolor        50
+## virginica         50</code></pre>
+
+</div>
+</div>
+</div>
+<div id="systeme-s4" class="section level1">
+<h1>Système S4</h1>
+<div id="manipulation-dobjets-dont-la-classe-est-de-type-s4" class="section level2">
+<h2>Manipulation d’objets dont la classe est de type S4</h2>
+<p>Même si nous n’illustrons pas ici comment créer des classes de type S4, il est bon de savoir comment utiliser ce type de classes qui est assez courant, particulièrement dans les packages distribués sur <a href="http://www.bioconductor.org/">Bioconductor</a>. Ces classes sont utilisables en R grâce au package <code>methods</code>, inclus dans l’installation de base.</p>
+<p>Pour illustrer les classes de type S4, installons le package <code>sp</code>, qui exploite ce type de classe.</p>
+<pre class="r"><code>install.packages(&quot;sp&quot;)</code></pre>
+<p>Voici un exemple d’utilisation d’une fonction de ce package, tiré d’une fiche d’aide du package.</p>
+<pre class="r"><code>library(sp)
+x = c(1,2,3,4,5)
+y = c(3,2,5,1,4)
+S &lt;- SpatialPoints(cbind(x,y))
+S</code></pre>
+<pre><code>## SpatialPoints:
+##      x y
+## [1,] 1 3
+## [2,] 2 2
+## [3,] 3 5
+## [4,] 4 1
+## [5,] 5 4
+## Coordinate Reference System (CRS) arguments: NA</code></pre>
+<pre class="r"><code>str(S)</code></pre>
+<pre><code>## Formal class &#39;SpatialPoints&#39; [package &quot;sp&quot;] with 3 slots
+##   ..@ coords     : num [1:5, 1:2] 1 2 3 4 5 3 2 5 1 4
+##   .. ..- attr(*, &quot;dimnames&quot;)=List of 2
+##   .. .. ..$ : NULL
+##   .. .. ..$ : chr [1:2] &quot;x&quot; &quot;y&quot;
+##   ..@ bbox       : num [1:2, 1:2] 1 1 5 5
+##   .. ..- attr(*, &quot;dimnames&quot;)=List of 2
+##   .. .. ..$ : chr [1:2] &quot;x&quot; &quot;y&quot;
+##   .. .. ..$ : chr [1:2] &quot;min&quot; &quot;max&quot;
+##   ..@ proj4string:Formal class &#39;CRS&#39; [package &quot;sp&quot;] with 1 slot
+##   .. .. ..@ projargs: chr NA</code></pre>
+<p>L’objet retourné par la fonction <code>SpatialPoints</code> n’est pas une liste. C’est un objet appartenant à une classe de type S4, définie dans le package <code>sp</code>.</p>
+<pre class="r"><code>isS4(S)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>class(S)</code></pre>
+<pre><code>## [1] &quot;SpatialPoints&quot;
+## attr(,&quot;package&quot;)
+## [1] &quot;sp&quot;</code></pre>
+<p>Pour atteindre les éléments dans l’objet, il est possible d’utiliser une méthode conçue à cet effet. Par exemple, la fiche d’aide ouverte par la commande <code>help(&quot;SpatialPoints-class&quot;)</code> nous informe qu’une méthode <code>coordinates</code> est définie pour les objets de la classe <code>&quot;SpatialPoints&quot;</code>. Nous pouvons aussi énumérer toutes les fonction génériques possédant une méthode définie pour une certaine classe de type S4 avec la fonctions <code>methods</code> comme suit.</p>
+<pre class="r"><code>methods(class = &quot;SpatialPoints&quot;)</code></pre>
+<pre><code>##  [1] $             $&lt;-           [             [[            [[&lt;-          [&lt;-          
+##  [7] addAttrToGeom as.data.frame bbox          coerce        coordinates   coordinates&lt;-
+## [13] coordnames    coordnames&lt;-  dimensions    fullgrid      geometry      geometry&lt;-   
+## [19] gridded       gridded&lt;-     is.projected  length        merge         over         
+## [25] plot          points        polygons      print         proj4string   proj4string&lt;-
+## [31] rbind         row.names     row.names&lt;-   show          spChFIDs&lt;-    split        
+## [37] sppanel       spsample      spTransform   summary      
+## see &#39;?methods&#39; for accessing help and source code</code></pre>
+<p>En fait, des méthodes de types S3 et S4 peuvent être définies pour des objets dont la classe est de type S4. La fonction <code>methods</code> retourne les méthodes des deux types. Pour se limiter à un seul type, il faut utiliser les fonctions <code>.S3methods</code> et <code>.S4methods</code>.</p>
+<pre class="r"><code>.S3methods(class = &quot;SpatialPoints&quot;)</code></pre>
+<pre><code>## [1] as.data.frame length        points        print         rbind         row.names    
+## [7] row.names&lt;-   split        
+## see &#39;?methods&#39; for accessing help and source code</code></pre>
+<pre class="r"><code>.S4methods(class = &quot;SpatialPoints&quot;)</code></pre>
+<pre><code>##  [1] $             $&lt;-           [             [[            [[&lt;-          [&lt;-          
+##  [7] addAttrToGeom bbox          coerce        coordinates   coordinates&lt;- coordnames   
+## [13] coordnames&lt;-  dimensions    fullgrid      geometry      geometry&lt;-    gridded      
+## [19] gridded&lt;-     is.projected  merge         over          plot          polygons     
+## [25] proj4string   proj4string&lt;- show          spChFIDs&lt;-    sppanel       spsample     
+## [31] spTransform   summary      
+## see &#39;?methods&#39; for accessing help and source code</code></pre>
+<p>Une fonction générique dans le système S4 n’a pas la même allure que dans le système S3.</p>
+<pre class="r"><code>coordinates</code></pre>
+<pre><code>## standardGeneric for &quot;coordinates&quot; defined from package &quot;sp&quot;
+## 
+## function (obj, ...) 
+## standardGeneric(&quot;coordinates&quot;)
+## &lt;bytecode: 0x0000000019955f48&gt;
+## &lt;environment: 0x000000001991d920&gt;
+## Methods may be defined for arguments: obj
+## Use  showMethods(&quot;coordinates&quot;)  for currently available ones.</code></pre>
+<p>La méthode <code>coordinates</code> pour un objet de classe <code>&quot;SpatialPoints&quot;</code> extrait l’élément de l’objet <code>S</code> nommé <code>coords</code>.</p>
+<pre class="r"><code>coordinates(S)</code></pre>
+<pre><code>##      x y
+## [1,] 1 3
+## [2,] 2 2
+## [3,] 3 5
+## [4,] 4 1
+## [5,] 5 4</code></pre>
+<p>Nous pouvons accéder à la définition de cette méthode grâce à la fonction <code>getMethod</code> comme suit.</p>
+<pre class="r"><code>getMethod(coordinates, signature = &quot;SpatialPoints&quot;)</code></pre>
+<pre><code>## Method Definition:
+## 
+## function (obj, ...) 
+## {
+##     .local &lt;- function (obj) 
+##     obj@coords
+##     .local(obj, ...)
+## }
+## &lt;bytecode: 0x000000001995e5e8&gt;
+## &lt;environment: namespace:sp&gt;
+## 
+## Signatures:
+##         obj            
+## target  &quot;SpatialPoints&quot;
+## defined &quot;SpatialPoints&quot;</code></pre>
+<p>Cette définition n’est pas aussi simple que celle d’une méthode de type S3. Je ne vais pas l’approfondir ici.</p>
+<p>Pour extraire des éléments d’un objet dont la classe est de type S4, il est aussi possible d’utiliser l’opérateur <code>@</code> (et non <code>$</code> puisqu’il ne s’agit pas d’une liste).</p>
+<pre class="r"><code>S@coords</code></pre>
+<pre><code>##      x y
+## [1,] 1 3
+## [2,] 2 2
+## [3,] 3 5
+## [4,] 4 1
+## [5,] 5 4</code></pre>
+<p>ou encore la fonction <code>slot</code>.</p>
+<pre class="r"><code>slot(S, &quot;coords&quot;)</code></pre>
+<pre><code>##      x y
+## [1,] 1 3
+## [2,] 2 2
+## [3,] 3 5
+## [4,] 4 1
+## [5,] 5 4</code></pre>
+<p>Ainsi, utiliser des classes de type S4 est simple. Il suffit de d’abord bien identifier que nous manipulons un objet dont la classe est de type S4. La mention <code>Formal class</code> dans la sortie de <code>str</code> nous l’indique. La fonction <code>isS4</code> peut aussi nous le confirmer. Ensuite, nous pouvons manipuler l’objet avec les fonctions génériques possédant des méthodes pour sa classe et nous pouvons extraire des éléments de l’objet avec l’opérateur <code>@</code> ou la fonction <code>slot</code>.</p>
+<p>Notons qu’un des intérêts du package <code>sp</code> est la production facilitée de graphiques représentant des données spatiales, par exemple des coordonnées géographiques, en s’assurant d’utiliser des axes sur la même échelle.</p>
+<pre class="r"><code>plot(S, main = &quot;Axes sur la même échelle&quot;, axes=TRUE)</code></pre>
+<p><img src="/programmation/oop_r_2019_files/figure-html/unnamed-chunk-56-1.png" width="65%" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot(x, y, main = &quot;Axes non contrôlés&quot;)</code></pre>
+<p><img src="/programmation/oop_r_2019_files/figure-html/unnamed-chunk-56-2.png" width="65%" style="display: block; margin: auto;" /></p>
+<hr />
+
+</div>
+</div>
+<div id="synthese" class="section level1">
+<h1>Synthèse</h1>
+<div id="systemes-de-programmation-orientee-objet-en-r" class="section level4">
+<h4>Systèmes de programmation orientée objet en R :</h4>
+<p><span class="math inline">\(\bullet\)</span> <strong>S3</strong> : le plus ancien, le moins formel, mais encore le plus utilisé.</p>
+<p><span class="math inline">\(\bullet\)</span> <strong>S4</strong> : semblable au S3, mais plus formel; la norme sur Bioconductor</p>
+<p>Les systèmes S3 et S4 se basent tous deux sur :</p>
+<ul>
+<li>des classes attribuées aux objets,</li>
+<li>des fonctions génériques (ex. <code>print</code>, <code>plot</code>, <code>summary</code>, etc.),</li>
+<li>des méthodes = différentes versions d’une fonction générique, associées à des classes spécifiques.
+<ul>
+<li>la fonction <code>methods</code> retourne les noms des :
+<ul>
+<li>méthodes existantes pour une fonction générique donnée ou</li>
+<li>fonctions génériques possédant une méthode pour une classe donnée.</li>
+</ul></li>
+</ul></li>
+</ul>
+<p><span class="math inline">\(\bullet\)</span> <strong>Autres</strong> : <strong>RC</strong> (Reference Classes ou R5), <strong>R6</strong>, etc.<br />
+<span class="math inline">\(\rightarrow\)</span> pas encore beaucoup utilisé, pas couvert dans le cours.</p>
+</div>
+<div id="fonctionnement-du-systeme-s3-1" class="section level4">
+<h4>Fonctionnement du système S3</h4>
+<ul>
+<li>fonction générique de type S3 : appelle la fonction <code>UseMethod</code></li>
+<li>méthode de type S3 = fonction dont le nom a la forme <code>nomFonctionGenerique.nomClasse</code></li>
+</ul>
+<p>C’est la valeur retournée par la fonction <code>class</code> sur l’objet fourni comme premier argument en entrée à une fonction générique qui détermine quelle méthode est utilisée.</p>
+<ul>
+<li><code>class</code> retourne l’attribut <code>class</code> d’un objet, s’il existe (<em>il peut être de longueur supérieure à 1</em>).</li>
+<li>Sinon <code>class</code> retourne la classe implicite de l’objet (ex. <code>&quot;list&quot;</code>, <code>&quot;matrix&quot;</code>, <code>&quot;numeric&quot;</code> <code>&quot;character&quot;</code>).</li>
+<li>La méthode utilisée est celle associée à la première classe, sinon la deuxième, etc.</li>
+<li>Si aucune méthode n’existe pour les classes de l’objet :
+<ul>
+<li>la méthode par défaut est utilisée, si elle existe;</li>
+<li>sinon une erreur est retournée.</li>
+</ul></li>
+</ul>
+</div>
+<div id="creation-de-classes-et-de-methodes-de-type-s3-1" class="section level4">
+<h4>Création de classes et de méthodes de type S3</h4>
+<p><strong>Création de classe de type S3</strong> = ajout d’un attribut <code>class</code> à un objet</p>
+<pre class="r"><code>class(objet) &lt;- &quot;nomClasse&quot;</code></pre>
+<p>Pratique courante = attribuer une classe à l’objet retourné par une de nos fonctions (permet notamment de contrôler l’affichage de la sortie grâce à une méthode <code>print</code>).</p>
+<p><strong>Création de méthode de type S3</strong> = création de fonctions avec bon nom</p>
+<pre class="r"><code>nomFonctionGenerique.nomClasse &lt;- function(x, ...){
+  # corps de la méthode
+}</code></pre>
+<p>où <code>nomClasse</code> peut être une classe existante ou une nouvelle classe.</p>
+</div>
+<div id="manipulation-dobjets-dont-la-classe-est-de-type-s4-1" class="section level4">
+<h4>Manipulation d’objets dont la classe est de type S4</h4>
+<ul>
+<li>Caractéristiques des <strong>objets possédant une classe de type S4</strong> :
+<ul>
+<li>possèdent un attribut <code>class</code>;</li>
+<li><code>isS4(objet)</code> retourne <code>TRUE</code>;</li>
+<li>la sortie de <code>str(objet)</code> contient « <code>Formal class</code> »;</li>
+<li>contiennent des éléments (<em>slots</em>) qui peuvent être extrait :
+<ul>
+<li>avec des méthodes conçues à cet effet,</li>
+<li>avec l’opérateur <code>@</code>,</li>
+<li>avec la fonction <code>slot</code>.</li>
+</ul></li>
+</ul></li>
+<li>Caractéristiques des <strong>fonctions génériques de type S4</strong> :
+<ul>
+<li>appellent la fonction <code>standardGeneric</code></li>
+</ul></li>
+<li>Caractéristiques des <strong>méthodes de type S4</strong> :
+<ul>
+<li>code source affiché avec <code>getMethod(nomFonctionGenerique, signature = &quot;nomClasse&quot;)</code></li>
+<li>l’affichage code source contient « <code>Method Definition</code> ».</li>
+</ul></li>
+</ul>
+<hr />
+</div>
+</div>
+<div id="references" class="section level1">
+<h1>Références</h1>
+<ul>
+<li>Matloff, N. (2011). <em>The Art of R Programming : A Tour of Statistical Software Design</em>. No Starch Press, chapitre 9.</li>
+<li>Wickham, H. (2014). Advanced R. CRC Press. URL de la deuxième édition en développement : <a href="https://adv-r.hadley.nz/oo.html" class="uri">https://adv-r.hadley.nz/oo.html</a></li>
+</ul>
+</div>
