@@ -1,10 +1,10 @@
 ---
 title: "Tests et exceptions en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2018-03-19"
+date: "2019-03-15"
 weight: 5
 slug: "tests_exceptions_r"
-categories: ["cours_2018-03-27"]
+categories: ["cours_2019-03-26"]
 categories_weight: 2
 lastmodifierdisplayname : "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
@@ -21,6 +21,7 @@ header-includes:
 editor_options: 
   chunk_output_type: console
 ---
+
 ***
 
 
@@ -28,7 +29,7 @@ editor_options:
 
 ## Démarche de travail recommandée
 
-Voici une bonne démarche de travail lors du développement d'une fonction R
+Les [étapes de développement de fonction conseillées dans les notes sur les fonctions R](https://stt4230.rbind.io/programmation/fonctions_r/#etapes-de-developpement-conseillees) peuvent être complétées comme suit :
 
 1. **Planifier** le travail (pas de programmation encore) :
     + définir clairement la tâche à accomplir par la fonction et la sortie qu'elle doit produire,
@@ -76,14 +77,6 @@ abs(pt1[1] - pt2[1]) + abs(pt1[2] - pt2[2])
 
 # Il faudrait que ça fonctionne peu importe la dimension de l'espace dans lequel mes 
 # points sont représentés (donc peu importe la longueur des vecteurs pt1 et pt2)
-distance <- 0
-for (i in 1:length(pt1)) {
-  distance <- distance + abs(pt1[i] - pt2[i])
-}
-distance
-
-# Il serait plus rapide et élégant de faire le calcul de façon 
-# vectorielle plutôt que d'utiliser une boucle.
 sum(abs(pt1 - pt2))
 ```
 
@@ -105,11 +98,13 @@ Les informations minimales à fournir sont :
 
 Le plus simple est de fournir des informations en commentaires avant la définition de la fonction ou au début du corps de celle-ci.
 
+\newpage
+
 ```{r}
 # Calcule la distance de Manhattan entre deux points
 # Arguments :
-# - pt1 : Un vecteur numerique des coordonnees du premier point.
-# - pt2 : Un vecteur numerique des coordonnees du deuxieme point.
+# - point1 : Un vecteur numerique des coordonnees du premier point.
+# - point2 : Un vecteur numerique des coordonnees du deuxieme point.
 # Sortie : La distance de Manhattan entre pt1 et pt2 (une seule valeur).
 Manhattan <- function(point1, point2) {
   sum(abs(point1 - point2))
@@ -140,10 +135,11 @@ source("C:/coursR/mesFonctions.R")
 
 Appeler la fonction `source` est donc similaire à sélectionner tout le code contenu dans un fichier et le soumettre dans la console. Cependant, les deux façons de faire ne sont pas identiques. Avec `source`, dès que le code dans le fichier comporte au moins une erreur de syntaxe, aucune ligne de code du fichier n'est soumise. Aussi, seuls les appels spécifiques à la fonction `print` provoquent des affichages, alors qu'une instruction contenant seulement le nom d'un objet ne génère aucun affichage. Mais la plus grande différence entre les deux approches est que soumettre une commande `source` est plus efficace en terme de temps de travail que de sélectionner des lignes de code dans un script R, puis de soumettre toutes ces lignes. Avec `source`, le script R contenant les définitions des fonctions n'a même pas besoin d'être ouvert.
 
-Ainsi, pour compléter la bonne pratique de placer la définition de nos fonctions dans un fichier distinct, il est recommandé d'inclure en entête de tout programme R utilisant les fonctions définies la commande `source("C:/coursR/mesFonctions.R")`.
+Ainsi, pour compléter la bonne pratique de placer la définition de nos fonctions dans un fichier distinct, il est recommandé d'inclure en entête de tout programme R utilisant les fonctions définies un certain fichier un appel à la fonction `source` pour soumettre les instructions contenues dans le fichier en question.
 
 ***
 
+\newpage
 
 # Tests
 
@@ -179,12 +175,16 @@ Résultat attendu selon un calcul à la main : 5 = résultat obtenu.
 ```{r}
 Manhattan(point1 = c(0,0), point2 = c(1,1))
 dist(rbind(c(0,0), c(1,1)), method = "manhattan")
+Manhattan(c(0,0), c(1,1)) == dist(rbind(c(0,0), c(1,1)), method = "manhattan")[1]
 
 Manhattan(point1 = c(0,-5), point2 = c(0,-15))
 dist(rbind(c(0,-5), c(0,-15)), method = "manhattan")
+Manhattan(c(0,-5), c(0,-15)) == dist(rbind(c(0,-5), c(0,-15)), method = "manhattan")[1]
 
 Manhattan(point1 = c(0,0,0,0,0), point2 = c(1,1,1,1,1))
 dist(rbind(c(0,0,0,0,0), c(1,1,1,1,1)), method = "manhattan")
+Manhattan(c(0,0,0,0,0), c(1,1,1,1,1)) == 
+  dist(rbind(c(0,0,0,0,0), c(1,1,1,1,1)), method = "manhattan")[1]
 ```
 
 Nous obtenons les mêmes distances. 
@@ -207,11 +207,13 @@ Lors de la rencontre d'exceptions, les fonctions R réagissent en générant des
 
 > Les erreurs et avertissements sont appelés **conditions** en R.
 
-En plus des erreurs et avertissements, R comporte un troisième type de condition : les messages. Les différents types de conditions sont définis ainsi :
+En plus des erreurs et avertissements, R comporte un troisième type de condition : les messages.
+
+Les différents types de conditions sont définis ainsi :
 
 - **Erreur** : L'exécution de la fonction est interrompue et un message d'erreur est affiché.
 - **Avertissement** : Un message d'avertissement est affiché pour signifier un problème potentiel. L'exécution de la fonction n'est pas interrompue.
-- **Message** : Un message est affiché pour apporter une information supplémentaire  (par exemple la valeur par défaut utilisée pour un argument important non fourni en entrée). L'exécution de la fonction n'est pas interrompue. Ce type de condition est en pratique peu utilisé.
+- **Message** : Un message est affiché pour apporter une information supplémentaire  (par exemple la valeur par défaut utilisée pour un argument important non fourni en entrée). L'exécution de la fonction n'est pas interrompue. Ce type de condition est moins utilisé que les deux autres.
 
 Notons que les messages associés à une condition R, peu importe son type, sont parfois traduits de façon automatique en fonction de la langue de notre système d'exploitation.
 
@@ -329,11 +331,13 @@ Dans cet exemple, le message d'erreur nous aide à comprendre que nous avons mal
 
 Dans d'autres cas, les messages d'erreur ou d'avertissement ne sont pas très informatifs. Dans un tel cas, la documentation de la fonction peut parfois nous aider. Une autre option est d'utiliser des outils de débogage pour comprendre la nature de l'exception rencontrée et comment utiliser correctement la fonction.
 
-Lorsque nous croyons avoir découvert un bogue dans du code de nous n'avons pas développé nous même, il est bien de contacter le mainteneur du code pour lui en faire part. Il faut par contre d'abord s'assurer d'utiliser la dernière version du code. Le mainteneur des fonctions de base de R est le R core team. La page web https://www.r-project.org/bugs.html explique comment faire part de bogues potentiels à cette équipe. Pour signaler un bogue dans un package R, il suffit de contacter son mainteneur par courriel. Toute documentation de package contient l'adresse courriel de son mainteneur. 
+#### Rapporter un bogue
+
+Lorsque nous croyons avoir découvert un bogue dans du code de nous n'avons pas développé nous même, il est bien de contacter le mainteneur du code pour lui en faire part. Il faut par contre d'abord s'assurer d'utiliser la dernière version du code. Le mainteneur des fonctions de base de R est le R core team. La page web https://www.r-project.org/bugs.html explique comment faire part de bogues potentiels à cette équipe. Pour signaler un bogue dans un package R, il suffit de contacter son mainteneur par courriel. Toute documentation de package contient l'adresse courriel de son mainteneur. Si le package est développé en utilisant un service web public d'hébergement et de gestion de versions, tel que GitHub, la meilleure façon de rapporter un bogue est de créer un nouvel *issue*.
 
 Faire part d'un bogue potentiel à un mainteneur présente des avantages pour tous. L'utilisateur arrive souvent ainsi à régler le problème qu'il rencontre et le mainteneur a l'opportunité d'améliorer son code en corrigeant des bogues ou en identifiant les aspects moins compris de son code ou de sa documentation. 
 
-#### Exemple : 
+#### Exemple de bogue dans notre propre code : 
 
 Supposons que nous développons une fonction qui calcule des moyennes. Si l'argument donné en entrée est un vecteur, la fonction doit calculer une seule moyenne, celle des observations dans le vecteur. Si l'argument donné en entrée a plus d'une dimension, la fonction `colMeans` doit être appelée. Pour une matrice en entrée, nous obtiendrions donc la moyenne des observations dans chaque colonne.
 
@@ -379,7 +383,7 @@ browser()
 
 dans le corps de la fonction, à l'endroit où nous souhaitons interrompre l'exécution. Ensuite, il faut soumettre de nouveau la définition de la fonction. Le prochain appel à cette fonction sera interrompu lorsque l'instruction `browser()` sera rencontré.
 
-Lorsque l'outil d'inspection de code ouvert par la fonction `browser` est en fonction, le symbole d'invite de commandes (*prompt*) dans la console devient `> Browse[d]` au lieu de `>`. Ici, `d` représente la profondeur de la séquence d'appels de fonctions. Les **mots-clés** suivants sont alors compris (voir [`help(browser)`](http://stat.ethz.ch/R-manual/R-devel/library/base/html/browser.html) pour la liste complète des mots-clés) :
+Lorsque l'outil d'inspection de code ouvert par la fonction `browser` est actif, le symbole d'invite de commandes (*prompt*) dans la console devient `> Browse[d]` au lieu de `>`. Ici, `d` représente la profondeur de la séquence d'appels de fonctions. Les **mots-clés** suivants sont alors compris (voir [`help(browser)`](http://stat.ethz.ch/R-manual/R-devel/library/base/html/browser.html) pour la liste complète des mots-clés) :
 
 - `n` : pour exécuter la prochaine commande,
 - `c` : pour exécuter jusqu'au prochain point d'arrêt (ex. une autre commande `browser()`),
@@ -555,7 +559,7 @@ Il vaut mieux arrêter l'exécution de la fonction si les arguments fournis en e
 - Pour générer une erreur : `stop`, `stopifnot`, `match.arg` (vue dans les notes sur la [création de fonctions en R](https://stt4230.rbind.io/programmation/fonctions_r/#valeur-par-defaut-pour-un-argument-acceptant-seulement-un-petit-nombre-de-chaines-de-caracteres-specifiques)),
 - Pour générer un avertissement : `warning`.
 
-Remarque : Pour la tâche spécifique de valider les valeurs fournies en argument, le package `checkmate` propose plusieurs fonctions rendant la tâche plus facile au développeur, par exemple les fonctions `checkCount`, `checkScalar`, `checkIntegerish`, etc.
+Remarque : Pour la tâche spécifique de valider les valeurs fournies en argument, le [package `checkmate`](https://cran.r-project.org/web/packages/checkmate/index.html) propose plusieurs fonctions rendant la tâche plus facile au développeur, par exemple les fonctions `checkCount`, `checkScalar`, `checkIntegerish`, etc.
 
 #### Exemple : 
 
@@ -681,7 +685,7 @@ inverses(a = matrix(1:4, 2, 2),
 
 Il faut donner comme premier argument à la fonction `try` une expression. Dans l'exemple précédent, il s'agissait d'une seule instruction. Il aurait aussi pu s'agir d'une séquence d'instructions, entre accolades. L'argument `silent = TRUE` a signifié à `try` de ne pas afficher de messages.
 
-L'objet retourné par `try` est l'objet retourné par l'expression fournie en premier argument si aucune erreur n'est rencontrée. Sinon, il s'agit d'un objet de classe `"try-error"` contenant le message d'erreur. L'instruction `inherits(tentative, "try-error")` retourne `TRUE` si `"try-error"` est une classe de tentative, `FALSE` sinon. L'utilisation de la fonction `inherits` est l'outil recommandé pour tester l'appartenance d'un objet à un classe.
+L'objet retourné par `try` est l'objet retourné par l'expression fournie en premier argument si aucune erreur n'est rencontrée. Sinon, il s'agit d'un objet de classe `"try-error"` contenant le message d'erreur. L'instruction `inherits(tentative, "try-error")` retourne `TRUE` si l'objet `tentative` possède la classe `"try-error"`, `FALSE` sinon. L'utilisation de la fonction `inherits` est l'outil recommandé pour tester l'appartenance d'un objet à un classe.
 
 
 #### Autres outils pour manipuler des erreurs et des avertissements en R :
@@ -699,6 +703,110 @@ L'objet retourné par `try` est l'objet retourné par l'expression fournie en pr
 suppressWarnings(Manhattan(rbind(c(0,0), c(1,0)), rbind(c(3,2), c(2,3))))
 ```
 
+***
+
+# Synthèse
+
+#### Bonnes pratiques dans le développement de fonctions
+
+1. **Planifier** le travail (pas de programmation encore) :
+    + définir clairement la tâche à accomplir par la fonction et la sortie qu'elle doit produire,
+    + prévoir les étapes à suivre afin d'effectuer cette tâche,
+    + identifier les arguments devant être fournis en entrée à la fonction.
+2. **Développer le corps de la fonction**
+    + 2.1. Écrire le programme par étapes, d'abord sans former la fonction, en commentant bien le code et en travaillant sur des mini-données test.
+    + 2.2 Pour chaque petite étape ou sous-tâche, tester interactivement si le programme produit le résultat escompté (tester souvent en cours de travail, ainsi il y a moins de débogage à faire).
+3. **Créer la fonction** à partir du programme développé.
+4. **Documenter** la fonction.
+5. **Tester** la fonction : sauvegarder nos tests et bien les structurer, car ils serviront souvent.
+6. Si nous rencontrons des comportements inattendus dans les tests, **déboguer** la fonction.
+
+En cas de **modification** d'une fonction, **répéter les étapes 4 à 6** jusqu'à ce que les tests ne révèlent plus aucun problème à régler ou amélioration à apporter.
+
+#### Organisation du code
+
+- placer la définition de nos fonctions dans un fichier distinct, disons `mesFonctions.R`;
+- inclure en entête de tout programme R utilisant ces fonctions la commande `source("chemin/mesFonctions.R")`.
+
+
+#### Tests - Objectif 1 : obtenir le résultat escompté
+
+Appeler les fonctions en donnant en entrée des valeurs d'arguments pour lesquelles nous savons quel résultat nous devrions obtenir.
+
+- Mini-exemples pour lesquels nous pouvons faire les calculs à la main pour trouver le résultat escompté. 
+- Comparer les résultats de nos fonctions aux résultats de fonctions effectuant le même calcul, s'il en existe.
+- Comparer les résultats de nos fonctions à des résultats théoriques ou des résultats publiés dans des articles scientifiques, si applicable.
+
+
+#### Tests - Objectif 2 : correctement gérer les exceptions
+
+> **exception** = situation anormale ou particulière qui requiert un traitement spécial
+
+Des exemples d'exceptions sont :
+
+- des arguments incorrects fournis en entrée,
+- des résultats de calcul inattendus.
+
+Réaction à des exceptions : erreurs ou avertissements générés.
+
+Différents types de **conditions en R** :
+
+- **Erreur** : exécution interrompue,  message d'erreur affiché.
+- **Avertissement** : exécution non interrompue, message d'avertissement affiché pour signaler un problème potentiel.
+- **Message** (moins fréquent) : exécution non interrompue, message affiché pour apporter une information supplémentaire.
+
+
+#### Formaliser des tests avec le package testthat
+
+Fonctions pour l’écriture, l’organisation et l’exécution automatique de tests unitaires en R :
+
+- fonction d'écriture (un appel à une de ces fonctions = un test unitaire) :
+
+    + `expect_equal`,
+    + `expect_error`,
+    + `expect_warning`,
+    + `expect_true`,
+    + etc.
+
+- fonction d'organisation : `context`, `test_that`
+
+- fonction d’exécution : `test_file`, `test_dir`, etc.
+
+
+
+#### Débogage
+
+> **débogage** = processus méthodique pour trouver et régler des bogues informatiques
+
+> **bogues** = anomalies de fonctionnement d'un programme
+
+\newpage 
+
+Outils de débogage en R :
+
+1. `traceback()` : retourne la séquence des appels de fonctions provoquant une erreur
+2. fonction `browser` (seule, avec `trace` ou avec `debug`) : permet
+    + d'interrompre l'exécution d'une fonction, 
+    + de donner accès à l'environnement d'exécution de la fonction et 
+    + d'exécuter le corps de la fonction une commande à la fois;
+3. option `error` : débogage post mortem  
+donne accès à l'environnement d'exécution de la fonction au moment de la génération d'une erreur.
+4. `print` et `cat` : imprime une trace des calculs
+
+#### Gestion d'exceptions
+
+*Produire des erreurs et des avertissements*
+
+- générer une erreur : `stop`, `stopifnot`, `match.arg`;
+- générer un avertissement : `warning`.
+
+*Manipuler des erreurs et des avertissements*
+
+- attraper des erreurs et les manipuler : `try`;
+- modifier la gestion des avertissements dans la session R :  
+option globale `warn`;
+- ignorer des avertissements : `suppressWarnings`.
+
 
 ***
 
@@ -706,9 +814,10 @@ suppressWarnings(Manhattan(rbind(c(0,0), c(1,0)), rbind(c(3,2), c(2,3))))
 
 Tests :
 
-- http://testthat.r-lib.org/
-- Wickham, H. (2015). *R packages*. O'Reilly. Chapitre 7. http://r-pkgs.had.co.nz/tests.html
-
+- Wickham, H., RStudio et R Core team (2018). testthat: Unit Testing for R. R package version
+  2.0.1. https://CRAN.R-project.org/package=testthat
+    - documentation du package : fiches d'aide du package, http://testthat.r-lib.org/
+    - Wickham, H. (2015). *R packages*. O'Reilly. Chapitre 7. http://r-pkgs.had.co.nz/tests.html
 
 
 Débogage : 
