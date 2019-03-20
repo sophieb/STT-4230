@@ -1,7 +1,7 @@
 +++
 title = "Notes de cours"
 description = ""
-date = "2010-03-10"
+date = "2010-03-20"
 lastmodifierdisplayname = "Sophie Baillargeon"
 lastmodifieremail = "sophie.baillargeon@mat.ulaval.ca"
 +++
@@ -43,7 +43,7 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
     * [Programmation orientée objet en R]({{%relref "programmation/oop_r_2019.html" %}})
     * [Tests et exceptions en R]({{%relref "programmation/tests_exceptions_r_2019.html" %}})
 * Packages R
-    * [Utilisation de packages R]({{%relref "packages/utilisation_packages_r_2018.html" %}})
+    * [Utilisation de packages R]({{%relref "packages/utilisation_packages_r_2019.html" %}})
     * [Développement de packages R]({{%relref "packages/developpement_packages_r_2018.html" %}})
 * Amélioration de code R
     * [Bonnes pratiques en R]({{%relref "amelioration_code/bonnes_pratiques_r_2019.html" %}})
