@@ -1,7 +1,7 @@
 ---
 title: "Tests et exceptions en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2019-03-15"
+date: "2019-03-21"
 weight: 5
 slug: "tests_exceptions_r"
 categories: ["cours_2019-03-26"]
@@ -83,7 +83,7 @@ sum(abs(pt1 - pt2))
 **Création de la fonction** à partir du programme développé (étape 3) :
 
 ```{r}
-Manhattan <- function(point1, point2) {
+distman <- function(point1, point2) {
   sum(abs(point1 - point2))
 }
 ```
@@ -106,7 +106,7 @@ Le plus simple est de fournir des informations en commentaires avant la définit
 # - point1 : Un vecteur numerique des coordonnees du premier point.
 # - point2 : Un vecteur numerique des coordonnees du deuxieme point.
 # Sortie : La distance de Manhattan entre pt1 et pt2 (une seule valeur).
-Manhattan <- function(point1, point2) {
+distman <- function(point1, point2) {
   sum(abs(point1 - point2))
 }
 ```
@@ -152,12 +152,12 @@ Tester ses fonctions consiste à appeler les fonctions en donnant en entrée des
 - Nous pouvons aussi comparer les résultats de nos fonctions à des résultats publiés dans des articles scientifiques ou des résultats théoriques. Si nos fonctions proposent de nouvelles méthodes de calculs, nous ne nous attendons pas nécessairement à reproduire de façon exacte les résultats publiés, mais nos résultats devraient être cohérents avec ceux publiés.
 
 #### Exemple : 
-Testons la fonction `Manhattan` avec d'autres points que ceux utilisés pour développer la fonction.
+Testons la fonction `distman` avec d'autres points que ceux utilisés pour développer la fonction.
 
 - Points avec coordonnées négatives :
 
 ```{r}
-Manhattan(point1 = c(0, -5), point2 = c(0, -15))
+distman(point1 = c(0, -5), point2 = c(0, -15))
 ```
 
 Résultat attendu selon un calcul à la main : 10 = résultat obtenu.
@@ -165,25 +165,25 @@ Résultat attendu selon un calcul à la main : 10 = résultat obtenu.
 - Points de dimension supérieure à 2 :
 
 ```{r}
-Manhattan(point1 = c(0,0,0,0,0), point2 = c(1,1,1,1,1))
+distman(point1 = c(0,0,0,0,0), point2 = c(1,1,1,1,1))
 ```
 
 Résultat attendu selon un calcul à la main : 5 = résultat obtenu.
 
-- Comparaisons avec la fonction `dist` qui implémente le même calcul que notre fonction `Manhattan` : 
+- Comparaisons avec la fonction `dist` qui implémente le même calcul que notre fonction `distman` : 
 
 ```{r}
-Manhattan(point1 = c(0,0), point2 = c(1,1))
+distman(point1 = c(0,0), point2 = c(1,1))
 dist(rbind(c(0,0), c(1,1)), method = "manhattan")
-Manhattan(c(0,0), c(1,1)) == dist(rbind(c(0,0), c(1,1)), method = "manhattan")[1]
+distman(c(0,0), c(1,1)) == dist(rbind(c(0,0), c(1,1)), method = "manhattan")[1]
 
-Manhattan(point1 = c(0,-5), point2 = c(0,-15))
+distman(point1 = c(0,-5), point2 = c(0,-15))
 dist(rbind(c(0,-5), c(0,-15)), method = "manhattan")
-Manhattan(c(0,-5), c(0,-15)) == dist(rbind(c(0,-5), c(0,-15)), method = "manhattan")[1]
+distman(c(0,-5), c(0,-15)) == dist(rbind(c(0,-5), c(0,-15)), method = "manhattan")[1]
 
-Manhattan(point1 = c(0,0,0,0,0), point2 = c(1,1,1,1,1))
+distman(point1 = c(0,0,0,0,0), point2 = c(1,1,1,1,1))
 dist(rbind(c(0,0,0,0,0), c(1,1,1,1,1)), method = "manhattan")
-Manhattan(c(0,0,0,0,0), c(1,1,1,1,1)) == 
+distman(c(0,0,0,0,0), c(1,1,1,1,1)) == 
   dist(rbind(c(0,0,0,0,0), c(1,1,1,1,1)), method = "manhattan")[1]
 ```
 
@@ -218,21 +218,21 @@ Les différents types de conditions sont définis ainsi :
 Notons que les messages associés à une condition R, peu importe son type, sont parfois traduits de façon automatique en fonction de la langue de notre système d'exploitation.
 
 #### Exemple : 
-Testons si notre fonction `Manhattan` gère correctement quelques exceptions.
+Testons si notre fonction `distman` gère correctement quelques exceptions.
 
-- Si nous donnons en entrée à notre fonction `Manhattan` des points de dimensions différentes, que se passe-t-il?
+- Si nous donnons en entrée à notre fonction `distman` des points de dimensions différentes, que se passe-t-il?
 
 ```{r}
-Manhattan(point1 = c(-1,0), point2 = c(1,2,3))
+distman(point1 = c(-1,0), point2 = c(1,2,3))
 ```
 
 Nous pourrions préférer que la fonction retourne une erreur plutôt qu'un avertissement. Nous y reviendrons plus loin.
 
 
-- Si nous donnons en entrée à `Manhattan` des arguments non numériques, que se passe-t-il?
+- Si nous donnons en entrée à `distman` des arguments non numériques, que se passe-t-il?
 
 ```{r, error = TRUE}
-Manhattan(point1 = c("a", "b"), point2 = c("c","d"))
+distman(point1 = c("a", "b"), point2 = c("c","d"))
 ```
 
 L'exécution de la fonction s'arrête et le message d'erreur affiché est informatif. Un **message informatif** aide l'utilisateur à comprendre ce qu'il a fait incorrectement. Un message non informatif ne guide pas suffisamment l'utilisateur dans la modification de son appel de la fonction afin de ne plus avoir d'erreur.
@@ -241,7 +241,7 @@ L'exécution de la fonction s'arrête et le message d'erreur affiché est inform
 - Si nous donnons en entrée des matrices, que se passe-t-il?
 
 ```{r, error = TRUE}
-Manhattan(point1 = rbind(c(0,0), c(1,0)), point2 = rbind(c(3,2), c(2,3)))
+distman(point1 = rbind(c(0,0), c(1,0)), point2 = rbind(c(3,2), c(2,3)))
 ```
 
 Ce résultat peut être surprenant pour quelqu'un qui pensait obtenir plus d'une distance, par exemple une entre la ligne i de `point1` et la ligne i de `point2` pour tout i = 1, ..., `nrow(point1)`. Nous pourrions envisager de produire un message d'avertissement (nous verrons comment faire plus loin).
@@ -270,7 +270,7 @@ L'utilisation de ce package n'est pas décrite en détail ici, mais un court exe
 
 #### Exemple :
 
-Voici quelques exemples qui reprennent des tests effectués précédemment sur la fonction `Manhattan`.
+Voici quelques exemples qui reprennent des tests effectués précédemment sur la fonction `distman`.
 
 ```{r}
 library(testthat)
@@ -281,14 +281,14 @@ library(testthat)
 
 ```{r}
 test_that("nous reproduisons un calcul à la main",
-          expect_equal(Manhattan(point1 = c(0,-5), point2 = c(0,-15)), 10))
+          expect_equal(distman(point1 = c(0,-5), point2 = c(0,-15)), 10))
 ```
 
 - Comparaison avec le résultat d'une autre fonction :
 
 ```{r}
 test_that("nous obtenons le même résultat que la fonction dist",
-          expect_equal(Manhattan(point1 = c(0,0), point2 = c(1,1)),
+          expect_equal(distman(point1 = c(0,0), point2 = c(1,1)),
           as.vector(dist(rbind(c(0,0), c(1,1)), method = "manhattan"))))
 ```
 
@@ -296,18 +296,18 @@ test_that("nous obtenons le même résultat que la fonction dist",
 
 ```{r, error = TRUE}
 test_that("des vecteurs de dimensions différentes génèrent une erreur",
-          expect_error(Manhattan(point1 = c(-1,0), point2 = c(1,2,3))))
+          expect_error(distman(point1 = c(-1,0), point2 = c(1,2,3))))
 ```
 
 ```{r, error = TRUE}
 test_that("des matrices génèrent un avertissement", {
           mat1 <- rbind(c(0,0), c(1,0))
           mat2 <- rbind(c(3,2), c(2,3))
-          expect_warning(Manhattan(point1 = mat1, point2 = mat2))
+          expect_warning(distman(point1 = mat1, point2 = mat2))
 })
 ```
 
-Nous allons apporter plus loin des changements à `Manhattan` afin de passer avec succès tous ces tests. Pour l'instant, nous passons avec succès les 2 premiers, mais échouons les deux derniers.
+Nous allons apporter plus loin des changements à `distman` afin de passer avec succès tous ces tests. Pour l'instant, nous passons avec succès les 2 premiers, mais échouons les deux derniers.
 
 
 ***
@@ -563,37 +563,37 @@ Remarque : Pour la tâche spécifique de valider les valeurs fournies en argumen
 
 #### Exemple : 
 
-Faisons générer une erreur à notre fonction `Manhattan` lorsqu'elle reçoit en entrée deux vecteurs qui ne sont pas de mêmes longueurs.
+Faisons générer une erreur à notre fonction `distman` lorsqu'elle reçoit en entrée deux vecteurs qui ne sont pas de mêmes longueurs.
 
 ```{r, eval = FALSE}
-Manhattan <- function(point1, point2) {
+distman <- function(point1, point2) {
   if (length(point1) != length(point2))
     stop("'point1' and 'point2' must have the same length")
   sum(abs(point1 - point2))
 }
 
-Manhattan(c(-1,0), c(1,2,3))
+distman(c(-1,0), c(1,2,3))
 ```
 ```
-## Error in Manhattan(c(-1, 0), c(1, 2, 3)) : 
+## Error in distman(c(-1, 0), c(1, 2, 3)) : 
 ##   'point1' and 'point2' must have the same length
 ```
 
 ou encore
 
 ```{r, error = TRUE}
-Manhattan <- function(point1, point2) {
+distman <- function(point1, point2) {
   stopifnot(length(point1) == length(point2))
   sum(abs(point1 - point2))
 }
 
-Manhattan(c(-1,0), c(1,2,3))
+distman(c(-1,0), c(1,2,3))
 ```
 
-Faisons générer un avertissement à notre fonction `Manhattan` si les arguments `point1` et `point2` sont de dimension supérieure à 1.
+Faisons générer un avertissement à notre fonction `distman` si les arguments `point1` et `point2` sont de dimension supérieure à 1.
 
 ```{r, error = TRUE}
-Manhattan <- function(point1, point2) {
+distman <- function(point1, point2) {
   if (length(point1) != length(point2)) 
     stop("'point1' and 'point2' must have the same length")
   if (!is.null(dim(point1)) || !is.null(dim(point2)))
@@ -601,7 +601,7 @@ Manhattan <- function(point1, point2) {
   sum(abs(point1 - point2))
 }
 
-Manhattan(rbind(c(0,0), c(1,0)), rbind(c(3,2), c(2,3)))
+distman(rbind(c(0,0), c(1,0)), rbind(c(3,2), c(2,3)))
 ```
 
 
@@ -609,19 +609,19 @@ Nos tests ne devraient maintenant plus échouer.
 
 ```{r, error = TRUE}
 test_that("nous reproduisons un calcul à la main",
-          expect_equal(Manhattan(point1 = c(0,-5), point2 = c(0,-15)), 10))
+          expect_equal(distman(point1 = c(0,-5), point2 = c(0,-15)), 10))
 
 test_that("nous obtenons le même résultat que la fonction dist",
-           expect_equal(Manhattan(point1 = c(0,0), point2 = c(1,1)),
+           expect_equal(distman(point1 = c(0,0), point2 = c(1,1)),
             as.vector(dist(rbind(c(0,0), c(1,1)), method = "manhattan"))))
 
 test_that("des vecteurs de dimensions différentes génèrent une erreur",
-          expect_error(Manhattan(point1 = c(-1,0), point2 = c(1,2,3))))
+          expect_error(distman(point1 = c(-1,0), point2 = c(1,2,3))))
 
 test_that("des matrices génèrent un avertissement", {
           mat1 <- rbind(c(0,0), c(1,0))
           mat2 <- rbind(c(3,2), c(2,3))
-          expect_warning(Manhattan(point1 = mat1, point2 = mat2))
+          expect_warning(distman(point1 = mat1, point2 = mat2))
 })
 ```
 
@@ -700,7 +700,7 @@ L'objet retourné par `try` est l'objet retourné par l'expression fournie en pr
 
 ```{r}
 # Exemple d'utilisation de la fonction suppressWarnings
-suppressWarnings(Manhattan(rbind(c(0,0), c(1,0)), rbind(c(3,2), c(2,3))))
+suppressWarnings(distman(rbind(c(0,0), c(1,0)), rbind(c(3,2), c(2,3))))
 ```
 
 ***

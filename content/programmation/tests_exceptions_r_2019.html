@@ -1,7 +1,7 @@
 ---
 title: "Tests et exceptions en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2019-03-15"
+date: "2019-03-21"
 weight: 5
 slug: "tests_exceptions_r"
 categories: ["cours_2019-03-26"]
@@ -108,7 +108,7 @@ abs(pt1[1] - pt2[1]) + abs(pt1[2] - pt2[2])</code></pre>
 sum(abs(pt1 - pt2))</code></pre>
 <pre><code>## [1] 2</code></pre>
 <p><strong>Création de la fonction</strong> à partir du programme développé (étape 3) :</p>
-<pre class="r"><code>Manhattan &lt;- function(point1, point2) {
+<pre class="r"><code>distman &lt;- function(point1, point2) {
   sum(abs(point1 - point2))
 }</code></pre>
 <p><strong>Documentation de la fonction</strong> (étape 4) :</p>
@@ -125,7 +125,7 @@ sum(abs(pt1 - pt2))</code></pre>
 # - point1 : Un vecteur numerique des coordonnees du premier point.
 # - point2 : Un vecteur numerique des coordonnees du deuxieme point.
 # Sortie : La distance de Manhattan entre pt1 et pt2 (une seule valeur).
-Manhattan &lt;- function(point1, point2) {
+distman &lt;- function(point1, point2) {
   sum(abs(point1 - point2))
 }</code></pre>
 <p>Nous allons revenir sur ce point dans le cours sur la création de packages, car toute fonction d’un package doit avoir une fiche d’aide. Nous verrons donc une façon plus formelle de documenter des fonctions.</p>
@@ -157,42 +157,42 @@ Manhattan &lt;- function(point1, point2) {
 </ul>
 <div id="exemple" class="section level4">
 <h4>Exemple :</h4>
-<p>Testons la fonction <code>Manhattan</code> avec d’autres points que ceux utilisés pour développer la fonction.</p>
+<p>Testons la fonction <code>distman</code> avec d’autres points que ceux utilisés pour développer la fonction.</p>
 <ul>
 <li>Points avec coordonnées négatives :</li>
 </ul>
-<pre class="r"><code>Manhattan(point1 = c(0, -5), point2 = c(0, -15))</code></pre>
+<pre class="r"><code>distman(point1 = c(0, -5), point2 = c(0, -15))</code></pre>
 <pre><code>## [1] 10</code></pre>
 <p>Résultat attendu selon un calcul à la main : 10 = résultat obtenu.</p>
 <ul>
 <li>Points de dimension supérieure à 2 :</li>
 </ul>
-<pre class="r"><code>Manhattan(point1 = c(0,0,0,0,0), point2 = c(1,1,1,1,1))</code></pre>
+<pre class="r"><code>distman(point1 = c(0,0,0,0,0), point2 = c(1,1,1,1,1))</code></pre>
 <pre><code>## [1] 5</code></pre>
 <p>Résultat attendu selon un calcul à la main : 5 = résultat obtenu.</p>
 <ul>
-<li>Comparaisons avec la fonction <code>dist</code> qui implémente le même calcul que notre fonction <code>Manhattan</code> :</li>
+<li>Comparaisons avec la fonction <code>dist</code> qui implémente le même calcul que notre fonction <code>distman</code> :</li>
 </ul>
-<pre class="r"><code>Manhattan(point1 = c(0,0), point2 = c(1,1))</code></pre>
+<pre class="r"><code>distman(point1 = c(0,0), point2 = c(1,1))</code></pre>
 <pre><code>## [1] 2</code></pre>
 <pre class="r"><code>dist(rbind(c(0,0), c(1,1)), method = &quot;manhattan&quot;)</code></pre>
 <pre><code>##   1
 ## 2 2</code></pre>
-<pre class="r"><code>Manhattan(c(0,0), c(1,1)) == dist(rbind(c(0,0), c(1,1)), method = &quot;manhattan&quot;)[1]</code></pre>
+<pre class="r"><code>distman(c(0,0), c(1,1)) == dist(rbind(c(0,0), c(1,1)), method = &quot;manhattan&quot;)[1]</code></pre>
 <pre><code>## [1] TRUE</code></pre>
-<pre class="r"><code>Manhattan(point1 = c(0,-5), point2 = c(0,-15))</code></pre>
+<pre class="r"><code>distman(point1 = c(0,-5), point2 = c(0,-15))</code></pre>
 <pre><code>## [1] 10</code></pre>
 <pre class="r"><code>dist(rbind(c(0,-5), c(0,-15)), method = &quot;manhattan&quot;)</code></pre>
 <pre><code>##    1
 ## 2 10</code></pre>
-<pre class="r"><code>Manhattan(c(0,-5), c(0,-15)) == dist(rbind(c(0,-5), c(0,-15)), method = &quot;manhattan&quot;)[1]</code></pre>
+<pre class="r"><code>distman(c(0,-5), c(0,-15)) == dist(rbind(c(0,-5), c(0,-15)), method = &quot;manhattan&quot;)[1]</code></pre>
 <pre><code>## [1] TRUE</code></pre>
-<pre class="r"><code>Manhattan(point1 = c(0,0,0,0,0), point2 = c(1,1,1,1,1))</code></pre>
+<pre class="r"><code>distman(point1 = c(0,0,0,0,0), point2 = c(1,1,1,1,1))</code></pre>
 <pre><code>## [1] 5</code></pre>
 <pre class="r"><code>dist(rbind(c(0,0,0,0,0), c(1,1,1,1,1)), method = &quot;manhattan&quot;)</code></pre>
 <pre><code>##   1
 ## 2 5</code></pre>
-<pre class="r"><code>Manhattan(c(0,0,0,0,0), c(1,1,1,1,1)) == 
+<pre class="r"><code>distman(c(0,0,0,0,0), c(1,1,1,1,1)) == 
   dist(rbind(c(0,0,0,0,0), c(1,1,1,1,1)), method = &quot;manhattan&quot;)[1]</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 <p>Nous obtenons les mêmes distances.</p>
@@ -224,25 +224,25 @@ Manhattan &lt;- function(point1, point2) {
 <p>Notons que les messages associés à une condition R, peu importe son type, sont parfois traduits de façon automatique en fonction de la langue de notre système d’exploitation.</p>
 <div id="exemple-1" class="section level4">
 <h4>Exemple :</h4>
-<p>Testons si notre fonction <code>Manhattan</code> gère correctement quelques exceptions.</p>
+<p>Testons si notre fonction <code>distman</code> gère correctement quelques exceptions.</p>
 <ul>
-<li>Si nous donnons en entrée à notre fonction <code>Manhattan</code> des points de dimensions différentes, que se passe-t-il?</li>
+<li>Si nous donnons en entrée à notre fonction <code>distman</code> des points de dimensions différentes, que se passe-t-il?</li>
 </ul>
-<pre class="r"><code>Manhattan(point1 = c(-1,0), point2 = c(1,2,3))</code></pre>
+<pre class="r"><code>distman(point1 = c(-1,0), point2 = c(1,2,3))</code></pre>
 <pre><code>## Warning in point1 - point2: longer object length is not a multiple of
 ## shorter object length</code></pre>
 <pre><code>## [1] 8</code></pre>
 <p>Nous pourrions préférer que la fonction retourne une erreur plutôt qu’un avertissement. Nous y reviendrons plus loin.</p>
 <ul>
-<li>Si nous donnons en entrée à <code>Manhattan</code> des arguments non numériques, que se passe-t-il?</li>
+<li>Si nous donnons en entrée à <code>distman</code> des arguments non numériques, que se passe-t-il?</li>
 </ul>
-<pre class="r"><code>Manhattan(point1 = c(&quot;a&quot;, &quot;b&quot;), point2 = c(&quot;c&quot;,&quot;d&quot;))</code></pre>
+<pre class="r"><code>distman(point1 = c(&quot;a&quot;, &quot;b&quot;), point2 = c(&quot;c&quot;,&quot;d&quot;))</code></pre>
 <pre><code>## Error in point1 - point2: non-numeric argument to binary operator</code></pre>
 <p>L’exécution de la fonction s’arrête et le message d’erreur affiché est informatif. Un <strong>message informatif</strong> aide l’utilisateur à comprendre ce qu’il a fait incorrectement. Un message non informatif ne guide pas suffisamment l’utilisateur dans la modification de son appel de la fonction afin de ne plus avoir d’erreur.</p>
 <ul>
 <li>Si nous donnons en entrée des matrices, que se passe-t-il?</li>
 </ul>
-<pre class="r"><code>Manhattan(point1 = rbind(c(0,0), c(1,0)), point2 = rbind(c(3,2), c(2,3)))</code></pre>
+<pre class="r"><code>distman(point1 = rbind(c(0,0), c(1,0)), point2 = rbind(c(3,2), c(2,3)))</code></pre>
 <pre><code>## [1] 9</code></pre>
 <p>Ce résultat peut être surprenant pour quelqu’un qui pensait obtenir plus d’une distance, par exemple une entre la ligne i de <code>point1</code> et la ligne i de <code>point2</code> pour tout i = 1, …, <code>nrow(point1)</code>. Nous pourrions envisager de produire un message d’avertissement (nous verrons comment faire plus loin).</p>
 </div>
@@ -265,34 +265,34 @@ Manhattan &lt;- function(point1, point2) {
 <p>L’utilisation de ce package n’est pas décrite en détail ici, mais un court exemple est présenté pour illustrer son utilisation. Écrire ses tests avec <code>testthat</code> demande un certain investissement en temps, mais une fois cette étape terminée, il est facile de lancer ses tests à plusieurs reprises en cours de travail.</p>
 <div id="exemple-2" class="section level4">
 <h4>Exemple :</h4>
-<p>Voici quelques exemples qui reprennent des tests effectués précédemment sur la fonction <code>Manhattan</code>.</p>
+<p>Voici quelques exemples qui reprennent des tests effectués précédemment sur la fonction <code>distman</code>.</p>
 <pre class="r"><code>library(testthat)</code></pre>
 <ul>
 <li>Cas simple pour lequel nous pouvons calculer à la main le résultat escompté :</li>
 </ul>
 <pre class="r"><code>test_that(&quot;nous reproduisons un calcul à la main&quot;,
-          expect_equal(Manhattan(point1 = c(0,-5), point2 = c(0,-15)), 10))</code></pre>
+          expect_equal(distman(point1 = c(0,-5), point2 = c(0,-15)), 10))</code></pre>
 <ul>
 <li>Comparaison avec le résultat d’une autre fonction :</li>
 </ul>
 <pre class="r"><code>test_that(&quot;nous obtenons le même résultat que la fonction dist&quot;,
-          expect_equal(Manhattan(point1 = c(0,0), point2 = c(1,1)),
+          expect_equal(distman(point1 = c(0,0), point2 = c(1,1)),
           as.vector(dist(rbind(c(0,0), c(1,1)), method = &quot;manhattan&quot;))))</code></pre>
 <ul>
 <li>Vérification de la gestion d’exceptions</li>
 </ul>
 <pre class="r"><code>test_that(&quot;des vecteurs de dimensions différentes génèrent une erreur&quot;,
-          expect_error(Manhattan(point1 = c(-1,0), point2 = c(1,2,3))))</code></pre>
+          expect_error(distman(point1 = c(-1,0), point2 = c(1,2,3))))</code></pre>
 <pre><code>## Error: Test failed: &#39;des vecteurs de dimensions différentes génèrent une erreur&#39;
-## * `Manhattan(point1 = c(-1, 0), point2 = c(1, 2, 3))` did not throw an error.</code></pre>
+## * `distman(point1 = c(-1, 0), point2 = c(1, 2, 3))` did not throw an error.</code></pre>
 <pre class="r"><code>test_that(&quot;des matrices génèrent un avertissement&quot;, {
           mat1 &lt;- rbind(c(0,0), c(1,0))
           mat2 &lt;- rbind(c(3,2), c(2,3))
-          expect_warning(Manhattan(point1 = mat1, point2 = mat2))
+          expect_warning(distman(point1 = mat1, point2 = mat2))
 })</code></pre>
 <pre><code>## Error: Test failed: &#39;des matrices génèrent un avertissement&#39;
-## * `Manhattan(point1 = mat1, point2 = mat2)` did not produce any warnings.</code></pre>
-<p>Nous allons apporter plus loin des changements à <code>Manhattan</code> afin de passer avec succès tous ces tests. Pour l’instant, nous passons avec succès les 2 premiers, mais échouons les deux derniers.</p>
+## * `distman(point1 = mat1, point2 = mat2)` did not produce any warnings.</code></pre>
+<p>Nous allons apporter plus loin des changements à <code>distman</code> afin de passer avec succès tous ces tests. Pour l’instant, nous passons avec succès les 2 premiers, mais échouons les deux derniers.</p>
 <hr />
 </div>
 </div>
@@ -481,26 +481,26 @@ inverses(a = matrix(1:4, 2, 2),
 </div>
 <div id="exemple-4" class="section level4">
 <h4>Exemple :</h4>
-<p>Faisons générer une erreur à notre fonction <code>Manhattan</code> lorsqu’elle reçoit en entrée deux vecteurs qui ne sont pas de mêmes longueurs.</p>
-<pre class="r"><code>Manhattan &lt;- function(point1, point2) {
+<p>Faisons générer une erreur à notre fonction <code>distman</code> lorsqu’elle reçoit en entrée deux vecteurs qui ne sont pas de mêmes longueurs.</p>
+<pre class="r"><code>distman &lt;- function(point1, point2) {
   if (length(point1) != length(point2))
     stop(&quot;&#39;point1&#39; and &#39;point2&#39; must have the same length&quot;)
   sum(abs(point1 - point2))
 }
 
-Manhattan(c(-1,0), c(1,2,3))</code></pre>
-<pre><code>## Error in Manhattan(c(-1, 0), c(1, 2, 3)) : 
+distman(c(-1,0), c(1,2,3))</code></pre>
+<pre><code>## Error in distman(c(-1, 0), c(1, 2, 3)) : 
 ##   &#39;point1&#39; and &#39;point2&#39; must have the same length</code></pre>
 <p>ou encore</p>
-<pre class="r"><code>Manhattan &lt;- function(point1, point2) {
+<pre class="r"><code>distman &lt;- function(point1, point2) {
   stopifnot(length(point1) == length(point2))
   sum(abs(point1 - point2))
 }
 
-Manhattan(c(-1,0), c(1,2,3))</code></pre>
-<pre><code>## Error in Manhattan(c(-1, 0), c(1, 2, 3)): length(point1) == length(point2) is not TRUE</code></pre>
-<p>Faisons générer un avertissement à notre fonction <code>Manhattan</code> si les arguments <code>point1</code> et <code>point2</code> sont de dimension supérieure à 1.</p>
-<pre class="r"><code>Manhattan &lt;- function(point1, point2) {
+distman(c(-1,0), c(1,2,3))</code></pre>
+<pre><code>## Error in distman(c(-1, 0), c(1, 2, 3)): length(point1) == length(point2) is not TRUE</code></pre>
+<p>Faisons générer un avertissement à notre fonction <code>distman</code> si les arguments <code>point1</code> et <code>point2</code> sont de dimension supérieure à 1.</p>
+<pre class="r"><code>distman &lt;- function(point1, point2) {
   if (length(point1) != length(point2)) 
     stop(&quot;&#39;point1&#39; and &#39;point2&#39; must have the same length&quot;)
   if (!is.null(dim(point1)) || !is.null(dim(point2)))
@@ -508,25 +508,25 @@ Manhattan(c(-1,0), c(1,2,3))</code></pre>
   sum(abs(point1 - point2))
 }
 
-Manhattan(rbind(c(0,0), c(1,0)), rbind(c(3,2), c(2,3)))</code></pre>
-<pre><code>## Warning in Manhattan(rbind(c(0, 0), c(1, 0)), rbind(c(3, 2), c(2, 3))):
+distman(rbind(c(0,0), c(1,0)), rbind(c(3,2), c(2,3)))</code></pre>
+<pre><code>## Warning in distman(rbind(c(0, 0), c(1, 0)), rbind(c(3, 2), c(2, 3))):
 ## &#39;point1&#39; and &#39;point2&#39; are treated as dimension 1 vectors</code></pre>
 <pre><code>## [1] 9</code></pre>
 <p>Nos tests ne devraient maintenant plus échouer.</p>
 <pre class="r"><code>test_that(&quot;nous reproduisons un calcul à la main&quot;,
-          expect_equal(Manhattan(point1 = c(0,-5), point2 = c(0,-15)), 10))
+          expect_equal(distman(point1 = c(0,-5), point2 = c(0,-15)), 10))
 
 test_that(&quot;nous obtenons le même résultat que la fonction dist&quot;,
-           expect_equal(Manhattan(point1 = c(0,0), point2 = c(1,1)),
+           expect_equal(distman(point1 = c(0,0), point2 = c(1,1)),
             as.vector(dist(rbind(c(0,0), c(1,1)), method = &quot;manhattan&quot;))))
 
 test_that(&quot;des vecteurs de dimensions différentes génèrent une erreur&quot;,
-          expect_error(Manhattan(point1 = c(-1,0), point2 = c(1,2,3))))
+          expect_error(distman(point1 = c(-1,0), point2 = c(1,2,3))))
 
 test_that(&quot;des matrices génèrent un avertissement&quot;, {
           mat1 &lt;- rbind(c(0,0), c(1,0))
           mat2 &lt;- rbind(c(3,2), c(2,3))
-          expect_warning(Manhattan(point1 = mat1, point2 = mat2))
+          expect_warning(distman(point1 = mat1, point2 = mat2))
 })</code></pre>
 <p>C’est bien le cas, car ce code de tests roule sans erreur.</p>
 </div>
@@ -594,7 +594,7 @@ inverses(a = matrix(1:4, 2, 2),
 <li>la fonction <code>suppressWarnings</code> : permet d’ignorer les avertissements générés par des instructions R spécifiques.</li>
 </ul>
 <pre class="r"><code># Exemple d&#39;utilisation de la fonction suppressWarnings
-suppressWarnings(Manhattan(rbind(c(0,0), c(1,0)), rbind(c(3,2), c(2,3))))</code></pre>
+suppressWarnings(distman(rbind(c(0,0), c(1,0)), rbind(c(3,2), c(2,3))))</code></pre>
 <pre><code>## [1] 9</code></pre>
 <hr />
 </div>
