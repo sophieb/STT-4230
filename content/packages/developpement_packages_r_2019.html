@@ -1,0 +1,844 @@
+---
+title: "Développement de packages R"
+author: "Sophie Baillargeon, Université Laval"
+date: "2019-03-21"
+weight: 2
+slug: "devel_packages_r"
+categories: ["cours_2019-04-02"]
+categories_weight: 2
+lastmodifierdisplayname : "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+  blogdown::html_page:
+    toc: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#etape-1.-ecrire-les-fonctions">Étape 1. Écrire les fonctions</a></li>
+<li><a href="#etape-2.-creer-la-structure-de-fichiers-du-package">Étape 2. Créer la structure de fichiers du package</a><ul>
+<li><a href="#repertoire-principal-portant-le-nom-du-package">Répertoire principal portant le nom du package</a></li>
+<li><a href="#sous-repertoire-nomme-r">Sous-répertoire nommé <code>R</code></a></li>
+<li><a href="#sous-repertoire-nomme-man">Sous-répertoire nommé <code>man</code></a></li>
+<li><a href="#fichier-nomme-description">Fichier nommé <code>DESCRIPTION</code></a></li>
+<li><a href="#fichier-nomme-namespace">Fichier nommé <code>NAMESPACE</code></a></li>
+<li><a href="#autres-fichiers-et-repertoires">Autres fichiers et répertoires</a></li>
+</ul></li>
+<li><a href="#etape-3.-ecrire-la-documentation-des-fonctions-et-du-package">Étape 3. Écrire la documentation des fonctions et du package</a><ul>
+<li><a href="#comment-ecrire-de-la-documentation-avec-roxygen2">Comment écrire de la documentation avec <code>roxygen2</code> ?</a></li>
+<li><a href="#comment-generer-les-fichiers-.rd-et-le-fichier-namespace">Comment générer les fichiers .Rd et le fichier <code>NAMESPACE</code> ?</a></li>
+</ul></li>
+<li><a href="#etape-4.-construire-et-verifier-le-package">Étape 4. Construire et vérifier le package</a><ul>
+<li><a href="#lancement-des-commandes-de-construction-et-de-verification-en-rstudio">Lancement des commandes de construction et de vérification en RStudio</a><ul>
+<li><a href="#sous-etape-a-creer-un-projet-rstudio-avec-le-repertoire-principal-du-package">Sous-étape a) Créer un projet RStudio avec le répertoire principal du package</a></li>
+<li><a href="#sous-etape-b-configurer-les-options-de-rstudio">Sous-étape b) Configurer les options de RStudio</a></li>
+<li><a href="#sous-etape-c-construire-a-partir-du-menu-build-de-rstudio">Sous-étape c) Construire à partir du menu « Build » de RStudio</a></li>
+</ul></li>
+<li><a href="#lancement-des-commandes-de-construction-et-de-verification-avec-devtools">Lancement des commandes de construction et de vérification avec <code>devtools</code></a></li>
+</ul></li>
+<li><a href="#etape-5.-si-desire-partager-le-package">Étape 5. Si désiré, partager le package</a></li>
+<li><a href="#etape-6.-au-besoin-mettre-a-jour-le-package">Étape 6. Au besoin, mettre à jour le package</a></li>
+<li><a href="#synthese">Synthèse</a></li>
+<li><a href="#references">Références</a></li>
+<li><a href="#annexe">Annexe</a><ul>
+<li><a href="#resolution-de-problemes-deja-rencontres">Résolution de problèmes déjà rencontrés</a></li>
+</ul></li>
+</ul>
+</div>
+
+<hr />
+<p> </p>
+<p>Pour créer un package R, il faut d’abord développer une structure de fichiers similaires à ce qui se retrouve dans n’importe quel <em>package source</em>. Pour voir de quoi à l’air une telle structure de fichier, il suffit de :</p>
+<ul>
+<li>télécharger un <em>package source</em> à partir du CRAN (par exemple <em>ggplot2_3.1.0.tar.gz</em> sur <a href="http://CRAN.R-project.org/package=ggplot2" class="uri">http://CRAN.R-project.org/package=ggplot2</a>),</li>
+<li>décompresser le fichier (il y a 2 étapes de décompression à effectuer).</li>
+</ul>
+<p>L’exemple utilisé ici, soit le package <code>ggplot2</code>, est un gros package. Seuls certains de ses fichiers et répertoires sont nécessaires dans tout package R.</p>
+<p>Après avoir développé les fichiers sources, qui incluent du code et de la documentation, il faut construire le package. Nous verrons ici comment réaliser cette construction avec RStudio.</p>
+
+<div id="etape-1.-ecrire-les-fonctions" class="section level1">
+<h1>Étape 1. Écrire les fonctions</h1>
+<p>Cette étape fait appel à ce que nous avons appris dans toutes les notes de cours précédentes, en particulier celles sur les <a href="https://stt4230.rbind.io/programmation/fonctions_r/">fonctions en R</a>.</p>
+<p>Lorsque nous créons des fonctions dans le but de les inclure dans un package, il faut garder en tête le chemin de recherche complet qu’utilisera R lors de l’exécution de ces fonctions. Ce chemin est le suivant :</p>
+<ol style="list-style-type: decimal">
+<li>l’environnement local d’exécution de la fonction,</li>
+<li>l’environnement englobant de la fonction, soit l’espace de noms du package,</li>
+<li>l’environnement des objets importés par le package,</li>
+<li>l’environnement du package R de base,</li>
+<li>l’environnement de travail,</li>
+<li>les environnements de tous les packages chargés.</li>
+</ol>
+<p>Nous savons déjà que, dans ce chemin de recherche, nous ne pouvons pas nous fier au contenu de l’environnement de travail, car il varie constamment en cours de session. Nous ne pouvons pas non plus nous fier aux packages chargés. En effet, la liste des packages chargés varie aussi en cours de session et d’un utilisateur à l’autre. Le bon fonctionnement des fonctions d’un package devrait dépendre d’un seul appel à la fonction <code>library</code>, celui servant à charger le package en question.</p>
+<p>Ainsi, dans le corps des fonctions d’un package, nous pouvons toujours faire appel</p>
+<ul>
+<li>aux arguments et variables locales,</li>
+<li>à tout objet, public ou privé, contenu dans le package,</li>
+<li>à des objets du package R de base, qui est toujours inclus dans le chemin de recherche.</li>
+</ul>
+<p>Si nous souhaitons faire appel à des objets autres, par exemple des fonctions provenant d’autres packages, il faudra faire le nécessaire pour inclure ces fonctions dans <em>l’environnement des objets importés par le package</em>. Aussi, dans le corps de nos fonctions, il est recommandé de faire appel à ces objets en utilisant l’opérateur <code>::</code> pour indiquer clairement de quel package ils proviennent. Par exemple, si nous voulons utiliser la fonction <code>dist</code> du package <code>stats</code>, il est bien de l’appeler comme suit : <code>stats::dist(...)</code>.</p>
+<p>Aussi, si notre but est éventuellement de rendre notre package public sur le CRAN, il faut respecter les politiques du CRAN : <a href="http://cran.r-project.org/web/packages/policies.html" class="uri">http://cran.r-project.org/web/packages/policies.html</a>. La plus importante de ces politiques est que notre package doit passer le <code>R CMD check --as-cran</code> sans erreurs ni avertissements (<a href="https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Checking-packages" class="uri">https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Checking-packages</a>, nous en reparlons plus loin). Pour passer cette vérification sans problèmes, notre code ne devrait pas, entre autres :</p>
+<ul>
+<li>contenir des symboles non-<a href="https://fr.wikipedia.org/wiki/American_Standard_Code_for_Information_Interchange">ASCII</a> (donc pas d’accents) :<br />
+<em>afin de s’assurer que le code est fonctionnel sur n’importe quelle plateforme informatique</em>;</li>
+<li>utiliser d’association partielle d’argument (donc nous devons utiliser le nom complet des arguments dans les appels de fonction) :<br />
+<em>afin de s’assurer que le code demeure fonctionnel si des arguments sont ajoutés aux définitions des fonctions appelées dans le code (ces nouveaux arguments pourraient porter des noms qui entrent en conflit avec l’association partielle)</em>;</li>
+<li>toujours utiliser comme valeurs logiques <code>TRUE</code> ou <code>FALSE</code> (donc pas de <code>T</code> ou <code>F</code>) :<br />
+<em>parce qu’un objet R nommé</em> <code>T</code> <em>ou</em> <code>F</code> <em>peut être défini, écrasant du coup les définitions</em> <code>T &lt;- TRUE</code> <em>et</em> <code>F &lt;- FALSE</code><em>, alors qu’il est impossible de créer un nouvel objet R nommé</em> <code>TRUE</code> <em>ou</em> <code>FALSE</code> <em>(mots-clés protégés)</em>.</li>
+</ul>
+
+</div>
+<div id="etape-2.-creer-la-structure-de-fichiers-du-package" class="section level1">
+<h1>Étape 2. Créer la structure de fichiers du package</h1>
+<p>Un package, dans sa version source, est simplement un répertoire de fichiers compressés. Cependant, ce répertoire doit comprendre des fichiers et des sous-répertoires portant des noms précis.</p>
+<p>Nous pouvons créer cette structure de fichiers à l’aide de :</p>
+<ul>
+<li>la fonction <code>package.skeleton</code> du package <code>utils</code> ou</li>
+<li>la fonction <code>create_package</code> du package <code>usethis</code> ou</li>
+<li>les fonctionnalités de création de projets RStudio.</li>
+</ul>
+<p>Cependant, nous pouvons aussi créer manuellement les répertoires et fichiers. Peu importe la procédure utilisée, il faut d’abord avoir un répertoire principal portant le nom du package. Le contenu de base d’un répertoire de package est le suivant :</p>
+<ul>
+<li>sous-répertoire nommé <code>R</code>,</li>
+<li>sous-répertoire nommé <code>man</code>,</li>
+<li>fichier nommé <code>DESCRIPTION</code>,</li>
+<li>fichier nommé <code>NAMESPACE</code>.</li>
+</ul>
+<div id="repertoire-principal-portant-le-nom-du-package" class="section level2">
+<h2>Répertoire principal portant le nom du package</h2>
+<p>Premièrement, un nom doit être choisi pour le package. Ce nom peut contenir uniquement les caractères <a href="https://fr.wikipedia.org/wiki/American_Standard_Code_for_Information_Interchange">ASCII</a> suivants : lettres, chiffres et <code>.</code> (point). Il ne peut donc pas contenir de lettres accentuées, ni le caractère <code>_</code> (tiret bas ou <em>underscore</em> en anglais). Il doit être composé d’au moins 2 caractères, débuter par une lettre et ne pas terminer par un point<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>.</p>
+<p>Ensuite, il faut créer un répertoire portant ce nom. Par exemple, si nous voulions créer un package nommé <code>manhattan</code>, il faudrait d’abord créer un répertoire nommé <code>manhattan</code> sur notre ordinateur. Ce pourrait être par exemple le répertoire <code>&quot;C:/coursR/manhattan&quot;</code>.</p>
+</div>
+<div id="sous-repertoire-nomme-r" class="section level2">
+<h2>Sous-répertoire nommé <code>R</code></h2>
+<p>Le sous-répertoire <code>R</code> doit comprendre des fichiers de scripts R (portant l’extension <code>.R</code>) contenant le code de création des fonctions ainsi que les commentaires <code>roxygen2</code>, si c’est l’outil que nous utilisons pour générer la documentation (nous y reviendrons plus loin). Le développeur peut choisir les noms qu’il veut pour ces fichiers et il peut y répartir le code source comme il le veut. Évidemment, une bonne pratique est de répartir le code source de façon à ce que ce soit facile de s’y retrouver. Certains préconisent la stratégie « un fichier par fonction, portant le nom de la fonction », mais ce n’est pas obligatoire. La stratégie opposée, « un seul fichier contenant toutes les fonctions », représente rarement une bonne répartition du code, à moins que les fonctions soient très peu nombreuses.</p>
+</div>
+<div id="sous-repertoire-nomme-man" class="section level2">
+<h2>Sous-répertoire nommé <code>man</code></h2>
+<p>Le sous-répertoire <code>man</code> doit comprendre des fichiers sources de fiches d’aide R (portant l’extension <code>.Rd</code>). Nous allons voir à la prochaine étape comment générer ces fichiers à l’aide du package <code>roxygen2</code>.</p>
+</div>
+<div id="fichier-nomme-description" class="section level2">
+<h2>Fichier nommé <code>DESCRIPTION</code></h2>
+<p>L fichier `DESCRIPTION est très important pour la construction du package. C’est un fichier court, comportant de l’information de base sur le package. Ce fichier doit respecter une syntaxe précise.</p>
+
+<div id="exemple" class="section level4">
+<h4>Exemple :</h4>
+<pre><code>Package: manhattan
+Version: 1.0.0
+Date: 2019-03-21
+License: GPL-3
+Title: Distance de Manhattan
+Description: Calcul de la distance de Manhattan entre deux points.
+Author: Sophie Baillargeon [aut, cre],
+    Autre Auteur [aut]
+Maintainer: Sophie Baillargeon &lt;sophie.baillargeon@mat.ulaval.ca&gt;
+Imports: stats
+LazyData: true</code></pre>
+<p> </p>
+<p>Ce fichier contient des champs nommés. Un champ débute par son nom (première lettre toujours majuscule), immédiatement suivi d’un deux-points et d’un espace. Vient ensuite la valeur fournie à ce champ. Les valeurs données aux champs peuvent s’étendre sur plus d’une ligne.</p>
+<p>Les champs obligatoires sont les suivants : <code>Package</code>, <code>Version</code>, <code>License</code>, <code>Title</code>, <code>Description</code>, <code>Author</code>, et <code>Maintainer</code>.</p>
+<p>Les champs <code>Author</code>, et <code>Maintainer</code> peuvent être remplacés par un champ <code>Authors@R</code>. Les codes de rôles acceptés dans ces champs sont énumérés dans la fiche d’aide ouverte pas la commande <a href="https://stat.ethz.ch/R-manual/R-devel/library/utils/html/person.html"><code>help(person)</code></a>. Par exemple, le champ <code>Authors@R</code> suivant pourrait remplacer les champs <code>Author</code>, et <code>Maintainer</code> dans l’exemple précédent.</p>
+<pre><code>Authors@R: c(person(&quot;Sophie&quot;, &quot;Baillargeon&quot;, role = c(&quot;aut&quot;, &quot;cre&quot;),
+                    email = &quot;sophie.baillargeon@mat.ulaval.ca&quot;),
+             person(&quot;Autre&quot;, &quot;Auteur&quot;, role = &quot;aut&quot;))</code></pre>
+<p>Voici quelques informations spécifiques à certains champs :</p>
+<ul>
+<li><code>Package</code> : le nom du package fourni dans ce champ doit correspondre parfaitement au nom du répertoire contenant les fichiers sources du package;</li>
+<li><code>Version</code> : il s’agit d’une séquence d’au minimum 2 (souvent 3) nombres entiers non négatifs séparés par un seul caractère <code>.</code> (point) ou <code>-</code> (tiret);</li>
+<li><code>Maintainer</code> : ce champ doit contenir un seul nom, celui de la personne à contacter pour toute question ou tout problème à rapporter concernant le package, suivi d’une adresse courriel valide placée entre les caractères <code>&lt;</code> et <code>&gt;</code>;</li>
+<li><code>Imports</code> : ce champ contient la liste des packages à partir desquels des objets sont importés (nous laisserons <code>roxygen2</code> écrire ce champ pour nous);</li>
+<li><code>LazyData</code>: si la valeur <code>true</code> est fournie dans ce champ, les jeux de données contenus dans le package seront directement accessibles dans l’environnement du package, sans que l’utilisateur ait besoin d’utiliser la commande <code>data</code> (nous avions discuté des différentes façons d’accéder à des jeux de données dans un package dans les <a href="https://stt4230.rbind.io/packages/utilisation_packages_r/#jeux-de-donnees">notes sur l’utilisation de packages R</a>).</li>
+</ul>
+<p>Le fichier <code>DESCRIPTION</code> doit contenir uniquement des caractères <a href="https://fr.wikipedia.org/wiki/American_Standard_Code_for_Information_Interchange">ASCII</a>, sauf s’il contient un champ <code>Encoding</code>.</p>
+<p>L’information complète et officielle concernant ce fichier peut être trouvée sur la page web suivante :<br />
+<a href="http://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file" class="uri">http://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file</a></p>
+</div>
+</div>
+<div id="fichier-nomme-namespace" class="section level2">
+<h2>Fichier nommé <code>NAMESPACE</code></h2>
+<p>Le fichier <code>NAMESPACE</code> permet de définir quels objets sont accessibles dans un package, c’est-à-dire exportés de l’espace de noms du package. Ce fichier permet aussi d’identifier quels objets provenant d’autres packages sont utilisés dans le package, donc de définir le contenu de l’environnement des objets importés par le package. Nous allons voir comment utiliser <code>roxygen2</code> pour générer ce fichier.</p>
+</div>
+<div id="autres-fichiers-et-repertoires" class="section level2">
+<h2>Autres fichiers et répertoires</h2>
+<p>Un package peut contenir plusieurs autres fichiers et sous-répertoires. Voici quelques autres répertoires parfois nécessaires :</p>
+<ul>
+<li>Sous-répertoire nommé <code>data</code> : Si le package contient des jeux de données, ils se trouvent habituellement dans ce répertoire. Ceux-ci sont typiquement dans un format de données R (souvent <code>.rda</code> ou <code>.rdata</code>).</li>
+<li>Sous-répertoire nommé <code>src</code> : Si le package contient du code C, C++ ou Fortran, ce code doit se trouver dans ce répertoire.</li>
+<li>Sous-répertoire nommé <code>vignettes</code> : Si le package contient de la documentation autre que les fiches d’aide (par exemple un guide d’utilisateur), il devrait idéalement se trouver dans ce répertoire.</li>
+<li>etc. : <a href="http://cran.r-project.org/doc/manuals/r-release/R-exts.html#Package-subdirectories" class="uri">http://cran.r-project.org/doc/manuals/r-release/R-exts.html#Package-subdirectories</a></li>
+</ul>
+<p>Autres fichiers utiles :</p>
+<ul>
+<li>Fichier nommé <code>NEWS</code> : Ce fichier décrit les modifications apportées à un package lors d’une mise à jour. Sa mise en forme n’est pas vraiment importante.</li>
+<li>etc. : <a href="http://cran.r-project.org/doc/manuals/r-release/R-exts.html#Package-structure" class="uri">http://cran.r-project.org/doc/manuals/r-release/R-exts.html#Package-structure</a></li>
+</ul>
+</div>
+</div>
+<div id="etape-3.-ecrire-la-documentation-des-fonctions-et-du-package" class="section level1">
+<h1>Étape 3. Écrire la documentation des fonctions et du package</h1>
+<p>Documenter ses fonctions est une étape intégrée au développement des fonctions. Cependant, il faut maintenant écrire la documentation dans un format qui produira correctement les fiches d’aide qui doivent être incluses dans le package.</p>
+<p>Ces fiches d’aide proviennent en fait de fichiers portant l’extension <code>.Rd</code>. Cependant, nous ne verrons pas comment éditer directement ces fichiers. Nous allons plutôt apprendre à utiliser le package <code>roxygen2</code>, qui permet de générer des fichiers <code>.Rd</code>, ainsi que le fichier <code>NAMESAPCE</code>, de façon automatique, à partir de commentaires intégrés au code.</p>
+<p>L’utilisation de <code>roxygen2</code> comporte les avantages suivants :</p>
+<ul>
+<li>la documentation se situe dans le même fichier que le code, ce qui aide à se rappeler que la documentation doit être mise à jour si le code est modifié,</li>
+<li>la syntaxe <code>roxygen2</code> est un peu plus simple que la syntaxe des fichiers <code>.Rd</code>.</li>
+</ul>
+<p>Rappelons que dans un package il faut obligatoirement documenter :</p>
+<div id="les-fonctions-publiques" class="section level4">
+<h4>Les fonctions publiques</h4>
+<p>Il est essentiel de faire des fiches d’aide pour ces fonctions, afin que tout utilisateur comprenne comment appeler correctement la fonction. Si un utilisateur a mal compris la documentation et fournit par erreur une valeur d’argument invalide en entrée, il est aussi souhaitable que la fonction retourne une erreur informative. Le code de ces fonctions publiques comporte donc typiquement de la <strong>validation des arguments fournis en entrée</strong>.</p>
+<p>À l’opposé, les <strong>fonctions privées ou internes</strong> ne sont pas conçues pour être appelées par n’importe quel utilisateur. Ces fonctions ne sont pas exportées de l’espace de noms et elles ne sont pas documentées officiellement. Il est tout de même bon de documenter minimalement ces fonctions pour nous-mêmes, mais nous n’avons pas à produire de fiches d’aide pour elles. De plus, pour ne pas alourdir ces fonctions, elles comportent typiquement peu ou pas de validation d’arguments.</p>
+</div>
+<div id="les-jeux-de-donnees-dans-le-repertoire-data" class="section level4">
+<h4>Les jeux de données dans le répertoire <code>data</code></h4>
+<p>Chaque jeu de données dans le répertoire <code>data</code> d’un package doit être décrit dans une fiche d’aide pour expliquer son contenu.</p>
+</div>
+<div id="les-classes-et-methodes-s4-ou-rc-publiques" class="section level4">
+<h4>Les classes et méthodes S4 ou RC publiques</h4>
+<p>Les packages exploitant le système de programmation orientée objet S4<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> ou le système RC<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> doivent fournir des fiches d’aide pour les classes et méthodes publiques.</p>
+</div>
+<div id="il-est-aussi-recommande-de-documenter" class="section level4">
+<h4>Il est aussi recommandé de documenter :</h4>
+<ul>
+<li>Les méthodes S3 pour des fonctions génériques :</li>
+</ul>
+<p>Nous pouvons leur faire une fiche d’aide indépendante ou encore les documenter dans la même fiche d’aide que la fonction qui crée les objets de la classe en question.</p>
+<ul>
+<li>Le package lui-même :</li>
+</ul>
+<p>Il est utile de créer une fiche d’aide présentant le package.</p>
+</div>
+<div id="comment-ecrire-de-la-documentation-avec-roxygen2" class="section level2">
+<h2>Comment écrire de la documentation avec <code>roxygen2</code> ?</h2>
+<p>Il suffit d’insérer des « commentaires » <code>roxygen2</code> dans le code source des fonctions, donc dans les scripts situés dans le sous-répertoire <code>R</code>. Un commentaire <code>roxygen2</code> débute par <code>#'</code>, ce qui le distingue d’un commentaire ordinaire, qui débute par <code>#</code>.</p>
+<div id="exemples" class="section level4">
+<h4>Exemples :</h4>
+<p>D’abord, voici des exemples de scripts R contenant des commentaires <code>roxygen2</code>. Des explications se retrouvent après les exemples. Ces exemples poursuivent l’exemple de création d’une fonction qui calcule la distance de Manhattan entre deux points provenant des notes <a href="https://stt4230.rbind.io/programmation/tests_exceptions_r/">Tests et exceptions en R</a>.</p>
+<p> </p>
+<p>Fichier <code>C:/coursR/manhattan/R/distman.R</code> :</p>
+<pre class="r"><code>#&#39; Distance de Manhattan
+#&#39; 
+#&#39; Calcule la distance de Manhattan entre deux points
+#&#39; 
+#&#39; @param point1 Un vecteur numerique des coordonnees du premier point.
+#&#39; @param point2 Un vecteur numerique des coordonnees du deuxieme point.
+#&#39; @return une seule valeur : la distance de Manhattan entre 
+#&#39;                            \code{point1} et \code{point2}
+#&#39; @author Sophie Baillargeon
+#&#39; @export
+#&#39; @examples
+#&#39; distman(point1 = c(0,-5), point2 = c(0,-15))
+distman &lt;- function(point1, point2) {
+  # Validation des arguments
+  if (length(point1) != length(point2)) 
+    stop(&quot;&#39;point1&#39; and &#39;point2&#39; must have the same length&quot;)
+  if (!is.null(dim(point1)) || !is.null(dim(point2)))
+    warning(&quot;&#39;point1&#39; and &#39;point2&#39; are treated as dimension 1 vectors&quot;)
+  # Calculs
+  out &lt;- list(dist = sum(abs(point1 - point2)))
+  # Sortie
+  class(out) &lt;- &quot;distman&quot;
+  return(out)
+}</code></pre>
+<p> </p>
+<p>Fichier <code>C:/coursR/manhattan/R/distman2.R</code> :</p>
+<pre class="r"><code>#&#39; Distance de Manhattan
+#&#39; 
+#&#39; Calcule la distance de Manhattan entre deux points
+#&#39; 
+#&#39; Utilise la fonction \code{\link[stats]{dist}} du package \pkg{stats}.
+#&#39; 
+#&#39; @param point1 Un vecteur numerique des coordonnees du premier point.
+#&#39; @param point2 Un vecteur numerique des coordonnees du deuxieme point.
+#&#39; @return \item{dist}{ la distance de Manhattan entre \code{point1} et \code{point2} }
+#&#39; @return \item{call}{ une copie de l&#39;appel de la fonction }
+#&#39; @author Sophie Baillargeon
+#&#39; @export
+#&#39; @importFrom stats dist
+#&#39; @examples
+#&#39; distman2(point1 = c(0,-5), point2 = c(0,-15)) 
+distman2 &lt;- function(point1, point2) {
+  call &lt;- match.call()
+  dist &lt;- stats::dist(rbind(point1, point2), method = &quot;manhattan&quot;)
+  out &lt;- list(dist = as.vector(dist), call = call)
+  class(out) &lt;- &quot;distman&quot;
+  return(out)
+}</code></pre>
+<p> </p>
+<p>Fichier <code>C:/coursR/manhattan/R/print.distman.R</code> :</p>
+<pre class="r"><code>#&#39; @describeIn distman Affiche un objet de classe \code{&quot;distman&quot;}
+#&#39; @param x Un objet produit par la fonction \code{distman}, a afficher.
+#&#39; @param \dots D&#39;autres arguments passes a d&#39;autres methodes. 
+#&#39; @export
+print.distman &lt;- function(x, ...) {
+  cat(&quot;Manhattan distance between &#39;point1&#39; and &#39;point2&#39; :&quot;, x$dist, &quot;\n&quot;)
+  invisible(x)
+}</code></pre>
+<p> </p>
+<p>Fichier <code>C:/coursR/manhattan/R/manhattan.R</code> :</p>
+<pre class="r"><code>#&#39; @details
+#&#39; \tabular{ll}{
+#&#39; Package: \tab manhattan\cr
+#&#39; Type: \tab Package\cr
+#&#39; Version: \tab 1.0.0\cr
+#&#39; Date: \tab 2019-04-02\cr
+#&#39; License: \tab GPL-3\cr
+#&#39; }
+&quot;_PACKAGE&quot;
+
+#&#39; Points aleatoires
+#&#39;
+#&#39; Coordonnes en deux dimensions de 10 points aleatoires.
+#&#39;
+#&#39; @format Une matrice contenant 10 points designes par les
+#&#39;         coordonnees suivantes.
+#&#39; \describe{
+#&#39;   \item{\code{X}}{ coordonnee en X }
+#&#39;   \item{\code{Y}}{ coordonnee en Y }
+#&#39; }
+#&#39; @examples
+#&#39; distman(point1 = points[4, ], point2 = points[8, ])
+#&#39;
+#&#39; # Note : Ces donnees ont ete crees par les instructions suivantes
+#&#39; points &lt;- matrix(sample(1:10, size = 20, replace = TRUE),
+#&#39;                  nrow = 10, ncol = 2)
+#&#39; colnames(points) &lt;- c(&quot;X&quot;, &quot;Y&quot;)
+&quot;points&quot;</code></pre>
+</div>
+<div id="explications" class="section level4">
+<h4>Explications :</h4>
+<p>Pour les fonctions et les méthodes associées à des fonctions génériques, il suffit de mettre en entête au code source les commentaires <code>roxygen2</code> qui généreront la documentation. Pour le package et les jeux de données, il faut ajouter un fichier d’extension <code>.R</code> dans le répertoire <code>R</code>. Ce fichier doit contenir les commentaires <code>roxygen2</code> pour documenter globalement le package, suivi de l’instruction <code>&quot;_PACKAGE&quot;</code>, et les commentaires pour documenter les jeux de données, chaque bloc suivi du nom du jeu de données sous forme de chaîne de caractères (par exemple <code>&quot;points&quot;</code>) .</p>
+<p>La première phrase de ces commentaires doit être le <strong>titre</strong> de la fiche d’aide. Ce titre peut optionnellement être précédé du tag <code>@title</code>.</p>
+<p>Cette phrase doit être suivie d’une ligne de commentaire <code>roxygen2</code> vide, puis du texte à mettre dans la section <strong>Description</strong>. Ce paragraphe peut optionnellement être précédé du tag <code>@description</code>.</p>
+<p>Si nous souhaitons avoir une section <strong>Details</strong>, il faut mettre à la suite de ce texte une ligne de commentaire <code>roxygen2</code> vide. Tout le texte après cette ligne vide, mais avant les lignes débutant par un tag <code>roxygen2</code> formera la section <strong>Details</strong>. Ces paragraphes peuvent optionnellement être précédés du tag <code>@details</code>.</p>
+<p>Ainsi, les deux documentations suivantes sont équivalentes :</p>
+<pre class="r"><code>#&#39; Distance de Manhattan
+#&#39; 
+#&#39; Calcule la distance de Manhattan entre deux points
+#&#39; 
+#&#39; Utilise la fonction \code{\link[stats]{dist}} du package \pkg{stats}.
+#&#39; 
+#&#39; @param point1 Un vecteur numerique des coordonnees du premier point.
+#&#39; @param point2 Un vecteur numerique des coordonnees du deuxieme point.
+#&#39; @return \item{dist}{ la distance de Manhattan entre \code{point1} et \code{point2} }
+#&#39; @return \item{call}{ une copie de l&#39;appel de la fonction }
+#&#39; @author Sophie Baillargeon
+#&#39; @export
+#&#39; @importFrom stats dist
+#&#39; @examples
+#&#39; distman2(point1 = c(0,-5), point2 = c(0,-15)) 
+distman2 &lt;- function(point1, point2) {
+  ... (code omis ici)
+}</code></pre>
+<p>et</p>
+<pre class="r"><code>#&#39; @title Distance de Manhattan
+#&#39; @description Calcule la distance de Manhattan entre deux points
+#&#39; @details Utilise la fonction \code{\link[stats]{dist}} du package \pkg{stats}.
+#&#39; @param point1 Un vecteur numerique des coordonnees du premier point.
+#&#39; @param point2 Un vecteur numerique des coordonnees du deuxieme point.
+#&#39; @return \item{dist}{ la distance de Manhattan entre \code{point1} et \code{point2} }
+#&#39; @return \item{call}{ une copie de l&#39;appel de la fonction }
+#&#39; @author Sophie Baillargeon
+#&#39; @export
+#&#39; @importFrom stats dist
+#&#39; @examples
+#&#39; distman2(point1 = c(0,-5), point2 = c(0,-15)) 
+distman2 &lt;- function(point1, point2) {
+  ... (code omis ici)
+}</code></pre>
+<p>Les sections qui suivent le titre et la description, qui sont obligatoires, et les informations détaillées (cette section est optionnelle), débutent toutes par des tags. Il faut obligatoirement décrire, si la fonction en possède :</p>
+<ul>
+<li>les arguments en entrée avec le tag <code>@param</code> :<br />
+il faut une description par argument, de la forme <code>@param nomArgument description</code>, où la description peut s’étendre sur plusieurs lignes;</li>
+<li>la sortie avec le tag <code>@return</code> :<br />
+si la fonction retourne une liste, il est recommandé d’avoir une description par élément de la liste, de la forme <code>@return \item{nomElementDeLaListe}{description}</code>, où la description peut encore une fois s’étendre sur plusieurs lignes.</li>
+</ul>
+<p>Il est recommandé de toujours mettre des exemples dans une fiche d’aide. Dans la documentation <code>roxygen2</code>, ceux-ci doivent être ajoutés à la fin du bloc de documentation, après le tag <code>@examples</code>.</p>
+<p>Nous pouvons aussi ajouter les informations suivantes :</p>
+<ul>
+<li>les noms des auteurs avec le tag <code>@author</code>,</li>
+<li>des références avec le tag <code>@references</code>,</li>
+<li>des liens vers les fiches d’aide de fonction en lien avec la fonction documentée avec le tag <code>@seealso</code>,</li>
+<li>etc. (Il ne semble pas encore exister de liste formelle de tous les tags <code>roxygens</code>, mais ces tags sont présentés via les vignettes du package <code>roxygen2</code> : <a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html" class="uri">https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html</a>.)</li>
+</ul>
+<div id="documenter-plusieurs-fonctions-dans-la-meme-fiche" class="section level5">
+<h5>Documenter plusieurs fonctions dans la même fiche</h5>
+<p>Les tags <code>@rdname</code> et <code>@describeIn</code> servent à présenter plusieurs fonctions dans la même fiche d’aide. Dans l’exemple, la fonction <code>distman</code> et la méthode <code>print.distman</code> sont documentées dans la même fiche d’aide grâce au tag <code>@describeIn</code>. Ce tag doit être suivi du nom de la fiche dans laquelle de l’information doit être ajouté, puis d’une courte description à propos de la fonction ou méthode documentée.</p>
+</div>
+<div id="documenter-des-jeux-de-donnees" class="section level5">
+<h5>Documenter des jeux de données</h5>
+<p>Pour documenter des jeux de données, deux tags supplémentaires sont disponibles :</p>
+<ul>
+<li><code>@format</code> pour décrire la structure R qui contient les données,</li>
+<li><code>@source</code> pour fournir une référence concernant la provenance des données.</li>
+</ul>
+</div>
+<div id="nom-des-fiches-daide" class="section level5">
+<h5>Nom des fiches d’aide</h5>
+<p>Nous pouvons contrôler le nom des fiches d’aide avec le tag <code>@name</code>. Sans ce tag, la fiche d’aide porte le nom de la fonction ou le nom du jeu de données qui suit le bloc de documentation <code>roxygen2</code>. Pour une documentation de package, l’instruction <code>&quot;_PACKAGE&quot;</code> qui suit le bloc de documentation indique à <code>roxygen2</code> d’utiliser le nom du package suivi de <code>-package</code> comme nom de fiche d’aide. Dans l’exemple, le nom de la fiche d’aide du package est donc <code>manhattan-package</code>. Cependant, <code>roxygen2</code> crée aussi un alias pour le nom de la fiche d’aide qui est le nom du package.</p>
+<p>Pour ouvrir une fiche d’aide avec la fonction <code>help</code> ou l’opérateur <code>?</code>, il faut lui donner en entrée le nom de la fiche ou un alias du nom de la fiche. Il est donc important de nommer intelligemment nos fiches d’aide. La norme est de donner à une fiche d’aide le nom de l’objet principal qu’elle documente et d’ajouter des alias pour les noms des autres objets documentés dans la fiche (c’est ce que fait <code>roxygen2</code> de façon automatique lorsque les tags <code>@rdname</code> et <code>@describeIn</code> sont utilisés).</p>
+</div>
+<div id="texte-formate-dans-des-fiche-daide" class="section level5">
+<h5>Texte formaté dans des fiche d’aide</h5>
+<p>Dans les commentaires <code>roxygen2</code>, il est possible de formater du texte en utilisant les tags de mises en forme acceptés dans les fichiers <code>.Rd</code>. Ces tags, par exemple <code>\code{}</code>, <code>\pkg{}</code>, <code>\item{}</code>, <code>\link{}</code>, <code>\dots</code>, etc., sont documentés sur la page web suivante : <a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/formatting.html" class="uri">https://cran.r-project.org/web/packages/roxygen2/vignettes/formatting.html</a>.</p>
+</div>
+<div id="tags-pour-definir-le-namespace" class="section level5">
+<h5>Tags pour définir le <code>NAMESPACE</code></h5>
+<p>Il est aussi essentiel de mettre les tags pour l’écriture du <code>NAMESPACE</code> :</p>
+<ul>
+<li>le tag <code>@export</code> exporte une fonction du <code>NAMESPACE</code> (donc la rend publique),</li>
+<li>le tag <code>@importFrom</code> assure l’importation des fonctions provenant d’autres packages qui sont utilisées dans le code de notre package.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="comment-generer-les-fichiers-.rd-et-le-fichier-namespace" class="section level2">
+<h2>Comment générer les fichiers .Rd et le fichier <code>NAMESPACE</code> ?</h2>
+<p>Pour générer les fichiers <code>.Rd</code> et le fichier <code>NAMESPACE</code>, il suffit de lancer la commande <code>roxygenize</code> du package <code>roxygen2</code>. La commande peut être lancée directement dans la console. Par exemple</p>
+<pre class="r"><code>roxygenize(&quot;C:/coursR/manhattan&quot;)</code></pre>
+<p>Elle peut aussi être lancée par l’intermédiaire d’un menu de RStudio (voir prochaine section).</p>
+<p>Dans l’exemple présenté précédemment, les commentaires <code>roxygen2</code> des fichiers <code>&quot;distman.R&quot;</code>, <code>&quot;distman2.R&quot;</code>, <code>&quot;print.distman.R&quot;</code> et <code>&quot;manhattan.R&quot;</code>, du sous-répertoire <code>&quot;C:/coursR/manhattan/R&quot;</code>, ont produit les fichiers suivants :</p>
+<ul>
+<li><code>NAMESPACE</code> dans le répertoire <code>C:/coursR/manhattan/</code>;</li>
+<li><code>distman.Rd</code>, <code>distman2.Rd</code>, <code>manhattan.Rd</code> et <code>points.Rd</code> dans le répertoire <code>C:/coursR/manhattan/man/</code>.</li>
+</ul>
+<p>Le fichier <code>C:/coursR/manhattan/NAMESPACE</code> est le suivant :</p>
+<p> </p>
+<pre class="r"><code># Generated by roxygen2: do not edit by hand
+
+S3method(print,distman)
+export(distman)
+export(distman2)
+importFrom(stats,dist)</code></pre>
+
+<p>Voici de quoi a l’air un des fichiers d’extension <code>.Rd</code> généré.</p>
+<p>Fichier <code>&quot;C:/coursR/manhattan/man/distman.Rd&quot;</code> :</p>
+<pre class="tikz"><code>% Generated by roxygen2: do not edit by hand
+% Please edit documentation in R/distman.R, R/print.distman.R
+\name{distman}
+\alias{distman}
+\alias{print.distman}
+\title{Distance de Manhattan}
+\usage{
+distman(point1, point2)
+
+\method{print}{distman}(x, ...)
+}
+\arguments{
+\item{point1}{Un vecteur numerique des coordonnees du premier point.}
+
+\item{point2}{Un vecteur numerique des coordonnees du deuxieme point.}
+
+\item{x}{Un objet produit par la fonction \code{distman}, a afficher.}
+
+\item{\dots}{D&#39;autres arguments passes a d&#39;autres methodes.}
+}
+\value{
+une seule valeur : la distance de Manhattan entre
+                           \code{point1} et \code{point2}
+}
+\description{
+Calcule la distance de Manhattan entre deux points
+}
+\section{Methods (by generic)}{
+\itemize{
+\item \code{print}: Affiche un objet de classe \code{&quot;distman&quot;}
+}}
+
+\examples{
+distman(point1 = c(0,-5), point2 = c(0,-15))
+}
+\author{
+Sophie Baillargeon
+}</code></pre>
+<p> </p>
+<p>Ces fichiers utilisent une syntaxe inspirée de la syntaxe de LaTeX. Lorsque nous utilisons <code>roxygen2</code>, nous n’avons pas besoin d’éditer directement ces fichiers, donc nous n’avons pas besoin de comprendre leur syntaxe. La syntaxe de <code>roxygen2</code> est plus simple.</p>
+
+</div>
+</div>
+<div id="etape-4.-construire-et-verifier-le-package" class="section level1">
+<h1>Étape 4. Construire et vérifier le package</h1>
+<p>Une fois les étapes 1 à 3 complétées, nous sommes prêts à construire le fichier compressé du package à partir du répertoire contenant les fichiers source. En fait, nous allons aussi à cette étape vérifier le répertoire afin de s’assurer qu’il produira un package conforme.</p>
+<p>Ces tâches se réalisent avec les utilitaires :</p>
+<ul>
+<li><code>R CMD check</code>,</li>
+<li><code>R CMD build</code>,</li>
+<li><code>R CMD INSTALL</code>.</li>
+</ul>
+<p>Ces utilitaires s’exploitent par des commandes soumises dans le <em>terminal</em> sous Unix / Linux ou Mac OS X / OS X / macOS et dans une fenêtre <em>invite de commandes</em> sous Windows. Dans ces notes, nous verrons comment utiliser un outil qui soumet ces commandes à notre place, sans que nous ayons besoin d’ouvrir le terminal ou la fenêtre d’invite de commandes.</p>
+<p>Les utilitaires <code>R CMD</code> <a href="https://stat.ethz.ch/R-manual/R-devel/library/utils/html/PkgUtils.html"><code>check</code>, <code>build</code></a> et <a href="http://stat.ethz.ch/R-manual/R-devel/library/utils/html/INSTALL.html"><code>INSTALL</code></a> sont inclus dans l’installation de base de R (dans le package <code>utils</code>). Cependant, ils nécessitent des outils supplémentaires pour fonctionner : les outils de développement de logiciel GNU, incluant un compilateur C/C++. Voici comment s’assurer que ces outils sont installés sur notre ordinateur, selon le système d’exploitation (plus de détails sur la page <a href="https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites" class="uri">https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites</a>) :</p>
+<ul>
+<li><p>Windows : il faut installer les « Rtools », téléchargeable sur la page web <a href="https://cran.r-project.org/bin/windows/Rtools/" class="uri">https://cran.r-project.org/bin/windows/Rtools/</a> (plus de détails dans le <a href="https://stt4230.rbind.io/introduction/installation_r_rstudio/#rtools">Guide d’installation ou de mise à jour de R et RStudio</a>);</p></li>
+<li><p>Mac OS X / OS X / macOS : il faut installer les « Apple Xcode developer tools », disponibles gratuitement sur le « App Store », s’ils ne sont pas déjà installés (souvent installés par défaut);</p></li>
+<li><p>Unix / Linux : il faut s’assurer d’avoir installé R accompagné des ses « development tools » (<code>r-base-dev</code>).</p></li>
+</ul>
+<p>Le package <code>pkgbuild</code> comporte une fonction pour tester si tout le nécessaire au développement de package est installé et fonctionne correctement.</p>
+<pre class="r"><code>library(pkgbuild)
+has_build_tools()</code></pre>
+<p>Si cet appel à la fonction <code>has_build_tools</code> retourne <code>TRUE</code>, alors tout est fonctionnel.</p>
+<p>De plus, une des commandes R pour le développement de packages, soit <code>R CMD check</code>, a besoin d’une installation de LaTeX pour tester la création de la documentation des packages en format PDF. Pour développer des packages, vous avez donc le choix entre :</p>
+<ul>
+<li>installer LaTeX sur votre ordinateur :
+<ul>
+<li>une version gratuite pour Windows est MiKTeX (<a href="https://miktex.org/download" class="uri">https://miktex.org/download</a>),</li>
+<li>une version gratuite pour Mac OS X / OS X / macOS est MacTeX (<a href="http://www.tug.org/mactex/" class="uri">http://www.tug.org/mactex/</a>),</li>
+<li>les systèmes Unix / Linux viennent habituellement par défaut avec une distribution de LaTeX;</li>
+</ul></li>
+<li>omettre la création de la documentation PDF lors de la soumission de la commande <code>R CMD check</code> grâce à l’option <code>--no-manual</code> (plus d’informations à venir en temps opportun).</li>
+</ul>
+<div id="lancement-des-commandes-de-construction-et-de-verification-en-rstudio" class="section level2">
+<h2>Lancement des commandes de construction et de vérification en RStudio</h2>
+<p><strong>RStudio</strong> peut <a href="https://support.rstudio.com/hc/en-us/articles/200486488?version=1.1.423&amp;mode=desktop">lancer pour nous les commandes de construction et de vérification de packages</a>. Le logiciel rend le processus vraiment plus simple que de lancer les commandes manuellement dans le <em>terminal</em> ou l’<em>invite de commandes</em>. Nous apprendrons donc seulement comment construire et vérifier un package avec <strong>RStudio</strong>.</p>
+
+<div id="sous-etape-a-creer-un-projet-rstudio-avec-le-repertoire-principal-du-package" class="section level3">
+<h3>Sous-étape a) Créer un projet RStudio avec le répertoire principal du package</h3>
+<p>Il faut tout d’abord créer un projet RStudio avec le répertoire principal de notre package. Pour ce faire, nous pouvons procéder comme suit :</p>
+<ul>
+<li>ouvrir le menu « File » et sélectionner « New Project… » (il y a aussi un bouton dans la barre de RStudio en haut à droite, nommé à l’origine « Project: (None) » qui ouvre un menu contenant aussi l’élément « New Project… »),</li>
+<li>sélectionner « Existing Directory »,</li>
+<li>sélectionner le répertoire principal du package, c’est-à-dire le répertoire portant le nom du package et contenant les fichiers sources,</li>
+<li>cliquer sur « Create Project ».</li>
+</ul>
+<p>Le projet sera créé et ouvert. Ça ajoute des fichiers dans le répertoire de notre package. Nous ne nous préoccuperons pas de ces fichiers. Ils sont automatiquement ignorés lors de la construction du package avec RStudio.</p>
+<p><strong>Note</strong> : Si nous sélectionnons « New Directory » plutôt que « Existing Directory », puis « R package », RStudio crée un squelette de répertoire de fichiers source de package.</p>
+</div>
+<div id="sous-etape-b-configurer-les-options-de-rstudio" class="section level3">
+<h3>Sous-étape b) Configurer les options de RStudio</h3>
+<p>Voici quelques configurations de RStudio que je conseille d’utiliser.</p>
+<div id="options-globales" class="section level4">
+<h4>Options globales :</h4>
+<p>(à modifier une seule fois)</p>
+<ul>
+<li>par le menu « Tools &gt; Global Options… »,</li>
+<li>dans « Packages », décocher « Cleanup output after successful R CMD check ».</li>
+</ul>
+<p>Les répertoires générés par la commande <code>R CMD check</code> ne seront ainsi pas effacés et nous pourrons, par exemple, aller y récupérer la version PDF de la documentation du package.</p>
+</div>
+<div id="options-du-projet" class="section level4">
+<h4>Options du projet :</h4>
+<p>(à modifier pour chaque nouveau projet)</p>
+<ul>
+<li>par le menu « Tools &gt; Project Options… »;</li>
+<li>dans « Build Tools » :
+<ul>
+<li>décocher « Use devtools package functions if available » (seulement nécessaire si nous souhaitons que la commande <code>R CMD check</code> génère la version PDF de la documentation du package),</li>
+<li>cocher « Generate documentation with Roxygen »,</li>
+<li>si le menu de configuration ne s’ouvre pas automatiquement, cliquez sur « Configure… », puis assurez-vous que les options suivantes soient cochées :
+<ul>
+<li>« Use roxygen to generate » : « Rd files » et « NAMESPACE »,</li>
+<li>« Automatically roxygenize when running » : tout cocher.</li>
+</ul></li>
+</ul></li>
+</ul>
+<p>Avec ces dernières configurations, la majorité des commandes de construction et de vérification de package lancées par le menu « Build » (voir ci-dessous) vont d’abord soumettre la commande <code>roxygenize</code> sur le répertoire du package avant de faire leur travail. Ainsi, les fichiers <code>.Rd</code> de documentation et le fichier <code>NAMESPACE</code> seront mis à jour à chaque lancement d’une de ces commandes</p>
+<p>Nous pouvons aussi soumettre la commande <code>roxygenize</code> par le menu « <strong>Build &gt; Document</strong> ».</p>
+<p><strong>Note</strong> : Si vous n’avez pas de compilateur LaTeX sur votre ordinateur, ajoutez l’option suivante à <code>R CMD check</code> : <code>--no-manual</code>. Cette fonction indique à <code>R CMD check</code> de ne pas vérifier la compilation de la version PDF de la documentation du package.</p>
+</div>
+</div>
+<div id="sous-etape-c-construire-a-partir-du-menu-build-de-rstudio" class="section level3">
+<h3>Sous-étape c) Construire à partir du menu « Build » de RStudio</h3>
+<p>Il est préférable de toujours d’abord s’assurer que le package passe sans erreur ou avertissements problématiques la vérification faite par la commande <code>R CMD check</code>. Ensuite, nous pouvons construire le package, soit dans sa version source, soit dans sa version binaire. Voici comment faire tout ça facilement en RStudio.</p>
+<ul>
+<li><p>Pour vérifier le package :<br />
+menu « <strong>Build &gt; Check Package</strong> » (lance en fait la commande <code>R CMD check</code>).</p></li>
+<li><p>Pour créer le package source (qui est aussi la version Unix / Linux) :<br />
+menu « <strong>Build &gt; Build Source Package</strong> » (lance en fait la commande <code>R CMD build</code>)<br />
+<span class="math inline">\(\rightarrow\)</span> un fichier nommé <code>&quot;nomPackage_numeroVersion.tar.gz&quot;</code> (dans notre exemple<br />
+<code>manhattan_1.0.0.tar.gz</code>) sera créé dans le répertoire au-dessus du répertoire principal du package.</p></li>
+<li><p>Pour créer le package binaire (si nous travaillons sous Windows ou Mac OS X / OS X / macOS) :<br />
+menu « <strong>Build &gt; Build Binary Package</strong> » (lance en fait la commande <code>R CMD INSTALL --build</code>)<br />
+<span class="math inline">\(\rightarrow\)</span> un fichier nommé <code>nomPackage_numeroVersion.zip</code> (sous Windows) ou <code>nomPackage_numeroVersion.tgz</code> (sous Mac OS X / OS X / macOS) sera créé dans le répertoire au-dessus du répertoire principal du package.</p></li>
+</ul>
+<p>La commande « <strong>Install and Restart</strong> » est pratique en cours de travail. Elle permet de construire le package dans le bon format pour notre système d’exploitation, l’installer (donc remplacer l’ancienne installation par la nouvelle) et charger de nouveau le package (avec la commande <code>library</code>).</p>
+<p>Vous trouverez en annexe des solutions à certains problèmes techniques déjà rencontrés lors du lancement d’une commande <code>R CMD</code>.</p>
+</div>
+</div>
+<div id="lancement-des-commandes-de-construction-et-de-verification-avec-devtools" class="section level2">
+<h2>Lancement des commandes de construction et de vérification avec <code>devtools</code></h2>
+<p>Nous ne couvrirons pas cette option ici, mais les commandes de construction et de vérification d’un package peuvent aussi être soumises à l’aide de fonctions du package <code>devtools</code> (<a href="https://github.com/hadley/devtools" class="uri">https://github.com/hadley/devtools</a>). Comme les utilitaires de RStudio, ces fonctions permettent de soumettre des commandes <code>R CMD</code> sans passer nous-mêmes par le terminal ou l’invite de commandes. Avec <code>devtools</code>, tout se réalise via des commandes soumises dans la console R.</p>
+</div>
+</div>
+<div id="etape-5.-si-desire-partager-le-package" class="section level1">
+<h1>Étape 5. Si désiré, partager le package</h1>
+<p>Notre package est maintenant prêt à être utilisé. Si nous souhaitons le partager avec le grand public, nous pouvons le rendre disponible sur le CRAN. Pour ce faire, il faut d’abord s’assurer de respecter les politiques du CRAN : <a href="http://cran.r-project.org/web/packages/policies.html" class="uri">http://cran.r-project.org/web/packages/policies.html</a>. Comme mentionné précédemment, il faut donc que notre package passe le <code>R CMD check --as-cran</code> sans erreurs ni avertissements.</p>
+<p>Une fois s’être assuré de respecter les politiques du CRAN, nous pouvons soumettre notre package au CRAN en ligne par l’intermédiaire de l’interface web suivante : <a href="https://cran.r-project.org/submit.html" class="uri">https://cran.r-project.org/submit.html</a></p>
+<p>Il suffit de suivre les instructions.</p>
+</div>
+<div id="etape-6.-au-besoin-mettre-a-jour-le-package" class="section level1">
+<h1>Étape 6. Au besoin, mettre à jour le package</h1>
+<p>Mettre à jour un package signifie de le modifier pour ajouter des fonctionnalités et/ou corriger des bogues. Lors d’une mise à jour, il faut suivre les étapes suivantes.</p>
+<div id="sous-etape-a-incrementer-le-numero-de-version" class="section level4">
+<h4>Sous-étape a) Incrémenter le numéro de version :</h4>
+<p>Cette incrémentation doit être effectuée dans le fichier <code>DESCRIPTION</code>, ainsi que dans tout commentaire <code>roxygen2</code> mentionnant la date de construction du package, par exemple dans la fiche d’aide du package.</p>
+<p>Rappelons qu’un numéro de version est une séquence d’au minimum 2 (souvent 3) nombres entiers non négatifs séparés par un seul caractère caractère <code>.</code> (point) ou <code>-</code> (tiret). Ces nombres ne sont pas contraints à être compris entre 0 et 9.</p>
+<p>Voici les règles que plusieurs développeurs de packages R suivent dans la numérotation des versions de leurs packages. Ils forment les numéros de version de 3 nombres entiers séparés par un point. En cours de développement, soit avant d’avoir une version qu’ils considèrent suffisamment testée, ils utilisent un 0 comme premier nombre dans le numéro de version (par exemple 0.9.12). Lorsqu’ils jugent leur package assez fiable pour être rendu disponible à plus grande échelle qu’à l’interne, ils changent le premier nombre dans le numéro de version pour 1, ce qui fait retomber à zéro les nombres suivants. La première version officielle porte donc le numéro de version 1.0.0.</p>
+<p>Ensuite, ils font évoluer les numéros de version comme suit.</p>
+<ul>
+<li><p>Lors d’une mise à jour majeure (beaucoup de nouvelles fonctionnalités) : le premier nombre de la numérotation est incrémenté de 1, les nombres subséquents retombent à 0.</p></li>
+<li><p>Lors d’une mise à jour mineure (seulement quelques fonctionnalités pas trop importantes ont été ajoutées ou d’importants bogues ont été réglés) : le premier nombre est inchangé, par contre le deuxième est incrémenté de 1 et le dernier retombe à 0.</p></li>
+<li><p>Si seulement quelques bogues ont été corrigés, sans changer du tout les fonctionnalités : le troisième nombre de la numérotation est incrémenté de 1, sans modifier les deux premiers nombres.</p></li>
+</ul>
+<p>La page Wikipédia <a href="https://en.wikipedia.org/wiki/Software_versioning" class="uri">https://en.wikipedia.org/wiki/Software_versioning</a> traite de ce sujet et propose d’autres règles.</p>
+</div>
+<div id="sous-etape-b-faire-les-mises-a-jour-dans-le-code" class="section level4">
+<h4>Sous-étape b) Faire les mises à jour dans le code :</h4>
+<p>L’ajout de fonctionnalités ou la correction de bogues impliquent des modifications à apporter au code.</p>
+</div>
+<div id="sous-etape-c-documenter-les-modifications" class="section level4">
+<h4>Sous-étape c) Documenter les modifications :</h4>
+<p>Les commentaires <code>roxygen2</code> produisant les fiches d’aide doivent être mis à jour de façon à refléter les modifications apportées au code. Une correction d’un bogue ne nécessite pas toujours de mise à jour des fiches d’aide, mais un ajout de fonctionnalités en nécessite toujours.</p>
+<p>Je conseille vivement aussi de documenter les mises à jour dans un fichier <code>NEWS</code>. Ce fichier est un point de repère pour un utilisateur d’un package qui souhaite identifier ce qui a changé lors d’une mise à jour, donc ce qui pourrait affecter son utilisation du package.</p>
+<p>Il n’y a pas de consensus en R à propos de comment rédiger le fichier <code>NEWS</code>, ni de l’endroit où le placer dans les fichiers source. Nous pouvons observer, notamment, les pratiques suivantes :</p>
+<ul>
+<li>fichier <code>NEWS</code> en format texte simple (dont le nom de fichier ne porte pas d’extension), placé dans le répertoire principal (au même niveau que les fichiers <code>DESCRIPTION</code> et <code>NAMESPACE</code>);</li>
+<li>fichier <code>NEWS.md</code> en format Markdown, placé dans le répertoire principal;</li>
+<li>fichier <code>NEWS</code> en format texte simple (dont le nom de fichier ne porte pas d’extension), placé dans le sous-répertoire <code>inst</code>;</li>
+<li>fichier <code>NEWS.Rd</code> en format <code>.Rd</code>, placé dans le sous-répertoire <code>inst</code>.</li>
+</ul>
+<p>La première des pratiques est probablement la plus répandue.</p>
+<p>Voici à quoi pourrait ressembler un fichier <code>NEWS</code> en format texte simple pour l’exemple du package <code>manhattan</code>, après l’avoir mis à jour.</p>
+
+<p>Fichier <code>&quot;C:/coursR/manhattan/NEWS&quot;</code> :</p>
+<pre class="tikz"><code>Changements dans manhattan version 1.1.0 (2019-04-02)
+ 
+* modifications des fonctions distman et distman2 afin qu&#39;elles
+  puissent calculer la distance entre plusieurs points
+
+* ajout d&#39;une methode plot pour un objet de classe &quot;distman&quot;
+ 
+
+Changements dans manhattan version 1.0.0 (2019-03-21)
+
+* premiere version du package manhattan</code></pre>
+<p> </p>
+<p>Si nous installions la version 1.1.0 du package et que nous chargions le package en R avec la commande <code>library</code>, nous pourrions afficher son fichier <code>NEWS</code> dans la console avec la instructions suivantes :</p>
+<pre class="r"><code>nouvelles &lt;- news(package = &quot;manhattan&quot;)
+print(nouvelles, doBrowse = FALSE)</code></pre>
+<p>Nous pouvons aussi voir le fichier <code>NEWS</code> des packages distribués sur le CRAN directement sur leur page web du CRAN.</p>
+</div>
+<div id="sous-etape-d-reconstruire-et-reverifier-le-package" class="section level4">
+<h4>Sous-étape d) Reconstruire et revérifier le package</h4>
+<p>Il faut finalement construire et vérifier de nouveau le package. Un nouveau fichier compressé sera produit, portant le nom du package accompagné du nouveau numéro de version.</p>
+<hr />
+</div>
+</div>
+<div id="synthese" class="section level1">
+<h1>Synthèse</h1>
+<p>Étapes de création d’un package R</p>
+<div id="ecrire-les-fonctions" class="section level4">
+<h4>1. Écrire les fonctions</h4>
+<p>Objets utilisables dans le corps des fonctions d’un package :</p>
+<ul>
+<li>arguments et variables locales,</li>
+<li>tout objet, public ou privé, contenu dans le package,</li>
+<li>objets provenant d’autres packages, à la condition d’inclure ces objets dans <em>l’environnement des objets importés par le package</em>,</li>
+<li>objets du package R de base.</li>
+</ul>
+<p>Si but = mettre sur le CRAN : respecter les politiques <a href="http://cran.r-project.org/web/packages/policies.html" class="uri">http://cran.r-project.org/web/packages/policies.html</a></p>
+</div>
+<div id="creer-la-structure-de-fichiers-du-package" class="section level4">
+<h4>2. Créer la structure de fichiers du package</h4>
+<p>Répertoire principal, portant le nom du package, contenant :</p>
+<ul>
+<li>sous-répertoire nommé <code>R</code> : répertoire des fichiers contenant le code source R des fonctions,</li>
+<li>sous-répertoire nommé <code>man</code> : répertoire des fichiers sources des fiches d’aide,</li>
+<li>fichier nommé <code>DESCRIPTION</code> : informations descriptives générales du package,</li>
+<li>fichier nommé <code>NAMESPACE</code> : fichier permettant de définir quels objets sont publics (exportés) et d’identifier les fonctions d’autres packages (excluant le package <code>base</code>) utilisées dans le package (objets importés).</li>
+<li>autres éléments, selon les besoins : fichier <code>NEWS</code>, sous-répertoire <code>data</code>, sous-répertoire <code>src</code>, etc.</li>
+</ul>
+</div>
+<div id="ecrire-la-documentation-des-fonctions-et-du-package" class="section level4">
+<h4>3. Écrire la documentation des fonctions et du package</h4>
+<p>Éléments à documenter :</p>
+<ul>
+<li>les fonctions publiques,</li>
+<li>les jeux de données,</li>
+<li>les classes et méthodes S4 ou RC publiques,</li>
+<li>les méthodes S3 pour des fonctions génériques (si pertinent),</li>
+<li>le package lui-même (recommandé).</li>
+</ul>
+<p><strong>Documentation d’un package avec <code>roxygen2</code> :</strong></p>
+<p>Commentaires dans le code source R pour générer les fiches d’aide (contenu du sous-répertoire <code>man</code>) et le fichier <code>NAMESPACE</code></p>
+<ul>
+<li>symbole de commentaire <code>roxygen2</code> : <code>#'</code>;</li>
+<li>commentaires en entête des fonctions ou
+<ul>
+<li>avant <code>&quot;_PACKAGE&quot;</code> pour la fiche d’aide globale du package,</li>
+<li>avant une chaîne de caractères contenant le nom d’un objet contenant des données;</li>
+</ul></li>
+<li>1<sup>ère</sup> ligne =&gt; titre de la fiche, suivi d’une ligne vide;</li>
+<li>1<sup>er</sup> paragraphe =&gt; champ <code>Descripion</code> de la fiche, suivi d’une ligne vide;</li>
+<li>autres paragraphes (optionnels) =&gt; champ <code>Details</code>;</li>
+<li>tags :
+<ul>
+<li><code>@param</code> : description des paramètres =&gt; champ <code>Arguments</code>;</li>
+<li><code>@return</code> : description de la sortie =&gt; champ <code>Value</code>;</li>
+<li>pour le fichier <code>NAMESPACE</code> : <code>@export</code>, <code>@importFrom</code>, etc.;</li>
+<li>autres sections : <code>@examples</code>, <code>@author</code>, <code>@references</code>, <code>@format</code>, etc.;</li>
+<li>pour jumeler des fiches : <code>@rdname</code>, <code>@describeIn</code>;</li>
+<li>métadonnées : <code>@name</code>, <code>@aliases</code>, etc.</li>
+</ul></li>
+</ul>
+</div>
+<div id="construire-et-verifier-le-package" class="section level4">
+<h4>4. Construire et vérifier le package</h4>
+<p>Outils nécessaires :</p>
+<ul>
+<li>R,</li>
+<li><a href="https://stt4230.rbind.io/packages/devel_packages_r/#etape-4.-construire-et-verifier-le-package">outils de développement de logiciel GNU</a>,</li>
+<li>compilateur LaTeX (uniquement pour générer la documentation au format PDF).</li>
+</ul>
+<p><strong><code>R CMD check</code></strong></p>
+<p>Effectue diverses vérifications du package :<br />
+- option <code>--as-cran</code> avant de soumettre an CRAN,<br />
+- option <code>--no-manual</code> si aucun compilateur LaTeX n’est installé sur notre ordinateur.</p>
+<p><strong><code>R CMD build</code></strong></p>
+<p>Construit le package source (.tar.gz, = version Unix / Linux).</p>
+<p><strong><code>R CMD INSTALL --build</code></strong></p>
+<p>Construit le package binaire (.zip sous Windows, .tgz sous Mac OS X / OS X / macOS )</p>
+<p><strong>Construire et vérifier le package avec RStudio :</strong></p>
+<ul>
+<li>Sous-étape a) Créer un projet RStudio avec notre package</li>
+<li>Sous-étape b) Configurer les options de RStudio</li>
+<li>Sous-étape c) Compiler à partir du menu « <strong>Build</strong> » de RStudio
+<ul>
+<li>vérifier le package : menu « <strong>Build &gt; Check Package</strong> »,</li>
+<li>créer le package source : menu « <strong>Build &gt; Build Source Package</strong> »,</li>
+<li>créer le package binaire : menu « <strong>Build &gt; Build Binary Package</strong> ».</li>
+</ul></li>
+</ul>
+
+<p>La compilation « <strong>Install and Restart</strong> » est pratique en cours de travail. Elle permet de</p>
+<ul>
+<li>compiler le package dans le bon format pour notre système d’exploitation,</li>
+<li>l’installer (donc remplacer l’ancienne installation par la nouvelle) et</li>
+<li>charger de nouveau le package (avec la commande <code>library</code>).</li>
+</ul>
+</div>
+<div id="si-desire-partager-le-package" class="section level4">
+<h4>5. Si désiré, partager le package</h4>
+<p>Il n’est pas compliqué de soumettre un package au CRAN : <a href="https://cran.r-project.org/submit.html" class="uri">https://cran.r-project.org/submit.html</a></p>
+</div>
+<div id="au-besoin-mettre-a-jour-le-package" class="section level4">
+<h4>6. Au besoin, mettre à jour le package</h4>
+<p>Mise à jour = modification pour ajouter des fonctionnalités et/ou corriger des bogues :</p>
+<ul>
+<li>Sous-étape a) Incrémenter le numéro de version
+<ul>
+<li>dans le fichier DESCRIPTION</li>
+<li>dans la fiche d’aide du package</li>
+</ul></li>
+<li>Sous-étape b) Faire les mises à jour dans le code</li>
+<li>Sous-étape c) Documenter les modifications :
+<ul>
+<li>mettre à jour les commentaires <code>roxygen2</code> produisant les fiches d’aide</li>
+<li>décrire brièvement les changements dans fichier NEWS<br />
+(non obligatoire, mais c’est une bonne pratique)</li>
+</ul></li>
+<li>Sous-étape d) Reconstruire et revérifier le package</li>
+</ul>
+<hr />
+</div>
+</div>
+<div id="references" class="section level1">
+<h1>Références</h1>
+<ul>
+<li>R Core Team (2019). <em>Writing R Extensions</em>. R Foundation for Statistical Computing. Chapitre 4.<br />
+URL <a href="https://cran.r-project.org/doc/manuals/r-release/R-exts.html" class="uri">https://cran.r-project.org/doc/manuals/r-release/R-exts.html</a></li>
+<li>Wickham, H. (2015). <em>R packages</em>. O’Reilly Media, Inc.
+<ul>
+<li>URL première édition (quelques informations dans cette version sont déjà obsolètes) :<br />
+<a href="http://r-pkgs.had.co.nz/" class="uri">http://r-pkgs.had.co.nz/</a></li>
+<li>URL deuxième édition (en développement) : <a href="https://r-pkgs.org" class="uri">https://r-pkgs.org</a></li>
+</ul></li>
+<li>Hadley Wickham, Peter Danenberg and Manuel Eugster (2018). roxygen2: In-Line Documentation for R. R package version 6.1.1.
+<ul>
+<li>URL <a href="https://CRAN.R-project.org/package=roxygen2" class="uri">https://CRAN.R-project.org/package=roxygen2</a>
+<ul>
+<li>les vignettes sont informatives : <a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/roxygen2.html" class="uri">https://cran.r-project.org/web/packages/roxygen2/vignettes/roxygen2.html</a></li>
+</ul></li>
+<li>documentation avec <code>roxygen2</code> : <a href="http://r-pkgs.had.co.nz/man.html" class="uri">http://r-pkgs.had.co.nz/man.html</a></li>
+</ul></li>
+</ul>
+<p>Pour le développement avec RStudio :</p>
+<ul>
+<li><a href="https://support.rstudio.com/hc/en-us/articles/200486488-Developing-Packages-with-RStudio" class="uri">https://support.rstudio.com/hc/en-us/articles/200486488-Developing-Packages-with-RStudio</a></li>
+</ul>
+<p>Pour le développement en utilisant le package <code>devtools</code> :</p>
+<ul>
+<li><a href="https://github.com/r-lib/devtools" class="uri">https://github.com/r-lib/devtools</a></li>
+<li><a href="https://rawgit.com/rstudio/cheatsheets/master/package-development.pdf" class="uri">https://rawgit.com/rstudio/cheatsheets/master/package-development.pdf</a></li>
+</ul>
+<hr />
+
+</div>
+<div id="annexe" class="section level1">
+<h1>Annexe</h1>
+<div id="resolution-de-problemes-deja-rencontres" class="section level2">
+<h2>Résolution de problèmes déjà rencontrés</h2>
+<p>Voici des problèmes déjà rencontrés par des étudiants du cours lors de la construction ou la vérification d’un package et leurs solutions.</p>
+<div id="erreur-installation-failed" class="section level4">
+<h4>Erreur « Installation failed »</h4>
+<p>PROBLÈME : Une erreur de ce type est produite par l’outil « <strong>Check Package</strong> » :</p>
+<pre><code>   * checking whether package &#39;manhattan&#39; can be installed ... ERROR
+   Installation failed.
+   See &#39;C:/coursR/NomRépertoireAvecAccents/manhattan.Rcheck/00install.out&#39; for details.</code></pre>
+<p>CAUSE : Le nom complet du répertoire du package contient des accents ou des espaces. (Cela ne cause pas toujours une erreur, ça dépend de la version de R utilisée et de votre système d’exploitation.)</p>
+<p>SOLUTION : Utiliser un répertoire dont le nom complet ne comprend aucun accent, ni aucun espace.</p>
+<p> </p>
+</div>
+<div id="erreur-de-permission-decriture-dans-un-repertoire-dinstallation" class="section level4">
+<h4>Erreur de permission d’écriture dans un répertoire d’installation</h4>
+<p>PROBLÈME : Une erreur de ce type est produite par l’outil « <strong>Build Binary Package</strong> », « <strong>Install and Restart</strong> » ou « <strong>Clean and Rebuild</strong> » :</p>
+<pre><code>   ERREUR : pas de permission pour installer dans le répertoire 
+   &#39;C:/Program Files/R/R-3.5.2/library&#39;</code></pre>
+<p>CAUSE : Le compte utilisé n’a pas la permission d’écrire dans le répertoire où R cherche à installer le package. Si vous travaillez à partir d’un compte administrateur, vous ne devriez pas rencontrer ce problème.</p>
+<p>SOLUTION : Modifier les options des outils de construction pour demander l’installation dans un autre répertoire, un pour lequel le compte utilisateur à une permission en écriture.</p>
+<p>Étape 1 : trouver le bon répertoire à utiliser</p>
+<p>Il faut utiliser un des répertoires dans lesquels R recherche des installations de packages. Un vecteur contenant tous ces répertoires est retourné par la commande suivante dans la console R :</p>
+<pre class="r"><code>.libPaths()</code></pre>
+<pre><code>## [1] &quot;C:/Users/Sophie/Documents/R/win-library/3.5&quot;
+## [2] &quot;C:/Program Files/R/R-3.5.2/library&quot;</code></pre>
+<p>Dans mon cas, le premier répertoire énuméré, soit <code>&quot;C:/Users/Sophie/Documents/R/win-library/3.5&quot;</code>, est localisé dans les fichiers du compte utilisateur. J’y ai donc assurément une permission en écriture. C’est lui que je vais utiliser.</p>
+<p>Étape 2 : ajouter une option aux outils de construction</p>
+<ol style="list-style-type: lower-alpha">
+<li>ouvrir la fenêtre de configuration des outils de construction</li>
+<li>ajouter l’option <code>--library=&quot;C:/Users/Sophie/Documents/R/win-library/3.5&quot;</code> (à adapter selon le nom du répertoire que vous avez choisi d’utiliser) à deux endroits :</li>
+</ol>
+<ul>
+<li>la configuration de l’outil « <strong>Install and Restart</strong> » et « <strong>Clean and Rebuild</strong> » se fait dans le champ, nommé « Build and Reload - R CMD INSTALL additionnal options: »</li>
+<li>la configuration de l’outil « <strong>Build Binary Package</strong> » se fait dans le dernier champ, nommé « Build Binary Package - R CMD INSTALL additionnal options: »</li>
+</ul>
+</div>
+<div id="verification-qui-gele-a-letape-checking-pdf-version-of-manual" class="section level4">
+<h4>Vérification qui gèle à l’étape « checking PDF version of manual »</h4>
+<p>PROBLÈME : Outil « <strong>Check Package</strong> » qui n’arrive pas à terminer son check, qui gèle à l’étape « checking PDF version of manual ».</p>
+<p>CAUSE : Je ne sais pas exactement… Ça ressemble à un bogue.</p>
+<p>SOLUTION : Modifier les options de l’outil « <strong>Check Package</strong> »</p>
+<ol style="list-style-type: lower-alpha">
+<li>ouvrir la fenêtre de configuration des outils de construction</li>
+<li>ajouter dans le champ nommé « Check Package - R CMD check additionnal options: » l’option suivante : <code>--no-manual</code></li>
+</ol>
+</div>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file" class="uri">https://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file</a><a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p><a href="https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Documenting-S4-classes-and-methods" class="uri">https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Documenting-S4-classes-and-methods</a><a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p><a href="https://r-pkgs.org/man.html#man-classes" class="uri">https://r-pkgs.org/man.html#man-classes</a><a href="#fnref3">↩</a></p></li>
+</ol>
+</div>
