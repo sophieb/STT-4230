@@ -1,7 +1,7 @@
 +++
 title = "Notes de cours"
 description = ""
-date = "2010-03-21"
+date = "2010-04-01"
 lastmodifierdisplayname = "Sophie Baillargeon"
 lastmodifieremail = "sophie.baillargeon@mat.ulaval.ca"
 +++
@@ -47,7 +47,7 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
     * [Développement de packages R]({{%relref "packages/developpement_packages_r_2019.html" %}})
 * Amélioration de code R
     * [Bonnes pratiques en R]({{%relref "amelioration_code/bonnes_pratiques_r_2019.html" %}})
-    * [Optimisation de temps d'exécution en R]({{%relref "amelioration_code/optim_temps_r_2018.html" %}})
+    * [Optimisation de temps d'exécution en R]({{%relref "amelioration_code/optim_temps_r_2019.html" %}})
     * [Métaprogrammation en R]({{%relref "amelioration_code/metaprogrammation_r_2018.html" %}})
 * [Tutoriels d'étudiants]({{%relref "tutoriels_etudiants" %}})
 * Autre matériel
