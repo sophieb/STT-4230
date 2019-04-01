@@ -1,10 +1,10 @@
 ---
 title: "Métaprogrammation en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2018-04-01"
+date: "2019-04-01"
 weight: 3
 slug: "metaprogrammation_r"
-categories: ["cours_2018-04-10"]
+categories: ["cours_2019-04-09"]
 categories_weight: 2
 lastmodifierdisplayname : "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
@@ -24,17 +24,11 @@ editor_options:
 
 ***
 
+&nbsp;
+
 La métaprogrammation se définit par **l'écriture d'un programme qui écrit lui-même un programme**. Par exemple, en R, il est possible d'écrire un bout de code qui compose d'abord une ou des instructions sous forme de chaînes de caractères ou d'expressions, puis qui évalue ces instructions dans un deuxième temps. La métaprogrammation est typiquement utilisée pour rendre un programme plus succinct, donc potentiellement plus facile à comprendre, ou pour automatiser certaines tâches.
 
-Voici quelques outils en R pour manipuler des éléments de langage sans les évaluer, ce qui permet de réaliser de la métaprogrammation.
-
-- assignation d'une valeur à un nom : `assign`;
-- retour de la valeur assignée à un nom : `get`;
-- appel d'une fonction : `do.call`;
-- manipulation de formules : `as.formula` et `update.formula`;
-- manipulation d'instructions : `quote`, `eval`, `call` et `parse`;
-- manipulation de l'appel d'une fonction : `substitute`, `deparse` et `match.call`.
-
+Les sections qui suivent décrivent quelques outils en R pour manipuler des éléments de langage sans les évaluer, ce qui permet de réaliser de la métaprogrammation.
 
 # Assignation d'une valeur à un nom d'objet avec `assign`
 
@@ -102,9 +96,15 @@ str(get(nom))
 
 Ce qui ne retourne pas la même chose que ceci.
 
-```{r}
+```{r eval = FALSE}
 str(nom)
 ```
+```{r}
+# Équivalent à
+str("nomObjet")
+```
+
+
 
 Par exemple, pour afficher le contenu des objets nommés `obj1` à `obj5`, nous pouvons procéder comme suit.
 
@@ -160,27 +160,37 @@ choixstat <- function(x, choix = c("table", "mean", "median", "sd", "mad"),
 }
 ```
 
-```{r}
-# Équivalent à median(c(2,3,2,3,3,4,NA,3), na.rm = TRUE)
-
+```{r eval = FALSE}
 choixstat(x = c(2,3,2,3,3,4,NA,3), choix = "median", retirerNA = TRUE)
 ```
 ```{r}
-# Équivalent à median(c(2,3,2,3,3,4,NA,3), na.rm = FALSE)
+# Équivalent
+median(c(2,3,2,3,3,4,NA,3), na.rm = TRUE)
+```
 
+```{r eval = FALSE}
 choixstat(x = c(2,3,2,3,3,4,NA,3), choix = "median", retirerNA = FALSE)
 ```
 ```{r}
-# Équivalent à table(c(2,3,2,3,3,4,NA,3), useNA = "no")
+# Équivalent à 
+median(c(2,3,2,3,3,4,NA,3), na.rm = FALSE)
+```
 
+```{r eval = FALSE}
 choixstat(x = c(2,3,2,3,3,4,NA,3), choix = "table", retirerNA = TRUE)
 ```
 ```{r}
-# Équivalent à table(c(2,3,2,3,3,4,NA,3), useNA = "ifany")
-
-choixstat(x = c(2,3,2,3,3,4,NA,3), choix = "table", retirerNA = FALSE)
+# Équivalent à 
+table(c(2,3,2,3,3,4,NA,3), useNA = "no")
 ```
 
+```{r eval = FALSE}
+choixstat(x = c(2,3,2,3,3,4,NA,3), choix = "table", retirerNA = FALSE)
+```
+```{r}
+# Équivalent à 
+table(c(2,3,2,3,3,4,NA,3), useNA = "ifany")
+```
 
 
 # Manipulation de formules
@@ -269,7 +279,7 @@ Nous pourrions aussi transformer une variable.
 update(f1, sqrt(.) ~ .)
 ```
 
-La fonction `update` est générique. Si le premier argument qu'elle reçoit est une formule, elle appelle la méthode `update.formula`. Dans un appel à `update` (ou directement `update.formula`), un `.` représente une partie de la formule originale. Le `.` à gauche du `~` représente le LHS du modèle fourni comme premier argument et le `.` à droite du `~` le RHS du modèle fourni comme premier argument.
+La fonction `update` est générique. Si le premier argument qu'elle reçoit est une formule, elle appelle la méthode `update.formula`. Dans un appel à `update.formula`, un `.` représente une partie de la formule originale. Le `.` à gauche du `~` représente le LHS du modèle fourni comme premier argument et le `.` à droite du `~` le RHS du modèle fourni comme premier argument.
 
 
 # Manipulation d'instructions
@@ -289,6 +299,8 @@ out <- median(x = 1:10)
 ```
 
 le résultat ne sera pas affiché, mais l'objet `out` contiendra le résultat de l'évaluation de `median(x = 1:10)`.
+
+\newpage
 
 ```{r}
 out
@@ -341,7 +353,7 @@ eval(out_call)
 
 ## Fonction `parse`
 
-Maintenant, ce qui serait vraiment utile est de pouvoir transformer une chaîne de caractères en instruction. C'est ce que nous permet de faire la fonction `parse`.
+Maintenant, ce qui serait vraiment utile est de pouvoir transformer une chaîne de caractères en expression C'est ce que nous permet de faire la fonction `parse`.
 
 Par exemple, si nous avons la chaîne de caractère suivante
 
@@ -484,10 +496,26 @@ Dans cet exemple, la valeur fournie à l'argument `y` ne contient pas un appel �
 
 ***
 
+# Synthèse
+
+**Manipuler des éléments de langage sans les évaluer**
+
+- assignation d'une valeur à un nom : `assign`;
+- retour de la valeur assignée à un nom : `get`;
+- appel d'une fonction : `do.call`;
+- manipulation de formules : `as.formula` et `update.formula`;
+- manipulation d'instructions : `quote`, `eval`, `call` et `parse`;
+- manipulation de l'appel d'une fonction : `substitute`, `deparse` et `match.call`.
+
+***
+
 # Références
 
 - R Core Team (2018). *R Language Definition*. R Foundation for Statistical Computing. Chapitre 6. URL http://cran.r-project.org/doc/manuals/r-devel/R-lang.html#Computing-on-the-language
-- Wickham, H. (2014). *Advanced R*. CRC Press. Chapitres 13-14. URL http://adv-r.had.co.nz/Expressions.html
+- Wickham, H. (2014). *Advanced R*. CRC Press. 
+    - Édition 1, Chapitres 13-14. URLs http://adv-r.had.co.nz/Computing-on-the-language.html,  
+    http://adv-r.had.co.nz/Expressions.html
+    - Édition 2, Section 4. URL https://adv-r.hadley.nz/metaprogramming.html
 
 
 
