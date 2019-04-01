@@ -1,10 +1,11 @@
 ---
 title: "Optimisation de temps d'exécution en R"
+linkTitle: "Optimisation temps exécution R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2018-04-02"
+date: "2019-04-01"
 weight: 2
 slug: "optim_temps_r"
-categories: ["cours_2018-04-10"]
+categories: ["cours_2019-04-09"]
 categories_weight: 1
 lastmodifierdisplayname : "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
@@ -27,9 +28,7 @@ editor_options:
 
 ***
 
-Lorsque nous écrivons du code, notre but premier est évidemment que ce code fonctionne correctement. Une fois nous être assuré que le code [produit le résultat escompté et gère correctement les exceptions](https://stt4230.rbind.io/programmation/tests_exceptions_r/), nous pouvons envisager améliorer le code.
-
-Une amélioration importante à apporter à un programme dont le temps d'exécution est trop long est de le rendre plus rapide. Cela peut faire la différence entre un programme peu ou pas utilisé et un programme fréquemment utilisé. Cependant, n'oublions pas qu'il est inutile d'optimiser le temps d'exécution d'un programme roulant déjà suffisamment rapidement.
+Lorsque nous écrivons du code, notre but premier est évidemment que ce code fonctionne correctement. Après avoir vérifié que le code [produit le résultat escompté et gère correctement les exceptions](https://stt4230.rbind.io/programmation/tests_exceptions_r/), nous devrions, selon les [bonnes pratiques](https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/), nous assurer que le code est facile à maintenir (écriture, compréhension et réutilisation aisées). Si notre code rencontre toutes les conditions énumérées ci-dessus, mais que son temps d'exécution est long, nous devrions envisager de le rendre plus rapide. Cette amélioration pourrait faire la différence entre un programme peu ou pas utilisé et un programme fréquemment utilisé. Cependant, n'oublions pas qu'il est inutile d'optimiser le temps d'exécution d'un programme roulant déjà suffisamment rapidement.
 
 Pour réduire le temps d'exécution d'un programme, il faut d'abord cerner la partie du programme responsable des lenteurs. Pour ce faire, il est conseillé d'utiliser des outils qui analysent la performance du code. Après avoir cerné les instructions problématiques, il faut les modifier de façon à effectuer le calcul plus rapidement. Certains outils d'analyse de performance sont présentés dans ce qui suit. Ensuite, nous verrons des stratégies d'optimisation de temps d'exécution.
 
@@ -48,7 +47,7 @@ Cependant, ces fonctions ne sont parfois pas suffisantes. Les packages suivants 
 - `microbenchmark` et 
 - `profvis`. 
 
-Pour illustrer l'utilisation de ces fonctions, nous allons utiliser un exemple tiré de [Peng et Leeuw, (2002)](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf). Nous allons étudier les temps d'exécution de fonctions R ayant pour but d'estimer la densité de probabilité d'une variable aléatoire par la méthode du noyau à partir d'observations de la variable aléatoire. De l'information sur cette méthode, appelée en anglais *Kernel density estimation*, peut être trouvée sur la page Wikipédia suivante : https://fr.wikipedia.org/wiki/Estimation_par_noyau.
+Pour illustrer l'utilisation de ces fonctions, nous allons utiliser un exemple tiré de [Peng et de Leeuw, (2002)](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf). Nous allons étudier les temps d'exécution de fonctions R ayant pour but d'estimer la fonction de densité d'une variable aléatoire par la méthode du noyau à partir d'observations de la variable aléatoire. De l'information sur cette méthode, appelée en anglais *Kernel density estimation*, peut être trouvée sur la page Wikipédia suivante : https://fr.wikipedia.org/wiki/Estimation_par_noyau.
 
 Il existe en fait déjà une fonction dans le package `stats` pour faire de l'estimation de densité par noyau. Il s'agit de la fonction `density`. Voici un exemple de ce qu'il est possible de réaliser avec cette fonction.
 
@@ -99,24 +98,24 @@ ksmooth1 <- function(x, xpts, h)
 
 Des [tags `roxygen2`](https://stt4230.rbind.io/packages/devel_packages_r/#comment-ecrire-de-la-documentation-avec-roxygen2) sont utilisés pour documenter la fonction. Cependant, les commentaires `roxygen2` écrits ici ne formeraient pas une fiche d'aide complète. Ce n'est pas un problème puisque nous n'avons pas l'intention de créer un package avec cette fonction. 
 
-Dans la fonction `ksmooth1`, le premier argument, nommé `x`, n'est pas équivalent au $x$ de la formule. Le $x$ de la formule représente un point en lequel nous souhaitons faire l'estimation. Son équivalent dans la fonction `ksmooth1` est donc un élément du vecteur `xpts`. Ce sont les $x_i$ de la formule que nous retrouvons dans le vecteur `x`. Dans la boucle, ce vecteur `x` est parcouru en utilisant l'indice `j`. Alors, en fait, `x[j]` dans le corps de la fonction représente un $x_i$ dans la formule. Le code aurait pu coller davantage à la notation dans la formule pour être encore plus clair, mais j'ai choisi de le conserver tel qu'il a été proposé dans [Peng et Leeuw, (2002)](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf).
+Dans la fonction `ksmooth1`, le premier argument, nommé `x`, n'est pas équivalent au $x$ de la formule. Le $x$ de la formule représente un point en lequel nous souhaitons faire l'estimation. Son équivalent dans la fonction `ksmooth1` est donc un élément du vecteur `xpts`. Ce sont les $x_i$ de la formule que nous retrouvons dans le vecteur `x`. Dans la boucle, ce vecteur `x` est parcouru en utilisant l'indice `j`. Alors, en fait, `x[j]` dans le corps de la fonction représente un $x_i$ dans la formule. Le code aurait pu coller davantage à la notation dans la formule pour être encore plus clair, mais j'ai choisi de le conserver tel qu'il a été proposé dans [Peng et de Leeuw, (2002)](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf).
 
 ## Fonction `system.time`
 
 Si nous donnons en entrée à la fonction `ksmooth1` un vecteur d'observations `x` de longueur 10000, mesurons combien de temps prendra l'évaluation d'un appel à la fonction. Pour ce faire, utilisons d'abord la [fonction `system.time`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/system.time.html).
 
 
-```{r}
+```{r R.options = list(width = 90)}
 # Simulation des observations
 x <- rnorm(10000)
 # Points pour lesquels nous souhaitons estimer la densité
-xpts <- seq(from = -4, to = 4,length.out = 17)
+xpts <- seq(from = -4, to = 4, length.out = 17)
 xpts
 # Estimation de la densité
 temps1 <- system.time(dens1 <- ksmooth1(x = x, xpts = xpts, h = 1))
 ```
 
-Il faut donner en entrée à `system.time` une instruction R, contenant ou non une affectation, ou encore des instructions R encadrées d'accolades. Cet ensemble d'instruction(s) est appelé *expression*. La fonction retourne le temps, en secondes, d'utilisation du CPU (*Central Processing Unit*) pour l'évaluation de l'expression. Le terme « évaluation » a ici la même signification que « exécution ». Il est simplement plus usuel de parler d'évaluation d'une expression que de l'exécution d'une expression. L'élément `elapsed` de la sortie de `system.time` représente le temps total d'évaluation de l'expression, qui peut être divisé en deux temps : le temps `user` (celui écoulé par le logiciel R = *calling process*) et le temps `system` (celui écoulé par le système d'exploitation de notre ordinateur pour le compte du logiciel R). 
+Il faut donner en entrée à `system.time` une instruction R, contenant ou non une affectation, ou encore des instructions R encadrées d'accolades. Cet ensemble d'instruction(s) est appelé *expression*. La fonction retourne le temps, en secondes, d'utilisation du CPU (*Central Processing Unit*) pour l'évaluation de l'expression. Le terme « évaluation » a ici la même signification que « exécution ». 
 
 Ici, j'obtiens les temps suivants :
 
@@ -124,11 +123,19 @@ Ici, j'obtiens les temps suivants :
 temps1
 ```
 
-Ce temps dépend des spécifications de l'ordinateur utilisé, en particulier de la puissance de son CPU. De plus, nous n'obtiendrons probablement pas exactement les mêmes nous évaluons à nouveau l'expression. Il y a une petite variation normale du temps d'exécution, causée notamment par les autres processus utilisant le CPU de notre ordinateur au moment où la commande est lancée.
+Les trois temps dans une sortie produite par `system.time` peuvent être définis ainsi :
+
+- `user` : temps écoulé par le logiciel R (*calling process*) pour évaluer l'expression;
+- `system` : temps écoulé par le système d'exploitation de notre ordinateur, mais pour le compte du logiciel R, pendant l'évaluation de l'expression;
+- `elapsed` : temps total écoulé entre la soumission de l'expression et le retour du résultat (peut être plus grand que la somme des deux autres temps, car le système a peut-être dû accorder du temps à d'autres processus actifs sur l'ordinateur pendant l'évaluation de l'expression)
+
+Les temps d'exécution obtenus dépendent des spécifications de l'ordinateur utilisé, en particulier de la puissance de son CPU. De plus, nous n'obtiendrons probablement pas exactement les mêmes si nous évaluons à nouveau l'expression. Il y a une petite variation normale du temps d'exécution, causée notamment par les autres processus utilisant le CPU de notre ordinateur au moment où la commande est lancée.
 
 ## Package `microbenchmark`
 
-Ainsi, pour évaluer plus précisément le temps d'évaluation d'une expression, il est préférable de l'évaluer plusieurs fois, puis de calculer le temps moyen ou médian d'évaluation. Le [package `microbenchmark`](https://CRAN.R-project.org/package=microbenchmark) nous aide à faire ça facilement comme suit :
+Pour évaluer plus précisément le temps d'évaluation d'une expression, il est préférable de l'évaluer plusieurs fois, puis de calculer le temps moyen ou médian d'évaluation. La médiane est la statistique que je recommande d'utiliser ici, car elle est robuste aux valeurs extrêmes.
+
+Le [package `microbenchmark`](https://CRAN.R-project.org/package=microbenchmark) s'utilise comme suit :
 
 ```{r  R.options = list(width = 85)}
 library(microbenchmark)
@@ -169,7 +176,7 @@ dens1 <- ksmooth1(x = x_long, xpts = xpts_long, h = 1)
 Rprof(NULL)
 ```
 
-Un fichier a est créé dans notre répertoire de travail. Il se nomme par défaut *Rprof.out*, mais nous pouvons changer ce nom avec l'argument `filename` de la fonction `Rprof`. Toutes les 0.01 seconde (argument `interval`), R a écrit dans ce fichier le nom de la fonction ou des fonctions dont un appel sont en cours d'évaluation.
+Un fichier a est créé dans notre répertoire de travail. Il se nomme par défaut *Rprof.out*, mais nous pouvons changer ce nom avec l'argument `filename` de la fonction `Rprof`. Toutes les 0.01 seconde (argument `interval`), R a écrit dans ce fichier le nom de la fonction ou des fonctions dont un appel est en cours d'évaluation.
 
 Typiquement, nous n'allons pas voir directement le contenu de ce fichier. Nous en affichons plutôt un résumé avec la fonction `summaryRprof` comme suit :
 
@@ -195,7 +202,7 @@ summaryRprof("Rprof.out")
 ## [1] 24.46
 ```
 
-Dans cette sortie, les éléments `by.self` et `by.total` contiennent les mêmes valeurs, mais pas dans le même ordre (colonnes interchangées). Les colonnes `total.time` et `total.pct` réfèrent au temps total passé à l'évaluation de l'appel à une fonction. Pour les colonnes `self.time` et `self.pct`, le temps d'évaluation des appels de fonctions imbriqués dans l'appel de fonction principal est retiré du temps total.
+Dans cette sortie, les éléments `by.self` et `by.total` contiennent les mêmes valeurs, mais pas dans le même ordre (colonnes interchangées). Les colonnes `total.time` et `total.pct` réfèrent au temps total passé à l'évaluation de l'appel à une fonction. Pour les colonnes `self.time` et `self.pct`, le temps d'évaluation des appels de fonctions imbriqués dans l'appel de la fonction en question est retiré du temps total.
 
 Dans l'exemple, la commande `dens1 <- ksmooth1(x = x_long, xpts = xpts_long, h = 1)` prend un total de 24.46 secondes à être évaluée. Cette commande comprend une assignation et un appel à la fonction `ksmooth1`. Les assignations simples ne sont pas retracées par `Rprof`, car il s'agit d'appels à un opérateur interne. Elles n'apparaissent donc pas dans la sortie de `summaryRprof`. Ici, les 24.46 secondes du temps total d'exécution sont 24.46 secondes à évaluer un appel à la fonction `ksmooth1`.
 
@@ -215,6 +222,8 @@ Rprof(NULL)
 # Résumé de la sortie de Rprof
 summaryRprof("Rprof.out")
 ```
+
+\newpage
 
 ```
 ## $by.self
@@ -310,7 +319,7 @@ Le site web suivant documente l'utilisation du package `profvis` : http://rstudi
 
 ## Comparaison de temps d'exécution avec la fonction `microbenchmark`
 
-Étudions maintenant la performance qu'une autre fonction d'estimation de densité par noyau gaussien tirée de [Peng et Leeuw, (2002)](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf). Le corps de cette fonction ne contient aucune boucle. Il fait plutôt du calcul vectoriel en utilisant, notamment, la fonction `outer`.
+Étudions maintenant la performance d'une autre fonction d'estimation de densité par noyau gaussien tirée de [Peng et de Leeuw, (2002)](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf). Le corps de cette fonction ne contient aucune boucle. Il fait plutôt du calcul vectoriel en utilisant, notamment, la fonction `outer`.
 
 
 ```{r}
@@ -351,7 +360,14 @@ Dans cet appel à la fonction `microbenchmark`, les deux instructions à compare
 
 Débuter ces expressions par une assignation avec l'opérateur `=` aide à alléger l'affichage des résultats. Le nom fourni à gauche de l'opérateur `=` pour une expression est celui utilisé pour identifier l'expression dans la sortie.
 
-La fonction `ksmooth2` est environ 24 fois plus rapide que la fonction `ksmooth1`. Cependant, elle utilise beaucoup plus de mémoire. Une matrice de dimension `length(x)` par `length(xpts)` est créée par la fonction. R impose une limite sur la taille des objets créés (pour plus de détails voir la [fiche d'aide `help("Memory-limits")`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Memory-limits.html)). Ainsi, la fonction `ksmooth2` retourne une erreur sur mon ordinateur si je lui donne en entrée des arguments `x` et `xpts` trop grands, par exemple :
+```{r echo = FALSE}
+out <- microbenchmark(dens1 = ksmooth1(x = x, xpts = xpts, h = 1), 
+                      dens2 = ksmooth2(x = x, xpts = xpts, h = 1),
+                      unit = "ms")
+out_medians <- aggregate(out$time, list(out$expr), median)
+```
+
+La fonction `ksmooth2` est environ `r round(out_medians[1, "x"]/out_medians[2, "x"])` fois plus rapide que la fonction `ksmooth1`. Cependant, elle utilise beaucoup plus de mémoire. Une matrice de dimension `length(x)` par `length(xpts)` est créée par la fonction. R impose une limite sur la taille des objets créés (pour plus de détails voir la [fiche d'aide `help("Memory-limits")`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Memory-limits.html)). Ainsi, la fonction `ksmooth2` retourne une erreur sur mon ordinateur si je lui donne en entrée des arguments `x` et `xpts` trop grands, par exemple :
 
 ```{r error = TRUE}
 x_test <- rnorm(1000000)
@@ -376,12 +392,10 @@ Il y a différentes stratégies utiles à connaître pour écrire du code R rapi
 1. Utiliser des fonctions optimisées
 2. Faire seulement ce qui est nécessaire
 3. Exploiter les calculs matriciels et vectoriels
-4. Faire du calcul en parallèle
-5. Éviter les allocations de mémoire inutiles
-6. Utiliser de la compilation en bytecode
-7. Reprogrammer en C ou C++ les bouts de code les plus lents
+4. Éviter les allocations de mémoire inutiles
+5. Faire du calcul en parallèle
+6. Reprogrammer en C ou C++ les bouts de code les plus lents
 
-Cette liste respecte l'ordre proposé dans le livre *Advanced R* de Wickham (2014) (URL : http://adv-r.had.co.nz/Profiling.html#improve-perf).
 
 ## Truc 1 : Utiliser des fonctions optimisées
 
@@ -428,7 +442,7 @@ microbenchmark(densd = density(x = x, bw = 1, kernel = "gaussian", from = -4, to
 
 La fonction `density` retourne presque instantanément le résultat, alors que la fonction `ksmooth1` doit rouler pendant plusieurs secondes pour effectuer une estimation en 17 points, à partir de 10000 observations.
 
-Le coeur du calcul de la fonction `density` est effectué par du code en langage C. C'est pour cette raison qu'elle est à ce point plus rapide que la fonction `ksmooth1`. Nous allons y revenir au truc 7.
+Le coeur du calcul de la fonction `density` est effectué par du code en langage C. C'est pour cette raison qu'elle est à ce point plus rapide que la fonction `ksmooth1`. Nous allons y revenir au truc 6.
 
 
 ## Truc 2 : Faire seulement ce qui est nécessaire
@@ -446,7 +460,7 @@ microbenchmark(
 
 Ce résultat s'explique par le fait que la fonction `colSums` est spécialisée dans la tâche que nous cherchions à effectuer. Son code est simplifié, par rapport au code de `apply` qui peut appliquer n'importe quelle fonction sur n'importe quelle dimension d'un array. Nous pourrions aussi dire que la fonction `colSums` est une fonction optimisée.
 
-C'est ce truc de faire seulement ce qui est nécessaire qui pousse certains programmeurs R à ne pas utiliser la fonction `return` pour retourner la sortie de leurs fonctions. L'appel à la fonction `return` amène une évaluation de plus à effectuer, sans être nécessaire. Pour faire un test, ajoutons un appel à la fonction `return` à la fin de la fonction `ksmooth2`.
+C'est ce truc, de faire seulement ce qui est nécessaire, qui pousse certains programmeurs R à ne pas utiliser la fonction `return` pour retourner la sortie de leurs fonctions. L'appel à la fonction `return` amène une évaluation de plus à effectuer, sans être nécessaire. Pour faire un test, ajoutons un appel à la fonction `return` à la fin de la fonction `ksmooth2`.
 
 ```{r}
 ksmooth2return <- function(x, xpts, h) 
@@ -473,7 +487,9 @@ La fonction `ksmooth2return` est effectivement légèrement plus lente que la fo
 
 ## Truc 3 : Exploiter les calculs matriciels et vectoriels
 
-Nous avons déjà vu qu'en effectuant des calculs matriciels et vectoriels, comme dans la fonction `ksmooth2`, nous arrivons à faire un calcul beaucoup plus rapidement qu'avec une boucle, comme dans la fonction `ksmooth1`. Il faut cependant faire attention à l'utilisation de la mémoire.
+
+
+Nous avons déjà vu qu'en effectuant des calculs matriciels et vectoriels en R, comme dans la fonction `ksmooth2`, nous arrivons à faire un calcul beaucoup plus rapidement qu'avec une boucle, comme dans la fonction `ksmooth1`. Le calcul matriciel ou vectoriel en R est optimisé pour être très rapide. Il faut cependant faire attention à l'utilisation de la mémoire.
 
 Nous aurions aussi pu coder la fonction `ksmooth` ainsi. 
 
@@ -521,7 +537,7 @@ ksmooth4 <- function(x, xpts, h)
 
 Cette version remplace la seule boucle restante par l'utilisation d'une fonction de la famille des `apply`. 
 
-Ces deux versions effectuent bien le même calcul que `ksmooth1`.
+Ces deux nouvelles versions effectuent bien le même calcul que `ksmooth1`.
 
 ```{r}
 dens1 <- ksmooth1(x = x, xpts = xpts, h = 1)
@@ -548,104 +564,11 @@ Ce qu'il faut retenir de ces exemples est ceci :
 
 - **Le code le plus rapide n'est pas toujours celui que nous croyons**. Il est parfois difficile de prédire quel bout de code sera le plus rapide. Ici, nous aurions pu croire que le calcul totalement vectoriel (`ksmooth2`) serait plus rapide qu'une boucle jumelée à un calcul vectoriel (`ksmooth3`). Pourtant, `ksmooth3` est légèrement plus rapide que `ksmooth2`. Il est donc toujours recommandé, lors de l'optimisation du temps d'exécution d'une fonction, d'essayer les différentes programmations possibles et de mesurer leurs temps d'exécution.
 
-- **Les fonctions de la famille des `apply` ne sont pas nécessairement plus rapides qu'une boucle**. Ces fonctions cachent littéralement des boucles et ne représentent pas une sorte de calcul vectoriel.
+- **Les fonctions de la famille des `apply` ne sont pas nécessairement plus rapides qu'une boucle**. Ces fonctions cachent littéralement des boucles et ne représentent pas une sorte de calcul vectoriel. Leur utilisation est recommandée principalement parce qu'elles mènent à du code plus court et plus clair selon plusieurs programmeurs R, pas à du code nécessairement plus rapide.
 
 
-## Truc 4 : Faire du calcul en parallèle
 
-
-Une importante technique pour réaliser des calculs informatiques plus rapidement est le calcul en parallèle. Il s'agit d'un type de calcul qui, dans sa version la plus simple, 
-
-- brise un long calcul en petits blocs de calcul indépendants;
-- réalise ces blocs de calcul sur plusieurs unités de calcul, simultanément (donc en parallèle);
-- rassemble à la fin tous les résultats.
-
-Les unités de calcul utilisées peuvent être différents coeurs sur une même machine, ou encore des coeurs de calcul sur différents noeuds de calcul dans une grappe de serveurs.
-
-Je vais réaliser un exemple dans lequel je vais exploiter tous les coeurs de mon ordinateur.
-
-Il existe un très grand nombre de packages R pour réaliser du calcul en parallèle (https://cran.r-project.org/web/views/HighPerformanceComputing.html). Un de ces packages vient avec l'installation de R. Il s'agit du package `parallel`. Ce package est donc déjà installé sur votre ordinateur si R y est installé. Cependant, le package n'est pas chargé par défaut lors de l'ouverture d'une nouvelle session R. Chargeons-le.
-
-```{r}
-library(parallel)
-```
-
-Tout d'abord, voyons combien de coeurs compte mon ordinateur.
-
-```{r}
-detectCores()
-```
-
-Il compte 4 coeurs logiques.
-
-Maintenant, si nous travaillons sous Windows, il faut d'abord établir une connexion entre R est les différents coeurs avec la fonction `makeCluster`.
-
-```{r}
-coeurs <- detectCores()
-grappe <- makeCluster(coeurs - 1)
-grappe
-```
-
-Notons que la première fois que j'ai soumis cette commande, Windows m'a demandé une autorisation.
-
-Remarquons aussi que je n'ai utilisé que 3 des 4 coeurs disponibles sur mon ordinateur dans le but de laisser un coeur libre pour les autres processus actifs (application pour courriels, navigateur web, etc.).
-
-Ensuite, je vais comparer la fonction `ksmooth4`, qui utilise `sapply`, à une autre version de `ksmooth` qui utilise la version parallèle du `sapply`, offerte par le package `parallel`, nommée `parSapply`.
-
-```{r}
-#' Estimation de densité par noyau gaussien
-#'
-#' Version 5 : utilisation de parSapply et d'un calcul vectoriel
-#'
-#' mêmes arguments et même sortie que ksmooth1
-#'
-ksmooth5 <- function(grappe, x, xpts, h)
-{
-  n <- length(x)
-  parSapply(
-    cl = grappe,
-    X = xpts,
-    FUN = function(xpts_i) {
-      sum(dnorm((xpts_i - x) / h)) / (n * h)
-    }
-  )
-}
-```
-
-Ces fonctions effectuent bien le même calcul.
-
-```{r}
-dens4 <- ksmooth4(x = x, xpts = xpts, h = 1)
-dens5 <- ksmooth5(grappe = grappe, x = x, xpts = xpts, h = 1)
-
-all.equal(dens4, dens5)
-```
-
-Laquelle est la plus rapide?
-
-```{r R.options = list(width = 100)}
-microbenchmark(unit = "ms",
-     sapply_v4 = ksmooth4(x = x, xpts = xpts, h = 1), 
-  parSapply_v5 = ksmooth5(grappe = grappe, x = x, xpts = xpts, h = 1))
-```
-
-Le calcul en parallèle a permis de réduire un peu le temps d'exécution. Même si 3 coeurs ont été exploités, le calcul n'est pas 3 fois plus rapide, car :
-
-- mon ordinateur possède en fait 2 coeurs logiques, chacun séparé en 2 coeurs logiques (pour un total de 4 coeurs logiques), et des coeurs logiques ne sont pas aussi rapides que des coeurs physiques;
-- toutes les communications entre les coeurs et R prennent aussi du temps.
-
-Une fois le calcul terminé, il est recommandé de fermer les connexions avec la fonction `stopCluster`.
-
-```{r}
-stopCluster(grappe)
-```
-
-Nous aurions pu aller chercher une amélioration plus importante du temps de calcul en utilisant plus d'unités de calcul. Le département de mathématiques et de statistique possède une grappe de calcul pouvant être utilisée par les étudiants du département pour faire du calcul en parallèle. [Calcul Québec](http://www.calculquebec.ca/fr/) gère aussi des supercalculateurs pour le calcul en parallèle utilisable gratuitement par tout chercheur (et ses étudiants) admissible aux subventions provenant des conseils de recherche canadiens, à la condition d'avoir obtenu des accès aux ressources : http://www.calculquebec.ca/fr/acces-aux-ressources. Finalement, plusieurs plateformes de [*cloud computing*](https://fr.wikipedia.org/wiki/Cloud_computing) permettent d'utiliser des serveurs de calculs à faible coût (par exemple [Amazon Web Services](https://aws.amazon.com), [Microsoft Azure](https://azure.microsoft.com), [Google Cloud Platform](https://cloud.google.com/))
-
-Lancer des calculs en parallèle sur une grappe de calcul ne s'effectue pas tout à fait comme le lancement de calculs en parallèle sur une seule machine. La communication avec la grappe s'effectue typiquement via des protocoles SSH et les programmes R se lancent en mode batch grâce à la commande `Rscript`. Ce sujet ne sera pas couvert ici, car il est plutôt complexe et la mise en oeuvre de calculs en parallèle dépend des ressources à notre disposition. Pour plus d'informations, je vous réfère à un document que j'ai écrit sur le sujet, qui est disponible ici : https://stt4230.rbind.io/autre_materiel/calcul_parallele_r/.
-
-
-## Truc 5 : Éviter les allocations de mémoire inutiles
+## Truc 4 : Éviter les allocations de mémoire inutiles
 
 Allouer de l'espace dans la mémoire d'un ordinateur est une opération coûteuse en temps. À chaque fois qu'un nouvel objet est créé, une allocation en mémoire est effectuée. 
 
@@ -670,7 +593,7 @@ Avec un vecteur, une instruction similaire ferait plutôt appel à la fonction `
 vecteur <- c(vecteur, nouvelElement)
 ```
 
-Le problème avec ces assignations est qu'elles modifient la dimension d'un objet. L'objet ne prend donc plus la même place en mémoire. Il ne serait pas une bonne idée de simplement utiliser les cases mémoires adjacentes pour agrandir l'objet, car ces cases mémoires sont potentiellement utilisées pour stocker d'autres objets R ou n'importe quelle valeur nécessaire à un processus en cours d'exécution sur l'ordinateur. L'ordinateur doit plutôt complètement déplacer l'objet dans de nouvelles cases mémoire qu'il sait être inutilisées afin de ne pas entrer en conflit avec quoi que ce soit. Ainsi, avec les commandes précédentes, nous avons peut-être l'impression de modifier le contenu de certaines cases mémoire alors qu'en réalité nous provoquons une nouvelle allocation de mémoire.
+Le problème avec ces assignations est qu'elles modifient la dimension d'un objet. L'objet ne requière donc plus la même quantité d'espace mémoire. Il ne serait pas une bonne idée de simplement utiliser les cases mémoires adjacentes pour agrandir l'objet, car ces cases mémoires sont potentiellement utilisées pour stocker d'autres objets R ou n'importe quelle valeur nécessaire à un processus en cours d'exécution sur l'ordinateur. L'ordinateur doit plutôt complètement déplacer l'objet dans de nouvelles cases mémoire qu'il sait être inutilisées afin de ne pas entrer en conflit avec quoi que ce soit. Ainsi, avec les commandes précédentes, nous avons peut-être l'impression de modifier le contenu de certaines cases mémoire alors qu'en réalité nous provoquons une nouvelle allocation de mémoire.
 
 **Exemple** : 
 
@@ -892,13 +815,20 @@ sommeDe4 <- function(sommeVisee = 50000){
 microbenchmark(sommeDe3(), sommeDe4(), unit = "ms")
 ```
 
-Ici, l'utilisation du data frame est environ 40 fois plus lente que l'utilisation d'une matrice!
+
+```{r echo = FALSE}
+out2 <- microbenchmark(sommeDe3(), sommeDe4(), unit = "ms")
+out2_medians <- aggregate(out$time, list(out$expr), median)
+```
+
+Ici, l'utilisation du data frame est environ `r round(out2_medians[1, "x"]/out2_medians[2, "x"])` fois plus lente que l'utilisation d'une matrice!
 
 Bref, autant que possible, il vaut mieux **éviter d'utiliser une data frame pour stocker des résultats générés dans une boucle**. 
 
-La lenteur des opérations de manipulation de data frame est bien connue ne R. Des alternatives plus rapides existent, notamment les objets de classe `data.table` offerts par le [package `data.table`]( https://CRAN.R-project.org/package=data.table). Ce package avait été mentionné dans les notes sur les [structures de données en R](https://stt4230.rbind.io/manipulation_donnees/structures_r/#le-data-table).
+La lenteur des opérations de manipulation de data frame est bien connue en R. Des alternatives plus rapides existent, notamment les objets de classe `data.table` offerts par le [package `data.table`]( https://CRAN.R-project.org/package=data.table). Ce package avait été mentionné dans les notes sur les [structures de données en R](https://stt4230.rbind.io/manipulation_donnees/structures_r/#le-data-table).
 
 
+<!---
 ## Truc 6 : Utiliser de la compilation en bytecode
 
 La compilation en bytecode (en anglais *byte code compilation*) consiste en une étape de compilation intermédiaire entre les instructions-machine et le code source. En R, le package `compiler` permet de faire facilement de la compilation en bytecode. Ce package vient avec l'installation de base de R (il est donc déjà installé pour vous, comme la package `parallel`).
@@ -935,18 +865,118 @@ Le R core team cherche toujours à rendre R le plus rapide possible. Effectuer d
 enableJIT(3)
 ```
 
+--->
 
-## Truc 7 : Reprogrammer en C ou C++ les bouts de code les plus lents
+## Truc 5 : Faire du calcul en parallèle
+
+
+Une importante technique pour réaliser des calculs informatiques plus rapidement est le calcul en parallèle. Il s'agit d'un type de calcul qui, dans sa version la plus simple, 
+
+- brise un long calcul en petits blocs de calcul indépendants;
+- réalise ces blocs de calcul sur plusieurs unités de calcul, simultanément (donc en parallèle);
+- rassemble à la fin tous les résultats.
+
+Les unités de calcul utilisées peuvent être localisées sur CPU (pour *Central Processing Unit*) ou sur GPU (pour *Graphical Processing Unit*). Nous pouvons exploiter différentes unités sur une seule machine ou encore sur plusieurs noeuds de calcul dans une grappe de serveurs.
+
+Je vais réaliser un exemple dans lequel je vais exploiter tous les coeurs du CPU de mon ordinateur.
+
+Il existe un très grand nombre de packages R pour réaliser du calcul en parallèle (https://cran.r-project.org/web/views/HighPerformanceComputing.html). Un de ces packages vient avec l'installation de R. Il s'agit du package `parallel`. Ce package est donc déjà installé sur votre ordinateur si R y est installé. Cependant, le package n'est pas chargé par défaut lors de l'ouverture d'une nouvelle session R. Chargeons-le.
+
+```{r}
+library(parallel)
+```
+
+Tout d'abord, voyons combien de coeurs compte mon ordinateur.
+
+```{r}
+detectCores()
+```
+
+Il compte 4 coeurs logiques.
+
+Maintenant, si nous travaillons sous Windows, il faut d'abord établir une connexion entre R est les différents coeurs avec la fonction `makeCluster`.
+
+```{r}
+coeurs <- detectCores()
+grappe <- makeCluster(coeurs - 1)
+grappe
+```
+
+Notons que la première fois que j'ai soumis cette commande, Windows m'a demandé une autorisation.
+
+Remarquons aussi que je n'ai utilisé que 3 des 4 coeurs disponibles sur mon ordinateur dans le but de laisser un coeur libre pour les autres processus actifs.
+
+Ensuite, je vais comparer la fonction `ksmooth4`, qui utilise `sapply`, à une autre version de `ksmooth` qui utilise la version parallèle du `sapply`, offerte par le package `parallel`, nommée `parSapply`.
+
+```{r}
+#' Estimation de densité par noyau gaussien
+#'
+#' Version 5 : utilisation de parSapply et d'un calcul vectoriel
+#'
+#' mêmes arguments et même sortie que ksmooth1
+#'
+ksmooth5 <- function(grappe, x, xpts, h)
+{
+  n <- length(x)
+  parSapply(
+    cl = grappe,
+    X = xpts,
+    FUN = function(xpts_i) {
+      sum(dnorm((xpts_i - x) / h)) / (n * h)
+    }
+  )
+}
+```
+
+Ces fonctions effectuent bien le même calcul.
+
+```{r}
+dens4 <- ksmooth4(x = x, xpts = xpts, h = 1)
+dens5 <- ksmooth5(grappe = grappe, x = x, xpts = xpts, h = 1)
+
+all.equal(dens4, dens5)
+```
+
+Laquelle est la plus rapide?
+
+\newpage
+
+```{r R.options = list(width = 100)}
+microbenchmark(unit = "ms",
+     sapply_v4 = ksmooth4(x = x, xpts = xpts, h = 1), 
+  parSapply_v5 = ksmooth5(grappe = grappe, x = x, xpts = xpts, h = 1))
+```
+
+Le calcul en parallèle a permis de réduire un peu le temps d'exécution. Même si 3 coeurs ont été exploités, le calcul n'est pas 3 fois plus rapide, car :
+
+- mon ordinateur possède en fait 2 coeurs physiques, chacun séparé en 2 coeurs logiques (pour un total de 4 coeurs logiques), et des coeurs logiques ne sont pas aussi rapides que des coeurs physiques;
+- toutes les communications entre les coeurs et R requièrent aussi un peu de temps.
+
+Une fois le calcul terminé, il est recommandé de fermer les connexions entre R et les coeurs de calcul avec la fonction `stopCluster`.
+
+```{r}
+stopCluster(grappe)
+```
+
+Nous aurions pu aller chercher une amélioration plus importante du temps de calcul en utilisant plus d'unités de calcul. Le département de mathématiques et de statistique possède une grappe de calcul pouvant être utilisée par les étudiants du département pour faire du calcul en parallèle. [Calcul Québec](http://www.calculquebec.ca/fr/) gère aussi des supercalculateurs pour le calcul en parallèle utilisable gratuitement par tout chercheur (et ses étudiants) admissible aux subventions provenant des conseils de recherche canadiens, à la condition d'avoir obtenu des accès aux ressources : http://www.calculquebec.ca/fr/acces-aux-ressources. Finalement, plusieurs plateformes de [*cloud computing*](https://fr.wikipedia.org/wiki/Cloud_computing) permettent d'utiliser des serveurs de calculs à faible coût (par exemple [Amazon Web Services](https://aws.amazon.com), [Microsoft Azure](https://azure.microsoft.com), [Google Cloud Platform](https://cloud.google.com/)).
+
+Lancer des calculs en parallèle sur une grappe de calcul ne s'effectue pas tout à fait comme le lancement de calculs en parallèle sur une seule machine. La communication avec la grappe s'effectue typiquement via des protocoles SSH et les programmes R se lancent en mode batch grâce à la commande `Rscript`. Ce sujet ne sera pas couvert ici, car il est plutôt complexe et la mise en oeuvre de calculs en parallèle dépend des ressources à notre disposition. Pour plus d'informations, je vous réfère à un document que j'ai écrit sur le sujet, qui est disponible ici : https://stt4230.rbind.io/autre_materiel/calcul_parallele_r/.
+
+
+
+## Truc 6 : Reprogrammer en C ou C++ les bouts de code les plus lents
 
 *Note : La matière présentée dans cette section ne sera pas évaluée.*
 
-Un dernier truc pour rendre du code R plus rapide est en fait de le reprogrammer en C ou C++. Le langage R étant un langage interprété, il n'est pas aussi rapide que du C ou du C++ qui sont des langages plus près du langage machine.
+Un dernier truc pour rendre du code R plus rapide est de reprogrammer ses bouts les plus lents en C ou C++. Le langage R étant un langage interprété, il n'est pas aussi rapide que du C ou du C++, qui sont des langages plus près du langage machine.
 
 Nous n'utilisons pas ce truc pour réaliser des analyses de données plus rapidement, mais plutôt pour créer une fonction qui réalise rapidement un certain calcul.
 
 Il existe quelques outils pour intégrer du code C ou C++ en R. Un outil très populaire pour intégrer du code C++ en R est le package `Rcpp` (http://www.rcpp.org/). Le R de base offre pour sa part les fonctions `.C`, `.Call` et `.External` pour ce faire (voir le manuel [*Writing R Extensions*, chapitre 5)](http://cran.r-project.org/doc/manuals/r-release/R-exts.html#System-and-foreign-language-interfaces). Je vais me contenter ici d'illustrer l'utilisation de la fonction `.C`, qui est la méthode la plus simple, mais la moins puissante. 
 
-La fonction `ksmooth1` peut être reprogrammée en C comme suit ([Peng et Leeuw, 2002](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf)) :
+La fonction `ksmooth1` peut être reprogrammée en C comme suit ([Peng et de Leeuw, 2002](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf)) :
+
+\newpage
 
 ```
 #include <R.h>
@@ -971,7 +1001,7 @@ void kernel_smooth(double *x, int *n, double *xpts,
 }
 ```
 
-Du code C destiné à être appelé en R avec la fonction `.C` se doit de respecter les propriétés suivantes ([Peng et Leeuw, 2002](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf)) :
+Du code C destiné à être appelé en R avec la fonction `.C` se doit de respecter les propriétés suivantes ([Peng et de Leeuw, 2002](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf)) :
 
 - Les fonctions C appelées en R doivent être de type « void ». Elles doivent retourner les résultats des calculs par leurs arguments.
 
@@ -981,7 +1011,7 @@ Du code C destiné à être appelé en R avec la fonction `.C` se doit de respec
 ```
 #include <R.h> 
 ```
-De plus, il est possible d'utiliser en C certaines fonctions mathématiques R en incluant le fichier d'en-tête Rmath.h dans votre fichier de code C par la ligne : 
+De plus, il est possible d'utiliser en C certaines fonctions mathématiques R en incluant le fichier d'en-tête Rmath.h dans le fichier de code C par la ligne : 
 ```
 #include <Rmath.h>
 ```
@@ -996,7 +1026,7 @@ Une fois le code C écrit, il reste trois étapes à compléter pour intégrer d
 2. Charger en R l'objet partagé ou le DLL créé à l'étape précédente avec la fonction `dyn.load` ;
 3. Appeler en R les fonctions créées dans le code C avec la fonction d'interface `.C`.
 
-Retournons donc à l'exemple. Supposons que le code C ci-dessus se trouve dans le fichier *C:/coursR/ksmoothC.c*. Dans le *terminal* sous Linux ou Mac OS X et dans une *fenêtre invite de commandes* sous Windows, il faut se positionner dans le répertoire contenant le fichier et lancer la commande suivante :
+Retournons donc à l'exemple. Supposons que le code C ci-dessus se trouve dans le fichier `C:/coursR/ksmoothC.c`. Dans le *terminal* sous Linux ou Mac OS X et dans une *fenêtre invite de commandes* sous Windows, il faut se positionner dans le répertoire contenant le fichier et lancer la commande suivante :
 
 ```
 R CMD SHLIB ksmoothC.c
@@ -1077,21 +1107,121 @@ Mais pourquoi `density` est-il tellement plus rapide alors qu'il fait appel à d
 
 ***
 
+# Synthèse
+
+#### Optimisation de temps d'exécution
+
+Outils pour analyser la performance d'un programme R :
+
+- calcul global de temps d'exécution :
+    + la fonction `system.time` (R de base),
+    + la fonction `microbenchmark` (package du même nom);
+- calcul plus détaillé de temps d'exécution :
+    + par fonction appelée (*call stack*) : les fonctions `Rprof` et `summaryRprof` (R de base),
+    + par ligne de code : la fonction `profvis` (package du même nom).
+
+**Conseil** : comparaison de différentes options  
+$\longrightarrow$ Le code le plus rapide n'est pas toujours celui que nous croyons. 
+
+
+#### Stratégies d’optimisation du temps d’exécution
+
+
+**Trucs** pour du code R plus rapide :
+
+1. Utiliser des fonctions optimisées
+2. Faire seulement ce qui est nécessaire
+3. Exploiter les calculs matriciels et vectoriels
+4. Éviter les allocations de mémoire inutiles
+5. Faire du calcul en parallèle
+6. Reprogrammer en C ou C++ les bouts de code les plus lents
+
+Contrainte : **compromis temps d'exécution / mémoire utilisée**
+
+
+##### Truc 1 : Utiliser des fonctions optimisées
+
+Profiter du travail des autres
+
+Le web regorge de fonctions R : la distribution de base de R, le CRAN, Bioconductor, etc.
+
+##### Truc 2 : Faire seulement ce qui est nécessaire
+
+Ne pas alourdir son code d'évaluations inutiles
+
+
+##### Truc 3 : Exploiter les calculs matriciels et vectoriels
+
+R est optimisé pour le calcul vectoriel
+
+(fonctions de la famille des `apply` = boucles, pas calcul vectoriel)
+
+
+##### Truc 4 : Éviter les allocations de mémoire inutiles
+
+Allouer de l'espace dans la mémoire d'un ordinateur = opération coûteuse en temps
+
+Opérations à éviter dans une boucle R :
+
+1. utilisation d'un objet de dimension croissante,
+2. assignation de valeur(s) dans un data frame.
+
+
+##### Truc 5 : Faire du calcul en parallèle
+
+Version la plus simple du calcul en parallèle : 
+
+- brise un long calcul en petits blocs de calcul indépendants;
+- réalise ces blocs de calcul sur plusieurs unités de calcul (coeurs d'un processeur) simultanément (donc en parallèle);
+- rassemble à la fin tous les résultats.
+
+Domaine très large : https://cran.r-project.org/web/views/HighPerformanceComputing.html
+
+Domaine très technique : dépend des ressources à notre portée (CPU versus GPU, plusieurs coeurs sur notre ordinateur, grappe de serveurs de calcul, plateforme de cloud computing, etc.)
+
+
+Point de départ en R : package `parallel`
+
+
+##### Truc 6 : Reprogrammer en C ou C++ les bouts de code les plus lents
+
+Meilleure solution pour développer une fonction très rapide, pas pour réaliser rapidement des analyses de données.
+
+- fonction d'interface `.C`,
+- fonction d'interface `.Call` ou `.External`,
+- package `Rcpp` pour l'intégration de code C++.
+
+
+***
 
 # Références
 
+- **Outils d'analyse de la performance d'un programme R**
+    + package `microbenchmark` :  https://CRAN.R-project.org/package=microbenchmark 
+    + Alternatives au package `microbenchmark` : package `bench` https://github.com/r-lib/bench
+    + package `profvis` : https://rstudio.github.io/profvis/
+
+&nbsp;
+
 - **Optimisation de temps d'exécution**
-    + Wickham, H. (2014). *Advanced R*. CRC Press. Chapitre 17. URL http://adv-r.had.co.nz/Profiling.html
+    + Wickham, H. (2014). *Advanced R*. CRC Press. 
+        + Édition 1, Chapitre 17, URL http://adv-r.had.co.nz/Profiling.html
+        + Édition 2, Chapitre 24, URL https://adv-r.hadley.nz/perf-improve.html#code-organisation
     + Matloff, N. (2011). *The Art of R Programming : A Tour of Statistical Software Design*, No Starch Press. Chapitre 14.
     + Adler, J. (2012). *R in a Nutshell*, Second edition. O'Reilly. Chapitre 24.
-    + http://www.noamross.net/blog/2014/4/16/vectorization-in-r--why.html
+    + http://www.noamross.net/blog/2014/4/16/vectorization-in-r--why.html  
+
+&nbsp;
 
 - **Interfacer du code dans un autre langage (en particulier C ou C++)**
     + Peng, R. D., & de Leeuw, J. (2002). An Introduction to the .C Interface to R. UCLA: Academic Technology Services, Statistical Consulting Group. URL http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf
     + R Core Team (2018). *Writing R Extensions*. R Foundation for Statistical Computing. Chapitre 5. URL http://cran.r-project.org/doc/manuals/r-release/R-exts.html#System-and-foreign-language-interfaces
     + Matloff, N. (2011). *The Art of R Programming : A Tour of Statistical Software Design*, No Starch Press. Chapitre 15.
-    + http://www.rcpp.org/
-    + Wickham, H. (2014). *Advanced R*. CRC Press. Chapitre 19. URL http://adv-r.had.co.nz/Rcpp.html
+    + Utilisation du package `Rcpp` :
+        + http://www.rcpp.org/
+        + Wickham, H. (2014). *Advanced R*. CRC Press. Chapitre 19. URL http://adv-r.had.co.nz/Rcpp.html  
+    
+&nbsp;
 
 - **Calcul en parallèle**
     + https://stt4230.rbind.io/autre_materiel/calcul_parallele_r/
