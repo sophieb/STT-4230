@@ -1,7 +1,7 @@
 +++
 title = "Notes de cours"
 description = ""
-date = "2010-04-01"
+date = "2019-04-01"
 lastmodifierdisplayname = "Sophie Baillargeon"
 lastmodifieremail = "sophie.baillargeon@mat.ulaval.ca"
 +++
