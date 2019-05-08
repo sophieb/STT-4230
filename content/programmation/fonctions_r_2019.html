@@ -649,7 +649,7 @@ compteImpair2 &lt;- function(x) {
 ##    0.03    0.00    0.03</code></pre>
 <pre class="r"><code>system.time(compteImpair2(x))</code></pre>
 <pre><code>##    user  system elapsed 
-##    0.22    0.00    0.21</code></pre>
+##    0.27    0.00    0.27</code></pre>
 <p>L’écart dans les temps d’exécution des deux fonctions se creuse encore plus si nous augmentons la longueur du vecteur <code>x</code>.</p>
 <p>Nous devrions donc choisir d’utiliser <code>compteImpair1</code> plutôt que <code>compteImpair2</code>.</p>
 <p>Nous allons revenir plus tard sur l’optimisation des temps d’exécution de nos fonctions.</p>
@@ -658,7 +658,7 @@ compteImpair2 &lt;- function(x) {
 </div>
 <div id="programmation-fonctionnelle" class="section level1">
 <h1>Programmation fonctionnelle</h1>
-<p>Maintenant que vous savez écrire des fonctions en R, vous pouvez exploiter tout le potentiel de la <a href="https://en.wikipedia.org/wiki/Functional_programming">programmation fonctionnelle</a>, paradigme de programmation exploité par R. En fait, nous avons déjà parlé de ce paradigme dans ce cours. L’<a href="https://stt4230.rbind.io/calculs/calculs_base_r/#fonctions-de-la-famille-des-apply">utilisation de fonctions de la famille des <code>apply</code></a> est une forme de programmation fonctionnelle. Contentons nous ici de parler de cet aspect de la programmation fonctionnelle : les fonctions de haut niveau qui prennent d’autres fonctions en entrées, comme les fonctions de la famille des <code>apply</code>.</p>
+<p>Maintenant que vous savez écrire des fonctions en R, vous pouvez exploiter tout le potentiel de la <a href="https://en.wikipedia.org/wiki/Functional_programming">programmation fonctionnelle</a>, paradigme de programmation exploité par R. En fait, nous avons déjà parlé de ce paradigme dans ce cours. L’<a href="https://stt4230.rbind.io/calculs/calculs_base_r/#fonctions-de-la-famille-des-apply">utilisation de fonctions de la famille des <code>apply</code></a> est une forme de programmation fonctionnelle. Contentons nous ici de parler de cet aspect de la programmation fonctionnelle : les fonctions de haut niveau qui prennent d’autres fonctions en entrée, comme les fonctions de la famille des <code>apply</code>.</p>
 <p>Nous avons déjà donné dans les <a href="https://stt4230.rbind.io/programmation/struct_controle_r/#fonction-de-la-famille-des-apply-versus-boucle">notes sur les structures de contrôle</a> un exemple de boucle <code>for</code> remplacé par un appel à une fonction de la famille des <code>apply</code>. En fait, pratiquement n’importe quelle boucle <code>for</code> en R peut être remplacée par un appel à une fonction de la famille des <code>apply</code> une fois que nous savons comment créer de nouvelles fonctions. Par exemple, reprenons l’exemple de boucle suivant, aussi tiré des <a href="https://stt4230.rbind.io/programmation/struct_controle_r/#enregistrement-des-resultats-dans-une-boucle">notes sur les structures de contrôle</a>.</p>
 <pre class="r"><code>modeles &lt;- vector(length = 6, mode = &quot;list&quot;)
 names(modeles) &lt;- names(attitude)[-1]
@@ -681,7 +681,7 @@ R2</code></pre>
 <pre><code>##               complaints privileges  learning    raises    critical     advance
 ## r.squared      0.6813142  0.1815756 0.3889745 0.3482640  0.02447321  0.02405175
 ## adj.r.squared  0.6699325  0.1523461 0.3671521 0.3249877 -0.01036703 -0.01080355</code></pre>
-<p>À l’aide de la bonne fonction, nous allons obtenir exactement le même résultat avec un code plus court, qui n’utilise pas de boucle, mais qui utilise la fonction <code>sapply</code>. Voici une fonction qui extrait des deux statistiques à conserver pour un seul modèle de régression.</p>
+<p>À l’aide de la bonne fonction, nous allons obtenir exactement le même résultat avec un code plus court, qui n’utilise pas de boucle, mais qui utilise la fonction <code>sapply</code>. Voici une fonction qui extrait les deux statistiques à conserver pour un seul modèle de régression.</p>
 <pre class="r"><code>R2_reg_rating_vs_var &lt;- function(variable){
   reg &lt;- lm(rating ~ ., data = attitude[, c(&quot;rating&quot;, variable)])
   c(r.squared = summary(reg)$r.squared, 
@@ -692,8 +692,8 @@ R2</code></pre>
 <pre><code>##               complaints privileges  learning    raises    critical     advance
 ## r.squared      0.6813142  0.1815756 0.3889745 0.3482640  0.02447321  0.02405175
 ## adj.r.squared  0.6699325  0.1523461 0.3671521 0.3249877 -0.01036703 -0.01080355</code></pre>
-<p>Un des avantages de l’utilisation de fonctions de la famille des <code>apply</code> en remplacement de boucles est que nous n’avons pas à initialiser préalablement un objet pour stocker les résultats. La fonction de haut-niveau gère cet aspect pour nous. Les adeptes de la programmation fonctionnelle sont également d’avis que l’utilisation de fonction de la famille des <code>apply</code> produit un code plus clair qu’une boucle.</p>
-<p>Il existe en R d’autres fonctions de haut-niveau, qui appliquent itérativement une fonction sur les éléments d’un objet. Pour les intéressés, la fiche d’aide ouverte par la commande <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/funprog.html"><code>help(funprog)</code></a> présente ces fonctions (<code>Map</code>, <code>Filter</code>, <code>Reduce</code>, etc.). Un package R se spécialise aussi dans ce genre de fonction, il s’agit du <a href="https://purrr.tidyverse.org/">package <code>purrr</code></a>.</p>
+<p>Un des avantages de l’utilisation de fonctions de la famille des <code>apply</code> en remplacement de boucles est que nous n’avons pas à initialiser préalablement un objet pour stocker les résultats. La fonction de haut niveau gère cet aspect pour nous. Les adeptes de la programmation fonctionnelle sont également d’avis que l’utilisation de fonction de la famille des <code>apply</code> produit un code plus clair qu’une boucle.</p>
+<p>Il existe en R d’autres fonctions de haut niveau, qui appliquent itérativement une fonction sur les éléments d’un objet. Pour les intéressés, la fiche d’aide ouverte par la commande <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/funprog.html"><code>help(funprog)</code></a> présente ces fonctions (<code>Map</code>, <code>Filter</code>, <code>Reduce</code>, etc.). Un package R se spécialise aussi dans ce genre de fonctions, il s’agit du <a href="https://purrr.tidyverse.org/">package <code>purrr</code></a>.</p>
 <hr />
 </div>
 <div id="synthese" class="section level1">

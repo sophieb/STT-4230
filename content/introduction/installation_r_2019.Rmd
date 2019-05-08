@@ -2,7 +2,7 @@
 title: "Guide d'installation ou de mise à jour de R et RStudio"
 linkTitle: "Installation de R et RStudio"
 author: "Sophie Baillargeon, Université Laval"
-date: "2019-03-21"
+date: "2019-05-08"
 weight: 2
 slug: "installation_r_rstudio"
 categories: ["cours_2019-01-15"]
@@ -31,12 +31,12 @@ Voici quelques conseils d'installation ou de mise à jour de R.
 
 ## Système d'exploitation
 
-Cette fiche explique les étapes générales d'installation de [R](https://www.r-project.org/) et [RSutdio](https://www.rstudio.com/) pour tous les systèmes d'exploitation, mais des explications plus détaillées sont fournies pour le système d'exploitation Windows seulement. Plus d'informations pour les utilisateurs Mac OS X / OS X / macOS ou Unix / Linux sont données dans les références suivantes&nbsp;:
+Cette fiche explique les étapes générales d'installation de [R](https://www.r-project.org/) et [RSutdio](https://www.rstudio.com/) pour tous les systèmes d'exploitation, mais des explications plus détaillées sont fournies surtout le système d'exploitation Windows. Plus d'informations pour les utilisateurs Mac OS X / OS X / macOS ou Unix / Linux sont données dans les références suivantes&nbsp;:
 
 - https://cran.r-project.org/doc/FAQ/R-FAQ.html#How-can-R-be-installed_003f      
 (documentation officielle du *R core team* concernant l'installation de R);
 - http://socserv.mcmaster.ca/jfox/Courses/R/ICPSR/R-install-instructions.html  
-(bonne source d'information sur l'installation de R, RStudio et de tout le nécessaire à la construction de packages R par John Fox).  
+(source d'information sur l'installation de R, RStudio et de tout le nécessaire à la construction de packages R par John Fox).  
 
 <!---
 Sous Windows
@@ -45,9 +45,9 @@ En démarrant des programmes (.exe) sous certaines versions de Windows, notammen
 
 ## Utilitaires pour automatiser les installations
 
-Pour les utilisateurs de Windows, le package `installr` propose des fonctions pour installer ou mettre à jour R, RStudio ou les Rtools simplement en lançant une commande dans la console R. https://github.com/talgalili/installr/
+Pour les utilisateurs de Windows, le [package `installr`](https://github.com/talgalili/installr/) propose des fonctions pour installer ou mettre à jour R, RStudio ou les Rtools simplement en lançant une commande dans la console R. https://github.com/talgalili/installr/
 
-Pour les utilisateurs de Mac OS X / OS X / macOS, le package `updateR` propose l'équivalent, mais limité à l'installation de R. https://github.com/AndreaCirilloAC/updateR
+Pour les utilisateurs de Mac OS X / OS X / macOS, le [package `updateR`](https://github.com/AndreaCirilloAC/updateR) propose l'équivalent, mais limité à l'installation de R. https://github.com/AndreaCirilloAC/updateR
 
 
 ## Nécessaire au développement de packages R {#tools}
@@ -101,6 +101,53 @@ Sous Windows ou Mac OS X / OS X / macOS, il suffit maintenant de télécharger u
 
 Cliquez sur «&nbsp;base&nbsp;», puis sur «&nbsp;Download R x.y.z for Windows&nbsp;» où x.y.z est le numéro de la version que vous souhaitez installer (probablement la version la plus à jour). Le téléchargement du fichier «&nbsp;R-x.y.z-win.exe&nbsp;» débutera. Il s'agit d'un installateur, soit un programme permettant d'installer R. Il vous suffit ensuite de double-cliquer sur ce fichier et l'installation débutera. *Vous pouvez accepter toutes les options par défaut offertes par l'installateur.*
 
+#### Informations plus détaillées pour les utilisateurs de Linux Ubuntu
+
+Vous pouvez procéder à l'installation de R en suivant les instructions décrites sur cette page web :
+
+> http://basicgroundwork.blogspot.ca/2015/05/install-r-in-ubuntu-1404.html
+
+La première étape est d'ajouter un des miroirs du CRAN à la liste des dépôts informatiques depuis lesquels notre instance peut acquérir des logiciels. Cette liste se trouve dans le fichier `/etc/apt/sources.list`. Nous allons y ajouter le miroir `http://cran.rstudio.com/bin/linux/ubuntu`, mais un autre miroir du CRAN aurait aussi fait l'affaire. Pour effectuer cet ajout, le blog cité plus haut suggère d'ouvrir le fichier avec `vi`, de l'éditer pour ajouter la ligne : `deb http://cran.rstudio.com/bin/linux/ubuntu trusty/`, puis d'enregistrer et fermer le fichier. Encore plus simplement, il est possible de réaliser cette édition en une seule commande soumise dans le terminal, la suivante.
+
+\definecolor{shadecolor}{gray}{0.2}\color{white}\begin{snugshade*}\begin{verbatim}
+printf 'deb http://cran.rstudio.com/bin/linux/ubuntu trusty/\n'| sudo tee -a \
+/etc/apt/sources.list
+\end{verbatim}\end{snugshade*}\color{black}\definecolor{shadecolor}{RGB}{248,248,248}
+
+Il faut ensuite mettre à jour la liste des fichiers disponibles dans les dépôts énumérés dans le fichier `/etc/apt/sources.list` avec la commande suivante.
+
+\definecolor{shadecolor}{gray}{0.2}\color{white}\begin{snugshade*}\begin{verbatim}
+sudo apt-get update
+\end{verbatim}\end{snugshade*}\color{black}\definecolor{shadecolor}{RGB}{248,248,248}
+
+Si l'erreur suivante est générée :
+
+\definecolor{shadecolor}{gray}{0.3}\color{white}\begin{snugshade*}\begin{verbatim}
+W: GPG error: http://cran.rstudio.com/bin/linux/ubuntu trusty/ Release: The following 
+signatures couldn't be verified because the public key is not available: NO_PUBKEY 
+51716619E084DAB9
+\end{verbatim}\end{snugshade*}\color{black}\definecolor{shadecolor}{RGB}{248,248,248}
+
+alors les commandes suivantes devraient régler le problème (en utilisant le même numéro de clé publique que dans l'erreur).
+
+\definecolor{shadecolor}{gray}{0.2}\color{white}\begin{snugshade*}\begin{verbatim}
+gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-key 51716619E084DAB9
+gpg -a --export 51716619E084DAB9| sudo apt-key add -
+sudo apt-get update
+\end{verbatim}\end{snugshade*}\color{black}\definecolor{shadecolor}{RGB}{248,248,248}
+
+Finalement, nous sommes en mesure de procéder à l'installation de R avec la commande suivante.
+
+\definecolor{shadecolor}{gray}{0.2}\color{white}\begin{snugshade*}\begin{verbatim}
+sudo apt-get install r-base r-base-dev
+\end{verbatim}\end{snugshade*}\color{black}\definecolor{shadecolor}{RGB}{248,248,248}
+
+<!--
+Autre références qui m'ont été utiles
+- http://thestatsgeek.com/2015/11/30/running-simulations-in-r-using-amazon-web-services/
+- fichier `ec2steps.bash` de https://github.com/JohnMount/ec2R
+- http://randyzwitch.com/r-amazon-ec2/?utm_content=buffer6b6e9&utm_source=buffer&utm_medium=twitter&utm_campaign=Buffer
+-->
 
 ## Mise à jour
 
