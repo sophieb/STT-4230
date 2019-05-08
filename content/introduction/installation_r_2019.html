@@ -127,29 +127,24 @@ has_build_tools()</code></pre>
 <div id="informations-plus-detaillees-pour-les-utilisateurs-de-linux-ubuntu" class="section level4">
 <h4>Informations plus détaillées pour les utilisateurs de Linux Ubuntu</h4>
 <p>Vous pouvez procéder à l’installation de R en suivant les instructions décrites sur cette page web :</p>
-<blockquote>
-<p><a href="http://basicgroundwork.blogspot.ca/2015/05/install-r-in-ubuntu-1404.html" class="uri">http://basicgroundwork.blogspot.ca/2015/05/install-r-in-ubuntu-1404.html</a></p>
-</blockquote>
+<ul>
+<li><a href="http://basicgroundwork.blogspot.ca/2015/05/install-r-in-ubuntu-1404.html" class="uri">http://basicgroundwork.blogspot.ca/2015/05/install-r-in-ubuntu-1404.html</a></li>
+</ul>
 <p>La première étape est d’ajouter un des miroirs du CRAN à la liste des dépôts informatiques depuis lesquels notre instance peut acquérir des logiciels. Cette liste se trouve dans le fichier <code>/etc/apt/sources.list</code>. Nous allons y ajouter le miroir <code>http://cran.rstudio.com/bin/linux/ubuntu</code>, mais un autre miroir du CRAN aurait aussi fait l’affaire. Pour effectuer cet ajout, le blog cité plus haut suggère d’ouvrir le fichier avec <code>vi</code>, de l’éditer pour ajouter la ligne : <code>deb http://cran.rstudio.com/bin/linux/ubuntu trusty/</code>, puis d’enregistrer et fermer le fichier. Encore plus simplement, il est possible de réaliser cette édition en une seule commande soumise dans le terminal, la suivante.</p>
-
-
-<p></p>
+<pre><code>printf &#39;deb http://cran.rstudio.com/bin/linux/ubuntu trusty/\n&#39;| sudo tee -a \
+/etc/apt/sources.list</code></pre>
 <p>Il faut ensuite mettre à jour la liste des fichiers disponibles dans les dépôts énumérés dans le fichier <code>/etc/apt/sources.list</code> avec la commande suivante.</p>
-
-
-<p></p>
-<p>Si l’erreur suivante est générée :</p>
-
-
-<p></p>
+<pre><code>sudo apt-get update</code></pre>
+<p>Si une erreur similaire à la suivante est générée :</p>
+<pre><code>W: GPG error: http://cran.rstudio.com/bin/linux/ubuntu trusty/ Release: The following 
+signatures couldn&#39;t be verified because the public key is not available: NO_PUBKEY 
+51716619E084DAB9</code></pre>
 <p>alors les commandes suivantes devraient régler le problème (en utilisant le même numéro de clé publique que dans l’erreur).</p>
-
-
-<p></p>
+<pre><code>gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-key 51716619E084DAB9
+gpg -a --export 51716619E084DAB9| sudo apt-key add -
+sudo apt-get update</code></pre>
 <p>Finalement, nous sommes en mesure de procéder à l’installation de R avec la commande suivante.</p>
-
-
-<p></p>
+<pre><code>sudo apt-get install r-base r-base-dev</code></pre>
 <!--
 Autre références qui m'ont été utiles
 - http://thestatsgeek.com/2015/11/30/running-simulations-in-r-using-amazon-web-services/
@@ -170,7 +165,7 @@ Autre références qui m'ont été utiles
 <li>sélectionnez « R for Windows u.v.w » où u.v.w est le numéro de la version de R à désinstaller;</li>
 <li>cliquez sur « Désinstaller ».</li>
 </ul>
-<p>Vous pouvez aussi aller dans les fichiers d’installation de R (par défaut <code>&quot;C:/Program Files/R/R-u.v.w&quot;</code>) et double-cliquer sur <code>unins000.exe</code>.</p>
+<p>Vous pouvez aussi aller dans les fichiers d’installation de R (par défaut <code>"C:/Program Files/R/R-u.v.w"</code>) et double-cliquer sur <code>unins000.exe</code>.</p>
 <p>La désinstallation démarrera.</p>
 </div>
 </div>
@@ -258,7 +253,7 @@ Finalement, on peut vouloir associer RStudio à certaines extensions de fichiers
 <h2>Packages et mise à jour de R</h2>
 <p>Après une mise à jour de R, il est possible que vous n’ayez plus accès, avec la nouvelle version de R, aux packages que vous aviez installés avec une version antérieure de R. Cela dépend en fait du répertoire d’installation des packages.</p>
 <p>S’ils sont installés directement dans le répertoire d’installation de R, il est certain que vous n’y aurez plus accès avec la nouvelle version de R. C’est que le nom du répertoire d’installation de packages dépend alors du numéro de version de R.</p>
-<p>Afin de ne pas forcer l’utilisateur à mettre à jour les packages qu’il utilise à chaque fois qu’il met R à jour, le comportement par défaut de R est d’installer les packages dans un répertoire local à l’utilisateur, dont le nom dépend seulement des deux premiers numéros composant le numéro de version. Par exemple, avec mon installation de R sous Windows, les packages que j’installe se retrouvent par défaut dans le répertoire <code>&quot;C:/Users/Sophie/Documents/R/win-library/u.v&quot;</code>. Lors d’une mise à jour mineure de R, seul le dernier numéro composant le numéro de version change. Par exemple, le 20 décembre 2018, la version 3.5.2 de R est sortie, améliorant la version 3.5.1 sortie en juillet 2018. Le répertoire d’installation de packages par défaut est donc demeuré le même entre les deux versions. Cependant, lorsqu’une mise à jour plus importante de R sortira, pour laquelle le deuxième numéro dans le numéro de version sera incrémenté, alors la mise à jour provoquera une perte d’accès aux packages installés précédemment selon le comportement par défaut de R.</p>
+<p>Afin de ne pas forcer l’utilisateur à mettre à jour les packages qu’il utilise à chaque fois qu’il met R à jour, le comportement par défaut de R est d’installer les packages dans un répertoire local à l’utilisateur, dont le nom dépend seulement des deux premiers numéros composant le numéro de version. Par exemple, avec mon installation de R sous Windows, les packages que j’installe se retrouvent par défaut dans le répertoire <code>"C:/Users/Sophie/Documents/R/win-library/u.v"</code>. Lors d’une mise à jour mineure de R, seul le dernier numéro composant le numéro de version change. Par exemple, le 20 décembre 2018, la version 3.5.2 de R est sortie, améliorant la version 3.5.1 sortie en juillet 2018. Le répertoire d’installation de packages par défaut est donc demeuré le même entre les deux versions. Cependant, lorsqu’une mise à jour plus importante de R sortira, pour laquelle le deuxième numéro dans le numéro de version sera incrémenté, alors la mise à jour provoquera une perte d’accès aux packages installés précédemment selon le comportement par défaut de R.</p>
 <p>Vous pouvez régler ce problème en :</p>
 <ul>
 <li>réinstallant tous les packages dont vous avez besoin avec la nouvelle version de R, du coup les packages sont mis à jour;</li>
@@ -290,7 +285,7 @@ Finalement, on peut vouloir associer RStudio à certaines extensions de fichiers
 <ul>
 <li>se rendre sur le site web de téléchargement des Rtools;</li>
 <li>vérifier le numéro de la version courante des Rtools en cliquant sur le lien « VERSION.txt » au-dessus du tableau de téléchargement;</li>
-<li>comparer ce numéro à celui dans le fichier « VERSION.txt » situé dans le dossier d’installation des Rtools (par défaut <code>&quot;C:/Rtools/VERSION.txt&quot;</code>);</li>
+<li>comparer ce numéro à celui dans le fichier « VERSION.txt » situé dans le dossier d’installation des Rtools (par défaut <code>"C:/Rtools/VERSION.txt"</code>);</li>
 <li>si la version sur votre ordinateur est antérieure à la version disponible sur internet, mettre les Rtools à jour.</li>
 </ul>
 <p>Comme pour R, il est conseillé de désinstaller les Rtools avant d’en installer une nouvelle version (des <a href="#uninstall">indications pour la désinstallation de programmes sous Windows sont fournies plus haut</a>).</p>
@@ -316,7 +311,8 @@ Finalement, on peut vouloir associer RStudio à certaines extensions de fichiers
 <div id="lexplorateur-de-fichiers-windows-naffiche-pas-les-extensions-de-certains-fichiers." class="section level4">
 <h4>L’explorateur de fichiers Windows n’affiche pas les extensions de certains fichiers.</h4>
 <p>Ce problème n’est pas en lien avec l’installation de R ou RStudio, mais on me questionne souvent à ce propos. Par défaut, Windows n’affiche pas les extensions des fichiers dont le type a été associé à un programme. Voici une façon de changer cette option avec Windows 10.</p>
-<p>Ouvrez la fenêtre d’« Options des dossiers » . Il est possible d’ouvrir cette fenêtre à partir d’un explorateur de fichiers, par le menu « Fichier &gt; Modifier les options des dossiers et de recherche ». Ensuite, sous l’onglet Affichage, décochez l’option « Masquer les extensions des fichiers dont le type est connu ».</p>
+<p>Ouvrez la fenêtre d’« Options des dossiers » . Il est possible d’ouvrir cette fenêtre à partir d’un explorateur de fichiers, par le menu « Fichier &gt; Modifier les options des dossiers et de recherche ».
+Ensuite, sous l’onglet Affichage, décochez l’option « Masquer les extensions des fichiers dont le type est connu ».</p>
 <!--
 #### Je n'arrive pas à installer des packages, car on me dit que je n'ai pas la permission de modifier le contenu du dossier où les packages doivent être installés.
 
