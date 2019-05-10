@@ -15,6 +15,7 @@ output:
     toc_depth: 4
   blogdown::html_page:
     toc: true
+    toc_depth: 4
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
@@ -35,7 +36,13 @@ editor_options:
 <li><a href="#code-facile-a-ecrire">Code facile à écrire</a></li>
 <li><a href="#code-facile-a-comprendre">Code facile à comprendre</a><ul>
 <li><a href="#documentation">Documentation</a></li>
-<li><a href="#guide-de-style">Guide de style</a></li>
+<li><a href="#guide-de-style">Guide de style</a><ul>
+<li><a href="#retours-a-la-ligne-et-indentations">Retours à la ligne et indentations</a></li>
+<li><a href="#operateur-dassignation">Opérateur d’assignation</a></li>
+<li><a href="#conventions-de-noms">Conventions de noms</a></li>
+<li><a href="#organisation-du-code">Organisation du code</a></li>
+<li><a href="#operateur-pipe">Opérateur « pipe »</a></li>
+</ul></li>
 </ul></li>
 <li><a href="#code-facile-a-reutiliser">Code facile à réutiliser</a><ul>
 <li><a href="#creer-des-fonctions">Créer des fonctions</a></li>
@@ -54,7 +61,7 @@ editor_options:
 <p>Peu importe le langage informatique, employer de <strong>bonnes pratiques</strong> de programmation signifie respecter certaines <strong>normes</strong> afin de créer du <strong>bon code</strong>.</p>
 <p>Qu’est-ce que du bon code ? Un bon code est un code qui <strong>produit les résultats escomptés</strong>, <strong>est facile à maintenir</strong> et <strong>roule suffisamment rapidement</strong>.</p>
 <p>Dans quels buts adoptons-nous de bonnes pratiques? Afin que notre code soit <strong>réellement utilisé</strong> et que n’importe qui (en particulier soi-même dans le futur) soit capable de comprendre <strong>ce que le code fait</strong> et <strong>comment s’en servir</strong>.</p>
-<p>À long terme, les bonnes pratiques apportent une <strong>augmentation de notre productivité</strong><a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> en évitant les répétitions inutiles.</p>
+<p>À long terme, les bonnes pratiques apportent une <strong>augmentation de notre productivité</strong><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> en évitant les répétitions inutiles.</p>
 <!--
 Les trois critères sont décrits dans les sections suivantes. Des outils aidant à respecter ces critères sont présentés. De bonnes habitudes de travail spécifiques à R sont proposées ici et là.
 -->
@@ -117,7 +124,8 @@ Les trois critères sont décrits dans les sections suivantes. Des outils aidant
 <h4>Retours à la ligne et indentations</h4>
 <p>Une façon simple de rendre son code plus lisible est d’y insérer des retours à la ligne et des indentations appropriées. Par exemple, supposons que nous avons la chaîne de caractères suivante :</p>
 <pre class="r"><code>text &lt;- &quot;Ceci est un example&quot;</code></pre>
-<p>et que nous souhaitons corriger deux fautes dans cette phrase : le mot example écrit en anglais plutôt qu’en français et le point manquant à la fin de la phrase. Voici une instruction R pour réaliser cette tâche.</p>
+<p>et que nous souhaitons corriger deux fautes dans cette phrase : le mot example écrit en anglais plutôt qu’en
+français et le point manquant à la fin de la phrase. Voici une instruction R pour réaliser cette tâche.</p>
 <pre class="r"><code>paste0(gsub(pattern = &quot;example&quot;, replacement = &quot;exemple&quot;, x = text), &quot;.&quot;)</code></pre>
 <p>Cette instruction comporte un appel de fonction imbriqué dans un autre. Elle serait plus facile à lire comme suit :</p>
 <pre class="r"><code>paste0(gsub(pattern = &quot;example&quot;, 
@@ -136,7 +144,7 @@ Les trois critères sont décrits dans les sections suivantes. Des outils aidant
 </div>
 <div id="operateur-dassignation" class="section level4">
 <h4>Opérateur d’assignation</h4>
-<p>Voici quelques différences<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a><a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> entre les opérateurs d’assignation <code>&lt;-</code> et <code>=</code>.</p>
+<p>Voici quelques différences<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> entre les opérateurs d’assignation <code>&lt;-</code> et <code>=</code>.</p>
 <div id="passage-de-valeurs-a-des-arguments-dans-des-appels-de-fonction" class="section level5">
 <h5>Passage de valeurs à des arguments dans des appels de fonction :</h5>
 <p>Pour <strong>passer des valeurs d’arguments dans un appel de fonction</strong>, l’opérateur d’assignation <code>=</code> est nettement préférable, car il ne crée pas d’objets dans l’environnement de travail, contrairement à <code>&lt;-</code>. Par exemple, supposons que l’on travaille à partir d’un environnement de travail vide.</p>
@@ -168,7 +176,7 @@ Les trois critères sont décrits dans les sections suivantes. Des outils aidant
 <p>Nous pouvons facilement évaluer son temps d’exécution en encadrant l’expression d’un appel à la fonction <code>system.time</code> comme suit.</p>
 <pre class="r"><code>system.time(res &lt;- apply(X = matrix(1, nrow = 10000, ncol = 1000), MARGIN = 1, FUN = median))</code></pre>
 <pre><code>##    user  system elapsed 
-##    0.56    0.01    0.57</code></pre>
+##    0.53    0.01    0.54</code></pre>
 <p>Cependant, si dans cette expression l’opérateur d’assignation <code>=</code> avait été utilisé, nous aurions obtenu une erreur.</p>
 <pre class="r"><code>system.time(res = apply(X = matrix(1, nrow = 10000, ncol = 1000), MARGIN = 1, FUN = median))</code></pre>
 <pre><code>## Error: in system.time(res = apply(X = matrix(1, nrow = 10000, ncol = 1000),  : 
@@ -184,7 +192,7 @@ Les trois critères sont décrits dans les sections suivantes. Des outils aidant
 </div>
 <div id="conventions-de-noms" class="section level4">
 <h4>Conventions de noms</h4>
-<p>Les noms des fonctions dans les packages de base de R ne suivent pas une unique convention pour les noms<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a>. Voici, par exemple, quelques conventions retrouvées en R :</p>
+<p>Les noms des fonctions dans les packages de base de R ne suivent pas une unique convention pour les noms<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>. Voici, par exemple, quelques conventions retrouvées en R :</p>
 <ul>
 <li>tout en minuscules (ex. <code>typeof</code>, <code>colnames</code>),</li>
 <li>mots séparés par un point (ex. <code>data.frame</code>, <code>read.table</code>),</li>
@@ -197,8 +205,8 @@ Les trois critères sont décrits dans les sections suivantes. Des outils aidant
 </div>
 <div id="organisation-du-code" class="section level4">
 <h4>Organisation du code</h4>
-<p>Un long code R a avantage a être séparé en plusieurs fichiers, par exemple un pour les fonctions et un autre pour les instructions à soumettre interactivement dans la console, ou encore un fichier par section du code. De plus, un code R dépend souvent d’autres fichiers, par exemple des fichiers de données à importer. Comment organiser intelligemment tous ces fichiers ? Il est recommandé de créer des sous-dossiers regroupant les fichiers de même type, par exemple un sous-dossier pour les données, un autre pour les résultats, un pour les scripts R, etc.<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a></p>
-<p>Chaque fichier devrait avoir un nom judicieusement choisi<a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a>. Il devrait idéalement être :</p>
+<p>Un long code R a avantage a être séparé en plusieurs fichiers, par exemple un pour les fonctions et un autre pour les instructions à soumettre interactivement dans la console, ou encore un fichier par section du code. De plus, un code R dépend souvent d’autres fichiers, par exemple des fichiers de données à importer. Comment organiser intelligemment tous ces fichiers ? Il est recommandé de créer des sous-dossiers regroupant les fichiers de même type, par exemple un sous-dossier pour les données, un autre pour les résultats, un pour les scripts R, etc.<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a></p>
+<p>Chaque fichier devrait avoir un nom judicieusement choisi<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a>. Il devrait idéalement être :</p>
 <ul>
 <li>significatif : bien décrire ce qu’il contient;</li>
 <li>facile à traiter dans un programme informatique : ne pas contenir d’espaces, ni d’accents;</li>
@@ -266,7 +274,7 @@ text %&gt;%
 <p>Cependant, si nous nous retrouvons à copier/coller souvent le même bout de code, c’est le signe que nous aurions avantage à créer une fonction à partir de ce code. Créer la fonction prend un certain temps, mais cet investissement en temps finit par faire sauver du temps si nous utilisons souvent la fonction.</p>
 <p>Ainsi <strong>créer des fonctions</strong> pour les tâches que nous effectuons souvent est une bonne pratique de programmation. Cette pratique rend le code plus facilement réutilisable.</p>
 <p>De plus, le risque d’erreur est moins grand lors de l’appel d’une fonction que lors de la modification manuellement d’un bout de code copié/collé.</p>
-<p>La création de fonctions est la principale façon en R d’appliquer le principe de programmation informatique DRY (<em>Don’t Repeat Yourself</em>)<a href="#fn7" class="footnoteRef" id="fnref7"><sup>7</sup></a>. Lorsque nous appliquons ce principe de ne pas répéter inutilement des bouts de codes, les mises à jour de programmes R sont beaucoup plus rapides à réaliser.</p>
+<p>La création de fonctions est la principale façon en R d’appliquer le principe de programmation informatique DRY (<em>Don’t Repeat Yourself</em>)<a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a>. Lorsque nous appliquons ce principe de ne pas répéter inutilement des bouts de codes, les mises à jour de programmes R sont beaucoup plus rapides à réaliser.</p>
 </div>
 <div id="creer-des-packages" class="section level3">
 <h3>Créer des packages</h3>
@@ -353,12 +361,12 @@ par(par.defaut)</code></pre>
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p><a href="https://nicercode.github.io/blog/2013-04-05-why-nice-code/" class="uri">https://nicercode.github.io/blog/2013-04-05-why-nice-code/</a><a href="#fnref1">↩</a></p></li>
-<li id="fn2"><p>R Inferno, section 8.2.26 : <a href="http://www.burns-stat.com/pages/Tutor/R_inferno.pdf" class="uri">http://www.burns-stat.com/pages/Tutor/R_inferno.pdf</a><a href="#fnref2">↩</a></p></li>
-<li id="fn3"><p><a href="http://stackoverflow.com/questions/1741820/assignment-operators-in-r-and" class="uri">http://stackoverflow.com/questions/1741820/assignment-operators-in-r-and</a><a href="#fnref3">↩</a></p></li>
-<li id="fn4"><p><a href="https://journal.r-project.org/archive/2012-2/RJournal_2012-2_Baaaath.pdf" class="uri">https://journal.r-project.org/archive/2012-2/RJournal_2012-2_Baaaath.pdf</a><a href="#fnref4">↩</a></p></li>
-<li id="fn5"><p><a href="https://andrewbtran.github.io/NICAR/2018/workflow/docs/01-workflow_intro.html" class="uri">https://andrewbtran.github.io/NICAR/2018/workflow/docs/01-workflow_intro.html</a><a href="#fnref5">↩</a></p></li>
-<li id="fn6"><p><a href="https://speakerdeck.com/jennybc/how-to-name-files" class="uri">https://speakerdeck.com/jennybc/how-to-name-files</a><a href="#fnref6">↩</a></p></li>
-<li id="fn7"><p><a href="http://fr.wikipedia.org/wiki/Ne_vous_r%C3%A9p%C3%A9tez_pas">http://fr.wikipedia.org/wiki/Ne_vous_r%C3%A9p%C3%A9tez_pas</a><a href="#fnref7">↩</a></p></li>
+<li id="fn1"><p><a href="https://nicercode.github.io/blog/2013-04-05-why-nice-code/" class="uri">https://nicercode.github.io/blog/2013-04-05-why-nice-code/</a><a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>R Inferno, section 8.2.26 : <a href="http://www.burns-stat.com/pages/Tutor/R_inferno.pdf" class="uri">http://www.burns-stat.com/pages/Tutor/R_inferno.pdf</a><a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p><a href="http://stackoverflow.com/questions/1741820/assignment-operators-in-r-and" class="uri">http://stackoverflow.com/questions/1741820/assignment-operators-in-r-and</a><a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p><a href="https://journal.r-project.org/archive/2012-2/RJournal_2012-2_Baaaath.pdf" class="uri">https://journal.r-project.org/archive/2012-2/RJournal_2012-2_Baaaath.pdf</a><a href="#fnref4" class="footnote-back">↩</a></p></li>
+<li id="fn5"><p><a href="https://andrewbtran.github.io/NICAR/2018/workflow/docs/01-workflow_intro.html" class="uri">https://andrewbtran.github.io/NICAR/2018/workflow/docs/01-workflow_intro.html</a><a href="#fnref5" class="footnote-back">↩</a></p></li>
+<li id="fn6"><p><a href="https://speakerdeck.com/jennybc/how-to-name-files" class="uri">https://speakerdeck.com/jennybc/how-to-name-files</a><a href="#fnref6" class="footnote-back">↩</a></p></li>
+<li id="fn7"><p><a href="http://fr.wikipedia.org/wiki/Ne_vous_r%C3%A9p%C3%A9tez_pas" class="uri">http://fr.wikipedia.org/wiki/Ne_vous_r%C3%A9p%C3%A9tez_pas</a><a href="#fnref7" class="footnote-back">↩</a></p></li>
 </ol>
 </div>
