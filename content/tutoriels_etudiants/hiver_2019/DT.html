@@ -1,0 +1,401 @@
+---
+title: "Package DT"
+linkTitle: "DT - tableaux interactifs"
+weight: 4
+author: "David Gagné et Joël D'Astous Pagé"
+date: "2019-05-22"
+output:
+  blogdown::html_page:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+bibliography: data/reference.bib
+csl: data/american-medical-association-alphabetical.csl
+nocite: | 
+  @cran, @rstudio, @statcan, @DT
+---
+
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/datatables-css/datatables-crosstalk.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/datatables-binding/datatables.js"></script>
+<link href="/rmarkdown-libs/dt-core/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="/rmarkdown-libs/dt-core/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/dt-core/js/jquery.dataTables.min.js"></script>
+<link href="/rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link href="/rmarkdown-libs/nouislider/jquery.nouislider.min.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/nouislider/jquery.nouislider.min.js"></script>
+<link href="/rmarkdown-libs/selectize/selectize.bootstrap3.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/selectize/selectize.min.js"></script>
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction"><span class="toc-section-number">1</span> Introduction</a></li>
+<li><a href="#elements-de-base"><span class="toc-section-number">2</span> Éléments de base</a></li>
+<li><a href="#arguments"><span class="toc-section-number">3</span> Arguments</a><ul>
+<li><a href="#noms-des-lignes-et-colonnes"><span class="toc-section-number">3.1</span> Noms des lignes et colonnes</a></li>
+<li><a href="#classes"><span class="toc-section-number">3.2</span> Classes</a></li>
+<li><a href="#titre-filtre-et-modification"><span class="toc-section-number">3.3</span> Titre, filtre et modification</a></li>
+</ul></li>
+<li><a href="#options"><span class="toc-section-number">4</span> Options</a></li>
+<li><a href="#fonctions-de-style-rapide"><span class="toc-section-number">5</span> Fonctions de style rapide</a></li>
+<li><a href="#autres"><span class="toc-section-number">6</span> Autres</a></li>
+<li><a href="#conclusion"><span class="toc-section-number">7</span> Conclusion</a></li>
+<li><a href="#references"><span class="toc-section-number">8</span> Références</a></li>
+<li><a href="#annexe-1"><span class="toc-section-number">9</span> Annexe 1</a></li>
+</ul>
+</div>
+
+<style>
+.column-left{
+  float: left;
+  width: 60%;
+  text-align: left;
+}
+.column-center{
+  display: inline-block;
+  width: 2%;
+  text-align: center;
+}
+.column-right{
+  float: right;
+  width: 38%;
+  text-align:left;
+}
+</style>
+<div id="introduction" class="section level1">
+<h1><span class="header-section-number">1</span> Introduction</h1>
+<p>Le package <code>DT</code><span class="citation"><sup>1</sup></span> est une interface de la bibliothèque JavaScript <code>DataTables</code><span class="citation"><sup>2</sup></span>. Il rend accessible les fonctionnalités de la librairie originale en R. La principale fonction de <code>DT</code> est <code>datatable</code>. Cette fonction permet de construire rapidement et efficacement un tableau interactif en format HTML à partir d’un data frame ou d’une matrice. Le format HTML des tableaux générés par <code>datatable</code> est alors compatible avec les énormes possibilités que permettent les packages <code>rmarkdown</code> et <code>shiny</code>. La fonction <code>datatable</code> offre plusieurs possibilités concernant l’affichage, la filtration de données, la pagination, le tri et bien plus. Un simple tableau est facilement transformé en un tableau interactif avec un esthétisme soigné. C’est définitivement une alternative à la création de tableaux de base (tableaux générés en Markdown avec les caractères « - » et « | »).</p>
+<p>Nous pouvons maintenant installer (si ce n’est pas déjà fait) et charger le package <code>DT</code><span class="citation"><sup>3</sup></span>.</p>
+<pre class="r"><code>if (!require(&quot;DT&quot;)) install.packages(&#39;DT&#39;)
+packageVersion(&quot;DT&quot;)
+## [1] &#39;0.6&#39;
+library(&quot;DT&quot;)</code></pre>
+<p><em>Note. Cette fiche a été créée avec la version 0.6 de <code>DT</code> et 1.12 de <code>rmarkdown</code>. Il se peut qu’il y ait eu des ajouts ou des modifications si vos versions sont plus récentes.</em></p>
+<p>Pour présenter les exemples d’utilisation de <code>DT</code> nous utiliserons des données sur la population des villes canadiennes extraites du site internet de Statistique Canada<span class="citation"><sup>4</sup></span>.</p>
+<pre class="r"><code>populationVillesCanada &lt;- readRDS(&quot;populationVillesCanada.rds&quot;)
+str(populationVillesCanada)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    33 obs. of  4 variables:
+##  $ Ville              : chr  &quot;St. John&#39;s&quot; &quot;Halifax&quot; &quot;Moncton&quot; ...
+##  $ Population2007     : int  186067 386498 131123 125550 157213 736993 195028 147023 ...
+##  $ Population2017     : int  219207 431701 152169 128541 159258 812205 218633 158942 ...
+##  $ VariationPopulation: num  17.8 11.7 16.1 2.4 1.3 10.2 12.1 8.1 ...</code></pre>
+</div>
+<div id="elements-de-base" class="section level1 tabset">
+<h1><span class="header-section-number">2</span> Éléments de base</h1>
+<p>Le package <code>DT</code> permet de générer rapidement un tableau à partir des données présentes dans <code>populationVillesCanada</code> avec la commande <code>datatable(data = populationVillesCanada)</code>. Nous remarquons rapidement qu’en plus des éléments standards d’un tableau (e.g. colonnes, lignes, entête), il y a des éléments interactifs supplémentaires. La sous-section ci-dessous présente ces différents éléments et leurs fonctions. La seconde sous-section présente le tableau (en vrai cette fois). Il est maintenant possible d’expérimenter avec ces nouvelles fonctions.</p>
+<!---
+> **Après avoir consulté l'image ci-dessous, cliquez sur l'onglet «&nbsp;Mon premier tableau DT&nbsp;». Vous  visualiserez un tableau créé avec la fonction `datatable`.**
+--->
+<div id="particularite-de-dt" class="section level3 unnumbered">
+<h3>Particularité de <code>DT</code></h3>
+<!---
+<div class="column-left">
+--->
+<p><img src="fig/datatable.png" /></p>
+<!---
+</div>
+<div class="column-center">
+</div>
+<div class="column-right">
+--->
+<table>
+<colgroup>
+<col width="7%" />
+<col width="92%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Lettre</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">A</td>
+<td align="left">Affiche le nombre de lignes par page</td>
+</tr>
+<tr class="even">
+<td align="left">B</td>
+<td align="left">Trie le tableau selon les valeurs de cette colonne (croissant ou décroissant)</td>
+</tr>
+<tr class="odd">
+<td align="left">C</td>
+<td align="left">Recherche une valeur dans le tableau</td>
+</tr>
+<tr class="even">
+<td align="left">D</td>
+<td align="left">Indique le nombre de lignes affichées et le nombre de lignes totales</td>
+</tr>
+<tr class="odd">
+<td align="left">E</td>
+<td align="left">Permet de naviguer entre les différentes pages du tableau</td>
+</tr>
+</tbody>
+</table>
+<!---
+</div>
+<div style="clear:both"><span></span></div>
+--->
+</div>
+<div id="mon-premier-tableau-dt" class="section level3 unnumbered">
+<h3>Mon premier tableau <code>DT</code></h3>
+<p>La fonction <code>datatable</code> du package <code>DT</code> permet de générer un tableau. Le tableau présente la population de 33 villes canadiennes pour les années 2007 et 2017<span class="citation"><sup>4</sup></span>.</p>
+<pre class="r"><code>datatable(data = populationVillesCanada)</code></pre>
+<div id="htmlwidget-1" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33"],["St. John's","Halifax","Moncton","Saint John","Saguenay","Québec","Sherbrooke","Trois-Rivières","Montréal","Ottawa–Gatineau","Kingston","Peterborough","Oshawa","Toronto","Hamilton","St. Catharines–Niagara","Kitchener–Cambridge–Waterloo","Brantford","Guelph","London","Windsor","Barrie","Grand Sudbury","Thunder Bay","Winnipeg","Regina","Saskatoon","Calgary","Edmonton","Kelowna","Abbotsford–Mission","Vancouver","Victoria"],[186067,386498,131123,125550,157213,736993,195028,147023,3714846,1188073,158664,120560,348280,5418207,722102,402581,474219,136330,140035,478492,333507,186064,164808,126024,719065,202481,244193,1153769,1104557,170987,165676,2218134,341571],[219207,431701,152169,128541,159258,812205,218633,158942,4138254,1377016,173862,126291,402399,6346088,787195,416539,527765,147489,159988,521756,344747,209081,165270,124164,825713,253220,323809,1488841,1411945,202208,190714,2571262,377414],[17.8,11.7,16.1,2.4,1.3,10.2,12.1,8.1,11.4,15.9,9.6,4.8,15.5,17.1,9,3.5,11.3,8.2,14.2,9,3.4,12.4,0.3,-1.5,14.8,25.1,32.6,29,27.8,18.3,15.1,15.9,10.5]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Ville<\/th>\n      <th>Population2007<\/th>\n      <th>Population2017<\/th>\n      <th>VariationPopulation<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<div id="arguments" class="section level1">
+<h1><span class="header-section-number">3</span> Arguments</h1>
+<p>Les arguments de <code>datatable</code> modifient le tableau et y ajoutent des propriétés utiles au lecteur.
+Dans cette section, les principaux arguments seront abordés.</p>
+<div id="noms-des-lignes-et-colonnes" class="section level2 tabset">
+<h2><span class="header-section-number">3.1</span> Noms des lignes et colonnes</h2>
+<p>Les noms des lignes peuvent être supprimés. De plus, il est possible de renommer les colonnes de différentes façons. Voici des exemples:</p>
+<div id="lignes" class="section level3 unnumbered">
+<h3>Lignes</h3>
+<p>Les noms des lignes sont supprimés avec l’argument <code>rownames = FALSE</code>.</p>
+<pre class="r"><code>datatable(populationVillesCanada, rownames = FALSE,
+          options = list(pageLength = 5)) # Cette option est ajoutée pour restreindre le nombre de lignes affichées.</code></pre>
+<div id="htmlwidget-2" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"filter":"none","data":[["St. John's","Halifax","Moncton","Saint John","Saguenay","Québec","Sherbrooke","Trois-Rivières","Montréal","Ottawa–Gatineau","Kingston","Peterborough","Oshawa","Toronto","Hamilton","St. Catharines–Niagara","Kitchener–Cambridge–Waterloo","Brantford","Guelph","London","Windsor","Barrie","Grand Sudbury","Thunder Bay","Winnipeg","Regina","Saskatoon","Calgary","Edmonton","Kelowna","Abbotsford–Mission","Vancouver","Victoria"],[186067,386498,131123,125550,157213,736993,195028,147023,3714846,1188073,158664,120560,348280,5418207,722102,402581,474219,136330,140035,478492,333507,186064,164808,126024,719065,202481,244193,1153769,1104557,170987,165676,2218134,341571],[219207,431701,152169,128541,159258,812205,218633,158942,4138254,1377016,173862,126291,402399,6346088,787195,416539,527765,147489,159988,521756,344747,209081,165270,124164,825713,253220,323809,1488841,1411945,202208,190714,2571262,377414],[17.8,11.7,16.1,2.4,1.3,10.2,12.1,8.1,11.4,15.9,9.6,4.8,15.5,17.1,9,3.5,11.3,8.2,14.2,9,3.4,12.4,0.3,-1.5,14.8,25.1,32.6,29,27.8,18.3,15.1,15.9,10.5]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>Ville<\/th>\n      <th>Population2007<\/th>\n      <th>Population2017<\/th>\n      <th>VariationPopulation<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"columnDefs":[{"className":"dt-right","targets":[1,2,3]}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="colonne-par-substitution" class="section level3 unnumbered">
+<h3>Colonne par substitution</h3>
+<p>Le nom de colonne <code>VariationPopulation</code> est recherché et remplacé par <code>NouveauNom</code>:</p>
+<pre class="r"><code>datatable(populationVillesCanada, colnames = c(&#39;NouveauNom&#39; = &#39;VariationPopulation&#39;),
+          options = list(pageLength = 5))</code></pre>
+<div id="htmlwidget-3" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33"],["St. John's","Halifax","Moncton","Saint John","Saguenay","Québec","Sherbrooke","Trois-Rivières","Montréal","Ottawa–Gatineau","Kingston","Peterborough","Oshawa","Toronto","Hamilton","St. Catharines–Niagara","Kitchener–Cambridge–Waterloo","Brantford","Guelph","London","Windsor","Barrie","Grand Sudbury","Thunder Bay","Winnipeg","Regina","Saskatoon","Calgary","Edmonton","Kelowna","Abbotsford–Mission","Vancouver","Victoria"],[186067,386498,131123,125550,157213,736993,195028,147023,3714846,1188073,158664,120560,348280,5418207,722102,402581,474219,136330,140035,478492,333507,186064,164808,126024,719065,202481,244193,1153769,1104557,170987,165676,2218134,341571],[219207,431701,152169,128541,159258,812205,218633,158942,4138254,1377016,173862,126291,402399,6346088,787195,416539,527765,147489,159988,521756,344747,209081,165270,124164,825713,253220,323809,1488841,1411945,202208,190714,2571262,377414],[17.8,11.7,16.1,2.4,1.3,10.2,12.1,8.1,11.4,15.9,9.6,4.8,15.5,17.1,9,3.5,11.3,8.2,14.2,9,3.4,12.4,0.3,-1.5,14.8,25.1,32.6,29,27.8,18.3,15.1,15.9,10.5]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Ville<\/th>\n      <th>Population2007<\/th>\n      <th>Population2017<\/th>\n      <th>NouveauNom<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"columnDefs":[{"className":"dt-right","targets":[2,3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="colonnes-par-vecteur-de-caracteres" class="section level3 unnumbered">
+<h3>Colonnes par vecteur de caractères</h3>
+<p>Les noms des colonnes sont modifiés par un vecteur de chaînes de caractères.</p>
+<pre class="r"><code>datatable(populationVillesCanada, colnames = c(&#39;Col1&#39;, &#39;Col2&#39;, &#39;Col3&#39;, &#39;Col4&#39;),
+          options = list(pageLength = 5))</code></pre>
+<div id="htmlwidget-4" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33"],["St. John's","Halifax","Moncton","Saint John","Saguenay","Québec","Sherbrooke","Trois-Rivières","Montréal","Ottawa–Gatineau","Kingston","Peterborough","Oshawa","Toronto","Hamilton","St. Catharines–Niagara","Kitchener–Cambridge–Waterloo","Brantford","Guelph","London","Windsor","Barrie","Grand Sudbury","Thunder Bay","Winnipeg","Regina","Saskatoon","Calgary","Edmonton","Kelowna","Abbotsford–Mission","Vancouver","Victoria"],[186067,386498,131123,125550,157213,736993,195028,147023,3714846,1188073,158664,120560,348280,5418207,722102,402581,474219,136330,140035,478492,333507,186064,164808,126024,719065,202481,244193,1153769,1104557,170987,165676,2218134,341571],[219207,431701,152169,128541,159258,812205,218633,158942,4138254,1377016,173862,126291,402399,6346088,787195,416539,527765,147489,159988,521756,344747,209081,165270,124164,825713,253220,323809,1488841,1411945,202208,190714,2571262,377414],[17.8,11.7,16.1,2.4,1.3,10.2,12.1,8.1,11.4,15.9,9.6,4.8,15.5,17.1,9,3.5,11.3,8.2,14.2,9,3.4,12.4,0.3,-1.5,14.8,25.1,32.6,29,27.8,18.3,15.1,15.9,10.5]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Col1<\/th>\n      <th>Col2<\/th>\n      <th>Col3<\/th>\n      <th>Col4<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"columnDefs":[{"className":"dt-right","targets":[2,3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<div id="classes" class="section level2 tabset">
+<h2><span class="header-section-number">3.2</span> Classes</h2>
+<p>L’apparence d’un tableau est modifiable avec l’argument <code>class</code><span class="citation"><sup>5</sup></span>. En voici quelques exemples:</p>
+<div id="hover" class="section level3 unnumbered">
+<h3><code>hover</code></h3>
+<p>La ligne sur laquelle le pointeur de la souris est positionné est mise en évidence par un changement de surbrillance.</p>
+<pre class="r"><code>datatable(data = populationVillesCanada, rownames = FALSE, class = &quot;hover&quot;,
+          options = list(pageLength = 5))</code></pre>
+<div id="htmlwidget-5" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-5">{"x":{"filter":"none","data":[["St. John's","Halifax","Moncton","Saint John","Saguenay","Québec","Sherbrooke","Trois-Rivières","Montréal","Ottawa–Gatineau","Kingston","Peterborough","Oshawa","Toronto","Hamilton","St. Catharines–Niagara","Kitchener–Cambridge–Waterloo","Brantford","Guelph","London","Windsor","Barrie","Grand Sudbury","Thunder Bay","Winnipeg","Regina","Saskatoon","Calgary","Edmonton","Kelowna","Abbotsford–Mission","Vancouver","Victoria"],[186067,386498,131123,125550,157213,736993,195028,147023,3714846,1188073,158664,120560,348280,5418207,722102,402581,474219,136330,140035,478492,333507,186064,164808,126024,719065,202481,244193,1153769,1104557,170987,165676,2218134,341571],[219207,431701,152169,128541,159258,812205,218633,158942,4138254,1377016,173862,126291,402399,6346088,787195,416539,527765,147489,159988,521756,344747,209081,165270,124164,825713,253220,323809,1488841,1411945,202208,190714,2571262,377414],[17.8,11.7,16.1,2.4,1.3,10.2,12.1,8.1,11.4,15.9,9.6,4.8,15.5,17.1,9,3.5,11.3,8.2,14.2,9,3.4,12.4,0.3,-1.5,14.8,25.1,32.6,29,27.8,18.3,15.1,15.9,10.5]],"container":"<table class=\"hover\">\n  <thead>\n    <tr>\n      <th>Ville<\/th>\n      <th>Population2007<\/th>\n      <th>Population2017<\/th>\n      <th>VariationPopulation<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"columnDefs":[{"className":"dt-right","targets":[1,2,3]}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="cell-border" class="section level3 unnumbered">
+<h3><code>cell-border</code></h3>
+<p>Les cellules sont entourées de lignes.</p>
+<pre class="r"><code>datatable(data = populationVillesCanada, 
+          rownames = FALSE, 
+          class = &quot;hover cell-border&quot;, # La modification est combinée à la précédente.
+          options = list(pageLength = 5))</code></pre>
+<div id="htmlwidget-6" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-6">{"x":{"filter":"none","data":[["St. John's","Halifax","Moncton","Saint John","Saguenay","Québec","Sherbrooke","Trois-Rivières","Montréal","Ottawa–Gatineau","Kingston","Peterborough","Oshawa","Toronto","Hamilton","St. Catharines–Niagara","Kitchener–Cambridge–Waterloo","Brantford","Guelph","London","Windsor","Barrie","Grand Sudbury","Thunder Bay","Winnipeg","Regina","Saskatoon","Calgary","Edmonton","Kelowna","Abbotsford–Mission","Vancouver","Victoria"],[186067,386498,131123,125550,157213,736993,195028,147023,3714846,1188073,158664,120560,348280,5418207,722102,402581,474219,136330,140035,478492,333507,186064,164808,126024,719065,202481,244193,1153769,1104557,170987,165676,2218134,341571],[219207,431701,152169,128541,159258,812205,218633,158942,4138254,1377016,173862,126291,402399,6346088,787195,416539,527765,147489,159988,521756,344747,209081,165270,124164,825713,253220,323809,1488841,1411945,202208,190714,2571262,377414],[17.8,11.7,16.1,2.4,1.3,10.2,12.1,8.1,11.4,15.9,9.6,4.8,15.5,17.1,9,3.5,11.3,8.2,14.2,9,3.4,12.4,0.3,-1.5,14.8,25.1,32.6,29,27.8,18.3,15.1,15.9,10.5]],"container":"<table class=\"hover cell-border\">\n  <thead>\n    <tr>\n      <th>Ville<\/th>\n      <th>Population2007<\/th>\n      <th>Population2017<\/th>\n      <th>VariationPopulation<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"columnDefs":[{"className":"dt-right","targets":[1,2,3]}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="compact" class="section level3 unnumbered">
+<h3><code>compact</code></h3>
+<p>Le vide dans les cellules est réduit afin d’optimiser l’espace.</p>
+<pre class="r"><code>datatable(data = populationVillesCanada, 
+          rownames = FALSE, 
+          class = &quot;hover cell-border compact&quot;,
+          options = list(pageLength = 5))</code></pre>
+<div id="htmlwidget-7" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-7">{"x":{"filter":"none","data":[["St. John's","Halifax","Moncton","Saint John","Saguenay","Québec","Sherbrooke","Trois-Rivières","Montréal","Ottawa–Gatineau","Kingston","Peterborough","Oshawa","Toronto","Hamilton","St. Catharines–Niagara","Kitchener–Cambridge–Waterloo","Brantford","Guelph","London","Windsor","Barrie","Grand Sudbury","Thunder Bay","Winnipeg","Regina","Saskatoon","Calgary","Edmonton","Kelowna","Abbotsford–Mission","Vancouver","Victoria"],[186067,386498,131123,125550,157213,736993,195028,147023,3714846,1188073,158664,120560,348280,5418207,722102,402581,474219,136330,140035,478492,333507,186064,164808,126024,719065,202481,244193,1153769,1104557,170987,165676,2218134,341571],[219207,431701,152169,128541,159258,812205,218633,158942,4138254,1377016,173862,126291,402399,6346088,787195,416539,527765,147489,159988,521756,344747,209081,165270,124164,825713,253220,323809,1488841,1411945,202208,190714,2571262,377414],[17.8,11.7,16.1,2.4,1.3,10.2,12.1,8.1,11.4,15.9,9.6,4.8,15.5,17.1,9,3.5,11.3,8.2,14.2,9,3.4,12.4,0.3,-1.5,14.8,25.1,32.6,29,27.8,18.3,15.1,15.9,10.5]],"container":"<table class=\"hover cell-border compact\">\n  <thead>\n    <tr>\n      <th>Ville<\/th>\n      <th>Population2007<\/th>\n      <th>Population2017<\/th>\n      <th>VariationPopulation<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"columnDefs":[{"className":"dt-right","targets":[1,2,3]}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<div id="titre-filtre-et-modification" class="section level2 tabset">
+<h2><span class="header-section-number">3.3</span> Titre, filtre et modification</h2>
+<p>Les trois prochaines sous-sections permettent de comparer l’ajout successif d’arguments supplémentaires.</p>
+<div id="ajout-dun-titre" class="section level3 unnumbered">
+<h3>Ajout d’un titre</h3>
+<p>L’argument <code>caption</code> permet d’ajouter un titre au tableau.</p>
+<pre class="r"><code>datatable(populationVillesCanada, 
+          rownames = FALSE, 
+          class = &quot;hover cell-border compact&quot;, 
+          caption = &quot;Tableau 1: Estimations de la population, selon la région métropolitaine de recensement.&quot;,
+          options = list(pageLength = 5))</code></pre>
+<div id="htmlwidget-8" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-8">{"x":{"filter":"none","caption":"<caption>Tableau 1: Estimations de la population, selon la région métropolitaine de recensement.<\/caption>","data":[["St. John's","Halifax","Moncton","Saint John","Saguenay","Québec","Sherbrooke","Trois-Rivières","Montréal","Ottawa–Gatineau","Kingston","Peterborough","Oshawa","Toronto","Hamilton","St. Catharines–Niagara","Kitchener–Cambridge–Waterloo","Brantford","Guelph","London","Windsor","Barrie","Grand Sudbury","Thunder Bay","Winnipeg","Regina","Saskatoon","Calgary","Edmonton","Kelowna","Abbotsford–Mission","Vancouver","Victoria"],[186067,386498,131123,125550,157213,736993,195028,147023,3714846,1188073,158664,120560,348280,5418207,722102,402581,474219,136330,140035,478492,333507,186064,164808,126024,719065,202481,244193,1153769,1104557,170987,165676,2218134,341571],[219207,431701,152169,128541,159258,812205,218633,158942,4138254,1377016,173862,126291,402399,6346088,787195,416539,527765,147489,159988,521756,344747,209081,165270,124164,825713,253220,323809,1488841,1411945,202208,190714,2571262,377414],[17.8,11.7,16.1,2.4,1.3,10.2,12.1,8.1,11.4,15.9,9.6,4.8,15.5,17.1,9,3.5,11.3,8.2,14.2,9,3.4,12.4,0.3,-1.5,14.8,25.1,32.6,29,27.8,18.3,15.1,15.9,10.5]],"container":"<table class=\"hover cell-border compact\">\n  <thead>\n    <tr>\n      <th>Ville<\/th>\n      <th>Population2007<\/th>\n      <th>Population2017<\/th>\n      <th>VariationPopulation<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"columnDefs":[{"className":"dt-right","targets":[1,2,3]}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="filtres" class="section level3 unnumbered">
+<h3>Filtres</h3>
+<p>L’argument <code>filter</code> est très intéressant. Il permet de restreindre les données affichées selon les filtres qu’on impose. Cela est utile lorsque le tableau contient beaucoup de données. Cliquez dans le champ du filtre de la colonne <code>Population2007</code>. Déplacez le curseur pour restreindre le jeu de données.</p>
+<pre class="r"><code>datatable(populationVillesCanada, 
+          rownames = FALSE, 
+          class = &quot;hover cell-border compact&quot;, 
+          caption = &quot;Tableau 1: Estimations de la population, selon la région métropolitaine de recensement.&quot;,
+          filter = &#39;top&#39;, # Les filtres sont positionnés au-dessus des colonnes.
+          options = list(pageLength = 5))</code></pre>
+<div id="htmlwidget-9" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9">{"x":{"filter":"top","filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none; position: absolute; width: 200px;\">\n      <div data-min=\"120560\" data-max=\"5418207\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none; position: absolute; width: 200px;\">\n      <div data-min=\"124164\" data-max=\"6346088\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none; position: absolute; width: 200px;\">\n      <div data-min=\"-1.5\" data-max=\"32.6\" data-scale=\"1\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","caption":"<caption>Tableau 1: Estimations de la population, selon la région métropolitaine de recensement.<\/caption>","data":[["St. John's","Halifax","Moncton","Saint John","Saguenay","Québec","Sherbrooke","Trois-Rivières","Montréal","Ottawa–Gatineau","Kingston","Peterborough","Oshawa","Toronto","Hamilton","St. Catharines–Niagara","Kitchener–Cambridge–Waterloo","Brantford","Guelph","London","Windsor","Barrie","Grand Sudbury","Thunder Bay","Winnipeg","Regina","Saskatoon","Calgary","Edmonton","Kelowna","Abbotsford–Mission","Vancouver","Victoria"],[186067,386498,131123,125550,157213,736993,195028,147023,3714846,1188073,158664,120560,348280,5418207,722102,402581,474219,136330,140035,478492,333507,186064,164808,126024,719065,202481,244193,1153769,1104557,170987,165676,2218134,341571],[219207,431701,152169,128541,159258,812205,218633,158942,4138254,1377016,173862,126291,402399,6346088,787195,416539,527765,147489,159988,521756,344747,209081,165270,124164,825713,253220,323809,1488841,1411945,202208,190714,2571262,377414],[17.8,11.7,16.1,2.4,1.3,10.2,12.1,8.1,11.4,15.9,9.6,4.8,15.5,17.1,9,3.5,11.3,8.2,14.2,9,3.4,12.4,0.3,-1.5,14.8,25.1,32.6,29,27.8,18.3,15.1,15.9,10.5]],"container":"<table class=\"hover cell-border compact\">\n  <thead>\n    <tr>\n      <th>Ville<\/th>\n      <th>Population2007<\/th>\n      <th>Population2017<\/th>\n      <th>VariationPopulation<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"columnDefs":[{"className":"dt-right","targets":[1,2,3]}],"order":[],"autoWidth":false,"orderClasses":false,"orderCellsTop":true,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="tableau-modifiable" class="section level3 unnumbered">
+<h3>Tableau modifiable</h3>
+<p>Il suffit de double-cliquer dans une cellule pour modifier la valeur.</p>
+<pre class="r"><code>datatable(populationVillesCanada, 
+          rownames = FALSE,
+          class = &quot;hover cell-border compact&quot;, 
+          caption = &quot;Tableau 1: Estimations de la population, selon la région métropolitaine de recensement.&quot;,
+          filter = &#39;top&#39;, 
+          editable = TRUE,
+          options = list(pageLength = 5))</code></pre>
+<div id="htmlwidget-10" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-10">{"x":{"filter":"top","filterHTML":"<tr>\n  <td data-type=\"character\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none; position: absolute; width: 200px;\">\n      <div data-min=\"120560\" data-max=\"5418207\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"integer\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none; position: absolute; width: 200px;\">\n      <div data-min=\"124164\" data-max=\"6346088\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n  <td data-type=\"number\" style=\"vertical-align: top;\">\n    <div class=\"form-group has-feedback\" style=\"margin-bottom: auto;\">\n      <input type=\"search\" placeholder=\"All\" class=\"form-control\" style=\"width: 100%;\"/>\n      <span class=\"glyphicon glyphicon-remove-circle form-control-feedback\"><\/span>\n    <\/div>\n    <div style=\"display: none; position: absolute; width: 200px;\">\n      <div data-min=\"-1.5\" data-max=\"32.6\" data-scale=\"1\"><\/div>\n      <span style=\"float: left;\"><\/span>\n      <span style=\"float: right;\"><\/span>\n    <\/div>\n  <\/td>\n<\/tr>","caption":"<caption>Tableau 1: Estimations de la population, selon la région métropolitaine de recensement.<\/caption>","editable":{"target":"cell","disable":{"columns":null}},"data":[["St. John's","Halifax","Moncton","Saint John","Saguenay","Québec","Sherbrooke","Trois-Rivières","Montréal","Ottawa–Gatineau","Kingston","Peterborough","Oshawa","Toronto","Hamilton","St. Catharines–Niagara","Kitchener–Cambridge–Waterloo","Brantford","Guelph","London","Windsor","Barrie","Grand Sudbury","Thunder Bay","Winnipeg","Regina","Saskatoon","Calgary","Edmonton","Kelowna","Abbotsford–Mission","Vancouver","Victoria"],[186067,386498,131123,125550,157213,736993,195028,147023,3714846,1188073,158664,120560,348280,5418207,722102,402581,474219,136330,140035,478492,333507,186064,164808,126024,719065,202481,244193,1153769,1104557,170987,165676,2218134,341571],[219207,431701,152169,128541,159258,812205,218633,158942,4138254,1377016,173862,126291,402399,6346088,787195,416539,527765,147489,159988,521756,344747,209081,165270,124164,825713,253220,323809,1488841,1411945,202208,190714,2571262,377414],[17.8,11.7,16.1,2.4,1.3,10.2,12.1,8.1,11.4,15.9,9.6,4.8,15.5,17.1,9,3.5,11.3,8.2,14.2,9,3.4,12.4,0.3,-1.5,14.8,25.1,32.6,29,27.8,18.3,15.1,15.9,10.5]],"container":"<table class=\"hover cell-border compact\">\n  <thead>\n    <tr>\n      <th>Ville<\/th>\n      <th>Population2007<\/th>\n      <th>Population2017<\/th>\n      <th>VariationPopulation<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"columnDefs":[{"className":"dt-right","targets":[1,2,3]}],"order":[],"autoWidth":false,"orderClasses":false,"orderCellsTop":true,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
+<div id="options" class="section level1 tabset">
+<h1><span class="header-section-number">4</span> Options</h1>
+<p>Les options sont des paramètres supplémentaires pour adapter un tableau. Consultez les deux sous-sections suivantes pour découvrir des exemples.</p>
+<div id="language" class="section level3 unnumbered">
+<h3><code>language</code></h3>
+<p>L’option <code>language</code> traduit les noms de tous les éléments.</p>
+<pre class="r"><code>datatable(populationVillesCanada, 
+          options = list(
+            language = list(url = &#39;http://cdn.datatables.net/plug-ins/1.10.11/i18n/French.json&#39;),
+            pageLength = 5
+            ))</code></pre>
+<div id="htmlwidget-11" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-11">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33"],["St. John's","Halifax","Moncton","Saint John","Saguenay","Québec","Sherbrooke","Trois-Rivières","Montréal","Ottawa–Gatineau","Kingston","Peterborough","Oshawa","Toronto","Hamilton","St. Catharines–Niagara","Kitchener–Cambridge–Waterloo","Brantford","Guelph","London","Windsor","Barrie","Grand Sudbury","Thunder Bay","Winnipeg","Regina","Saskatoon","Calgary","Edmonton","Kelowna","Abbotsford–Mission","Vancouver","Victoria"],[186067,386498,131123,125550,157213,736993,195028,147023,3714846,1188073,158664,120560,348280,5418207,722102,402581,474219,136330,140035,478492,333507,186064,164808,126024,719065,202481,244193,1153769,1104557,170987,165676,2218134,341571],[219207,431701,152169,128541,159258,812205,218633,158942,4138254,1377016,173862,126291,402399,6346088,787195,416539,527765,147489,159988,521756,344747,209081,165270,124164,825713,253220,323809,1488841,1411945,202208,190714,2571262,377414],[17.8,11.7,16.1,2.4,1.3,10.2,12.1,8.1,11.4,15.9,9.6,4.8,15.5,17.1,9,3.5,11.3,8.2,14.2,9,3.4,12.4,0.3,-1.5,14.8,25.1,32.6,29,27.8,18.3,15.1,15.9,10.5]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Ville<\/th>\n      <th>Population2007<\/th>\n      <th>Population2017<\/th>\n      <th>VariationPopulation<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"language":{"url":"http://cdn.datatables.net/plug-ins/1.10.11/i18n/French.json"},"pageLength":5,"columnDefs":[{"className":"dt-right","targets":[2,3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="order" class="section level3 unnumbered">
+<h3><code>order</code></h3>
+<p>L’option <code>order</code> permet de trier par défaut un tableau. Le tri peut se faire par la combinaison de plus d’une colonne. Dans l’exemple ci-dessous, le tableau est d’abord trié par la quatrième colonne (la colonne du nom des lignes ne compte pas dans la numérotation des colonnes) en ordre décroissant. En cas d’égalité, le tri est ensuite exécuté selon le nom de la ville en ordre croissant.</p>
+<pre class="r"><code>datatable(populationVillesCanada, 
+          options = list(
+            language = list(url = &#39;http://cdn.datatables.net/plug-ins/1.10.11/i18n/French.json&#39;),
+            order = list(list(4, &#39;desc&#39;), # Tri décroissant sur la colonne 4 (VariationPopulation).
+                         list(1, &#39;asc&#39;)) # Tri secondaire croissant sur la colonne 1.
+            ))</code></pre>
+<div id="htmlwidget-12" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-12">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33"],["St. John's","Halifax","Moncton","Saint John","Saguenay","Québec","Sherbrooke","Trois-Rivières","Montréal","Ottawa–Gatineau","Kingston","Peterborough","Oshawa","Toronto","Hamilton","St. Catharines–Niagara","Kitchener–Cambridge–Waterloo","Brantford","Guelph","London","Windsor","Barrie","Grand Sudbury","Thunder Bay","Winnipeg","Regina","Saskatoon","Calgary","Edmonton","Kelowna","Abbotsford–Mission","Vancouver","Victoria"],[186067,386498,131123,125550,157213,736993,195028,147023,3714846,1188073,158664,120560,348280,5418207,722102,402581,474219,136330,140035,478492,333507,186064,164808,126024,719065,202481,244193,1153769,1104557,170987,165676,2218134,341571],[219207,431701,152169,128541,159258,812205,218633,158942,4138254,1377016,173862,126291,402399,6346088,787195,416539,527765,147489,159988,521756,344747,209081,165270,124164,825713,253220,323809,1488841,1411945,202208,190714,2571262,377414],[17.8,11.7,16.1,2.4,1.3,10.2,12.1,8.1,11.4,15.9,9.6,4.8,15.5,17.1,9,3.5,11.3,8.2,14.2,9,3.4,12.4,0.3,-1.5,14.8,25.1,32.6,29,27.8,18.3,15.1,15.9,10.5]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Ville<\/th>\n      <th>Population2007<\/th>\n      <th>Population2017<\/th>\n      <th>VariationPopulation<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"language":{"url":"http://cdn.datatables.net/plug-ins/1.10.11/i18n/French.json"},"order":[[4,"desc"],[1,"asc"]],"columnDefs":[{"className":"dt-right","targets":[2,3,4]},{"orderable":false,"targets":0}],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<div id="fonctions-de-style-rapide" class="section level1 tabset">
+<h1><span class="header-section-number">5</span> Fonctions de style rapide</h1>
+<p>Le package <code>DT</code> inclut des fonctions permettant de modifier rapidement et avec peu de code le format ou le style des tableaux. Ces fonctions s’utilisent facilement avec l’opérateur <em>foward-pipe</em>, qu’on écrit comme ceci : <code>%&gt;%</code>. Cet opérateur permet d’enchaîner des modifications au tableau initial et a l’avantage de permettre de lire le code de gauche à droite. Vous trouverez plus d’informations sur les opérateurs <em>pipe</em> <a href="https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/#operateur-pipe">ici</a>.</p>
+<div id="format-des-colonnes" class="section level3 unnumbered">
+<h3>Format des colonnes</h3>
+<p>Voici des exemples d’appels de fonctions qui peuvent être ajoutés à la suite de la création du tableau pour modifier les formats des colonnes:</p>
+<p><em>Note. Le code ci-dessous est un exemple et n’est pas interprété</em></p>
+<pre class="r"><code>formatPercentage(&quot;colonneA&quot;, 1) # La colonne nommée &quot;colonneA&quot; sera convertie en pourcentage arrondi au dixième.
+formatCurrency(1:2, &#39;\U20AC&#39;, 2) # Les deux premières colonnes du tableau seront exprimées en euro arrondi au centième. 
+formatRound(c(&quot;colonneA&quot;, &quot;colonneB&quot;), 3) # Les colonnes nommées &quot;colonneA&quot; et &quot;colonneB&quot; seront arrondies au millième.</code></pre>
+<p>Un exemple d’utilisation de la fonction <code>formatRound</code>:</p>
+<p><em>Note. Le code ci-dessous est interprété</em></p>
+<pre class="r"><code>datatable(populationVillesCanada)  %&gt;% 
+  formatRound(&#39;VariationPopulation&#39;, 0) # Les valeurs de cette colonne seront arrondies à l&#39;entier.</code></pre>
+<div id="htmlwidget-13" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-13">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33"],["St. John's","Halifax","Moncton","Saint John","Saguenay","Québec","Sherbrooke","Trois-Rivières","Montréal","Ottawa–Gatineau","Kingston","Peterborough","Oshawa","Toronto","Hamilton","St. Catharines–Niagara","Kitchener–Cambridge–Waterloo","Brantford","Guelph","London","Windsor","Barrie","Grand Sudbury","Thunder Bay","Winnipeg","Regina","Saskatoon","Calgary","Edmonton","Kelowna","Abbotsford–Mission","Vancouver","Victoria"],[186067,386498,131123,125550,157213,736993,195028,147023,3714846,1188073,158664,120560,348280,5418207,722102,402581,474219,136330,140035,478492,333507,186064,164808,126024,719065,202481,244193,1153769,1104557,170987,165676,2218134,341571],[219207,431701,152169,128541,159258,812205,218633,158942,4138254,1377016,173862,126291,402399,6346088,787195,416539,527765,147489,159988,521756,344747,209081,165270,124164,825713,253220,323809,1488841,1411945,202208,190714,2571262,377414],[17.8,11.7,16.1,2.4,1.3,10.2,12.1,8.1,11.4,15.9,9.6,4.8,15.5,17.1,9,3.5,11.3,8.2,14.2,9,3.4,12.4,0.3,-1.5,14.8,25.1,32.6,29,27.8,18.3,15.1,15.9,10.5]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Ville<\/th>\n      <th>Population2007<\/th>\n      <th>Population2017<\/th>\n      <th>VariationPopulation<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data) {\nDTWidget.formatRound(this, row, data, 4, 0, 3, ',', '.');\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
+</div>
+<div id="style-des-colonnes" class="section level3 unnumbered">
+<h3>Style des colonnes</h3>
+<p>Il est aussi possible de modifier le style pour toutes les cellules d’une colonne ou de modifier les cellules conditionnellement à leurs valeurs.</p>
+<p>Dans l’exemple ci-dessous:</p>
+<ul>
+<li>La colonne <code>Ville</code> sera rouge avec du texte en caractère gras de couleur blanche.</li>
+<li>La colonne <code>Population 2017</code> sera blanche pour les valeurs inférieures ou égales à 1 million d’habitants et grise pour les autres. De plus, le texte sera en noir pour la valeur minimale, en rouge pour la valeur maximale et en bleu pour toutes les autres.</li>
+<li>Dans la colonne <code>VariationPopulation</code>, des barres orangées de longueurs proportionnelles aux valeurs dans la colonne seront ajoutées.</li>
+</ul>
+<pre class="r"><code>datatable(populationVillesCanada)  %&gt;% 
+  formatStyle( # Fonction pour changer le style d&#39;une colonne
+    &#39;Ville&#39;,  # Nom de la colonne à modifier
+    color = &#39;white&#39;, # Couleur du texte dans la colonne
+    backgroundColor = &#39;red&#39;, # Couleur des cases de la colonne
+    fontWeight = &#39;bold&#39; # Affiche les caractères en gras
+    ) %&gt;% 
+  formatStyle(
+    &#39;Population2017&#39;,
+    # Change la couleur du texte selon un intervalle
+    color = styleInterval(
+      c(min(populationVillesCanada$Population2017), # Valeur minimum de la colonne
+        max(populationVillesCanada$Population2017) - 0.1), # Valeur maximum de la colonne
+      c(&#39;black&#39;, &#39;blue&#39;, &#39;red&#39;)), # Couleur pour les trois intervals
+    backgroundColor = styleInterval(1000000, c(&#39;white&#39;, &#39;gray&#39;)) # Change la couleur des cases selon un intervalle
+    ) %&gt;%
+  formatStyle(
+    &#39;VariationPopulation&#39;,
+    color = &#39;black&#39;,
+    background = styleColorBar(populationVillesCanada$VariationPopulation, &#39;orange&#39;), # Inclus des barres de données selon la valeur dans les cellules
+    backgroundSize = &#39;100% 90%&#39;, # Amplitude du remplissage horizontale (100%) et verticale (90%) de la barre dans une cellule
+    backgroundRepeat = &#39;no-repeat&#39;, # Répétition de l&#39;image de fond
+    backgroundPosition = &#39;center&#39; # Positionnement vertical de la barre
+    )</code></pre>
+<div id="htmlwidget-14" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-14">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33"],["St. John's","Halifax","Moncton","Saint John","Saguenay","Québec","Sherbrooke","Trois-Rivières","Montréal","Ottawa–Gatineau","Kingston","Peterborough","Oshawa","Toronto","Hamilton","St. Catharines–Niagara","Kitchener–Cambridge–Waterloo","Brantford","Guelph","London","Windsor","Barrie","Grand Sudbury","Thunder Bay","Winnipeg","Regina","Saskatoon","Calgary","Edmonton","Kelowna","Abbotsford–Mission","Vancouver","Victoria"],[186067,386498,131123,125550,157213,736993,195028,147023,3714846,1188073,158664,120560,348280,5418207,722102,402581,474219,136330,140035,478492,333507,186064,164808,126024,719065,202481,244193,1153769,1104557,170987,165676,2218134,341571],[219207,431701,152169,128541,159258,812205,218633,158942,4138254,1377016,173862,126291,402399,6346088,787195,416539,527765,147489,159988,521756,344747,209081,165270,124164,825713,253220,323809,1488841,1411945,202208,190714,2571262,377414],[17.8,11.7,16.1,2.4,1.3,10.2,12.1,8.1,11.4,15.9,9.6,4.8,15.5,17.1,9,3.5,11.3,8.2,14.2,9,3.4,12.4,0.3,-1.5,14.8,25.1,32.6,29,27.8,18.3,15.1,15.9,10.5]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Ville<\/th>\n      <th>Population2007<\/th>\n      <th>Population2017<\/th>\n      <th>VariationPopulation<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data) {\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'font-weight':'bold','color':'white','background-color':'red'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'color':isNaN(parseFloat(value)) ? '' : value <= 124164.000000 ? 'black' : value <= 6346087.900000 ? 'blue' : 'red','background-color':isNaN(parseFloat(value)) ? '' : value <= 1000000.000000 ? 'white' : 'gray'});\nvar value=data[4]; $(this.api().cell(row, 4).node()).css({'color':'black','background':isNaN(parseFloat(value)) || value <= -1.500000 ? '' : 'linear-gradient(90.000000deg, transparent ' + (32.600000 - value)/34.100000 * 100 + '%, orange ' + (32.600000 - value)/34.100000 * 100 + '%)','background-size':'100% 90%','background-repeat':'no-repeat','background-position':'center'});\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
+</div>
+</div>
+<div id="autres" class="section level1">
+<h1><span class="header-section-number">6</span> Autres</h1>
+<p>Cette fiche détaille les principaux arguments de <code>datatable</code>. Consultez l’annexe 1 pour plus d’informations.</p>
+<p>Le package <code>DT</code> contient aussi d’autres fonctions<span class="citation"><sup>6</sup></span>. Par exemple, <code>coerceValue</code>, qui permet de remplacer rapidement une chaîne de caractères par une autre.</p>
+<p>L’opérateur <em>foward-pipe</em> <code>%&gt;%</code>, provenant du package <code>magrittr</code>, est importé par le package <code>DT</code>. Il n’est donc pas nécessaire de charger le package <code>magrittr</code> pour y avoir accès lorsque le package <code>DT</code> est chargé.</p>
+<p>Pour finir, comme le package <code>DT</code> est fait pour produire des tableaux en HTML, il s’intègre facilement dans des applications <code>shiny</code>. Il est donc possible de produire un tableau <code>DT</code> dans une application <code>shiny</code> et d’interagir avec celui-ci ou d’afficher des éléments en temps réel. Pour ce faire, les principales fonctions sont <code>dataTableAjax</code>, <code>dataTableOutput</code> et <code>dataTableProxy</code><span class="citation"><sup>7</sup></span>.</p>
+</div>
+<div id="conclusion" class="section level1">
+<h1><span class="header-section-number">7</span> Conclusion</h1>
+<p>Le package <code>DT</code> est un <em>wrapper</em> de la bibliothèque JavaScript <code>DataTables</code>, dont la principale fonction est <code>datatable</code>. L’exécution de la fonction <code>datatable</code> combinée à un data frame ou une matrice permet de générer un tableau interactif en format HTML. Le tableau possède des éléments interactifs qui permettent de moduler et filtrer l’affichage des données contenues dans le tableau. De plus, les éléments de base qui composent ce tableau peuvent convenir pour la plupart des occasions. Si l’affichage ne comble pas tous les besoins, davantage d’arguments, d’options, de fonctions, d’extensions et de plug-ins sont disponibles. Parmi toutes ces possibilités, <code>filter</code>, <code>language</code> et <code>order</code> sont nos coups de coeur. Comme les tableaux générés sont en format HTML, il est facile de les intégrer à un rapport <code>R Markdown</code> ou dans une application <code>shiny</code>.</p>
+<p>La grand avantage d’un tableau généré par <code>DT</code> par rapport à un tableau <code>Markdown</code> de base (généré avec les caractères « - » et « | ») est que les valeurs affichées sont celles contenues dans un data frame ou une matrice et non pas des valeurs saisies à la main.</p>
+<p>Il y a beaucoup de similitudes entre <code>DT</code> et <code>kableExtra</code><span class="citation"><sup>8</sup></span>. Avec les deux packages, il est possible de faire des tableaux en HTML hautement modifiables. La majorité des fonctions abordées dans ce tutoriel ont une équivalence avec <code>kableExtra</code>. Cependant, <code>DT</code> se démarque par ses capacités interactives, comme la fenêtre de recherche, le tri ou l’affichage des données sur plusieurs pages. Par contre, <code>kableExtra</code> a l’avantage d’être compatible avec Latex pour intégrer des tableaux dans des documents PDF.</p>
+<p>Un petit inconvénient au package <code>DT</code> concerne l’affichage des tableaux dans <code>R Markdown</code>. L’affichage est très pâle et peut rendre la lecture difficile, surtout si utilisé avec un projecteur (lors d’une présentation par exemple). Le problème est facilement réglable en changeant le thème de base dans <code>R Markdown</code>. Pour obtenir un affichage adéquat, il faut étrangement ajouter un retour de chariot à la suite du tableau qui vient juste d’être généré. Il est important de souligner que la version de <code>DT</code> utilisée ici est 0.6. Une version inférieure à 1 indique souvent que c’est une version bêta. Cela laisse croire que des inconvénients comme ce problème d’affichage trop pâle seront résolus dans une prochaine version stable.</p>
+<p>Somme toute, le package <code>DT</code> est un incontournable pour l’affichage d’un tableau HTML interactif.</p>
+</div>
+<div id="references" class="section level1">
+<h1><span class="header-section-number">8</span> Références</h1>
+<div id="refs">
+<div id="ref-DTrstudio">
+<p>1. <a href="https://rstudio.github.io/DT/">https://rstudio.github.io/DT/</a>.</p>
+</div>
+<div id="ref-DataTables">
+<p>2. <a href="https://datatables.net/">https://datatables.net/</a>.</p>
+</div>
+<div id="ref-DT">
+<p>3. <a href="https://github.com/rstudio/DT">https://github.com/rstudio/DT</a>.</p>
+</div>
+<div id="ref-statcan">
+<p>4. <a href="https://www150.statcan.gc.ca/n1/pub/12-581-x/2018000/pop-fra.htm#t4">https://www150.statcan.gc.ca/n1/pub/12-581-x/2018000/pop-fra.htm#t4</a>.</p>
+</div>
+<div id="ref-classes">
+<p>5. <a href="https://datatables.net/manual/styling/classes">https://datatables.net/manual/styling/classes</a>.</p>
+</div>
+<div id="ref-cran">
+<p>6. <a href="https://cran.r-project.org/web/packages/DT/DT.pdf">https://cran.r-project.org/web/packages/DT/DT.pdf</a>.</p>
+</div>
+<div id="ref-DTshiny">
+<p>7. <a href="https://rstudio.github.io/DT/shiny.html">https://rstudio.github.io/DT/shiny.html</a>.</p>
+</div>
+<div id="ref-kableExtra">
+<p>8. <a href="https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html">https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html</a>.</p>
+</div>
+</div>
+</div>
+<div id="annexe-1" class="section level1">
+<h1><span class="header-section-number">9</span> Annexe 1</h1>
+<p>Arguments de <code>datatable</code></p>
+<pre class="r"><code>datatable(data, # Matrice ou data frame
+          options = list(), # Option d&#39;initialisation
+          class = &quot;display&quot;, # classe CSS de la table
+          callback = JS(&quot;return table;&quot;), 
+          rownames, # Affiche le nom des lignes
+          colnames, # Permet de renommer le nom des colonnes
+          container, # htmltools::tags$table()
+          caption = NULL, # htmltools::tags$caption()
+          filter = c(&quot;none&quot;, &quot;bottom&quot;, &quot;top&quot;), # Filtre des colonnes
+          style = &quot;default&quot;, # Applique un autre style
+          width = NULL, # Largueur du tableau en pixel
+          height = NULL, # Hauteur du tableau en pixel
+          elementId = NULL, # Identifiant du tableau
+          fillContainer = getOption(&quot;DT.fillContainer&quot;, NULL),
+          autoHideNavigation = getOption(&quot;DT.autoHideNavigation&quot;, NULL), # Cache le volet de navigation si toutes les données s&#39;affichent sur une page
+          extensions = list(), # Ajout d&#39;extension à datatable
+          plugins = NULL, # Ajout d&#39;un plugin au tableau
+          editable = FALSE) # Rend les données du tableau modifiables</code></pre>
+</div>

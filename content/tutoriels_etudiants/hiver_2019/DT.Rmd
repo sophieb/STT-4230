@@ -1,0 +1,339 @@
+---
+title: "Package DT"
+linkTitle: "DT - tableaux interactifs"
+weight: 4
+author: "David Gagné et Joël D'Astous Pagé"
+date: "2019-05-22"
+output:
+  blogdown::html_page:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+bibliography: data/reference.bib
+csl: data/american-medical-association-alphabetical.csl
+nocite: | 
+  @cran, @rstudio, @statcan, @DT
+---
+<style>
+.column-left{
+  float: left;
+  width: 60%;
+  text-align: left;
+}
+.column-center{
+  display: inline-block;
+  width: 2%;
+  text-align: center;
+}
+.column-right{
+  float: right;
+  width: 38%;
+  text-align:left;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+Le package `DT`[@DTrstudio] est une interface de la bibliothèque JavaScript `DataTables`[@DataTables]. Il rend accessible les fonctionnalités de la librairie originale en R. La principale fonction de `DT` est `datatable`. Cette fonction permet de construire rapidement et efficacement un tableau interactif en format HTML à partir d'un data frame ou d'une matrice. Le format HTML des tableaux générés par `datatable` est alors compatible avec les énormes possibilités que permettent les packages `rmarkdown` et `shiny`. La fonction `datatable` offre plusieurs possibilités concernant l'affichage, la filtration de données, la pagination, le tri et bien plus. Un simple tableau est facilement transformé en un tableau interactif avec un esthétisme soigné. C'est définitivement une alternative à la création de tableaux de base (tableaux générés en Markdown avec les caractères «&nbsp;-&nbsp;» et «&nbsp;|&nbsp;»).
+
+Nous pouvons maintenant installer (si ce n'est pas déjà fait) et charger le package `DT`[@DT]. 
+
+```{r Installation et chargement du package DT, echo=TRUE, message=FALSE, warning=FALSE, collapse=TRUE}
+if (!require("DT")) install.packages('DT')
+packageVersion("DT")
+library("DT")
+```
+_Note. Cette fiche a été créée avec la version 0.6 de `DT` et 1.12 de `rmarkdown`. Il se peut qu'il y ait eu des ajouts ou des modifications si vos versions sont plus récentes._
+
+Pour présenter les exemples d'utilisation de `DT` nous utiliserons des données sur la population des villes canadiennes extraites du site internet de Statistique Canada[@statcan].
+```{r echo = FALSE}
+options.default <- options(str = strOptions(vec.len = 3))
+```
+```{r Data import}
+populationVillesCanada <- readRDS("populationVillesCanada.rds")
+str(populationVillesCanada)
+```
+```{r echo = FALSE}
+options(options.default)
+```
+
+
+# Éléments de base {.tabset}
+
+Le package `DT` permet de générer rapidement un tableau à partir des données présentes dans `populationVillesCanada` avec la commande `datatable(data = populationVillesCanada)`. Nous remarquons rapidement qu'en plus des éléments standards d'un tableau (e.g. colonnes, lignes, entête), il y a des éléments interactifs supplémentaires. La sous-section ci-dessous présente ces différents éléments et leurs fonctions. La seconde sous-section présente le tableau (en vrai cette fois). Il est maintenant possible d'expérimenter avec ces nouvelles fonctions.
+
+<!---
+> **Après avoir consulté l'image ci-dessous, cliquez sur l'onglet «&nbsp;Mon premier tableau DT&nbsp;». Vous  visualiserez un tableau créé avec la fonction `datatable`.**
+--->
+
+### Particularité de `DT` {-}
+
+<!---
+<div class="column-left">
+--->
+
+![](fig/datatable.png)
+
+<!---
+</div>
+<div class="column-center">
+</div>
+<div class="column-right">
+--->
+
+|Lettre|Description                                                                  |
+|:-----|:----------------------------------------------------------------------------|
+|A     |Affiche le nombre de lignes par page                                       |
+|B     |Trie le tableau selon les valeurs de cette colonne (croissant ou décroissant)|
+|C     |Recherche une valeur dans le tableau                                         |
+|D     |Indique le nombre de lignes affichées et le nombre de lignes totales         |
+|E     |Permet de naviguer entre les différentes pages du tableau                    |
+
+<!---
+</div>
+<div style="clear:both"><span></span></div>
+--->
+
+### Mon premier tableau `DT` {-}
+La fonction `datatable` du package `DT` permet de générer un tableau. Le tableau présente la population de 33 villes canadiennes pour les années 2007 et 2017[@statcan].
+```{r 1er tableau}
+datatable(data = populationVillesCanada)
+```
+
+
+# Arguments
+Les arguments de `datatable` modifient le tableau et y ajoutent des propriétés utiles au lecteur.
+Dans cette section, les principaux arguments seront abordés.
+
+## Noms des lignes et colonnes {.tabset}
+
+Les noms des lignes peuvent être supprimés. De plus, il est possible de renommer les colonnes de différentes façons. Voici des exemples:
+
+### Lignes {-}
+Les noms des lignes sont supprimés avec l'argument `rownames = FALSE`.
+```{r rownames = FALSE}
+datatable(populationVillesCanada, rownames = FALSE,
+          options = list(pageLength = 5)) # Cette option est ajoutée pour restreindre le nombre de lignes affichées.
+```
+
+### Colonne par substitution {-}
+Le nom de colonne `VariationPopulation` est recherché et remplacé par `NouveauNom`:
+```{r colnames par substitution}
+datatable(populationVillesCanada, colnames = c('NouveauNom' = 'VariationPopulation'),
+          options = list(pageLength = 5))
+```
+
+### Colonnes par vecteur de caractères {-}
+Les noms des colonnes sont modifiés par un vecteur de chaînes de caractères.
+```{r colnames par vecteur de caractères}
+datatable(populationVillesCanada, colnames = c('Col1', 'Col2', 'Col3', 'Col4'),
+          options = list(pageLength = 5))
+```
+
+
+## Classes{.tabset}
+L'apparence d'un tableau est modifiable avec l'argument `class`[@classes]. En voici quelques exemples:
+
+### `hover` {-}
+La ligne sur laquelle le pointeur de la souris est positionné est mise en évidence par un changement de surbrillance.
+```{r hover}
+datatable(data = populationVillesCanada, rownames = FALSE, class = "hover",
+          options = list(pageLength = 5))
+```
+
+### `cell-border` {-}
+Les cellules sont entourées de lignes. 
+```{r cell-border}
+datatable(data = populationVillesCanada, 
+          rownames = FALSE, 
+          class = "hover cell-border", # La modification est combinée à la précédente.
+          options = list(pageLength = 5))
+```
+
+### `compact` {-}
+Le vide dans les cellules est réduit afin d'optimiser l'espace.
+```{r compact}
+datatable(data = populationVillesCanada, 
+          rownames = FALSE, 
+          class = "hover cell-border compact",
+          options = list(pageLength = 5))
+```
+
+## Titre, filtre et modification{.tabset}
+
+Les trois prochaines sous-sections permettent de comparer l'ajout successif d'arguments supplémentaires.
+
+### Ajout d'un titre {-}
+L'argument `caption` permet d'ajouter un titre au tableau.
+```{r caption}
+datatable(populationVillesCanada, 
+          rownames = FALSE, 
+          class = "hover cell-border compact", 
+          caption = "Tableau 1: Estimations de la population, selon la région métropolitaine de recensement.",
+          options = list(pageLength = 5))
+```
+
+### Filtres {-}
+L'argument `filter` est très intéressant. Il permet de restreindre les données affichées selon les filtres qu'on impose. Cela est utile lorsque le tableau contient beaucoup de données. Cliquez dans le champ du filtre de la colonne `Population2007`. Déplacez le curseur pour restreindre le jeu de données.
+```{r caption et filter}
+datatable(populationVillesCanada, 
+          rownames = FALSE, 
+          class = "hover cell-border compact", 
+          caption = "Tableau 1: Estimations de la population, selon la région métropolitaine de recensement.",
+          filter = 'top', # Les filtres sont positionnés au-dessus des colonnes.
+          options = list(pageLength = 5))
+```
+
+### Tableau modifiable {-}
+Il suffit de double-cliquer dans une cellule pour modifier la valeur.
+```{r caption, filter et editable}
+datatable(populationVillesCanada, 
+          rownames = FALSE,
+          class = "hover cell-border compact", 
+          caption = "Tableau 1: Estimations de la population, selon la région métropolitaine de recensement.",
+          filter = 'top', 
+          editable = TRUE,
+          options = list(pageLength = 5))
+```
+
+
+# Options{.tabset}
+Les options sont des paramètres supplémentaires pour adapter un tableau. Consultez les deux sous-sections suivantes pour découvrir des exemples.
+
+### `language` {-} 
+
+L'option `language` traduit les noms de tous les éléments. 
+```{r language}
+datatable(populationVillesCanada, 
+          options = list(
+            language = list(url = 'http://cdn.datatables.net/plug-ins/1.10.11/i18n/French.json'),
+            pageLength = 5
+            ))
+```
+
+### `order` {-} 
+L'option `order` permet de trier par défaut un tableau. Le tri peut se faire par la combinaison de plus d'une colonne. Dans l'exemple ci-dessous, le tableau est d'abord trié par la quatrième colonne (la colonne du nom des lignes ne compte pas dans la numérotation des colonnes) en ordre décroissant. En cas d'égalité, le tri est ensuite exécuté selon le nom de la ville en ordre croissant. 
+```{r order}
+datatable(populationVillesCanada, 
+          options = list(
+            language = list(url = 'http://cdn.datatables.net/plug-ins/1.10.11/i18n/French.json'),
+            order = list(list(4, 'desc'), # Tri décroissant sur la colonne 4 (VariationPopulation).
+                         list(1, 'asc')) # Tri secondaire croissant sur la colonne 1.
+            ))
+```
+
+
+# Fonctions de style rapide {.tabset}
+
+Le package `DT` inclut des fonctions permettant de modifier rapidement et avec peu de code le format ou le style des tableaux. Ces fonctions s'utilisent facilement avec l'opérateur *foward-pipe*, qu'on écrit comme ceci : `%>%`. Cet opérateur permet d'enchaîner des modifications au tableau initial et a l'avantage de permettre de lire le code de gauche à droite. Vous trouverez plus d'informations sur les opérateurs *pipe* [ici](https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/#operateur-pipe). 
+
+### Format des colonnes {-}
+
+Voici des exemples d'appels de fonctions qui peuvent être ajoutés à la suite de la création du tableau pour modifier les formats des colonnes:
+
+_Note. Le code ci-dessous est un exemple et n'est pas interprété_
+```{r eval=FALSE, include=TRUE}
+formatPercentage("colonneA", 1) # La colonne nommée "colonneA" sera convertie en pourcentage arrondi au dixième.
+formatCurrency(1:2, '\U20AC', 2) # Les deux premières colonnes du tableau seront exprimées en euro arrondi au centième. 
+formatRound(c("colonneA", "colonneB"), 3) # Les colonnes nommées "colonneA" et "colonneB" seront arrondies au millième.
+```
+
+Un exemple d'utilisation de la fonction `formatRound`:
+
+_Note. Le code ci-dessous est interprété_
+```{r formatRound}
+datatable(populationVillesCanada)  %>% 
+  formatRound('VariationPopulation', 0) # Les valeurs de cette colonne seront arrondies à l'entier.
+```
+
+### Style des colonnes {-}
+
+Il est aussi possible de modifier le style pour toutes les cellules d'une colonne ou de modifier les cellules conditionnellement à leurs valeurs.
+
+Dans l'exemple ci-dessous:
+
+- La colonne `Ville` sera rouge avec du texte en caractère gras de couleur blanche.
+- La colonne `Population 2017` sera blanche pour les valeurs inférieures ou égales à 1 million d'habitants et grise pour les autres. De plus, le texte sera en noir pour la valeur minimale, en rouge pour la valeur maximale et en bleu pour toutes les autres.
+- Dans la colonne `VariationPopulation`, des barres orangées de longueurs proportionnelles aux valeurs dans la colonne seront ajoutées.
+
+```{r formatStyle}
+datatable(populationVillesCanada)  %>% 
+  formatStyle( # Fonction pour changer le style d'une colonne
+    'Ville',  # Nom de la colonne à modifier
+    color = 'white', # Couleur du texte dans la colonne
+    backgroundColor = 'red', # Couleur des cases de la colonne
+    fontWeight = 'bold' # Affiche les caractères en gras
+    ) %>% 
+  formatStyle(
+    'Population2017',
+    # Change la couleur du texte selon un intervalle
+    color = styleInterval(
+      c(min(populationVillesCanada$Population2017), # Valeur minimum de la colonne
+        max(populationVillesCanada$Population2017) - 0.1), # Valeur maximum de la colonne
+      c('black', 'blue', 'red')), # Couleur pour les trois intervals
+    backgroundColor = styleInterval(1000000, c('white', 'gray')) # Change la couleur des cases selon un intervalle
+    ) %>%
+  formatStyle(
+    'VariationPopulation',
+    color = 'black',
+    background = styleColorBar(populationVillesCanada$VariationPopulation, 'orange'), # Inclus des barres de données selon la valeur dans les cellules
+    backgroundSize = '100% 90%', # Amplitude du remplissage horizontale (100%) et verticale (90%) de la barre dans une cellule
+    backgroundRepeat = 'no-repeat', # Répétition de l'image de fond
+    backgroundPosition = 'center' # Positionnement vertical de la barre
+    )
+```
+
+# Autres
+Cette fiche détaille les principaux arguments de `datatable`. Consultez l'annexe 1 pour plus d'informations.
+
+Le package `DT` contient aussi d’autres fonctions[@cran]. Par exemple, `coerceValue`, qui permet de remplacer rapidement une chaîne de caractères par une autre.
+
+L'opérateur *foward-pipe* `%>%`, provenant du package `magrittr`, est importé par le package `DT`. Il n'est donc pas nécessaire de charger le package `magrittr` pour y avoir accès lorsque le package `DT` est chargé.
+
+Pour finir, comme le package `DT` est fait pour produire des tableaux en HTML, il s’intègre facilement dans des applications `shiny`. Il est donc possible de produire un tableau `DT` dans une application `shiny` et d’interagir avec celui-ci ou d’afficher des éléments en temps réel. Pour ce faire, les principales fonctions sont `dataTableAjax`, `dataTableOutput` et `dataTableProxy`[@DTshiny].
+
+
+# Conclusion
+
+Le package `DT` est un *wrapper* de la bibliothèque JavaScript `DataTables`, dont la principale fonction est `datatable`. L'exécution de la fonction `datatable` combinée à un data frame ou une matrice permet de générer un tableau interactif en format HTML. Le tableau possède des éléments interactifs qui permettent de moduler et filtrer l'affichage des données contenues dans le tableau. De plus, les éléments de base qui composent ce tableau peuvent convenir pour la plupart des occasions. Si l'affichage ne comble pas tous les besoins, davantage d'arguments, d'options, de fonctions, d'extensions et de plug-ins sont disponibles. Parmi toutes ces possibilités, `filter`, `language` et `order` sont nos coups de coeur. Comme les tableaux générés sont en format HTML, il est facile de les intégrer à un rapport `R Markdown` ou dans une application `shiny`.
+
+La grand avantage d'un tableau généré par `DT` par rapport à un tableau `Markdown` de base (généré avec les caractères «&nbsp;-&nbsp;» et «&nbsp;|&nbsp;») est que les valeurs affichées sont celles contenues dans un data frame ou une matrice et non pas des valeurs saisies à la main.
+
+Il y a beaucoup de similitudes entre `DT` et `kableExtra`[@kableExtra]. Avec les deux packages, il est possible de faire des tableaux en HTML hautement modifiables. La majorité des fonctions abordées dans ce tutoriel ont une équivalence avec `kableExtra`. Cependant, `DT` se démarque par ses capacités interactives, comme la fenêtre de recherche, le tri ou l'affichage des données sur plusieurs pages. Par contre, `kableExtra` a l'avantage d'être compatible avec Latex pour intégrer des tableaux dans des documents PDF.
+
+Un petit inconvénient au package `DT` concerne l'affichage des tableaux dans `R Markdown`. L'affichage est très pâle et peut rendre la lecture difficile, surtout si utilisé avec un projecteur (lors d'une présentation par exemple). Le problème est facilement réglable en changeant le thème de base dans `R Markdown`. Pour obtenir un affichage adéquat, il faut étrangement ajouter un retour de chariot à la suite du tableau qui vient juste d'être généré. Il est important de souligner que la version de `DT` utilisée ici est 0.6. Une version inférieure à 1 indique souvent que c'est une version bêta. Cela laisse croire que des inconvénients  comme ce problème d'affichage trop pâle seront résolus dans une prochaine version stable.
+
+Somme toute, le package `DT` est un incontournable pour l'affichage d'un tableau HTML interactif.
+
+
+# Références
+
+<div id="refs"></div>
+
+# Annexe 1
+Arguments de `datatable`
+```{r eval=FALSE, include=TRUE}
+datatable(data, # Matrice ou data frame
+          options = list(), # Option d'initialisation
+          class = "display", # classe CSS de la table
+          callback = JS("return table;"), 
+          rownames, # Affiche le nom des lignes
+          colnames, # Permet de renommer le nom des colonnes
+          container, # htmltools::tags$table()
+          caption = NULL, # htmltools::tags$caption()
+          filter = c("none", "bottom", "top"), # Filtre des colonnes
+          style = "default", # Applique un autre style
+          width = NULL, # Largueur du tableau en pixel
+          height = NULL, # Hauteur du tableau en pixel
+          elementId = NULL, # Identifiant du tableau
+          fillContainer = getOption("DT.fillContainer", NULL),
+          autoHideNavigation = getOption("DT.autoHideNavigation", NULL), # Cache le volet de navigation si toutes les données s'affichent sur une page
+          extensions = list(), # Ajout d'extension à datatable
+          plugins = NULL, # Ajout d'un plugin au tableau
+          editable = FALSE) # Rend les données du tableau modifiables
+```
+
