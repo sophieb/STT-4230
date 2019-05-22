@@ -8,11 +8,8 @@ output:
   blogdown::html_page:
     toc: true
     toc_depth: 2
-    number_sections: true
 bibliography: data/reference.bib
 csl: data/american-medical-association-alphabetical.csl
-nocite: | 
-  @cran, @rstudio, @statcan, @DT
 ---
 
 <script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
@@ -31,19 +28,19 @@ nocite: |
 
 <div id="TOC">
 <ul>
-<li><a href="#introduction"><span class="toc-section-number">1</span> Introduction</a></li>
-<li><a href="#elements-de-base"><span class="toc-section-number">2</span> Éléments de base</a></li>
-<li><a href="#arguments"><span class="toc-section-number">3</span> Arguments</a><ul>
-<li><a href="#noms-des-lignes-et-colonnes"><span class="toc-section-number">3.1</span> Noms des lignes et colonnes</a></li>
-<li><a href="#classes"><span class="toc-section-number">3.2</span> Classes</a></li>
-<li><a href="#titre-filtre-et-modification"><span class="toc-section-number">3.3</span> Titre, filtre et modification</a></li>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#elements-de-base">Éléments de base</a></li>
+<li><a href="#arguments">Arguments</a><ul>
+<li><a href="#noms-des-lignes-et-colonnes">Noms des lignes et colonnes</a></li>
+<li><a href="#classes">Classes</a></li>
+<li><a href="#titre-filtre-et-modification">Titre, filtre et modification</a></li>
 </ul></li>
-<li><a href="#options"><span class="toc-section-number">4</span> Options</a></li>
-<li><a href="#fonctions-de-style-rapide"><span class="toc-section-number">5</span> Fonctions de style rapide</a></li>
-<li><a href="#autres"><span class="toc-section-number">6</span> Autres</a></li>
-<li><a href="#conclusion"><span class="toc-section-number">7</span> Conclusion</a></li>
-<li><a href="#references"><span class="toc-section-number">8</span> Références</a></li>
-<li><a href="#annexe-1"><span class="toc-section-number">9</span> Annexe 1</a></li>
+<li><a href="#options">Options</a></li>
+<li><a href="#fonctions-de-style-rapide">Fonctions de style rapide</a></li>
+<li><a href="#autres">Autres</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+<li><a href="#references">Références</a></li>
+<li><a href="#annexe-1">Annexe 1</a></li>
 </ul>
 </div>
 
@@ -65,15 +62,15 @@ nocite: |
 }
 </style>
 <div id="introduction" class="section level1">
-<h1><span class="header-section-number">1</span> Introduction</h1>
-<p>Le package <code>DT</code><span class="citation"><sup>1</sup></span> est une interface de la bibliothèque JavaScript <code>DataTables</code><span class="citation"><sup>2</sup></span>. Il rend accessible les fonctionnalités de la librairie originale en R. La principale fonction de <code>DT</code> est <code>datatable</code>. Cette fonction permet de construire rapidement et efficacement un tableau interactif en format HTML à partir d’un data frame ou d’une matrice. Le format HTML des tableaux générés par <code>datatable</code> est alors compatible avec les énormes possibilités que permettent les packages <code>rmarkdown</code> et <code>shiny</code>. La fonction <code>datatable</code> offre plusieurs possibilités concernant l’affichage, la filtration de données, la pagination, le tri et bien plus. Un simple tableau est facilement transformé en un tableau interactif avec un esthétisme soigné. C’est définitivement une alternative à la création de tableaux de base (tableaux générés en Markdown avec les caractères « - » et « | »).</p>
-<p>Nous pouvons maintenant installer (si ce n’est pas déjà fait) et charger le package <code>DT</code><span class="citation"><sup>3</sup></span>.</p>
+<h1>Introduction</h1>
+<p>Le <a href="https://rstudio.github.io/DT/">package <code>DT</code></a><span class="citation"><sup>1</sup></span> est une interface de la <a href="https://datatables.net/">bibliothèque JavaScript <code>DataTables</code></a><span class="citation"><sup>2</sup></span>. Il rend accessible les fonctionnalités de la librairie originale en R. La principale fonction de <code>DT</code> est <code>datatable</code>. Cette fonction permet de construire rapidement et efficacement un tableau interactif en format HTML à partir d’un data frame ou d’une matrice. Le format HTML des tableaux générés par <code>datatable</code> est alors compatible avec les énormes possibilités que permettent les packages <code>rmarkdown</code> et <code>shiny</code>. La fonction <code>datatable</code> offre plusieurs possibilités concernant l’affichage, la filtration de données, la pagination, le tri et bien plus. Un simple tableau est facilement transformé en un tableau interactif avec un esthétisme soigné. C’est définitivement une alternative à la création de tableaux de base (tableaux générés en Markdown avec les caractères « - » et « | »).</p>
+<p>Nous pouvons maintenant installer (si ce n’est pas déjà fait) et charger le <a href="https://github.com/rstudio/DT">package <code>DT</code></a><span class="citation"><sup>3</sup></span>.</p>
 <pre class="r"><code>if (!require(&quot;DT&quot;)) install.packages(&#39;DT&#39;)
 packageVersion(&quot;DT&quot;)
 ## [1] &#39;0.6&#39;
 library(&quot;DT&quot;)</code></pre>
 <p><em>Note. Cette fiche a été créée avec la version 0.6 de <code>DT</code> et 1.12 de <code>rmarkdown</code>. Il se peut qu’il y ait eu des ajouts ou des modifications si vos versions sont plus récentes.</em></p>
-<p>Pour présenter les exemples d’utilisation de <code>DT</code> nous utiliserons des données sur la population des villes canadiennes extraites du site internet de Statistique Canada<span class="citation"><sup>4</sup></span>.</p>
+<p>Pour présenter les exemples d’utilisation de <code>DT</code> nous utiliserons des données sur la population des villes canadiennes extraites du <a href="https://www150.statcan.gc.ca/n1/pub/12-581-x/2018000/pop-fra.htm#t4">site internet de Statistique Canada</a><span class="citation"><sup>4</sup></span>.</p>
 <pre class="r"><code>populationVillesCanada &lt;- readRDS(&quot;populationVillesCanada.rds&quot;)
 str(populationVillesCanada)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    33 obs. of  4 variables:
@@ -83,7 +80,7 @@ str(populationVillesCanada)</code></pre>
 ##  $ VariationPopulation: num  17.8 11.7 16.1 2.4 1.3 10.2 12.1 8.1 ...</code></pre>
 </div>
 <div id="elements-de-base" class="section level1 tabset">
-<h1><span class="header-section-number">2</span> Éléments de base</h1>
+<h1>Éléments de base</h1>
 <p>Le package <code>DT</code> permet de générer rapidement un tableau à partir des données présentes dans <code>populationVillesCanada</code> avec la commande <code>datatable(data = populationVillesCanada)</code>. Nous remarquons rapidement qu’en plus des éléments standards d’un tableau (e.g. colonnes, lignes, entête), il y a des éléments interactifs supplémentaires. La sous-section ci-dessous présente ces différents éléments et leurs fonctions. La seconde sous-section présente le tableau (en vrai cette fois). Il est maintenant possible d’expérimenter avec ces nouvelles fonctions.</p>
 <!---
 > **Après avoir consulté l'image ci-dessous, cliquez sur l'onglet «&nbsp;Mon premier tableau DT&nbsp;». Vous  visualiserez un tableau créé avec la fonction `datatable`.**
@@ -148,11 +145,11 @@ str(populationVillesCanada)</code></pre>
 </div>
 </div>
 <div id="arguments" class="section level1">
-<h1><span class="header-section-number">3</span> Arguments</h1>
+<h1>Arguments</h1>
 <p>Les arguments de <code>datatable</code> modifient le tableau et y ajoutent des propriétés utiles au lecteur.
 Dans cette section, les principaux arguments seront abordés.</p>
 <div id="noms-des-lignes-et-colonnes" class="section level2 tabset">
-<h2><span class="header-section-number">3.1</span> Noms des lignes et colonnes</h2>
+<h2>Noms des lignes et colonnes</h2>
 <p>Les noms des lignes peuvent être supprimés. De plus, il est possible de renommer les colonnes de différentes façons. Voici des exemples:</p>
 <div id="lignes" class="section level3 unnumbered">
 <h3>Lignes</h3>
@@ -180,8 +177,8 @@ Dans cette section, les principaux arguments seront abordés.</p>
 </div>
 </div>
 <div id="classes" class="section level2 tabset">
-<h2><span class="header-section-number">3.2</span> Classes</h2>
-<p>L’apparence d’un tableau est modifiable avec l’argument <code>class</code><span class="citation"><sup>5</sup></span>. En voici quelques exemples:</p>
+<h2>Classes</h2>
+<p>L’apparence d’un tableau est modifiable avec l’<a href="https://datatables.net/manual/styling/classes">argument <code>class</code></a><span class="citation"><sup>5</sup></span>. En voici quelques exemples:</p>
 <div id="hover" class="section level3 unnumbered">
 <h3><code>hover</code></h3>
 <p>La ligne sur laquelle le pointeur de la souris est positionné est mise en évidence par un changement de surbrillance.</p>
@@ -212,7 +209,7 @@ Dans cette section, les principaux arguments seront abordés.</p>
 </div>
 </div>
 <div id="titre-filtre-et-modification" class="section level2 tabset">
-<h2><span class="header-section-number">3.3</span> Titre, filtre et modification</h2>
+<h2>Titre, filtre et modification</h2>
 <p>Les trois prochaines sous-sections permettent de comparer l’ajout successif d’arguments supplémentaires.</p>
 <div id="ajout-dun-titre" class="section level3 unnumbered">
 <h3>Ajout d’un titre</h3>
@@ -253,7 +250,7 @@ Dans cette section, les principaux arguments seront abordés.</p>
 </div>
 </div>
 <div id="options" class="section level1 tabset">
-<h1><span class="header-section-number">4</span> Options</h1>
+<h1>Options</h1>
 <p>Les options sont des paramètres supplémentaires pour adapter un tableau. Consultez les deux sous-sections suivantes pour découvrir des exemples.</p>
 <div id="language" class="section level3 unnumbered">
 <h3><code>language</code></h3>
@@ -280,7 +277,7 @@ Dans cette section, les principaux arguments seront abordés.</p>
 </div>
 </div>
 <div id="fonctions-de-style-rapide" class="section level1 tabset">
-<h1><span class="header-section-number">5</span> Fonctions de style rapide</h1>
+<h1>Fonctions de style rapide</h1>
 <p>Le package <code>DT</code> inclut des fonctions permettant de modifier rapidement et avec peu de code le format ou le style des tableaux. Ces fonctions s’utilisent facilement avec l’opérateur <em>foward-pipe</em>, qu’on écrit comme ceci : <code>%&gt;%</code>. Cet opérateur permet d’enchaîner des modifications au tableau initial et a l’avantage de permettre de lire le code de gauche à droite. Vous trouverez plus d’informations sur les opérateurs <em>pipe</em> <a href="https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/#operateur-pipe">ici</a>.</p>
 <div id="format-des-colonnes" class="section level3 unnumbered">
 <h3>Format des colonnes</h3>
@@ -334,22 +331,22 @@ formatRound(c(&quot;colonneA&quot;, &quot;colonneB&quot;), 3) # Les colonnes nom
 </div>
 </div>
 <div id="autres" class="section level1">
-<h1><span class="header-section-number">6</span> Autres</h1>
+<h1>Autres</h1>
 <p>Cette fiche détaille les principaux arguments de <code>datatable</code>. Consultez l’annexe 1 pour plus d’informations.</p>
-<p>Le package <code>DT</code> contient aussi d’autres fonctions<span class="citation"><sup>6</sup></span>. Par exemple, <code>coerceValue</code>, qui permet de remplacer rapidement une chaîne de caractères par une autre.</p>
+<p>Le package <code>DT</code> contient aussi d’<a href="https://cran.r-project.org/web/packages/DT/DT.pdf">autres fonctions</a><span class="citation"><sup>6</sup></span>. Par exemple, <code>coerceValue</code>, qui permet de remplacer rapidement une chaîne de caractères par une autre.</p>
 <p>L’opérateur <em>foward-pipe</em> <code>%&gt;%</code>, provenant du package <code>magrittr</code>, est importé par le package <code>DT</code>. Il n’est donc pas nécessaire de charger le package <code>magrittr</code> pour y avoir accès lorsque le package <code>DT</code> est chargé.</p>
-<p>Pour finir, comme le package <code>DT</code> est fait pour produire des tableaux en HTML, il s’intègre facilement dans des applications <code>shiny</code>. Il est donc possible de produire un tableau <code>DT</code> dans une application <code>shiny</code> et d’interagir avec celui-ci ou d’afficher des éléments en temps réel. Pour ce faire, les principales fonctions sont <code>dataTableAjax</code>, <code>dataTableOutput</code> et <code>dataTableProxy</code><span class="citation"><sup>7</sup></span>.</p>
+<p>Pour finir, comme le package <code>DT</code> est fait pour produire des tableaux en HTML, il s’intègre facilement dans des applications <code>shiny</code>. Il est donc possible de produire un tableau <code>DT</code> dans une application <code>shiny</code> et d’interagir avec celui-ci ou d’afficher des éléments en temps réel. Pour ce faire, les principales fonctions sont <a href="https://rstudio.github.io/DT/shiny.html"><code>dataTableAjax</code>, <code>dataTableOutput</code> et <code>dataTableProxy</code></a><span class="citation"><sup>7</sup></span>.</p>
 </div>
 <div id="conclusion" class="section level1">
-<h1><span class="header-section-number">7</span> Conclusion</h1>
+<h1>Conclusion</h1>
 <p>Le package <code>DT</code> est un <em>wrapper</em> de la bibliothèque JavaScript <code>DataTables</code>, dont la principale fonction est <code>datatable</code>. L’exécution de la fonction <code>datatable</code> combinée à un data frame ou une matrice permet de générer un tableau interactif en format HTML. Le tableau possède des éléments interactifs qui permettent de moduler et filtrer l’affichage des données contenues dans le tableau. De plus, les éléments de base qui composent ce tableau peuvent convenir pour la plupart des occasions. Si l’affichage ne comble pas tous les besoins, davantage d’arguments, d’options, de fonctions, d’extensions et de plug-ins sont disponibles. Parmi toutes ces possibilités, <code>filter</code>, <code>language</code> et <code>order</code> sont nos coups de coeur. Comme les tableaux générés sont en format HTML, il est facile de les intégrer à un rapport <code>R Markdown</code> ou dans une application <code>shiny</code>.</p>
 <p>La grand avantage d’un tableau généré par <code>DT</code> par rapport à un tableau <code>Markdown</code> de base (généré avec les caractères « - » et « | ») est que les valeurs affichées sont celles contenues dans un data frame ou une matrice et non pas des valeurs saisies à la main.</p>
-<p>Il y a beaucoup de similitudes entre <code>DT</code> et <code>kableExtra</code><span class="citation"><sup>8</sup></span>. Avec les deux packages, il est possible de faire des tableaux en HTML hautement modifiables. La majorité des fonctions abordées dans ce tutoriel ont une équivalence avec <code>kableExtra</code>. Cependant, <code>DT</code> se démarque par ses capacités interactives, comme la fenêtre de recherche, le tri ou l’affichage des données sur plusieurs pages. Par contre, <code>kableExtra</code> a l’avantage d’être compatible avec Latex pour intégrer des tableaux dans des documents PDF.</p>
+<p>Il y a beaucoup de similitudes entre <code>DT</code> et <a href="https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html"><code>kableExtra</code></a><span class="citation"><sup>8</sup></span>. Avec les deux packages, il est possible de faire des tableaux en HTML hautement modifiables. La majorité des fonctions abordées dans ce tutoriel ont une équivalence avec <code>kableExtra</code>. Cependant, <code>DT</code> se démarque par ses capacités interactives, comme la fenêtre de recherche, le tri ou l’affichage des données sur plusieurs pages. Par contre, <code>kableExtra</code> a l’avantage d’être compatible avec Latex pour intégrer des tableaux dans des documents PDF.</p>
 <p>Un petit inconvénient au package <code>DT</code> concerne l’affichage des tableaux dans <code>R Markdown</code>. L’affichage est très pâle et peut rendre la lecture difficile, surtout si utilisé avec un projecteur (lors d’une présentation par exemple). Le problème est facilement réglable en changeant le thème de base dans <code>R Markdown</code>. Pour obtenir un affichage adéquat, il faut étrangement ajouter un retour de chariot à la suite du tableau qui vient juste d’être généré. Il est important de souligner que la version de <code>DT</code> utilisée ici est 0.6. Une version inférieure à 1 indique souvent que c’est une version bêta. Cela laisse croire que des inconvénients comme ce problème d’affichage trop pâle seront résolus dans une prochaine version stable.</p>
 <p>Somme toute, le package <code>DT</code> est un incontournable pour l’affichage d’un tableau HTML interactif.</p>
 </div>
 <div id="references" class="section level1">
-<h1><span class="header-section-number">8</span> Références</h1>
+<h1>Références</h1>
 <div id="refs">
 <div id="ref-DTrstudio">
 <p>1. <a href="https://rstudio.github.io/DT/">https://rstudio.github.io/DT/</a>.</p>
@@ -378,7 +375,7 @@ formatRound(c(&quot;colonneA&quot;, &quot;colonneB&quot;), 3) # Les colonnes nom
 </div>
 </div>
 <div id="annexe-1" class="section level1">
-<h1><span class="header-section-number">9</span> Annexe 1</h1>
+<h1>Annexe 1</h1>
 <p>Arguments de <code>datatable</code></p>
 <pre class="r"><code>datatable(data, # Matrice ou data frame
           options = list(), # Option d&#39;initialisation
