@@ -11,6 +11,7 @@ output:
 bibliography: data/reference.bib
 csl: data/american-medical-association-alphabetical.csl
 ---
+
 <style>
 .column-left{
   float: left;
@@ -58,7 +59,6 @@ str(populationVillesCanada)
 options(options.default)
 ```
 
-
 # Éléments de base {.tabset}
 
 Le package `DT` permet de générer rapidement un tableau à partir des données présentes dans `populationVillesCanada` avec la commande `datatable(data = populationVillesCanada)`. Nous remarquons rapidement qu'en plus des éléments standards d'un tableau (e.g. colonnes, lignes, entête), il y a des éléments interactifs supplémentaires. La sous-section ci-dessous présente ces différents éléments et leurs fonctions. La seconde sous-section présente le tableau (en vrai cette fois). Il est maintenant possible d'expérimenter avec ces nouvelles fonctions.
@@ -84,7 +84,7 @@ Le package `DT` permet de générer rapidement un tableau à partir des données
 
 |Lettre|Description                                                                  |
 |:-----|:----------------------------------------------------------------------------|
-|A     |Affiche le nombre de lignes par page                                       |
+|A     |Affiche le nombre de lignes par page                                         |
 |B     |Trie le tableau selon les valeurs de cette colonne (croissant ou décroissant)|
 |C     |Recherche une valeur dans le tableau                                         |
 |D     |Indique le nombre de lignes affichées et le nombre de lignes totales         |
@@ -97,10 +97,13 @@ Le package `DT` permet de générer rapidement un tableau à partir des données
 
 ### Mon premier tableau `DT` {-}
 La fonction `datatable` du package `DT` permet de générer un tableau. Le tableau présente la population de 33 villes canadiennes pour les années 2007 et 2017[@statcan].
-```{r 1er tableau}
+```{r 1er tableau, eval = TRUE}
 datatable(data = populationVillesCanada)
 ```
-
+```{r 1er tableau widgetframe, echo = FALSE, eval = FALSE}
+t1 <- datatable(data = populationVillesCanada)
+widgetframe::frameWidget(t1)
+```
 
 # Arguments
 Les arguments de `datatable` modifient le tableau et y ajoutent des propriétés utiles au lecteur.
@@ -112,52 +115,86 @@ Les noms des lignes peuvent être supprimés. De plus, il est possible de renomm
 
 ### Lignes {-}
 Les noms des lignes sont supprimés avec l'argument `rownames = FALSE`.
-```{r rownames = FALSE}
+```{r no rownames, eval = TRUE}
 datatable(populationVillesCanada, rownames = FALSE,
-          options = list(pageLength = 5)) # Cette option est ajoutée pour restreindre le nombre de lignes affichées.
+          options = list(pageLength = 5))
+          # L'option ajoutée sert à restreindre le nombre de lignes affichées.
+```
+```{r no rownames widgetframe, echo = FALSE, eval = FALSE}
+t_lignes <- datatable(populationVillesCanada, rownames = FALSE,
+          options = list(pageLength = 5))
+widgetframe::frameWidget(t_lignes)
 ```
 
 ### Colonne par substitution {-}
 Le nom de colonne `VariationPopulation` est recherché et remplacé par `NouveauNom`:
-```{r colnames par substitution}
+```{r colnames par substitution, eval = TRUE}
 datatable(populationVillesCanada, colnames = c('NouveauNom' = 'VariationPopulation'),
           options = list(pageLength = 5))
+```
+```{r colnames par substitution widgetframe, echo = FALSE, eval = FALSE}
+t_substitut <- datatable(populationVillesCanada, colnames = c('NouveauNom' = 'VariationPopulation'),
+          options = list(pageLength = 5))
+widgetframe::frameWidget(t_substitut)
 ```
 
 ### Colonnes par vecteur de caractères {-}
 Les noms des colonnes sont modifiés par un vecteur de chaînes de caractères.
-```{r colnames par vecteur de caractères}
+```{r colnames par vecteur de caractères, eval = TRUE}
 datatable(populationVillesCanada, colnames = c('Col1', 'Col2', 'Col3', 'Col4'),
           options = list(pageLength = 5))
 ```
-
+```{r colnames par vecteur de caractères widgetframe, echo = FALSE,  eval = FALSE}
+t_col <- datatable(populationVillesCanada, colnames = c('Col1', 'Col2', 'Col3', 'Col4'),
+          options = list(pageLength = 5))
+widgetframe::frameWidget(t_col)
+```
 
 ## Classes{.tabset}
 L'apparence d'un tableau est modifiable avec l'[argument `class`](https://datatables.net/manual/styling/classes)[@classes]. En voici quelques exemples:
 
 ### `hover` {-}
 La ligne sur laquelle le pointeur de la souris est positionné est mise en évidence par un changement de surbrillance.
-```{r hover}
+```{r hover, eval = TRUE}
 datatable(data = populationVillesCanada, rownames = FALSE, class = "hover",
           options = list(pageLength = 5))
+```
+```{r hover widgetframe, echo = FALSE,,  eval = FALSE}
+t_hover <- datatable(data = populationVillesCanada, rownames = FALSE, class = "hover",
+          options = list(pageLength = 5))
+widgetframe::frameWidget(t_hover)
 ```
 
 ### `cell-border` {-}
 Les cellules sont entourées de lignes. 
-```{r cell-border}
+```{r cell-border, eval = TRUE}
 datatable(data = populationVillesCanada, 
           rownames = FALSE, 
           class = "hover cell-border", # La modification est combinée à la précédente.
           options = list(pageLength = 5))
 ```
+```{r cell-border widgetframe, echo = FALSE,  eval = FALSE}
+t_border <- datatable(data = populationVillesCanada, 
+          rownames = FALSE, 
+          class = "hover cell-border", # La modification est combinée à la précédente.
+          options = list(pageLength = 5))
+widgetframe::frameWidget(t_border)
+```
 
 ### `compact` {-}
 Le vide dans les cellules est réduit afin d'optimiser l'espace.
-```{r compact}
+```{r compact, eval = TRUE}
 datatable(data = populationVillesCanada, 
           rownames = FALSE, 
           class = "hover cell-border compact",
           options = list(pageLength = 5))
+```
+```{r compact widgetframe, echo = FALSE,  eval = FALSE}
+t_compact <- datatable(data = populationVillesCanada, 
+          rownames = FALSE, 
+          class = "hover cell-border compact",
+          options = list(pageLength = 5))
+widgetframe::frameWidget(t_compact)
 ```
 
 ## Titre, filtre et modification{.tabset}
@@ -166,17 +203,25 @@ Les trois prochaines sous-sections permettent de comparer l'ajout successif d'ar
 
 ### Ajout d'un titre {-}
 L'argument `caption` permet d'ajouter un titre au tableau.
-```{r caption}
+```{r caption, eval = TRUE}
 datatable(populationVillesCanada, 
           rownames = FALSE, 
           class = "hover cell-border compact", 
           caption = "Tableau 1: Estimations de la population, selon la région métropolitaine de recensement.",
           options = list(pageLength = 5))
 ```
+```{r caption widgetframe, echo = FALSE,  eval = FALSE}
+t_titre <- datatable(populationVillesCanada, 
+          rownames = FALSE, 
+          class = "hover cell-border compact", 
+          caption = "Tableau 1: Estimations de la population, selon la région métropolitaine de recensement.",
+          options = list(pageLength = 5))
+widgetframe::frameWidget(t_titre)
+```
 
 ### Filtres {-}
 L'argument `filter` est très intéressant. Il permet de restreindre les données affichées selon les filtres qu'on impose. Cela est utile lorsque le tableau contient beaucoup de données. Cliquez dans le champ du filtre de la colonne `Population2007`. Déplacez le curseur pour restreindre le jeu de données.
-```{r caption et filter}
+```{r caption et filter, eval = TRUE}
 datatable(populationVillesCanada, 
           rownames = FALSE, 
           class = "hover cell-border compact", 
@@ -184,10 +229,19 @@ datatable(populationVillesCanada,
           filter = 'top', # Les filtres sont positionnés au-dessus des colonnes.
           options = list(pageLength = 5))
 ```
+```{r caption et filter widgetframe, echo = FALSE,  eval = FALSE}
+t_filtre <- datatable(populationVillesCanada, 
+          rownames = FALSE, 
+          class = "hover cell-border compact", 
+          caption = "Tableau 1: Estimations de la population, selon la région métropolitaine de recensement.",
+          filter = 'top', # Les filtres sont positionnés au-dessus des colonnes.
+          options = list(pageLength = 5))
+widgetframe::frameWidget(t_filtre)
+```
 
 ### Tableau modifiable {-}
 Il suffit de double-cliquer dans une cellule pour modifier la valeur.
-```{r caption, filter et editable}
+```{r caption, filter et editable, eval = TRUE}
 datatable(populationVillesCanada, 
           rownames = FALSE,
           class = "hover cell-border compact", 
@@ -196,7 +250,16 @@ datatable(populationVillesCanada,
           editable = TRUE,
           options = list(pageLength = 5))
 ```
-
+```{r caption, filter et editable widgetframe, echo = FALSE,  eval = FALSE}
+t_modif <- datatable(populationVillesCanada, 
+          rownames = FALSE,
+          class = "hover cell-border compact", 
+          caption = "Tableau 1: Estimations de la population, selon la région métropolitaine de recensement.",
+          filter = 'top', 
+          editable = TRUE,
+          options = list(pageLength = 5))
+widgetframe::frameWidget(t_modif)
+```
 
 # Options{.tabset}
 Les options sont des paramètres supplémentaires pour adapter un tableau. Consultez les deux sous-sections suivantes pour découvrir des exemples.
@@ -204,17 +267,25 @@ Les options sont des paramètres supplémentaires pour adapter un tableau. Consu
 ### `language` {-} 
 
 L'option `language` traduit les noms de tous les éléments. 
-```{r language}
+```{r language, eval = TRUE}
 datatable(populationVillesCanada, 
           options = list(
             language = list(url = 'http://cdn.datatables.net/plug-ins/1.10.11/i18n/French.json'),
             pageLength = 5
             ))
 ```
+```{r language widgetframe, echo = FALSE,  eval = FALSE}
+t_langue <- datatable(populationVillesCanada, 
+          options = list(
+            language = list(url = 'http://cdn.datatables.net/plug-ins/1.10.11/i18n/French.json'),
+            pageLength = 5
+            ))
+widgetframe::frameWidget(t_langue)
+```
 
 ### `order` {-} 
 L'option `order` permet de trier par défaut un tableau. Le tri peut se faire par la combinaison de plus d'une colonne. Dans l'exemple ci-dessous, le tableau est d'abord trié par la quatrième colonne (la colonne du nom des lignes ne compte pas dans la numérotation des colonnes) en ordre décroissant. En cas d'égalité, le tri est ensuite exécuté selon le nom de la ville en ordre croissant. 
-```{r order}
+```{r order, eval = TRUE}
 datatable(populationVillesCanada, 
           options = list(
             language = list(url = 'http://cdn.datatables.net/plug-ins/1.10.11/i18n/French.json'),
@@ -222,7 +293,15 @@ datatable(populationVillesCanada,
                          list(1, 'asc')) # Tri secondaire croissant sur la colonne 1.
             ))
 ```
-
+```{r order widgetframe, echo = FALSE,  eval = FALSE}
+t_order <- datatable(populationVillesCanada, 
+          options = list(
+            language = list(url = 'http://cdn.datatables.net/plug-ins/1.10.11/i18n/French.json'),
+            order = list(list(4, 'desc'), # Tri décroissant sur la colonne 4 (VariationPopulation).
+                         list(1, 'asc')) # Tri secondaire croissant sur la colonne 1.
+            ))
+widgetframe::frameWidget(t_order)
+```
 
 # Fonctions de style rapide {.tabset}
 
@@ -234,17 +313,27 @@ Voici des exemples d'appels de fonctions qui peuvent être ajoutés à la suite 
 
 _Note. Le code ci-dessous est un exemple et n'est pas interprété_
 ```{r eval=FALSE, include=TRUE}
-formatPercentage("colonneA", 1) # La colonne nommée "colonneA" sera convertie en pourcentage arrondi au dixième.
-formatCurrency(1:2, '\U20AC', 2) # Les deux premières colonnes du tableau seront exprimées en euro arrondi au centième. 
-formatRound(c("colonneA", "colonneB"), 3) # Les colonnes nommées "colonneA" et "colonneB" seront arrondies au millième.
+formatPercentage("colonneA", 1)
+# La colonne nommée "colonneA" sera convertie en pourcentage arrondi au dixième.
+
+formatCurrency(1:2, '\U20AC', 2)
+# Les deux premières colonnes du tableau seront exprimées en euro arrondi au centième. 
+
+formatRound(c("colonneA", "colonneB"), 3)
+# Les colonnes nommées "colonneA" et "colonneB" seront arrondies au millième.
 ```
 
 Un exemple d'utilisation de la fonction `formatRound`:
 
 _Note. Le code ci-dessous est interprété_
-```{r formatRound}
+```{r formatRound, eval = TRUE}
 datatable(populationVillesCanada)  %>% 
   formatRound('VariationPopulation', 0) # Les valeurs de cette colonne seront arrondies à l'entier.
+```
+```{r formatRound widgetframe, echo = FALSE,  eval = FALSE}
+t_format <- datatable(populationVillesCanada)  %>% 
+  formatRound('VariationPopulation', 0) # Les valeurs de cette colonne seront arrondies à l'entier.
+widgetframe::frameWidget(t_format)
 ```
 
 ### Style des colonnes {-}
@@ -257,31 +346,66 @@ Dans l'exemple ci-dessous:
 - La colonne `Population 2017` sera blanche pour les valeurs inférieures ou égales à 1 million d'habitants et grise pour les autres. De plus, le texte sera en noir pour la valeur minimale, en rouge pour la valeur maximale et en bleu pour toutes les autres.
 - Dans la colonne `VariationPopulation`, des barres orangées de longueurs proportionnelles aux valeurs dans la colonne seront ajoutées.
 
-```{r formatStyle}
+```{r formatStyle, eval = TRUE}
 datatable(populationVillesCanada)  %>% 
-  formatStyle( # Fonction pour changer le style d'une colonne
-    'Ville',  # Nom de la colonne à modifier
-    color = 'white', # Couleur du texte dans la colonne
+  formatStyle(               # Fonction pour changer le style d'une colonne
+    'Ville',                 # Nom de la colonne à modifier
+    color = 'white',         # Couleur du texte dans la colonne
     backgroundColor = 'red', # Couleur des cases de la colonne
-    fontWeight = 'bold' # Affiche les caractères en gras
+    fontWeight = 'bold'      # Affiche les caractères en gras
     ) %>% 
   formatStyle(
     'Population2017',
-    # Change la couleur du texte selon un intervalle
-    color = styleInterval(
-      c(min(populationVillesCanada$Population2017), # Valeur minimum de la colonne
+    color = styleInterval(               # Change la couleur du texte selon un intervalle
+      c(min(populationVillesCanada$Population2017),        # Valeur minimum de la colonne
         max(populationVillesCanada$Population2017) - 0.1), # Valeur maximum de la colonne
-      c('black', 'blue', 'red')), # Couleur pour les trois intervals
-    backgroundColor = styleInterval(1000000, c('white', 'gray')) # Change la couleur des cases selon un intervalle
+      c('black', 'blue', 'red')),        # Couleur pour les trois intervals
+    backgroundColor = styleInterval(     # Change la couleur des cases selon un intervalle
+      1000000, 
+      c('white', 'gray')) 
     ) %>%
   formatStyle(
     'VariationPopulation',
     color = 'black',
-    background = styleColorBar(populationVillesCanada$VariationPopulation, 'orange'), # Inclus des barres de données selon la valeur dans les cellules
-    backgroundSize = '100% 90%', # Amplitude du remplissage horizontale (100%) et verticale (90%) de la barre dans une cellule
+    background = styleColorBar( # Inclus des barres de données selon la valeur dans les cellules
+      populationVillesCanada$VariationPopulation, 
+      'orange'), 
+    backgroundSize = '100% 90%',    # Amplitude du remplissage horizontale (100%) 
+                                    # et verticale (90%) de la barre dans une cellule
     backgroundRepeat = 'no-repeat', # Répétition de l'image de fond
-    backgroundPosition = 'center' # Positionnement vertical de la barre
+    backgroundPosition = 'center'   # Positionnement vertical de la barre
     )
+```
+```{r formatStyle widgetframe, echo = FALSE,  eval = FALSE}
+t_style <- datatable(populationVillesCanada)  %>% 
+  formatStyle(               # Fonction pour changer le style d'une colonne
+    'Ville',                 # Nom de la colonne à modifier
+    color = 'white',         # Couleur du texte dans la colonne
+    backgroundColor = 'red', # Couleur des cases de la colonne
+    fontWeight = 'bold'      # Affiche les caractères en gras
+    ) %>% 
+  formatStyle(
+    'Population2017',
+    color = styleInterval(               # Change la couleur du texte selon un intervalle
+      c(min(populationVillesCanada$Population2017),        # Valeur minimum de la colonne
+        max(populationVillesCanada$Population2017) - 0.1), # Valeur maximum de la colonne
+      c('black', 'blue', 'red')),        # Couleur pour les trois intervals
+    backgroundColor = styleInterval(     # Change la couleur des cases selon un intervalle
+      1000000, 
+      c('white', 'gray')) 
+    ) %>%
+  formatStyle(
+    'VariationPopulation',
+    color = 'black',
+    background = styleColorBar( # Inclus des barres de données selon la valeur dans les cellules
+      populationVillesCanada$VariationPopulation, 
+      'orange'), 
+    backgroundSize = '100% 90%',    # Amplitude du remplissage horizontale (100%) 
+                                    # et verticale (90%) de la barre dans une cellule
+    backgroundRepeat = 'no-repeat', # Répétition de l'image de fond
+    backgroundPosition = 'center'   # Positionnement vertical de la barre
+    )
+widgetframe::frameWidget(t_style)
 ```
 
 # Autres
@@ -292,7 +416,6 @@ Le package `DT` contient aussi d’[autres fonctions](https://cran.r-project.org
 L'opérateur *foward-pipe* `%>%`, provenant du package `magrittr`, est importé par le package `DT`. Il n'est donc pas nécessaire de charger le package `magrittr` pour y avoir accès lorsque le package `DT` est chargé.
 
 Pour finir, comme le package `DT` est fait pour produire des tableaux en HTML, il s’intègre facilement dans des applications `shiny`. Il est donc possible de produire un tableau `DT` dans une application `shiny` et d’interagir avec celui-ci ou d’afficher des éléments en temps réel. Pour ce faire, les principales fonctions sont [`dataTableAjax`, `dataTableOutput` et `dataTableProxy`](https://rstudio.github.io/DT/shiny.html)[@DTshiny].
-
 
 # Conclusion
 
@@ -306,10 +429,11 @@ Un petit inconvénient au package `DT` concerne l'affichage des tableaux dans `R
 
 Somme toute, le package `DT` est un incontournable pour l'affichage d'un tableau HTML interactif.
 
-
 # Références
 
 <div id="refs"></div>
+
+&nbsp;
 
 # Annexe 1
 Arguments de `datatable`
@@ -328,7 +452,8 @@ datatable(data, # Matrice ou data frame
           height = NULL, # Hauteur du tableau en pixel
           elementId = NULL, # Identifiant du tableau
           fillContainer = getOption("DT.fillContainer", NULL),
-          autoHideNavigation = getOption("DT.autoHideNavigation", NULL), # Cache le volet de navigation si toutes les données s'affichent sur une page
+          autoHideNavigation = getOption("DT.autoHideNavigation", NULL), 
+            # Cache le volet de navigation si toutes les données s'affichent sur une page
           extensions = list(), # Ajout d'extension à datatable
           plugins = NULL, # Ajout d'un plugin au tableau
           editable = FALSE) # Rend les données du tableau modifiables
