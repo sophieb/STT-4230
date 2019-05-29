@@ -8,7 +8,7 @@
 }(function (HC) {
 	'use strict';
 	/**
-	 * Grouped Categories v1.1.0 (2016-06-21)
+	 * Grouped Categories v1.1.3 (2017-03-27)
 	 *
 	 * (c) 2012-2016 Black Label
 	 *
@@ -160,11 +160,12 @@
 
 	// setup required axis options
 	axisProto.setupGroups = function (options) {
-		var categories,
+		var categories = deepClone(options.categories),
 			reverseTree = [],
-			stats = {};
-		
-		categories = deepClone(options.categories);
+			stats = {},
+			labelOptions = this.options.labels,
+			userAttr = labelOptions.groupedOptions,
+			css = labelOptions.style;
 
 		// build categories tree
 		buildTree(categories, reverseTree, stats);
@@ -180,8 +181,14 @@
 		// #66: tickWidth for x axis defaults to 1, for y to 0
 		this.tickWidth = pick(options.tickWidth, this.isXAxis ? 1 : 0);
 		this.directionFactor = [-1, 1, 1, -1][this.side];
-
 		this.options.lineWidth = pick(options.lineWidth, 1);
+		// #85: align labels vertically
+		this.groupFontHeights = [];
+		for (var i = 0; i <= stats.depth; i++) {
+			var hasOptions = userAttr && userAttr[i - 1],
+				mergedCSS = hasOptions && userAttr[i - 1].style ? merge(css, userAttr[i - 1].style) : css;
+			this.groupFontHeights[i] = Math.round(this.chart.renderer.fontMetrics(mergedCSS ? mergedCSS.fontSize : 0).b * 0.3);
+		}
 	};
 
 
@@ -239,9 +246,13 @@
 				// #58: use tickWidth/tickColor instead of lineWidth/lineColor:
 				strokeWidth: tickWidth, // < 4.0.3
 				'stroke-width': tickWidth, // 4.0.3+ #30
-				stroke: options.tickColor
+				stroke: options.tickColor || '' // for styled mode (tickColor === undefined)
 			})
 			.add(axis.axisGroup);
+			// for styled mode - add class
+			if (!options.tickColor) {
+				grid.addClass('highcharts-tick');
+			}
 		}
 
 		// go through every level and draw horizontal grid line
@@ -359,28 +370,31 @@
 
 	// Override methods prototypes
 	tickProto.addLabel = function () {
-		var category;
+		var tick = this,
+			axis = tick.axis,
+			category;
 		
-		protoTickAddLabel.call(this);
+		protoTickAddLabel.call(tick);
 		
-		if (!this.axis.categories || !(category = this.axis.categories[this.pos])) {
+		if (!axis.categories || !(category = axis.categories[tick.pos])) {
 			return false;
 		}
 		
 		// set label text - but applied after formatter #46
-		if (this.label) {
-			this.label.attr('text', this.axis.labelFormatter.call({
-				axis: this.axis,
-				chart: this.axis.chart,
-				isFirst: this.isFirst,
-				isLast: this.isLast,
-				value: category.name
+		if (tick.label) {
+			tick.label.attr('text', tick.axis.labelFormatter.call({
+				axis: axis,
+				chart: axis.chart,
+				isFirst: tick.isFirst,
+				isLast: tick.isLast,
+				value: category.name,
+				pos: tick.pos
 			}));
 		}
 		
 		// create elements for parent categories
-		if (this.axis.isGrouped && this.axis.options.labels.enabled) {
-			this.addGroupedLabels(category);
+		if (axis.isGrouped && axis.options.labels.enabled) {
+			tick.addGroupedLabels(category);
 		}
 		return true;
 	};
@@ -437,8 +451,10 @@
 				category.tick = tick;
 			}
 
-			// set level size
-			axis.groupSize(depth, tick.label.getBBox()[size]);
+			// set level size, #93
+			if (tick) {
+				axis.groupSize(depth, tick.label.getBBox()[size]);
+			}
 
 			// go up to the parent category
 			category = category.parent;
@@ -476,7 +492,7 @@
 			tickWidth = axis.tickWidth,
 			xy = tickPosition(tick, tickPos),
 			start = horiz ? xy.y : xy.x,
-			baseLine = axis.chart.renderer.fontMetrics(axis.options.labels.style.fontSize).b,
+			baseLine = axis.chart.renderer.fontMetrics(axis.options.labels.style ? axis.options.labels.style.fontSize : 0).b,
 			depth = 1,
 			reverseCrisp = ((horiz && xy.x === axis.pos + axis.len) || (!horiz && xy.y === axis.pos)) ? -1 : 0, // adjust grid lines for edges
 			gridAttrs,
@@ -530,7 +546,7 @@
 			
 			attrs = horiz ? {
 				x: (minPos.x + maxPos.x) / 2 + userX,
-				y: size + lvlSize / 2 + baseLine - bBox.height / 2 - 4 + userY / 2
+				y: size + axis.groupFontHeights[depth] + lvlSize / 2 + userY / 2
 			} : {
 				x: size + lvlSize / 2 + userX,
 				y: (minPos.y + maxPos.y - bBox.height) / 2 + baseLine + userY

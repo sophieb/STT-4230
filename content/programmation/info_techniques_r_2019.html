@@ -131,7 +131,8 @@ x # même vecteur que précédemment</code></pre>
 <p>Maintenant, observons un phénomène étonnant. Demandons à R d’afficher le nombre 2^53 + 1, soit 9007199254740993.</p>
 <pre class="r"><code>9007199254740993</code></pre>
 <pre><code>## [1] 9007199254740992</code></pre>
-<p>R affiche plutôt le nombre 2^53, soit 9007199254740992. Pourtant, ceci est correct :</p>
+<p>R affiche plutôt le nombre 2^53, soit 9007199254740992.
+Pourtant, ceci est correct :</p>
 <pre class="r"><code>9007199254740994</code></pre>
 <pre><code>## [1] 9007199254740994</code></pre>
 <p>Mais pas ceci :</p>
@@ -183,7 +184,7 @@ Figure 1: Chemin de recherche parcouru par R pour évaluer les expressions soumi
 <pre><code>## Error in `[.data.frame`(iris, Sepal.Width &gt; 4, c(Petal.Length, Petal.Width)) : 
 ##   object &#39;Petal.Length&#39; not found</code></pre>
 <p>parce que <code>Sepal.Width</code>, <code>Petal.Length</code> et <code>Petal.Width</code> sont des noms d’objets dont R doit trouver les valeurs. Le chemin de recherche parcouru par R pour trouver ces valeurs débute dans l’environnement de travail et se poursuit dans les environnements des packages chargés, en commençant par les packages les plus récemment chargés. R retourne une erreur, car il ne trouve nulle part ces objets. Il y a bien des colonnes du data frame <code>iris</code> qui portent les noms de ses objets, mais il ne s’agit pas d’objets directement accessibles. Ce sont des éléments dans un objet.</p>
-<p>Dans la commande <code>subset(iris, subset = Sepal.Width &gt; 4, select = c(Petal.Length, Petal.Width))</code>, R doit aussi trouver la valeur des objets <code>Sepal.Width</code>, <code>Petal.Length</code> et <code>Petal.Width</code>. Il trouve cette fois ces objets, car la fonction <code>subset</code> modifie le chemin de recherche de R (mais uniquement le temps de l’évaluation de l’appel à cette fonction). Elle ajoute au tout début du chemin de recherche un environnement, contenant les colonnes du data frame fourni comme premier argument. Dans l’exemple, l’environnement ajouté au chemin de recherche contient donc des vecteurs nommés <code>&quot;Sepal.Length&quot;</code>, <code>&quot;Sepal.Width&quot;</code>, <code>&quot;Petal.Length&quot;</code>, <code>&quot;Petal.Width&quot;</code> et <code>&quot;Species&quot;</code>, soit les colonnes de <code>iris</code>.</p>
+<p>Dans la commande <code>subset(iris, subset = Sepal.Width &gt; 4, select = c(Petal.Length, Petal.Width))</code>, R doit aussi trouver la valeur des objets <code>Sepal.Width</code>, <code>Petal.Length</code> et <code>Petal.Width</code>. Il trouve cette fois ces objets, car la fonction <code>subset</code> modifie le chemin de recherche de R (mais uniquement le temps de l’évaluation de l’appel à cette fonction). Elle ajoute au tout début du chemin de recherche un environnement, contenant les colonnes du data frame fourni comme premier argument. Dans l’exemple, l’environnement ajouté au chemin de recherche contient donc des vecteurs nommés <code>"Sepal.Length"</code>, <code>"Sepal.Width"</code>, <code>"Petal.Length"</code>, <code>"Petal.Width"</code> et <code>"Species"</code>, soit les colonnes de <code>iris</code>.</p>
 <p>Le chemin de recherche utilisé par R pour évaluer les expressions données à <code>subset</code> dans cet exemple est illustré dans la figure 2.</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-21"></span>
 <img src="fig/chemin_with.png" alt="Chemin de recherche parcouru par R pour évaluer les expressions données en argument à la fonction subset dans l'exemple" width="25%" />
@@ -244,7 +245,8 @@ head(women2)</code></pre>
 <h2>La fonction <code>attach</code></h2>
 <p>Certains d’entre vous connaissent peut-être la fonction <code>attach</code>. Cette fonction permet d’ajouter un data frame dans le chemin de recherche, juste <strong>en dessous</strong> de l’environnement de travail. Par exemple, la commande</p>
 <pre class="r"><code>attach(iris)</code></pre>
-<p>modifie le chemin suivant <img src="fig/chemin.png" width="25%" style="display: block; margin: auto;" /><img src="fig/par.png" width="25%" style="display: block; margin: auto;" /><img src="fig/chemin_attach.png" width="25%" style="display: block; margin: auto;" /></p>
+<p>modifie le chemin suivant
+<img src="fig/chemin.png" width="25%" style="display: block; margin: auto;" /><img src="fig/par.png" width="25%" style="display: block; margin: auto;" /><img src="fig/chemin_attach.png" width="25%" style="display: block; margin: auto;" /></p>
 <p>Je ne recommande pas l’utilisation de <code>attach</code>, car si l’environnement de travail contient déjà un objet portant le même nom qu’une colonne du data frame attaché, c’est l’objet dans l’environnement de travail qui sera retourné plutôt que la colonne du data frame si nous utilisons ce nom dans nos instructions. Ce comportement s’explique par le fait que l’environnement de travail demeure le point de départ du chemin de recherche avec <code>attach</code>, alors qu’avec <code>with</code> c’est le data frame qui est le point de départ du chemin de recherche.</p>
 <p>Pour retirer du chemin de recherche un data frame attaché, il faut utiliser la fonction <code>detach</code>.</p>
 <pre class="r"><code>detach(iris)</code></pre>
@@ -262,18 +264,19 @@ head(women2)</code></pre>
 <pre><code>## The following objects are masked from &#39;package:base&#39;:
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
-<p>Le chargement d’un nouveau package ajoute un environnement dans le chemin de recherche, juste en dessous de l’environnement de travail. Ainsi, la commande <code>library(dplyr)</code> a modifié le chemin suivant <img src="fig/chemin.png" width="25%" style="display: block; margin: auto;" /><img src="fig/par.png" width="25%" style="display: block; margin: auto;" /><img src="fig/chemin_library.png" width="25%" style="display: block; margin: auto;" /></p>
+<p>Le chargement d’un nouveau package ajoute un environnement dans le chemin de recherche, juste en dessous de l’environnement de travail. Ainsi, la commande <code>library(dplyr)</code> a modifié le chemin suivant
+<img src="fig/chemin.png" width="25%" style="display: block; margin: auto;" /><img src="fig/par.png" width="25%" style="display: block; margin: auto;" /><img src="fig/chemin_library.png" width="25%" style="display: block; margin: auto;" /></p>
 <p>Un appel à un des noms de fonction en double, par exemple à <code>union</code>, va utiliser par défaut la fonction <code>union</code> du package <code>dplyr</code> puisque l’environnement de ce package est plus haut dans le chemin de recherche que l’environnement du package <code>base</code>.</p>
 <pre class="r"><code>union  # remarquez le nom de l&#39;environnement de provenant de la fonction</code></pre>
 <pre><code>## function (x, y, ...) 
 ## UseMethod(&quot;union&quot;)
-## &lt;bytecode: 0x0000000012ce8b68&gt;
+## &lt;bytecode: 0x0000000012127888&gt;
 ## &lt;environment: namespace:dplyr&gt;</code></pre>
 <p>Pour accéder à la fonction <code>union</code> du package <code>base</code> avec ce chemin d’accès, il faut utiliser l’opérateur <code>::</code> comme suit.</p>
 <pre class="r"><code>base::union  # remarquez le nom de l&#39;environnement de provenant de la fonction</code></pre>
 <pre><code>## function (x, y) 
 ## unique(c(as.vector(x), as.vector(y)))
-## &lt;bytecode: 0x0000000014460228&gt;
+## &lt;bytecode: 0x0000000014f6bd48&gt;
 ## &lt;environment: namespace:base&gt;</code></pre>
 <p>Notez que l’auteur du package <code>dplyr</code> a délibérément repris des noms de fonctions du R de base. Il s’agit de versions de ces fonctions qu’il juge meilleures.</p>
 <p>Un package peut être retiré du chemin de recherche avec la fonction <code>detach</code> comme suit :</p>

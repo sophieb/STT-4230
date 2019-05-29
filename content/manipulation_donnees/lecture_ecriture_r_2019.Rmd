@@ -20,6 +20,8 @@ header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
 - \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+editor_options: 
+  chunk_output_type: console
 ---
 
 ***
@@ -387,7 +389,7 @@ De plus, il est possible de lire directement dans une table HTML. La majorité d
 
 Une façon d'importer en R les données d'une table HTML serait de copier/coller le contenu de la table dans un fichier (texte ou autre), puis d'importer ce fichier en R. Cependant, cette procédure n'est pas automatique. Certains packages R permettent d'éviter l'étape intermédiaire du copier/coller. Voici comment lire des données directement à partir d'une table HTML avec le [package `rvest`](https://github.com/hadley/rvest).
 
-```{r HTML, warning = FALSE, message = FALSE}
+```{r HTML, warning = FALSE, message = FALSE, eval = FALSE}
 library(rvest)
 url <- "http://pro.boxoffice.com/numbers/all_time"
 doc <- read_html(url)
@@ -396,9 +398,14 @@ boxoffice <- tables[[1]]
 str(boxoffice)
 ```
 
+```{r echo = FALSE}
+boxoffice <- readRDS("C:/coursR/boxoffice_20190125.rds")
+str(boxoffice)
+```
+
 La fonction `read_html` lit tout le code HTML d'une page web. La fonction `html_table` en extrait les tables et les converties en data frames. La plupart du temps, les données publiées sur internet sont sous forme de tableaux et se trouvent dans des tables HTML. Pour finir, il ne reste plus qu'à extraire la bonne table parmi toutes les tables lues.
 
-Le data frame obtenu dans le code précédent, nommé `boxoffice`, contient les recettes des films ayant générés le plus de revenus dans les cinémas américains, telles que présentées sur la page web http://pro.boxoffice.com/numbers/all_time. Ce data frame pourrait être amélioré en renommant ses colonnes.
+Le data frame obtenu dans le code précédent, nommé `boxoffice`, contient les recettes des films ayant générés le plus de revenus dans les cinémas américains, telles que présentées sur la page web http://pro.boxoffice.com/numbers/all_time le 25 janvier 2019. Ce data frame pourrait être amélioré en renommant ses colonnes.
 
 Mentionnons finalement qu'il existe de plus en plus de packages R pour aller chercher rapidement, à partir de R, des données ouvertes publiées sur des sites web. Par exemple, le [package `gtrendsR`](https://github.com/PMassicotte/gtrendsR) permet d'importer en R des données provenant de [Google trends](https://trends.google.ca). Ce genre de possibilité ne sera pas illustrée ici, mais la page web suivante énumère des packages utiles pour aller chercher des données sur divers sites web :  
 https://cran.r-project.org/web/views/WebTechnologies.html.
@@ -462,7 +469,7 @@ write(dataExS_json, "dataExS.json")
 
 Le [package `openxlsx`](https://CRAN.R-project.org/package=openxlsx) offre des fonctions pour exporter des données stockées dans un objet R dans un fichier EXCEL. Par exemple, le contenu du data frame `dataExS` peut être écrit dans un fichier EXCEL comme suit.
 
-```{r}
+```{r, message = FALSE}
 library(openxlsx)
 write.xlsx(dataExS, file = "dataExS.xlsx")
 ```

@@ -125,8 +125,8 @@ editor_options:
 <pre class="r"><code>cars2$dist &lt;- cars2$dist * 0.3048</code></pre>
 <p>Nous savons que l’instruction <code>cars2$dist</code>, servant à identifier la colonne à modifier, aurait pu être écrite de bien d’autres façons, notamment :</p>
 <ul>
-<li><code>cars2[[&quot;dist&quot;]]</code></li>
-<li><code>cars2[, &quot;dist&quot;]</code></li>
+<li><code>cars2[["dist"]]</code></li>
+<li><code>cars2[, "dist"]</code></li>
 <li><code>cars2[, 2]</code></li>
 <li>etc.</li>
 </ul>
@@ -330,7 +330,7 @@ boxoffice &lt;- tables[[1]]</code></pre>
 <div id="fonction-paste" class="section level3">
 <h3>Fonction <code>paste</code> :</h3>
 <p>La <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/paste.html">fonction <code>paste</code></a> sert à concaténer des éléments de vecteurs. Elle retourne toujours un résultat sous le format caractère. Elle n’est pas illustrée ici, car elle a été présentée dans les notes sur les <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#les-vecteurs-de-chaines-de-caracteres">structures de données en R</a>.</p>
-<p>Notons que la fonction <code>paste0</code> est en quelque sorte une version de la fonction <code>paste</code> avec l’argument <code>sep = &quot;&quot;</code> (aucun caractère comme séparation entre les chaînes de caractères à concaténer).</p>
+<p>Notons que la fonction <code>paste0</code> est en quelque sorte une version de la fonction <code>paste</code> avec l’argument <code>sep = ""</code> (aucun caractère comme séparation entre les chaînes de caractères à concaténer).</p>
 </div>
 <div id="fonction-nchar" class="section level3">
 <h3>Fonction <code>nchar</code> :</h3>
@@ -354,7 +354,7 @@ extrait</code></pre>
 </div>
 <div id="fonction-strsplit" class="section level3">
 <h3>Fonction <code>strsplit</code> :</h3>
-<p>La <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/strsplit.html">fonction <code>strsplit</code></a> sépare des chaînes de caractères en sous-chaînes de caractères en coupant lors de la rencontre d’une certaine sous-chaîne de caractères. Tentons d’utiliser cette fonction pour séparer le nom du film du nom du distributeur, qui se retrouvent tous deux dans la colonne <code>&quot;Movie (Distributor)&quot;</code> du data frame <code>boxoffice</code>. Demandons à <code>strsplit</code> de briser le contenu de cette colonne en deux parties : ce qui se trouve avant la parenthèse ouvrante et ce qui se trouve après. Étant donné que le nom du distributeur est toujours placé à la fin de la chaîne de caractères, entre parenthèses, nous réussirons ainsi à isoler les deux éléments.</p>
+<p>La <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/strsplit.html">fonction <code>strsplit</code></a> sépare des chaînes de caractères en sous-chaînes de caractères en coupant lors de la rencontre d’une certaine sous-chaîne de caractères. Tentons d’utiliser cette fonction pour séparer le nom du film du nom du distributeur, qui se retrouvent tous deux dans la colonne <code>"Movie (Distributor)"</code> du data frame <code>boxoffice</code>. Demandons à <code>strsplit</code> de briser le contenu de cette colonne en deux parties : ce qui se trouve avant la parenthèse ouvrante et ce qui se trouve après. Étant donné que le nom du distributeur est toujours placé à la fin de la chaîne de caractères, entre parenthèses, nous réussirons ainsi à isoler les deux éléments.</p>
 
 <pre class="r"><code>resSplit &lt;- strsplit(x = boxoffice$&quot;Movie (Distributor)&quot;, split = &quot;(&quot;, fixed = TRUE)
 resSplit[1:2]</code></pre>
@@ -364,7 +364,7 @@ resSplit[1:2]</code></pre>
 ## [[2]]
 ## [1] &quot;Avatar &quot; &quot;Fox)&quot;</code></pre>
 <p>Par défaut, la fonction considère que la valeur donnée a l’argument <code>split</code> est une <a href="https://fr.wikipedia.org/wiki/Expression_r%C3%A9guli%C3%A8re">expression régulière</a>. Les expressions régulières ne seront pas vues ici. Elles constituent un moyen puissant pour effectuer des recherches dans des chaînes de caractères. L’argument <code>fixed = TRUE</code> demande à <code>strsplit</code> de ne pas considérer l’argument <code>split</code> comme une expression régulière, mais bien de traiter la chaîne de caractères telle qu’elle a été fournie.</p>
-<p>Le résultat de la fonction <code>strsplit</code> est toujours une liste de la même longueur que le vecteur assigné à l’argument <code>x</code>. Chaque élément de la liste est un vecteur comprenant les sous-chaînes de caractères obtenues de la séparation. Ici, ces vecteurs ont le plus souvent une longueur de 2. Par exemple pour le premier film du jeu de données, Star Wars: The Force Awakens (Disney), on obtient le vecteur <code>[&quot;Star Wars: The Force Awakens &quot;, &quot;Disney)&quot;]</code>. Par contre, certains titres de film comprennent un élément entre parenthèses de plus, par exemple <code>&quot;The Lion King (1994) (Disney)&quot;</code>. Pour eux, la longueur du vecteur est 3.</p>
+<p>Le résultat de la fonction <code>strsplit</code> est toujours une liste de la même longueur que le vecteur assigné à l’argument <code>x</code>. Chaque élément de la liste est un vecteur comprenant les sous-chaînes de caractères obtenues de la séparation. Ici, ces vecteurs ont le plus souvent une longueur de 2. Par exemple pour le premier film du jeu de données, Star Wars: The Force Awakens (Disney), on obtient le vecteur <code>["Star Wars: The Force Awakens ", "Disney)"]</code>. Par contre, certains titres de film comprennent un élément entre parenthèses de plus, par exemple <code>"The Lion King (1994) (Disney)"</code>. Pour eux, la longueur du vecteur est 3.</p>
 <p>La commande suivante permet d’extraire le dernier élément de chacun des vecteurs se trouvant dans <code>resSplit</code>. Elle utilise la fonction <code>sapply</code> vue dans le cours sur les <a href="https://stt4230.rbind.io/calculs/calculs_base_r/#fonctions-lapply-sapply-et-mapply">calculs de base en R</a>.</p>
 <pre class="r"><code>distributeur &lt;- sapply(resSplit, tail, n = 1)
 distributeur[1:2]</code></pre>
@@ -417,7 +417,7 @@ sum(Disney)</code></pre>
 </div>
 <div id="fonction-iconv" class="section level3">
 <h3>Fonction <code>iconv</code> :</h3>
-<p>Pour la tâche spécifique de retirer des accents, il est en fait encore plus simple d’utiliser la <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/iconv.html">fonction <code>iconv</code></a>. Celle-ci permet de convertir l’encodage de chaîne de caractères. Un bon truc pour retirer des accents de chaînes de caractères, peu importe la langue utilisée dans ces chaînes, est de convertir vers l’encodage <code>&quot;ASCII//TRANSLIT&quot;</code>. Voici un exemple.</p>
+<p>Pour la tâche spécifique de retirer des accents, il est en fait encore plus simple d’utiliser la <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/iconv.html">fonction <code>iconv</code></a>. Celle-ci permet de convertir l’encodage de chaîne de caractères. Un bon truc pour retirer des accents de chaînes de caractères, peu importe la langue utilisée dans ces chaînes, est de convertir vers l’encodage <code>"ASCII//TRANSLIT"</code>. Voici un exemple.</p>
 <pre class="r"><code>iconv(c(&quot;François va à l&#39;École des Pionniers.&quot;, &quot;Où est situé cette école?&quot;), 
       to = &quot;ASCII//TRANSLIT&quot;)</code></pre>
 <pre><code>## [1] &quot;Francois va a l&#39;Ecole des Pionniers.&quot; &quot;Ou est situe cette ecole?&quot;</code></pre>
@@ -426,22 +426,22 @@ sum(Disney)</code></pre>
 </div>
 <div id="manipulation-de-dates" class="section level2">
 <h2>Manipulation de dates</h2>
-<p>Une des variables de <code>boxoffice</code> est une date : la variable <code>&quot;Release Date&quot;</code> contenant la date de sortie des films. Elle est pour l’instant stockée sous format caractère.</p>
+<p>Une des variables de <code>boxoffice</code> est une date : la variable <code>"Release Date"</code> contenant la date de sortie des films. Elle est pour l’instant stockée sous format caractère.</p>
 <pre class="r"><code>str(boxoffice$&quot;Release Date&quot;)</code></pre>
 <pre><code>##  chr [1:1000] &quot;Dec 18, 2015&quot; &quot;Dec 18, 2009&quot; &quot;Feb 16, 2018&quot; ...</code></pre>
 <p>Nous pourrions vouloir compter le nombre d’années écoulées depuis la sortie des films. Pour ce faire, le plus simple est d’utiliser un format de date proposé par R.</p>
 <div id="fonctions-as.date-et-sys.getlocale" class="section level3">
 <h3>Fonctions <code>as.Date</code> et <code>Sys.getlocale</code></h3>
-<p>Nous allons convertir les données dans la colonne <code>&quot;Release Date&quot;</code> dans un format date de R avec la <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/as.Date.html">fonction <code>as.Date</code></a>. Cependant, cette conversion fonctionnera uniquement si les paramètres régionaux (en anglais <em>locale</em>) de notre session R sont en anglais, puisque les dates comportent des abréviations de noms de mois en anglais. Ainsi, commençons par vérifier quel paramètre régional pour le temps utilise notre session R avec la <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/locales.html">fonction <code>Sys.getlocale</code></a>.</p>
+<p>Nous allons convertir les données dans la colonne <code>"Release Date"</code> dans un format date de R avec la <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/as.Date.html">fonction <code>as.Date</code></a>. Cependant, cette conversion fonctionnera uniquement si les paramètres régionaux (en anglais <em>locale</em>) de notre session R sont en anglais, puisque les dates comportent des abréviations de noms de mois en anglais. Ainsi, commençons par vérifier quel paramètre régional pour le temps utilise notre session R avec la <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/locales.html">fonction <code>Sys.getlocale</code></a>.</p>
 <pre class="r"><code>Sys.getlocale(category = &quot;LC_TIME&quot;)</code></pre>
 <pre><code>## [1] &quot;English_Canada.1252&quot;</code></pre>
-<p>Dans mon cas, j’utilise un système d’exploitation en anglais. En conséquence, les paramètres régionaux de mes sessions R sont par défaut en anglais. Si ce n’est pas votre cas, il faut d’abord changer le paramètre <code>&quot;LC_TIME&quot;</code> de votre session R pour qu’il s’agisse de l’anglais. Sous Windows, vous pouvez procéder comme suit.</p>
+<p>Dans mon cas, j’utilise un système d’exploitation en anglais. En conséquence, les paramètres régionaux de mes sessions R sont par défaut en anglais. Si ce n’est pas votre cas, il faut d’abord changer le paramètre <code>"LC_TIME"</code> de votre session R pour qu’il s’agisse de l’anglais. Sous Windows, vous pouvez procéder comme suit.</p>
 <pre class="r"><code># Sous Windows
 Sys.setlocale(&quot;LC_TIME&quot;, locale = &quot;English&quot;)</code></pre>
-<p>Les valeurs comprises comme argument <code>locale</code> dépendent du système d’exploitation. Sous un système d’exploitation Mac OS X / OS X / macOS ou Unix / Linux, tentez une des valeurs suivantes : <code>&quot;en_CA&quot;</code>, <code>&quot;en_CA.UTF-8&quot;</code> ou <code>en_CA.utf8</code> (ou la version US de ces valeurs, soit <code>&quot;en_US&quot;</code>, <code>&quot;en_US.UTF-8&quot;</code> ou <code>en_US.utf8</code>).</p>
+<p>Les valeurs comprises comme argument <code>locale</code> dépendent du système d’exploitation. Sous un système d’exploitation Mac OS X / OS X / macOS ou Unix / Linux, tentez une des valeurs suivantes : <code>"en_CA"</code>, <code>"en_CA.UTF-8"</code> ou <code>en_CA.utf8</code> (ou la version US de ces valeurs, soit <code>"en_US"</code>, <code>"en_US.UTF-8"</code> ou <code>en_US.utf8</code>).</p>
 <pre class="r"><code># Sous Mac OS X / OS X / macOS
 Sys.setlocale(&quot;LC_TIME&quot;, locale = &quot;en_CA.UTF-8&quot;)</code></pre>
-<p>Une fois s’être assuré d’avoir un paramètre <code>&quot;LC_TIME&quot;</code> en anglais, nous pouvons appeler la fonction <code>as.Date</code> comme suit.</p>
+<p>Une fois s’être assuré d’avoir un paramètre <code>"LC_TIME"</code> en anglais, nous pouvons appeler la fonction <code>as.Date</code> comme suit.</p>
 <pre class="r"><code>boxoffice$Date &lt;- as.Date(boxoffice$&quot;Release Date&quot;, format = &quot;%b %d, %Y&quot;)
 str(boxoffice[, c(&quot;Release Date&quot;, &quot;Date&quot;)])</code></pre>
 <pre><code>## &#39;data.frame&#39;:    1000 obs. of  2 variables:
@@ -494,7 +494,7 @@ head(boxoffice[, -c(1,4)])</code></pre>
 ## 5                   Titanic (Paramount) Dec 19, 1997 1997-12-19 21.1006160    12
 ## 6            Jurassic World (Universal) Jun 12, 2015 2015-06-12  3.6221766     6</code></pre>
 <p> </p>
-<p><strong>Note</strong> : Il existe d’autres formats de date en R permettant d’inclure l’heure : <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/DateTimeClasses.html"><code>&quot;POSIXlt&quot;</code> et <code>&quot;POSIXct&quot;</code></a>, mais nous n’approfondirons pas ces formats. Seule une petite partie des possibilités de manipulation de dates en R est abordée ici.</p>
+<p><strong>Note</strong> : Il existe d’autres formats de date en R permettant d’inclure l’heure : <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/DateTimeClasses.html"><code>"POSIXlt"</code> et <code>"POSIXct"</code></a>, mais nous n’approfondirons pas ces formats. Seule une petite partie des possibilités de manipulation de dates en R est abordée ici.</p>
 <hr />
 </div>
 </div>
@@ -1305,12 +1305,12 @@ dataEx_large2</code></pre>
 <tbody>
 <tr class="odd">
 <td>large vers long</td>
-<td><code>reshape</code> (avec <code>direction = &quot;long&quot;</code>)</td>
+<td><code>reshape</code> (avec <code>direction = "long"</code>)</td>
 <td><code>gather</code></td>
 </tr>
 <tr class="even">
 <td>long vers large</td>
-<td><code>reshape</code> (avec <code>direction = &quot;wide&quot;</code>)</td>
+<td><code>reshape</code> (avec <code>direction = "wide"</code>)</td>
 <td><code>spread</code></td>
 </tr>
 </tbody>
@@ -1347,7 +1347,8 @@ dataEx_long3</code></pre>
 <ul>
 <li><code>data</code> : le data frame à transformer de mise en forme.</li>
 <li><code>key</code> : le nom de la colonne dans la mise en forme longue pour contenir l’identifiant de la variable à laquelle correspond la donnée qui se retrouvera dans la colonne identifiée par <code>value</code>.</li>
-<li><code>value</code> : le nom de la colonne dans la mise en forme longue correspondant à plusieurs colonnes sous la mise en forme large.</li>
+<li><code>value</code> : le nom de la colonne dans la mise en forme longue correspondant à plusieurs
+colonnes sous la mise en forme large.</li>
 </ul>
 <p>Notons que les noms fournis aux arguments <code>key</code> et <code>value</code> peuvent être encadrés de guillemets (donc sous forme de chaîne de caractères) ou non.</p>
 <p>Après avoir fourni les trois premiers arguments nommés obligatoires, il faut fournir les noms (sans les encadrer de guillemets) des colonnes dans le jeu de données d’origine sous la mise en forme large (<code>data</code>) contenant les données à combiner dans des colonnes uniques sous la mise en forme longue.</p>
@@ -1600,7 +1601,7 @@ spread(data = subset(plants_inter, select = - Diametre),
 <div id="transformation-de-variables-1" class="section level4">
 <h4>Transformation de variables</h4>
 <ul>
-<li>Ajout ou modification de variables dans un data frame :
+<li><p>Ajout ou modification de variables dans un data frame :</p>
 <ul>
 <li>assignation à une colonne, nouvelle pour un ajout,</li>
 <li>concaténation de colonnes avec <code>cbind</code> ou <code>data.frame</code>,</li>
@@ -1609,7 +1610,7 @@ spread(data = subset(plants_inter, select = - Diametre),
 <li><p>Variable conditionnelle à une autre : <code>ifelse</code>;</p></li>
 <li><p>Catégorisation d’une variable numérique : <code>cut</code>, <code>ave</code>;</p></li>
 <li><p>Normalisation de valeurs : <code>scale</code>;</p></li>
-<li>Manipulation de chaînes de caractères :
+<li><p>Manipulation de chaînes de caractères :</p>
 <ul>
 <li><code>paste</code> : concatène des chaînes de caractères,</li>
 <li><code>nchar</code> : calcule le nombre de caractères,</li>
@@ -1622,7 +1623,7 @@ spread(data = subset(plants_inter, select = - Diametre),
 <li><code>chartr</code> : remplace des caractères par d’autres,</li>
 <li><code>iconv</code> : convertit l’encodage de chaîne de caractères;</li>
 </ul></li>
-<li>Manipulation de dates :
+<li><p>Manipulation de dates :</p>
 <ul>
 <li><code>as.Date</code> : convertit une chaîne de caractère en format date,</li>
 <li><code>Sys.setlocale</code> : permet de modifier les paramètres régionaux d’une session R (utile lorsque nous voulons convertir en format <code>Date</code> des chaînes de caractères contenant des noms de mois dans une langue autre que celle du système d’exploitation de notre ordinateur),</li>
@@ -1639,7 +1640,7 @@ spread(data = subset(plants_inter, select = - Diametre),
 <ul>
 <li><p>Concaténer des vecteurs, matrices ou data frames en lignes (lignes = observations dans un data frame) : <code>rbind</code>.</p></li>
 <li><p>Concaténer des vecteurs, matrices ou data frames en colonnes (lignes = variables dans un data frame) : <code>cbind</code>, <code>data.frame</code>.</p></li>
-<li>Fusionner par association (ajout de colonnes en identifiant les lignes correspondantes) : <code>merge</code>
+<li><p>Fusionner par association (ajout de colonnes en identifiant les lignes correspondantes) : <code>merge</code></p>
 <ul>
 <li>argument <code>by</code>, ou arguments <code>by.x</code> et <code>by.y</code>, pour spécifier les variables identifiant les unités (ou individus) à faire correspondre</li>
 <li>argument <code>all</code>, ou arguments <code>all.x</code> et <code>all.y</code>, pour spécifier les lignes à conserver.</li>
@@ -1669,12 +1670,12 @@ spread(data = subset(plants_inter, select = - Diametre),
 <h5>Changement de mise en forme de jeux de données</h5>
 <ul>
 <li><p><code>t</code> : transpose des matrices</p></li>
-<li><strong>Mise en forme « large »</strong> :
+<li><p><strong>Mise en forme « large »</strong> :</p>
 <ul>
 <li>une seule ligne par individu (lorsque la largeur est maximale),</li>
 <li>les vecteurs d’observations de certaines variables sont placés dans différentes colonnes.</li>
 </ul></li>
-<li><strong>Mise en forme « longue »</strong> :
+<li><p><strong>Mise en forme « longue »</strong> :</p>
 <ul>
 <li>plus d’une ligne par individu,</li>
 <li>les vecteurs d’observations de certaines variables sont empilés dans une même colonne, les uns en dessous des autres,</li>
@@ -1694,13 +1695,13 @@ spread(data = subset(plants_inter, select = - Diametre),
 <tr class="odd">
 <td>large vers long</td>
 <td><code>stack</code></td>
-<td><code>reshape</code> (<code>direction = &quot;long&quot;</code>)</td>
+<td><code>reshape</code> (<code>direction = "long"</code>)</td>
 <td><code>gather</code></td>
 </tr>
 <tr class="even">
 <td>long vers large</td>
 <td><code>unstack</code></td>
-<td><code>reshape</code> (<code>direction = &quot;wide&quot;</code>)</td>
+<td><code>reshape</code> (<code>direction = "wide"</code>)</td>
 <td><code>spread</code></td>
 </tr>
 </tbody>
@@ -1747,7 +1748,8 @@ spread(data = subset(plants_inter, select = - Diametre),
 </ul></li>
 <li>En lien avec les variables :
 <ul>
-<li><code>key</code> : nom colonne contenant les identifiants des variables; de vouloir modifier la mise en forme : des mesures répétées dans le temps.</li>
+<li><code>key</code> : nom colonne contenant les identifiants des variables;
+de vouloir modifier la mise en forme : des mesures répétées dans le temps.</li>
 </ul></li>
 <li>En lien avec les valeurs :
 <ul>

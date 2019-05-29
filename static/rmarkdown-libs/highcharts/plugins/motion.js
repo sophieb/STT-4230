@@ -51,11 +51,13 @@
         this.playRange = H.createElement('input', {
             id: 'play-range',
             type: 'range',
-            value: this.dataLength - 1,
             min: 0,
             max: this.dataLength - 1,
             step: this.options.magnet.step
         }, null, this.playControls, null);
+        // Important: max must be set before value in order to allow for
+        // higher numbers than 100.
+        this.playRange.value = H.pick(this.options.startIndex, this.dataLength - 1);
 
         // Play-range HTML-output
         this.playOutput = H.createElement('label', {
@@ -115,7 +117,7 @@
         this.updateChart(this.inputValue);
 
         // Auto-play
-        if (this.autoPlay) {
+        if (this.options.autoPlay) {
             this.play();
         }
     }
@@ -206,6 +208,7 @@
             i;
         if (this.currentAxisValue !== roundedInput) {
             this.currentAxisValue = roundedInput;
+            this.chart.options.motion.startIndex = roundedInput;
             for (seriesKey in this.dataSeries) {
                 if (this.dataSeries.hasOwnProperty(seriesKey)) {
                     series = this.dataSeries[seriesKey];

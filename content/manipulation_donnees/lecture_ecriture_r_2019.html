@@ -20,6 +20,8 @@ header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
 - \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+editor_options: 
+  chunk_output_type: console
 ---
 
 
@@ -63,14 +65,14 @@ header-includes:
 <p>Avant toute chose, revenons sur le répertoire de travail (ou répertoire courant, en anglais <em>working directory</em>). Afin d’accéder à des données en R, il faut typiquement aller les lire là où elles se trouvent. Si les données se trouvent dans un fichier situé sur l’ordinateur local, dans un certain répertoire, il faut aller lire son contenu à cet endroit.</p>
 <p>Dans toute commande R effectuant une lecture ou de l’écriture dans un fichier, il faut identifier le fichier. Il peut être identifié en utilisant son chemin d’accès complet, ou encore en utilisant un chemin d’accès relatif à un emplacement courant. Peu importe l’option choisie, le chemin doit se terminer par le nom complet du fichier, incluant son extension.</p>
 <p>Par exemple, supposons que le fichier <code>dataEx.txt</code> se trouve dans le répertoire <code>C:\coursR</code> de l’ordinateur d’un utilisateur de R sous Windows. Le chemin d’accès complet de ce fichier est <code>C:\coursR\dataEx.txt</code>. Le chemin d’accès du fichier relatif au répertoire <code>C:\coursR</code> est pour sa part simplement le nom du fichier, soit <code>dataEx.txt</code>.</p>
-<p><strong>Remarque importante</strong> : Bien que le caractère utilisé pour séparer les composantes dans un chemin d’accès sous Windows soit <code>\</code>, ce caractère est réservé en R pour les « séquences d’échappement ». Il s’agit de séquences ayant une signification particulière dans une chaîne de caractères (par exemple <code>&quot;\t&quot;</code> représente une tabulation, <code>&quot;\n&quot;</code> représente un retour de chariot, etc.). Dans un chemin d’accès en R, il faut plutôt séparer les composantes par le caractère <code>/</code>, ou encore par <code>\\</code>.</p>
+<p><strong>Remarque importante</strong> : Bien que le caractère utilisé pour séparer les composantes dans un chemin d’accès sous Windows soit <code>\</code>, ce caractère est réservé en R pour les « séquences d’échappement ». Il s’agit de séquences ayant une signification particulière dans une chaîne de caractères (par exemple <code>"\t"</code> représente une tabulation, <code>"\n"</code> représente un retour de chariot, etc.). Dans un chemin d’accès en R, il faut plutôt séparer les composantes par le caractère <code>/</code>, ou encore par <code>\\</code>.</p>
 <p>Lorsqu’un fichier est identifié par un chemin relatif dans une instruction, R doit faire une supposition quant au répertoire à partir duquel chercher le fichier. C’est justement l’utilité du répertoire de travail. Il s’agit de l’emplacement de base, celui à partir duquel débuter un chemin d’accès à un fichier lorsque le début du chemin n’est pas spécifié par l’utilisateur.</p>
 <p>Pour connaître le répertoire de travail d’une session R, il suffit de soumettre la commande suivante :</p>
 <pre class="r"><code>getwd()</code></pre>
 <p>Pour accéder au fichier <code>dataEx.txt</code> en utilisant seulement son nom, il faut d’abord s’assurer que le répertoire de travail de la session R correspond au répertoire contenant le fichier. La fonction <code>setwd</code> permet de modifier le répertoire de travail. Par exemple, la commande suivante change le répertoire de travail pour <code>C:\coursR</code>.</p>
 <pre class="r"><code>setwd(&quot;C:/coursR&quot;)</code></pre>
 <p>Dans une commande R, un chemin d’accès doit toujours être présenté sous forme de chaîne de caractères, donc ête encadré de guillemets.</p>
-<p>Si le répertoire de travail avait été fixé à <code>&quot;C:&quot;</code>, le chemin d’accès relatif du fichier aurait été <code>&quot;/coursR/dataEx.txt&quot;</code> (le <code>&quot;/&quot;</code> au début du chemin indique que <code>coursR</code> est un répertoire et non un fichier).</p>
+<p>Si le répertoire de travail avait été fixé à <code>"C:"</code>, le chemin d’accès relatif du fichier aurait été <code>"/coursR/dataEx.txt"</code> (le <code>"/"</code> au début du chemin indique que <code>coursR</code> est un répertoire et non un fichier).</p>
 <div id="acceder-au-systeme-de-fichiers-de-notre-ordinateur-a-partir-de-r" class="section level2">
 <h2>Accéder au système de fichiers de notre ordinateur à partir de R</h2>
 <p>Ainsi, R à accès au système de fichiers de l’ordinateur à partir duquel la session a été démarrée. Par défaut, l’accès se fait à partir du répertoire de travail. Directement dans la console R, il est possible de voir le contenu du répertoire de travail, créer des fichiers et des répertoires, effacer des fichiers, etc. Par exemple, la fonction <code>dir</code> permet d’afficher le contenu d’un répertoire (par défaut le répertoire de travail). Pour plus d’information à ce propos, la fiche d’aide nommée <code>files</code> (ouverte avec la commande <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/files.html"><code>help(files)</code></a>) est un bon point de départ.</p>
@@ -159,7 +161,7 @@ str(dataEx_txt)</code></pre>
 ##  $ de1    : int  2 3 4 1 2 3 5 6 5 4
 ##  $ de2    : Factor w/ 6 levels &quot;.&quot;,&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,..: 2 5 3 4 6 5 1 3 6 4
 ##  $ lanceur: Factor w/ 3 levels &quot;.&quot;,&quot;Kim&quot;,&quot;Luc&quot;: 3 3 1 3 3 2 2 2 2 2</code></pre>
-<p>La première variable, <code>de1</code>, a été correctement lu, mais il y a un problème avec la deuxième variable, <code>de2</code>. Elle est un facteur. Nous souhaitons considérer cette variable numérique et non catégorique (il s’agit du résultat d’un lancer de dé). Afin de pouvoir faire des calculs numériques sur cette variable, elle doit être stockée dans un vecteur (= colonne du data frame) de valeurs numériques. R a cru que les valeurs dans cette colonne étaient de type caractère à cause de la valeur manquante représentée par un point. L’argument <code>na.strings</code> de <code>read.table</code> indique à R les chaînes de caractères à interpréter comme des valeurs manquantes. Par défaut, <code>na.strings</code> prend la valeur <code>&quot;NA&quot;</code>. Il faut donc changer la valeur de cet argument comme suit.</p>
+<p>La première variable, <code>de1</code>, a été correctement lu, mais il y a un problème avec la deuxième variable, <code>de2</code>. Elle est un facteur. Nous souhaitons considérer cette variable numérique et non catégorique (il s’agit du résultat d’un lancer de dé). Afin de pouvoir faire des calculs numériques sur cette variable, elle doit être stockée dans un vecteur (= colonne du data frame) de valeurs numériques. R a cru que les valeurs dans cette colonne étaient de type caractère à cause de la valeur manquante représentée par un point. L’argument <code>na.strings</code> de <code>read.table</code> indique à R les chaînes de caractères à interpréter comme des valeurs manquantes. Par défaut, <code>na.strings</code> prend la valeur <code>"NA"</code>. Il faut donc changer la valeur de cet argument comme suit.</p>
 <pre class="r"><code>dataEx_txt &lt;- read.table(&quot;dataEx.txt&quot;, header = TRUE, na.strings = &quot;.&quot;)
 str(dataEx_txt)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    10 obs. of  3 variables:
@@ -196,26 +198,26 @@ str(dataEx_txt)</code></pre>
 <li>Quel caractère sépare les valeurs ?
 <ul>
 <li>Fournir ce caractère comme valeur à l’argument <code>sep</code>.</li>
-<li>Par défaut <code>sep = &quot;&quot;</code>, ce qui signifie que le séparateur est un « blanc », soit un espace ou plus, une tabulation, une fin de ligne ou un retour de chariot.</li>
+<li>Par défaut <code>sep = ""</code>, ce qui signifie que le séparateur est un « blanc », soit un espace ou plus, une tabulation, une fin de ligne ou un retour de chariot.</li>
 </ul></li>
 <li>Quel est le symbole décimal ?
 <ul>
 <li>Fournir ce symbole sous forme de chaîne de caractères à l’argument <code>dec</code>.</li>
-<li>Par défaut <code>dec = &quot;.&quot;</code></li>
+<li>Par défaut <code>dec = "."</code></li>
 </ul></li>
 <li>Comment sont représentées les valeurs manquantes ?
 <ul>
 <li>Fournir cette représentation sous forme de chaîne de caractères à l’argument <code>na.strings</code>.</li>
-<li>Par défaut <code>na.strings = &quot;NA&quot;</code>.</li>
+<li>Par défaut <code>na.strings = "NA"</code>.</li>
 </ul></li>
 <li>Est-ce que certaines valeurs sont encadrées ? Si oui, par quel symbole ?
 <ul>
 <li>S’il y a des valeurs encadrées, fournir à l’argument <code>quote</code> une chaîne de caractère contenant une concaténation de tous les caractères utilisés pour encadrer ces valeurs.</li>
-<li>Par défaut <code>quote = &quot;\&quot;'&quot;</code>, ce qui signifie qu’un guillemet double ou simple indique le début ou la fin d’une valeur. La barre oblique inversée (<code>\</code>) devant le deuxième <code>&quot;</code> dans <code>&quot;\&quot;'&quot;</code> est nécessaire afin que ce <code>&quot;</code> ne soit pas interprété comme la fin de la chaîne de caractères fournie en valeur d’entrée à <code>quote</code>.</li>
+<li>Par défaut <code>quote = "\"'"</code>, ce qui signifie qu’un guillemet double ou simple indique le début ou la fin d’une valeur. La barre oblique inversée (<code>\</code>) devant le deuxième <code>"</code> dans <code>"\"'"</code> est nécessaire afin que ce <code>"</code> ne soit pas interprété comme la fin de la chaîne de caractères fournie en valeur d’entrée à <code>quote</code>.</li>
 </ul></li>
 <li>Est-ce qu’il y a des caractères spéciaux, par exemple des accents ? Si oui, quel encodage est utilisé ?
 <ul>
-<li>Un des encodages les plus courants est <code>UTF-8</code>. En cas de problèmes avec des accents mal lus, essayer l’argument <code>encoding = &quot;UTF-8&quot;</code>. Ça pourrait régler le problème.</li>
+<li>Un des encodages les plus courants est <code>UTF-8</code>. En cas de problèmes avec des accents mal lus, essayer l’argument <code>encoding = "UTF-8"</code>. Ça pourrait régler le problème.</li>
 <li>Par défaut l’encodage est supposé inconnu.</li>
 </ul></li>
 <li>Est-ce que les données ou les noms des variables débutent à la ligne 1 ?
@@ -230,8 +232,8 @@ str(dataEx_txt)</code></pre>
 </ul></li>
 <li>Est-ce que le fichier contient des commentaires ? Si oui, quel signe précède ces lignes ?
 <ul>
-<li>Fournir à <code>comment.char</code> un seul caractère, soit celui indiquant que le reste d’une ligne contient un commentaire. Pour empêcher la détection de commentaires, utiliser <code>comment.char = &quot;&quot;</code>.</li>
-<li>Par défaut <code>comment.char = &quot;#&quot;</code>.</li>
+<li>Fournir à <code>comment.char</code> un seul caractère, soit celui indiquant que le reste d’une ligne contient un commentaire. Pour empêcher la détection de commentaires, utiliser <code>comment.char = ""</code>.</li>
+<li>Par défaut <code>comment.char = "#"</code>.</li>
 </ul></li>
 <li>Est-ce que les colonnes contenant des chaînes de caractères doivent être converties en facteurs ?
 <ul>
@@ -261,7 +263,7 @@ str(dataEx_txt)</code></pre>
 6;2;&quot;Kim&quot;
 5;5;&quot;Kim&quot;
 4;3;&quot;Kim&quot;</code></pre>
-<p>La fonction <code>read.csv2</code> est tout indiquée pour importer ce fichier puisque la valeur par défaut de son argument <code>sep</code> est <code>&quot;;&quot;</code>. Cette fonction appelle en fait la fonction <code>read.table</code>, mais avec des valeurs par défaut différentes pour les arguments. Ce type de fonction est appelé fonction enveloppe (en anglais <em>wrapper</em>). La fonction <code>read.table</code> possède 4 fonctions enveloppe : <code>read.csv</code>, <code>read.csv2</code>, <code>read.delim</code> et <code>read.delim2</code>.</p>
+<p>La fonction <code>read.csv2</code> est tout indiquée pour importer ce fichier puisque la valeur par défaut de son argument <code>sep</code> est <code>";"</code>. Cette fonction appelle en fait la fonction <code>read.table</code>, mais avec des valeurs par défaut différentes pour les arguments. Ce type de fonction est appelé fonction enveloppe (en anglais <em>wrapper</em>). La fonction <code>read.table</code> possède 4 fonctions enveloppe : <code>read.csv</code>, <code>read.csv2</code>, <code>read.delim</code> et <code>read.delim2</code>.</p>
 <p>Les arguments de la fonction <code>read.csv2</code> ont-ils toutes les bonnes valeurs par défaut pour importer le fichier <code>dataEx.csv</code>?</p>
 <pre class="r"><code>dataEx_csv &lt;- read.csv2(&quot;dataEx.csv&quot;)
 str(dataEx_csv)</code></pre>
@@ -385,7 +387,7 @@ str(boxoffice)</code></pre>
 ##  $ X3: chr  &quot;Dec 18, 2015&quot; &quot;Dec 18, 2009&quot; &quot;Feb 16, 2018&quot; &quot;Apr 27, 2018&quot; ...
 ##  $ X4: chr  &quot;$936,662,225&quot; &quot;$760,507,625&quot; &quot;$700,059,566&quot; &quot;$678,815,482&quot; ...</code></pre>
 <p>La fonction <code>read_html</code> lit tout le code HTML d’une page web. La fonction <code>html_table</code> en extrait les tables et les converties en data frames. La plupart du temps, les données publiées sur internet sont sous forme de tableaux et se trouvent dans des tables HTML. Pour finir, il ne reste plus qu’à extraire la bonne table parmi toutes les tables lues.</p>
-<p>Le data frame obtenu dans le code précédent, nommé <code>boxoffice</code>, contient les recettes des films ayant générés le plus de revenus dans les cinémas américains, telles que présentées sur la page web <a href="http://pro.boxoffice.com/numbers/all_time" class="uri">http://pro.boxoffice.com/numbers/all_time</a>. Ce data frame pourrait être amélioré en renommant ses colonnes.</p>
+<p>Le data frame obtenu dans le code précédent, nommé <code>boxoffice</code>, contient les recettes des films ayant générés le plus de revenus dans les cinémas américains, telles que présentées sur la page web <a href="http://pro.boxoffice.com/numbers/all_time" class="uri">http://pro.boxoffice.com/numbers/all_time</a> le 25 janvier 2019. Ce data frame pourrait être amélioré en renommant ses colonnes.</p>
 <p>Mentionnons finalement qu’il existe de plus en plus de packages R pour aller chercher rapidement, à partir de R, des données ouvertes publiées sur des sites web. Par exemple, le <a href="https://github.com/PMassicotte/gtrendsR">package <code>gtrendsR</code></a> permet d’importer en R des données provenant de <a href="https://trends.google.ca">Google trends</a>. Ce genre de possibilité ne sera pas illustrée ici, mais la page web suivante énumère des packages utiles pour aller chercher des données sur divers sites web :<br />
 <a href="https://cran.r-project.org/web/views/WebTechnologies.html" class="uri">https://cran.r-project.org/web/views/WebTechnologies.html</a>.</p>
 </div>
@@ -426,7 +428,8 @@ dataExS</code></pre>
 <h2>Exportation de données dans un fichier texte</h2>
 <p>Le format de fichier le plus universel pour exporter des données est le format texte. Un grand nombre de logiciels peuvent lire ce format. Les fonctions de base en R pour écrire dans un fichier texte sont <code>write</code> et <code>write.table</code>. Nous verrons ici seulement comment utiliser <code>write.table</code>, qui est plus adaptée à l’exportation de jeux de données. Par exemple, exportons le contenu du data frame <code>dataExS</code> dans le fichier texte <code>dataExS.txt</code></p>
 <pre class="r"><code>write.table(dataExS, file = &quot;dataExS.txt&quot;)</code></pre>
-<p>Il faut spécifier à la fonction l’objet dans lequel se trouvent les données à exporter (typiquement une matrice ou un data frame), ainsi que le fichier dans lequel écrire les données. Tout comme son équivalent pour lire des données <code>read.table</code>, la fonction <code>write.table</code> possède plusieurs arguments permettant de contrôler notamment le symbole de décimale (<code>dec</code>), le symbole représentant les valeurs manquantes (<code>na</code>), le séparateur entre les différentes colonnes (<code>sep</code>), la présence ou non des noms des lignes ou des colonnes (<code>row.names</code> et <code>col.names</code>), etc.</p>
+<p>Il faut spécifier à la fonction l’objet dans lequel se trouvent les données à exporter (typiquement une matrice ou un data frame), ainsi que le fichier dans lequel écrire les données.
+Tout comme son équivalent pour lire des données <code>read.table</code>, la fonction <code>write.table</code> possède plusieurs arguments permettant de contrôler notamment le symbole de décimale (<code>dec</code>), le symbole représentant les valeurs manquantes (<code>na</code>), le séparateur entre les différentes colonnes (<code>sep</code>), la présence ou non des noms des lignes ou des colonnes (<code>row.names</code> et <code>col.names</code>), etc.</p>
 <p>Il existe aussi deux fonctions enveloppe à la fonction <code>write.table</code> pour les formats CSV, nommées <code>write.csv</code> et <code>write.csv2</code>.</p>
 </div>
 <div id="exportation-de-donnees-dans-un-fichier-json" class="section level2">

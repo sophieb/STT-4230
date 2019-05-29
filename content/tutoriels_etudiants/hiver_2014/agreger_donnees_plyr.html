@@ -44,7 +44,8 @@ header-includes:
 <div id="presentation-de-la-tache-a-effectuer-et-du-jeu-de-donnees-iris" class="section level2">
 <h2>1. Présentation de la tâche à effectuer et du jeu de données Iris</h2>
 <p>Cette fiche montre comment calculer des statistiques descriptives pour un jeu de données agrégé en <code>R</code>. Une comparaison de deux méthodes permettra de déterminer laquelle est plus simple d’utilisation pour calculer le minimum, la moyenne et le maximum d’une variable pour un regroupement d’observation d’un jeu de données. La première méthode utilise des fonctions de base dans le progiciel <code>R</code>, alors que la deuxième méthode recourt l’installation d’un package.</p>
-<p>Pour comparer les deux méthodes, un jeu de données très connu sur les iris de Fisher est utilisé. Ce jeu de données contient des données morphologiques sur 3 différentes espèces d’iris; <em>setosa</em>, <em>virginica</em> et <em>versicolor</em>. Pour chacune de ces espèces, on a mesuré sur un échantillon de 50 plants la longueur et la largeur du pétale et du sépale. Pour de plus amples informations concernant ce jeu de données, on peut visiter ce lien web : <a href="http://en.wikipedia.org/wiki/Iris_flower_data_set" class="uri">http://en.wikipedia.org/wiki/Iris_flower_data_set</a></p>
+<p>Pour comparer les deux méthodes, un jeu de données très connu sur les iris de Fisher est utilisé. Ce jeu de données contient des données morphologiques sur 3 différentes espèces d’iris; <em>setosa</em>, <em>virginica</em> et <em>versicolor</em>. Pour chacune de ces espèces, on a mesuré sur un échantillon de 50 plants la longueur et la largeur du pétale et du sépale. Pour de plus amples informations concernant ce jeu de données, on peut visiter ce lien web :
+<a href="http://en.wikipedia.org/wiki/Iris_flower_data_set" class="uri">http://en.wikipedia.org/wiki/Iris_flower_data_set</a></p>
 <p>Pour visualiser ce jeu de données dans <code>R</code>, on a seulement besoin de taper <code>print(iris)</code> dans la console.</p>
 <pre class="r"><code>head(iris)</code></pre>
 <pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
@@ -83,7 +84,12 @@ header-includes:
 </div>
 <div id="utilisation-de-aggregate-avec-les-donnees-sur-les-iris-de-fisher" class="section level3">
 <h3>2.2 Utilisation de <code>aggregate</code> avec les données sur les iris de Fisher</h3>
-<p>Voici un exemple pour bien comprendre l’utilisation de la fonction <code>aggregate</code>. D’abord, on veut déterminer le minimum de la longueur du sépale selon les différentes espèces. * L’argument <strong>x</strong> est la variable <em>Sepal.Length</em> * L’argument <strong>by</strong> est la variable <em>Species</em> * L’argument <strong>FUN</strong> est la fonction <strong><code>min</code></strong></p>
+<p>Voici un exemple pour bien comprendre l’utilisation de la fonction <code>aggregate</code>. D’abord, on veut déterminer le minimum de la longueur du sépale selon les différentes espèces.</p>
+<ul>
+<li>L’argument <strong>x</strong> est la variable <em>Sepal.Length</em></li>
+<li>L’argument <strong>by</strong> est la variable <em>Species</em></li>
+<li>L’argument <strong>FUN</strong> est la fonction <strong><code>min</code></strong></li>
+</ul>
 <pre class="r"><code>minimum &lt;- aggregate(x = iris$Sepal.Length, by = list(iris$Species), FUN=min)
 print(minimum)</code></pre>
 <pre><code>##      Group.1   x
@@ -93,7 +99,8 @@ print(minimum)</code></pre>
 <blockquote>
 <p>On obtient donc le miminum de la longueur du sépale pour les différentes espèces.</p>
 </blockquote>
-<p>De manière plus rapide et plus simplifié, on peut utiliser une formule <code>y ~ x</code> où <code>y</code> est en fonction de <code>x</code> dans la fonction <code>aggregate</code>. Ainsi, on peut déterminer le minimum, la moyenne et le maximum avec la formule simplifiée.</p>
+<p>De manière plus rapide et plus simplifié, on peut utiliser une formule <code>y ~ x</code> où <code>y</code> est en fonction de <code>x</code> dans la fonction <code>aggregate</code>.
+Ainsi, on peut déterminer le minimum, la moyenne et le maximum avec la formule simplifiée.</p>
 <pre class="r"><code>minimum &lt;- aggregate(Sepal.Length ~ Species, data= iris, FUN=min)
 moyenne &lt;- aggregate(Sepal.Length ~ Species, data= iris, FUN=mean)
 maximum &lt;- aggregate(Sepal.Length ~ Species, data= iris, FUN=max)</code></pre>
@@ -159,7 +166,11 @@ library(plyr)</code></pre>
 </div>
 <div id="fonction-summarize" class="section level3">
 <h3>3.2 - Fonction <code>summarize</code></h3>
-<p>La fonction <code>summarize</code> est une fonction qui permet de calculer des statistiques sur l’ensemble des observations d’un jeu de données. Son écriture générale est : <code>summarize(.data, ...)</code> , où : * <strong><code>.data</code></strong> est un <em>data frame</em> * <strong><code>...</code></strong> correspond aux variables que l’on désire obtenir, de la forme nom_variable = valeur <strong>(i.e.: moyenne = mean(Sepal.Length))</strong>.</p>
+<p>La fonction <code>summarize</code> est une fonction qui permet de calculer des statistiques sur l’ensemble des observations d’un jeu de données. Son écriture générale est : <code>summarize(.data, ...)</code> , où :</p>
+<ul>
+<li><strong><code>.data</code></strong> est un <em>data frame</em></li>
+<li><strong><code>...</code></strong> correspond aux variables que l’on désire obtenir, de la forme nom_variable = valeur <strong>(i.e.: moyenne = mean(Sepal.Length))</strong>.</li>
+</ul>
 <p>Elle prend en entrée un objet de type <em>data frame</em> et retourne un nouvel objet, aussi de type <em>data frame</em>. L’objet résultant de la fonction <code>summarize</code> contient une seule observation et chacune des variables correspond aux statistiques qui ont été demandées. Par exemple, si l’on désire obtenir le minimum, le maximum et la moyenne de la longueur du sépale pour l’ensemble des iris, il suffit de lancer la commande suivante :</p>
 <pre class="r"><code>exemple &lt;- summarize(iris, mininimum = min(Sepal.Length), 
                      maximum = max(Sepal.Length), moyenne = mean(Sepal.Length))
@@ -176,7 +187,13 @@ str(exemple)</code></pre>
 </div>
 <div id="conjonction-de-ddply-et-summarize" class="section level3">
 <h3>3.3 - Conjonction de <code>ddply</code> et <code>summarize</code></h3>
-<p>L’écriture générale pour la fonction <code>ddply</code> est la suivante : <code>ddply(.data, .variables, .fun = NULL, ...)</code>, où : * <strong><code>.data</code></strong> est un jeu de données de format <em>data frame</em> * <strong><code>.variables</code></strong> est une formule ou un vecteur de caractères spécifiant les variables servant à regrouper les observations * <strong><code>.fun</code></strong> est la fonction qui doit être appliquée à chacun des sous-ensembles du jeu de données</p>
+<p>L’écriture générale pour la fonction <code>ddply</code> est la suivante :
+<code>ddply(.data, .variables, .fun = NULL, ...)</code>, où :</p>
+<ul>
+<li><strong><code>.data</code></strong> est un jeu de données de format <em>data frame</em></li>
+<li><strong><code>.variables</code></strong> est une formule ou un vecteur de caractères spécifiant les variables servant à regrouper les observations</li>
+<li><strong><code>.fun</code></strong> est la fonction qui doit être appliquée à chacun des sous-ensembles du jeu de données</li>
+</ul>
 <blockquote>
 <p>L’aide de <code>R</code> peut être consultée pour obtenir plus d’informations sur l’ensemble des options de la fonction <code>ddply</code>.</p>
 </blockquote>
@@ -209,6 +226,6 @@ print(resultat)</code></pre>
 <li>Aide interactive de <code>R</code></li>
 <li>Information sur le jeu de données des iris de Fisher: <a href="http://en.wikipedia.org/wiki/Iris_flower_data_set" class="uri">http://en.wikipedia.org/wiki/Iris_flower_data_set</a></li>
 <li>Manuel de référence du package <code>plyr</code>: <a href="http://cran.r-project.org/web/packages/plyr/plyr.pdf" class="uri">http://cran.r-project.org/web/packages/plyr/plyr.pdf</a></li>
-<li>Matloff, Norman. 2011. The Art of R Programming: A Tour of Statistical Software Design. San Fancisco. No Starch Press Inc., 373 p.</li>
+<li>Matloff, Norman. 2011. The Art of R Programming: A Tour of Statistical Software Design. San Fancisco. No Starch Press Inc., 373 p. </li>
 </ul>
 </div>

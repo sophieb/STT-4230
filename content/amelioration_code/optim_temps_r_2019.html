@@ -76,7 +76,9 @@ hist(faithful$eruptions, freq = FALSE, ylab = &quot;densité&quot;, cex.main = 0
 lines(dens)</code></pre>
 <p><img src="/amelioration_code/optim_temps_r_2019_files/figure-html/unnamed-chunk-1-1.png" width="80%" style="display: block; margin: auto;" /></p>
 <p>Un histogramme est aussi une méthode d’estimation de densité. Ici, nous avons superposé une courbe de densité estimée par la méthode du noyau (aussi appelée densité Kernel) à un histogramme.</p>
-<p>Nous allons écrire une version moins puissante de la fonction <code>density</code>. L’estimation de densité par noyau au point <span class="math inline">\(x\)</span> se fait par la formule suivante : <span class="math display">\[\hat{f}(x) = \frac{1}{nh} \sum_{i = 1}^n K \left( \frac{x - x_i}{h} \right)\]</span> où <span class="math inline">\(x_i\)</span> pour <span class="math inline">\(i=1, 2, \ldots, n\)</span> sont les observations, <span class="math inline">\(K\)</span> est une fonction noyau (en anglais <em>kernel</em>) à définir et <span class="math inline">\(h\)</span> est un paramètre de lissage (parfois appelée fenêtre). Plus la valeur de <span class="math inline">\(h\)</span> est grande, plus la courbe obtenue est lisse.</p>
+<p>Nous allons écrire une version moins puissante de la fonction <code>density</code>. L’estimation de densité par noyau au point <span class="math inline">\(x\)</span> se fait par la formule suivante :
+<span class="math display">\[\hat{f}(x) = \frac{1}{nh} \sum_{i = 1}^n K \left( \frac{x - x_i}{h} \right)\]</span>
+où <span class="math inline">\(x_i\)</span> pour <span class="math inline">\(i=1, 2, \ldots, n\)</span> sont les observations, <span class="math inline">\(K\)</span> est une fonction noyau (en anglais <em>kernel</em>) à définir et <span class="math inline">\(h\)</span> est un paramètre de lissage (parfois appelée fenêtre). Plus la valeur de <span class="math inline">\(h\)</span> est grande, plus la courbe obtenue est lisse.</p>
 <p>La fonction <code>density</code> permet l’utilisation de plusieurs fonctions noyau via l’argument <code>kernel</code>. Nous allons plutôt nous restreindre au noyau gaussien, qui est en fait la fonction de densité d’une distribution normale standard. Nous allons donc utiliser la fonction <code>dnorm</code> pour évaluer la fonction <span class="math inline">\(K\)</span> dans la formule ci-dessus.</p>
 <p>Voici la première fonction proposée.</p>
 <pre class="r"><code>#&#39; Estimation de densité par noyau gaussien
@@ -121,7 +123,7 @@ temps1 &lt;- system.time(dens1 &lt;- ksmooth1(x = x, xpts = xpts, h = 1))</code>
 <p>Ici, j’obtiens les temps suivants :</p>
 <pre class="r"><code>temps1</code></pre>
 <pre><code>##    user  system elapsed 
-##    0.20    0.04    0.24</code></pre>
+##    0.33    0.00    0.41</code></pre>
 <p>Les trois temps dans une sortie produite par <code>system.time</code> peuvent être définis ainsi :</p>
 <ul>
 <li><code>user</code> : temps écoulé par le logiciel R (<em>calling process</em>) pour évaluer l’expression;</li>
@@ -138,17 +140,17 @@ temps1 &lt;- system.time(dens1 &lt;- ksmooth1(x = x, xpts = xpts, h = 1))</code>
 microbenchmark(dens1 &lt;- ksmooth1(x = x, xpts = xpts, h = 1), unit = &quot;ms&quot;)</code></pre>
 <pre><code>## Unit: milliseconds
 ##                                          expr      min       lq     mean   median
-##  dens1 &lt;- ksmooth1(x = x, xpts = xpts, h = 1) 145.7653 158.6465 172.9465 162.9595
+##  dens1 &lt;- ksmooth1(x = x, xpts = xpts, h = 1) 147.8901 156.9427 160.7611 159.2118
 ##        uq      max neval
-##  168.5703 367.3068   100</code></pre>
-<p>Ici, la fonction <code>microbenchmark</code> du package du même nom a été utilisée. Par défaut, cette fonction évalue 100 fois l’expression. Dans la commande précédente, nous avons fourni la valeur <code>&quot;ms&quot;</code> à l’argument <code>unit</code>. Le temps a donc été mesuré en millisecondes. Nous aurions pu aller jusqu’à des unités aussi petites que des nanosecondes, ce qui est impossible avec la fonction <code>system.time</code>.</p>
+##  162.9824 203.0739   100</code></pre>
+<p>Ici, la fonction <code>microbenchmark</code> du package du même nom a été utilisée. Par défaut, cette fonction évalue 100 fois l’expression. Dans la commande précédente, nous avons fourni la valeur <code>"ms"</code> à l’argument <code>unit</code>. Le temps a donc été mesuré en millisecondes. Nous aurions pu aller jusqu’à des unités aussi petites que des nanosecondes, ce qui est impossible avec la fonction <code>system.time</code>.</p>
 <p>Le premier argument fourni dans l’appel à la fonction <code>microbenchmark</code> précédent est l’expression dont le temps d’évaluation est à mesurer, comme dans l’appel à la fonction <code>system.time</code>. Cependant, nous verrons plus loin que la fonction <code>microbenchmark</code> accepte en entrée plusieurs expressions, dont les temps d’exécution sont à comparer, alors que la fonction <code>system.time</code> est limitée au chronométrage d’une expression à la fois.</p>
 <p>Notons que nous pouvons considérer ici que la fonction <code>ksmooth1</code> a d’abord été testée. Nous supposons donc qu’elle retourne un résultat valide. Voici d’ailleurs ce qu’elle retourne pour l’exemple précédent.</p>
 <pre class="r"><code># Résultat obtenu
 dens1</code></pre>
-<pre><code>##  [1] 0.00503112 0.01306494 0.02977098 0.05955283 0.10468498 0.16195495 0.22085536
-##  [8] 0.26579588 0.28246371 0.26502251 0.21937571 0.16005069 0.10283319 0.05816452
-## [15] 0.02897141 0.01272254 0.00493518</code></pre>
+<pre><code>##  [1] 0.00528655 0.01313148 0.02912885 0.05758210 0.10111527 0.15730969 0.21644590
+##  [8] 0.26309910 0.28228630 0.26711825 0.22276588 0.16366340 0.10594109 0.06046127
+## [15] 0.03045198 0.01354740 0.00532605</code></pre>
 <pre class="r"><code># Graphique
 hist(x, freq=FALSE, ylab = &quot;densité&quot;, cex.main = 0.9,
      main = &quot;Densité empirique d&#39;un échantillon aléatoire tiré d&#39;une distribution N(0,1)&quot;)
@@ -309,11 +311,11 @@ all.equal(dens1, dens2)</code></pre>
                unit = &quot;ms&quot;)</code></pre>
 <pre><code>## Unit: milliseconds
 ##   expr      min       lq      mean    median       uq      max neval
-##  dens1 153.9126 159.3390 181.39168 162.78545 175.0907 503.4697   100
-##  dens2  13.4105  13.6247  15.75379  13.83575  15.7709  43.5627   100</code></pre>
+##  dens1 154.2305 160.7595 184.38763 165.99625 180.6229 512.2439   100
+##  dens2  13.0907  13.5470  15.82822  13.82005  16.9286  41.8499   100</code></pre>
 <p>Dans cet appel à la fonction <code>microbenchmark</code>, les deux instructions à comparer sont fournies en deux arguments distincts. Grâce à l’argument <code>...</code> de la <a href="https://www.rdocumentation.org/packages/microbenchmark/versions/1.4-4/topics/microbenchmark">fonction <code>microbenchmark</code></a>, cette fonction peut prendre autant d’expressions à chronométrer que souhaité.</p>
 <p>Débuter ces expressions par une assignation avec l’opérateur <code>=</code> aide à alléger l’affichage des résultats. Le nom fourni à gauche de l’opérateur <code>=</code> pour une expression est celui utilisé pour identifier l’expression dans la sortie.</p>
-<p>La fonction <code>ksmooth2</code> est environ 12 fois plus rapide que la fonction <code>ksmooth1</code>. Cependant, elle utilise beaucoup plus de mémoire. Une matrice de dimension <code>length(x)</code> par <code>length(xpts)</code> est créée par la fonction. R impose une limite sur la taille des objets créés (pour plus de détails voir la <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/Memory-limits.html">fiche d’aide <code>help(&quot;Memory-limits&quot;)</code></a>). Ainsi, la fonction <code>ksmooth2</code> retourne une erreur sur mon ordinateur si je lui donne en entrée des arguments <code>x</code> et <code>xpts</code> trop grands, par exemple :</p>
+<p>La fonction <code>ksmooth2</code> est environ 12 fois plus rapide que la fonction <code>ksmooth1</code>. Cependant, elle utilise beaucoup plus de mémoire. Une matrice de dimension <code>length(x)</code> par <code>length(xpts)</code> est créée par la fonction. R impose une limite sur la taille des objets créés (pour plus de détails voir la <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/Memory-limits.html">fiche d’aide <code>help("Memory-limits")</code></a>). Ainsi, la fonction <code>ksmooth2</code> retourne une erreur sur mon ordinateur si je lui donne en entrée des arguments <code>x</code> et <code>xpts</code> trop grands, par exemple :</p>
 <pre class="r"><code>x_test &lt;- rnorm(1000000)
 xpts_test &lt;- seq(from = -4, to = 4, length.out = 1000000)
 test_memoire &lt;- ksmooth2(x = x_test, xpts = xpts_test, h = 1)</code></pre>
@@ -349,16 +351,16 @@ test_memoire &lt;- ksmooth1(x = x_test, xpts = xpts_test, h = 1)</code></pre>
 <p>d’où le choix des valeurs fournies aux arguments <code>from</code>, <code>to</code> et <code>n</code> de <code>density</code>.</p>
 <p>Comparons maintenant les valeurs obtenues.</p>
 <pre class="r"><code>all.equal(dens1, densd$y)</code></pre>
-<pre><code>## [1] &quot;Mean relative difference: 0.0009605335&quot;</code></pre>
+<pre><code>## [1] &quot;Mean relative difference: 0.0009598587&quot;</code></pre>
 <p>Il y a de très petites différences ente les valeurs, parce que le paramètre de lissage <code>h</code> de <code>ksmooth1</code> n’est pas tout à fait définit comme le paramètre <code>bw</code> de la fonction <code>density</code>. Cependant, ces différences sont tellement petites que nous pouvons tout de même considérer que les deux fonctions effectuent le même calcul.</p>
 <p>Comparons les temps d’exécution des deux fonctions.</p>
 <pre class="r"><code>microbenchmark(densd = density(x = x, bw = 1, kernel = &quot;gaussian&quot;, from = -4, to = 4, n = 17), 
                dens1 = ksmooth1(x = x, xpts = xpts, h = 1),
                unit = &quot;ms&quot;)</code></pre>
 <pre><code>## Unit: milliseconds
-##   expr      min       lq       mean   median        uq      max neval
-##  densd   0.5609   0.5976   0.760453   0.7227   0.78015   3.0814   100
-##  dens1 153.5009 158.1941 177.799952 162.4660 172.06055 414.6463   100</code></pre>
+##   expr      min        lq       mean   median        uq      max neval
+##  densd   0.4644   0.50315   0.652796   0.6049   0.65055   3.3861   100
+##  dens1 157.2973 163.58380 184.591883 169.0898 181.23480 415.1592   100</code></pre>
 <p>La fonction <code>density</code> retourne presque instantanément le résultat, alors que la fonction <code>ksmooth1</code> doit rouler pendant plusieurs secondes pour effectuer une estimation en 17 points, à partir de 10000 observations.</p>
 <p>Le coeur du calcul de la fonction <code>density</code> est effectué par du code en langage C. C’est pour cette raison qu’elle est à ce point plus rapide que la fonction <code>ksmooth1</code>. Nous allons y revenir au truc 6.</p>
 </div>
@@ -371,9 +373,9 @@ microbenchmark(
   colSums(mat), 
   apply(mat, 2, sum))</code></pre>
 <pre><code>## Unit: microseconds
-##                expr    min      lq     mean  median      uq     max neval
-##        colSums(mat)   62.6   83.65  111.423  102.20  119.75   854.0   100
-##  apply(mat, 2, sum) 1469.7 1619.75 3127.221 2646.35 3192.25 36358.6   100</code></pre>
+##                expr    min   lq     mean  median      uq     max neval
+##        colSums(mat)   64.3   90  128.645  111.15  124.50  1104.2   100
+##  apply(mat, 2, sum) 1443.6 1985 2924.217 2699.35 3150.25 12298.7   100</code></pre>
 <p>Ce résultat s’explique par le fait que la fonction <code>colSums</code> est spécialisée dans la tâche que nous cherchions à effectuer. Son code est simplifié, par rapport au code de <code>apply</code> qui peut appliquer n’importe quelle fonction sur n’importe quelle dimension d’un array. Nous pourrions aussi dire que la fonction <code>colSums</code> est une fonction optimisée.</p>
 <p>C’est ce truc, de faire seulement ce qui est nécessaire, qui pousse certains programmeurs R à ne pas utiliser la fonction <code>return</code> pour retourner la sortie de leurs fonctions. L’appel à la fonction <code>return</code> amène une évaluation de plus à effectuer, sans être nécessaire. Pour faire un test, ajoutons un appel à la fonction <code>return</code> à la fin de la fonction <code>ksmooth2</code>.</p>
 <pre class="r"><code>ksmooth2return &lt;- function(x, xpts, h) 
@@ -389,9 +391,9 @@ microbenchmark(
                dens2return = ksmooth2return(x = x, xpts = xpts, h = 1),
                unit = &quot;us&quot;, times = 1000)</code></pre>
 <pre><code>## Unit: microseconds
-##         expr     min      lq     mean  median      uq     max neval
-##        dens2 13407.1 13699.1 15561.70 13999.5 16756.1 49113.1  1000
-##  dens2return 13407.6 13708.5 15714.96 13977.8 16908.6 54333.8  1000</code></pre>
+##         expr     min       lq     mean   median       uq     max neval
+##        dens2 12844.6 13666.65 15392.46 13869.25 16642.45 56117.9  1000
+##  dens2return 12760.4 13662.35 15543.10 13900.65 16643.60 64322.3  1000</code></pre>
 <p>La fonction <code>ksmooth2return</code> est effectivement légèrement plus lente que la fonction <code>ksmooth2</code>. Mais la différence entre les temps d’exécution médians des deux fonctions est à peine de l’ordre de quelques microsecondes. Alors d’autres programmeurs R préfèrent utiliser <code>return</code>, même s’il ralentit très légèrement les fonctions, dans le but d’avoir un code le plus clair possible.</p>
 </div>
 <div id="truc-3-exploiter-les-calculs-matriciels-et-vectoriels" class="section level2">
@@ -449,11 +451,11 @@ all.equal(dens1, dens3)</code></pre>
    boucleEtCalculVectoriel_v3 = ksmooth3(x = x, xpts = xpts, h = 1),
     applyEtCalculVectoriel_v4 = ksmooth4(x = x, xpts = xpts, h = 1))</code></pre>
 <pre><code>## Unit: milliseconds
-##                         expr      min        lq      mean   median        uq      max neval
-##              doubleBoucle_v1 146.2717 157.60550 167.92406 161.6542 166.42055 271.3329   100
-##  calculVectorielSeulement_v2  12.8684  13.42710  14.51020  13.7407  14.18970  22.6257   100
-##   boucleEtCalculVectoriel_v3  12.3378  12.64405  13.51275  13.2210  13.71395  18.4034   100
-##    applyEtCalculVectoriel_v4  12.3710  12.61720  13.60812  13.2517  13.70665  22.9410   100</code></pre>
+##                         expr      min        lq      mean    median       uq      max neval
+##              doubleBoucle_v1 149.6830 158.17820 168.65424 161.35360 166.6637 283.9634   100
+##  calculVectorielSeulement_v2  12.8570  13.22960  14.13334  13.61015  13.9142  22.3728   100
+##   boucleEtCalculVectoriel_v3  12.3001  12.43515  13.00858  12.56965  13.1963  18.4680   100
+##    applyEtCalculVectoriel_v4  12.3428  12.48855  13.29448  12.72855  13.3075  25.3553   100</code></pre>
 <p>Nous constatons que les deux dernières versions sont encore plus rapides que la version 2!</p>
 <p>Ce qu’il faut retenir de ces exemples est ceci :</p>
 <ul>
@@ -507,9 +509,9 @@ all.equal(dens1, dens3)</code></pre>
 <p>Comparons les temps d’exécution des deux fonctions.</p>
 <pre class="r"><code>microbenchmark(sommeDe1(), sommeDe2(), unit = &quot;ms&quot;)</code></pre>
 <pre><code>## Unit: milliseconds
-##        expr      min       lq      mean    median        uq      max neval
-##  sommeDe1() 237.9276 245.8114 262.81962 249.59720 261.19355 436.3259   100
-##  sommeDe2()  55.5943  57.8289  62.75463  59.98025  62.36245 238.9566   100</code></pre>
+##        expr      min        lq      mean   median        uq      max neval
+##  sommeDe1() 237.1290 242.97985 262.69391 246.1635 256.13745 542.7847   100
+##  sommeDe2()  54.4905  56.97385  61.77169  58.1141  60.10935 116.0421   100</code></pre>
 <p>Nous constatons donc qu’en termes de temps de calcul, il est préférable de créer un très grand objet, de le remplir, puis de mettre de côté les éléments inutilisés que de faire croître la taille d’un objet. C’est de la préallocation de mémoire. Par contre, encore là, il y a une limite à la grandeur de l’objet qui peut être créé.</p>
 </div>
 <div id="modification-delements-dans-un-data-frame" class="section level3">
@@ -604,9 +606,9 @@ sommeDe4 &lt;- function(sommeVisee = 50000){
 
 microbenchmark(sommeDe3(), sommeDe4(), unit = &quot;ms&quot;)</code></pre>
 <pre><code>## Unit: milliseconds
-##        expr      min       lq      mean    median       uq       max neval
-##  sommeDe3()  55.4661  58.1437  62.30574  60.20075  62.8413  130.6055   100
-##  sommeDe4() 786.6482 824.1455 852.72828 836.44135 846.2782 1640.4014   100</code></pre>
+##        expr      min        lq     mean   median        uq       max neval
+##  sommeDe3()  55.5756  59.02365  63.6488  61.0856  65.25895  111.2359   100
+##  sommeDe4() 779.3537 824.60140 886.2946 857.8143 911.84030 1481.3662   100</code></pre>
 <p>Ici, l’utilisation du data frame est environ 12 fois plus lente que l’utilisation d’une matrice!</p>
 <p>Bref, autant que possible, il vaut mieux <strong>éviter d’utiliser une data frame pour stocker des résultats générés dans une boucle</strong>.</p>
 <p>La lenteur des opérations de manipulation de data frame est bien connue en R. Des alternatives plus rapides existent, notamment les objets de classe <code>data.table</code> offerts par le <a href="https://CRAN.R-project.org/package=data.table">package <code>data.table</code></a>. Ce package avait été mentionné dans les notes sur les <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#le-data-table">structures de données en R</a>.</p>
@@ -644,11 +646,11 @@ microbenchmark(unit = "ms",
 
 ```
 ## Unit: milliseconds
-##                expr      min       lq      mean    median        uq      max neval
-##       dens_ksmooth1 147.6823 158.0379 171.14492 162.13995 169.81325 297.6284   100
-##  dens_ksmooth1_byte 147.6841 156.8739 169.49850 161.10200 167.35175 281.8898   100
-##       dens_ksmooth3  12.3091  12.4496  13.16269  12.54790  13.03770  21.5798   100
-##  dens_ksmooth3_byte  12.2921  12.4490  13.03690  12.60265  13.17235  16.9724   100
+##                expr      min        lq      mean    median        uq      max neval
+##       dens_ksmooth1 151.2961 159.01115 170.44773 163.00770 168.63725 340.6391   100
+##  dens_ksmooth1_byte 148.2453 158.09170 168.83802 161.77770 167.29900 296.2068   100
+##       dens_ksmooth3  12.2958  12.39965  12.76138  12.51180  12.79205  16.3856   100
+##  dens_ksmooth3_byte  12.3091  12.39385  12.81442  12.50635  12.76155  17.1500   100
 ```
 
 Bon, cette technique n'est pas magique, mais c'est mieux que rien. Avec à peu près aucun effort de programmation (seul un appel à fonction `cmpfun` a été nécessaire), nous avons réduit de moitié le temps d'exécution de la double boucle dans `ksmooth1`. Par contre, avec du calcul vectoriel, cette technique n'apporte pas toujours de gain en temps d'exécution, comme nous pouvons le constater avec la fonction `ksmooth3`.
@@ -716,9 +718,9 @@ all.equal(dens4, dens5)</code></pre>
      sapply_v4 = ksmooth4(x = x, xpts = xpts, h = 1), 
   parSapply_v5 = ksmooth5(grappe = grappe, x = x, xpts = xpts, h = 1))</code></pre>
 <pre><code>## Unit: milliseconds
-##          expr     min       lq    mean  median       uq     max neval
-##     sapply_v4 15.3240 17.36850 18.3629 17.9694 18.88875 27.5871   100
-##  parSapply_v5  7.9206  9.19135 11.9842  9.9402 14.93030 24.7145   100</code></pre>
+##          expr     min       lq     mean   median      uq     max neval
+##     sapply_v4 16.5854 17.42565 18.64925 18.05075 18.9691 33.6488   100
+##  parSapply_v5  7.9927  8.76185  9.91989  9.15605  9.8572 26.8664   100</code></pre>
 <p>Le calcul en parallèle a permis de réduire un peu le temps d’exécution. Même si 3 coeurs ont été exploités, le calcul n’est pas 3 fois plus rapide, car :</p>
 <ul>
 <li>mon ordinateur possède en fait 2 coeurs physiques, chacun séparé en 2 coeurs logiques (pour un total de 4 coeurs logiques), et des coeurs logiques ne sont pas aussi rapides que des coeurs physiques;</li>
@@ -761,12 +763,14 @@ void kernel_smooth(double *x, int *n, double *xpts,
 <ul>
 <li><p>Les fonctions C appelées en R doivent être de type « void ». Elles doivent retourner les résultats des calculs par leurs arguments.</p></li>
 <li><p>Les arguments passés aux fonctions C sont des pointeurs à un nombre ou à un tableau. Il faut donc correctement déréférencer les pointeurs dans le code C afin d’obtenir la valeur d’un élément dont l’adresse est contenue dans le pointeur. Un pointeur est déréférencé en ajoutant <code>*</code> devant celui-ci.</p></li>
-<li><p>Il est préférable d’inclure dans tout fichier contenant du code C à être appelé en R le fichier d’en-tête R.h en ajoutant au début du fichier de code C la ligne :</p>
+<li><p>Il est préférable d’inclure dans tout fichier contenant du code C à être appelé en R le fichier d’en-tête R.h en ajoutant au début du fichier de code C la ligne :</p></li>
+</ul>
 <pre><code>#include &lt;R.h&gt; </code></pre>
 <p>De plus, il est possible d’utiliser en C certaines fonctions mathématiques R en incluant le fichier d’en-tête Rmath.h dans le fichier de code C par la ligne :</p>
 <pre><code>#include &lt;Rmath.h&gt;</code></pre>
-<p>Les fonctions mathématiques R utilisables en C sont énumérées dans le manuel de R <a href="https://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-R-API"><em>Writing R Extensions</em>, chapitre 6</a>.</p></li>
-<li><p>Le fichier contenant le code C doit porter l’extension <em>.c</em>.</p></li>
+<p>Les fonctions mathématiques R utilisables en C sont énumérées dans le manuel de R <a href="https://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-R-API"><em>Writing R Extensions</em>, chapitre 6</a>.</p>
+<ul>
+<li>Le fichier contenant le code C doit porter l’extension <em>.c</em>.</li>
 </ul>
 <p>Une fois le code C écrit, il reste trois étapes à compléter pour intégrer du code C en R avec la fonction <code>.C</code>.</p>
 <ol style="list-style-type: decimal">

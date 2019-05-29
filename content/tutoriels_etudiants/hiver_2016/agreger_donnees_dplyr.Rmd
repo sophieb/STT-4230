@@ -23,20 +23,20 @@ header-includes:
 library("markdown")
 ```
 
-#1. Introduction 
+# 1. Introduction 
 Dans nos calculs quotidiens, on a souvent recours à la subdivision d'un jeu de données en sous-ensembles afin d'effectuer des calculs statistiques sur les sous-ensembles obtenus. Cette façon de faire permet de tirer le maximum d'informations possibles sur le jeu de données en question. Les packages de base en R permettent de faire une telle opération. Par exemple, si dans un jeu de données, on veut calculer des statistiques descriptives pour une variable selon les niveaux d'une autre variable, les packages de base en R offrent la fonction *aggregate* qui permet d'effectuer cette tâche. Il existe aussi d'autres packages alternatifs en R qui, une fois installés, permettent d'agréger un jeu de données. Le package *dplyr* est l'un des plus courants. Cette fiche a pour but d'expliquer comment calculer des statistiques descriptives en R dans le but d'obtenir un jeu de données agrégées. À cet effet, deux méthodes seront utilisées pour illustrer le calcul des statistiques. La première méthode utilisera des fonctions de R de base  et la deuxième méthode n'utilisera que des fonctions du package alternatif *dplyr*. 
 
-#2. Objectifs du travail 
-##2.1. Objectif général
+# 2. Objectifs du travail 
+## 2.1. Objectif général
 > Créer un jeu de données agrégées en calculant des statistiques descriptives pour une variable selon les niveaux d'une autre variable. 
 
-##2.2. Objectifs spécifiques
+## 2.2. Objectifs spécifiques
 + Calculer les statistiques descriptives du jeu de données par la méthode de base
 + Agréger le jeu de données par la méthode alternative (utilisation du package *dplyr*) 
 + Comparer les deux méthodes d'agrégation 
 
-#3. Méthodologie  
-##3.1. Présentation du jeu de données `Wimbledon.men.2013`
+# 3. Méthodologie  
+## 3.1. Présentation du jeu de données `Wimbledon.men.2013`
 Pour effectuer la comparaison entre les deux méthodes, un jeu de données concernant tous les matchs de tennis en simple masculin ayant eu lieu lors du tournoi de Wimbledon en 2013 sera utilisé pour faire les démontrations. Ce jeu de données contient des informations telles que: les adversaires du matchs (les variables `player1` et `player2`), la ronde de la compétition à laquelle les joueurs se sont affrontés (variable `Round`), le nombre de sets gagnés par les deux joueurs (variables `FNL.1` et `FNL.2`) etc. Pour télécharger et obtenir plus d'informations sur le jeu de donnée, allez à l'adresse suivante:
 
 <https://archive.ics.uci.edu/ml/machine-learning-databases/00300/>
@@ -60,7 +60,7 @@ str(Wimbledon.men.2013)
 ``` 
 Il s'agit donc d'un dataframe à 114 observations de 42 variables. Ses éléments sont des sous-objets de type vecteur. Parmi ces sous-objets de type vecteur, 2 sont de type facteur, 2 sont des vecteurs logiques et 38 sont numériques.  
 
-##3.2. Calcul sur le jeu de données 
+## 3.2. Calcul sur le jeu de données 
 
 
 À ce jeu de données, on ajoutera une nouvelle variable qui contiendra le nombre de sets dans chacun des matchs puis pour démontrer la création du jeu de données agrégées, on calculera par **Ronde** (Variable `Round`): 
@@ -80,8 +80,8 @@ kable(modele, format = "markdown")
 
 Ces calculs seront réalisés dans un premier temps par la méthode de base en utilisant la fonction `aggregate` pour agréger le jeu de données. Dans un second temps, on utilisera la méthode alternative avec le package `dplyr` pour effectuer ces mêmes calculs. Enfin, on effectuera une comparaison entre les deux méthodes.
 
-#4. Méthode de base en R: Fonction `aggregate` 
-##4.1. Présentation de la fonction `aggregate`
+# 4. Méthode de base en R: Fonction `aggregate` 
+## 4.1. Présentation de la fonction `aggregate`
 
 Dans R la fonction  `aggregate` se trouve dans le package `stats`, l'un des pakages de R de base. Elle permet de subdiviser un jeu de données en sous-ensembles en calculant des statistiques descriptives pour chaque sous-ensemble d'observations.  
 
@@ -95,7 +95,7 @@ getNmatchs <- function(y, set = 3){ sum(y == set) }
 
 Dans cette fonction, l'argument `y` est un vecteur de valeurs numériques (contenant des nombres de sets pour des matchs de tennis) et l'argument `set` est un paramètre pour spécifier le nombre de sets qui nous intéresse.   
 
-##4.2. Utilisation de `aggregate` sur Wimbledon.men.2013 
+## 4.2. Utilisation de `aggregate` sur Wimbledon.men.2013 
 Avant de commencer à utiliser `aggregate`, on doit d'abord ajouter une nouvelle variable à notre jeu de données. Cette variable contiendra le nombre de sets dans chacun des matchs (somme des variables FNL.1 et FNL.2) et sera nommée `NST`. 
 ```{r,eval=TRUE,echo=TRUE}
 Wimbledon.men.2013$NST<-Wimbledon.men.2013$FNL.1+Wimbledon.men.2013$FNL.2   
@@ -113,7 +113,7 @@ On veut calculer le nombre de matchs respectivement à 3, 4 et 5 sets ainsi que 
  
 + `FUN` est la fonction permettant de faire les calculs (`getNmatchs <- function(y, set = 3){ sum(y == set) }`et `mean`)   
 
-###4.2.1. Calcul du nombre de matchs à 3 sets 
+### 4.2.1. Calcul du nombre de matchs à 3 sets 
 Pour calculer le nombre de matchs à 3 sets, on fera appel à la fonction créée `getNmatchs` dans l'argument `FUN` de `aggregate`. L'argument `set` de `getNmatchs` sera dans ce cas égal à 3. 
 
 
@@ -136,7 +136,7 @@ print(N3ST)
 ``` 
 L'ajout de la fonction `list` permet de nommer la variable de l'argument `x`. Sans cet ajout, il ne serait pas possible de nommer cette variable dans `aggregate`.
 
-###4.2.2. Calcul du nombre de matchs à 4 sets 
+### 4.2.2. Calcul du nombre de matchs à 4 sets 
 Dans ce cas, l'argument `set` de `getNmatchs` prend la valeur 4. Ainsi, on obtient: 
 
 ```{r,eval=TRUE,echo=TRUE}
@@ -148,7 +148,7 @@ N4ST<-aggregate(list(N4ST=Wimbledon.men.2013$NST),by=list(Round=Wimbledon.men.20
 print(N4ST)
 ``` 
 
-###4.2.3. Calcul du nombre de matchs à 5 sets
+### 4.2.3. Calcul du nombre de matchs à 5 sets
 
  Dans ce cas, l'argument `set` de `getNmatchs` prend la valeur 5. 
 
@@ -162,7 +162,7 @@ N5ST<-aggregate(list(N5ST=Wimbledon.men.2013$NST),by=list(Round=Wimbledon.men.20
 #Nombre de matchs à 5 sets par ronde
 print(N5ST)
 ``` 
-###4.2.4. Calcul du nombre moyen de sets par match
+### 4.2.4. Calcul du nombre moyen de sets par match
 Dans ce cas, l'argument `FUN` de `aggregate` est égal à la fonction `mean`. 
 ```{r,eval=TRUE,echo=TRUE}
 MeanNST<-aggregate(list(MeanNST=Wimbledon.men.2013$NST),by=list(Round=Wimbledon.men.2013$Round),
@@ -181,7 +181,7 @@ str(MeanNST)
 ``` 
 Avec la fonction `aggregate`, on a obtenu 4 dataframes à 7 observations de 2 variables, contenant des sous-objets de type vecteur numérique. 
 
-###4.2.5. Fusion des jeux de données obtenus 
+### 4.2.5. Fusion des jeux de données obtenus 
 Pour avoir exactement le même résultat que celui recherché, il nous faut fusionner les 4 jeux de données obtenus en fonction de la variable commune `Round` de façon à avoir un jeu de données unique contenant les 4 statistiques calculées par `Round`. Pour ce faire, on va utiliser la fonction `merge` qui est conçue pour ne prendre que deux objets en arguments. Pour cela, il faudra imbriquer deux `merge` dans un autre `merge`. 
 
 ```{r,eval=TRUE,echo=TRUE}
@@ -201,9 +201,9 @@ aggregate(Wimbledon.men.2013$NST,by=list(Round=Wimbledon.men.2013$Round),
 
 Le résultat obtenu n'a cependant pas l'allure souhaitée. Les noms des colonnes des statistiques calculées ne correspondent pas et le jeu de données est uniformisé à 6 chiffres après la virgule. Il aurait fallu une mise en forme pour obtenir le résultat tel que souhaité.  
 
-#5. Méthode alternative:  `Package dplyr` 
+# 5. Méthode alternative:  `Package dplyr` 
 
-##5.1. Présentation du Package `dplyr`  
+## 5.1. Présentation du Package `dplyr`  
 `dplyr`  est un package créé par Hadley Whickam et qui permet de manipuler facilement des données. D'où son surnom "A grammar of data manipulation" (Réf: <https://cran.r-project.org/web/packages/dplyr/dplyr.pdf>).  
 Pour utiliser `dplyr`, il faut d'abord l'installer dans R. L'installation de `dplyr` se fait de la manière suivante: 
 ```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE,results='hide'}
@@ -230,7 +230,7 @@ help(dplyr)
 ou visitez le manuel de référence sur <https://cran.r-project.org/web/packages/dplyr/dplyr.pdf>.   
 A noter que pour calculer les statistiques descriptives en fonction d'un sous-ensemble d'observations, les fonctions `mutate`, `group_by`, `select`, `summarize` seront utilisées.  
 
-##5.2. Fonction `mutate`  
+## 5.2. Fonction `mutate`  
 
 Pour bien illustrer l'utilisation de `dplyr`, on va importer de nouveau le fichier de données en R et on l'appellera `Wimbledon`.  
 
@@ -248,7 +248,7 @@ On l'utilisera donc pour ajouter la nouvelle variable `NST` qui est fonction des
 ```{r,eval=TRUE,echo=TRUE}
 Wimbledon<-mutate(Wimbledon,NST=FNL.1+FNL.2)
 ```   
-##5.3. Fonction `select` et `slice`  
+## 5.3. Fonction `select` et `slice`  
 
 Pour afficher les 10 premières lignes d'un groupe de colonnes sélectionnées du jeu de données `Wimbledon` modifié, on utilisera les fonctions `select` et `slice`.  
 `select` permettra de séléctionner les colonnes qu'on veut visualiser et `slice` nous permettra de séléctionner la position des lignes qui nous intéressent.   
@@ -256,7 +256,7 @@ Pour afficher les 10 premières lignes d'un groupe de colonnes sélectionnées d
 ```{r,eval=TRUE,echo=TRUE}
 select(slice(Wimbledon,1:10),Player1,Player2,Round,FNL.1,FNL.2,NST)
 ```   
-##5.4. Fonction `group_by` et `summarise` 
+## 5.4. Fonction `group_by` et `summarise` 
 `group_by` permet de subdiviser un jeu de données en sous-ensembles. Elle est de la forme `group_by(.data,by_vars)`, où: 
 
 + `.data` est le fichier de données que l'on veut grouper; 
@@ -280,7 +280,7 @@ str(essai)
 
 `summarise` retourne un *dataframe* avec une seule observation et 4 variables, soit une variable par statistique calculée. Cette fonction permet donc de calculer plusieurs statistiques lors d'un seul appel de fonction et de nommer chacune des variables. Cependant, on ne peut pas l'appliquer sur des sous-ensembles d'un jeu de données. Pour contourner cet obstacle, `dplyr` permet d'utiliser conjointement les fonctions `group_by` et `summarise`.  
 
-##5.5. Utilisation conjointe de `group_by` et `summarise` 
+## 5.5. Utilisation conjointe de `group_by` et `summarise` 
 
 Dans cette conjonction, la fonction `group_by` subdivise le jeu de données en sous-ensembles et la fonction `summarise` calcule les statistiques pour chaque sous-ensemble obtenu avec `group_by`. *Quel beau travail d'équipe!!* 
 
@@ -309,14 +309,14 @@ summarise(
   N5ST=getNmatchs(NST,5),
   MeanNST=mean(NST,na.rm=TRUE))
 ```    
-#6. Comparaison des deux méthodes 
+# 6. Comparaison des deux méthodes 
 En résumé, les deux méthodes (la méthode de base avec `aggregate` et la méthode alternative avec les fonctions `group_by` et `summarise` de `dplyr`) permettent de calculer le nombre de matchs à 3 sets, le nombre de matchs à 4 sets, le nombre de matchs à sets et le nombre de moyen de sets par match en fonction de la ronde (`Round`) de la compétition de tennis Wimbledon en 2013. Toutefois, il existe des avantages et des inconvénients pour chacune des méthodes. 
 
-##6.1. Avantages et inconvénients de la méthode de base (`aggregate`) 
+## 6.1. Avantages et inconvénients de la méthode de base (`aggregate`) 
 L'utilisation de `aggregate` présente l'avantage de ne pas exiger l'installation préalable de packages vu que cette fonction est issue du R de base. De plus, son utilisation pour calculer des statistiques pour des sous-ensembles d'un jeu de données ne requiert pas de conjonction avec une autre fonction comme c'est le cas de `summarise` qui nécessite `group_by`.  
 Toutefois, il n'est pas possible d'effectuer le calcul des statistiques et de nommer chacune des variables en un seul appel de fonction. Il faut autant d'appels de fonctions que de statistiques à calculer pour accomplir une telle tâche. Ce qui a pour conséquence l'utilisation de `merge` pour combiner les résultats obtenus. Ce qui n'est pas pratique dans le cas où on aurait un grand nombre de statistiques à calculer sur un jeu de données.  
 
-##6.2. Avantages et inconvénients de la méthode alternative 
+## 6.2. Avantages et inconvénients de la méthode alternative 
 
 L'utilisation conjointe de `group_by` et de `summarise` permet d'effectuer les calculs en un seul appel de fonction et de nommer les variables issues des calculs statistiques. De plus, le résultat est obtenu sous forme d'un tableau de données sans avoir besoin d'utiliser `merge`. Ce qui est pratique dans le cas d'un grand nombre de statistiques à calculer.    
 
@@ -324,7 +324,8 @@ Toutefois, cette méthode n'est pas sans inconvénients. Elle exige l'installati
 
 De plus, l'affichage du tableau des résultats contient des informations supplémentaires sur le type des sous-objets du tableau. Cela peut être considéré comme un avantage ou un inconvénient selon l'angle sous lequel on l'analyse.   
 
-#7. Références bibliographiques 
+# 7. Références bibliographiques
+
 + Aide intéractive de R 
 + Introduction to dplyr: <https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html> 
 + Informations sur le jeu de données Wimbledon.men.2013:<https://archive.ics.uci.edu/ml/datasets/Tennis+Major+Tournament+Match+Statistics> 

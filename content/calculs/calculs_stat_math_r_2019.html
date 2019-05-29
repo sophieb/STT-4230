@@ -195,20 +195,20 @@ par(par.default)</code></pre>
 <h3>Fonction <code>sample</code></h3>
 <p>La fonction <code>sample</code> permet de tirer un échantillon aléatoire de taille déterminée par l’argument <code>size</code>,</p>
 <pre class="r"><code>sample(1:6, size = 6)</code></pre>
-<pre><code>## [1] 2 3 1 4 5 6</code></pre>
+<pre><code>## [1] 6 3 2 5 1 4</code></pre>
 <p>avec ou sans (par défaut) remise grâce à l’argument <code>replace</code>,</p>
 <pre class="r"><code>sample(1:6, size = 6, replace = TRUE)</code></pre>
-<pre><code>## [1] 5 4 5 5 4 6</code></pre>
+<pre><code>## [1] 5 1 1 4 3 4</code></pre>
 <p>en utilisant des probabilités de sélection égales (par défaut) entre les éléments de l’ensemble de départ ou non grâce à l’argument <code>prob</code>.</p>
 <pre class="r"><code>sample(1:6, size = 20, replace = TRUE, prob = c(1/2, rep(1/10, 5)))</code></pre>
-<pre><code>##  [1] 1 5 1 1 5 1 1 1 4 1 6 2 5 1 4 2 4 2 1 1</code></pre>
+<pre><code>##  [1] 1 1 2 6 2 6 5 1 5 1 1 1 1 1 2 1 1 1 1 2</code></pre>
 <p>La fonction <code>sample</code> prend comme premier argument un vecteur représentant l’ensemble des éléments à partir desquels faire le tirage aléatoire. Ce vecteur peut contenir des données de n’importe quel type.</p>
 <pre class="r"><code>sample(c(&quot;Luc&quot;, &quot;Kim&quot;, &quot;Paul&quot;, &quot;Ève&quot;))</code></pre>
-<pre><code>## [1] &quot;Kim&quot;  &quot;Paul&quot; &quot;Ève&quot;  &quot;Luc&quot;</code></pre>
+<pre><code>## [1] &quot;Luc&quot;  &quot;Kim&quot;  &quot;Paul&quot; &quot;Ève&quot;</code></pre>
 <p>Si l’argument <code>size</code> n’est pas spécifié, il prend comme valeur par défaut la longueur du vecteur fourni au premier argument. Remarquez que lorsque la taille de l’échantillon est égale à la taille de l’ensemble de départ et que l’échantion est tiré sans remise, cet échantillon est en fait une permutation aléatoire des éléments de l’ensemble de départ.</p>
 <p>La fonction <code>sample.int</code> est très similaire à la fonction <code>sample</code>, mais elle prend comme premier argument un seul entier, <code>n</code>, et tire aléatoirement <code>size</code> entiers entre 1 et <code>n</code>.</p>
 <pre class="r"><code>sample.int(n = 6, size = 4)</code></pre>
-<pre><code>## [1] 6 5 2 1</code></pre>
+<pre><code>## [1] 1 6 2 3</code></pre>
 <p>Si nous souhaitons sélectionner aléatoirement des observations (lignes) dans un jeu de données, il est d’usage de sélectionner d’abord des entiers compris entre 1 et le nombre total d’observations, puis d’extraire du jeu de donnée les observations sur les lignes portant les numéros sélectionnés. Voici un exemple, utilisant les données sur les <a href="https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/iris.html">iris de Fisher</a> incluses dans l’installation de base de R.</p>
 <pre class="r"><code>str(iris)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    150 obs. of  5 variables:
@@ -219,15 +219,15 @@ par(par.default)</code></pre>
 ##  $ Species     : Factor w/ 3 levels &quot;setosa&quot;,&quot;versicolor&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...</code></pre>
 <pre class="r"><code>index_ech &lt;- sample.int(n = nrow(iris), size = 5, replace = FALSE)
 index_ech</code></pre>
-<pre><code>## [1] 101 139  89  88  44</code></pre>
+<pre><code>## [1] 129  77  68   8 101</code></pre>
 <pre class="r"><code>iris_ech &lt;- iris[index_ech, ]
 iris_ech</code></pre>
 <pre><code>##     Sepal.Length Sepal.Width Petal.Length Petal.Width    Species
-## 101          6.3         3.3          6.0         2.5  virginica
-## 139          6.0         3.0          4.8         1.8  virginica
-## 89           5.6         3.0          4.1         1.3 versicolor
-## 88           6.3         2.3          4.4         1.3 versicolor
-## 44           5.0         3.5          1.6         0.6     setosa</code></pre>
+## 129          6.4         2.8          5.6         2.1  virginica
+## 77           6.8         2.8          4.8         1.4 versicolor
+## 68           5.8         2.7          4.1         1.0 versicolor
+## 8            5.0         3.4          1.5         0.2     setosa
+## 101          6.3         3.3          6.0         2.5  virginica</code></pre>
 </div>
 <div id="germe-de-la-generation-pseudo-aleatoire" class="section level3">
 <h3>Germe de la génération pseudo-aléatoire</h3>
@@ -235,39 +235,39 @@ iris_ech</code></pre>
 <p>Plusieurs RNG sont implémentés en R. Celui utilisé par défaut, nommé Mersenne Twister, a été choisi parce qu’il est réputé être bon. Sans entrer dans les détails du fonctionnement des RNG implémentés dans le package <code>base</code> de R, il faut savoir qu’ils travaillent tous à partir d’une séquence de nombres appelée <em>germe</em> (en anglais <em>seed</em>). En contrôlant ce germe, il est possible de générer de nouveau, autant de fois que désiré, les mêmes valeurs.</p>
 <p>Par défaut, R contrôle le germe des RNG de façon automatique. Chaque fois qu’une commande faisant intervenir un RNG est évaluée, R crée un nouveau germe à partir, notamment, de l’heure à laquelle la commande est soumise. Ainsi, deux générations pseudo-aléatoires consécutives ne produisent en général pas le même résultat.</p>
 <pre class="r"><code>sample(letters, size = 5)</code></pre>
-<pre><code>## [1] &quot;c&quot; &quot;a&quot; &quot;z&quot; &quot;p&quot; &quot;t&quot;</code></pre>
+<pre><code>## [1] &quot;u&quot; &quot;m&quot; &quot;h&quot; &quot;r&quot; &quot;a&quot;</code></pre>
 <pre class="r"><code>sample(letters, size = 5)</code></pre>
-<pre><code>## [1] &quot;n&quot; &quot;j&quot; &quot;e&quot; &quot;f&quot; &quot;v&quot;</code></pre>
+<pre><code>## [1] &quot;z&quot; &quot;g&quot; &quot;r&quot; &quot;j&quot; &quot;l&quot;</code></pre>
 <p>En tout temps, il est possible de connaître le germe du RNG en R. Il est stocké dans un objet nommé <code>.Random.seed</code>. Cet objet est un vecteur numérique de longueur 626 pour le RNG Mersenne Twister. Voyons de quoi ont l’air les premiers éléments de ce vecteur à différents moments.</p>
 <pre class="r"><code>str(.Random.seed)</code></pre>
-<pre><code>##  int [1:626] 403 55 -1123955728 -267184877 96709297 1329333600 1519483646 -150612343 ..</code></pre>
+<pre><code>##  int [1:626] 10403 62 -1467453931 -2032381265 -1419188042 -1157470496 -2045634013 -18..</code></pre>
 <pre class="r"><code>sample(letters, size = 5)</code></pre>
-<pre><code>## [1] &quot;b&quot; &quot;x&quot; &quot;t&quot; &quot;m&quot; &quot;d&quot;</code></pre>
+<pre><code>## [1] &quot;q&quot; &quot;o&quot; &quot;j&quot; &quot;e&quot; &quot;i&quot;</code></pre>
 <pre class="r"><code>str(.Random.seed)</code></pre>
-<pre><code>##  int [1:626] 403 60 -1123955728 -267184877 96709297 1329333600 1519483646 -150612343 ..</code></pre>
+<pre><code>##  int [1:626] 10403 69 -1467453931 -2032381265 -1419188042 -1157470496 -2045634013 -18..</code></pre>
 <pre class="r"><code>sample(letters, size = 5)</code></pre>
-<pre><code>## [1] &quot;r&quot; &quot;s&quot; &quot;m&quot; &quot;l&quot; &quot;z&quot;</code></pre>
+<pre><code>## [1] &quot;s&quot; &quot;m&quot; &quot;h&quot; &quot;b&quot; &quot;l&quot;</code></pre>
 <pre class="r"><code>str(.Random.seed)</code></pre>
-<pre><code>##  int [1:626] 403 65 -1123955728 -267184877 96709297 1329333600 1519483646 -150612343 ..</code></pre>
+<pre><code>##  int [1:626] 10403 75 -1467453931 -2032381265 -1419188042 -1157470496 -2045634013 -18..</code></pre>
 <p>Nous constatons qu’au moins un élément de ce vecteur (le deuxième élément) change à chaque fois que nous appelons la fonction <code>sample</code>. La fonction <code>set.seed</code> permet de fixer le germe du RNG à partir d’une seule valeur entière. Par exemple, la commande suivante :</p>
 <pre class="r"><code>set.seed(753)</code></pre>
 <p>spécifie le germe suivant :</p>
 <pre class="r"><code>str(.Random.seed)</code></pre>
-<pre><code>##  int [1:626] 403 624 302719261 615841082 -1828406925 -1314498536 214287161 142621094 ..</code></pre>
+<pre><code>##  int [1:626] 10403 624 302719261 615841082 -1828406925 -1314498536 214287161 14262109..</code></pre>
 <p>En soumettant de nouveau le même appel à la fonction <code>sample</code>, nous obtenons l’échantillon suivant.</p>
 <pre class="r"><code>sample(letters, size = 5)</code></pre>
-<pre><code>## [1] &quot;n&quot; &quot;v&quot; &quot;m&quot; &quot;x&quot; &quot;g&quot;</code></pre>
+<pre><code>## [1] &quot;v&quot; &quot;r&quot; &quot;g&quot; &quot;i&quot; &quot;t&quot;</code></pre>
 <p>La soumission de cette commande a eu pour effet de modifier le germe.</p>
 <pre class="r"><code>str(.Random.seed)</code></pre>
-<pre><code>##  int [1:626] 403 5 47777699 -819670847 -326033232 523235278 1163109177 1104276299 186..</code></pre>
+<pre><code>##  int [1:626] 10403 6 47777699 -819670847 -326033232 523235278 1163109177 1104276299 1..</code></pre>
 <p>Donc si nous resoumettons la commande <code>sample</code>, nous n’obtiendrons sûrement pas le même résultat.</p>
 <pre class="r"><code>sample(letters, size = 5)</code></pre>
-<pre><code>## [1] &quot;e&quot; &quot;j&quot; &quot;o&quot; &quot;i&quot; &quot;g&quot;</code></pre>
+<pre><code>## [1] &quot;l&quot; &quot;q&quot; &quot;f&quot; &quot;e&quot; &quot;k&quot;</code></pre>
 <p>Par contre, si nous fixons de nouveau le germe à partir de l’entier 753 avec <code>set.seed</code>, nous arriverons à obtenir de nouveau l’avant-dernier échantillon généré.</p>
 <pre class="r"><code>set.seed(753)
 sample(letters, size = 5)</code></pre>
-<pre><code>## [1] &quot;n&quot; &quot;v&quot; &quot;m&quot; &quot;x&quot; &quot;g&quot;</code></pre>
-<p>À n’importe quel moment, dans n’importe qu’elle session R, nous obtiendrons l’échantillon {n, v, m, x, g} si nous soumettons la commande <code>set.seed(753)</code> avant la commande <code>sample(letters, size = 5)</code>.</p>
+<pre><code>## [1] &quot;v&quot; &quot;r&quot; &quot;g&quot; &quot;i&quot; &quot;t&quot;</code></pre>
+<p>À n’importe quel moment, dans n’importe qu’elle session R, nous obtiendrons l’échantillon {v, r, g, i, t} si nous soumettons la commande <code>set.seed(753)</code> avant la commande <code>sample(letters, size = 5)</code>.</p>
 <p>L’utilité de fixer le germe d’une génération pseudo-aléatoire est de rendre son résultat reproduisible.</p>
 <p> </p>
 </div>
@@ -772,27 +772,27 @@ Hothorn, T. et Everitt, B.S. (2014). <em>A handbook of statistical analyses usin
 <pre class="r"><code>iris_ech_num &lt;- iris_ech[, c(&quot;Sepal.Length&quot;, &quot;Sepal.Width&quot;, &quot;Petal.Length&quot;, &quot;Petal.Width&quot;)]
 iris_ech_num</code></pre>
 <pre><code>##     Sepal.Length Sepal.Width Petal.Length Petal.Width
-## 101          6.3         3.3          6.0         2.5
-## 139          6.0         3.0          4.8         1.8
-## 89           5.6         3.0          4.1         1.3
-## 88           6.3         2.3          4.4         1.3
-## 44           5.0         3.5          1.6         0.6</code></pre>
+## 129          6.4         2.8          5.6         2.1
+## 77           6.8         2.8          4.8         1.4
+## 68           5.8         2.7          4.1         1.0
+## 8            5.0         3.4          1.5         0.2
+## 101          6.3         3.3          6.0         2.5</code></pre>
 <p>Calculons la distance euclidienne entre ces observations, basée sur les 4 variables numériques.</p>
 <pre class="r"><code>dist(iris_ech_num, method = &quot;euclidean&quot;, diag = TRUE)</code></pre>
-<pre><code>##           101       139        89        88        44
-## 101 0.0000000                                        
-## 139 1.4525839 0.0000000                              
-## 89  2.3727621 0.9486833 0.0000000                    
-## 88  2.2360680 0.9949874 1.0344080 0.0000000          
-## 44  4.9699095 3.5958309 2.7110883 3.3852622 0.0000000</code></pre>
+<pre><code>##           129        77        68         8       101
+## 129 0.0000000                                        
+## 77  1.1357817 0.0000000                              
+## 68  1.9570386 1.2884099 0.0000000                    
+## 8   4.7686476 3.9912404 2.9206164 0.0000000          
+## 101 0.7615773 1.7748239 2.5436195 5.2191953 0.0000000</code></pre>
 <p>La distance euclidienne est un cas particulier de la <a href="https://fr.wikipedia.org/wiki/Distance_(math%C3%A9matiques)#Exemples_de_distances_classiques">distance de Minkowski</a>, avec un paramètre <span class="math inline">\(p = 2\)</span>.</p>
 <pre class="r"><code>dist(iris_ech_num, method = &quot;minkowski&quot;, p = 2, diag = TRUE)</code></pre>
-<pre><code>##           101       139        89        88        44
-## 101 0.0000000                                        
-## 139 1.4525839 0.0000000                              
-## 89  2.3727621 0.9486833 0.0000000                    
-## 88  2.2360680 0.9949874 1.0344080 0.0000000          
-## 44  4.9699095 3.5958309 2.7110883 3.3852622 0.0000000</code></pre>
+<pre><code>##           129        77        68         8       101
+## 129 0.0000000                                        
+## 77  1.1357817 0.0000000                              
+## 68  1.9570386 1.2884099 0.0000000                    
+## 8   4.7686476 3.9912404 2.9206164 0.0000000          
+## 101 0.7615773 1.7748239 2.5436195 5.2191953 0.0000000</code></pre>
 <p>La fonction <code>dist</code> propose quelques autres distances pour variables numériques (voir la <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/dist.html">fiche d’aide de la fonction</a> pour la liste complète). Le package <code>stats</code> offre aussi la fonction <code>mahalanobis</code> pour calculer des <a href="https://fr.wikipedia.org/wiki/Distance_de_Mahalanobis">distance de Mahalanobis</a>.</p>
 </div>
 <div id="distance-entre-des-chaines-de-caracteres" class="section level4">
@@ -801,10 +801,10 @@ iris_ech_num</code></pre>
 <pre class="r"><code>adist(&quot;Allo&quot;, &quot;Hello&quot;)</code></pre>
 <pre><code>##      [,1]
 ## [1,]    2</code></pre>
-<p>La distance de Levenshtein, aussi appelée distance minimale d’édition, compte le nombre minimal d’insertions, de retraits et de substitutions à effectuer pour transformer la première chaîne de caractères en la deuxième. Il est possible d’associer un coût différent à chacune de ces opérations. Par défaut, elles ont toutes un coût de 1. La distance de Levenshtein entre <code>&quot;Allo&quot;</code> et <code>&quot;Hello&quot;</code> vaut 2 parce que pour transformer <code>&quot;Allo&quot;</code> en <code>&quot;Hello&quot;</code> il faut au minimum faire les deux opérations suivantes :</p>
+<p>La distance de Levenshtein, aussi appelée distance minimale d’édition, compte le nombre minimal d’insertions, de retraits et de substitutions à effectuer pour transformer la première chaîne de caractères en la deuxième. Il est possible d’associer un coût différent à chacune de ces opérations. Par défaut, elles ont toutes un coût de 1. La distance de Levenshtein entre <code>"Allo"</code> et <code>"Hello"</code> vaut 2 parce que pour transformer <code>"Allo"</code> en <code>"Hello"</code> il faut au minimum faire les deux opérations suivantes :</p>
 <ul>
 <li>ajouter une lettre (par exemple un <code>H</code> au début);</li>
-<li>transformer une lettre (par exemple transformer le <code>&quot;A&quot;</code> en <code>&quot;e&quot;</code>).</li>
+<li>transformer une lettre (par exemple transformer le <code>"A"</code> en <code>"e"</code>).</li>
 </ul>
 </div>
 </div>
@@ -969,7 +969,8 @@ B</code></pre>
 <p><em>(Ce sujet ne sera pas approfondi, car ce qui est offert en R dans ce domaine n’est pas très performant ni facile d’utilisation.)</em></p>
 <div id="calculs-symboliques-derivation-avec-d-deriv-et-deriv3" class="section level4">
 <h4>Calculs symboliques : dérivation avec <code>D</code>, <code>deriv</code> et <code>deriv3</code></h4>
-<p>Tout comme les logiciels Maple ou Mathematica, R peut faire du calcul symbolique de dérivées. Cependant, il est loin d’être le meilleur outil pour ces tâches. Pour illustrer les capacités (limitées) de R dans ce domaine, tentons d’abord de calculer la dérivée suivante : <span class="math display">\[\frac{d}{dx}( log(x) + sin(x) ).\]</span></p>
+<p>Tout comme les logiciels Maple ou Mathematica, R peut faire du calcul symbolique de dérivées. Cependant, il est loin d’être le meilleur outil pour ces tâches. Pour illustrer les capacités (limitées) de R dans ce domaine, tentons d’abord de calculer la dérivée suivante :
+<span class="math display">\[\frac{d}{dx}( log(x) + sin(x) ).\]</span></p>
 <pre class="r"><code>df &lt;- deriv(~ log(x) + sin(x), &quot;x&quot;)
 df</code></pre>
 <pre><code>## expression({
@@ -979,7 +980,7 @@ df</code></pre>
 ##     attr(.value, &quot;gradient&quot;) &lt;- .grad
 ##     .value
 ## })</code></pre>
-<p>L’objet <code>df</code> est particulier. Il s’agit d’une expression. La ligne <code>.grad[, &quot;x&quot;] &lt;- 1/x + cos(x)</code> permet de constater que R a bien trouvé que la dérivée symbolique de <span class="math inline">\(log(x) + sin(x)\)</span> est <span class="math inline">\(1/x + cos(x)\)</span>. Nous pouvons maintenant utiliser <code>df</code> pour calculer cette dérivée en certains points. Étant donné que nous avons nommé <code>x</code> la variable dans la fonction à dériver, il faut d’abord créer un objet nommé <code>x</code> contenant les valeurs en lesquelles nous souhaitons calculer la dérivée.</p>
+<p>L’objet <code>df</code> est particulier. Il s’agit d’une expression. La ligne <code>.grad[, "x"] &lt;- 1/x + cos(x)</code> permet de constater que R a bien trouvé que la dérivée symbolique de <span class="math inline">\(log(x) + sin(x)\)</span> est <span class="math inline">\(1/x + cos(x)\)</span>. Nous pouvons maintenant utiliser <code>df</code> pour calculer cette dérivée en certains points. Étant donné que nous avons nommé <code>x</code> la variable dans la fonction à dériver, il faut d’abord créer un objet nommé <code>x</code> contenant les valeurs en lesquelles nous souhaitons calculer la dérivée.</p>
 <pre class="r"><code>x &lt;- 2:5</code></pre>
 <p>Ensuite, nous soumettons la commande suivante pour obtenir le résultat recherché.</p>
 <pre class="r"><code>eval(df)</code></pre>
