@@ -1,0 +1,288 @@
+---
+title: "Package dygraphs"
+linkTitle: "dygraphs - graphiques temporels interactifs"
+author: "Simon Laflamme et Anabelle Plourde-Leclerc"
+date: '2019-05-29'
+output:
+  blogdown::html_page:
+    toc: true
+    toc_depth: 4
+    number_sections: true
+---
+
+<style>
+body {text-align: justify}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "", out.width='100%')
+```
+
+***
+
+# Introduction
+Cette fiche a pour but de montrer de nombreuses fonctionnalités qui se trouvent dans le package `dygraphs`, qui est une interface R d'une bibliothèque de graphiques JavaScript. Celui-ci fournit des fonctions intéressantes pour la création de graphiques à partir de séries chronologiques. Les graphiques générés par ce package sont interactifs et en deux dimensions. Le package permet de zoomer sur les séries temporelles afin d'augmenter la visibilité des graphiques. De plus, il offre la sélection des zones sur le graphique et permet de faire la synchronisation de plusieurs graphiques.
+
+# Installation et chargement
+Vous pouvez installer le package `dygraphs` de la façon suivante :
+```{r, eval = FALSE, results="hide"}
+install.packages("dygraphs", repo="http://cran.rstudio.com/")
+```
+Pour utiliser le package, il faut d'abord le charger dans la session R avec la commande suivante :
+```{r}
+library(dygraphs)
+```
+# Données utilisées
+Afin de présenter des exemples concrets, nous utiliserons un objet R de classe `mts`. Cette classe fait référence en anglais à *Multivariate Time Series*. L'objet est importé à partir du fichier `demographieCanada.rds`.
+
+```{r}
+demoCanada <- readRDS("demographieCanada.rds")
+colnames(demoCanada) <- c("Accr. démographique", 
+                          "Accr. naturel", 
+                          "Accr. migratoire intl")
+```
+
+Le données contenues dans l'objet `demoCanada` sont présentées ci-dessous. Ces données proviennent de la page web [Coup d'oeil sur le Canada 2018 - Population](https://www150.statcan.gc.ca/n1/pub/12-581-x/2018000/pop-fra.htm), dans la section «&nbsp;Tableau de données du graphique 1&nbsp;». En bref, il s'agit de données d'accroissement démographique au Canada qui sont publiées par Statistique Canada. Les accroissements doivent être interprétées en milliers de personnes.
+```{r, echo = FALSE}
+demographieCanada <- data.frame(demoCanada)
+Annees <- data.frame(seq(from = 1987, to = 2017, by = 1))
+demographieCanada <- cbind(Annees, demographieCanada)
+colnames(demographieCanada) <- c("Année", 
+                                 "Accr. démographique", 
+                                 "Accr. naturel", 
+                                 "Accr. migratoire intl")
+rmarkdown::paged_table(demographieCanada, options = list(rows.print = 12))
+```
+
+# Utilisation du package `dygraphs`
+## Graphique de base (fonction `dygraph`)
+Pour créer un graphique, il suffit d'appeler la fonction `dygraph` en donnant l'objet de classe `mts` comme premier argument. Tout comme pour un graphique simple en R (par exemple, avec la fonction `plot`), il est possible de spécifier le titre du graphique et les étiquettes pour les axes x et y avec les paramètres `main`, `xlab` et `ylab` respectivement.
+```{r message = FALSE}
+dg <- dygraph(demoCanada, 
+              main = "Accroissement démographique au Canada de 1987 à 2017", 
+              xlab = "Année", 
+              ylab = "Population en milliers")
+dg
+```
+En survolant le graphique avec le pointeur de la souris, on voit apparaître dans la légende les données selon l'année où se situe le pointeur. Ces données sont aussi indiquées par des points qui apparaissent dans le graphique. En maintenant le bouton de la souris enfoncé et en déplaçant le curseur sur le graphique (à la verticale ou à l'horizontale), il est possible d'effectuer un zoom sur une région du graphique. Il suffit de double-cliquer sur le graphique pour le réinitialiser.
+
+### Synchronisation de graphiques
+En spécifiant une valeur commune de l'argument `group` pour différents graphiques, cela a pour effet de synchroniser le déplacement et le zoom horizontal pour tous les graphiques du groupe.
+```{r, fig.height=2, results='hold'}
+dygraph(demoCanada[,1], main = "Accroissement démographique", group = "accr")
+dygraph(demoCanada[,2], main = "Accroissement naturel", group = "accr")
+dygraph(demoCanada[,3], main = "Accroissement migratoire international", group = "accr")
+```
+
+## Ajout d'éléments et d'options
+### Opérateur *pipe* `%>%`
+Il est conseillé d'ajouter les éléments et options du graphique à l'aide de l'opérateur *pipe* `%>%` du package `magrittr`. Les fonctions du package `dygraphs` prennent en paramètre un objet de class `dygraphs` et retournent un objet `dygraphs` modifié. Supposons qu'on veuille ajouter à l'objet `dg` trois éléments à l'aide des fonctions fictives `dyFct1`, `dyFct2` et `dyFct3`. À l'aide de l'opérateur d'assignation `<-`, la commande nécessite plusieurs lignes et plusieurs assignations pour afficher le graphique modifié :
+```{r, eval=FALSE}
+dg1 <- dyFct1(dg)
+dg2 <- dyFct2(dg1)
+dg3 <- dyFct3(dg2)
+dg3
+```
+En imbriquant les appels de fonctions, le code peut rapidement devenir difficile à lire s'il y a plusieurs paramètres passés aux fonctions :
+```{r, eval=FALSE}
+dg1 <- dyFct3(dyFct2(dyFct1(dg, param1 = 1, param2 = 7), param3 = "abc"), param4 = 3)
+dg1
+```
+
+À l'aide de l'opérateur *pipe* `%>%` du package `magrittr`, il est possible de modifier l'objet `dygraphs`, puis le passer en paramètre à la fonction suivante, sans compromettre la lisibilité du code. La commande peut donc se faire en une (ou plusieurs) ligne de code à l'aide d'une seule assignation et sans rendre le code trop lourd.
+```{r, eval=FALSE}
+dg1 <- dg %>% dyFct1(param1 = 1, param2 = 7) %>% dyFct2(param3 = "abc") %>% dyFct3(param4 = 3)
+dg1
+```
+En chargeant le package `dygraphs`, l'opérateur *pipe* `%>%` du package `magrittr` est automatiquement importé, ce qui facilite le travail de l'utilisater en lui évitant d'avoir à installer et charger manuellement un package supplémentaire. 
+
+### Fonction `dyRangeSelector`
+La fonction `dyRangeSelector` ajoute une fenêtre en-dessous du graphique qui permet de sélectionner un intervalle de temps à afficher dans le graphique. L'argument `dateWindow` permet de sélectionner l'intervalle affiché par défaut. Les arguments `strokeColor` et `fillColor` sont utilisés pour personnaliser les couleurs de la fenêtre de sélection. L'argument `height` sert à spécifier sa hauteur en pixels.
+```{r}
+dg %>% dyRangeSelector(dateWindow = c("2000-01-01", "2010-01-01"), 
+                       strokeColor = "red", 
+                       fillColor = "navy", 
+                       height = 60)
+```
+
+La fonction `dyRangeSelector` peut être utilisée sur un groupe pour synchroniser le déplacement horizontal.
+```{r, fig.height=2, results='hold'}
+dygraph(demoCanada[,1], main = "Accroissement démographique", group = "accr")
+dygraph(demoCanada[,2], main = "Accroissement naturel", group = "accr")
+dygraph(demoCanada[,3], main = "Accroissement migratoire international", group = "accr") %>% 
+  dyRangeSelector(height = 15)
+```
+
+### Fonction `dyHighlight`
+La fonction `dyHighlight` permet de mettre en valeur une série de données en la survolant avec le pointeur de la souris. L'argument `highlightCircleSize` indique la taille des points affichés dans le graphique. L'argument `highlightSeriesBackgroundAlpha` permet de spécifier l'intensité de la couleur des lignes qui ne sont pas mises en évidence, alors que `strokeWidth` correspond à l'épaisseur de la ligne mise en évidence. Lorsque l'argument `hideOnMouseOut` est `TRUE`, la figure reprend son apparence originale lorsque le pointeur quitte le graphique, alors que si l'argument est `FALSE`, la mise en évidence de la ligne persiste même si le pointeur a quitté le graphique.
+```{r}
+dg %>%
+  dyHighlight(highlightCircleSize = 5, 
+              highlightSeriesBackgroundAlpha = 0.2,
+              highlightSeriesOpts = list(strokeWidth = 3),
+              hideOnMouseOut = TRUE)
+```
+
+### Fonction `dyShading`
+La fonction `dyShading` permet de mettre une région du graphique en évidence en modifiant la couleur de l'arrière-plan. Les arguments `from` et `to` représentent respectivement les bornes inférieure et supérieure de l'intervalle à colorer. Le paramètre `color` permet de spécifier la couleur de l'arrière-plan pour la région indiquée. Pour modifier plusieurs régions du graphique, il faut faire plusieurs appels successifs de la fonction `dyShading`.
+```{r}
+dg %>% 
+  dyShading(from = "1987-1-1", to = "1988-2-1", 
+            color = rgb(red = 0.85, green = 0.85, blue = 0.93, alpha = 0.8)) %>%
+  dyShading(from = "1989-12-1", to = "1995-11-1", 
+            color = rgb(red = 0.85, green = 0.85, blue = 0.93, alpha = 0.8))
+```
+
+### Fonction `dyEvent`
+La fonction `dyEvent` permet de mettre en évidence un événement en ajoutant une ligne verticale sur le graphique. L'argument `x` spécifie la valeur en abscisse où la droite sera ajoutée, l'argument `label` spécifie l'étiquette de la droite, `labelLoc` spécifie la position de l'étiquette parmi `"top"` et `"bottom"`, `color` indique la couleur de la droite et `strokePattern` spécifie le type de ligne parmi `"dotted"`, `"dashed"`, `"dotdash"`, `"solid"` ou tout autre motif personnalisé sous la forme d'un vecteur numérique.
+```{r}
+dg %>% dyEvent(x = "2000-02-29", 
+               label = "Première version officielle de R",
+               labelLoc = "top",
+               color = "blue", 
+               strokePattern = c(15,5,7,5))
+```
+
+### Fonction `dyLimit`
+La fonction `dyLimit` permet, de façon similaire à la fonction `dyEvent`, de mettre en évidence une valeur dans le graphique en ajoutant une ligne horizontale. L'argument `limit` permet de spécifier la valeur en ordonnée où la droite sera ajoutée. Les valeurs possibles pour l'argument `labelLoc` sont `"left"` et `"right"`.
+```{r}
+dg %>% dyLimit(limit = 350, 
+               label = "Accroissement de 350 000", 
+               labelLoc = "left", 
+               color = "red", 
+               strokePattern = "dotted")
+```
+
+### Fonction `dyOptions`
+La fonction `dyOptions` contient une panoplie d'arguments permettant de modifier les graphiques. Les différentes options présentées peuvent être combinées dans un seul appel de la fonction `dyOptions`.
+
+#### Option `stepPlot`
+L'option `stepPlot` permet d'afficher le graphique sous forme de paliers plutôt qu'un tracé linéaire. Il est possible de l'appliquer pour toutes séries du graphique ou pour une seule. 
+```{r}
+dg %>% dyOptions(stepPlot = TRUE)
+```
+
+#### Option `drawPoints`
+L'option `drawPoints` rend les points du jeu de données visibles sur le graphique.
+```{r}
+dg %>% dyOptions(drawPoints = TRUE, pointSize = 2)
+```
+
+#### Option `axisLineWidth`
+L'option `axisLineWidth` permet de modifier la largeur du trait de l'axe des x et des y. 
+```{r}
+dg %>% dyOptions(axisLineWidth = 2.5)
+```
+
+#### Option `axisLineColor`
+L'option `axisLineColor` modifie la couleur du trait de l'axe des x et des y.
+```{r}
+dg %>% dyOptions(axisLineColor = "red")
+```
+
+#### Option `fillGraph`
+L'option `fillGraph` remplit d'une couleur l'espace entre les axes et les séries lorsque sa valeur est `TRUE`.
+```{r}
+dg %>% dyOptions(fillGraph = TRUE)
+```
+
+#### Option `includeZero`
+L'option `includeZero` assure que l'axe des y est mis à l'échelle à partir de zéro plutôt que dans le bas de la plage de valeurs. 
+```{r}
+dg %>% dyOptions(includeZero = TRUE)
+```
+
+#### Option `stackedGraph`
+L'option `stackedGraph` permet d'empiler des séries les unes sur les autres. La première série spécifiée dans le jeu de données sera positionnée en haut, ainsi de suite jusqu'à ce que la dernière soit celle en bas du graphique.
+```{r}
+dygraph(demoCanada[, c("Accr. migratoire intl", "Accr. naturel")], 
+        main = "Accroissement démographique au Canada de 1987 à 2017", 
+        xlab = "Année", 
+        ylab = "Population en milliers") %>% 
+  dyOptions(stackedGraph = TRUE, includeZero = TRUE)
+```
+
+### Fonction `dySeries`
+La fonction `dySeries` permet de sélectionner une série d'un graphique et de la caractériser via des options. Lorsque les options ne sont pas explicitement spécifiées, les paramètres par défaut sont déterminés par la fonction `dyOptions`. L'argument `name` sert à spécifier à quelle série nous voulons apporter les modifications. Sa valeur doit correspondre au nom qu'elle possède dans le jeu de données. L'argument `stemPlot` permet de tracer une série *en tiges*, au lieu d'être linéaire. L'option `drawPoints` rend les points du jeu de données visibles sur le graphique et on peut changer la taille de chacun de ces points avec l'option `pointSize`, comme nous l'avons déjà illustré avec la fonction `dyOptions`. Les arguments suivants, que nous avons aussi vus précédemment, peuvent être utilisés : `color`, `stepPlot`, `fillGraph`, `strokeWidth` et `strokePattern`. De plus, l'argument `strokeBorderWidth` trace une bordure, blanche par défaut, autour de la ligne de la série. Cette option a l'avantage de faciliter la distinction des séries lorsqu'elles se croisent. On peut changer la couleur de cet ajout de bordure avec `strokeBorderColor`.
+
+```{r}
+dg %>%
+  dySeries(name = "Accr. naturel",
+           stemPlot = TRUE,
+           drawPoints = TRUE,
+           pointSize = 4) %>%
+  dySeries(name = "Accr. migratoire intl",
+           strokeBorderWidth = 3,
+           strokeBorderColor = "cyan")
+```
+
+#### Option `axis`
+L'option `axis` permet de choisir quel axe des y on veut associer à la série. Si la valeur du paramètre est `"y"`, l'axe choisit sera l'axe des y habituel que l'on retrouve à gauche et si la valeur du paramètre est `"y2"`, l'axe des y apparaitra à droite. Attention, si la valeur est `"y2"`, l'intervalle de cet axe sera spécifique à la série choisie et indépendante de l'intervalle de l'axe des y situé à gauche.
+```{r}
+dg %>%
+  dySeries(name = "Accr. naturel",
+           stepPlot = TRUE,
+           drawPoints = TRUE,
+           pointSize = 4,
+           axis = "y2")
+```
+
+### Fonction `dyAxis`
+La fonction `dyAxis` ressemble à la fonction `dyOption`, mais elle propose de personnaliser l'affichage différemment pour chacun des axes. 
+
+#### Option `label`
+On peut nommer le nom de chacun des axes avec l'option `label`.
+```{r}
+dg %>% 
+  dyAxis("x", label = "Année") %>%
+  dyAxis("y", label = "Population en millers")
+```
+
+#### Option `valueRange`
+L'option `valueRange` est pour spécifier l'intervalle de l'axe des y.
+```{r}
+dg %>% 
+  dyAxis("y", valueRange = c(20,550))
+```
+
+#### Options `drawGrid` et `gridLineColor`
+L'option `drawGrid` fait apparaître, en arrière-plan du graphique, des lignes verticales si la valeur est `TRUE` pour l'axe des x, ou des lignes horizontales si la valeur est `TRUE` pour l'axe des y. On peut ensuite spécifier une couleur pour les lignes de la grille avec l'option `gridLineColor`. 
+```{r}
+dg %>% 
+  dyAxis("x",
+         drawGrid = TRUE, 
+         gridLineColor = "green") %>%
+  dyAxis("y", 
+         drawGrid = TRUE, 
+         gridLineColor = "red")
+```
+
+### Fonction `dyLegend`
+La fonction `dyLegend` offre plusieurs options pour personnaliser l'apparence et le comportement de la légende du graphique.
+
+#### Option `show`
+L'option `show` permet de changer l'affichage de la légende. Les valeurs possibles sont: `"auto"`, `"always"`, `"onmouseover"`, `"follow"` ou `"never"`. Alors, la légende peut-être visible en haut à droite, de manière automatique, en tout temps, seulement lorsque la souris est sur le graphique. La légende peut aussi suivre le pointeur de la souris ou ne jamais s'afficher.
+```{r}
+dg %>% dyLegend(show = "follow")
+```
+
+#### Option `hideOnMouseOut`
+L'option `hideOnMouseOut` indique si la légende doit ou non être masquée lorsque le pointeur de la souris quitte la zone de graphique. Si la valeur est `FALSE`, c'est la dernière valeur qui a été indiquée avec la souris qui reste affichée dans la légende. 
+```{r}
+dg %>% dyLegend(hideOnMouseOut = FALSE)
+```
+
+#### Option `width`
+L'option `width` définit la largeur que prendra la légende, en pixels.
+```{r}
+dg %>% dyLegend(width = 600)
+```
+
+# Conclusion et commentaires
+Le package `dygraphs` offre une variété de graphiques interactifs attrayants qui se manipulent aisément dans R Markdown. L'un des points forts est la facilité d'utilisation des fonctions présentes dans ce package. De plus, les options proposées sont multiples et elles sont flexibles. La qualité des graphiques et l'apparence sont soignées. Il y a plusieurs autres types de graphiques qui sont suggérés dans ce package que nous n'avons pas précisé dans cette présentation, mais qui méritent d'être connus. Bref, c'est un package surprenant et même si ses fonctionnalités sont principalement créées par JavaScript, aucun problème n'a été rencontré lors de la production des graphiques. Le seul point négatif est que l'interaction de ces graphiques n'est pas accessible dans les formats PDF, il faut donc privilégier l’utilisation de formats HTML. 
+
+
+# Références
++ <https://rstudio.github.io/dygraphs/>
++ <http://dygraphs.com/options.html>
++ <https://cran.r-project.org/web/packages/dygraphs/dygraphs.pdf>
