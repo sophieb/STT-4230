@@ -28,6 +28,7 @@ Read more on [revealjs github repo](https://github.com/hakimel/reveal.js/#markdo
 
 ## Demo
 
+
 {{<revealjs theme="moon" progress="true">}}
 
 # In the morning
@@ -69,6 +70,50 @@ ___
 
 ## Source :
 
-* [{{%icon "sunglasses" %}} click here to view raw content](https://raw.githubusercontent.com/vjeantet/hugo-theme-docdock/master/exampleSite/content/shortcodes/revealjs.md)
-editURL
+{{%expand "Show code ..."%}}
 
+```
+{{</*revealjs theme="moon" progress="true"*/>}}
+
+# In the morning
+
+___
+
+
+## Getting up
+
+- Turn off alarm
+- Get out of bed
+
+___
+
+## Breakfast
+
+- Eat eggs
+- Drink coffee
+
+---
+
+# In the evening
+
+___
+
+## Dinner
+
+- Eat spaghetti
+- Drink wine
+
+___
+
+## Going to sleep
+
+- Get in bed
+- Count sheep
+
+{{</*revealjs*/>}}
+
+```
+
+{{%/expand%}}
+
+* [{{%icon "sunglasses" %}} click here to view raw content](https://raw.githubusercontent.com/vjeantet/hugo-theme-docdock/master/exampleSite/content/shortcodes/revealjs.md)

@@ -1,52 +1,51 @@
-  </article>
-  <aside class="footline">
-  	{{if .Params.tags }}
-	  <div class="tags"> 
-	    {{ range $index, $tag := .Params.tags }}
-	      <a class="label label-default" href="{{$.Site.BaseURL}}tags/{{ $tag | urlize }}">{{ $tag }}</a>
-	    {{ end }}
-	  </div>
-	{{end}}
+  <div class="chevrons">
+    {{ partial "next-prev-page.html" . }}
+  </div>
 
-  	{{with .Params.LastModifierDisplayName}}
-  	<div class="author">
-  	    <i class='fa fa-user'></i> <a href="mailto:{{ $.Params.LastModifierEmail }}">{{ . }}</a>
-  	</div>
-  	{{end}}
+  </section>
+</article>
 
-	{{ if not .Date.IsZero }}
-  	<div class="date">
-  	    <i class='fa fa-calendar'></i> {{ .Date.Format "02/01/2006" }}
-  	</div>
-  	{{end}}
+<footer>
 
-  	<div class="github-link">
-  		<a href="{{ .Site.Params.editURL }}{{ replace .File.Dir "\\" "/" }}{{ .File.LogicalName }}" target="blank"><i class="fa fa-code-fork"></i>
+<div class="footline">
+    {{if .Params.tags }}
+    <div class="tags"> 
+      {{ range $index, $tag := .Params.tags }}
+        <a class="label label-default" href="{{$.Site.BaseURL}}tags/{{ $tag | urlize }}">{{ $tag }}</a>
+      {{ end }}
+    </div>
+    {{end}}
+
+    {{with .Params.LastModifierDisplayName}}
+    <div class="author">
+        <i class='fa fa-user'></i> <a href="mailto:{{ $.Params.LastModifierEmail }}">{{ . }}</a>
+    </div>
+    {{end}}
+
+    {{ if not .Page.Lastmod.IsZero }}
+    <div class="date">
+        <i class='fa fa-calendar'></i> {{T "last-update-on"}} {{ .Page.Lastmod.Format "02/01/2006" }}
+    </div>
+    {{end}}
+
+    {{ if .Site.Params.editURL }}
+    <div class="github-link">
+      <a href="{{ .Site.Params.editURL }}{{ replace .File.Dir "\\" "/" }}{{ .File.LogicalName }}" target="blank"><i class="fa fa-code-fork"></i>
         {{T "Edit-this-page"}}</a>
     </div>
-  </aside>
-  <aside class="chevrons">
-    {{ partial "next-prev-page.html" . }}
-  </aside>
-  </section>
-</section>
-<footer>
+    {{end}}
+  </div>
+
+
 	<div>
 {{ $footer := print "_footer." .Lang }}
-{{ range where .Site.Pages "Source.BaseFileName" $footer }}
+{{ range where .Site.Pages "File.BaseFileName" $footer }}
   {{ .Content }} 
 {{else}}
   {{ if .Site.GetPage "page" "_footer.md" }}
     {{(.Site.GetPage "page" "_footer.md").Content}}
   {{else}}
-    <strong>{{ T "create-footer-md" }}</strong>
-    <br>
-      Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-    proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    {{ T "create-footer-md" }}
   {{end}}
 {{end}}
 
