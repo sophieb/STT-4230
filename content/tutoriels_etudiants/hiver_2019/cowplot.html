@@ -1,0 +1,502 @@
+---
+title: "Package cowplot"
+linkTitle: "cowplot - extension de ggplot2"
+author: "Diamilatou N'diaye & Saib Romaric Traore"
+weight: 2
+date: '2019-05-29'
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
+  blogdown::html_page:
+    toc: true
+    toc_depth: 2
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+editor_options:
+  chunk_output_type: console
+---
+
+
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction-a-cowplot">Introduction à <code>cowplot</code></a></li>
+<li><a href="#chargement-du-package-et-description-des-donnees">Chargement du package et description des données</a></li>
+<li><a href="#creation-de-graphiques-simples">Création de graphiques simples</a></li>
+<li><a href="#mise-en-forme-de-graphiques-ggplot2">Mise en forme de graphiques ggplot2</a></li>
+<li><a href="#ajout-dannotations">Ajout d’annotations</a></li>
+<li><a href="#combinaison-de-graphiques-fonction-plot_grid">Combinaison de graphiques : fonction <code>plot_grid</code></a><ul>
+<li><a href="#combien-de-graphiques-peut-on-combiner">Combien de graphiques peut-on combiner ?</a></li>
+<li><a href="#est-ce-possible-dajouter-des-identifiants">Est-ce possible d’ajouter des identifiants ?</a></li>
+<li><a href="#peut-on-modifier-laffichage-des-graphiques">Peut-on modifier l’affichage des graphiques ?</a></li>
+</ul></li>
+<li><a href="#combinaison-de-graphiques-fonction-draw_plot">Combinaison de graphiques : fonction <code>draw_plot</code></a><ul>
+<li><a href="#comment-avoir-une-legende-commune">Comment avoir une légende commune ?</a></li>
+<li><a href="#est-ce-possible-dajouter-des-identifiants-1">Est-ce possible d’ajouter des identifiants ?</a></li>
+</ul></li>
+<li><a href="#sauvegarde-dune-grille-de-graphiques-avec-la-fonction-save_plot">Sauvegarde d’une grille de graphiques avec la fonction <code>save_plot</code></a></li>
+<li><a href="#observations-personnelles-sur-le-package">Observations personnelles sur le package</a></li>
+<li><a href="#references">Références</a></li>
+</ul>
+</div>
+
+<hr />
+<div id="introduction-a-cowplot" class="section level1">
+<h1>Introduction à <code>cowplot</code></h1>
+<p>Un des meilleurs moyens de visualisation de résultats statistiques sont les représentations graphiques. Avec <code>ggplot2</code>, les représentations graphiques sont devenues incontournables. Cette visualisation devient beaucoup plus parlante lorsqu’il est possible de synthétiser l’information contenue dans ces graphiques par leur combinaison. Le package <code>cowplot</code> permet de combiner facilement plusieurs tracés <code>ggplot2</code>. Développé par Claus O. Wilke, ce package offre également des fonctionnalités pour faciliter l’ajout d’annotations sur les graphiques <code>ggplot2</code>. Il a été développé pour fournir un thème aux graphiques <code>ggplot2</code>, qui nécessite peu de manipulations des tailles d’annotations, d’axe, de fond, … Le présent document a pour objectif de faire une présentation du package et de ses fonctionnalités.</p>
+</div>
+<div id="chargement-du-package-et-description-des-donnees" class="section level1">
+<h1>Chargement du package et description des données</h1>
+<p>Nous aurons besoin d’installer (si ce n’est pas déjà fait) et de charger le package <code>cowplot</code>. Le chargement de ce package provoque aussi le chargement du package <code>ggplot2</code>, dont il dépend.</p>
+<pre class="r"><code>library(cowplot)</code></pre>
+<p>Les données que nous allons utiliser pour présenter nos fonctions sont issues du jeux de données <code>quakes</code> du package <code>datasets</code>. Elles concernent des séismes ayant étés enregistrés aux iles Fidji depuis 1964. Ces données sont présentées sous forme de data frame de 1000 observations issues de 5 variables : la magnitude, la latitude, la longitude et la profondeur du séisme, ainsi que le nombre de stations ayant rapporté le séisme. Nous allons ensuite ajouter deux facteurs à ce data frame :</p>
+<ul>
+<li><code>magFactor</code>, qui représente la magnitude arrondie à l’entier inferieur, avec 3 niveaux : 4,5 ou 6; et</li>
+<li><code>region</code>, qui représente la région où a eu lieu l’événement, prenant les niveaux : <code>Est</code> ou <code>Ouest</code>.</li>
+</ul>
+<pre class="r"><code>library(datasets)
+quakes$magFactor &lt;- factor(floor(quakes$mag))
+quakes$region &lt;- factor(quakes$long &gt;= 175, labels = c(&quot;Ouest&quot;, &quot;Est&quot;))
+str(quakes)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    1000 obs. of  7 variables:
+##  $ lat      : num  -20.4 -20.6 -26 -18 -20.4 ...
+##  $ long     : num  182 181 184 182 182 ...
+##  $ depth    : int  562 650 42 626 649 195 82 194 211 622 ...
+##  $ mag      : num  4.8 4.2 5.4 4.1 4 4 4.8 4.4 4.7 4.3 ...
+##  $ stations : int  41 15 43 19 11 12 43 15 35 19 ...
+##  $ magFactor: Factor w/ 3 levels &quot;4&quot;,&quot;5&quot;,&quot;6&quot;: 1 1 2 1 1 1 1 1 1 1 ...
+##  $ region   : Factor w/ 2 levels &quot;Ouest&quot;,&quot;Est&quot;: 2 2 2 2 2 2 1 2 2 2 ...</code></pre>
+<pre class="r"><code>summary(quakes)</code></pre>
+<pre><code>##       lat              long           depth            mag      
+##  Min.   :-38.59   Min.   :165.7   Min.   : 40.0   Min.   :4.00  
+##  1st Qu.:-23.47   1st Qu.:179.6   1st Qu.: 99.0   1st Qu.:4.30  
+##  Median :-20.30   Median :181.4   Median :247.0   Median :4.60  
+##  Mean   :-20.64   Mean   :179.5   Mean   :311.4   Mean   :4.62  
+##  3rd Qu.:-17.64   3rd Qu.:183.2   3rd Qu.:543.0   3rd Qu.:4.90  
+##  Max.   :-10.72   Max.   :188.1   Max.   :680.0   Max.   :6.40  
+##     stations      magFactor   region   
+##  Min.   : 10.00   4:802     Ouest:205  
+##  1st Qu.: 18.00   5:193     Est  :795  
+##  Median : 27.00   6:  5                
+##  Mean   : 33.42                        
+##  3rd Qu.: 42.00                        
+##  Max.   :132.00</code></pre>
+</div>
+<div id="creation-de-graphiques-simples" class="section level1">
+<h1>Création de graphiques simples</h1>
+<p>Nous allons ensuite poursuivre en créant des graphiques afin d’illustrer les fonctionnalités des différents outils présentés. Certains des graphiques présentés sont issus du <a href="https://stt4230.rbind.io/communication_resultats/graphiques_r/">cours sur les graphiques en R</a>.</p>
+<pre class="r"><code>hist &lt;- ggplot(quakes, aes(mag, fill = region)) + 
+  geom_bar()
+
+factor &lt;- ggplot(data = quakes, mapping = aes(x = mag, y = stations)) + 
+  geom_point() + 
+  facet_wrap(facets = ~ region)
+
+diag_dispersion &lt;- ggplot(data = quakes) + 
+  geom_point(mapping = aes(x = mag, y = stations))
+
+
+cathego &lt;- ggplot(quakes, aes(x = magFactor, y = long, color = region, shape = region)) +
+  geom_jitter(position = position_jitter(0.2))
+
+density &lt;- ggplot(data = quakes) + 
+  geom_density(mapping = aes(x = mag, fill = region), alpha = 0.5)
+ 
+violon &lt;- ggplot(quakes, aes(x = region, y = long)) + 
+  geom_violin() + 
+  geom_boxplot(width=0.1)</code></pre>
+</div>
+<div id="mise-en-forme-de-graphiques-ggplot2" class="section level1">
+<h1>Mise en forme de graphiques ggplot2</h1>
+<p>Dans un premier temps nous étudierons comment le package <code>cowplot</code> permet de modifier la mise en forme de graphiques produits par <code>ggplot2</code>.</p>
+<p>Le chargement de <code>cowplot</code> conduit à une modification de l’apparence de graphiques <code>ggplot2</code>. En effet <code>ggplot2</code> produit par défaut des graphiques avec un thème prédéfinit ayant, notamment, une grille blanche sur un fond gris. L’utilisation de <code>ggplot2</code> est relativement simple, elle requiert le type de graphique à tracer et les variables à représenter. En contrepartie, la mise en forme de graphiques <code>ggplot2</code> devient rapidement compliquée.</p>
+<p>Le fait de charger le package <code>cowplot</code> modifie l’apparence du graphique. Il enlève la grille de fond pour permettre d’obtenir un fond blanc et change un peu le format des axes et des annotations. Pour éviter ces modifications, il faut prendre le <code>theme_gray</code> qui reproduit la mise en forme par défaut effectuée par <code>ggplot2</code>.</p>
+<pre class="r"><code>hist</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-5-1.png" width="80%" style="display: block; margin: auto;" /></p>
+
+<pre class="r"><code>hist + theme_gray()</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-6-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>On peut également modifier le thème de base de <code>cowplot</code>, c’est-à-dire changer de police, de taille (titre, titre et échelle des axes) ainsi que l’épaisseur des axes. Ceci est possible avec la fonction <code>theme_cowplot</code>.</p>
+<pre class="r"><code>hist + theme_cowplot(font_size = 16, font_family = &quot;&quot;, line_size = 0.9)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-7-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>L’utilisation de la fonction <code>theme_set</code> permet de définir un thème commun à tous les autres graphiques produits par la suite.</p>
+<pre class="r"><code>theme_set(theme_cowplot(font_size = 12, font_family = &quot;&quot;, line_size = 0.5)) </code></pre>
+<p>Il est aussi possible de modifier le fond des graphiques. <code>ggplot2</code> produit une grille de fond, mais celle-ci est assez imposante. Ainsi la fonction <code>background_grid</code> de <code>cowplot</code> permet de contrôler cette grille. La fonction prend comme arguments le <code>major</code> de la grille, c’est à dire l’axe qui aura les traits les plus épais, et aussi le <code>minor</code>, soit l’axe avec le tracé plus fin. Ensuite, nous pouvons modifier la taille et la couleur des axes <code>major</code> ou <code>minor</code>.</p>
+<pre class="r"><code>hist + background_grid(major = &quot;x&quot;, minor = &quot;y&quot;,
+                       size.major = 0.1, size.minor = 0.5, 
+                       colour.major = &quot;gray90&quot;, colour.minor = &quot;grey&quot;)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-9-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Le package <code>cowplot</code> permet de modifier les bordures des graphiques avec la fonction <code>panel_border</code>. L’argument <code>remove = TRUE</code> enlève les bordures existantes, s’il y en a. Les arguments <code>colour</code>, <code>size</code> et <code>linetype</code> servent à spécifier la couleur, l’épaisseur et le type de ligne des bordures.</p>
+<pre class="r"><code>factor</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-10-1.png" width="80%" style="display: block; margin: auto;" /></p>
+
+<pre class="r"><code>factor + panel_border(colour = &quot;grey&quot;, size = 0.5, linetype = 1)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-11-1.png" width="80%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="ajout-dannotations" class="section level1">
+<h1>Ajout d’annotations</h1>
+<p>Poursuivons en examinant les différentes possibilités d’ajout d’annotations sur un graphique <code>ggplot2</code> permises par <code>cowplot</code>.</p>
+<p>La fonction <code>draw_line</code> permet d’ajouter une ligne reliant certains points par-dessus le graphique initial. Pour cela, il faut préciser les coordonnées des points à relier, la couleur et l’épaisseur de la ligne.</p>
+<pre class="r"><code>Reg &lt;- lm(stations ~ mag, data = quakes)
+x &lt;- seq(4,6,0.1)
+y &lt;- Reg$coefficients[2]*x + Reg$coefficients[1]
+diag_dispersion + draw_line(x = x, y = y, color = &quot;blue&quot;, size = 2)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-12-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Une autre fonction qui permet l’ajout d’annotations sur un graphique est <code>draw_figure_label</code>. Les arguments de cette fonction sont : l’expression à ajouter ; puis la position où la mettre, dont les options sont <code>top.left</code>, <code>top</code>, <code>top.right</code>, <code>bottom.left</code>, <code>bottom</code>, <code>bottom.right</code> (la valeur par défaut est <code>top.left</code>). Il est optionnel de préciser la police et la taille voulues pour l’expression. Cependant, la fonction ajoute l’annotation à l’intérieur de la zone graphique, ce qui cause un décalage de la représentation. L’ajout de la fonction <code>ggdraw</code> permet de corriger ce problème en séparant la zone graphique de l’annotation.</p>
+<pre class="r"><code>ggdraw(cathego) + draw_figure_label(label = &quot;Figure 1&quot;, position = &quot;top.right&quot;, fontface = &quot;bold&quot;)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-13-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Pour ajouter des annotations sous le graphique, nous avons recours à la fonction <code>add_sub</code>. Après avoir précisé le graphique que nous souhaitons utiliser et l’expression à écrire, nous avons recours à la fonction <code>ggdraw</code> pour afficher correctement le graphique, car <code>add_sub</code> retourne une liste.</p>
+<pre class="r"><code>ggdraw(add_sub(cathego,
+  &quot;Les triangles bleus representent la region Est.\nLes points oranges representent la region Ouest.&quot;
+))</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-14-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>La fonction <code>draw_label</code> permet quant à elle d’ajouter, par exemple, une expression mathématique sur un graphique.</p>
+<pre class="r"><code>moy &lt;- mean(quakes$mag)
+et &lt;- sd(quakes$mag)
+
+graph &lt;- ggplot(data = quakes, mapping = aes(x = mag)) +
+  geom_histogram(mapping = aes(y = stat(density)), 
+                 binwidth = 0.2, colour = &quot;black&quot;, fill = &quot;white&quot;) +
+  labs(x = &quot;magnitude&quot;, y = &quot;densité&quot;,
+       title = &quot;Densité empirique des magnitudes dans le jeu de données quakes&quot;) +
+  # Ajout d&#39;une courbe de densité théorique, paramètres estimés avec les données
+  stat_function(fun = dnorm, args = list(mean = moy, sd = et), 
+                xlim = c(3.9, 6.5), colour = &quot;blue&quot;)
+
+label &lt;- expression(paste(&quot;Densité N(&quot;, mu, &quot; = &quot;, 4.6, &quot;, &quot;, sigma^2, &quot; = &quot;, 0.4^2, &quot;)&quot;))
+graph + draw_label(label, x = 5.4, y = 0.40, hjust = 0, vjust = 0, colour = &quot;blue&quot;) </code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-15-1.png" width="80%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="combinaison-de-graphiques-fonction-plot_grid" class="section level1">
+<h1>Combinaison de graphiques : fonction <code>plot_grid</code></h1>
+<p>La fonction <code>plot_grid</code> permet de combiner plusieurs graphiques dans une grille.
+Voici une brève description de ses arguments :</p>
+<table>
+<colgroup>
+<col width="40%" />
+<col width="59%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>...</code></td>
+<td>graphiques à organiser dans la grille</td>
+</tr>
+<tr class="even">
+<td><code>plotlist = NULL</code></td>
+<td>liste des graphiques à organiser dans la grille, si non fournis via <code>...</code></td>
+</tr>
+<tr class="odd">
+<td><code>align = c("none", "h", "v", "hv")</code></td>
+<td>alignement (vertical ou horizontal) des graphiques</td>
+</tr>
+<tr class="even">
+<td><code>axis = c("none", "l", "r", "t", "b", "lr", "tb", "tblr")</code></td>
+<td>marge par rapport auxquelles effectuer l’alignement</td>
+</tr>
+<tr class="odd">
+<td><code>nrow = NULL</code></td>
+<td>nombre de lignes dans la grille</td>
+</tr>
+<tr class="even">
+<td><code>ncol = NULL</code></td>
+<td>nombre de colonnes dans la grille</td>
+</tr>
+<tr class="odd">
+<td><code>rel_widths = 1</code></td>
+<td>largeurs relatives des colonnes</td>
+</tr>
+<tr class="even">
+<td><code>rel_heights = 1</code></td>
+<td>hauteurs relatives des colonnes</td>
+</tr>
+<tr class="odd">
+<td><code>labels = NULL</code></td>
+<td>liste des étiquettes à ajouter aux graphiques</td>
+</tr>
+<tr class="even">
+<td><code>label_size = 14</code></td>
+<td>taille des étiquettes</td>
+</tr>
+<tr class="odd">
+<td><code>label_fontfamily = NULL</code></td>
+<td>famille de police de caractères des étiquettes</td>
+</tr>
+<tr class="even">
+<td><code>label_fontface = "bold"</code></td>
+<td>mise en relief de la police de caractères des étiquettes</td>
+</tr>
+<tr class="odd">
+<td><code>label_colour = NULL</code></td>
+<td>couleur des étiquettes</td>
+</tr>
+<tr class="even">
+<td><code>label_x = 0</code></td>
+<td>positions pour les étiquettes sur l’axe des abscisses</td>
+</tr>
+<tr class="odd">
+<td><code>label_y = 1</code></td>
+<td>positions pour les étiquettes sur l’axe des ordonnées</td>
+</tr>
+<tr class="even">
+<td><code>hjust = -0.5</code></td>
+<td>ajustement horizontal de chaque étiquette</td>
+</tr>
+<tr class="odd">
+<td><code>vjust = 1.5</code></td>
+<td>ajustement vertical de chaque étiquette</td>
+</tr>
+<tr class="even">
+<td><code>scale = 1</code></td>
+<td>réglage de l’échelle</td>
+</tr>
+</tbody>
+</table>
+<div id="combien-de-graphiques-peut-on-combiner" class="section level2">
+<h2>Combien de graphiques peut-on combiner ?</h2>
+<p>La fonction <code>plot_grid</code> peut combiner le nombre désiré de graphiques. La combinaison est très simple. Essayons de combiner 4 graphiques simples crées auparavant (<code>diag_dispersion</code>, <code>density</code>, <code>violon</code> et <code>cathego</code>).</p>
+<pre class="r"><code>plot_grid(diag_dispersion, density, violon, cathego)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-16-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Remarquons que le remplissage de la grille de graphiques se fait ligne par ligne.</p>
+<p>En plus d’avoir le choix du nombre de graphiques, nous pouvons décider d’afficher un graphique vide. Pour cela, on utilise <code>NULL</code> comme nom du graphique. Essayons d’afficher (<code>diag_dispersion</code>, <code>density</code>, <code>violon</code>) avec un graphique vide.</p>
+
+<pre class="r"><code>plot_grid(diag_dispersion, NULL, density, violon)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-17-1.png" width="80%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="est-ce-possible-dajouter-des-identifiants" class="section level2">
+<h2>Est-ce possible d’ajouter des identifiants ?</h2>
+<p>Il est possible avec la fonction <code>plot_grid</code> d’ajouter des identifiants aux graphiques combinés et de mettre en forme ces identifiants. Avec <code>labels = "AUTO"</code>, nous obtenons des identifiants générés automatiquement, sous forme de lettres majuscules.</p>
+<pre class="r"><code>plot_grid(diag_dispersion, density, violon, cathego, labels = &quot;AUTO&quot;)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-18-1.png" width="80%" style="display: block; margin: auto;" /></p>
+
+<p>Avec <code>labels = "auto"</code>, nous obtenons des identifiants sous forme de lettres minuscules.</p>
+<pre class="r"><code>plot_grid(diag_dispersion, density, violon, cathego, labels = &quot;auto&quot;)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-19-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Nous pouvons également spécifier les identifiants à utiliser, par exemple avec <code>labels = c("1", "2", "3", "4")</code>.</p>
+<pre class="r"><code>plot_grid(diag_dispersion, density, violon, cathego, labels = c(&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;))</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-20-1.png" width="80%" style="display: block; margin: auto;" /></p>
+
+<p>Le changement de police, de couleur et d’emplacement des identifiants est possible avec <code>label_size</code>, <code>label_colour</code> et <code>lable_y</code>.</p>
+<pre class="r"><code>plot_grid(diag_dispersion, density, violon, cathego,
+          labels = c(&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;),
+          label_size = 16, label_colour = &#39;Blue&#39;, label_y = 0.4)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-21-1.png" width="80%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="peut-on-modifier-laffichage-des-graphiques" class="section level2">
+<h2>Peut-on modifier l’affichage des graphiques ?</h2>
+<p>Il est possible de modifier l’affichage des graphiques en jouant avec les parcelles. La grille est constituée de parcelles dans lesquelles sont disposés nos graphiques. Par défaut, la disposition des parcelles est déterminée automatiquement par la fonction. Avec les paramètres <code>ncol</code> et <code>nrow</code>, on peut manipuler le nombre et la disposition des parcelles dans lesquelles les graphiques seront placés. Les graphiques s’adaptent aux dimensions des parcelles. Voici quelques exemples de dispositions de parcelles.</p>
+<p><img src="fig/parcelle.png" width="60%" style="display: block; margin: auto;" /></p>
+
+<p>Avec <code>ncol = 2</code> et <code>nrow = 2</code>, on obtient 4 parcelles sous la forme d’une matrice 2x2, mais <code>ncol = 1</code> et <code>nrow = 4</code>, donnent 4 parcelles sous la forme d’une matrice 4x1.</p>
+<pre class="r"><code>plot_grid(diag_dispersion, density, violon, cathego, 
+          labels = c(&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;), label_size = 16, label_colour = &#39;Blue&#39;,
+          ncol = 2, nrow = 2)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-23-1.png" width="80%" style="display: block; margin: auto;" /></p>
+
+<pre class="r"><code>plot_grid(diag_dispersion, density, violon, cathego, 
+          labels = c(&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;), label_size = 16, label_colour = &#39;Blue&#39;,
+          ncol = 1, nrow = 4)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-24-1.png" width="80%" style="display: block; margin: auto;" /></p>
+
+<p>Il est possible de définir plus de parcelles que de graphiques.</p>
+<pre class="r"><code>plot_grid(diag_dispersion, density, violon, 
+          labels = c(&quot;1&quot;, &quot;2&quot;, &quot;3&quot;), label_size = 16, label_colour = &#39;Blue&#39;,
+          ncol = 2, nrow = 2)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-25-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Il est également possible de modifier la dimension relative des parcelles. On pourrait, par exemple, souhaiter que la 2<sup>e</sup> colonne soit 3 fois plus grande que la première, ou simplement que la première ligne soit plus petite que les autres. Les paramètres <code>rel_widths</code> et <code>rel_heights</code> permettent de faire ces ajustements. Cela nous permet de mettre en valeur un graphique plus important que les autres.</p>
+
+<pre class="r"><code>plot_grid(diag_dispersion, density, violon, cathego, 
+          labels = c(&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;), label_size = 16, label_colour = &#39;Blue&#39;,
+          ncol = 2, nrow = 2,
+          rel_widths = c(1, 3), rel_heights = c(3, 1))</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-26-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Si on souhaite diminuer l’aperçu global de nos graphiques, on peut utiliser <code>scale</code> qui permet de modifier l’échelle de la grille. Le résultat n’est pas excellent, donc pas illustré ici.</p>
+</div>
+</div>
+<div id="combinaison-de-graphiques-fonction-draw_plot" class="section level1">
+<h1>Combinaison de graphiques : fonction <code>draw_plot</code></h1>
+<p>La fonction <code>draw_plot</code> permet également de combiner les graphiques, mais faut il faut définir les positions de chaque graphique. Voici une brève description des paramètres de cette fonction :</p>
+<table>
+<colgroup>
+<col width="21%" />
+<col width="78%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>plot</code></td>
+<td>graphique à ajouter</td>
+</tr>
+<tr class="even">
+<td><code>x = 0</code></td>
+<td>emplacement x (gauche/droite) du coin inférieur gauche du graphique</td>
+</tr>
+<tr class="odd">
+<td><code>y = 0</code></td>
+<td>emplacement y (en haut/en bas) du coin inférieur gauche du graphique</td>
+</tr>
+<tr class="even">
+<td><code>width = 1</code></td>
+<td>largeur de la parcelle</td>
+</tr>
+<tr class="odd">
+<td><code>height = 1</code></td>
+<td>hauteur de la parcelle</td>
+</tr>
+<tr class="even">
+<td><code>scale = 1</code></td>
+<td>réglage de l’échelle</td>
+</tr>
+</tbody>
+</table>
+<p>La fonction <code>draw_plot</code> s’utilise avec la fonction <code>ggdraw</code>, qui permet d’initialiser un graphique.</p>
+<p>Essayons de combiner nos 4 graphiques :</p>
+<ul>
+<li><code>x = 0, y = 0.5</code> permet de placer le 1<sup>er</sup> graphique en haut à gauche;</li>
+<li><code>x = 0.5, y = 0.5</code> permet de placer le 2<sup>e</sup> graphique en haut à droite;</li>
+<li><code>x = 0, y = 0</code> permet de placer le 3<sup>e</sup> graphique en en bas à gauche;</li>
+<li><code>x = 0.5, y = 0</code> permet de placer le 4<sup>e</sup> graphique en en bas à droite;</li>
+<li><code>width = 0.5, height = 0.5</code> permet de définir la même taille pour tous les graphiques.</li>
+</ul>
+<p>À la différence de <code>plot_grid</code>, la fonction <code>draw_plot</code> prend un seul graphique à la fois.</p>
+<pre class="r"><code>ggdraw() +
+  draw_plot(diag_dispersion, x = 0, y = 0.5, width = 0.5, height = 0.5) +
+  draw_plot(density, x = 0.5, y = 0.5, width = 0.5, height = 0.5) +
+  draw_plot(violon, x = 0, y = 0, width = 0.5, height = 0.5) +
+  draw_plot(cathego, x = 0.5, y = 0, width = 0.5, height = 0.5)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-27-1.png" width="80%" style="display: block; margin: auto;" /></p>
+
+<p>On peut même superposer deux graphiques, il suffit de jouer avec la position et la dimension des graphiques.</p>
+<pre class="r"><code> ggdraw() +
+  draw_plot(density, x = 0, y = 0, width = 1, height = 1) +
+  draw_plot(hist, x = 0.5, y = 0.5, width = 0.5, height = 0.4)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-28-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<div id="comment-avoir-une-legende-commune" class="section level2">
+<h2>Comment avoir une légende commune ?</h2>
+<p>La possibilité de récupérer la légende d’un graphique <code>ggplot2</code> est offerte par <code>cowplot</code> avec la fonction <code>get_legend</code>. Cette fonction peut s’avérer utile lorque l’on cherche à enlever les légendes individuelles de graphiques dans le but de les regrouper et de leur assigner une légende commune.</p>
+<pre class="r"><code>legend &lt;- get_legend(hist)</code></pre>
+<p>Dans l’exemple précèdent, nous pourrions souhaiter obtenir une même légende pour les deux graphiques. Alors nous pouvons retirer les légendes individuelles avec <code>theme(legend.position = 'none')</code>, puis en remettre une, préalablement extraite avec <code>get_legend</code>, à l’aide de la fonction <code>plot_grid</code>.</p>
+<pre class="r"><code>density2 &lt;- density + theme(legend.position = &quot;none&quot;)
+hist2 &lt;- hist + theme(legend.position=&#39;none&#39;)
+a &lt;- ggdraw() +
+  draw_plot(density2, x = 0, y = 0, width = 1, height = 1) +
+  draw_plot(hist2 , x = 0.5, y = 0.5, width = 0.5, height = 0.4)
+plot_grid(a, legend, rel_widths = c(1, 0.2))</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-30-1.png" width="80%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="est-ce-possible-dajouter-des-identifiants-1" class="section level2">
+<h2>Est-ce possible d’ajouter des identifiants ?</h2>
+<p>Nous pouvons afficher les identifiants et modifier la couleur, la taille et la police de ceux-ci avec la fonction <code>draw_plot_label</code>.</p>
+<pre class="r"><code>ggdraw() +
+  draw_plot(diag_dispersion, x = 0, y = 0.5, width = 0.5, height = 0.5) +
+  draw_plot(density, x = 0.5, y = 0.5, width = 0.5, height = 0.5) +
+  draw_plot(violon, x = 0, y = 0, width = 0.5, height = 0.5) +
+  draw_plot(cathego, x = 0.5, y = 0, width = 0.5, height = 0.5) +
+  draw_plot_label(label = c(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;, &quot;D&quot;), 
+                  x = c(0, 0.5, 0, 0.5), y = c(1, 1, 0.5, 0.5), 
+                  size = 14, colour = &#39;blue&#39;)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-31-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_grid(a, legend, rel_widths = c(1, 0.2)) +
+  draw_plot_label(label = c(&quot;A&quot;, &quot;B&quot;), 
+                  x = c(0, 0.4), y = c(1, 0.9), 
+                  size = 20, colour = &quot;purple&quot;)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2019/cowplot_files/figure-html/unnamed-chunk-32-1.png" width="80%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="sauvegarde-dune-grille-de-graphiques-avec-la-fonction-save_plot" class="section level1">
+<h1>Sauvegarde d’une grille de graphiques avec la fonction <code>save_plot</code></h1>
+<p>Lorsque l’on travaille avec <code>cowplot</code>, la fonction <code>save_plot</code> est utilisée pour enregistrer une grille de graphiques. C’est une alternative à <code>ggsave</code> avec un meilleur support pour les graphiques multi-figures. Voici une brève description des paramètres de la fonction <code>save_plot</code> :</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="66%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>filename</code></td>
+<td>nom du fichier à créer</td>
+</tr>
+<tr class="even">
+<td><code>plot</code></td>
+<td>graphique à enregister</td>
+</tr>
+<tr class="odd">
+<td><code>ncol = 1</code></td>
+<td>nombre de parcelles par colonne</td>
+</tr>
+<tr class="even">
+<td><code>nrow = 1</code></td>
+<td>nombre de parcelles par ligne</td>
+</tr>
+<tr class="odd">
+<td><code>base_height = 4</code></td>
+<td>hauteur des parcelles</td>
+</tr>
+<tr class="even">
+<td><code>base_aspect_ratio = 1.1</code></td>
+<td>rapport largeur/hauteur des parcelles</td>
+</tr>
+<tr class="odd">
+<td><code>base_width = NULL</code></td>
+<td>largeur des parcelles (déduit de <code>base_height</code> et <code>base_aspect_ratio</code> par défaut)</td>
+</tr>
+<tr class="even">
+<td><code>...</code></td>
+<td>autres arguments à passer à <code>ggsave</code> au besoin</td>
+</tr>
+</tbody>
+</table>
+<p>Il est possible d’enregistrer la grille au format PDF, PNG et JPG.
+Pour enregistrer une grille, <code>save_plot</code> et <code>plot_grid</code> doivent avoir les mêmes valeurs pour <code>nrow</code> et <code>ncol</code>.</p>
+<pre class="r"><code>graphique_final &lt;- 
+  plot_grid(diag_dispersion, density, violon, cathego, 
+            labels=c(&quot;1&quot;, &quot;2&quot;, &quot;3&quot;,&quot;4&quot;),label_size = 16, label_colour = &#39;Blue&#39;,
+            ncol = 2, nrow = 2)
+
+#format PDF
+save_plot(&quot;graphique_final.pdf&quot;, graphique_final, 
+          ncol = 2, nrow = 2, base_aspect_ratio = 1.3)
+#format PNG
+save_plot(&quot;graphique_final.png&quot;, graphique_final, 
+          ncol = 2, nrow = 2, base_aspect_ratio = 1.3)
+#format JPG
+save_plot(&quot;graphique_final.jpg&quot;, graphique_final, 
+          ncol = 2, nrow = 2, base_aspect_ratio = 1.3)</code></pre>
+</div>
+<div id="observations-personnelles-sur-le-package" class="section level1">
+<h1>Observations personnelles sur le package</h1>
+<p>Le package <code>cowplot</code> est relativement facile d’utilisation, notamment pour la combinaison de graphiques. Il permet de faciliter la production de graphiques destinés aux publications scientifiques.
+Bien que le package <code>cowplot</code> soit assez bien documenté dans l’ensemble, certaines fonctions demeurent assez peu documentées.
+Dans certains cas, avoir une légende commune pour des graphiques de même type permet une simplicité dans la présentation. Un des points négatifs de <code>cowplot</code> est qu’il n’offre pas la possibilité de faire facilement une légende pour tous les graphiques mis en commun par la fonction <code>plot_grid</code>.
+De plus <code>cowplot</code> ne permet pas la combinaison de graphiques, de tables et de textes. Ces fonctionnalités sont offertes par d’autres packages tel que <code>gridExtra</code> par exemple.</p>
+</div>
+<div id="references" class="section level1">
+<h1>Références</h1>
+<p><a href="https://cran.r-project.org/web/packages/cowplot/cowplot.pdf" class="uri">https://cran.r-project.org/web/packages/cowplot/cowplot.pdf</a></p>
+<p><a href="https://cran.r-project.org/web/packages/cowplot/vignettes/introduction.html" class="uri">https://cran.r-project.org/web/packages/cowplot/vignettes/introduction.html</a></p>
+<p><a href="https://www.rdocumentation.org/packages/cowplot/versions/0.9.4" class="uri">https://www.rdocumentation.org/packages/cowplot/versions/0.9.4</a></p>
+<p><a href="https://bioinfo.iric.ca/fr/introduction-a-cowplot/" class="uri">https://bioinfo.iric.ca/fr/introduction-a-cowplot/</a></p>
+<p><a href="http://www.sthda.com/french/wiki/ggplot2-combiner-plusieurs-graphiques-sur-la-m-me-page-logiciel-r-et-visualisation-de-donn-es" class="uri">http://www.sthda.com/french/wiki/ggplot2-combiner-plusieurs-graphiques-sur-la-m-me-page-logiciel-r-et-visualisation-de-donn-es</a></p>
+<p><a href="https://CRAN.R-project.org/package=gridExtra" class="uri">https://CRAN.R-project.org/package=gridExtra</a></p>
+</div>
