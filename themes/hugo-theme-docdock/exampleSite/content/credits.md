@@ -5,7 +5,7 @@ description = "contributors and packages used by hugo-theme-docdock"
 
 
 ## github contributors
-{{%ghcontributors "https://api.github.com/repos/vjeantet/hugo-theme-docdock/contributors?per_page=100" %}}
+{{<ghcontributors "https://api.github.com/repos/vjeantet/hugo-theme-docdock/contributors?per_page=100" >}}
 
 ### Other contribution
 <div class="ghContributors">
@@ -41,4 +41,4 @@ description = "contributors and packages used by hugo-theme-docdock"
 ## Tooling
 
 * [Netlify](https://www.netlify.com) - Continuous deployement and hosting of this documentation
-* [Hugo](https://gohugo.io/) {{%icon "fa-smile-o"%}}
+* [Hugo](https://gohugo.io/) {{<icon "fa-smile-o">}}

@@ -25,4 +25,4 @@ Example from the current website, **note the `pre` param** which allows you to i
 	weight = 2
 
 
-[{{%icon circle-arrow-right%}} Read more about hugo and menu here](https://gohugo.io/extras/menus/)
+[{{<icon circle-arrow-right>}} Read more about hugo and menu here](https://gohugo.io/extras/menus/)

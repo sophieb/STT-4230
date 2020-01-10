@@ -37,7 +37,7 @@ content
 ```
 
 
-{{%alert info %}} **_index.md** is required in each folder, it's your "folder home page"{{%/alert%}}
+{{<alert info >}} **_index.md** is required in each folder, it's your "folder home page"{{</alert>}}
 
 ### Add header to a menu entry
 
@@ -88,7 +88,7 @@ Add a `url` param next to `[menu.main]`
 	url = "/shortcode/image/"
 	+++
 
-{{%alert info%}}Look at the menu "Create Page/About images" which redirects to "Shortcodes/image{{%/alert%}}
+{{<alert info>}}Look at the menu "Create Page/About images" which redirects to "Shortcodes/image{{</alert>}}
  -->
 ### Order sibling menu/page entries
 
@@ -99,7 +99,7 @@ in your frontmatter add `weight` param with a number to order.
 	weight = 4
 	+++
 
-{{%info%}}add `ordersectionsby = "title"` in your config.toml to order menu entries by title{{%/info%}}
+{{<info>}}add `ordersectionsby = "title"` in your config.toml to order menu entries by title{{</info>}}
 
 
 ### Hide a menu entry
@@ -132,7 +132,7 @@ Content organization **is** your `content` folder structure.
 
 ### Homepage
 
-Find out how to [customize homepage]({{%relref "homepage.md"%}}) 
+Find out how to [customize homepage]({{<relref "homepage.md">}}) 
 
 
 

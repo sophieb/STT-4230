@@ -4,7 +4,7 @@ description = ""
 weight = 1
 +++
 
-{{% alert theme="warning" %}}HUGO **v0.32** minimum required to use this theme{{%/alert%}}
+{{< alert theme="warning" >}}HUGO **v0.32** minimum required to use this theme{{</alert>}}
 
 The following steps are here to help you initialize your new website. If you don’t know Hugo at all, we strongly suggest you to train by following this [great documentation for beginners](https://gohugo.io/overview/quickstart/).
 <!--more-->
@@ -71,7 +71,7 @@ $ git clone https://github.com/vjeantet/hugo-theme-docdock.git themes/docdock
 
 ### 3. Install DocDock from ZIP
 
-All files from theme will be tracked inside parent repo, to update it, have to override files in theme. [{{%icon download%}} download following zip](https://github.com/vjeantet/hugo-theme-docdock/archive/master.zip) and extract inside `themes/`.
+All files from theme will be tracked inside parent repo, to update it, have to override files in theme. [{{<icon download>}} download following zip](https://github.com/vjeantet/hugo-theme-docdock/archive/master.zip) and extract inside `themes/`.
 
 ```
 https://github.com/vjeantet/hugo-theme-docdock/archive/master.zip
@@ -80,4 +80,4 @@ Name of theme in next step will be `hugo-theme-docdock-master`, can rename as yo
 
 ## Configuration
 
-[Follow instructions here]({{%relref "configuration.md"%}})
+[Follow instructions here]({{<relref "configuration.md">}})

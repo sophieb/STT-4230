@@ -3,6 +3,6 @@ title = "Hiver 2015"
 weight = 5
 +++
 
-{{%children depth="2"%}}
+{{<children depth="2">}}
 
     

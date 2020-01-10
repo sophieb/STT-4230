@@ -6,16 +6,16 @@ date = "2017-04-24T18:36:24+02:00"
 
 A basic md content page can be rendered as a reveal.js presentation full screen.
 
-{{%alert info%}}You can, also, **embed presentation in a page** as a small box, using the [revealjs]({{% relref "shortcodes/revealjs.md"%}}) shortcode in your md file.{{%/alert%}}
+{{<alert info>}}You can, also, **embed presentation in a page** as a small box, using the [revealjs]({{< relref "shortcodes/revealjs.md">}}) shortcode in your md file.{{</alert>}}
 
 
 ## Formating
 Use your common Markdown syntax you use in Hugo, don't forget, you can put html tags too.
 
-{{%notice info %}} Special syntax (in html comment) is available for adding attributes to Markdown elements. This is useful for fragments, amongst other things.
-{{%/notice%}}
+{{<notice info >}} Special syntax (in html comment) is available for adding attributes to Markdown elements. This is useful for fragments, amongst other things.
+{{</notice>}}
 
-Please read the [{{%icon book%}} doc from hakimel](https://github.com/hakimel/reveal.js/#instructions)
+Please read the [{{<icon book>}} doc from hakimel](https://github.com/hakimel/reveal.js/#instructions)
 
 
 ## Options
@@ -111,4 +111,4 @@ ___
 
 ```
 
-[{{%icon expand%}}click here to view this page rendered]({{%relref "myslide.md"%}})
+[{{<icon expand>}}click here to view this page rendered]({{<relref "myslide.md">}})

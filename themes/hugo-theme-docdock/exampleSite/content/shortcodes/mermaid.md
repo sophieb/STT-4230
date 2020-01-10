@@ -4,7 +4,7 @@ description = ""
 +++
 
 ## Flowchart example
-{{%expand "Show code ..."%}}
+{{<expand "Show code ...">}}
 	{{</*mermaid align="left"*/>}}
 	graph LR;
 		A[Hard edge] -->|Link text| B(Round edge)
@@ -12,7 +12,7 @@ description = ""
     	C -->|One| D[Result one]
     	C -->|Two| E[Result two]
     {{</* /mermaid */>}}
-{{%/expand%}}
+{{</expand>}}
 
 {{<mermaid align="left">}}
 graph LR;
@@ -24,7 +24,7 @@ graph LR;
 
 ### With sub-graphs and some style
 
-{{%expand "Show code..."%}}
+{{<expand "Show code...">}}
     {{</*mermaid align="left"*/>}}
     graph LR;
         X --> Y
@@ -50,7 +50,7 @@ graph LR;
         classDef left fill:#ccf,stroke:#f66,stroke-width:2px,stroke-dasharray: 5, 5
         class A1,B1,C1 left
     {{</* /mermaid */>}}
-{{%/expand%}}
+{{</expand>}}
 
 {{<mermaid align="left">}}
 graph LR;
@@ -79,7 +79,7 @@ graph LR;
 {{</mermaid>}}
 
 ## Sequence example
-{{%expand "Show code ..."%}}
+{{<expand "Show code ...">}}
 	{{</*mermaid*/>}}
 	sequenceDiagram
 	    participant Alice
@@ -93,7 +93,7 @@ graph LR;
 	    John->Bob: How about you?
 	    Bob-->John: Jolly good!
 	{{</* /mermaid */>}}
-{{%/expand%}}
+{{</expand>}}
 
 {{<mermaid>}}
 sequenceDiagram
@@ -112,7 +112,7 @@ sequenceDiagram
 
 
 ## GANTT Example
-{{%expand "Show code ..."%}}
+{{<expand "Show code ...">}}
 	{{</*mermaid*/>}}
 	gantt
 	        dateFormat  YYYY-MM-DD
@@ -130,7 +130,7 @@ sequenceDiagram
 	        Create tests for renderer           :2d
 	        Add to mermaid                      :1d
 	{{</* /mermaid */>}}
-{{%/expand%}}
+{{</expand>}}
 
 {{<mermaid>}}
 gantt

@@ -17,7 +17,7 @@ disableNavChevron = true
 disableSearch = true
 ```
 
-## hide the {{%icon fa-home%}} icon in side bar
+## hide the {{<icon fa-home>}} icon in side bar
 ```
 [params]
 disableHomeIcon = true

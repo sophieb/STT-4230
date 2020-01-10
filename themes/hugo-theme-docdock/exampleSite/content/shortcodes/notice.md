@@ -8,54 +8,54 @@ The notice shortcode shows 4 types of disclaimers to help you structure your pag
 
 ## Note
 
-	{{%/* notice note */%}}
+	{{</* notice note */>}}
 	A notice disclaimer
-	{{%/* /notice */%}}
+	{{</* /notice */>}}
 
 renders as
 
-{{% notice note %}}
+{{< notice note >}}
 A notice disclaimer
-{{% /notice %}}
+{{< /notice >}}
 
 
 ## Info
 
-	{{%/* notice info */%}}
+	{{</* notice info */>}}
 	An information disclaimer
-	{{%/* /notice */%}}
+	{{</* /notice */>}}
 
 renders as
 
-{{% notice info %}}
+{{< notice info >}}
 An information disclaimer
-{{% /notice %}}
+{{< /notice >}}
 
 
 
 ## Tip
 
-	{{%/* notice tip */%}}
+	{{</* notice tip */>}}
 	A tip disclaimer
-	{{%/* /notice */%}}
+	{{</* /notice */>}}
 
 renders as
 
-{{% notice tip %}}
+{{< notice tip >}}
 A tip disclaimer
-{{% /notice %}}
+{{< /notice >}}
 
 
 
 ## Warning
 
-	{{%/* notice warning */%}}
+	{{</* notice warning */>}}
 	An warning disclaimer
-	{{%/* /notice */%}}
+	{{</* /notice */>}}
 
 renders as
 
-{{% notice warning %}}
+{{< notice warning >}}
 An warning disclaimer
-{{% /notice %}}
+{{< /notice >}}
 
