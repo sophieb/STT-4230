@@ -23,37 +23,37 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
 #### Ce site web comprend les pages suivantes : 
 
 * Introduction à R
-    * [Présentation de R]({{%relref "introduction/presentation_r_2019.html" %}})
-    * [Installation de R et RStudio]({{%relref "introduction/installation_r_2019.html" %}})
-    * [Concepts de base en R]({{%relref "introduction/base_r_2019.html" %}})
+    * [Présentation de R]({{< relref "introduction/presentation_r_2019.html" >}})
+    * [Installation de R et RStudio]({{< relref "introduction/installation_r_2019.html" >}})
+    * [Concepts de base en R]({{< relref "introduction/base_r_2019.html" >}})
 * Manipulation de données en R
-    * [Structure de données en R]({{%relref "manipulation_donnees/structures_donnees_r_2019.html" %}})
-    * [Lecture et écriture dans des fichiers externes à partir de R]({{%relref "manipulation_donnees/lecture_ecriture_r_2019.html" %}})
-    * [Prétraitement de données en R]({{%relref "manipulation_donnees/pretraitement_donnees_r_2019.html" %}})
+    * [Structure de données en R]({{< relref "manipulation_donnees/structures_donnees_r_2019.html" >}})
+    * [Lecture et écriture dans des fichiers externes à partir de R]({{< relref "manipulation_donnees/lecture_ecriture_r_2019.html" >}})
+    * [Prétraitement de données en R]({{< relref "manipulation_donnees/pretraitement_donnees_r_2019.html" >}})
 * Calculs en R
-    * [Calculs de base en R]({{%relref "calculs/calculs_base_r_2019.html" %}})
-    * [Calculs statistiques et mathématiques plus avancés en R]({{%relref "calculs/calculs_stat_math_r_2019.html" %}})
+    * [Calculs de base en R]({{< relref "calculs/calculs_base_r_2019.html" >}})
+    * [Calculs statistiques et mathématiques plus avancés en R]({{< relref "calculs/calculs_stat_math_r_2019.html" >}})
 * Communication de résultats en R
-    * [Graphiques en R]({{%relref "communication_resultats/graphiques_r_2019.html" %}})
-    * [Rédaction de documents en R Markdown]({{%relref "communication_resultats/redaction_r_markdown_2019.html" %}})
+    * [Graphiques en R]({{< relref "communication_resultats/graphiques_r_2019.html" >}})
+    * [Rédaction de documents en R Markdown]({{< relref "communication_resultats/redaction_r_markdown_2019.html" >}})
 * Programmation en R
-    * [Informations techniques concernant R]({{%relref "programmation/info_techniques_r_2019.html" %}})
-    * [Structure de contrôle en R]({{%relref "programmation/struct_controle_r_2019.html" %}})
-    * [Fonctions en R]({{%relref "programmation/fonctions_r_2019.html" %}})
-    * [Programmation orientée objet en R]({{%relref "programmation/oop_r_2019.html" %}})
-    * [Tests et exceptions en R]({{%relref "programmation/tests_exceptions_r_2019.html" %}})
+    * [Informations techniques concernant R]({{< relref "programmation/info_techniques_r_2019.html" >}})
+    * [Structure de contrôle en R]({{< relref "programmation/struct_controle_r_2019.html" >}})
+    * [Fonctions en R]({{< relref "programmation/fonctions_r_2019.html" >}})
+    * [Programmation orientée objet en R]({{< relref "programmation/oop_r_2019.html" >}})
+    * [Tests et exceptions en R]({{< relref "programmation/tests_exceptions_r_2019.html" >}})
 * Packages R
-    * [Utilisation de packages R]({{%relref "packages/utilisation_packages_r_2019.html" %}})
-    * [Développement de packages R]({{%relref "packages/developpement_packages_r_2019.html" %}})
+    * [Utilisation de packages R]({{< relref "packages/utilisation_packages_r_2019.html" >}})
+    * [Développement de packages R]({{< relref "packages/developpement_packages_r_2019.html" >}})
 * Amélioration de code R
-    * [Bonnes pratiques en R]({{%relref "amelioration_code/bonnes_pratiques_r_2019.html" %}})
-    * [Optimisation de temps d'exécution en R]({{%relref "amelioration_code/optim_temps_r_2019.html" %}})
-    * [Métaprogrammation en R]({{%relref "amelioration_code/metaprogrammation_r_2019.html" %}})
-* [Tutoriels d'étudiants]({{%relref "tutoriels_etudiants" %}})
+    * [Bonnes pratiques en R]({{< relref "amelioration_code/bonnes_pratiques_r_2019.html" >}})
+    * [Optimisation de temps d'exécution en R]({{< relref "amelioration_code/optim_temps_r_2019.html" >}})
+    * [Métaprogrammation en R]({{< relref "amelioration_code/metaprogrammation_r_2019.html" >}})
+* [Tutoriels d'étudiants]({{< relref "tutoriels_etudiants" >}})
 * Autre matériel
-    * [Atelier sur la visualisation de données en R]({{%relref "autre_materiel/atelier_visualisation_donnees_r_2017.html" %}})
-    * [Calcul en parallèle sur CPU avec R]({{%relref "autre_materiel/calcul_parallele_r_2017.html" %}})
-    * [Atelier sur la visualisation de données avec ggplot2]({{%relref "autre_materiel/atelier_visualisation_ggplot2_2019.html" %}})
+    * [Atelier sur la visualisation de données en R]({{< relref "autre_materiel/atelier_visualisation_donnees_r_2017.html" >}})
+    * [Calcul en parallèle sur CPU avec R]({{< relref "autre_materiel/calcul_parallele_r_2017.html" >}})
+    * [Atelier sur la visualisation de données avec ggplot2]({{< relref "autre_materiel/atelier_visualisation_ggplot2_2019.html" >}})
 
 
 
