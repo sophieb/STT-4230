@@ -20,11 +20,11 @@ Read more on [revealjs github repo](https://github.com/hakimel/reveal.js/#markdo
 * center
 
 
-{{<warning title="Important" >}}Even if the enclosed content is a mardown, use `<` shortcode notation instead of the `%` notation {{</warning >}}
+{{%warning title="Important" %}}Even if the enclosed content is a mardown, use `<` shortcode notation instead of the `%` notation {{%/warning %}}
 
 ### Content formating and slide delimiters
 
-[read more on this here]({{< relref "page-slide.md">}})
+[read more on this here]({{% relref "page-slide.md"%}})
 
 ## Demo
 
@@ -70,7 +70,7 @@ ___
 
 ## Source :
 
-{{<expand "Show code ...">}}
+{{%expand "Show code ..."%}}
 
 ```
 {{</*revealjs theme="moon" progress="true"*/>}}
@@ -114,6 +114,6 @@ ___
 
 ```
 
-{{</expand>}}
+{{%/expand%}}
 
-* [{{<icon "sunglasses" >}} click here to view raw content](https://raw.githubusercontent.com/vjeantet/hugo-theme-docdock/master/exampleSite/content/shortcodes/revealjs.md)
+* [{{%icon "sunglasses" %}} click here to view raw content](https://raw.githubusercontent.com/vjeantet/hugo-theme-docdock/master/exampleSite/content/shortcodes/revealjs.md)

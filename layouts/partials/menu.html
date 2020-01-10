@@ -11,23 +11,23 @@
   {{- end}}
 {{- end}}
 
-
 <!-- templates -->
 {{- define "section-tree-nav" }}
 {{- $showvisitedlinks := .showvisitedlinks }}
 {{- $currentNode := .currentnode }}
  {{- with .sect}}
   {{- if and .IsSection (or (not .Params.hidden) $.showhidden)}}
+    {{- $numberOfPages := (add (len .Pages) (len .Sections)) }}
     {{- safeHTML .Params.head}}
-    <li data-nav-id="{{.URL}}" class="dd-item
+    <li data-nav-id="{{.Permalink}}" class="dd-item
         {{- if .IsAncestor $currentNode}} parent{{end}}
-        {{- if eq .URL $currentNode.URL}} active{{end}}
+        {{- if eq .Permalink $currentNode.Permalink}} active{{end}}
         {{- if .Params.alwaysopen}} alwaysopen{{end -}}
+        {{- if ne $numberOfPages 0 }} haschildren{{end}}
         ">
-      <a href="{{ .RelPermalink}}">
-        <span>{{safeHTML .Params.Pre}}{{.LinkTitle}}{{safeHTML .Params.Post}}</span>
-
-        {{- $numberOfPages := (add (len .Pages) (len .Sections)) }}
+      <div>
+      <a href="{{ .RelPermalink}}">{{safeHTML .Params.Pre}}{{.LinkTitle}}{{safeHTML .Params.Post}}</a>
+        
         {{- if ne $numberOfPages 0 }}
           {{- if or (.IsAncestor $currentNode) (.Params.alwaysopen) }}
             <i class="fa fa-angle-down fa-lg category-icon"></i>
@@ -37,7 +37,7 @@
         {{- end}}
 
         {{- if $showvisitedlinks}}<i class="fa fa-circle-thin read-icon"></i>{{end}}
-      </a>
+      </div>
       {{- if ne $numberOfPages 0 }}
         <ul>
           {{- .Scratch.Set "pages" .Pages }}
@@ -66,13 +66,15 @@
     </li>
   {{- else}}
     {{- if not .Params.Hidden }}
-      <li data-nav-id="{{.URL}}" class="dd-item
-     {{- if eq .URL $currentNode.URL}} active{{end -}}
+      <li data-nav-id="{{.Permalink}}" class="dd-item
+     {{- if eq .Permalink $currentNode.Permalink}} active{{end -}}
       ">
-        <a href="{{ .RelPermalink}}">
-          <span>{{safeHTML .Params.Pre}}{{.LinkTitle}}{{safeHTML .Params.Post}}</span>
+        <div>
+          <a href="{{ .RelPermalink}}">
+            {{safeHTML .Params.Pre}}{{.LinkTitle}}{{safeHTML .Params.Post}}
+          </a>
           {{- if $showvisitedlinks}}<i class="fa fa-circle-thin read-icon"></i>{{end}}
-        </a>
+        </div>
     </li>
      {{- end}}
   {{- end}}

@@ -19,7 +19,7 @@ Hugo-theme-docdock defines two types of pages. _Default_ and _Slide_.
 * **Slide** is a page that use the full screen to display its markdown content as a [reveals.js presentation](http://lab.hakim.se/reveal-js/).
 * **HomePage** is a special content that will be displayed as home page content.
 
-To tell Hugo-theme-docdock to consider a page as a slide, just add a `type="slide"`in then frontmatter of your file. [{{<icon circle-arrow-right>}}read more on page as slide]({{<relref "page-slide.md">}})
+To tell Hugo-theme-docdock to consider a page as a slide, just add a `type="slide"`in then frontmatter of your file. [{{%icon circle-arrow-right%}}read more on page as slide]({{%relref "page-slide.md"%}})
 
 
 Hugo-theme-docdock provides archetypes to help you create this kind of pages.
@@ -51,4 +51,4 @@ Hugo provides a flexible way to handle order for your pages.
 
 The simplest way is to use `weight` parameter in the front matter of your page. 
 
-[{{<icon circle-arrow-right>}}Read more on content organization]({{<relref "content-organisation/_index.md">}})
+[{{%icon circle-arrow-right%}}Read more on content organization]({{%relref "content-organisation/_index.md"%}})

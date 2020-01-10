@@ -3,7 +3,7 @@ title = "icon"
 description = "Display an icon."
 +++
 
-Display an icon like `{{< icon cloud >}}`
+Display an icon like `{{% icon cloud %}}`
 
 It uses :
 
@@ -19,10 +19,10 @@ This `icon` shortcode will display an icon in your page.
 | name | **required** | name of icon (see bellow) |
 | size | none | size of icon, medium, xx-small, x-small, small, large, x-large, xx-large, 11px, 2em, 20%.... |
 
-{{<alert info>}}
+{{%alert info%}}
 **Tips :**
 setting only the name as argument works too : `{{</*icon film*/>}}` instead of `{{</*icon name="film"*/>}}`
-{{</alert>}}
+{{%/alert%}}
 
 # Demo
 	
