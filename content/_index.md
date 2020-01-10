@@ -12,9 +12,9 @@ Ce site web contient les notes du cours **STT-4230 / STT-6230 R pour scientifiqu
 
 Selon le [répertoire des cours de l'Université Laval](https://www.ulaval.ca/les-etudes/cours/repertoire/detailsCours/stt-4230-r-pour-scientifique.html), le cours STT-4230 / STT-6230 est ainsi décrit :
 
-{{%panel%}}
+{{< panel >}}
 Ce cours a pour objectif d'amener l'étudiant à une maîtrise avancée de R, de sorte qu'il puisse utiliser ce langage pour programmer et implanter de nouvelles méthodes de calcul d'une manière efficiente et réutilisable. L'étudiant apprend à : comprendre ce que fait un programme R donné, faire ses propres programmes R (y compris des énoncés conditionnels, des boucles si nécessaire, des calculs vectoriels), créer des fonctions R et savoir les documenter, déboguer un programme R et l'optimiser en termes de temps de calcul.
-{{%/panel%}}
+{{< /panel >}}
 
 Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur le site web du cours, dans l'environnement numérique de l'Université Laval «&nbsp;monPortail&nbsp;» : https://monportail.ulaval.ca.
 
