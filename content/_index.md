@@ -1,7 +1,6 @@
 +++
-title = "Notes de cours"
-description = ""
-date = "2020-09-01"
+title = "STT-4230"
+date = "2020-01-10"
 lastmodifierdisplayname = "Sophie Baillargeon"
 lastmodifieremail = "sophie.baillargeon@mat.ulaval.ca"
 +++
