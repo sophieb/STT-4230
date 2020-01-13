@@ -14,7 +14,7 @@ output:
     toc_depth: 3
     highlight: tango
   blogdown::html_page:
-    toc: true
+    toc: yes
     toc_depth: 3
     highlight: tango
 header-includes:
@@ -66,26 +66,29 @@ rep(1, times <- 3) # Oups, times se retrouve dans l'environnement de travail
 ```
 
 
-### Quels noms sont acceptés en R ?
+### Quels noms sont acceptés en R ? {#noms}
 
 Un nom d'objet R doit respecter les règles suivantes[^1].
 
 - Le nom d'un objet peut uniquement contenir des lettres, des chiffres, des
 points ou des barres de soulignement.
 
-- Il commence obligatoirement par une lettre ou un point et s'il commence
+- Il commence obligatoirement par une lettre ou un point. S'il commence
 par un point, le deuxième caractère ne doit pas être un chiffre.
 
 - Il ne doit pas être un des mots suivants, qui sont réservés par R[^2] : `if`, `else`, `repeat`, `while`, `function`, `for`, `in`, `next`, `break`, `TRUE`, `FALSE`, `NULL`, `Inf`, `NaN`, `NA`, `NA_integer_`, `NA_real_`, `NA_complex_`, `NA_character_`, `...` et `..1`, `..2`, etc.
 
-[^1]: https://stat.ethz.ch/R-manual/R-devel/library/base/html/make.names.html
-[^2]: https://stat.ethz.ch/R-manual/R-devel/library/base/html/Reserved.html
+[^1]: https://stat.ethz.ch/R-manual/R-patched/library/base/html/make.names.html
+[^2]: https://stat.ethz.ch/R-manual/R-patched/library/base/html/Reserved.html
 
 Remarques :
 
 - Les lettres accentuées sont acceptées, mais il vaut mieux les éviter, car leur transfert d'un système d'exploitation à un autre est souvent problématique.
 
 - Il n'y a aucune restriction sur la longueur des noms.
+
+- Si vous tentez de créer un objet portant un nom qui ne respecte pas une des règles précédentes, une erreur sera générée.
+
 
 ## Comment accéder à un résultat gardé en mémoire dans un objet ?
 
@@ -99,7 +102,7 @@ mais pas&nbsp;:
 ```
 car les guillemets servent à créer des chaînes de caractères.
 
-De plus, il faut **respecter la casse** car R différencie les majuscules et les minuscules. Donc `A` n'est pas le même objet que `a` en R.
+De plus, il faut **respecter la casse** car R différencie les majuscules et les minuscules. Donc `A` n'est pas le même symbole que `a` en R.
 
 Soumettre une commande R contenant uniquement le nom d'un objet est équivalent à soumettre un appel à la fonction `print` en fournissant cet objet comme premier argument. Ainsi, les commandes suivantes sont équivalentes :
 
@@ -121,6 +124,8 @@ Ces noms sont ici entre guillemets, car ils sont affichés par `ls` en tant que 
 
 
 #### Mais est-ce vraiment le seul objet accessible ?
+
+\mbox{}
 
 Non. En plus des objets que vous avez créés, vous avez accès aux objets venant avec l'installation de R. Ils sont simplement rangés ailleurs que dans l'environnement de travail. Voici la liste de tous les *groupes* d'objets auxquels vous avez accès directement. 
 
@@ -145,19 +150,27 @@ options(max.print = op.default$max.print)
 
 #### Quelle est la nature de tous ces objets ?
 
+\mbox{}
+
 Il s'agit principalement de fonctions et de jeux de données. Par exemple l'environnement du package `base` contient la fonction suivante&nbsp;:
+
+\newpage
+
 ```{r}
 casefold
 ```
-Cette fonction sert à convertir la casse de caractères alphabétiques dans une ou plusieurs chaînes de caractères, réunies dans un vecteur. La casse d'un caractère alphabétique, soit d'une lettre, est sa forme majuscule (capitale) ou minuscule. En anglais, les majuscules sont appelées *upper case characters* et les minuscules *lower case characters*.
+Cette fonction sert à convertir la casse de caractères alphabétiques dans une ou plusieurs chaînes de caractères, réunies dans un vecteur[^3]. La casse d'un caractère alphabétique, soit d'une lettre, est sa forme majuscule (capitale) ou minuscule. En anglais, les majuscules sont appelées *upper case characters* et les minuscules *lower case characters*.
 
 L'environnement du package `base` contient aussi le jeu de données suivant&nbsp;:
 ```{r}
 women
 ```
-Il s'agit de valeurs moyennes de grandeur et de poids, calculées en 1975, pour des femmes américaines âgées entre 30 et 39 ans.  
+Il s'agit de valeurs moyennes de grandeur et de poids, calculées en 1975, pour des femmes américaines âgées entre 30 et 39 ans[^4].  
 
-#### Truc&nbsp;: 
+[^3]: https://stat.ethz.ch/R-manual/R-patched/library/base/html/chartr.html
+[^4]: https://stat.ethz.ch/R-manual/R-patched/library/datasets/html/women.html 
+
+#### Astuce&nbsp;: 
 
 Utilisez la fonction `str` pour avoir un aperçu d'un objet plutôt que de l'afficher en entier.
 
@@ -166,24 +179,33 @@ str(casefold)
 str(women)
 ```
 
+Ainsi, si l'objet est de grande taille, vous ne surchargerez pas la console en affichant la totalité de son contenu.
+
+\newpage
 
 ## Qu'est-ce qu'une fonction R ?
 
-Une fonction R est un bout de code qui produit un certain résultat lorsqu'exécuté. Une fonction prend des valeurs en entrée, nommées *arguments*. Lorsqu'elle est appelée, la fonction traite les valeurs fournies en entrée dans l'appel. Ensuite, elle retourne un objet en sortie ou encore produit un ou des résultats, comme un graphique ou l'écriture dans un fichier externe.
+Une fonction R est, comme dans tout langage informatique, un bout de code qui produit un certain résultat lorsqu'exécuté. Pour exécuter le code composant une fonction, celle-ci doit être *appelée*. Lorsqu'elle est appelée, la fonction prend des valeurs en entrée, qui sont assignées à des *arguments*. Le code de la fonction réfère à ces arguments de façon à ce que l'appel de la fonction provoque un traitement des valeurs fournies en entrée. En bout de ligne, la fonction génère un résultat, qui est la plupart du temps *retourné* dans un objet en sortie. Ce résultat peut aussi être un *effet de bord*[^5] tel que la production d'un graphique, l'écriture dans un fichier externe, la modification d'un paramètre de la session R, etc.
+
+[^5]: https://fr.wikipedia.org/wiki/Effet_de_bord_(informatique)
+
 
 ```{r echo = FALSE, out.width = "80%", fig.pos = 'h', fig.align = 'center', fig.cap = "Représentation schématique de l'exécution d'un appel à une fonction R"}
 knitr::include_graphics("fig/Fonction.png")
 ```
 
-\newpage
 
 Un objet R de type fonction est composé des éléments suivants.
+
+\vspace{6pt}
 
 - Une liste d'arguments, avec leurs valeurs par défaut s'il y a lieu. Exemple&nbsp;:
 ```{r}
 args(casefold)
 ```
 La fonction `casefold` possède deux arguments : `x` et `upper`. L'argument `x` n'a pas de valeur par défaut, mais `upper` a `FALSE` comme valeur par défaut.
+
+\vspace{6pt}
 
 - Le corps de la fonction, soit le code composant la fonction. Exemple&nbsp;:
 ```{r}
@@ -203,10 +225,9 @@ Un appel de fonction est une instruction formée des éléments suivants, en res
 
 1. le nom de la fonction à appeler;
 2. une parenthèse ouvrante `(`;
-3. au besoin, des valeurs pour les arguments, spécifiées ainsi&nbsp;: 
+3. au besoin, des valeurs pour les arguments, spécifiées ainsi (et séparés par une virgule si plus d'une valeur d'argument est à donner en entrée)&nbsp;: 
     a) nom de l'argument, suivi de l'opérateur `=` (éléments non obligatoires),
-    b) commande générant la valeur à fournir en argument (souvent simplement le nom d'un objet),
-    c) si plus d'une valeur d'argument est à donner en entrée, elles doivent être séparés par une virgule;
+    b) commande générant la valeur à fournir en argument (souvent simplement le nom d'un objet);
 4. une parenthèse fermante `)`.
 
 Dans l'exemple précédent, c'est-à-dire&nbsp;:
@@ -260,9 +281,9 @@ casefold(FALSE, x = c("Bonjour", "à", "tous!"))
 Si la valeur `c("Bonjour", "à", "tous!")` est explicitement assignée à l'argument `x`, la valeur `FALSE` est implicitement assignée à `upper`, même si elle est fournie en première position, car les assignations explicites ont préséance sur les assignations implicites.
 
 
-#### Truc&nbsp;: 
+#### Astuce&nbsp;: 
 
-Pour éviter les erreurs dans un appel de fonction, il vaut mieux toujours assigner les valeurs passées en entrée à des noms d'arguments. Par contre, dans la pratique, lorsque le premier argument d'une fonction R est un objet contenant les données sur lesquelles appliquer le calcul (ce qui est fréquent en R), il est habituel de ne pas le nommer. Ainsi, dans l'exemple initial, l'appel le plus usuel est le suivant&nbsp;:
+Pour éviter les erreurs dans un appel de fonction, il vaut mieux toujours assigner les valeurs passées en entrée à des noms d'arguments. Par contre, dans la pratique, lorsque le premier argument d'une fonction R est un objet contenant des données sur lesquelles appliquer un calcul (ce qui est fréquent en R), il est habituel de ne pas le nommer. Ainsi, dans l'exemple initial, l'appel le plus usuel est le suivant&nbsp;:
 
 ```{r, eval = FALSE}
 casefold(c("Bonjour", "à", "tous!"), upper = TRUE)
@@ -288,12 +309,16 @@ L'argument `...` n'a pas la même utilisé dans ces deux fonctions. Je vais util
 
 #### Utilité 1&nbsp;: recevoir un nombre indéterminé d'arguments
 
+\mbox{}
+
 La première utilité de `...` est de permettre à une fonction de recevoir en entrée un nombre indéterminé d'arguments. Si `...` est placé au tout début de la liste des arguments, il a typiquement cette utilité. C'est le cas pour la fonction `paste`. Cette fonction peut concaténer les valeurs provenant d'autant d'objets que désiré grâce à l'argument `...`. Voici des exemples.
 
 ```{r}
 paste("a", 1:4, sep = "-")
 paste("a", 1:4, c(TRUE, FALSE), collapse = " ")
 ```
+
+#### Astuce&nbsp;:
 
 Les arguments « attrapés » par `...` peuvent être assignés à des noms, tant que ceux-ci diffèrent des noms des autres arguments de la fonction. Dans un appel à la fonction `paste`, nommer les arguments attrapés par `...` n'a aucun impact.
 
@@ -309,14 +334,14 @@ args(list)
 list("a", 1:4)
 ```
 
-\newpage
-
 ```{r}
 # Appel à la fonction list avec assignation des arguments à des noms
 list(lettre = "a", chiffre = 1:4)
 ```
 
-#### Utilité 2&nbsp;: passer des arguments à une autre fonction
+#### Utilité 2&nbsp;: passer des arguments à une autre fonction  
+
+\mbox{}
 
 La deuxième utilité de l'argument `...` est de passer des arguments à une autre fonction appelée dans le corps de la première fonction. Si `...` est placé à la fin de la liste des arguments, il a typiquement cette utilité. 
 
@@ -374,7 +399,7 @@ L'objet `weight ~ height` est une formule.
 str(weight ~ height)
 ```
 
-La partie de gauche de la formule (à gaude du `~`) contient la, ou plus rarement les, noms des variables réponse. La partie de droite contient pour sa part le ou les noms des variables explicatives. Ces noms sont accompagnés, au besoin, d'opérateurs et de fonctions pour désigner comment former les termes du modèle incluant les variables. Par exemple, voici la formule à utiliser dans l'appel à la fonction `lm` pour effectuer une régression polynomiale de degré deux avec les données `women`.
+La partie de gauche de la formule (à gaude du `~`) contient la ou, plus rarement, les noms des variables réponse. La partie de droite contient pour sa part le ou les noms des variables explicatives. Ces noms sont accompagnés, au besoin, d'opérateurs et de fonctions pour désigner comment former les termes du modèle à partir des variables explicatives. Par exemple, voici la formule à utiliser dans l'appel à la fonction `lm` pour effectuer une régression polynomiale de degré deux avec les données `women`.
 
 ```{r}
 reg_poly <- lm(weight ~ height + I(height^2), data = women)
@@ -385,9 +410,13 @@ Je n'irai pas plus loin dans la présentation des formules R ici. L'écriture de
 
 #### Comment accéder aux résultats de la fonction d'ajustement de modèle ?
 
-Un objet obtenu en sortie d'une fonction d'ajustement de modèle contient beaucoup d'informations. Beaucoup plus qu'il ne le laisse paraître à première vue.
+\mbox{}
+
+Un objet obtenu en sortie d'une fonction d'ajustement de modèle contient beaucoup plus d'informations qu'il ne le laisse paraître à première vue.
 
 Par exemple, affichons dans la console l'objet `reg` créé dans le premier exemple d'ajustement de modèle.
+
+\newpage
 
 ```{r}
 reg 
@@ -428,7 +457,7 @@ Un package R est un **regroupement de fonctions et/ou de données documentées**
 
 L'installation de base de R est composée d'un certain nombre de packages R. Un très grand nombre de packages supplémentaires sont aussi disponibles sur le web. Les packages sont la façon formelle de partager publiquement des fonctions R.
 
-La majorité des développeurs de packages R les rendent disponibles sur le **CRAN** (*Comprehensive R Archive Network*)&nbsp;: http://www.r-project.org/  >  «&nbsp;CRAN&nbsp;» dans le menu de gauche.
+La majorité des développeurs de packages R les rendent disponibles sur le **CRAN** (*Comprehensive R Archive Network*)&nbsp;:  http://www.r-project.org/  >  «&nbsp;CRAN&nbsp;» dans le menu de gauche.
 
 Le site web **Bioconductor** (http://www.bioconductor.org/) propose aussi beaucoup de packages R spécifiques au domaine de la bio-informatique.
 
@@ -437,7 +466,7 @@ Finalement, certains développeurs distribuent simplement leurs packages R sur l
 
 ### Comment utiliser un package ?
 
-Pour utiliser un package R, il faut premièrement qu'il soit installé sur notre ordinateur. Installer R provoque l'installation de certains packages. Les packages supplémentaires doivent être installés séparément. La [fiche sur l'installation de R](https://stt4230.rbind.io/introduction/installation_r_rstudio/) explique comment procéder à ces installations.
+Pour utiliser un package R, il faut premièrement qu'il soit installé. Installer R provoque l'installation de certains packages. Les packages supplémentaires doivent être installés séparément. La [fiche sur l'installation de R](https://stt4230.rbind.io/introduction/installation_r_rstudio/) explique comment procéder à ces installations.
 
 Ensuite, il faut charger un package dans une session R afin d'avoir accès aux fonctions qu'il contient. Le démarrage d'une session R provoque automatiquement le chargement de certains packages. Par défaut, les packages suivants sont chargés automatiquement : `base`, `methods`, `datasets`, `utils`, `grDevices`, `graphics`, `stats`. Pour charger d'autres packages, il faut utiliser la fonction `library`, comme dans cet exemple&nbsp;:
 ```{r, eval = FALSE}
@@ -457,7 +486,7 @@ Avant d'utiliser une fonction pour la première fois, il est utile de savoir&nbs
 
 - ce que la fonction fait;
 - les utilités de ses arguments et les formats d'objets acceptés comme valeur en argument;
-- le format du résultat en sortie si la fonction retourne quelque chose.
+- le format du résultat en sortie et/ou l'effet de bord produit.
 
 Toutes les fonctions ont une fiche d'aide, toujours structurée de la même façon, procurant ces informations. En R, la fonction `help` (ou l'opérateur `?`) permet d'accéder à cette fiche d'aide, comme dans cet exemple&nbsp;:
 
@@ -475,11 +504,11 @@ help('+')
 
 La majorité des fiches d'aide de fonctions R comportent des exemples d'utilisation de la fonction à la fin. Ces exemples sont souvent très utiles pour comprendre comment utiliser la fonction.
 
-Aussi, le CRAN comporte une page web pour chaque package R qu'il héberge (https://cran.r-project.org/web/packages/). Celle-ci contient la version PDF des fiches d'aide de toutes les fonctions publiques du package (le *reference manual*).  Dans certains cas, cette page comporte un lien vers un site web documentant davantage le package. Elle comporte aussi parfois des guides d'utilisation du package, appelés *vignettes*, créés par les développeurs du package (par exemple https://cran.r-project.org/web/packages/dplyr/index.html).
+Aussi, le CRAN comporte une page web pour chaque package R qu'il héberge (par exemple https://CRAN.R-project.org/package=dplyr). Celle-ci contient la version PDF des fiches d'aide de toutes les fonctions publiques du package. Ce document se nomme *reference manual* (par exemple https://cran.r-project.org/web/packages/dplyr/dplyr.pdf).  Dans certains cas, la page web d'un package sur le CRAN comporte un lien vers un site web documentant davantage le package. Elle comporte aussi parfois des guides d'utilisation du package, appelés *vignettes*, créés par les développeurs du package (par exemple https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html).
 
-Les vignettes d'un package sont aussi consultables hors-ligne, à partir de R. Dans le bas d'une fiche d'aide R, il y a toujours un lien vers l'index du package contenant la fonction documentée dans la fiche. Dans la première partie de cet index, il y a un lien vers les vignettes du package, si celui-ci en possède.
+Les vignettes d'un package sont aussi consultables hors-ligne, à partir de R. Dans le bas d'une fiche d'aide R, il y a toujours un lien vers l'index du package contenant la fonction documentée dans la fiche. Dans la première partie de cet index, il y a un lien vers les vignettes du package (nommé *User guides, package vignettes and other documentation*), si celui-ci en possède.
 
-Il n'y a pas que les développeurs de R et de packages R qui fournissent de l'information sur des fonctions R. La communauté R étant très active, il est fréquent de trouver sur le web de l'information à propos d'une fonction R provenant d'utilisateurs de la fonction. Par exemple, lançons la recherche « `R function lm` » dans un moteur de recherche web tel que **Google**. Les résultats contiennent des versions en ligne de la fiche d'aide de la fonction ainsi que des pages web très pertinentes pour apprendre à utiliser la fonction, créées par des utilisateurs. 
+Il n'y a pas que le *R core team* et les autres développeurs de packages R qui fournissent de l'information sur des fonctions R. La communauté R étant très active, il est fréquent de trouver sur le web de l'information à propos d'une fonction R provenant d'utilisateurs de la fonction. Par exemple, lançons la recherche « `R function lm` » dans un moteur de recherche web tel que **Google**. Les résultats contiennent des versions en ligne de la fiche d'aide de la fonction ainsi que des pages web très pertinentes pour apprendre à utiliser la fonction, créées par des utilisateurs. 
 
 
 ### Comment dénicher une fonction pour réaliser une certaine tâche ?
@@ -488,13 +517,11 @@ Il est relativement facile d'obtenir de l'information lorsque nous connaissons l
 
 Afin de trouver une fonction R qui effectue une certaine tâche, le premier endroit pour chercher est encore un moteur de recherche web. En entrant dans la barre de recherche « `R function` », suivi d'une courte description en anglais de la tâche à effectuer, il est fort probable que des résultats pertinents seront retournés. Le web contient vraiment beaucoup d'informations sur la programmation en R, principalement en anglais. Des pages sur des sites sociaux de questions/réponses tels que **StackOverflow** (http://stackoverflow.com/questions/tagged/r) ou **CrossValidated** (http://stats.stackexchange.com/questions/tagged/r) sont souvent suggérés.
 
-Il existe aussi des outils de recherche spécifiques à R. Tout d'abord, la fonction R `help.start` appelée sans lui fournir d'arguments en entrées :
+Il existe aussi des outils de recherche spécifiques à R. Tout d'abord, la fonction R `help.start`, appelée sans lui fournir d'arguments en entrées, ouvre une table des matières contenant des liens vers la documentation R. Toute cette information est aussi accessible en ligne sur le site web http://stat.ethz.ch/R-manual/R-patched/doc/html/.
 
 ```{r, eval = FALSE}
 help.start()
 ```
-
-ouvre une table des matières contenant des liens vers la documentation R. Toute cette information est aussi accessible en ligne sur le site web http://stat.ethz.ch/R-manual/R-patched/doc/html/. 
 
 Aussi, la fonction R `help.search` permet de rechercher la présence de chaînes de caractères dans les fiches d'aide R, par exemple&nbsp;:
 
@@ -502,13 +529,13 @@ Aussi, la fonction R `help.search` permet de rechercher la présence de chaînes
 help.search("regression")
 ```
 
-Cependant, les fonctions `help`, `help.start` et `help.search` donnent uniquement accès à la documentation des packages R installés dans le chemin de recherche de la session R à partir de laquel la commande est soumise. Pour faire une recherche dans les fiches d'aide de tous les packages R sur le CRAN, Bioconductor ou Github, le site web suivant est un bon outil.
+Cependant, les fonctions `help`, `help.start` et `help.search` donnent uniquement accès à la documentation des packages R installés dans le chemin de recherche de la session R à partir de laquelle la commande est soumise. Pour faire une recherche dans les fiches d'aide de tous les packages R sur le CRAN, Bioconductor ou Github, le site web suivant est un bon outil.
 
 > http://www.rdocumentation.org/
 
 Le site web http://rseek.org/ permet d'élargir la recherche à&nbsp;:
 
-- toute la documentation distribuée par l'équipe de R, incluant les manuels du R core team (http://cran.r-project.org/manuals.html);
+- toute la documentation distribuée par l'équipe de R, incluant les manuels du *R core team* (http://cran.r-project.org/manuals.html);
 - les messages publiés sur les listes courriel de R (http://www.r-project.org/mail.html), dont le R-help où les abonnés peuvent poser des questions concernant R;
 - le R Journal (http://journal.r-project.org/);
 - des blogues et autres sites web consacrés à R, dont R-bloggers (http://www.r-bloggers.com/) et Quick-R (http://www.statmethods.net/);
@@ -528,13 +555,13 @@ plot(x = women$height, y = women$weight)
 
 Pour un vecteur de données `x` et un vecteur de données `y` fournis en entrée, elle génère un diagramme de dispersion.
 
-Elle accepte plusieurs autres types d'objets comme premier argument. Par exemple, si on lui donne en entrée un objet créé par la fonction `lm`, elle génère quelques graphiques de résidus (non affichés ici).
+Elle accepte plusieurs autres types d'objets comme premier argument. Par exemple, si elle reçoit en entrée un objet créé par la fonction `lm`, elle génère quelques graphiques de résidus (non affichés ici).
 
 ```{r, eval = FALSE}
 plot(reg)
 ```
 
-Un cours sera consacré à ce sujet.
+La fonction `plot` n'est que la pointe de l'iceberg de toutes les possibilités graphiques de R. Un cours sera consacré à ce sujet.
 
 
 ## Est-ce que de la programmation orientée objet est possible en R ?
@@ -547,9 +574,9 @@ Jetons un coup d'oeil au corps de la fonction `plot`.
 plot
 ```
 
-La fonction `plot` possède seulement trois arguments&nbsp;: `x`, `y` et `...`. Aussi, le corps de la fonction est un peu particulier. Il est très court. Il contient uniquement un appel à la fonction `UseMethod`. Cette caractéristique indique que `plot` est une fonction générique S3.
+La fonction `plot` possède seulement trois arguments&nbsp;: `x`, `y` et `...`. Aussi, le corps de la fonction est un peu particulier. Il est très court. Il contient uniquement un appel à la fonction `UseMethod`. Cette caractéristique indique que `plot` est une fonction générique de type S3.
 
-À travers l'appel à la fonction `UseMethod`, la fonction `plot` appelle une sous-fonction (appelée *méthode S3*), choisie selon la classe de l'objet fourni en entrée comme valeur pour le premier argument (ici `x`). Pour énumérer toutes les  «&nbsp;versions&nbsp;» d'une fonction générique auxquelles notre installation de R nous donne accès, il faut appeler la fonction `methods` comme suit.
+À travers l'appel à la fonction `UseMethod`, la fonction `plot` appelle une sous-fonction (appelée *méthode*), choisie selon la classe de l'objet fourni en entrée comme valeur pour le premier argument (ici `x`). Pour énumérer toutes les  «&nbsp;versions&nbsp;» d'une fonction générique auxquelles notre installation de R nous donne accès, il faut appeler la fonction `methods` comme suit.
 
 ```{r}
 methods(plot)
@@ -559,7 +586,7 @@ Les caractères se trouvant après le point dans le nom d'une méthode S3 repré
 
 Les méthodes sont souvent documentées, au même titre que les fonctions. Par exemple, la fiche d'aide ouverte par `help(plot.lm)` fourni de l'information à propos du comportement de la fonction `plot` avec un objet de classe `lm`, 
 
-La programmation orientée objet est un sujet technique plutôt avancé, certainement pas un concept de base. Nous reviendrons sur ce concept vers la fin de la session.
+La programmation orientée objet est un sujet technique plutôt avancé. Nous reviendrons sur ce concept vers la fin de la session.
 
 
 ## Comment conserver une trace des commandes soumises au cours d'une session R ?
@@ -568,15 +595,15 @@ Il est possible de sauver l'**historique des commandes** soumises au cours d'une
 
 Il est aussi possible de sauver l'**environnement de travail** avec la fonction `save.image`. Le fichier ainsi créé (d'extension `.RData` par défaut) contient tout le contenu de l'environnement de travail, soit tous les objets créés depuis l'ouverture de R  (et jamais effacés).
 
-#### Truc&nbsp;: 
+#### Astuce&nbsp;: 
 
-En fait, la console R garde toujours une trace en mémoire des commandes que vous avez soumises. Vous pouvez parcourir cet historique, dans la console, avec les touches  «&nbsp;flèche vers le haut&nbsp;» et  «&nbsp;flèche vers le bas&nbsp;» de votre clavier. Ainsi, pour soumettre de nouveau une commande, vous pouvez éviter de la retaper en y accédant à l'aide de la touche  «&nbsp;flèche vers le haut&nbsp;».
-
-
+En fait, la console R garde toujours une trace en mémoire des commandes que vous avez soumises (comme le Terminal Linux). Vous pouvez parcourir cet historique, dans la console, avec les touches  «&nbsp;flèche vers le haut&nbsp;» et  «&nbsp;flèche vers le bas&nbsp;» de votre clavier. Ainsi, pour soumettre de nouveau une commande, vous pouvez éviter de la retaper en y accédant à l'aide de la touche  «&nbsp;flèche vers le haut&nbsp;».
 
 ## Comment quitter R ?
 
-La commande `q()` provoque la fin de la session R, tout comme la fermeture de la fenêtre de la console R. R demande alors si nous souhaitons sauvegarder une **image de la session**. Si nous répondons oui, il sauvegarde l'historique des commandes dans un fichier nommé  «&nbsp;`.Rhistory`&nbsp;» et le contenu de l'environnement de travail dans un fichier nommé  «&nbsp;`.RData`&nbsp;».
+La commande `q()` provoque la fin de la session R, tout comme la fermeture de la fenêtre de la console R. R demande alors si une **image de la session** doit être sauvegardée. Si la réponse fournie à cette question est oui, R sauvegarde l'historique des commandes dans un fichier nommé  «&nbsp;`.Rhistory`&nbsp;» et le contenu de l'environnement de travail dans un fichier nommé  «&nbsp;`.RData`&nbsp;».
+
+\newpage
 
 ## Qu'est-ce que le répertoire de travail ?
 
@@ -585,9 +612,11 @@ R a parfois besoin de lire ou d'écrire dans des fichiers externes. Il le fait p
 - lors de l'importation de données provenant d'un fichier externe (lecture dans un fichier);
 - lors de l'enregistrement de l'historique des commandes ou de l'environnement de travail (écriture dans un fichier).
 
-R se définit un emplacement par défaut pour ces fichiers. Cet emplacement se nomme **répertoire de travail** (en anglais *working directory*), parfois appelé répertoire courant. Lorsqu'aucun emplacement n'est spécifié lors d'une communication entre R et un fichier externe, R considérera par défaut que le fichier se trouve dans le répertoire de travail.
+R se définit un emplacement par défaut pour ces fichiers. Cet emplacement se nomme **répertoire de travail** (en anglais *working directory*), parfois appelé répertoire courant. Lorsqu'aucun emplacement n'est spécifié lors d'une communication entre R et un fichier externe, R considérera par défaut que le fichier se situe dans le répertoire de travail.
 
 #### Comment contrôler le répertoire de travail ?
+
+\mbox{}
 
 La commande suivante permet de connaître le répertoire de travail&nbsp;:
 
@@ -604,7 +633,7 @@ où `"cheminAccesRepertoire"` est le chemin d'accès d'un répertoire sur votre 
 
 #### Attention&nbsp;: 
 
-En R, les chemins d'accès contenant le caractère `\` ne sont pas acceptés. Ce n'est pas très pratique pour ceux qui travaillent sous Windows, car un chemin d'accès copié à partir d'un explorateur de fichiers Windows contient ce caractère. Il faut toujours remplacer les `\` par `/` ou `\\` (ex.: `"C:\MesDocuments"` devient `"C:/MesDocuments"` ou `"C:\\MesDocuments"`). 
+En R, les chemins d'accès contenant le caractère `\` ne sont pas acceptés. Ce n'est pas très pratique pour ceux qui travaillent sous Windows, car un chemin d'accès copié à partir d'un explorateur de fichiers Windows contient ce caractère. Il faut toujours remplacer, dans un chemin d'accès fourni à R, les `\` par `/` ou `\\` (ex.: `"C:\MesDocuments"` devient `"C:/MesDocuments"` ou `"C:\\MesDocuments"`). 
 
 ## Comment charger un fichier d'extension `.RData` ?
 
@@ -614,60 +643,67 @@ Les objets sauvegardés dans un fichier d'extension `.RData` deviennent accessib
 
 Si le répertoire de travail de R à son ouverture contient un fichier `.RData`, les objets contenus dans ce fichier sont automatiquement chargés en R. Dans ce cas, l'environnement de travail n'est pas vide en début de session.
 
+#### Astuce&nbsp;: 
+
+Je recommande de ne jamais accepter l'enregistrement d'une image de la session à la fermeture d'une session R, afin que le répertoire de travail par défaut ne contienne pas de fichier d'extension `.RData` et que toute nouvelle session R démarre avec un environnement de travail vide. Partir d'un environnement de travail vide aide à garder le contrôle sur son contenu et ainsi à éviter des erreurs de manipulation de mauvaises données.
+
 
 ## Pourquoi créer des programmes R plutôt que de travailler directement dans la console ?
 
-Retrouver des commandes spécifiques dans un ancien historique peut être difficile. Une meilleure méthode de travail que de travailler directement dans la console R consiste à rédiger des *programmes R*, aussi appelés *scripts R*.
+Retrouver des commandes spécifiques dans un ancien historique peut être difficile. Une meilleure méthode de travail que de travailler directement dans la console R consiste à rédiger des *programmes R*, aussi appelés *scripts R*. Les programmes facilitent la réutilisation du code.
 
-Les programmes facilitent la réutilisation du code. Des commentaires peuvent y être insérés pour expliquer ce que font les instructions (en utilisant le symbole `#`).
+Faire rouler un ancien programme recrée tous les objets produits par les instructions dans le programme (ce qui remplace une image de session). Si le code de création de certains objets est long à exécuter, ces objets peuvent être enregistrés dans un fichier externe lors de leur création d'origine. Ensuite, pour utiliser ces objets, il suffit de les charger dans une session R (au lieu de faire rouler de nouveau le code pour les créer). Nous verrons comment faire ça lors d'un prochain cours.
+
+Un programme R comporte donc une série d'instructions R. Il peut aussi inclure des commentaires, soit des caractères non exécutés, par exemple pour expliquer ce que font les instructions. Sur une ligne d'un programme R, tous les caractères suivant le symbole `#` sont considérés comme étant des commentaires.
 
 ```{r, eval = FALSE}
-# Exemple de commentaire
-1 + 1 # calcul simple
+# Exemple de ligne en commentaire
+1 + 1  # exemple de commentaire suivant une instruction
 ```
 
-Faire rouler un ancien programme recrée tous les objets produits par les commandes dans le programme. Plus besoin d'image de session, sauf si la création de ces objets est longue à rouler.
 
+## Quel outil utiliser pour éditer un programme R ?
 
-### Quel outil utiliser pour éditer un programme R ?
-
-Un programme R s'édite dans une fenêtre séparée de la console. Le GUI de la version Windows de R possède un éditeur de code R minimaliste, qui s'ouvre par le menu  «&nbsp;Fichier > Nouveau script&nbsp;». Par convention, l'**extension `.R`** est donnée à un programme R. À partir de cet éditeur, le raccourci clavier Ctrl-R permet de soumettre dans la console des lignes de code de l'éditeur. 
+Un programme R s'édite dans une fenêtre séparée de la console. Le GUI de la version Windows de R possède un éditeur de code R minimaliste, qui s'ouvre par le menu  «&nbsp;Fichier > Nouveau script&nbsp;». Par convention, l'**extension `.R` ou `.r`** est donnée à un programme R. À partir de cet éditeur, le raccourci clavier Ctrl-R permet de soumettre dans la console des lignes de code de l'éditeur. 
 
 Il existe cependant des outils bien plus performants que cet éditeur pour programmer en R. Plusieurs éditeurs de code R ou environnements intégrés de développement R (en anglais IDE pour Integrated Development Environment) sont offerts, notamment&nbsp;:
 
 - RStudio (http://www.rstudio.com/), 
+- des extensions R pour Visual Studio Code (par exemple https://marketplace.visualstudio.com/items?itemName=Ikuyadeu.r)
 - Emacs avec ESS (http://ess.r-project.org/), 
 - Eclipse avec StatET (https://eclipse.org/statet), 
 - Tinn-R (http://sourceforge.net/projects/tinn-r/), 
-- le module d'extension R Tools pour Visual Studio (https://www.visualstudio.com/fr/vs/rtvs/)
 - etc.
 
-RStudio est probablement le plus populaire de ces outils. Il s'agit d'un IDE déjà très complet et qui continue d'être activement développé. Une version gratuite du logiciel est offerte (https://www.rstudio.com/products/rstudio/download/, version  «&nbsp;Desktop, Open Source License&nbsp;»). 
+### Caractéristiques de RStudio
 
-RStudio facilite le travail en R grâce aux caractéristiques suivantes.
+RStudio est probablement le plus populaire de ces outils. Il s'agit d'un IDE déjà très complet et qui continue d'être activement développé. Une version gratuite du logiciel est offerte (https://www.rstudio.com/products/rstudio/download/, version  «&nbsp;Desktop, Open Source License&nbsp;»). Nous utiliserons RStudio dans ce cours.
+
+RStudio facilite le travail en R, par exemple grâce aux caractéristiques suivantes.
 
 - Éditeur de code R, notamment pourvu de 
     + coloration syntaxique,
     + complètement automatique (en anglais *autocompletion*),
+    + fermeture automatique de parenthèses, guillemets et crochets,
     + pliage de code.
     
-\newpage
-
-- Fenêtre divisée en sous-fenêtres, comprennant chacune potentiellement un choix de sous-fenêtres en onglets. La configuration par défaut propose les 4 sous-fenêtres suivantes :
+- Fenêtre divisée en sous-fenêtres, comprenant chacune potentiellement un choix de sous-fenêtres en onglets. La configuration par défaut propose les 4 sous-fenêtres suivantes :
     + en haut à gauche : l'**éditeur R** (possibilité d'avoir plusieurs programmes ouverts, accessibles via des onglets); 
-    + en bas à gauche : la **console R** (possibilité d'y ouvrir aussi une fenêtre *Terminal*);
+    + en bas à gauche : la **console R** (aussi une fenêtre *Terminal* et autres);
     + en haut à droite : la visualisation du contenu des **environnements** chargés (aussi de l'historique des commandes et autres);
-    + en bas à droite : la visualisation de (seuls les principaux onglets sont listés ici) :
-        + l'arborescence de **fichiers** sur votre ordinateur,
-        + les **graphiques** produits,
-        + les **packages** installés,
-        + les fiches d'**aide**.
+    + en bas à droite : la visualisation de, notamment,
+        + l'arborescence de **fichiers** (*Files*) sur votre ordinateur,
+        + les **graphiques** produits (*Plots*),
+        + les **packages** installés ,
+        + les fiches d'**aide** (*Help*).
+        
 - Possibilité de lancer certaines commandes à partir de menus, notamment :
     + des appels aux fonctions courantes telles que :
         + `help` : en utilisant la barre de recherche de la sous-fenêtre *Help*,
         + `install.packages` : en utilisant le bouton *Install* de la sous-fenêtre *Packages*, 
         + `setwd`: par le menu *Session* > *Set Working Directory*;
     + des commandes de construction de package par le menu *Build*;
+    
 - Nombreux raccourcis clavier (https://support.rstudio.com/hc/en-us/articles/200711853-Keyboard-Shortcuts), notamment :
     + les raccourcis usuels tels que : 
         + **Ctrl-C** / **Ctrl-V** pour effectuer un copier / coller,
@@ -676,12 +712,32 @@ RStudio facilite le travail en R grâce aux caractéristiques suivantes.
         + etc.;
     + **Ctrl-Enter** pour soumettre (dans la console) la ligne du programme source où le curseur se situe ou la sélection (dans l'éditeur);
     + **Tab** ou **Ctrl+Space** pour tenter un complètement automatique.
-- Plusieurs autres fonctionnalités permettant de travailler de façon plus productive.
+    
+Plusieurs autres fonctionnalités de RStudio permettent de travailler de façon plus productive.
+
+#### Détails concernant le complètement automatique (*autocompletion*) :
+
+RStudio peut compléter nos commandes pour nous. En cours de saisie d'une commande dans la console ou dans un script R, RStudio ouvre une petite fenêtre contenant des suggestions de suite à notre commande. Si cette fenêtre ne s'ouvre pas d'elle-même, la touche « Tab » devrait permettre de l'ouvrir. RStudio propose des suggestions de suite pour :
+
+- les noms d'objets se trouvant dans un des environnements dans le chemin de recherche,
+- les noms des éléments d'une liste ou les noms de colonnes d'un data frame après l'opérateur $, 
+- les arguments à ajouter à un appel de fonction,
+- etc.
+
+Si vous n'aimez pas ce comportement, vous pouvez le configurer par le menu « Tools > Global Options... > Code, onglet Completion.
+
+#### Détails concernant la fermeture automatique de parenthèses, guillemets et crochets :
+
+RStudio offre aussi de fermer les parenthèses, guillemets et crochets automatiquement. Ainsi, si nous ouvrons une parenthèse dans un programme ou dans la console, une parenthèse fermante est automatiquement ajoutée à la ligne de commande.
+
+Si vous n'aimez pas cette fonctionnalité, vous pouvez l'enlever par le menu « Tools > Global Options... > Code, onglet Editing, en décochant l'option « Insert matching parens/quotes ».
+
+La [fiche sur l'installation de R](https://stt4230.rbind.io/introduction/installation_r_rstudio/#config) mentionne d'autres configurations de RStudio qui pourraient vous intéresser.
 
 
-### Quelles sont les règles de syntaxe du langage R ?
+## Quelles sont les règles de syntaxe du langage R ?
 
-Lors de l'écriture de code R, il y a quelques règles de syntaxe à respecter. En plus des règles concernant les choix de noms d'objets énumérées précédemment, voici les règles de base du langage R.
+Lors de l'écriture de code R, il y a quelques règles de syntaxe à respecter. En plus des [règles concernant les choix de noms d'objets](#noms) énumérées précédemment, voici les règles de base du langage R.
 
 - Chaque commande doit se terminer par un retour de chariot ou un point-virgule (moins usuel).
 - Une commande peut s'étaler sur plusieurs lignes.
@@ -698,9 +754,9 @@ d'un programme.
 
 ## Comment connaître et modifier les paramètres d'une session R ?
 
-Une session R comporte un certain nombre de paramètres nommés options. La fonction R `options` permet de connaître les paramètres de notre session, ainsi que de les modifier. Il faut d'abord aller voir la fiche d'aide de la fonction (ouverte par la commande `help(options)`[^3]), pour obtenir de l'information sur ces paramètres.
+Une session R comporte un certain nombre de paramètres nommés options. La fonction R `options` permet de connaître les paramètres de notre session, ainsi que de les modifier. Il faut d'abord aller voir la fiche d'aide de la fonction (ouverte par la commande `help(options)`[^6]), pour obtenir de l'information sur ces paramètres.
 
-[^3]: https://stat.ethz.ch/R-manual/R-devel/library/base/html/options.html
+[^6]: https://stat.ethz.ch/R-manual/R-patched/library/base/html/options.html
 
 Par exemple, la façon dont les nombres sont affichés dans la console est notamment contrôlée par les options `digits` et `scipen`. Ces options prennent par défaut les valeurs suivantes.
 
@@ -715,10 +771,6 @@ optionsDefaut$scipen
 ```
 
 L’option `digits` représente le nombre maximal de chiffres affichés, par exemple&nbsp;:
-```{r}
-print(1.23456789)
-```
-ou plus simplement
 ```{r}
 1.23456789
 ```
@@ -749,7 +801,6 @@ options(scipen = -1)
 10000
 ```
 
-\newpage
 
 ## Où trouver plus d'information ?
 
@@ -765,7 +816,7 @@ Voici des sources d'information sur l'utilisation de R et la programmation R. Ce
 
 Référence officielle pour le logiciel R et sa documentation (retournée par la commande `citation()`)&nbsp;:
 
-R Core Team (2018). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
+R Core Team (2019). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
 
 
 **Documentation de packages R** qui ne se retrouvent pas dans l'installation de base&nbsp;:
@@ -784,22 +835,26 @@ R Core Team (2018). R: A language and environment for statistical computing. R F
 
 **Sites web à propos de R** :
 
+- http://larmarange.github.io/analyse-R/,
 - http://www.statmethods.net/,
 - http://www.cookbook-r.com/,
 - http://www.r-graph-gallery.com/.
 
-**Formations ou exercices R** :
+**Exercices ou formations R** :
 
 - http://r-exercises.com/,
 -	http://swirlstats.com,
 - http://swcarpentry.github.io/r-novice-inflammation/,
-- http://swcarpentry.github.io/r-novice-gapminder/.
+- http://swcarpentry.github.io/r-novice-gapminder/,
+- https://www.udemy.com/course/r-basics/.
 
 **Outils sociaux de questions/réponses** :
 
 - StackOverflow (http://stackoverflow.com/questions/tagged/r), 
 - CrossValidated (http://stats.stackexchange.com/questions/tagged/r),
 - la liste courriel R-help (https://stat.ethz.ch/mailman/listinfo/r-help).
+
+\newpage
 
 **Outils pour suivre la communauté R** :
 
@@ -808,21 +863,20 @@ R Core Team (2018). R: A language and environment for statistical computing. R F
 - hashtag #rstats sur Twitter : https://twitter.com/hashtag/rstats,
 - le groupe « The R Project for Statistical Computing » sur LinkedIn : https://www.linkedin.com/groups/77616.
 
-\newpage
 
 **Livres et notes de cours**
 
 Référence officielle pour les notes de ce cours&nbsp;:
 
-- Baillargeon, S. (2019). R pour scientifique : notes de cours, STT-4230/STT-6230. Université Laval, Département de mathématiques et de statistique. URL https://stt4230.rbind.io/
+- Baillargeon, S. (2020). R pour scientifique : notes de cours, STT-4230/STT-6230. Université Laval, Département de mathématiques et de statistique. URL https://stt4230.rbind.io/
 
 Livres que j'utilise le plus&nbsp;:
 
 - Matloff, N. (2011). The art of R programming: A tour of statistical software design. No Starch Press.
-- Wickham, H. (2014). Advanced R. CRC Press. URL http://adv-r.had.co.nz/
+- Wickham, H. (2019). Advanced R, Second Edition. Chapman and Hall/CRC. URL https://adv-r.hadley.nz/
+    + Solutionnaire des exercices dans ce livre : https://advanced-r-solutions.rbind.io/
 - Wickham, H. (2015). R packages. O'Reilly Media, Inc. URL http://r-pkgs.had.co.nz/
 - Grolemund, G. et Wickham, H. (2016). R for Data Science. O'Reilly Media, Inc. URL http://r4ds.had.co.nz/
-
 
 Autres livres&nbsp;:
 
@@ -832,7 +886,7 @@ Autres livres&nbsp;:
 - Chambers, J. M. (2008). Software for Data Analysis: Programming with R. Springer.
 - Cotton, R. (2013). Learning R: A Step-by-Step Function Guide to Data Analysis, O'Reilly Media.
 - Davies, T. M. (2016). The Book of R: A First Course in Programming and Statistics. No Starch Press.
-- Gillespie, C. et Lovelace, R. (2016). Efficient R Programming: A Practical Guide to Smarter Programming. O'Reilly Media, Inc. version en ligne&nbsp;: https://csgillespie.github.io/efficientR/
+- Gillespie, C. et Lovelace, R. (2016). Efficient R Programming: A Practical Guide to Smarter Programming. O'Reilly Media, Inc. URL https://csgillespie.github.io/efficientR/
 - Gentleman, R. (2009). R Programming for Bioinformatics. Chapman and Hall/CRC.
 - Kabacoff, R. (2015), R in action. 2e édition. Manning Publications.
 - Muenchen, R. A. (2011). R for SAS and SPSS Users. Second edition. Springer.
@@ -840,5 +894,7 @@ Autres livres&nbsp;:
 - Zumel, N. et Mount, J. (2014). Practical Data Science with R. Manning Publications Co. 
 - Zuur, A. F., Ieno, E. N. et Meesters, E. H.W.G. (2009). A Beginner’s Guide to R. Springer.
 
+Notes de cours d'introduction à R et à la programmation informatique (en français):
 
+- Goulet, V. (2019). Programmer avec R. Université Laval, École d'actuariat. URL https://vigou3.gitlab.io/programmer-avec-r/
 
