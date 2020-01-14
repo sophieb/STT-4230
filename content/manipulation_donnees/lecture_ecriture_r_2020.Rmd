@@ -2,24 +2,29 @@
 title: "Lecture et écriture dans des fichiers externes à partir de R"
 linkTitle: "Lecture/écriture dans fichiers en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2019-01-14"
+date: "2020-01-13"
 weight: 2
 slug: "lecture_ecriture_r"
-categories: ["cours_2019-01-22"]
+categories: ["cours_2020-01-21"]
 categories_weight: 2
 lastmodifierdisplayname : "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
 output:
-  pdf_document:
+  pdf_document: 
+    highlight: tango
     toc: yes
     toc_depth: 3
   blogdown::html_page:
-    toc: true
+    highlight: tango
+    toc: yes
+    toc_depth: 3
 header-includes:
 - \usepackage{float}
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
 - \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \renewcommand{\linethickness}{0.05em}
+- \usepackage{longtable,booktabs}
 editor_options: 
   chunk_output_type: console
 ---
@@ -187,9 +192,8 @@ str(dataEx_txt)
 
 Nous avons illustré ici quatre arguments de la fonction `read.table`. Elle en possède plusieurs autres, à adapter selon le fichier à lire. 
 
-\newpage
+### Résumé des arguments les plus utiles de la fonction `read.table`
 
-#### Résumé des arguments les plus utiles de la fonction `read.table`
 
 Chaque argument de la fonction `read.table` est en lien avec une question que l'utilisateur doit se poser lors de la lecture d'un fichier de données.
 
@@ -274,6 +278,49 @@ Ici, la première ligne a correctement été interprétée comme le nom des vari
 dataEx_csv <- read.csv2("dataEx.csv", na.strings = "")
 str(dataEx_csv)
 ```
+
+
+### Lecture de fichiers textes volumineux
+
+La fonction `read.table` (et ses fonctions enveloppe) arrive en principe à lire n'importe quel fichier texte de données. Elle peut cependant être lente pour lire des fichiers volumineux. Dans ce cas, il est plus pratique de se tourner vers une alternative plus rapide.
+
+#### Package `readr`
+
+\mbox{}
+
+Le package [`readr`](https://CRAN.R-project.org/package=readr) du [`tidyverse`](https://www.tidyverse.org/) offre différentes fonctions pour lire des fichiers textes, selon leur format. Par exemple, il offre la fonction [`read_csv2`](https://readr.tidyverse.org/reference/read_delim.html), similaire à la fonction `read.csv2` du R de base. Voici un exemple d'utilisation de cette fonction.
+
+```{r message = FALSE}
+library(readr)
+dataEx_csv_readr <- read_csv2("dataEx.csv")
+str(dataEx_csv_readr)
+```
+
+L'objet retourné par les fonctions de `readr` est un [tibble](https://stt4230.rbind.io/manipulation_donnees/structures_r/#le-tibble). Remarquons que la fonction `read_csv2` a, par défaut, correctement inteprété les valeurs manquantes et elle n'a pas stocké les données de type caractère dans un facteur.
+
+Plus d'informations sur l'importation de données avec `readr` sont présentées :
+
+- dans documentation du package : https://readr.tidyverse.org/
+- dans le chapitre 11 du livre Grolemund, G. et Wickham, H. (2016). R for Data Science. O'Reilly Media, Inc. : https://r4ds.had.co.nz/data-import.html
+
+
+#### Package `data.table`
+
+\mbox{}
+
+Bien que les fonctions du package `readr` tendent à être plus rapides que la fonction `read.table` selon différentes sources, par exemple https://csgillespie.github.io/efficientR/5-3-importing-data.html#fast-data-reading, une autre fonction est capable d'être encore plus rapide : la fonction [`fread`](https://rdatatable.gitlab.io/data.table/reference/fread.html) du package [`data.table`](https://CRAN.R-project.org/package=data.table). Voici un exemple d'utilisation de cette fonction.
+
+```{r}
+library(data.table)
+dataEx_csv_fread <- fread("dataEx.csv", na.strings = "")
+str(dataEx_csv_fread)
+```
+
+L'objet retourné par la fonction `fread` est un [data table](https://stt4230.rbind.io/manipulation_donnees/structures_r/#le-data-table). Tout comme la fonction `read.table`, la fonction `fread` possède un argument nommé `na.strings`, que nous avons du spécifier afin que la valeur manquante pour la variable catégorique soit vien interprétée. Le comportement par défaut de `fread` avec des données de types caractères n'est cependant pas le même que celui de la fonction `read.table`. Il stocke ces données dans un vecteur, comme le fait les fonctions de `readr`.
+
+La documentation du package `data.table` se trouve sur la page web suivante :  
+https://rdatatable.gitlab.io/data.table/
+
 
 ## Importation de données en format JSON
 
@@ -383,29 +430,31 @@ Un des grands avantages de `readxl` comparativement à d'autres packages offrant
 
 ## Importation de données publiées sur internet
 
-Le web est rempli de données de toutes sortes. Pour lire des données stockées dans un fichier téléchargeable sur une page web, il suffit de d'abord télécharger le fichier, puis le lire avec un des moyens présentés précédemment. Il est aussi possible de donner comme argument `file` à une fonction de la famille `read.table` directement une URL (adresse web). 
+Le web est rempli de données de toutes sortes. Pour lire des données stockées dans un fichier téléchargeable sur une page web, il suffit de d'abord télécharger le fichier, puis de le lire avec un des moyens présentés précédemment. Il est aussi possible de donner comme argument `file` à une fonction de la famille `read.table` directement une URL (adresse web). 
 
-De plus, il est possible de lire directement dans une table HTML. La majorité des sites web utilisent le langage HTML. Ce truc donne donc facilement accès à un très grand nombre de données. C'est une forme de ce qui est appelé en anglais le « *web harvesting* » ou « *web scraping* ».
+La plupart des données disponibles sur le web ne sont cependant pas distribuées dans un fichier. Souvent, elles sont simplement présentées sous forme de tableaux dans des tables HTML. Une façon d'importer en R les données d'une table HTML serait de copier/coller le contenu de la table dans un fichier (texte ou autre), puis d'importer ce fichier en R. Si la table HTML en question provient d'une page sur un Wiki, tel que Wikipédia, le site web https://wikitable2csv.ggor.de/ facilite même cette tâche en créant des fichiers au format CSV contenant les données dans les tables HTML.
 
-Une façon d'importer en R les données d'une table HTML serait de copier/coller le contenu de la table dans un fichier (texte ou autre), puis d'importer ce fichier en R. Cependant, cette procédure n'est pas automatique. Certains packages R permettent d'éviter l'étape intermédiaire du copier/coller. Voici comment lire des données directement à partir d'une table HTML avec le [package `rvest`](https://github.com/hadley/rvest).
+Ces façons de procéder ne sont cependant pas automatiques. Certains packages R permettent d'éviter les étapes intermédiaires manuelles et permettent de lire directement dans une table HTML. Il est ainsi facile d'accéder à un très grand nombre de données en R. C'est une forme de ce qui est appelé en anglais le « *web harvesting* » ou « *web scraping* ».
+
+Voici un exemple de lecture de données directement à partir d'une table HTML avec le [package `rvest`](https://github.com/hadley/rvest).
 
 ```{r HTML, warning = FALSE, message = FALSE, eval = FALSE}
 library(rvest)
-url <- "http://pro.boxoffice.com/numbers/all_time"
-doc <- read_html(url)
-tables <- html_table(doc)
+url <- "https://en.wikipedia.org/wiki/List_of_highest-grossing_films"
+page <- read_html(url)
+tables <- html_table(page, fill = TRUE)
 boxoffice <- tables[[1]]
 str(boxoffice)
 ```
 
 ```{r echo = FALSE}
-boxoffice <- readRDS("C:/coursR/boxoffice_20190125.rds")
+boxoffice <- readRDS("C:/coursR/boxoffice_20200113.rds")
 str(boxoffice)
 ```
 
-La fonction `read_html` lit tout le code HTML d'une page web. La fonction `html_table` en extrait les tables et les converties en data frames. La plupart du temps, les données publiées sur internet sont sous forme de tableaux et se trouvent dans des tables HTML. Pour finir, il ne reste plus qu'à extraire la bonne table parmi toutes les tables lues.
+La fonction `read_html` lit tout le code HTML d'une page web. Cette lecture fonctionnera évidemment à la condition d'être connecté à internet. La fonction `html_table` en extrait les tables et les converties en data frames. Pour finir, il ne reste plus qu'à extraire la table voulue parmi toutes les tables lues.
 
-Le data frame obtenu dans le code précédent, nommé `boxoffice`, contient les recettes des films ayant générés le plus de revenus dans les cinémas américains, telles que présentées sur la page web http://pro.boxoffice.com/numbers/all_time le 25 janvier 2019. Ce data frame pourrait être amélioré en renommant ses colonnes.
+Le data frame obtenu dans le code précédent, nommé `boxoffice`, contient les recettes des films ayant générés le plus de revenus dans les cinémas américains, telles que présentées sur la page web https://en.wikipedia.org/wiki/List_of_highest-grossing_films le 13 janvier 2020.
 
 Mentionnons finalement qu'il existe de plus en plus de packages R pour aller chercher rapidement, à partir de R, des données ouvertes publiées sur des sites web. Par exemple, le [package `gtrendsR`](https://github.com/PMassicotte/gtrendsR) permet d'importer en R des données provenant de [Google trends](https://trends.google.ca). Ce genre de possibilité ne sera pas illustrée ici, mais la page web suivante énumère des packages utiles pour aller chercher des données sur divers sites web :  
 https://cran.r-project.org/web/views/WebTechnologies.html.
@@ -423,6 +472,7 @@ Voici une liste de vérifications qu'il est toujours bon d'effectuer après une 
 -	Est-ce que les données manquantes sont bien représentées dans data frame par la constante `NA`, et ce, dans les colonnes de tout type ?
 
 Si vous répondez oui à toutes ces questions, votre importation de données a de bonnes chances d'avoir été effectuée correctement.
+
 
 
 # Écriture dans des fichiers 
@@ -557,11 +607,11 @@ La fonction `load` ajoute des objets dans l'environnement de travail. Si des obj
 
 ***
 
-\newpage
-
-# Synthèse
+# Résumé
 
 #### Répertoire de travail et écriture de chemins d'accès à des fichiers
+
+\mbox{}
 
 Répertoire de travail = emplacement par défaut dans le système de fichier de notre ordinateur utilisé dans la session R (emplacement supposé par R lorsque cette information n’est pas spécifiée)
 
@@ -583,12 +633,35 @@ Exemple :
 
 #### Lecture (importation) de données
 
+\mbox{}
+
 Format à lire  Fonctions de lecture
 -------------  ----------------------
 texte          `read.table` (`.csv`, `.csv2`, `.delim`, `.delim2`)
+&nbsp;         `read_table` (`_csv`, `_delim`, etc.;  package `readr`)
+&nbsp;         `fread` (package `data.table`)
 JSON           `fromJSON` (package `jsonlite`)
 EXCEL          `read_excel` (package `readxl`)
 table HTML     `read_html` + `html_table` (package `rvest`)
+
+<!--
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+Format à lire & Fonctions de lecture\tabularnewline
+\midrule
+\endhead
+texte & \texttt{read.table} (\texttt{.csv}, \texttt{.csv2},
+\texttt{.delim}, \texttt{.delim2})\tabularnewline
+ & \texttt{read\_table} (\texttt{\_csv}, \texttt{\_delim}, 
+ etc.; package \texttt{readr})\tabularnewline
+ & \texttt{fread} (package \texttt{data.table})\tabularnewline
+JSON & \texttt{fromJSON} (package \texttt{jsonlite})\tabularnewline
+EXCEL & \texttt{read\_excel} (package \texttt{readxl})\tabularnewline
+table HTML & \texttt{read\_html} + \texttt{html\_table} (package
+\texttt{rvest})\tabularnewline
+\bottomrule
+\end{longtable}
+-->
 
 Des fonctions R existent pour importer des données sous plusieurs autres formats (voir références dans les notes) $\rightarrow$ non couvert dans le cours
 
@@ -596,6 +669,8 @@ Des fonctions R existent pour importer des données sous plusieurs autres format
 
 
 #### Écriture (exportation) dans des fichiers
+
+\mbox{}
 
 Élément(s) à exporter   | Fonction d'écriture                          
 --------------------------- | ------------------------------------------------------
@@ -609,8 +684,72 @@ métadonnées             | - format JSON : `toJSON` (package `jsonlite`) + `wri
 sorties R               | - `capture.output`, 
 &nbsp;                  | - `sink` 
 
+<!--
+\begin{longtable}[]{@{}ll@{}}
+\toprule
+\begin{minipage}[b]{0.31\columnwidth}\raggedright
+Élément(s) à exporter\strut
+\end{minipage} & \begin{minipage}[b]{0.63\columnwidth}\raggedright
+Fonction d'écriture\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.31\columnwidth}\raggedright
+données et (optionnel)\strut
+\end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright
+- format texte (recommandé) : \texttt{write.table} (\texttt{.csv},
+\texttt{.csv2})\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.31\columnwidth}\raggedright
+métadonnées\strut
+\end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright
+- format JSON : \texttt{toJSON} (package \texttt{jsonlite}) +
+\texttt{write}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.31\columnwidth}\raggedright
+~\strut
+\end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright
+- format EXCEL : \texttt{write.xlsx} (package \texttt{openxlsx})\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.31\columnwidth}\raggedright
+---------------------------\strut
+\end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright
+------------------------------------------------------\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.31\columnwidth}\raggedright
++ structure complète\strut
+\end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright
+- \texttt{save.image}, \texttt{save} (objet(s) + leur(s) nom(s))\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.31\columnwidth}\raggedright
+(objet R intact)\strut
+\end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright
+- \texttt{saveRDS} (un seul objet, sans son nom)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.31\columnwidth}\raggedright
+---------------------------\strut
+\end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright
+------------------------------------------------------\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.31\columnwidth}\raggedright
+sorties R\strut
+\end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright
+- \texttt{capture.output},\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.31\columnwidth}\raggedright
+~\strut
+\end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright
+- \texttt{sink}\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+-->
+
+\newpage
 
 #### Chargement d’objet(s) R provenant d'un fichier externe
+
+\mbox{}
 
 Fonction pour charger en R des objets stockés dans un fichier externe :
 
