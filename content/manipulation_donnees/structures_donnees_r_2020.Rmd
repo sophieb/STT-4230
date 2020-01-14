@@ -1,28 +1,31 @@
 ---
 title: "Structures de données en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2020-01-13"
+date: '2020-01-13'
 weight: 1
-slug: "structures_r"
+slug: structures_r
 categories: ["cours_2020-01-21"]
 categories_weight: 1
-lastmodifierdisplayname : "Sophie Baillargeon"
-lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+lastmodifierdisplayname: Sophie Baillargeon
+lastmodifieremail: sophie.baillargeon@mat.ulaval.ca
 output:
-  pdf_document:
+  pdf_document: 
+    highlight: tango
     toc: yes
     toc_depth: 3
   blogdown::html_page:
-    toc: true
+    highlight: tango
+    toc: yes
+    toc_depth: 3
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
 - \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \renewcommand{\linethickness}{0.05em}
+- \usepackage{longtable,booktabs}
 ---
 
 ***
-
-\newpage
 
 # Introduction
 
@@ -32,12 +35,29 @@ Le point de départ d'une analyse de données en R est d'avoir accès aux donné
 
 Le tableau suivant présente les différents types d'objets R servant de structure de données offerts dans le R de base, selon leur nombre de dimensions. 
 
-Nombre de dimensions | Objets atomiques | Objets récursifs
---------------- | --------------------- | -----------------------------
-1 | **vecteur** | **liste**
-2 | **matrice** | **data frame**
-$\vdots$ | $\vdots$ |
-n | **array**   |
+Nombre de dimensions | Objets atomiques | Objets récursifs |
+--------------- | --------------------- | -----------------------------|
+1 | **vecteur** | **liste** |
+2 | **matrice** | **data frame** |
+$\vdots$ | $\vdots$ | |
+n | **array**   | - |
+
+
+<!--
+\begin{longtable}[]{@{}lll@{}}
+\toprule
+Nombre de dimensions & Objets atomiques & Objets
+récursifs\tabularnewline
+\midrule
+\endhead
+1 & \textbf{vecteur} & \textbf{liste}\tabularnewline
+2 & \textbf{matrice} & \textbf{data frame}\tabularnewline
+\(\vdots\) & \(\vdots\) &\tabularnewline
+n & \textbf{array} & -\tabularnewline
+\bottomrule
+\end{longtable}
+-->
+
 
 Aux 5 types d'objets de ce tableau, il faut ajouter les **facteurs**. Ils sont une généralisation des vecteurs, utiles pour stocker des données catégoriques.
 
@@ -298,7 +318,7 @@ str(ca)
 typeof(ca)
 ```
 
-Ce sont les guillemets qui indiquent à R qu'il s'agit d'une donnée de type caractère.
+Ce sont les guillemets (simples ou doubles) qui indiquent à R qu'il s'agit d'une donnée de type caractère.
 
 ```{r}
 str("1")
@@ -349,6 +369,8 @@ Il y a trois opérateurs d'indiçage d'éléments d'un objet R : `[`, `[[` et `$
 
 #### `[` versus `[[` et `$`
 
+\mbox{}
+
 L'opérateur `[` effectue de l'extraction **d'éléments** (potentiellement plus d'un) en **préservant presque toujours la structure** de l'objet (l'objet produit en résultat de l'extraction est, sauf exception, du même type que l'objet d'origine et conserve la majorité de ses attributs).
 
 Les opérateurs `[[` et `$` permettent de référer à **un seul élément** et ils **simplifient l'objet** lors d'une extraction (retirent des attributs pour les objets atomiques et sortent de l'objet principal pour un objet récursif).
@@ -396,12 +418,16 @@ attributes(extrait_mat)
 
 #### Extractions d'éléments dans un objet à plusieurs dimensions 
 
-Les opérateurs `[` et `[[` prennent en entrée un argument pour chacune des dimensions d'un objet. Par exemple, pour l'array à 3 dimensions `arr`, la commande suivante extrait un seul élément, dont la position est identifiée par les valeurs fournies en entrée aux arguments de `[`.
+\mbox{}
+
+Les opérateurs `[` et `[[` prennent en entrée un argument pour chacune des dimensions d'un objet, comme illustré dans l'exemple précédent. Voici un autre exemple, avec l'array à 3 dimensions `arr`. La commande suivante extrait un seul élément de `arr`, dont la position est identifiée par les valeurs fournies en entrée aux arguments de `[`.
 ```{r}
 arr[2, 1, 3]
 ```
 
 #### Spécificité de l'opérateur `$`
+
+\mbox{}
 
 L'opérateur `$` fonctionne seulement avec les objets récursifs (une liste ou un data frame) dont les éléments sont nommés. Il doit être suivi du nom de l'élément à extraire. Ce nom n'a pas besoin d'être encadré de guillemets s'il ne contient pas d'espaces.
 
@@ -416,6 +442,8 @@ dat$V2
 ```
 
 #### Identification de l'élément à extraire avec l'opérateur `[[`
+
+\mbox{}
 
 Les arguments fournis à `[[` pour identifier l'unique élément à extraire peuvent recevoir des valeurs de type :
 
@@ -437,17 +465,19 @@ vec[[2.6]]
 
 #### Identification du ou des éléments à extraire avec l'opérateur `[`
 
+\mbox{}
+
 Étant donné que l'opérateur `[` permet l'extraction de plusieurs éléments, il accepte une plus grande variété de types de valeurs. Voici les valeurs qu'il accepte en argument pour identifier les éléments à extraire :
 
 - un ou des nombres positifs, dont les valeurs sont entre 1 et la taille de la dimension concernée :  
 *positions des éléments à conserver*;
 - un ou des nombres négatifs, dont les valeurs sont entre 1 et la taille de la dimension concernée :  
-*__-__ positions des éléments à exclure*;
-- un ou des chaînes de caractères (possible seulement si les éléments sont nommés) :  
+*-1 $\times$ positions des éléments à exclure*;
+- une ou des chaînes de caractères (possible seulement si les éléments sont nommés) :  
 *noms des éléments à conserver*;
 - vecteur de logiques (doit être de la même longueur que la dimension concernée) :  
 `TRUE` *pour les éléments à conserver,* `FALSE` *pour ceux à exclure*;
-- rien : utile par exemple pour extraire une ligne d'une matrice ou d'un data frame en conservant toutes les colonnes.
+- rien : utile par exemple pour extraire tous les éléments selon une dimension d'un objet à plusieurs dimensions.
 
 Voici quelques exemples :
 
@@ -490,6 +520,8 @@ Les sections suivantes proposent plusieurs autres exemples d'extraction de donn�
 
 #### Argument `drop` de l'opérateur `[`
 
+\mbox{}
+
 L'opérateur `[` préserve la structure des objets, sauf dans quelques cas particuliers.
 Un de ces cas est l'extraction d'une colonne, complète ou partielle, d'un data frame. Le résultat de l'extraction est alors un vecteur ou un facteur, et non un autre data frame, comme dans cet exemple.
 
@@ -530,6 +562,8 @@ En plus des opérateurs d'indiçage, certaines fonctions permettent aussi d'extr
 
 #### Fonction `head`
 
+\mbox{}
+
 La fonction `head` extrait les premiers éléments d'un vecteur, d'une liste ou d'un facteur et les premières lignes d'une matrice ou d'un data frame. L'argument `n` permet de spécifier combien d'éléments ou de lignes extraire. Voici un exemple.
 
 ```{r}
@@ -539,6 +573,8 @@ head(dat, n = 3)
 
 #### Fonction `tail`
 
+\mbox{}
+
 À l'inverse, la fonction `tail` extrait les derniers éléments ou les dernières lignes.
 
 ```{r}
@@ -547,6 +583,8 @@ tail(dat, n = 1)
 ```
 
 #### Fonction `subset`
+
+\mbox{}
 
 La fonction `subset` est quant à elle une option de rechange à l'opérateur `[` utilisé avec des identifiants logiques. Elle fonctionne avec les vecteurs.
 
@@ -563,10 +601,16 @@ subset(mat, subset = c(FALSE, TRUE, FALSE, TRUE), select = 1)
 Lorsque le premier argument fourni en entrée à la fonction `subset` est un data frame, il est possible de référer aux colonnes de celui-ci directement par leurs noms dans les arguments `subset` et `select`. Il est aussi possible de retirer une colonne en utilisant l'opérateur `-` avant le nom de la colonne à retirer dans la valeur fournie à l'argument `select`.
 
 ```{r}
-subset(dat, subset = c(TRUE, FALSE, TRUE, TRUE), select = - V3)
+subset(dat, subset = c(TRUE, FALSE, FALSE, TRUE), select = - V3)
 ```
 
+**Note** : Typiquement, le vecteur de `TRUE` et `FALSE` servant à identifier les lignes à conserver est créé par une condition logique, comme dans l'exemple suivant.
 
+```{r}
+subset(dat, subset = V1 < 6, select = - V3)
+```
+
+Nous verrons plus tard comment utiliser des opérateurs logiques pour créer des vecteurs d'identifiants logiques. Avec ces opérateurs, il sera facile d'extraire par exemple toutes les valeurs tombant dans un certain ensemble de valeurs acceptées.
 
 ## Remplacement d'éléments
 
@@ -595,7 +639,7 @@ vec[1:3] <- 0.5
 vec
 ```
 
-Ça fonctionne aussi lorsque le vecteur le plus court est de longueur supérieure à 1. Dans l'exemple suivant, 4 valeurs sont identifiées à remplacer, mais 2 valeurs de remplacement sont fournies. Le vecteur de valeurs de remplacement est donc dupliqué.
+Cela fonctionne aussi lorsque le vecteur le plus court est de longueur supérieure à 1. Dans l'exemple suivant, 4 valeurs sont identifiées à remplacer, mais 2 valeurs de remplacement sont fournies. Le vecteur de valeurs de remplacement est donc dupliqué.
 
 ```{r}
 vec[1:4] <- c(0.1, 0.2)
@@ -615,6 +659,8 @@ Aussi, la fonction `replace` permet de remplacer des éléments dans un vecteur.
 
 
 ***
+
+\newpage
 
 # Le vecteur
 
@@ -828,6 +874,8 @@ names(de) <- c("l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9", "l10")
 
 #### Un seul élément
 
+\mbox{}
+
 Un élément d'un vecteur peut être extrait en l'identifiant par sa position comme suit.
 
 ```{r}
@@ -852,9 +900,13 @@ de$l1
 
 #### Plusieurs éléments
 
+\mbox{}
+
 Pour extraire plusieurs éléments simultanément, il faut utiliser un autre vecteur afin d'identifier les éléments à extraire. Voici quelques exemples selon le type du vecteur d'identifiants.
 
 ##### - Identifiants numériques 
+
+\mbox{}
 
 Dans cet exemple, les éléments à extraire sont identifiés par des nombres représentant leurs positions.
 
@@ -893,6 +945,8 @@ de[seq(from = 2, to = 10, by = 2)]
 
 ##### - Identifiants caractères 
 
+\mbox{}
+
 Dans cet exemple, des chaînes de caractères contenant les noms des éléments à extraire sont utilisées.
 
 ```{r}
@@ -901,6 +955,8 @@ de[c("l3","l6","l7")]
 
 
 ##### - Identifiants logiques 
+
+\mbox{}
 
 Voici un exemple de vecteur logique permettant d'identifier des éléments à extraire. Ce vecteur servira à extraire des éléments du vecteur `de`. Il doit donc être de longueur 10, tout comme `de`. Le vecteur contient la valeur `TRUE` aux positions des éléments à extraire et `FALSE` aux positions des éléments à exclure.
 
@@ -915,11 +971,10 @@ Ce vecteur est utile pour extraire le premier et le dernier élément de `de`
 de[index.logic]
 ```
 
-Nous verrons plus tard comment utiliser des opérateurs logiques pour créer des vecteurs d'identifiants logiques. Avec ces opérateurs, il sera facile d'extraire par exemple toutes les valeurs tombant dans un certain ensemble de valeurs acceptées.
-
-\newpage
 
 #### Extraction par exclusion
+
+\mbox{}
 
 Une autre méthode d'extraction d'éléments d'un vecteur consiste à identifier des éléments à exclure. Pour ce faire, il faut utiliser un indicateur numérique de position négatif. Voici un exemple qui permet d'extraire tous les éléments de `de` à l'exception des deux premiers.
 
@@ -1155,6 +1210,8 @@ Tout ce qui a été mentionné concernant l'extraction de données dans un vecte
 
 #### Un seul élément
 
+\mbox{}
+
 Un élément est identifié par sa position en ligne et en colonne.
 
 ```{r}
@@ -1170,6 +1227,8 @@ des[19]
 parce qu'en mémoire, une matrice est stockée comme un vecteur, en mettant bout à bout ses colonnes.
 
 #### Plusieurs éléments
+
+\mbox{}
 
 Il est possible d'extraire des lignes complètes,
 
@@ -1398,6 +1457,8 @@ exemple
 
 #### Un seul élément
 
+\mbox{}
+
 Voici quelques exemples :
 
 ```{r}
@@ -1431,6 +1492,8 @@ exemple$liste$lignes
 
 #### Plusieurs éléments
 
+\mbox{}
+
 Pour extraire d'un coup plusieurs éléments d'une liste, il faut employer l'opérateur `[`. Voici un exemple.
 
 ```{r}
@@ -1441,6 +1504,7 @@ noms[1:2]
 
 #### Extraction par exclusion
 
+\mbox{}
 
 La façon la plus simple de retirer un élément d'une liste est d'assigner la valeur `NULL` à l'élément en question.
 
@@ -1460,6 +1524,8 @@ Peu de langages de programmation possèdent une structure de données équivalen
 
 Afin de mieux comprendre le data frame, rappelons d'abord quelques définitions relatives à un jeu de données[^1].
 
+[^1]: Ces définitions sont tirées de la référence suivante : Baillargeon, S., Rivest, L.-P., Simard, M., Ghazzali, N., Mérette, C., Belisle, C., Duchesne, T., Labbe, A. et Lakhal-Chaieb, L. (2013). Analyse de tableaux de fréquences : notes de cours, STT-4400/STT-6210. Université Laval, Département de mathématiques et de statistique.
+
 ### Définitions relatives à un jeu de données
 
 - **Données** : En statistique, des données sont des valeurs numériques (des nombres) ou alphanumériques (des chaînes de caractères) représentant les observations de certaines variables sur certains individus. Elles se présentent souvent sous la forme de jeux de données, c'est-à-dire de tableaux de valeurs, stockées dans un fichier informatique.
@@ -1473,9 +1539,6 @@ Afin de mieux comprendre le data frame, rappelons d'abord quelques définitions 
 - **Variable** : Le terme variable désigne la représentation d'une caractéristique des individus. Ainsi, une variable n'est pas la caractéristique elle-même, mais plutôt une mesure de cette caractéristique.
 
 - **Observation** : Une observation est l'ensemble des valeurs obtenues en mesurant des variables sur un individu de la population.
-
-
-[^1]: Ces définitions sont tirées de la référence suivante : Baillargeon, S., Rivest, L.-P., Simard, M., Ghazzali, N., Mérette, C., Belisle, C., Duchesne, T., Labbe, A. et Lakhal-Chaieb, L. (2013). Analyse de tableaux de fréquences : notes de cours, STT-4400/STT-6210. Université Laval, Département de mathématiques et de statistique.
 
 
 ### Représentation d'un jeu de données en R
@@ -1551,6 +1614,8 @@ desPlus
 Il faut donner en entrée à la fonction `data.frame` tous les vecteurs et/ou facteurs qu'il doit contenir, dans l'ordre désiré. La fonction `data.frame` accepte aussi en entrée des matrices, comme dans l'exemple précédent, auquel cas les colonnes des matrices en entrée deviennent des colonnes dans le data frame en sortie.
 
 Regardons la structure interne du data frame que nous venons de créer.  
+
+\newpage
 
 ```{r}
 str(desPlus)
@@ -1649,6 +1714,8 @@ L'extraction d'éléments d'un data frame s'effectue comme pour une liste ou enc
 
 #### En traitant le data frame comme une liste
 
+\mbox{}
+
 Comme il a déjà été mentionné à quelques reprises maintenant, le data frame est un objet récursif et ses éléments sont ses colonnes. Alors, extraire des éléments d'un data frame signifie extraire des colonnes.
 
 Tous les opérateurs d'indiçage introduits plus tôt fonctionnent avec le data frame, comme le démontre ces exemples.
@@ -1661,6 +1728,8 @@ desPlus$de1
 
 #### En traitant le data frame comme une matrice
 
+\mbox{}
+
 Il est aussi possible d'exploiter les deux dimensions du data frame et d'extraire des éléments de ses colonnes. Pour ce faire, il faut simplement traiter le data frame comme une matrice et fournir deux arguments à l'opérateur d'indiçage `[` ou `[[` : le premier pour identifier des lignes, le deuxième pour identifier des colonnes. Voici quelques exemples.
 
 ```{r}
@@ -1671,6 +1740,8 @@ desPlus[[1, 1]]
 
 
 #### Extraction par exclusion
+
+\mbox{}
 
 Comme pour une liste, assigner la valeur NULL à un élément d'un data frame l'efface de celui-ci, comme dans cet exemple.
 
@@ -1709,6 +1780,8 @@ Un tibble se manipule comme un data frame, mais il possède les distinctions sui
 
 
 #### Pour en apprendre davantage
+
+\mbox{}
 
 Voici quelques références pour ceux intéressés à en apprendre davantage à propos des tibbles :
 
@@ -1755,6 +1828,8 @@ Nous verrons dans un prochain cours comment produire avec les fonctionnalités d
 
 
 #### Pour en apprendre davantage
+
+\mbox{}
 
 Voici quelques références pour ceux intéressés à en apprendre davantage à propos des data tables :
 
@@ -1923,6 +1998,8 @@ Afin de s'assurer de garder le contrôle de nos objets, il est aussi possible de
 
 &nbsp;
 
+\newpage
+
 **Exemple** : Comment créer un vecteur d'entiers? 
 
 - l'opérateur `':'` crée par défaut des vecteurs d'entiers lorsque la valeur de départ est un entier
@@ -1949,6 +2026,8 @@ str(vect4)
 
 #### Utilité des conversions implicites de type 
 
+\mbox{}
+
 Nous éviter des erreurs!
 
 Voici une assignation qui retourne le résultat escompté en R grâce aux conversions implicites de type, mais qui ne retournerait pas le résultat escompté dans certains autres langages.
@@ -1964,6 +2043,8 @@ L'objet `x` a changé le type de ses éléments afin de pouvoir garder en mémoi
 
 
 #### Conversions explicites de chaînes de caractères vers des nombres 
+
+\mbox{}
 
 Il est même possible de convertir certains caractères en nombres. Lorsque la chaîne de caractères contient en fait des caractères numériques utilisant le point comme signe décimal, la conversion est directe avec `as.numeric` (ou `as.double` ou `as.integer`).
 
@@ -1983,17 +2064,15 @@ type.convert(vect6, na.strings = "-", dec = ",")
 
 ***
 
-# Synthèse
+# Résumé
 
 #### Contenant versus contenu
 
-**Objet** R servant de structure de données  
+\mbox{}
 
-$\qquad =$ CONTENANT
+**Objet** R servant de structure de données = CONTENANT
 
-**Éléments** stockés dans cet objet  
-
-$\qquad =$ CONTENU :
+**Éléments** stockés dans cet objet = CONTENU :
 
 - **données** : valeurs observées de variables aléatoires, valeurs de résultats de calculs (ex.: statistiques descriptives, coefficients d'une modèle), etc.
 - **métadonnées = attributs** (souvent facultatives) :  
@@ -2001,6 +2080,8 @@ nom des éléments (par dimension), nombre d'éléments par dimension pour les m
 
 
 #### Caractéristiques des structures de données en R
+
+\mbox{}
 
 - Type de l'objet : `is.`(`atomic`/`recursive`), `is.`(`vector`/`matrix`/`array`/`list`/`data.frame`/`factor`)
 - Type des données en éléments : `typeof`, `is.`(`numeric`/`character`/`logical`/...)
@@ -2015,31 +2096,69 @@ nom des éléments (par dimension), nombre d'éléments par dimension pour les m
 
 #### Types de structures de données en R
 
-Nombre de dimensions | Objets atomiques | Objets récursifs
---------------- | --------------------- | -----------------------------
-1 | **vecteur** | **liste**
-2 | **matrice** | **data frame**
-$\vdots$ | $\vdots$ |
-n | **array**   |
+\mbox{}
+
+Nombre de dimensions | Objets atomiques | Objets récursifs |
+--------------- | --------------------- | -----------------------------|
+1 | **vecteur** | **liste** |
+2 | **matrice** | **data frame** |
+$\vdots$ | $\vdots$ | |
+n | **array**   | - |
+
+<!--
+\begin{longtable}[]{@{}lll@{}}
+\toprule
+Nombre de dimensions & Objets atomiques & Objets
+récursifs\tabularnewline
+\midrule
+\endhead
+1 & \textbf{vecteur} & \textbf{liste}\tabularnewline
+2 & \textbf{matrice} & \textbf{data frame}\tabularnewline
+\(\vdots\) & \(\vdots\) &\tabularnewline
+n & \textbf{array} & - \tabularnewline
+\bottomrule
+\end{longtable}
+-->
+
 
 - Objets atomiques : Éléments = données toutes du même type
 - Objets récursifs : Éléments = objets de types quelconques
 
 **facteur** = une généralisation du vecteur pour stocker les observations d'une variable catégorique
 
-\newpage
 
 #### Attributs selon le type d'objet
 
+\mbox{}
+
 Fonctions pour extraire des attributs : `attributes` (tous les attributs), `attr` (un seul attribut), `names`, `dimnames`, `colnames`, `rownames`, `dim`, `nrow`, `ncol`, `class`, `levels`, etc.
 
-Type d'objet | names | dimnames | dim | class | levels
--------------|-------|----------|-----|-------|-------
-vecteur | ($\checkmark$) | - | - | $\bullet$ | - 
-matrice ou array | - | ($\checkmark$) | $\checkmark$ | $\bullet$ | - 
-liste | ($\checkmark$) | - | - | $\bullet$ | - 
-data frame | ($\checkmark$) | ($\checkmark$, $\bullet$) | $\bullet$ | $\checkmark$ | - 
-facteur | ($\checkmark$) | - | - | $\checkmark$ | $\checkmark$ 
+
+Type d'objet | names | dimnames | dim | class | levels |
+-------------|-------|----------|-----|-------|--------|
+vecteur | ($\checkmark$) | - | - | $\bullet$ | - |  
+matrice ou array | - | ($\checkmark$) | $\checkmark$ | $\bullet$ | - |
+liste | ($\checkmark$) | - | - | $\bullet$ | - |
+data frame | ($\checkmark$) | ($\checkmark$, $\bullet$) | $\bullet$ | $\checkmark$ | - |
+facteur | ($\checkmark$) | - | - | $\checkmark$ | $\checkmark$ |
+
+<!--
+\begin{longtable}[]{@{}llllll@{}}
+\toprule
+Type d'objet & names & dimnames & dim & class & levels\tabularnewline
+\midrule
+\endhead
+vecteur & (\(\checkmark\)) & - & - & \(\bullet\) & -\tabularnewline
+matrice ou array & - & (\(\checkmark\)) & \(\checkmark\) & \(\bullet\) &
+-\tabularnewline
+liste & (\(\checkmark\)) & - & - & \(\bullet\) & -\tabularnewline
+data frame & (\(\checkmark\)) & (\(\checkmark\), \(\bullet\)) &
+\(\bullet\) & \(\checkmark\) & -\tabularnewline
+facteur & (\(\checkmark\)) & - & - & \(\checkmark\) &
+\(\checkmark\)\tabularnewline
+\bottomrule
+\end{longtable}
+-->
 
 Légende :  
 « - » = attribut non existant pour ce type d'objet  
@@ -2048,6 +2167,8 @@ Légende :
 
 
 #### Extraction d'éléments
+
+\mbox{}
 
 - Opérateurs d'indiçage : 
     + `[` : extrait un ou plusieurs éléments, préserve la structure de l'objet, sauf si une simplification est possible et `drop = TRUE` (`TRUE` est la valeur par défaut du paramètre);
@@ -2066,6 +2187,8 @@ Différentes façons d'identifier les éléments à extraire avec `[` :
 
 #### Remplacement d'éléments dans un objet
 
+\mbox{}
+
 Afin de modifier des éléments dans un objet, il faut soumettre une commande contenant les 3 composantes suivantes :
 
 1. une extraction avec l'opérateur `[`, `[[` ou `$` pour identifier les éléments à remplacer (ou simplement le nom de l'objet s'il doit être remplacé dans son entièreté),
@@ -2079,10 +2202,14 @@ matriceA[1:2,3] <- c(3,5)
 
 ##### Règle de recyclage
 
+\mbox{}
+
 Lors d'une assignation ou de toute opération faisant intervenir 2 vecteurs de longueurs différentes, les éléments du vecteur le plus court sont répétés de façon à ce que ce vecteur devienne de la même longueur que le vecteur le plus long. 
 
 
 #### Conversions de types de données
+
+\mbox{}
 
 Les types de données communs, du moins contraignant au plus contraignant :
 
@@ -2095,10 +2222,14 @@ Fonctions R pour effectuer des **conversions explicites** :
 
 ##### Donnée manquante
 
+\mbox{}
+
 Peu importe le type, une **donnée manquante** est toujours représentée en R par `NA`.
 
 
 #### Le vecteur
+
+\mbox{}
 
 Simple objet atomique de dimension 1
 
@@ -2115,6 +2246,8 @@ Simple objet atomique de dimension 1
 
 #### La matrice
 
+\mbox{}
+
 Généralisation du vecteur à 2 dimensions
 
 - fonctions de création : 
@@ -2130,6 +2263,8 @@ Généralisation du vecteur à 2 dimensions
 
 #### Le array
 
+\mbox{}
+
 Généralisation du vecteur ou de la matrice à une dimension quelconque 
 
 - fonctions de création : 
@@ -2143,6 +2278,8 @@ Généralisation du vecteur ou de la matrice à une dimension quelconque
 
 #### La liste
 
+\mbox{}
+
 Objet récursif de dimension 1
 
 - fonctions de création : 
@@ -2154,6 +2291,8 @@ Objet récursif de dimension 1
     + ou encore $ pour extraire un élément nommée.
 
 #### Le data frame
+
+\mbox{}
 
 Objet récursif de dimension 2 conçu pour stocker    
 
@@ -2172,6 +2311,8 @@ Objet récursif de dimension 2 conçu pour stocker
 
 #### Le facteur
 
+\mbox{}
+
 Généralisation du vecteur conçu pour stocker les valeurs observées d’une variable catégorique.
 
 - fonctions de création : `factor`, `as.factor`;
@@ -2188,13 +2329,13 @@ Généralisation du vecteur conçu pour stocker les valeurs observées d’une v
 
 # Références
 
-- R Core Team (2016). An Introduction to R.  
+- R Core Team (2019). An Introduction to R.  
 https://cran.r-project.org/doc/manuals/r-release/R-intro.html
 
 - R Core Team (2016). The R Language Definition.  
 https://cran.r-project.org/doc/manuals/r-release/R-lang.html
 
 - Wickham, H. (2014). Advanced R. CRC Press.
-    + http://adv-r.had.co.nz/Data-structures.html,
-    + http://adv-r.had.co.nz/Subsetting.html.
+    + https://adv-r.hadley.nz/vectors-chap.html,
+    + https://adv-r.hadley.nz/subsetting.html.
 
