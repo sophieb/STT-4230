@@ -26,7 +26,7 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
     * [Installation de R et RStudio]({{< relref "introduction/installation_r_2020.html" >}})
     * [Concepts de base en R]({{< relref "introduction/base_r_2020.html" >}})
 * Manipulation de données en R
-    * [Structure de données en R]({{< relref "manipulation_donnees/structures_donnees_r_2020.html" >}})
+    * [Structures de données en R]({{< relref "manipulation_donnees/structures_donnees_r_2020.html" >}})
     * [Lecture et écriture dans des fichiers externes à partir de R]({{< relref "manipulation_donnees/lecture_ecriture_r_2020.html" >}})
     * [Prétraitement de données en R]({{< relref "manipulation_donnees/pretraitement_donnees_r_2019.html" >}})
 * Calculs en R
@@ -37,7 +37,7 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
     * [Rédaction de documents en R Markdown]({{< relref "communication_resultats/redaction_r_markdown_2019.html" >}})
 * Programmation en R
     * [Informations techniques concernant R]({{< relref "programmation/info_techniques_r_2019.html" >}})
-    * [Structure de contrôle en R]({{< relref "programmation/struct_controle_r_2019.html" >}})
+    * [Structures de contrôle en R]({{< relref "programmation/struct_controle_r_2019.html" >}})
     * [Fonctions en R]({{< relref "programmation/fonctions_r_2019.html" >}})
     * [Programmation orientée objet en R]({{< relref "programmation/oop_r_2019.html" >}})
     * [Tests et exceptions en R]({{< relref "programmation/tests_exceptions_r_2019.html" >}})

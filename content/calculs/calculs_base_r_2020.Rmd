@@ -75,11 +75,11 @@ c(5, 6, 5, 6) + c(2, 5, 3, 1)
 
 Cette règle de recyclage est exploitée, souvent sans que l'utilisateur en soit pleinement conscient,  lorsque l'un des deux vecteurs impliqués dans une opération est de longueur 1. Par exemple, la commande suivante impliquant un exposant,
 ```{r}
-y^2
+y ^ 2
 ```
 est en fait traduite par R en la commande suivante :
 ```{r}
-y^rep(2, times = length(y))
+y ^ rep(2, times = length(y))
 ```
 
 #### Règle de recyclage avec des objets à plus d'une dimension
@@ -185,21 +185,21 @@ Les premiers opérateurs sont usuels et ne requièrent aucune explication. Expli
 
 L'opérateur `%/%` réalise une [division entière](https://fr.wikipedia.org/wiki/Division_euclidienne). Pour illustrer ce type de division, prenons l'exemple suivant.
 ```{r}
-5/2
+5 / 2
 ```
 L'opérateur de division ordinaire `/` retourne un nombre réel. L'opérateur `%/%` retourne la partie entière du résultat obtenu avec `/`. La partie décimale est tronquée. 
 ```{r}
-5%/%2
+5 %/% 2
 ```
 L'opérateur [modulo](https://fr.wikipedia.org/wiki/Modulo_(op%C3%A9ration)) `%%` retourne le reste de la division entière. Dans l'exemple traité ici, ce reste vaut 1 car 5 - 2*2 = 1.
 ```{r}
-5%%2
+5 %% 2
 ```
 
 **Astuces** :
 
 - Cet opérateur est pratique pour tester si des nombres sont pairs ou impairs. Les nombres pairs sont des multiples de 2. Alors `x %% 2` retourne 0 pour les nombres pairs et 1 pour les nombres impairs.
-- L'opérateur modulo peut aussi servir à tester si un nombre stocké sous le type `double` est en réalité un entier. S'il s'agit d'un entier, `x %% 1` retournera 0.  
+- L'opérateur modulo peut aussi servir à tester si un nombre stocké sous le type `double` est en réalité un entier au sens mathématique. S'il s'agit d'un entier, `x %% 1` retournera 0.  
 
 
 ### Opérateurs de comparaison
@@ -331,8 +331,8 @@ cbind(p, q, "p et q" = p & q, "p ou q" = p | q, "p xor q" = xor(p, q))
 Ainsi, 
 
 - l'instruction `x & y` retournera un vecteur contenant des `TRUE` aux positions pour lesquelles la valeur en `x` et la valeur en `y` sont toutes les deux `TRUE` et contenant des `FALSE` partout ailleurs;
-- l'instruction `x & y` retournera un vecteur contenant des `FALSE` aux positions pour lesquelles la valeur en `x` et la valeur en `y` sont toutes les deux `FALSE` et contenant des `TRUE` partout ailleurs;
-- l'instruction `x & y` retournera un vecteur contenant des `TRUE` aux positions pour lesquelles la valeur en `x` ou la valeur en `y` est `TRUE`, mais pas les deux, et contenant des `FALSE` partout ailleurs.
+- l'instruction `x | y` retournera un vecteur contenant des `FALSE` aux positions pour lesquelles la valeur en `x` et la valeur en `y` sont toutes les deux `FALSE` et contenant des `TRUE` partout ailleurs;
+- l'instruction `xor(x, y)` retournera un vecteur contenant des `TRUE` aux positions pour lesquelles la valeur en `x` ou la valeur en `y` est `TRUE`, mais pas les deux, et contenant des `FALSE` partout ailleurs.
 
 
 ## Fonctions mathématiques agissant de façon vectorielle
@@ -357,7 +357,7 @@ round(x, digits = 1)
 # Arrondissement à l'entier supérieur
 ceiling(x)
 # Arrondissement à la partie entière
-trunc(x, digits = 2)
+trunc(x)
 ```
 
 Ces fonctions arrivent aussi à effectuer des calculs par élément dans un objet atomique de dimension supérieure à un ou dans un data frame.
@@ -382,7 +382,7 @@ Certaines fonctions mathématiques en R effectuent des calculs faisant interveni
 Voici quelques exemples.
 ```{r}
 # Matrice de données numériques pour les exemples
-mat <- matrix(c(2,5,3,4,6,5,4,3,1,2,9,8), nrow = 3, ncol = 4)
+mat <- matrix(c(2, 5, 3, 4, 6, 5, 4, 3, 1, 2, 9, 8), nrow = 3, ncol = 4)
 mat
 # Produit de tous les éléments
 prod(mat)
@@ -470,7 +470,7 @@ pi
 
 `Inf` est le symbole R pour l'infini $\infty$.
 ```{r}
--5/0
+-5 / 0
 ```
 
 `NaN` est un mot-clé signifiant *Not A Number*. Ce mot-clé est retourné par R lorsqu'un utilisateur lui demande d'effectuer une opération mathématique impossible, par exemple :
@@ -599,7 +599,7 @@ quantile(cars$speed)
 ```
 L'argument `probs` permet de demander n'importe quels quantiles. Dans l'exemple suivant, les premiers et neuvièmes déciles sont demandés.
 ```{r}
-quantile(cars$speed, probs = c(0.1,0.9))
+quantile(cars$speed, probs = c(0.1, 0.9))
 ```
 
 **Remarque** : Il existe plusieurs façons de calculer des quantiles. La fonction `quantile` implémente 9 algorithmes de calcul de quantiles (voir [`help(quantile)`](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html)).
@@ -679,7 +679,7 @@ pmax(c(-2, 4, -3, 4, 7, -6, 0),
      c( 1, 2,  3, 4, 5,  6, 7),
      c( 5, 0, -2, 4, 5,  3, 3))
 ```
-Ces fonctions sont utiles pour tronquer des valeurs. Par exemple, l'instruction suivante permet de tronquer à zéro les valeurs dans le vecteur en entrée, donc de remplacer toute valeur négative qu'il contient par zéro.
+Ces fonctions sont utiles pour remplacer des valeurs par un seuil. Par exemple, l'instruction suivante permet de remplacer par zéro toute valeur négative contenue dans le vecteur en entrée.
 ```{r}
 pmax(c(-2, 4, -3, 4, 7, -6, 0), 0)
 ```
@@ -705,9 +705,9 @@ Les fonctions `table`, `xtabs` et `ftable` permettent de calculer des fréquence
 Voici un petit jeu de données pour illustrer l'utilisation de ces fonctions. Il contient des observations concernant 7 individus fictifs : la couleur de leurs yeux, la couleur de leurs cheveux et leur genre.
 ```{r}
 sondage <- data.frame(
-  yeux = c("brun", "brun", "bleu", "brun", "vert", "brun", "bleu"),
-  cheveux = c("brun", "noir", "blond", "brun", "brun", "blond", "brun"),
-  genre = c("féminin", "masculin", "féminin", "féminin", "masculin", "féminin", "masculin")
+  yeux    = c("brun",    "brun",     "bleu",    "brun",    "vert",     "brun",    "bleu"),
+  cheveux = c("brun",    "noir",     "blond",   "brun",    "brun",     "blond",   "brun"),
+  genre   = c("féminin", "masculin", "féminin", "féminin", "masculin", "féminin", "masculin")
 )
 sondage
 ```
@@ -1346,7 +1346,7 @@ Elles permettent donc de s'assurer qu'une condition possède toutes les caracté
 
 ### Fonctions `all` et `any`
 
-Les fonctions `all` et `any` font partie des fonctions R retournant toujours une seule valeur logique. La fonction `all` indique si tous les éléments d'un vecteur logique sont `TRUE`. Par exemple, pour tester si toutes les valeurs dans le vecteur `de` sont entières, nous pourrions utiliser la commande suivante.
+Les fonctions `all` et `any` font partie des fonctions R retournant toujours une seule valeur logique. La fonction `all` indique si tous les éléments d'un vecteur logique sont `TRUE`. Par exemple, pour tester si toutes les valeurs dans le vecteur `de` sont entières au sens mathématique, nous pourrions utiliser la commande suivante.
 ```{r}
 all(de %% 1 == 0)
 ```
