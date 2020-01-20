@@ -1,0 +1,1836 @@
+---
+title: "Calculs de base en R"
+author: "Sophie Baillargeon, Université Laval"
+date: "2020-01-19"
+weight: 1
+slug: "calculs_base_r"
+categories: ["cours_2020-01-28"]
+categories_weight: 1
+lastmodifierdisplayname : "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document: 
+    toc: yes
+    toc_depth: 3
+    highlight: tango
+  blogdown::html_page:
+    toc: yes
+    toc_depth: 3
+    highlight: tango
+header-includes:
+- \usepackage{float}
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \renewcommand{\linethickness}{0.05em}
+---
+
+
+
+
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  { background-color: #f8f8f8; }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<div id="TOC">
+<ul>
+<li><a href="#fonctionnement-vectoriel-et-règle-de-recyclage">Fonctionnement vectoriel et règle de recyclage</a></li>
+<li><a href="#fonctions-et-opérateurs-pour-des-calculs-mathématiques">Fonctions et opérateurs pour des calculs mathématiques</a><ul>
+<li><a href="#opérateurs-mathématiques">Opérateurs mathématiques</a><ul>
+<li><a href="#opérateurs-arithmétiques">Opérateurs arithmétiques</a></li>
+<li><a href="#opérateurs-de-comparaison">Opérateurs de comparaison</a></li>
+<li><a href="#opérateurs-et-fonction-logiques-vectoriels">Opérateurs et fonction logiques vectoriels</a></li>
+</ul></li>
+<li><a href="#fonctions-mathématiques-agissant-de-façon-vectorielle">Fonctions mathématiques agissant de façon vectorielle</a></li>
+<li><a href="#fonctions-mathématiques-combinant-des-éléments">Fonctions mathématiques combinant des éléments</a></li>
+<li><a href="#fonctions-dopérations-sur-des-ensembles">Fonctions d’opérations sur des ensembles</a></li>
+<li><a href="#mots-clés-mathématiques">Mots-clés mathématiques</a></li>
+</ul></li>
+<li><a href="#fonctions-pour-le-calcul-de-statistiques-descriptives">Fonctions pour le calcul de statistiques descriptives</a><ul>
+<li><a href="#fonctions-retournant-une-seule-statistique">Fonctions retournant une seule statistique</a><ul>
+<li><a href="#traitement-des-observations-manquantes-et-argument-na.rm">Traitement des observations manquantes et argument <code>na.rm</code></a></li>
+</ul></li>
+<li><a href="#fonctions-pouvant-retourner-plusieurs-statistiques">Fonctions pouvant retourner plusieurs statistiques</a></li>
+<li><a href="#fonctions-retournant-un-vecteur-de-statistiques">Fonctions retournant un vecteur de statistiques</a></li>
+<li><a href="#fonctions-de-calcul-de-fréquences">Fonctions de calcul de fréquences</a></li>
+<li><a href="#fonctions-pour-lénumération-de-combinaisons">Fonctions pour l’énumération de combinaisons</a></li>
+<li><a href="#fonctions-pour-le-traitement-des-observations-dupliquées">Fonctions pour le traitement des observations dupliquées</a></li>
+</ul></li>
+<li><a href="#fonctions-de-la-famille-des-apply">Fonctions de la famille des <code>apply</code></a><ul>
+<li><a href="#fonction-apply">Fonction <code>apply</code></a><ul>
+<li><a href="#fonctions-raccourcies-rowsums-colsums-rowmeans-et-colmeans">Fonctions raccourcies : <code>rowSums</code>, <code>colSums</code>, <code>rowMeans</code> et <code>colMeans</code></a></li>
+</ul></li>
+<li><a href="#fonctions-lapply-sapply-et-mapply">Fonctions <code>lapply</code>, <code>sapply</code> et <code>mapply</code></a></li>
+<li><a href="#fonctions-tapply-by-et-aggregate">Fonctions <code>tapply</code>, <code>by</code> et <code>aggregate</code></a></li>
+<li><a href="#autres-fonctions-pour-réaliser-des-calculs-par-niveaux-de-facteurs">Autres fonctions pour réaliser des calculs par niveaux de facteurs</a></li>
+<li><a href="#choix-de-la-fonction-de-la-famille-des-apply-à-utiliser">Choix de la fonction de la famille des <code>apply</code> à utiliser</a></li>
+</ul></li>
+<li><a href="#conditions-logiques">Conditions logiques</a><ul>
+<li><a href="#conditions-logiques-vectorielles-de-longueur-quelconque">Conditions logiques vectorielles de longueur quelconque</a><ul>
+<li><a href="#opérateur-in-de-comparaison-à-un-ensemble-de-valeurs">Opérateur <code>%in%</code> de comparaison à un ensemble de valeurs</a></li>
+<li><a href="#fonctions-de-comparaison-pour-caractères-spéciaux">Fonctions de comparaison pour caractères spéciaux</a></li>
+</ul></li>
+<li><a href="#conditions-logiques-de-longueur-1">Conditions logiques de longueur 1</a><ul>
+<li><a href="#opérateurs-et-fonctions-logiques-non-vectoriels">Opérateurs et fonctions logiques non vectoriels</a></li>
+<li><a href="#fonctions-all-et-any">Fonctions <code>all</code> et <code>any</code></a></li>
+<li><a href="#fonctions-de-vérification-de-type">Fonctions de vérification de type</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#comparaison-de-deux-objets-r">Comparaison de deux objets R</a></li>
+<li><a href="#résumé">Résumé</a></li>
+<li><a href="#références">Références</a></li>
+</ul>
+</div>
+
+<hr />
+<p>R est un environnement spécialisé dans les calculs statistiques. Voyons comment réaliser de tels calculs en R, en se limitant pour l’instant à des calculs simples. Des fonctionnalités de R permettant de réaliser des calculs plus avancés (ex. réaliser des tests statistiques, ajuster des modèles, générer des observations aléatoires, faire de l’algèbre linéaire, etc.) seront vues dans un autre cours. Je présente ici des fonctionnalités utiles pour :</p>
+<ul>
+<li>implanter une formule mathématique;</li>
+<li>effectuer une transformation mathématique de variables dans un jeu de données;</li>
+<li>calculer des statistiques descriptives, par exemple dans le cadre d’une analyse exploratoire de données.</li>
+</ul>
+<div id="fonctionnement-vectoriel-et-règle-de-recyclage" class="section level1">
+<h1>Fonctionnement vectoriel et règle de recyclage</h1>
+<p>Tous les opérateurs et plusieurs des fonctions qui sont présentés dans cette fiche agissent de façon vectorielle. Ils effectuent un traitement élément par élément sur le ou les objets reçus en entrée.</p>
+<p>Par exemple, si les deux matrices suivantes sont additionnées avec l’opérateur <code>+</code>,</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">matrix</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">6</span> , <span class="dt">nrow =</span> <span class="dv">2</span>, <span class="dt">ncol =</span> <span class="dv">3</span>)</a></code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    1    3    5
+## [2,]    2    4    6</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw">matrix</span>(<span class="dv">6</span><span class="op">:</span><span class="dv">1</span> , <span class="dt">nrow =</span> <span class="dv">2</span>, <span class="dt">ncol =</span> <span class="dv">3</span>)</a></code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    6    4    2
+## [2,]    5    3    1</code></pre>
+<p>l’élément en position (i,j) dans la première matrice sera additionné à l’élément à la même position dans la deuxième matrice, et ce, pour toutes les positions. Le résultat de cette addition terme à terme est donc le suivant :</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">matrix</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">6</span> , <span class="dt">nrow =</span> <span class="dv">2</span>, <span class="dt">ncol =</span> <span class="dv">3</span>) <span class="op">+</span><span class="st"> </span><span class="kw">matrix</span>(<span class="dv">6</span><span class="op">:</span><span class="dv">1</span> , <span class="dt">nrow =</span> <span class="dv">2</span>, <span class="dt">ncol =</span> <span class="dv">3</span>)</a></code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    7    7    7
+## [2,]    7    7    7</code></pre>
+<p> </p>
+<p>Si les deux objets intervenant dans l’opération ne sont pas de mêmes dimensions, la <strong>règle de recyclage</strong> s’applique. Cette règle avait déjà été mentionnée dans les notes sur les <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#remplacement-delements">structures de données en R</a>. Étant donné son importance, revoyons-là plus en profondeur ici.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">x &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">5</span>, <span class="dv">6</span>)</a>
+<a class="sourceLine" id="cb7-2" title="2">y &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">3</span>, <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb7-3" title="3">x <span class="op">+</span><span class="st"> </span>y</a></code></pre></div>
+<pre><code>## [1]  7 11  8  7</code></pre>
+<p>L’instruction précédente effectue 4 additions, une pour chacun des 4 éléments du plus long des deux vecteurs dans l’opération, soit ici le deuxième. Le premier vecteur est plutôt de longueur 2. R répète donc ses éléments pour créer un vecteur aussi long que le deuxième</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">rep</span>(x, <span class="dt">times =</span> <span class="kw">length</span>(y)<span class="op">/</span><span class="kw">length</span>(x))</a></code></pre></div>
+<pre><code>## [1] 5 6 5 6</code></pre>
+<p>et effectue en réalité l’opération suivante :</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">c</span>(<span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">5</span>, <span class="dv">6</span>) <span class="op">+</span><span class="st"> </span><span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">3</span>, <span class="dv">1</span>)</a></code></pre></div>
+<pre><code>## [1]  7 11  8  7</code></pre>
+<p>Cette règle de recyclage est exploitée, souvent sans que l’utilisateur en soit pleinement conscient, lorsque l’un des deux vecteurs impliqués dans une opération est de longueur 1. Par exemple, la commande suivante impliquant un exposant,</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1">y<span class="op">^</span><span class="dv">2</span></a></code></pre></div>
+<pre><code>## [1]  4 25  9  1</code></pre>
+<p>est en fait traduite par R en la commande suivante :</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1">y<span class="op">^</span><span class="kw">rep</span>(<span class="dv">2</span>, <span class="dt">times =</span> <span class="kw">length</span>(y))</a></code></pre></div>
+<pre><code>## [1]  4 25  9  1</code></pre>
+<div id="règle-de-recyclage-avec-des-objets-à-plus-dune-dimension" class="section level4">
+<h4>Règle de recyclage avec des objets à plus d’une dimension</h4>
+
+<p>La règle de recyclage s’applique aussi dans des opérations faisant intervenir des objets à plus d’une dimension. Par exemple, pour additionner le même vecteur, disons</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1">y &lt;-<span class="st"> </span><span class="dv">3</span><span class="op">:</span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb17-2" title="2">y</a></code></pre></div>
+<pre><code>## [1] 3 2 1</code></pre>
+<p>à chacune des colonnes d’une matrice, disons</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1">mat &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">12</span> , <span class="dt">nrow =</span> <span class="dv">3</span>, <span class="dt">ncol =</span> <span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb19-2" title="2">mat</a></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]    1    4    7   10
+## [2,]    2    5    8   11
+## [3,]    3    6    9   12</code></pre>
+<p>il suffit de lancer la commande suivante</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1">mat <span class="op">+</span><span class="st"> </span>y</a></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]    4    7   10   13
+## [2,]    4    7   10   13
+## [3,]    4    7   10   13</code></pre>
+<p>au lieu de la suivante, qui retourne exactement le même résultat.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" title="1">mat <span class="op">+</span><span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rep</span>(y, <span class="dt">times =</span> <span class="kw">length</span>(mat)<span class="op">/</span><span class="kw">length</span>(y)), <span class="dt">nrow =</span> <span class="kw">nrow</span>(mat), <span class="dt">ncol =</span> <span class="kw">ncol</span>(mat))</a></code></pre></div>
+<p>Dans cette dernière commande, les deux arguments fournis à l’opérateur <code>+</code> sont réellement de mêmes dimensions, car la deuxième matrice est la suivante</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" title="1"><span class="kw">matrix</span>(<span class="kw">rep</span>(y, <span class="kw">length</span>(mat)<span class="op">/</span><span class="kw">length</span>(y)), <span class="dt">nrow =</span> <span class="kw">nrow</span>(mat), <span class="dt">ncol =</span> <span class="kw">ncol</span>(mat))</a></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]    3    3    3    3
+## [2,]    2    2    2    2
+## [3,]    1    1    1    1</code></pre>
+<p>Une règle de recyclage utilisée pour former une matrice de dimension appropriée va donc remplir la matrice une colonne à la fois, comme le fait la fonction <code>matrix</code> par défaut.</p>
+<div style="page-break-after: always;"></div>
+</div>
+<div id="règle-de-recyclage-lorsque-la-longueur-de-lobjet-le-plus-long-nest-pas-multiple-de-la-longueur-de-lobjet-le-plus-court" class="section level4">
+<h4>Règle de recyclage lorsque la longueur de l’objet le plus long n’est pas multiple de la longueur de l’objet le plus court</h4>
+
+<p>Lorsque la longueur de l’objet le plus long n’est pas multiple de la longueur de l’objet le plus court, la règle de recyclage fonctionne quand même. R recycle l’objet le plus court assez de fois pour arriver à un objet de longueur égale ou supérieure à l’objet le plus long. Ensuite, si l’objet recyclé est plus long que l’autre objet, il est tronqué de façon à ce que les deux objets aient la même longueur.</p>
+<p>Prenons par exemple les deux vecteurs suivants :</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" title="1">x &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">12</span></a>
+<a class="sourceLine" id="cb26-2" title="2">x</a></code></pre></div>
+<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10 11 12</code></pre>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" title="1">y &lt;-<span class="st"> </span><span class="dv">5</span><span class="op">:</span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb28-2" title="2">y</a></code></pre></div>
+<pre><code>## [1] 5 4 3 2 1</code></pre>
+<p>Supposons que la commande suivante soit soumise en R.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" title="1">x <span class="op">+</span><span class="st"> </span>y</a></code></pre></div>
+<p>L’objet de gauche dans l’addition est de longueur 12 et l’objet de droite de longueur 5. L’objet de droite sera donc recyclé 3 fois,</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" title="1">y_recycle &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="dv">5</span><span class="op">:</span><span class="dv">1</span>, <span class="dt">times =</span> <span class="kw">ceiling</span>(<span class="kw">length</span>(x)<span class="op">/</span><span class="kw">length</span>(y)))</a>
+<a class="sourceLine" id="cb31-2" title="2">y_recycle</a></code></pre></div>
+<pre><code>##  [1] 5 4 3 2 1 5 4 3 2 1 5 4 3 2 1</code></pre>
+<p>puis sa longueur sera réduite à la longueur de l’objet de gauche.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" title="1"><span class="kw">length</span>(y_recycle) &lt;-<span class="st"> </span><span class="kw">length</span>(x)</a>
+<a class="sourceLine" id="cb33-2" title="2">y_recycle</a></code></pre></div>
+<pre><code>##  [1] 5 4 3 2 1 5 4 3 2 1 5 4</code></pre>
+<p>Ensuite l’addition terme à terme sera effectuée.</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" title="1">x <span class="op">+</span><span class="st"> </span>y_recycle</a></code></pre></div>
+<pre><code>##  [1]  6  6  6  6  6 11 11 11 11 11 16 16</code></pre>
+<p>Cependant, R émettra un avertissement pour nous informer qu’il a dû faire cet ajustement de longueur.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" title="1">x <span class="op">+</span><span class="st"> </span>y</a></code></pre></div>
+<pre><code>## Warning in x + y: longer object length is not a multiple of shorter object
+## length</code></pre>
+<pre><code>##  [1]  6  6  6  6  6 11 11 11 11 11 16 16</code></pre>
+<div style="page-break-after: always;"></div>
+</div>
+</div>
+<div id="fonctions-et-opérateurs-pour-des-calculs-mathématiques" class="section level1">
+<h1>Fonctions et opérateurs pour des calculs mathématiques</h1>
+<div id="opérateurs-mathématiques" class="section level2">
+<h2>Opérateurs mathématiques</h2>
+<div id="opérateurs-arithmétiques" class="section level3">
+<h3>Opérateurs arithmétiques</h3>
+<p>Voici une liste d’opérateurs arithmétiques disponibles en R :</p>
+<ul>
+<li><code>+</code> : addition,</li>
+<li><code>-</code> : soustraction,</li>
+<li><code>*</code> : multiplication,</li>
+<li><code>/</code> : division,</li>
+<li><code>^</code> : puissance,</li>
+<li><code>%/%</code> : division entière,</li>
+<li><code>%%</code> : modulo = reste de la division entière.</li>
+</ul>
+<p>Les premiers opérateurs sont usuels et ne requièrent aucune explication. Expliquons cependant brièvement les deux derniers opérateurs de cette liste.</p>
+<div id="division-entière-et-modulo" class="section level4">
+<h4>Division entière et modulo</h4>
+
+<p>L’opérateur <code>%/%</code> réalise une <a href="https://fr.wikipedia.org/wiki/Division_euclidienne">division entière</a>. Pour illustrer ce type de division, prenons l’exemple suivant.</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" title="1"><span class="dv">5</span><span class="op">/</span><span class="dv">2</span></a></code></pre></div>
+<pre><code>## [1] 2.5</code></pre>
+<p>L’opérateur de division ordinaire <code>/</code> retourne un nombre réel. L’opérateur <code>%/%</code> retourne la partie entière du résultat obtenu avec <code>/</code>. La partie décimale est tronquée.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" title="1"><span class="dv">5</span><span class="op">%/%</span><span class="dv">2</span></a></code></pre></div>
+<pre><code>## [1] 2</code></pre>
+<p>L’opérateur <a href="https://fr.wikipedia.org/wiki/Modulo_(op%C3%A9ration)">modulo</a> <code>%%</code> retourne le reste de la division entière. Dans l’exemple traité ici, ce reste vaut 1 car 5 - 2*2 = 1.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" title="1"><span class="dv">5</span><span class="op">%%</span><span class="dv">2</span></a></code></pre></div>
+<pre><code>## [1] 1</code></pre>
+<p><strong>Astuces</strong> :</p>
+<ul>
+<li>Cet opérateur est pratique pour tester si des nombres sont pairs ou impairs. Les nombres pairs sont des multiples de 2. Alors <code>x %% 2</code> retourne 0 pour les nombres pairs et 1 pour les nombres impairs.</li>
+<li>L’opérateur modulo peut aussi servir à tester si un nombre stocké sous le type <code>double</code> est en réalité un entier. S’il s’agit d’un entier, <code>x %% 1</code> retournera 0.</li>
+</ul>
+</div>
+</div>
+<div id="opérateurs-de-comparaison" class="section level3">
+<h3>Opérateurs de comparaison</h3>
+<p>Les opérateurs de comparaison permettent de comparer des valeurs. Ils retournent <code>TRUE</code> ou <code>FALSE</code>. Il s’agit des opérateurs suivants :</p>
+<ul>
+<li><code>==</code> : égalité,</li>
+<li><code>!=</code> : non-égalité,</li>
+<li><code>&gt;</code> : plus grand,</li>
+<li><code>&gt;=</code> : plus grand ou égal,</li>
+<li><code>&lt;</code> : plus petit,</li>
+<li><code>&lt;=</code> : plus petit ou égal.</li>
+</ul>
+<div style="page-break-after: always;"></div>
+<p>Supposons <code>x</code> et <code>y</code> les deux vecteurs numériques suivants.</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb46-1" title="1">x &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">7</span>, <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb46-2" title="2">y &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">4</span>)</a></code></pre></div>
+<p>Comparons ces vecteurs à l’aide d’un opérateur de comparaison. Est-ce que les valeurs contenues dans <code>x</code> sont supérieures aux valeurs contenues dans <code>y</code> ?</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb47-1" title="1">x <span class="op">&gt;</span><span class="st"> </span>y</a></code></pre></div>
+<pre><code>## [1] FALSE FALSE  TRUE FALSE</code></pre>
+<p>L’opérateur fonctionne de façon vectorielle, donc une comparaison est effectuée pour toutes les paires d’éléments à la même position dans les vecteurs <code>x</code> et <code>y</code>. Les valeurs dans le résultat retourné sont de type logique.</p>
+<p>Les valeurs dans un vecteur peuvent aussi être comparées à une seule valeur, auquel cas la règle de recyclage s’applique.</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb49-1" title="1">x <span class="op">!=</span><span class="st"> </span><span class="dv">5</span></a></code></pre></div>
+<pre><code>## [1]  TRUE FALSE  TRUE  TRUE</code></pre>
+<div id="comparaison-de-valeurs-non-numériques" class="section level4">
+<h4>Comparaison de valeurs non numériques</h4>
+
+<p>Les opérateurs de comparaison ne fonctionnent pas seulement avec des valeurs numériques. Ils peuvent aussi être utilisés pour comparer des valeurs logiques ou caractères. Dans ce cas, il faut savoir que R considère que <code>FALSE</code> est inférieure à <code>TRUE</code>.</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb51-1" title="1"><span class="ot">FALSE</span> <span class="op">&lt;</span><span class="st"> </span><span class="ot">TRUE</span> </a></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p>Quant aux caractères, les opérateurs de comparaison utilisent l’ordre de classement des caractères pour déterminer, entre deux valeurs, celle qui est inférieure. Cet ordre dépend des paramètres régionaux de la session R. D’une langue à l’autre, cet ordre peut varier.</p>
+<p>Pour connaître l’ordre utilisé dans une session R, les instructions suivantes sont utiles :</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb53-1" title="1">caracteres_speciaux &lt;-<span class="st"> </span></a>
+<a class="sourceLine" id="cb53-2" title="2"><span class="st">  </span><span class="kw">c</span>(<span class="st">&quot;!&quot;</span>, <span class="st">&quot;</span><span class="ch">\&quot;</span><span class="st">&quot;</span>, <span class="st">&quot;#&quot;</span>, <span class="st">&quot;$&quot;</span>, <span class="st">&quot;%&quot;</span>, <span class="st">&quot;&amp;&quot;</span>, <span class="st">&quot;&#39;&quot;</span>, <span class="st">&quot;(&quot;</span>, <span class="st">&quot;)&quot;</span>, <span class="st">&quot;*&quot;</span>, <span class="st">&quot;+&quot;</span>, <span class="st">&quot;,&quot;</span>, <span class="st">&quot;-&quot;</span>, <span class="st">&quot;.&quot;</span>, <span class="st">&quot;/&quot;</span>, <span class="st">&quot;:&quot;</span>, <span class="st">&quot;;&quot;</span>, </a>
+<a class="sourceLine" id="cb53-3" title="3">    <span class="st">&quot;&lt;&quot;</span>, <span class="st">&quot;=&quot;</span>,<span class="st">&quot;&gt;&quot;</span>, <span class="st">&quot;?&quot;</span>, <span class="st">&quot;@&quot;</span>, <span class="st">&quot;[&quot;</span>, <span class="st">&quot;</span><span class="ch">\\</span><span class="st">&quot;</span>, <span class="st">&quot;]&quot;</span>, <span class="st">&quot;^&quot;</span>, <span class="st">&quot;_&quot;</span>, <span class="st">&quot;{&quot;</span>, <span class="st">&quot;|&quot;</span>, <span class="st">&quot;}&quot;</span>, <span class="st">&quot;~&quot;</span>)</a>
+<a class="sourceLine" id="cb53-4" title="4">lettres_accentuees &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;à&quot;</span>, <span class="st">&quot;â&quot;</span>, <span class="st">&quot;é&quot;</span>, <span class="st">&quot;è&quot;</span>, <span class="st">&quot;ê&quot;</span>, <span class="st">&quot;ë&quot;</span>, <span class="st">&quot;ï&quot;</span>, <span class="st">&quot;î&quot;</span>, <span class="st">&quot;ô&quot;</span>, <span class="st">&quot;ù&quot;</span>, <span class="st">&quot;ü&quot;</span>, <span class="st">&quot;û&quot;</span>, <span class="st">&quot;ç&quot;</span>)</a>
+<a class="sourceLine" id="cb53-5" title="5">catacteres_ordonnes &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">c</span>(caracteres_speciaux, <span class="dv">0</span><span class="op">:</span><span class="dv">9</span>, letters, LETTERS, </a>
+<a class="sourceLine" id="cb53-6" title="6">                              lettres_accentuees, <span class="kw">toupper</span>(lettres_accentuees))) </a>
+<a class="sourceLine" id="cb53-7" title="7"><span class="kw">paste</span>(catacteres_ordonnes, <span class="dt">collapse =</span> <span class="st">&quot;&quot;</span>)</a></code></pre></div>
+<p>J’ai obtenu le résultat suivant, qui sera peut-être différent sur votre ordinateur si vous n’avez pas les mêmes paramètres régionaux que moi.</p>
+<pre><code>&quot;&#39;-!\&quot;#$%&amp;()*,./:;?@[\\]^_{|}~+&lt;=&gt;0123456789aAàÀâÂbBcCçÇdDeEéÉèÈêÊëËfFgGhHiIîÎïÏjJkKlLmM
+nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
+<p>Ainsi, dans ma session R :</p>
+<ul>
+<li>les caractères spéciaux sont inférieurs aux chiffres et aux lettres,</li>
+<li>les chiffres sont inférieurs aux lettres,</li>
+<li>les lettres sont classées en ordre alphabétique et
+<ul>
+<li>les lettres minuscules sont inférieures aux lettres majuscules,</li>
+<li>les lettres non accentuées sont inférieures aux lettres accentuées.</li>
+</ul></li>
+</ul>
+<p>Pour des chaînes à plus d’un caractère, la comparaison s’effectue caractère par caractère (premiers caractères comparés entre eux, puis deuxièmes en cas d’égalité, puis troisièmes en cas d’égalités aux deux premières positions, etc.).</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb55-1" title="1"><span class="st">&quot;arborescence&quot;</span> <span class="op">&lt;</span><span class="st"> &quot;arbre&quot;</span> </a></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p>Aussi, l’absence de caractères vaut moins que la présence.</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb57-1" title="1"><span class="st">&quot;a&quot;</span> <span class="op">&lt;</span><span class="st"> &quot;aa&quot;</span></a></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p><strong>Remarque</strong> : Afin de correctement ordonner des nombres, il faut s’assurer de les stocker sous un format numérique. S’ils sont stockés sous forme de chaînes de caractères, les résultats obtenus ne seront pas toujours ceux attendus, comme dans cet exemple pour lequel 2 est dit non inférieur à 10 lorsque les nombres sont fournis à l’opérateur de comparaison sous forme de chaînes de caractères.</p>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb59-1" title="1"><span class="dv">2</span> <span class="op">&lt;</span><span class="st"> </span><span class="dv">10</span></a></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb61-1" title="1"><span class="st">&quot;2&quot;</span> <span class="op">&lt;</span><span class="st"> &quot;10&quot;</span></a></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+</div>
+</div>
+<div id="opérateurs-et-fonction-logiques-vectoriels" class="section level3">
+<h3>Opérateurs et fonction logiques vectoriels</h3>
+<p>Un opérateur ou une fonction logique vectoriel prend en entrée un ou deux vecteurs de logiques et retourne un autre vecteur de valeurs logiques. Le R de base comporte les opérateurs et la fonction logiques vectoriels suivants :</p>
+<ul>
+<li><code>!</code> : négation,</li>
+<li><code>&amp;</code> : et,</li>
+<li><code>|</code> : ou,</li>
+<li><code>xor</code> : ou exclusif.</li>
+</ul>
+<div id="opérateur-de-négation" class="section level4">
+<h4>Opérateur de négation <code>!</code></h4>
+
+<p>L’opérateur <code>!</code> n’a qu’un seul argument, alors que les autres opérateurs logiques en ont deux. Il effectue une négation, donc transforme les <code>TRUE</code> en <code>FALSE</code> et les <code>FALSE</code> en <code>TRUE</code>.</p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb63-1" title="1"><span class="op">!</span><span class="st"> </span><span class="kw">c</span>(<span class="ot">TRUE</span>, <span class="ot">FALSE</span>)</a></code></pre></div>
+<pre><code>## [1] FALSE  TRUE</code></pre>
+</div>
+<div id="opérateurs-et-fonction-xor" class="section level4">
+<h4>Opérateurs <code>&amp;</code> et <code>|</code>, fonction <code>xor</code></h4>
+
+<p>Les opérateurs <code>&amp;</code> et <code>|</code>, ainsi que la fonction <code>xor</code>, appliquent de façon vectorielle les <a href="https://fr.wikipedia.org/wiki/Table_de_v%C3%A9rit%C3%A9">tables de vérité</a> des fonctions mathématiques logiques « et », « ou » et « ou exclusif » respectivement.</p>
+<p><strong>Rappel</strong> : table de vérité de <a href="https://fr.wikipedia.org/wiki/Conjonction_logique">« et »</a>, <a href="https://fr.wikipedia.org/wiki/Disjonction_logique">« ou »</a> et <a href="https://fr.wikipedia.org/wiki/Fonction_OU_exclusif">« ou exclusif »</a></p>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb65-1" title="1">p &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="kw">c</span>(<span class="ot">FALSE</span>, <span class="ot">TRUE</span>), <span class="dt">each =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb65-2" title="2">q &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="kw">c</span>(<span class="ot">FALSE</span>, <span class="ot">TRUE</span>), <span class="dt">times =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb65-3" title="3"><span class="kw">cbind</span>(p, q, <span class="st">&quot;p et q&quot;</span> =<span class="st"> </span>p <span class="op">&amp;</span><span class="st"> </span>q, <span class="st">&quot;p ou q&quot;</span> =<span class="st"> </span>p <span class="op">|</span><span class="st"> </span>q, <span class="st">&quot;p xor q&quot;</span> =<span class="st"> </span><span class="kw">xor</span>(p, q))</a></code></pre></div>
+<pre><code>##          p     q p et q p ou q p xor q
+## [1,] FALSE FALSE  FALSE  FALSE   FALSE
+## [2,] FALSE  TRUE  FALSE   TRUE    TRUE
+## [3,]  TRUE FALSE  FALSE   TRUE    TRUE
+## [4,]  TRUE  TRUE   TRUE   TRUE   FALSE</code></pre>
+<p>Ainsi,</p>
+<ul>
+<li>l’instruction <code>x &amp; y</code> retournera un vecteur contenant des <code>TRUE</code> aux positions pour lesquelles la valeur en <code>x</code> et la valeur en <code>y</code> sont toutes les deux <code>TRUE</code> et contenant des <code>FALSE</code> partout ailleurs;</li>
+<li>l’instruction <code>x &amp; y</code> retournera un vecteur contenant des <code>FALSE</code> aux positions pour lesquelles la valeur en <code>x</code> et la valeur en <code>y</code> sont toutes les deux <code>FALSE</code> et contenant des <code>TRUE</code> partout ailleurs;</li>
+<li>l’instruction <code>x &amp; y</code> retournera un vecteur contenant des <code>TRUE</code> aux positions pour lesquelles la valeur en <code>x</code> ou la valeur en <code>y</code> est <code>TRUE</code>, mais pas les deux, et contenant des <code>FALSE</code> partout ailleurs.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="fonctions-mathématiques-agissant-de-façon-vectorielle" class="section level2">
+<h2>Fonctions mathématiques agissant de façon vectorielle</h2>
+<p>R offre aussi plusieurs fonctions de calculs mathématiques, travaillant de façon vectorielle, dont les suivantes :</p>
+<ul>
+<li>racine carrée : <code>sqrt</code>;</li>
+<li>exponentielles et logarithmes : <code>exp</code>, <code>log</code> (= logarithme naturel), <code>log10</code>, <code>log2</code>;</li>
+<li>fonctions trigonométriques : <code>sin</code>, <code>cos</code>, <code>tan</code>, <code>acos</code>, <code>asin</code>, <code>atan</code>, <code>atan2</code>;</li>
+<li>fonctions relatives au signe : <code>abs</code>, <code>sign</code>;</li>
+<li>fonctions d’arrondissement : <code>ceiling</code>, <code>floor</code>, <code>round</code>, <code>trunc</code>, <code>signif</code>;</li>
+<li>fonctions reliées aux fonctions mathématiques <a href="https://fr.wikipedia.org/wiki/Fonction_b%C3%AAta">bêta</a> et <a href="https://fr.wikipedia.org/wiki/Fonction_gamma">gamma</a>: <code>beta</code>, <code>gamma</code>, <code>factorial</code>, <code>choose</code>, etc.</li>
+</ul>
+<p>Ces fonctions font un calcul distinct pour tous les éléments de l’objet fourni en entrée et retournent un résultat de même dimension que l’objet en entrée. Voici quelques exemples.</p>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb67-1" title="1"><span class="co"># Vecteur de données numériques pour les exemples</span></a>
+<a class="sourceLine" id="cb67-2" title="2">x &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dt">from =</span> <span class="fl">-1.25</span>, <span class="dt">to =</span> <span class="fl">1.5</span>, <span class="dt">by =</span> <span class="fl">0.25</span>)</a>
+<a class="sourceLine" id="cb67-3" title="3">x</a></code></pre></div>
+<pre><code>##  [1] -1.25 -1.00 -0.75 -0.50 -0.25  0.00  0.25  0.50  0.75  1.00  1.25  1.50</code></pre>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb69-1" title="1"><span class="co"># Arrondissement régulier au dixième près</span></a>
+<a class="sourceLine" id="cb69-2" title="2"><span class="kw">round</span>(x, <span class="dt">digits =</span> <span class="dv">1</span>)</a></code></pre></div>
+<pre><code>##  [1] -1.2 -1.0 -0.8 -0.5 -0.2  0.0  0.2  0.5  0.8  1.0  1.2  1.5</code></pre>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb71-1" title="1"><span class="co"># Arrondissement à l&#39;entier supérieur</span></a>
+<a class="sourceLine" id="cb71-2" title="2"><span class="kw">ceiling</span>(x)</a></code></pre></div>
+<pre><code>##  [1] -1 -1  0  0  0  0  1  1  1  1  2  2</code></pre>
+<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb73-1" title="1"><span class="co"># Arrondissement à la partie entière</span></a>
+<a class="sourceLine" id="cb73-2" title="2"><span class="kw">trunc</span>(x, <span class="dt">digits =</span> <span class="dv">2</span>)</a></code></pre></div>
+<pre><code>##  [1] -1 -1  0  0  0  0  0  0  0  1  1  1</code></pre>
+<p>Ces fonctions arrivent aussi à effectuer des calculs par élément dans un objet atomique de dimension supérieure à un ou dans un data frame.</p>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb75-1" title="1"><span class="co"># Matrice de données numériques pour les exemples</span></a>
+<a class="sourceLine" id="cb75-2" title="2">x_mat &lt;-<span class="st"> </span><span class="kw">matrix</span>(x, <span class="dt">nrow =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb75-3" title="3">x_mat</a></code></pre></div>
+<pre><code>##       [,1]  [,2]  [,3] [,4] [,5] [,6]
+## [1,] -1.25 -0.75 -0.25 0.25 0.75 1.25
+## [2,] -1.00 -0.50  0.00 0.50 1.00 1.50</code></pre>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb77-1" title="1"><span class="co"># Extraction du signe</span></a>
+<a class="sourceLine" id="cb77-2" title="2"><span class="kw">sign</span>(x_mat)</a></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4] [,5] [,6]
+## [1,]   -1   -1   -1    1    1    1
+## [2,]   -1   -1    0    1    1    1</code></pre>
+</div>
+<div id="fonctions-mathématiques-combinant-des-éléments" class="section level2">
+<h2>Fonctions mathématiques combinant des éléments</h2>
+<p>Certaines fonctions mathématiques en R effectuent des calculs faisant intervenir plus d’un élément de l’objet donné en entrée, plutôt que d’effectuer un calcul distinct pour chacun des éléments. C’est le cas des fonctions suivantes :</p>
+<ul>
+<li>somme ou produit de tous les éléments (retourne une seule valeur) : <code>sum</code>, <code>prod</code>;</li>
+<li>somme ou produit cumulatif des éléments (retourne un vecteur de même longueur que le vecteur en entrée) : <code>cummsum</code>, <code>cumprod</code>;</li>
+<li>différences entre des éléments : <code>diff</code>.</li>
+</ul>
+<p>Voici quelques exemples.</p>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb79-1" title="1"><span class="co"># Matrice de données numériques pour les exemples</span></a>
+<a class="sourceLine" id="cb79-2" title="2">mat &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">6</span>,<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">9</span>,<span class="dv">8</span>), <span class="dt">nrow =</span> <span class="dv">3</span>, <span class="dt">ncol =</span> <span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb79-3" title="3">mat</a></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]    2    4    4    2
+## [2,]    5    6    3    9
+## [3,]    3    5    1    8</code></pre>
+<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb81-1" title="1"><span class="co"># Produit de tous les éléments</span></a>
+<a class="sourceLine" id="cb81-2" title="2"><span class="kw">prod</span>(mat)</a></code></pre></div>
+<pre><code>## [1] 6220800</code></pre>
+<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb83-1" title="1"><span class="co"># Somme cumulative des éléments (ici 2, 2+5, 2+5+3, 2+5+3+4, ...)</span></a>
+<a class="sourceLine" id="cb83-2" title="2"><span class="kw">cumsum</span>(mat)</a></code></pre></div>
+<pre><code>##  [1]  2  7 10 14 20 25 29 32 33 35 44 52</code></pre>
+<div id="fonction-diff" class="section level4">
+<h4>Fonction <code>diff</code></h4>
+
+<p>Pour une matrice ou un data frame, <code>diff</code> calcule les différences terme à terme des éléments composant les lignes. Par défaut, la fonction calcule pour chaque ligne, à l’exception de la première, la différence entre la ligne et la ligne au-dessous.</p>
+<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb85-1" title="1"><span class="kw">diff</span>(mat)</a></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]    3    2   -1    7
+## [2,]   -2   -1   -2   -1</code></pre>
+<p>La commande suivante retourne donc le même résultat que la précédente.</p>
+<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb87-1" title="1">mat[<span class="op">-</span><span class="dv">1</span>, ] <span class="op">-</span><span class="st"> </span>mat[<span class="op">-</span><span class="kw">nrow</span>(mat), ]</a></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]    3    2   -1    7
+## [2,]   -2   -1   -2   -1</code></pre>
+<p>Pour un vecteur, la fonction <code>diff</code> retourne les différences entre un élément (sauf le premier) et l’élément précédent.</p>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb89-1" title="1"><span class="kw">diff</span>(<span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">3</span>, <span class="dv">4</span>))</a></code></pre></div>
+<pre><code>## [1]  3 -2  1</code></pre>
+<p>La fonction <code>diff</code> peut calculer des différences entre les éléments séparés par plus d’une position grâce à l’argument <code>lag</code>, comme dans cet exemple.</p>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb91-1" title="1"><span class="kw">diff</span>(<span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">3</span>, <span class="dv">4</span>), <span class="dt">lag =</span> <span class="dv">2</span>)</a></code></pre></div>
+<pre><code>## [1]  1 -1</code></pre>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb93-1" title="1"><span class="co"># soustractions effectuées : 3-2 et 4-5</span></a></code></pre></div>
+</div>
+</div>
+<div id="fonctions-dopérations-sur-des-ensembles" class="section level2">
+<h2>Fonctions d’opérations sur des ensembles</h2>
+<p>Les fonctions R d’<a href="https://fr.wikipedia.org/wiki/Alg%C3%A8bre_des_parties_d%27un_ensemble">opérations sur des ensembles</a> sont les suivantes :</p>
+<ul>
+<li><code>union</code> : union,</li>
+<li><code>intersect</code> : intersection,</li>
+<li><code>setdiff</code> : différence,</li>
+<li><code>setequal</code> : test d’égalité,</li>
+<li><code>is.element</code> : test d’inclusion.</li>
+</ul>
+<p>Voici quelques exemples utilisant les deux ensembles suivants, stockés sous forme de vecteur :</p>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb94-1" title="1">A &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;m&quot;</span>, <span class="st">&quot;s&quot;</span>, <span class="st">&quot;e&quot;</span>, <span class="st">&quot;f&quot;</span>, <span class="st">&quot;m&quot;</span>)</a>
+<a class="sourceLine" id="cb94-2" title="2">B &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;m&quot;</span>, <span class="st">&quot;e&quot;</span>, <span class="st">&quot;h&quot;</span>, <span class="st">&quot;i&quot;</span>)</a></code></pre></div>
+<p>Union de tous les éléments des ensembles <code>A</code> et <code>B</code>, en retirant les doublons :</p>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb95-1" title="1"><span class="kw">union</span>(A, B)</a></code></pre></div>
+<pre><code>## [1] &quot;m&quot; &quot;s&quot; &quot;e&quot; &quot;f&quot; &quot;h&quot; &quot;i&quot;</code></pre>
+<p>Identification des éléments communs entre <code>A</code> et <code>B</code>, en retirant les doublons :</p>
+<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb97-1" title="1"><span class="kw">intersect</span>(A, B)</a></code></pre></div>
+<pre><code>## [1] &quot;m&quot; &quot;e&quot;</code></pre>
+<p>Identification des éléments de <code>A</code> ne se retrouvant pas dans <code>B</code>, en retirant les doublons :</p>
+<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb99-1" title="1"><span class="kw">setdiff</span>(A, B)</a></code></pre></div>
+<pre><code>## [1] &quot;s&quot; &quot;f&quot;</code></pre>
+<p>Test sur l’égalité entre les ensembles <code>A</code> et <code>B</code> :</p>
+<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb101-1" title="1"><span class="kw">setequal</span>(A, B)</a></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<p>Test sur la présence de <code>"d"</code> et <code>"e"</code> dans l’ensemble <code>A</code> :</p>
+<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb103-1" title="1"><span class="kw">is.element</span>(<span class="dt">el =</span> <span class="kw">c</span>(<span class="st">&quot;d&quot;</span>, <span class="st">&quot;e&quot;</span>), <span class="dt">set =</span> A)</a></code></pre></div>
+<pre><code>## [1] FALSE  TRUE</code></pre>
+</div>
+<div id="mots-clés-mathématiques" class="section level2">
+<h2>Mots-clés mathématiques</h2>
+<p>En R, le nombre <span class="math inline">\(\pi\)</span> est représenté par le mot-clé <code>pi</code>.</p>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb105-1" title="1">pi</a></code></pre></div>
+<pre><code>## [1] 3.141593</code></pre>
+<p><code>Inf</code> est le symbole R pour l’infini <span class="math inline">\(\infty\)</span>.</p>
+<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb107-1" title="1"><span class="dv">-5</span><span class="op">/</span><span class="dv">0</span></a></code></pre></div>
+<pre><code>## [1] -Inf</code></pre>
+<p><code>NaN</code> est un mot-clé signifiant <em>Not A Number</em>. Ce mot-clé est retourné par R lorsqu’un utilisateur lui demande d’effectuer une opération mathématique impossible, par exemple :</p>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb109-1" title="1"><span class="kw">log</span>(<span class="op">-</span><span class="dv">1</span>)</a></code></pre></div>
+<pre><code>## Warning in log(-1): NaNs produced</code></pre>
+<pre><code>## [1] NaN</code></pre>
+<p><strong>Rappel</strong> : Attention à ne pas confondre le mot-clé <code>NaN</code> avec le mot-clé <code>NA</code> qui signifie plutôt <em>Not Available</em> et qui sert à représenter les données manquantes.</p>
+<hr />
+</div>
+</div>
+<div id="fonctions-pour-le-calcul-de-statistiques-descriptives" class="section level1">
+<h1>Fonctions pour le calcul de statistiques descriptives</h1>
+<div id="fonctions-retournant-une-seule-statistique" class="section level2">
+<h2>Fonctions retournant une seule statistique</h2>
+<p>Certaines fonctions de calcul de statistiques descriptives retournent en sortie une seule valeur. C’est le cas des fonctions suivantes :</p>
+<ul>
+<li><a href="https://fr.wikipedia.org/wiki/Indicateur_de_position">mesures de position</a> : <code>min</code>, <code>max</code>;</li>
+<li><a href="https://fr.wikipedia.org/wiki/Indicateur_de_tendance_centrale">mesures de tendance centrale</a> : <code>mean</code>, <code>median</code>;</li>
+<li><a href="https://fr.wikipedia.org/wiki/Indicateur_de_dispersion">mesure de dispersion</a> : <code>sd</code> (écart-type).</li>
+</ul>
+<p>Utilisons le jeu de données <code>cars</code> du package <code>datasets</code> pour présenter quelques exemples. Ce jeu de données contient 50 observations de 2 variables numériques.</p>
+<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb112-1" title="1"><span class="kw">str</span>(cars)</a></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    50 obs. of  2 variables:
+##  $ speed: num  4 4 7 7 8 9 10 10 10 11 ...
+##  $ dist : num  2 10 4 22 16 10 18 26 34 17 ...</code></pre>
+<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb114-1" title="1"><span class="co"># Moyenne des observations de la variable dist</span></a>
+<a class="sourceLine" id="cb114-2" title="2"><span class="kw">mean</span>(cars<span class="op">$</span>dist)</a></code></pre></div>
+<pre><code>## [1] 42.98</code></pre>
+<p>Si l’objet en entrée a plus d’une dimension, la sortie est tout de même de longueur 1. Donc tous les éléments contenus dans l’objet sont mis en commun pour faire le calcul.</p>
+<div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb116-1" title="1"><span class="kw">max</span>(cars)</a></code></pre></div>
+<pre><code>## [1] 120</code></pre>
+<div id="fonctions-which.max-et-which.min" class="section level4">
+<h4>Fonctions <code>which.max</code> et <code>which.min</code></h4>
+
+<p>Les fonctions <code>min</code> et <code>max</code> retournent respectivement la valeur la plus petite et la valeur la plus grande parmi les éléments d’un objet. Les fonctions <code>which.max</code> et <code>which.min</code> retournent pour leur part la position dans l’objet du <strong>premier</strong> maximum ou minimum.</p>
+<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb118-1" title="1"><span class="kw">which.min</span>(cars<span class="op">$</span>speed)</a></code></pre></div>
+<pre><code>## [1] 1</code></pre>
+<p>Dans l’exemple précédent, il y a en fait deux observations qui prennent la valeur minimum de <code>min(cars$speed)</code>. La commande suivante permet de trouver la position de toutes les observations prenant la valeur minimale.</p>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb120-1" title="1"><span class="kw">which</span>(cars<span class="op">$</span>speed <span class="op">==</span><span class="st"> </span><span class="kw">min</span>(cars<span class="op">$</span>speed))</a></code></pre></div>
+<pre><code>## [1] 1 2</code></pre>
+<!--Nous reviendrons sur la fonction `which` à la fin de cette fiche.-->
+</div>
+<div id="traitement-des-observations-manquantes-et-argument-na.rm" class="section level3">
+<h3>Traitement des observations manquantes et argument <code>na.rm</code></h3>
+<p>Les fonctions <code>min</code>, <code>max</code>, <code>mean</code>, <code>median</code> et <code>sd</code>, ainsi que quelques autres fonctions vues dans ces notes, ont un argument en commun nommé <code>na.rm</code>. Cet argument sert à indiquer à la fonction comment agir en présence de données manquantes (<code>NA</code>). Par défaut, <code>na.rm</code> prend la valeur <code>FALSE</code> pour ces fonctions. Cette valeur signifie que les données manquantes ne doivent pas être retirées avant d’effectuer le calcul. Cependant, en présence de données manquantes, ces fonctions ne sont pas en mesure de calculer des statistiques. Par exemple, supposons que nous voulions calculer la médiane des données dans le vecteur suivant.</p>
+<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb122-1" title="1">x &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">3</span>, <span class="dv">6</span>, <span class="ot">NA</span>, <span class="dv">8</span>, <span class="dv">11</span>, <span class="dv">15</span>, <span class="dv">23</span>)</a></code></pre></div>
+<p>Si nous ne retirons pas la donnée manquante, nous obtenons le résultat suivant.</p>
+<div class="sourceCode" id="cb123"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb123-1" title="1"><span class="kw">median</span>(x)</a></code></pre></div>
+<pre><code>## [1] NA</code></pre>
+<p>Ce résultat s’explique par le fait que la valeur de la médiane dépend de toutes les observations, incluant l’observation manquante, qui est inconnue. La valeur de la médiane est donc elle aussi inconnue. Pour calculer plutôt la médiane des observations non manquantes, il faut donner la valeur <code>TRUE</code> à l’argument <code>na.rm</code> comme suit.</p>
+<div class="sourceCode" id="cb125"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb125-1" title="1"><span class="kw">median</span>(x, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<pre><code>## [1] 9.5</code></pre>
+<p>Notons que la fonction <code>na.omit</code> permet de retirer les observations manquantes d’un objet R. Si l’objet est un vecteur, les éléments contenant <code>NA</code> sont retirés.</p>
+<div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb127-1" title="1"><span class="kw">na.omit</span>(x)</a></code></pre></div>
+<pre><code>## [1]  3  6  8 11 15 23
+## attr(,&quot;na.action&quot;)
+## [1] 3
+## attr(,&quot;class&quot;)
+## [1] &quot;omit&quot;</code></pre>
+<p>La fonction <code>na.omit</code> ajoute deux attributs à l’objet, dont un pour identifier les observations retirées.</p>
+<p>Remarquons que les deux commandes suivantes retournent le même résultat.</p>
+<div class="sourceCode" id="cb129"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb129-1" title="1"><span class="kw">median</span>(x, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<pre><code>## [1] 9.5</code></pre>
+<div class="sourceCode" id="cb131"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb131-1" title="1"><span class="kw">median</span>(<span class="kw">na.omit</span>(x))</a></code></pre></div>
+<pre><code>## [1] 9.5</code></pre>
+<p>Si la fonction <code>na.omit</code> reçoit en entrée une matrice ou un data frame, elle retire toutes les lignes contenant au moins un <code>NA</code>, comme dans cet exemple :</p>
+<div class="sourceCode" id="cb133"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb133-1" title="1">exJeu &lt;-<span class="st"> </span><span class="kw">data.frame</span>(x, <span class="dt">y =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="ot">NA</span>, <span class="dv">8</span>, <span class="dv">9</span>, <span class="dv">6</span>, <span class="ot">NA</span>, <span class="dv">2</span>)); </a>
+<a class="sourceLine" id="cb133-2" title="2">exJeu</a></code></pre></div>
+<pre><code>##    x  y
+## 1  3  2
+## 2  6 NA
+## 3 NA  8
+## 4  8  9
+## 5 11  6
+## 6 15 NA
+## 7 23  2</code></pre>
+<div class="sourceCode" id="cb135"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb135-1" title="1"><span class="kw">na.omit</span>(exJeu)</a></code></pre></div>
+<pre><code>##    x y
+## 1  3 2
+## 4  8 9
+## 5 11 6
+## 7 23 2</code></pre>
+</div>
+</div>
+<div id="fonctions-pouvant-retourner-plusieurs-statistiques" class="section level2">
+<h2>Fonctions pouvant retourner plusieurs statistiques</h2>
+<p>D’autres fonctions peuvent retourner plus d’une statistique, notamment les fonctions suivantes :</p>
+<ul>
+<li>mesures de position : <code>range</code>, <code>quantile</code>;</li>
+<li>résumé comprenant plusieurs mesures : <code>summary</code>;</li>
+<li>variances, covariances et corrélations : <code>var</code>, <code>cov</code>, <code>cor</code>.</li>
+</ul>
+<div id="fonctions-range-et-quantile" class="section level4">
+<h4>Fonctions <code>range</code> et <code>quantile</code></h4>
+
+<p>La fonction <code>range</code> retourne à la fois le minimum est le maximum, comme dans cet exemple :</p>
+<div class="sourceCode" id="cb137"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb137-1" title="1"><span class="kw">range</span>(cars<span class="op">$</span>speed)</a></code></pre></div>
+<pre><code>## [1]  4 25</code></pre>
+<p>Une façon simple d’obtenir l’étendue d’observations à partir de la sortie de la fonction <code>range</code> est de procéder comme suit :</p>
+<div class="sourceCode" id="cb139"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb139-1" title="1"><span class="kw">diff</span>(<span class="kw">range</span>(cars<span class="op">$</span>speed))</a></code></pre></div>
+<pre><code>## [1] 21</code></pre>
+<p>La fonction <code>quantile</code> calcule des quantiles empiriques. Par défaut, elle retourne le minimum, le maximum et les quartiles, comme dans cet exemple :</p>
+<div class="sourceCode" id="cb141"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb141-1" title="1"><span class="kw">quantile</span>(cars<span class="op">$</span>speed)</a></code></pre></div>
+<pre><code>##   0%  25%  50%  75% 100% 
+##    4   12   15   19   25</code></pre>
+<p>L’argument <code>probs</code> permet de demander n’importe quels quantiles. Dans l’exemple suivant, les premiers et neuvièmes déciles sont demandés.</p>
+<div class="sourceCode" id="cb143"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb143-1" title="1"><span class="kw">quantile</span>(cars<span class="op">$</span>speed, <span class="dt">probs =</span> <span class="kw">c</span>(<span class="fl">0.1</span>,<span class="fl">0.9</span>))</a></code></pre></div>
+<pre><code>##  10%  90% 
+##  8.9 23.1</code></pre>
+<p><strong>Remarque</strong> : Il existe plusieurs façons de calculer des quantiles. La fonction <code>quantile</code> implémente 9 algorithmes de calcul de quantiles (voir <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html"><code>help(quantile)</code></a>).</p>
+</div>
+<div id="fonction-summary" class="section level4">
+<h4>Fonction <code>summary</code></h4>
+
+<p>La fonction <code>summary</code> retourne les statistiques suivantes selon l’entrée qu’elle reçoit :</p>
+<ul>
+<li>vecteur numérique : minimum, premier quartile, médiane, moyenne, troisième quartile, maximum;</li>
+<li>facteur : fréquences des modalités (comme la fonction <code>table</code> vue plus loin);</li>
+<li>matrice ou data frame : la fonction <code>summary</code> est appliquée séparément à chacune des colonnes.</li>
+</ul>
+<p>Utilisons le jeu de données <code>Puromycin</code> du package <code>datasets</code> pour présenter quelques exemples d’utilisation de la fonction <code>summary</code>. Ce jeu de données contient 23 observations de 3 variables, dont deux numériques et une catégorique, stockée sous forme de facteur.</p>
+<div class="sourceCode" id="cb145"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb145-1" title="1"><span class="kw">str</span>(Puromycin)</a></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    23 obs. of  3 variables:
+##  $ conc : num  0.02 0.02 0.06 0.06 0.11 0.11 0.22 0.22 0.56 0.56 ...
+##  $ rate : num  76 47 97 107 123 139 159 152 191 201 ...
+##  $ state: Factor w/ 2 levels &quot;treated&quot;,&quot;untreated&quot;: 1 1 1 1 1 1 1 1 1 1 ...
+##  - attr(*, &quot;reference&quot;)= chr &quot;A1.3, p. 269&quot;</code></pre>
+<div class="sourceCode" id="cb147"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb147-1" title="1"><span class="co"># Vecteur numérique en entrée :</span></a>
+<a class="sourceLine" id="cb147-2" title="2"><span class="kw">summary</span>(Puromycin<span class="op">$</span>rate)</a></code></pre></div>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    47.0    91.5   124.0   126.8   158.5   207.0</code></pre>
+<div class="sourceCode" id="cb149"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb149-1" title="1"><span class="co"># Facteur en entrée :</span></a>
+<a class="sourceLine" id="cb149-2" title="2"><span class="kw">summary</span>(Puromycin<span class="op">$</span>state)</a></code></pre></div>
+<pre><code>##   treated untreated 
+##        12        11</code></pre>
+<div class="sourceCode" id="cb151"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb151-1" title="1"><span class="co"># Data frame entier en entrée :</span></a>
+<a class="sourceLine" id="cb151-2" title="2"><span class="kw">summary</span>(Puromycin)</a></code></pre></div>
+<pre><code>##       conc             rate             state   
+##  Min.   :0.0200   Min.   : 47.0   treated  :12  
+##  1st Qu.:0.0600   1st Qu.: 91.5   untreated:11  
+##  Median :0.1100   Median :124.0                 
+##  Mean   :0.3122   Mean   :126.8                 
+##  3rd Qu.:0.5600   3rd Qu.:158.5                 
+##  Max.   :1.1000   Max.   :207.0</code></pre>
+</div>
+<div id="fonctions-var-cov-et-cor" class="section level4">
+<h4>Fonctions <code>var</code>, <code>cov</code> et <code>cor</code></h4>
+
+<p>La fonction <code>var</code> peut prendre en entrée un vecteur ou un objet à deux dimensions. Si elle reçoit en entrée un vecteur, elle calcule la variance empirique de toutes les valeurs, comme dans cet exemple :</p>
+<div class="sourceCode" id="cb153"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb153-1" title="1"><span class="kw">var</span>(cars<span class="op">$</span>speed)</a></code></pre></div>
+<pre><code>## [1] 27.95918</code></pre>
+<p>Cependant, si elle reçoit en entrée une matrice ou un data frame de valeurs numériques, elle considère que chaque colonne contient les observations d’une variable aléatoire. Elle va calculer une <a href="https://fr.wikipedia.org/wiki/Covariance">matrice de variances-covariances</a>, comme dans cet exemple :</p>
+<div class="sourceCode" id="cb155"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb155-1" title="1"><span class="kw">var</span>(cars)</a></code></pre></div>
+<pre><code>##           speed     dist
+## speed  27.95918 109.9469
+## dist  109.94694 664.0608</code></pre>
+<p>La fonction <code>cov</code> fait exactement le même calcul par défaut.</p>
+<div class="sourceCode" id="cb157"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb157-1" title="1"><span class="kw">cov</span>(cars)</a></code></pre></div>
+<pre><code>##           speed     dist
+## speed  27.95918 109.9469
+## dist  109.94694 664.0608</code></pre>
+<p>Elle peut cependant calculer des covariances de Kendall ou de Spearman (toutes deux des statistiques non paramétriques basées sur les rangs des observations) au lieu de la covariance classique de Pearson. La fonction <code>cor</code> calcule des corrélations plutôt que des covariances. Elle aussi peut utiliser les définitions de <a href="https://fr.wikipedia.org/wiki/Corr%C3%A9lation_(statistiques)">Pearson</a> (par défaut), <a href="https://fr.wikipedia.org/wiki/Tau_de_Kendall">Kendall</a> et <a href="https://fr.wikipedia.org/wiki/Corr%C3%A9lation_de_Spearman">Spearman</a>. Voici un exemple de calcul de matrice de corrélations de Spearman.</p>
+<div class="sourceCode" id="cb159"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb159-1" title="1"><span class="kw">cor</span>(cars, <span class="dt">method =</span> <span class="st">&quot;spearman&quot;</span>)</a></code></pre></div>
+<pre><code>##           speed      dist
+## speed 1.0000000 0.8303568
+## dist  0.8303568 1.0000000</code></pre>
+</div>
+</div>
+<div id="fonctions-retournant-un-vecteur-de-statistiques" class="section level2">
+<h2>Fonctions retournant un vecteur de statistiques</h2>
+<p>Certaines fonctions, telles que les suivantes, retournent autant de statistiques qu’il y a d’éléments dans l’objet donné en entrée.</p>
+<ul>
+<li>mesures de position : <code>cummin</code>, <code>cummax</code>, <code>pmin</code>, <code>pmax</code>;</li>
+<li>rangs : <code>rank</code>.</li>
+</ul>
+<div id="fonctions-cummin-et-cummax" class="section level4">
+<h4>Fonctions <code>cummin</code> et <code>cummax</code></h4>
+
+<p>Les fonctions <code>cummin</code> et <code>cummax</code> calculent les minimums et les maximums cumulatifs. Comme nous pouvons le constater dans l’exemple suivant, la valeur en position <code>i</code> du vecteur retourné par une de ces deux fonctions est la valeur minimale ou maximale dans le sous-vecteur <code>x[1:i]</code>.</p>
+<div class="sourceCode" id="cb161"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb161-1" title="1"><span class="kw">cummin</span>(<span class="dt">x =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">-3</span>, <span class="dv">4</span>, <span class="dv">7</span>, <span class="dv">-6</span>, <span class="dv">0</span>))</a></code></pre></div>
+<pre><code>## [1] -2 -2 -3 -3 -3 -6 -6</code></pre>
+</div>
+<div id="fonctions-pmin-et-pmax" class="section level4">
+<h4>Fonctions <code>pmin</code> et <code>pmax</code></h4>
+
+<p>Les fonctions <code>pmin</code> et <code>pmax</code> calculent le minimum et le maximum par position, entre autant de vecteurs que désiré, comme dans l’exemple suivant.</p>
+<div class="sourceCode" id="cb163"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb163-1" title="1"><span class="kw">pmax</span>(<span class="kw">c</span>(<span class="op">-</span><span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">-3</span>, <span class="dv">4</span>, <span class="dv">7</span>, <span class="dv">-6</span>, <span class="dv">0</span>), </a>
+<a class="sourceLine" id="cb163-2" title="2">     <span class="kw">c</span>( <span class="dv">1</span>, <span class="dv">2</span>,  <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>,  <span class="dv">6</span>, <span class="dv">7</span>),</a>
+<a class="sourceLine" id="cb163-3" title="3">     <span class="kw">c</span>( <span class="dv">5</span>, <span class="dv">0</span>, <span class="dv">-2</span>, <span class="dv">4</span>, <span class="dv">5</span>,  <span class="dv">3</span>, <span class="dv">3</span>))</a></code></pre></div>
+<pre><code>## [1] 5 4 3 4 7 6 7</code></pre>
+<p>Ces fonctions sont utiles pour tronquer des valeurs. Par exemple, l’instruction suivante permet de tronquer à zéro les valeurs dans le vecteur en entrée, donc de remplacer toute valeur négative qu’il contient par zéro.</p>
+<div class="sourceCode" id="cb165"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb165-1" title="1"><span class="kw">pmax</span>(<span class="kw">c</span>(<span class="op">-</span><span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">-3</span>, <span class="dv">4</span>, <span class="dv">7</span>, <span class="dv">-6</span>, <span class="dv">0</span>), <span class="dv">0</span>)</a></code></pre></div>
+<pre><code>## [1] 0 4 0 4 7 0 0</code></pre>
+</div>
+<div id="fonction-rank" class="section level4">
+<h4>Fonction <code>rank</code></h4>
+
+<p>Certains tests statistiques non paramétriques utilisent des statistiques basées sur les rangs des observations. Voici un exemple d’obtention de ces rangs avec la fonction <code>rank</code>.</p>
+<div class="sourceCode" id="cb167"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb167-1" title="1"><span class="kw">rank</span>(<span class="kw">c</span>(<span class="op">-</span><span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">-3</span>, <span class="dv">4</span>, <span class="dv">7</span>, <span class="dv">-6</span>, <span class="dv">0</span>))</a></code></pre></div>
+<pre><code>## [1] 3.0 5.5 2.0 5.5 7.0 1.0 4.0</code></pre>
+<p>Par défaut, en cas d’égalité, le rang moyen est utilisé. Pour changer cette option, il faut modifier la valeur de l’argument <code>ties.method</code>. Dans l’exemple suivant, le rang minimum est retourné en cas d’égalité.</p>
+<div class="sourceCode" id="cb169"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb169-1" title="1"><span class="kw">rank</span>(<span class="kw">c</span>(<span class="op">-</span><span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">-3</span>, <span class="dv">4</span>, <span class="dv">7</span>, <span class="dv">-6</span>, <span class="dv">0</span>), <span class="dt">ties.method =</span> <span class="st">&quot;min&quot;</span>)</a></code></pre></div>
+<pre><code>## [1] 3 5 2 5 7 1 4</code></pre>
+</div>
+</div>
+<div id="fonctions-de-calcul-de-fréquences" class="section level2">
+<h2>Fonctions de calcul de fréquences</h2>
+<p>Les fonctions <code>table</code>, <code>xtabs</code> et <code>ftable</code> permettent de calculer des fréquences.</p>
+<p>Voici un petit jeu de données pour illustrer l’utilisation de ces fonctions. Il contient des observations concernant 7 individus fictifs : la couleur de leurs yeux, la couleur de leurs cheveux et leur genre.</p>
+<div class="sourceCode" id="cb171"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb171-1" title="1">sondage &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
+<a class="sourceLine" id="cb171-2" title="2">  <span class="dt">yeux =</span> <span class="kw">c</span>(<span class="st">&quot;brun&quot;</span>, <span class="st">&quot;brun&quot;</span>, <span class="st">&quot;bleu&quot;</span>, <span class="st">&quot;brun&quot;</span>, <span class="st">&quot;vert&quot;</span>, <span class="st">&quot;brun&quot;</span>, <span class="st">&quot;bleu&quot;</span>),</a>
+<a class="sourceLine" id="cb171-3" title="3">  <span class="dt">cheveux =</span> <span class="kw">c</span>(<span class="st">&quot;brun&quot;</span>, <span class="st">&quot;noir&quot;</span>, <span class="st">&quot;blond&quot;</span>, <span class="st">&quot;brun&quot;</span>, <span class="st">&quot;brun&quot;</span>, <span class="st">&quot;blond&quot;</span>, <span class="st">&quot;brun&quot;</span>),</a>
+<a class="sourceLine" id="cb171-4" title="4">  <span class="dt">genre =</span> <span class="kw">c</span>(<span class="st">&quot;féminin&quot;</span>, <span class="st">&quot;masculin&quot;</span>, <span class="st">&quot;féminin&quot;</span>, <span class="st">&quot;féminin&quot;</span>, <span class="st">&quot;masculin&quot;</span>, <span class="st">&quot;féminin&quot;</span>, <span class="st">&quot;masculin&quot;</span>)</a>
+<a class="sourceLine" id="cb171-5" title="5">)</a>
+<a class="sourceLine" id="cb171-6" title="6">sondage</a></code></pre></div>
+<pre><code>##   yeux cheveux    genre
+## 1 brun    brun  féminin
+## 2 brun    noir masculin
+## 3 bleu   blond  féminin
+## 4 brun    brun  féminin
+## 5 vert    brun masculin
+## 6 brun   blond  féminin
+## 7 bleu    brun masculin</code></pre>
+<div id="fonctions-table" class="section level4">
+<h4>Fonctions <code>table</code></h4>
+
+<p>La fonction <code>table</code> permet de compter le nombre d’occurrences de chacune des modalités d’une variable catégorique dans des données. Demandons, par exemple, à <code>table</code> de compter le nombre d’individus dans les données <code>sondage</code> classés dans chacune des catégories de couleurs de cheveux.</p>
+<div class="sourceCode" id="cb173"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb173-1" title="1"><span class="kw">table</span>(sondage<span class="op">$</span>cheveux)</a></code></pre></div>
+<pre><code>## 
+## blond  brun  noir 
+##     2     4     1</code></pre>
+<p>La fonction <code>table</code> produit un tableau de fréquences à une variable si elle reçoit les observations d’une seule variable. Elle peut aussi produire des tableaux de fréquences croisées à deux variables ou plus.</p>
+<div class="sourceCode" id="cb175"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb175-1" title="1"><span class="co"># Exemple de tableau de fréquences à deux variables (avec variables nommées)</span></a>
+<a class="sourceLine" id="cb175-2" title="2"><span class="kw">table</span>(<span class="dt">yeux =</span> sondage<span class="op">$</span>yeux, <span class="dt">cheveux =</span> sondage<span class="op">$</span>cheveux)</a></code></pre></div>
+<pre><code>##       cheveux
+## yeux   blond brun noir
+##   bleu     1    1    0
+##   brun     1    2    1
+##   vert     0    1    0</code></pre>
+<div class="sourceCode" id="cb177"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb177-1" title="1"><span class="co"># Exemple de tableau de fréquences à trois variables (data frame en entrée à table)</span></a>
+<a class="sourceLine" id="cb177-2" title="2">t3 &lt;-<span class="st"> </span><span class="kw">table</span>(sondage)</a>
+<a class="sourceLine" id="cb177-3" title="3">t3</a></code></pre></div>
+<pre><code>## , , genre = féminin
+## 
+##       cheveux
+## yeux   blond brun noir
+##   bleu     1    0    0
+##   brun     1    2    0
+##   vert     0    0    0
+## 
+## , , genre = masculin
+## 
+##       cheveux
+## yeux   blond brun noir
+##   bleu     0    1    0
+##   brun     0    0    1
+##   vert     0    1    0</code></pre>
+</div>
+<div id="fonctions-ftable" class="section level4">
+<h4>Fonctions <code>ftable</code></h4>
+
+<p>La fonction <code>ftable</code> retourne un tableau de fréquences sous la forme d’une table « plate » (en anglais <em>flat</em>, d’où le <code>f</code> dans le nom de la fonction) dans le cas d’un croisement de 3 variables ou plus, plutôt que sous la forme d’un array comme le fait la fonction <code>table</code>. Elle accepte les mêmes types d’entrées que <code>table</code> (série d’objets atomiques à une dimension ou objet récursif dont les éléments sont interprétables en facteurs) et peut aussi recevoir une sortie de la fonction <code>table</code>, comme dans l’exemple suivant.</p>
+<div class="sourceCode" id="cb179"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb179-1" title="1"><span class="kw">ftable</span>(t3)</a></code></pre></div>
+<pre><code>##              genre féminin masculin
+## yeux cheveux                       
+## bleu blond               1        0
+##      brun                0        1
+##      noir                0        0
+## brun blond               1        0
+##      brun                2        0
+##      noir                0        1
+## vert blond               0        0
+##      brun                0        1
+##      noir                0        0</code></pre>
+</div>
+<div id="fonctions-xtabs" class="section level4">
+<h4>Fonctions <code>xtabs</code></h4>
+
+<p>La fonction <code>xtabs</code> fait le même calcul que les fonctions précédentes, mais elle prend en entrée une formule. Le tableau de fréquences à deux variables créé précédemment peut être réobtenu de la façon suivante avec <code>xtabs</code>.</p>
+<div class="sourceCode" id="cb181"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb181-1" title="1"><span class="kw">xtabs</span>(<span class="op">~</span><span class="st"> </span>yeux <span class="op">+</span><span class="st"> </span>cheveux, <span class="dt">data =</span> sondage)</a></code></pre></div>
+<pre><code>##       cheveux
+## yeux   blond brun noir
+##   bleu     1    1    0
+##   brun     1    2    1
+##   vert     0    1    0</code></pre>
+<p>La fonction <code>xtabs</code> est utile lorsque les données que nous avons en main contiennent déjà des fréquences, car il est possible d’inclure une variable réponse contenant des dénombrements dans la formule que nous lui fournissons en entrée. Par exemple, <code>xtabs</code> permet de facilement retrouver le tableau de fréquences marginales croisées entre les variables <code>yeux</code> et <code>cheveux</code> à partir du tableau de fréquences à trois variables produit précédemment mis sous forme de data frame, qui a l’allure suivante.</p>
+<div class="sourceCode" id="cb183"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb183-1" title="1">t3_df &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(t3)</a>
+<a class="sourceLine" id="cb183-2" title="2">t3_df</a></code></pre></div>
+<pre><code>##    yeux cheveux    genre Freq
+## 1  bleu   blond  féminin    1
+## 2  brun   blond  féminin    1
+## 3  vert   blond  féminin    0
+## 4  bleu    brun  féminin    0
+## 5  brun    brun  féminin    2
+## 6  vert    brun  féminin    0
+## 7  bleu    noir  féminin    0
+## 8  brun    noir  féminin    0
+## 9  vert    noir  féminin    0
+## 10 bleu   blond masculin    0
+## 11 brun   blond masculin    0
+## 12 vert   blond masculin    0
+## 13 bleu    brun masculin    1
+## 14 brun    brun masculin    0
+## 15 vert    brun masculin    1
+## 16 bleu    noir masculin    0
+## 17 brun    noir masculin    1
+## 18 vert    noir masculin    0</code></pre>
+<p>Il suffit de procéder comme suit :</p>
+<div class="sourceCode" id="cb185"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb185-1" title="1">t2 &lt;-<span class="st"> </span><span class="kw">xtabs</span>(Freq <span class="op">~</span><span class="st"> </span>yeux <span class="op">+</span><span class="st"> </span>cheveux, <span class="dt">data =</span> t3_df)</a>
+<a class="sourceLine" id="cb185-2" title="2">t2</a></code></pre></div>
+<pre><code>##       cheveux
+## yeux   blond brun noir
+##   bleu     1    1    0
+##   brun     1    2    1
+##   vert     0    1    0</code></pre>
+</div>
+<div id="autres-fonctions-relatives-au-calcul-de-fréquences" class="section level4">
+<h4>Autres fonctions relatives au calcul de fréquences</h4>
+
+<p>Les fonctions <code>margin.table</code>, <code>addmargins</code> et <code>prop.table</code> permettent de calculer des fréquences marginales ou relatives à partir d’un tableau de fréquences. Voici quelques exemples d’utilisation de ces fonctions exploitant le tableau de fréquences à deux variables produit ci-dessus.</p>
+<div class="sourceCode" id="cb187"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb187-1" title="1"><span class="co"># Fréquences marginales en colonnes :</span></a>
+<a class="sourceLine" id="cb187-2" title="2"><span class="kw">margin.table</span>(t2, <span class="dt">margin =</span> <span class="dv">2</span>)</a></code></pre></div>
+<pre><code>## cheveux
+## blond  brun  noir 
+##     2     4     1</code></pre>
+<div class="sourceCode" id="cb189"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb189-1" title="1"><span class="co"># Fréquences marginales ajoutées au tableau :</span></a>
+<a class="sourceLine" id="cb189-2" title="2"><span class="kw">addmargins</span>(t2)</a></code></pre></div>
+<pre><code>##       cheveux
+## yeux   blond brun noir Sum
+##   bleu     1    1    0   2
+##   brun     1    2    1   4
+##   vert     0    1    0   1
+##   Sum      2    4    1   7</code></pre>
+<div class="sourceCode" id="cb191"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb191-1" title="1"><span class="co"># Fréquences relatives croisées :</span></a>
+<a class="sourceLine" id="cb191-2" title="2"><span class="kw">prop.table</span>(t2)</a></code></pre></div>
+<pre><code>##       cheveux
+## yeux       blond      brun      noir
+##   bleu 0.1428571 0.1428571 0.0000000
+##   brun 0.1428571 0.2857143 0.1428571
+##   vert 0.0000000 0.1428571 0.0000000</code></pre>
+<div class="sourceCode" id="cb193"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb193-1" title="1"><span class="co"># Fréquences relatives conditionnelles à la variable yeux :</span></a>
+<a class="sourceLine" id="cb193-2" title="2"><span class="kw">prop.table</span>(t2, <span class="dt">margin =</span> <span class="dv">1</span>)</a></code></pre></div>
+<pre><code>##       cheveux
+## yeux   blond brun noir
+##   bleu  0.50 0.50 0.00
+##   brun  0.25 0.50 0.25
+##   vert  0.00 1.00 0.00</code></pre>
+</div>
+<div id="transformation-du-format-dun-objet-de-classe-table" class="section level4">
+<h4>Transformation du format d’un objet de classe <code>"table"</code></h4>
+
+<p>Les fonctions <code>table</code> et <code>xtabs</code> attribuent à l’objet qu’ils retournent en sortie la classe <code>"table"</code>, comme nous pouvons le constater en observant l’objet <code>t2</code>.</p>
+<div class="sourceCode" id="cb195"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb195-1" title="1"><span class="kw">attributes</span>(t2)</a></code></pre></div>
+<pre><code>## $dim
+## [1] 3 3
+## 
+## $dimnames
+## $dimnames$yeux
+## [1] &quot;bleu&quot; &quot;brun&quot; &quot;vert&quot;
+## 
+## $dimnames$cheveux
+## [1] &quot;blond&quot; &quot;brun&quot;  &quot;noir&quot; 
+## 
+## 
+## $class
+## [1] &quot;xtabs&quot; &quot;table&quot;
+## 
+## $call
+## xtabs(formula = Freq ~ yeux + cheveux, data = t3_df)</code></pre>
+<div class="sourceCode" id="cb197"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb197-1" title="1"><span class="kw">str</span>(t2)</a></code></pre></div>
+<pre><code>##  &#39;xtabs&#39; int [1:3, 1:3] 1 1 0 1 2 1 0 1 0
+##  - attr(*, &quot;dimnames&quot;)=List of 2
+##   ..$ yeux   : chr [1:3] &quot;bleu&quot; &quot;brun&quot; &quot;vert&quot;
+##   ..$ cheveux: chr [1:3] &quot;blond&quot; &quot;brun&quot; &quot;noir&quot;
+##  - attr(*, &quot;call&quot;)= language xtabs(formula = Freq ~ yeux + cheveux, data = t3_df)</code></pre>
+<p>Il est parfois utile de transformer un objet de classe <code>"table"</code> en un array (matrice si la table croise deux variables) ou un data frame. Pour la transformation en array, il suffit de retirer l’attribut <code>class</code> avec la fonction <code>unclass</code>, comme dans cet exemple :</p>
+<div class="sourceCode" id="cb199"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb199-1" title="1"><span class="kw">str</span>(<span class="kw">unclass</span>(t2))</a></code></pre></div>
+<pre><code>##  int [1:3, 1:3] 1 1 0 1 2 1 0 1 0
+##  - attr(*, &quot;dimnames&quot;)=List of 2
+##   ..$ yeux   : chr [1:3] &quot;bleu&quot; &quot;brun&quot; &quot;vert&quot;
+##   ..$ cheveux: chr [1:3] &quot;blond&quot; &quot;brun&quot; &quot;noir&quot;
+##  - attr(*, &quot;call&quot;)= language xtabs(formula = Freq ~ yeux + cheveux, data = t3_df)</code></pre>
+<p>Comme nous avons pu le constater dans un exemple précédent, la transformation en data frame crée pour sa part un jeu de données contenant une ligne par combinaison distincte des niveaux des facteurs croisés dans la table. Le data frame obtenu comporte une colonne par facteur, ainsi qu’une colonne nommée <code>Freq</code> contenant les fréquences dans la table. En voici un exemple :</p>
+<div class="sourceCode" id="cb201"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb201-1" title="1"><span class="kw">str</span>(<span class="kw">as.data.frame</span>(t2))</a></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    9 obs. of  3 variables:
+##  $ yeux   : Factor w/ 3 levels &quot;bleu&quot;,&quot;brun&quot;,..: 1 2 3 1 2 3 1 2 3
+##  $ cheveux: Factor w/ 3 levels &quot;blond&quot;,&quot;brun&quot;,..: 1 1 1 2 2 2 3 3 3
+##  $ Freq   : int  1 1 0 1 2 1 0 1 0</code></pre>
+</div>
+</div>
+<div id="fonctions-pour-lénumération-de-combinaisons" class="section level2">
+<h2>Fonctions pour l’énumération de combinaisons</h2>
+<p>Un fonction utile pour énumérer toutes les combinaisons des niveaux d’un facteur est <code>expand.grid</code>. Par exemple, retrouvons avec cette fonction toutes les combinaisons présentes dans le data frame <code>t3_df</code> créé précédemment.</p>
+<div class="sourceCode" id="cb203"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb203-1" title="1"><span class="kw">expand.grid</span>(<span class="dt">yeux =</span> <span class="kw">c</span>(<span class="st">&quot;bleu&quot;</span>, <span class="st">&quot;brun&quot;</span>, <span class="st">&quot;vert&quot;</span>),</a>
+<a class="sourceLine" id="cb203-2" title="2">            <span class="dt">cheveux =</span> <span class="kw">c</span>(<span class="st">&quot;blond&quot;</span>, <span class="st">&quot;brun&quot;</span>, <span class="st">&quot;noir&quot;</span>),</a>
+<a class="sourceLine" id="cb203-3" title="3">            <span class="dt">genre =</span> <span class="kw">c</span>(<span class="st">&quot;féminin&quot;</span>, <span class="st">&quot;masculin&quot;</span>))</a></code></pre></div>
+<pre><code>##    yeux cheveux    genre
+## 1  bleu   blond  féminin
+## 2  brun   blond  féminin
+## 3  vert   blond  féminin
+## 4  bleu    brun  féminin
+## 5  brun    brun  féminin
+## 6  vert    brun  féminin
+## 7  bleu    noir  féminin
+## 8  brun    noir  féminin
+## 9  vert    noir  féminin
+## 10 bleu   blond masculin
+## 11 brun   blond masculin
+## 12 vert   blond masculin
+## 13 bleu    brun masculin
+## 14 brun    brun masculin
+## 15 vert    brun masculin
+## 16 bleu    noir masculin
+## 17 brun    noir masculin
+## 18 vert    noir masculin</code></pre>
+<p>Il faut fournir en entrée à <code>expand.grid</code> les valeurs à combiner. Si les vecteurs ou facteurs contenant ces valeurs sont fournis avec des noms, comme dans l’exemple précédent (via les assignations), les colonnes du data frame retourné en sortie par <code>expand.grid</code> porteront ces noms.</p>
+<p>Une autre fonction R permet d’énumérer des combinaisons possibles : la fonction <code>combn</code>. Il s’agit de combinaisons au sens mathématique cette fois, donc « de dispositions non ordonnées d’un certain nombre d’éléments d’un ensemble »<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. Par exemple, voici toutes les combinaisons possibles de 3 éléments parmi l’ensemble <code>c("Ève", "Jean", "Mia", "Paul")</code>, trouvées par la fonction <code>combn</code>.</p>
+<div class="sourceCode" id="cb205"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb205-1" title="1"><span class="kw">combn</span>(<span class="dt">x =</span> <span class="kw">c</span>(<span class="st">&quot;Ève&quot;</span>, <span class="st">&quot;Jean&quot;</span>, <span class="st">&quot;Mia&quot;</span>, <span class="st">&quot;Paul&quot;</span>), <span class="dt">m =</span> <span class="dv">3</span>)</a></code></pre></div>
+<pre><code>##      [,1]   [,2]   [,3]   [,4]  
+## [1,] &quot;Ève&quot;  &quot;Ève&quot;  &quot;Ève&quot;  &quot;Jean&quot;
+## [2,] &quot;Jean&quot; &quot;Jean&quot; &quot;Mia&quot;  &quot;Mia&quot; 
+## [3,] &quot;Mia&quot;  &quot;Paul&quot; &quot;Paul&quot; &quot;Paul&quot;</code></pre>
+<p>Contrairement à <code>expand.grid</code> qui présente les combinaisons possibles ligne par ligne, chaque colonne de la sortie produite par <code>combn</code> représente une combinaison possible.</p>
+<div style="page-break-after: always;"></div>
+<p>Notons finalement que la fonction <code>choose</code> mentionnée précédemment permet de compter le nombre de combinaisons possibles de <code>k</code> éléments d’un ensemble de taille <code>n</code>. Elle calcule donc le <a href="https://fr.wikipedia.org/wiki/Coefficient_binomial">coefficient binomial</a> <span class="math inline">\({n\choose k}\)</span>.</p>
+<div class="sourceCode" id="cb207"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb207-1" title="1"><span class="co"># Nombre de combinaisons possibles dans l&#39;exemple précédent :</span></a>
+<a class="sourceLine" id="cb207-2" title="2"><span class="kw">choose</span>(<span class="dt">n =</span> <span class="dv">4</span>, <span class="dt">k =</span> <span class="dv">3</span>)</a></code></pre></div>
+<pre><code>## [1] 4</code></pre>
+</div>
+<div id="fonctions-pour-le-traitement-des-observations-dupliquées" class="section level2">
+<h2>Fonctions pour le traitement des observations dupliquées</h2>
+<p>Il est parfois utile de gérer les observations dupliquées dans un jeu de données. En R, les fonctions suivantes sont utiles avec des observations dupliquées :</p>
+<ul>
+<li>pour tester la présence d’observations dupliquées : <code>duplicated</code>,</li>
+<li>pour retirer les observations dupliquées : <code>unique</code>.</li>
+</ul>
+<p>Une observation est ici définie par l’ensemble des valeurs observées de toutes les variables pour un individu (ou une unité) de la population statistique à l’étude. Donc une observation dupliquée est une ligne répétée (donc deux lignes ou plus complètement identiques) dans une matrice ou un data frame. Dans le cas d’une seule variable, stockée dans un vecteur, une observation dupliquée est une valeur présente plus d’une fois dans le vecteur.</p>
+<p>Pour illustrer l’emploi des fonctions <code>duplicated</code> et <code>unique</code>, réutilisons le jeu de données <code>sondage</code>. Ce jeu de données contient une observation dupliquée.</p>
+<div class="sourceCode" id="cb209"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb209-1" title="1">sondage</a></code></pre></div>
+<pre><code>##   yeux cheveux    genre
+## 1 brun    brun  féminin
+## 2 brun    noir masculin
+## 3 bleu   blond  féminin
+## 4 brun    brun  féminin
+## 5 vert    brun masculin
+## 6 brun   blond  féminin
+## 7 bleu    brun masculin</code></pre>
+<p>En effet, les lignes 1 et 4 sont identiques. La fonction <code>duplicated</code> identifie la 4e observation comme une duplication d’une autre observation.</p>
+<div class="sourceCode" id="cb211"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb211-1" title="1"><span class="kw">duplicated</span>(sondage)</a></code></pre></div>
+<pre><code>## [1] FALSE FALSE FALSE  TRUE FALSE FALSE FALSE</code></pre>
+<p>L’observation peut être retirée avec la fonction <code>unique</code> comme suit.</p>
+<div class="sourceCode" id="cb213"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb213-1" title="1"><span class="kw">unique</span>(sondage)</a></code></pre></div>
+<pre><code>##   yeux cheveux    genre
+## 1 brun    brun  féminin
+## 2 brun    noir masculin
+## 3 bleu   blond  féminin
+## 5 vert    brun masculin
+## 6 brun   blond  féminin
+## 7 bleu    brun masculin</code></pre>
+<p>Si elles reçoivent un vecteur en entrée, les fonctions <code>duplicated</code> et <code>unique</code> réagissent comme suit.</p>
+<div class="sourceCode" id="cb215"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb215-1" title="1"><span class="kw">duplicated</span>(<span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>))</a></code></pre></div>
+<pre><code>## [1] FALSE FALSE FALSE  TRUE  TRUE  TRUE</code></pre>
+<div class="sourceCode" id="cb217"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb217-1" title="1"><span class="kw">unique</span>(<span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>))</a></code></pre></div>
+<pre><code>## [1] 1 3 2</code></pre>
+<hr />
+</div>
+</div>
+<div id="fonctions-de-la-famille-des-apply" class="section level1">
+<h1>Fonctions de la famille des <code>apply</code></h1>
+<p>R propose plusieurs fonctions, dites « de la famille des <code>apply</code> », qui ont pour but d’appliquer itérativement une autre fonction sur des sous-sections d’un objet. Les grandes étapes d’un traitement effectué par une de ces fonctions sont les suivantes :</p>
+<ul>
+<li>séparer un objet en sous-objets;</li>
+<li>répéter la même action pour tous les sous-objets : appeler une fonction en lui donnant comme premier argument le sous-objet;</li>
+<li>combiner les résultats obtenus.</li>
+</ul>
+<p>Ces fonctions cachent en fait des boucles. Les fonctions de la famille des <code>apply</code> sont utiles pour :</p>
+<ul>
+<li>obtenir des statistiques marginales à partir d’une matrice ou d’un array,</li>
+<li>appliquer le même traitement à tous les éléments d’une liste,</li>
+<li>calculer des statistiques descriptives selon les niveaux de facteurs,</li>
+<li>effectuer des calculs en parallèle (nous y reviendrons plus tard),</li>
+<li>etc.</li>
+</ul>
+<p>Nous verrons ici les fonctions : <code>apply</code>, <code>lapply</code>, <code>sapply</code>, <code>mapply</code>, <code>tapply</code>, <code>by</code> et <code>aggregate</code>.</p>
+<div id="fonction-apply" class="section level2">
+<h2>Fonction <code>apply</code></h2>
+<p>Si elle reçoit comme premier argument une matrice, la fonction <code>apply</code> appelle en boucle une fonction en lui donnant en entrée l’une après l’autre chacune des lignes ou des colonnes d’une matrice. Voici un exemple.</p>
+<div class="sourceCode" id="cb219"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb219-1" title="1">mat &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">12</span>, <span class="dt">nrow =</span> <span class="dv">3</span>, <span class="dt">ncol =</span> <span class="dv">4</span>, <span class="dt">byrow =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb219-2" title="2">mat[<span class="dv">2</span>,<span class="dv">3</span>] &lt;-<span class="st"> </span><span class="ot">NA</span></a>
+<a class="sourceLine" id="cb219-3" title="3">mat</a></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]    1    2    3    4
+## [2,]    5    6   NA    8
+## [3,]    9   10   11   12</code></pre>
+<div class="sourceCode" id="cb221"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb221-1" title="1"><span class="co"># Calcul sur chaque ligne :</span></a>
+<a class="sourceLine" id="cb221-2" title="2"><span class="kw">apply</span>(mat, <span class="dt">MARGIN =</span> <span class="dv">1</span>, <span class="dt">FUN =</span> mean)</a></code></pre></div>
+<pre><code>## [1]  2.5   NA 10.5</code></pre>
+<div class="sourceCode" id="cb223"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb223-1" title="1"><span class="co"># Calcul sur chaque colonne :</span></a>
+<a class="sourceLine" id="cb223-2" title="2"><span class="kw">apply</span>(mat, <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> mean)</a></code></pre></div>
+<pre><code>## [1]  5  6 NA  8</code></pre>
+<p>Pour ajouter un argument à envoyer à la fonction <code>FUN</code>, il suffit de l’ajouter à la liste des arguments fournis, préférablement en le nommant. C’est l’argument <code>...</code> qui permet ce transfert d’arguments entre une fonction principale et une fonction présente dans le corps de la fonction principale.</p>
+<div class="sourceCode" id="cb225"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb225-1" title="1"><span class="kw">apply</span>(mat, <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> mean, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<pre><code>## [1] 5 6 7 8</code></pre>
+<p>La fonction retourne une liste si <code>FUN</code> retourne plus d’une valeur.</p>
+<div class="sourceCode" id="cb227"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb227-1" title="1"><span class="kw">apply</span>(mat, <span class="dt">MARGIN =</span> <span class="dv">1</span>, <span class="dt">FUN =</span> summary)</a></code></pre></div>
+<pre><code>## [[1]]
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    1.00    1.75    2.50    2.50    3.25    4.00 
+## 
+## [[2]]
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&#39;s 
+##   5.000   5.500   6.000   6.333   7.000   8.000       1 
+## 
+## [[3]]
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    9.00    9.75   10.50   10.50   11.25   12.00</code></pre>
+<p>De façon plus générale, la fonction <code>apply</code> peut itérer sur des sous-objets créés à partir d’un array à plus de deux dimensions.</p>
+<div class="sourceCode" id="cb229"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb229-1" title="1">arr &lt;-<span class="st"> </span><span class="kw">array</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">12</span>, <span class="dt">dim =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb229-2" title="2">arr</a></code></pre></div>
+<pre><code>## , , 1
+## 
+##      [,1] [,2] [,3]
+## [1,]    1    3    5
+## [2,]    2    4    6
+## 
+## , , 2
+## 
+##      [,1] [,2] [,3]
+## [1,]    7    9   11
+## [2,]    8   10   12</code></pre>
+<div class="sourceCode" id="cb231"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb231-1" title="1"><span class="kw">apply</span>(arr, <span class="dt">MARGIN =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="dt">FUN =</span> sum)</a></code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    8   12   16
+## [2,]   10   14   18</code></pre>
+<p>Si elle reçoit en entrée un data frame, elle le transformera en matrice avant d’effectuer les calculs.</p>
+<div id="fonctions-raccourcies-rowsums-colsums-rowmeans-et-colmeans" class="section level3">
+<h3>Fonctions raccourcies : <code>rowSums</code>, <code>colSums</code>, <code>rowMeans</code> et <code>colMeans</code></h3>
+<p>Pour le calcul de sommes et de moyennes par lignes ou colonnes d’une matrice, il existe des fonctions raccourcies à la fonction <code>apply</code> : <code>rowSums</code>, <code>colSums</code>, <code>rowMeans</code>, <code>colMeans</code>. Par exemple :</p>
+<div class="sourceCode" id="cb233"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb233-1" title="1"><span class="kw">colMeans</span>(mat, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<pre><code>## [1] 5 6 7 8</code></pre>
+<p>est équivalent à <code>apply(mat,  MARGIN = 2, FUN = mean, na.rm = TRUE)</code> et</p>
+<div class="sourceCode" id="cb235"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb235-1" title="1"><span class="kw">rowSums</span>(mat, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<pre><code>## [1] 10 19 42</code></pre>
+<p>est équivalent à <code>apply(mat,  MARGIN = 1, FUN = sum, na.rm = TRUE)</code>.</p>
+<p>Ces fonctions spécialisées ont été optimisées en termes de temps d’exécution.</p>
+</div>
+</div>
+<div id="fonctions-lapply-sapply-et-mapply" class="section level2">
+<h2>Fonctions <code>lapply</code>, <code>sapply</code> et <code>mapply</code></h2>
+<p>Les fonctions <code>lapply</code>, <code>sapply</code> et <code>mapply</code> prennent en entrée un vecteur ou une liste (qui peut aussi être un data frame) et appliquent une fonction sur chaque élément de cet objet. Voici une liste qui sera utilisée pour illustrer l’emploi de ces fonctions. Cette liste contient les mots formant trois courtes phrases (ponctuation omise).</p>
+<div class="sourceCode" id="cb237"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb237-1" title="1">phrases &lt;-<span class="st"> </span><span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb237-2" title="2">  <span class="dt">phrase1 =</span> <span class="kw">c</span>(<span class="st">&quot;regarde&quot;</span>, <span class="st">&quot;la&quot;</span>, <span class="st">&quot;belle&quot;</span>, <span class="st">&quot;neige&quot;</span>),</a>
+<a class="sourceLine" id="cb237-3" title="3">  <span class="dt">phrase2 =</span> <span class="kw">c</span>(<span class="st">&quot;allons&quot;</span>, <span class="st">&quot;skier&quot;</span>),</a>
+<a class="sourceLine" id="cb237-4" title="4">  <span class="dt">phrase3 =</span> <span class="kw">c</span>(<span class="st">&quot;non&quot;</span>, <span class="st">&quot;il&quot;</span>, <span class="st">&quot;fait&quot;</span>, <span class="st">&quot;trop&quot;</span>, <span class="st">&quot;froid&quot;</span>)</a>
+<a class="sourceLine" id="cb237-5" title="5">)</a></code></pre></div>
+<div id="fonction-sapply" class="section level4">
+<h4>Fonction <code>sapply</code> :</h4>
+
+<p>Supposons que nous voulons isoler le dernier mot de chaque phrase dans la liste <code>phrases</code>. L’action que nous souhaitons réaliser revient à extraire le dernier élément d’un vecteur. Elle doit être réalisée pour tous les vecteurs qui sont des éléments de la liste <code>phrases</code>. Nous pourrions réaliser cette tâche avec la commande suivante.</p>
+<div class="sourceCode" id="cb238"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb238-1" title="1">derniers_mots &lt;-<span class="st"> </span><span class="kw">sapply</span>(phrases, <span class="dt">FUN =</span> tail, <span class="dt">n =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb238-2" title="2">derniers_mots</a></code></pre></div>
+<pre><code>## phrase1 phrase2 phrase3 
+## &quot;neige&quot; &quot;skier&quot; &quot;froid&quot;</code></pre>
+<p>Décortiquons maintenant cette commande. L’instruction <code>sapply(phrases, FUN = tail, n = 1)</code> permet d’appliquer la fonction <code>tail</code> à chaque élément de la liste <code>phrases</code>. Ces éléments sont tous des vecteurs. L’argument <code>n = 1</code> est passé à la fonction <code>tail</code>. Ainsi, seul le dernier élément de chaque vecteur est extrait. C’est comme si nous avions soumis la commande</p>
+<div class="sourceCode" id="cb240"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb240-1" title="1"><span class="kw">tail</span>(phrases[[i]], <span class="dt">n =</span> <span class="dv">1</span>)</a></code></pre></div>
+<p>séparément pour tous les éléments, donc pour <code>i</code> = 1, 2 et 3, puis que nous avions rassemblé les résultats.</p>
+</div>
+<div id="utilisation-dun-opérateur-comme-valeur-de-largument-fun" class="section level4">
+<h4>Utilisation d’un opérateur comme valeur de l’argument <code>FUN</code> :</h4>
+
+<p>Si nous cherchions plutôt à isoler le deuxième mot de chaque phrase dans la liste <code>phrases</code>, nous pourrions réaliser cette extraction avec la commande suivante.</p>
+<div class="sourceCode" id="cb241"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb241-1" title="1"><span class="kw">sapply</span>(phrases, <span class="dt">FUN =</span> <span class="st">&#39;[&#39;</span>, <span class="dv">2</span>)</a></code></pre></div>
+<pre><code>## phrase1 phrase2 phrase3 
+##    &quot;la&quot; &quot;skier&quot;    &quot;il&quot;</code></pre>
+<p>Dans cet exemple, la fonction à appliquer est en fait l’opérateur d’extraction du crochet simple. Rappelons que les opérateurs sont en fait des fonctions. Donc, pour un vecteur quelconque, disons</p>
+<div class="sourceCode" id="cb243"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb243-1" title="1">x &lt;-<span class="st"> </span>phrases[[<span class="dv">1</span>]]</a></code></pre></div>
+<p>les commandes suivantes sont équivalentes.</p>
+<div class="sourceCode" id="cb244"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb244-1" title="1">x[<span class="dv">2</span>]</a></code></pre></div>
+<pre><code>## [1] &quot;la&quot;</code></pre>
+<div class="sourceCode" id="cb246"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb246-1" title="1"><span class="st">&#39;[&#39;</span>(x, <span class="dv">2</span>)</a></code></pre></div>
+<pre><code>## [1] &quot;la&quot;</code></pre>
+<p>Ainsi, l’objet duquel nous voulons extraire est le premier argument à fournir à l’opérateur <code>[</code>. L’identifiant de l’élément à extraire (ici un entier représentant une position) est le deuxième argument à fournir à l’opérateur <code>[</code>. Si l’objet avait plus d’une dimension, il suffirait d’ajouter des arguments.</p>
+<p>Lorsque l’argument <code>FUN</code> d’une fonction de la famille des <code>apply</code> est un opérateur, il faut toujours l’encadrer de guillemets (simples ou doubles).</p>
+</div>
+<div id="fonction-lapply" class="section level4">
+<h4>Fonction <code>lapply</code> :</h4>
+
+<p>La fonction <code>lapply</code> fait exactement le même calcul que la fonction <code>sapply</code>, mais retourne le résultat sous la forme d’une liste plutôt que sous une forme simplifiée. Voici un appel à <code>lapply</code> équivalent à l’appel à <code>sapply</code> qui a permis de créer <code>derniers_mots</code>. Les valeurs en sortie n’ont pas changé, mais elles sont stockées dans une liste plutôt que dans un vecteur.</p>
+<div class="sourceCode" id="cb248"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb248-1" title="1"><span class="kw">lapply</span>(phrases, <span class="dt">FUN =</span> tail, <span class="dt">n =</span> <span class="dv">1</span>)</a></code></pre></div>
+<pre><code>## $phrase1
+## [1] &quot;neige&quot;
+## 
+## $phrase2
+## [1] &quot;skier&quot;
+## 
+## $phrase3
+## [1] &quot;froid&quot;</code></pre>
+</div>
+<div id="fonction-mapply" class="section level4">
+<h4>Fonction <code>mapply</code> :</h4>
+
+<p>Il aurait aussi été possible de solutionner le problème de l’extraction des derniers mots des phrases en utilisant la fonction <code>mapply</code>. La différence entre cette fonction et les fonctions <code>sapply</code> et <code>lapply</code> est qu’elle peut fournir à la fonction <code>FUN</code> plusieurs (ou de multiples, d’où le <code>m</code> dans <code>mapply</code>) arguments qui sont des vecteurs ou des listes.</p>
+<p>Par exemple, nous pourrions extraire les derniers mots en appliquant l’opérateur <code>[</code> à chaque élément de la liste <code>phrases</code>, mais en spécifiant comme argument pour l’opérateur d’extraction la position du dernier élément. Cette position diffère un peu d’un élément à l’autre. Elle est égale à la longueur de l’élément.</p>
+<p>Nous pourrions donc, dans un premier temps, calculer la longueur de chaque élément de <code>phrases</code> comme suit :</p>
+<div class="sourceCode" id="cb250"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb250-1" title="1">longueurs_phrases &lt;-<span class="st"> </span><span class="kw">sapply</span>(phrases, length)</a>
+<a class="sourceLine" id="cb250-2" title="2">longueurs_phrases</a></code></pre></div>
+<pre><code>## phrase1 phrase2 phrase3 
+##       4       2       5</code></pre>
+<p>Ayant en main un vecteur contenant les longueurs, nous pouvons utiliser <code>mapply</code> pour extraire les derniers éléments des vecteurs dans <code>phrases</code> par la commande suivante :</p>
+<div class="sourceCode" id="cb252"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb252-1" title="1"><span class="kw">mapply</span>(<span class="dt">FUN =</span> <span class="st">&quot;[&quot;</span>, phrases, longueurs_phrases)</a></code></pre></div>
+<pre><code>## phrase1 phrase2 phrase3 
+## &quot;neige&quot; &quot;skier&quot; &quot;froid&quot;</code></pre>
+<p>La boucle cachée derrière cet appel à la fonction <code>mapply</code> est la suivante : pour <code>i</code> allant de 1 à 3, soit le nombre total d’éléments dans la liste <code>phrases</code>, l’extraction suivante est effectuée.</p>
+<div class="sourceCode" id="cb254"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb254-1" title="1"><span class="st">&quot;[&quot;</span>(phrases[[i]], longueurs_phrases[[i]])</a></code></pre></div>
+<div style="page-break-after: always;"></div>
+<p>Voici un autre exemple d’utilisation de la fonction <code>mapply</code>. Supposons que nous possédons trois listes contenant des vecteurs numériques, dont la longueur est la même selon la position, telles que les listes suivantes.</p>
+<div class="sourceCode" id="cb255"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb255-1" title="1">liste1 &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>), <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>))</a>
+<a class="sourceLine" id="cb255-2" title="2">liste2 &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="kw">c</span>(<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">3</span>), <span class="kw">c</span>(<span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb255-3" title="3">liste3 &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">9</span>, <span class="dv">8</span>, <span class="dv">6</span>), <span class="kw">c</span>(<span class="dv">7</span>, <span class="dv">5</span>, <span class="dv">0</span>))</a></code></pre></div>
+<p>Nous pourrions utiliser <code>mapply</code> pour former des matrices en concaténant en lignes tous les vecteurs à la même position dans les listes, comme suit :</p>
+<div class="sourceCode" id="cb256"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb256-1" title="1"><span class="kw">mapply</span>(<span class="dt">FUN =</span> rbind, liste1, liste2, liste3)</a></code></pre></div>
+<pre><code>## [[1]]
+##      [,1] [,2] [,3] [,4] [,5]
+## [1,]    1    2    3    4    5
+## [2,]    3    5    4    2    3
+## [3,]    0    3    9    8    6
+## 
+## [[2]]
+##      [,1] [,2] [,3]
+## [1,]    1    2    3
+## [2,]    3    4    2
+## [3,]    7    5    0</code></pre>
+<p>La fonction <code>mapply</code> est capable d’itérer sur les éléments d’un nombre indéterminé de vecteurs ou de listes.</p>
+</div>
+</div>
+<div id="fonctions-tapply-by-et-aggregate" class="section level2">
+<h2>Fonctions <code>tapply</code>, <code>by</code> et <code>aggregate</code></h2>
+<p>Ces fonctions appliquent elles aussi la même fonction à plusieurs sous-objets. Ce qui les distingue des autres fonctions de la famille des <code>apply</code> est la formation des sous-objets, qui se réalise cette fois selon les niveaux de facteurs.</p>
+<p>Nous allons reprendre le jeu de données <code>Puromycin</code> pour illustrer l’utilisation de ces fonctions.</p>
+<div class="sourceCode" id="cb258"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb258-1" title="1"><span class="kw">str</span>(Puromycin)</a></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    23 obs. of  3 variables:
+##  $ conc : num  0.02 0.02 0.06 0.06 0.11 0.11 0.22 0.22 0.56 0.56 ...
+##  $ rate : num  76 47 97 107 123 139 159 152 191 201 ...
+##  $ state: Factor w/ 2 levels &quot;treated&quot;,&quot;untreated&quot;: 1 1 1 1 1 1 1 1 1 1 ...
+##  - attr(*, &quot;reference&quot;)= chr &quot;A1.3, p. 269&quot;</code></pre>
+<div id="fonction-tapply" class="section level4">
+<h4>Fonction <code>tapply</code> :</h4>
+
+<p>Nous pourrions par exemple calculer la moyenne de la variable <code>rate</code> selon les niveaux du facteur <code>state</code> comme suit.</p>
+<div class="sourceCode" id="cb260"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb260-1" title="1"><span class="kw">tapply</span>(Puromycin<span class="op">$</span>rate, <span class="dt">INDEX =</span> Puromycin<span class="op">$</span>state, <span class="dt">FUN =</span> mean)</a></code></pre></div>
+<pre><code>##   treated untreated 
+##  141.5833  110.7273</code></pre>
+<p>L’argument <code>INDEX</code> pourrait être une liste de plusieurs facteurs.</p>
+<div class="sourceCode" id="cb262"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb262-1" title="1"><span class="kw">tapply</span>(Puromycin<span class="op">$</span>rate, <span class="dt">INDEX =</span> Puromycin[, <span class="kw">c</span>(<span class="st">&quot;conc&quot;</span>, <span class="st">&quot;state&quot;</span>)], <span class="dt">FUN =</span> mean)</a></code></pre></div>
+<pre><code>##       state
+## conc   treated untreated
+##   0.02    61.5      59.0
+##   0.06   102.0      85.0
+##   0.11   131.0     106.5
+##   0.22   155.5     127.5
+##   0.56   196.0     151.0
+##   1.1    203.5     160.0</code></pre>
+<p>Dans l’exemple ci-dessous, nous avons fourni à <code>INDEX</code> un data frame, mais rappelons-nous que les data frames sont des cas particulier de listes. De plus, un élément de ce data frame n’est pas un facteur. Il s’agit de la variable <code>conc</code>. Cela n’a pas posé problème parce que <code>lapply</code> est arrivé à transformer l’élément en facteur.</p>
+</div>
+<div id="fonction-by" class="section level4">
+<h4>Fonction <code>by</code> :</h4>
+
+<p>La fonction <code>by</code> prend comme objet en entrée un data frame et permet d’effectuer un calcul sur des sous-objets qui sont aussi des data frames. Par exemple, nous pourrions calculer la matrice de corrélations entre les observations des variables <code>conc</code> et <code>rate</code> selon les niveaux du facteur <code>state</code> comme suit.</p>
+<div class="sourceCode" id="cb264"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb264-1" title="1"><span class="kw">by</span>(Puromycin[, <span class="kw">c</span>(<span class="st">&quot;conc&quot;</span>, <span class="st">&quot;rate&quot;</span>)], <span class="dt">INDICES =</span> Puromycin<span class="op">$</span>state, <span class="dt">FUN =</span> cor)</a></code></pre></div>
+<pre><code>## Puromycin$state: treated
+##           conc      rate
+## conc 1.0000000 0.8310362
+## rate 0.8310362 1.0000000
+## ------------------------------------------------------------ 
+## Puromycin$state: untreated
+##           conc      rate
+## conc 1.0000000 0.8207311
+## rate 0.8207311 1.0000000</code></pre>
+</div>
+<div id="fonction-aggregate" class="section level4">
+<h4>Fonction <code>aggregate</code> :</h4>
+
+<p>Finalement, la fonction <code>aggregate</code> prend aussi en entrée un data frame, mais elle applique la fonction séparément pour chaque colonne du data frame.</p>
+<div class="sourceCode" id="cb266"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb266-1" title="1"><span class="kw">aggregate</span>(Puromycin[, <span class="kw">c</span>(<span class="st">&quot;conc&quot;</span>, <span class="st">&quot;rate&quot;</span>)], <span class="dt">by =</span> <span class="kw">list</span>(<span class="dt">state =</span> Puromycin<span class="op">$</span>state), <span class="dt">FUN =</span> mean)</a></code></pre></div>
+<pre><code>##       state      conc     rate
+## 1   treated 0.3450000 141.5833
+## 2 untreated 0.2763636 110.7273</code></pre>
+<p>L’argument <code>by</code> doit obligatoirement être une liste. Nommer les éléments de la liste aide à clarifier la sortie.</p>
+<p>La fonction <code>aggregate</code> accepte aussi des formules en entrée, comme dans les exemples ci-dessous.</p>
+<div class="sourceCode" id="cb268"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb268-1" title="1"><span class="co"># Exemple avec deux variables réponses et une variable explicative (de groupement)</span></a>
+<a class="sourceLine" id="cb268-2" title="2"><span class="kw">aggregate</span>(<span class="kw">cbind</span>(conc, rate) <span class="op">~</span><span class="st"> </span>state, <span class="dt">data =</span> Puromycin, <span class="dt">FUN =</span> mean)</a></code></pre></div>
+<pre><code>##       state      conc     rate
+## 1   treated 0.3450000 141.5833
+## 2 untreated 0.2763636 110.7273</code></pre>
+<div class="sourceCode" id="cb270"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb270-1" title="1"><span class="co"># Exemple avec une variable réponse et deux variables explicatives (de groupement)</span></a>
+<a class="sourceLine" id="cb270-2" title="2"><span class="kw">aggregate</span>(rate <span class="op">~</span><span class="st"> </span>conc <span class="op">+</span><span class="st"> </span>state, <span class="dt">data =</span> Puromycin, <span class="dt">FUN =</span> median)</a></code></pre></div>
+<pre><code>##    conc     state  rate
+## 1  0.02   treated  61.5
+## 2  0.06   treated 102.0
+## 3  0.11   treated 131.0
+## 4  0.22   treated 155.5
+## 5  0.56   treated 196.0
+## 6  1.10   treated 203.5
+## 7  0.02 untreated  59.0
+## 8  0.06 untreated  85.0
+## 9  0.11 untreated 106.5
+## 10 0.22 untreated 127.5
+## 11 0.56 untreated 151.0
+## 12 1.10 untreated 160.0</code></pre>
+</div>
+</div>
+<div id="autres-fonctions-pour-réaliser-des-calculs-par-niveaux-de-facteurs" class="section level2">
+<h2>Autres fonctions pour réaliser des calculs par niveaux de facteurs</h2>
+<p>Quelques packages R offrent d’autres fonctions permettant de réaliser des calculs par niveaux de facteurs. L’utilisation de deux de ces packages, souvent mentionnés par la communauté R, est illustrée ici en reproduisant les deux exemples précédents.</p>
+<div id="package-dplyr" class="section level4">
+<h4>Package <code>dplyr</code></h4>
+
+<p>L’utilisation conjointe des fonctions <a href="https://dplyr.tidyverse.org/reference/group_by.html"><code>group_by</code></a> et <a href="https://dplyr.tidyverse.org/reference/summarise.html"><code>summarize</code></a> du package <a href="https://CRAN.R-project.org/package=dplyr"><code>dplyr</code></a> du <a href="https://www.tidyverse.org/"><code>tidyverse</code></a> permet d’agréger, en utilisant une statistique de notre choix, les observations de variables selon les niveaux de facteurs. En voici un exemple.</p>
+<div class="sourceCode" id="cb272"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb272-1" title="1"><span class="kw">library</span>(dplyr)</a></code></pre></div>
+<div class="sourceCode" id="cb273"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb273-1" title="1"><span class="co"># Exemple avec deux variables réponses et une variable explicative (de groupement)</span></a>
+<a class="sourceLine" id="cb273-2" title="2"><span class="kw">summarize</span>(<span class="kw">group_by</span>(Puromycin, state), <span class="dt">conc =</span> <span class="kw">mean</span>(conc), <span class="dt">rate =</span> <span class="kw">mean</span>(rate))</a></code></pre></div>
+<pre><code>## # A tibble: 2 x 3
+##   state      conc  rate
+##   &lt;fct&gt;     &lt;dbl&gt; &lt;dbl&gt;
+## 1 treated   0.345  142.
+## 2 untreated 0.276  111.</code></pre>
+<div class="sourceCode" id="cb275"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb275-1" title="1"><span class="co"># Exemple avec une variable réponse et deux variables explicatives (de groupement)</span></a>
+<a class="sourceLine" id="cb275-2" title="2"><span class="kw">summarize</span>(<span class="kw">group_by</span>(Puromycin, conc, state), <span class="dt">rate =</span> <span class="kw">median</span>(rate))</a></code></pre></div>
+<pre><code>## # A tibble: 12 x 3
+## # Groups:   conc [6]
+##     conc state      rate
+##    &lt;dbl&gt; &lt;fct&gt;     &lt;dbl&gt;
+##  1  0.02 treated    61.5
+##  2  0.02 untreated  59  
+##  3  0.06 treated   102  
+##  4  0.06 untreated  85  
+##  5  0.11 treated   131  
+##  6  0.11 untreated 106. 
+##  7  0.22 treated   156. 
+##  8  0.22 untreated 128. 
+##  9  0.56 treated   196  
+## 10  0.56 untreated 151  
+## 11  1.1  treated   204. 
+## 12  1.1  untreated 160</code></pre>
+<p>Pour plus d’informations :</p>
+<ul>
+<li><a href="https://dplyr.tidyverse.org/" class="uri">https://dplyr.tidyverse.org/</a></li>
+<li><a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2016/agreger_donnees_dplyr/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2016/agreger_donnees_dplyr/</a></li>
+</ul>
+<div style="page-break-after: always;"></div>
+</div>
+<div id="package-data.table" class="section level4">
+<h4>Package <code>data.table</code></h4>
+
+<p>Il est aussi possible de réaliser ces agrégations grâce à l’argument <code>by</code> de l’opérateur <code>[</code> du package <a href="https://rdatatable.gitlab.io/data.table/"><code>data.table</code></a>.</p>
+<div class="sourceCode" id="cb277"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb277-1" title="1"><span class="kw">library</span>(data.table)</a>
+<a class="sourceLine" id="cb277-2" title="2">Puromycin_dt &lt;-<span class="st"> </span><span class="kw">data.table</span>(Puromycin)</a></code></pre></div>
+<div class="sourceCode" id="cb278"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb278-1" title="1"><span class="co"># Exemple avec deux variables réponses et une variable explicative (de groupement)</span></a>
+<a class="sourceLine" id="cb278-2" title="2">Puromycin_dt[, .(<span class="dt">conc =</span> <span class="kw">mean</span>(conc), <span class="dt">rate =</span> <span class="kw">mean</span>(rate)), by =<span class="st"> </span>state]</a></code></pre></div>
+<pre><code>##        state      conc     rate
+## 1:   treated 0.3450000 141.5833
+## 2: untreated 0.2763636 110.7273</code></pre>
+<div class="sourceCode" id="cb280"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb280-1" title="1"><span class="co"># Exemple avec une variable réponse et deux variables explicatives (de groupement)</span></a>
+<a class="sourceLine" id="cb280-2" title="2">Puromycin_dt[, .(<span class="dt">rate =</span> <span class="kw">median</span>(rate)), by =<span class="st"> </span>.(conc, state)]</a></code></pre></div>
+<pre><code>##     conc     state  rate
+##  1: 0.02   treated  61.5
+##  2: 0.06   treated 102.0
+##  3: 0.11   treated 131.0
+##  4: 0.22   treated 155.5
+##  5: 0.56   treated 196.0
+##  6: 1.10   treated 203.5
+##  7: 0.02 untreated  59.0
+##  8: 0.06 untreated  85.0
+##  9: 0.11 untreated 106.5
+## 10: 0.22 untreated 127.5
+## 11: 0.56 untreated 151.0
+## 12: 1.10 untreated 160.0</code></pre>
+<p>Ce package offre l’avantage de pouvoir effectuer ces opérations rapidement sur de grands jeux de données.</p>
+<p>Pour plus d’informations :</p>
+<ul>
+<li><a href="https://rdatatable.gitlab.io/data.table/articles/datatable-intro.html#aggregations" class="uri">https://rdatatable.gitlab.io/data.table/articles/datatable-intro.html#aggregations</a></li>
+<li><a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2017/data.table/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2017/data.table/</a></li>
+</ul>
+</div>
+</div>
+<div id="choix-de-la-fonction-de-la-famille-des-apply-à-utiliser" class="section level2">
+<h2>Choix de la fonction de la famille des <code>apply</code> à utiliser</h2>
+<p>Les fonctions de la famille des <code>apply</code> servent à appliquer un même calcul sur différentes parties (sous-objets) d’une structure de données R (objet principal).</p>
+<p>La structure de données peut être brisée en sous-objets de différentes façons. Par exemple, s’il s’agit d’une matrice, elle peut être séparée en lignes ou en colonnes. S’il s’agit d’une liste, elle peut être séparée en éléments. Il est aussi possible de briser un vecteur ou un data frame en blocs d’observations référant à différents niveaux de facteurs. Dans ces notes, les fonctions de la famille des <code>apply</code> ont été séparées en 3 catégories selon la façon de former les sous-objets.</p>
+<p>Le format de la sortie retournée varie aussi d’une fonction à l’autre.</p>
+<p>Quand vient le temps de choisir une fonction de la famille des <code>apply</code> à utiliser, il faut donc se demander :</p>
+<ul>
+<li>Quel est le type de l’objet sur lequel appliquer les calculs?</li>
+<li>Comment les sous-objets doivent-ils être formés?</li>
+<li>Quel format de sortie est le plus approprié?</li>
+</ul>
+<p>Le tableau suivant permet de facilement comparer les fonctions de la famille des <code>apply</code> présentées en fournissant les réponses aux questions précédentes.</p>
+<table>
+<colgroup>
+<col width="12%" />
+<col width="31%" />
+<col width="33%" />
+<col width="22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Fonction</th>
+<th>Objet typique en entrée</th>
+<th>Formation des sous-objets</th>
+<th>Format de la sortie</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>apply</code></td>
+<td>array (matrice)</td>
+<td>selon une ou des dimensions</td>
+<td>vecteur, array, liste</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr class="odd">
+<td><code>lapply</code></td>
+<td>vecteur, liste (data frame)</td>
+<td>éléments de l’objet en entrée</td>
+<td>liste</td>
+</tr>
+<tr class="even">
+<td><code>sapply</code></td>
+<td>vecteur, liste (data frame)</td>
+<td>éléments de l’objet en entrée</td>
+<td>simplifié par défaut</td>
+</tr>
+<tr class="odd">
+<td><code>mapply</code></td>
+<td>vecteurs, listes (data frames)</td>
+<td>éléments des objets en entrée</td>
+<td>simplifié par défaut</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr class="odd">
+<td><code>tapply</code></td>
+<td>vecteur</td>
+<td>selon les niveaux de facteurs</td>
+<td>array ou liste</td>
+</tr>
+<tr class="even">
+<td><code>by</code></td>
+<td>data frame</td>
+<td>selon les niveaux de facteurs</td>
+<td>array ou liste</td>
+</tr>
+<tr class="odd">
+<td><code>aggregate</code></td>
+<td>data frame</td>
+<td>selon les niveaux de facteurs</td>
+<td>data frame</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td></td>
+<td>et par colonne du data frame</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+</div>
+<div id="conditions-logiques" class="section level1">
+<h1>Conditions logiques</h1>
+<p>Une condition logique est simplement une instruction R qui retourne une ou des valeurs logiques (<code>TRUE</code> ou <code>FALSE</code>). Ce type d’instruction a différentes utilités, par exemple :</p>
+<ul>
+<li>explorer des données : répondre à des questions du genre combien d’observations respectent une certaine condition;</li>
+<li>filtrer des données : extraire les observations respectant une certaine condition;</li>
+<li>définir une condition dans une structure de contrôle conditionnelle <code>if ... else</code>;</li>
+<li>etc.</li>
+</ul>
+<div id="conditions-logiques-vectorielles-de-longueur-quelconque" class="section level2">
+<h2>Conditions logiques vectorielles de longueur quelconque</h2>
+<p>Les deux premières utilités potentielles des conditions logiques énumérées ci-dessus requièrent la création d’un vecteur de valeurs logiques de la même longueur que l’objet R sur lequel la condition est testée. Nous avons vu au début de cette fiche des outils pour écrire de telles conditions logiques :</p>
+<ul>
+<li>les opérateurs de comparaison : <code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code> et <code>&lt;=</code>;</li>
+<li>les opérateurs et fonctions logiques vectoriels : <code>!</code> (négation), <code>&amp;</code> (et), <code>|</code> (ou) et <code>xor</code> (ou exclusif).</li>
+</ul>
+<p>Voici des exemples d’écriture de conditions logiques utilisant le vecteur suivant, que nous avons déjà manipulé dans des <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#fonction-c">notes précédentes</a>.</p>
+<div class="sourceCode" id="cb282"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb282-1" title="1">de &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">5</span>, <span class="dv">4</span>)</a></code></pre></div>
+<p>Supposons que nous voulions connaître le nombre d’éléments dans ce vecteur numérique dont la valeur est supérieure à 3. La condition logique suivante nous permet d’identifier ces valeurs.</p>
+<div class="sourceCode" id="cb283"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb283-1" title="1">condition &lt;-<span class="st"> </span>de <span class="op">&gt;</span><span class="st"> </span><span class="dv">3</span></a>
+<a class="sourceLine" id="cb283-2" title="2">condition</a></code></pre></div>
+<pre><code>##  [1] FALSE FALSE  TRUE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE</code></pre>
+<p>Compter le nombre de valeurs supérieures à 3 dans <code>de</code> revient à compter le nombre de <code>TRUE</code> dans le vecteur précédent. Ce calcul se réalise facilement avec la fonction <code>sum</code> comme suit.</p>
+<div class="sourceCode" id="cb285"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb285-1" title="1"><span class="kw">sum</span>(condition)</a></code></pre></div>
+<pre><code>## [1] 5</code></pre>
+<p>Même si une somme est une opération mathématique sur des valeurs numériques, la commande précédente ne retourne par d’erreur, car R réalise d’abord une <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#conversions">conversion implicite de type de données</a> pour transformer les valeurs logiques en nombres (<code>TRUE</code> devient 1 et <code>FALSE</code> devient 0), puis effectue la somme.</p>
+<p>Le vecteur <code>condition</code> serait aussi utile pour extraire les éléments de <code>de</code> ayant une valeur supérieure à 3. Nous savons que l’<a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#extraction-d%C3%A9l%C3%A9ments">opérateur d’indiçage <code>[</code> et la fonction d’extraction <code>subset</code></a> acceptent en entrée un vecteur logique. Nous pouvons donc extraire les éléments respectant la condition comme suit.</p>
+<div class="sourceCode" id="cb287"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb287-1" title="1">de[condition]</a></code></pre></div>
+<pre><code>## [1] 4 5 6 5 4</code></pre>
+<div id="fonction-which" class="section level4">
+<h4>Fonction <code>which</code></h4>
+
+<p>Une fonction parfois utile avec un vecteur logique est la fonction <code>which</code>, utilisée précédemment dans un exemple. Elle permet de connaître les positions des <code>TRUE</code> dans le vecteur, comme l’illustre cet exemple :</p>
+<div class="sourceCode" id="cb289"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb289-1" title="1"><span class="kw">which</span>(condition)</a></code></pre></div>
+<pre><code>## [1]  3  7  8  9 10</code></pre>
+<p>L’utilisation de <code>which</code> n’est cependant pas nécessaire lors de l’extraction d’éléments à partir d’un vecteur logique. Par exemple, les commandes <code>de[which(condition)]</code> et <code>de[condition]</code> produisent le même résultat, mais la commande sans appel à la fonction <code>which</code> a l’avantage d’être plus succincte.</p>
+</div>
+<div id="conditions-combinant-des-vecteurs-logiques" class="section level4">
+<h4>Conditions combinant des vecteurs logiques</h4>
+
+<p>La condition précédente était plutôt simple. Une condition plus complexe requiert souvent de combiner des vecteurs logiques à l’aide d’un opérateur logique. Par exemple, l’instruction suivante identifie les éléments du vecteur <code>de</code> dont la valeur se situe dans l’intervalle <span class="math inline">\([3, 5]\)</span>.</p>
+<div class="sourceCode" id="cb291"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb291-1" title="1">de <span class="op">&gt;=</span><span class="st"> </span><span class="dv">3</span> <span class="op">&amp;</span><span class="st"> </span>de <span class="op">&lt;=</span><span class="st"> </span><span class="dv">5</span></a></code></pre></div>
+<pre><code>##  [1] FALSE  TRUE  TRUE FALSE FALSE  TRUE  TRUE FALSE  TRUE  TRUE</code></pre>
+<p>L’instruction suivante identifie pour sa part les éléments du vecteur <code>de</code> égaux à 1, 4 ou 6.</p>
+<div class="sourceCode" id="cb293"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb293-1" title="1">de <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">|</span><span class="st"> </span>de <span class="op">==</span><span class="st"> </span><span class="dv">4</span> <span class="op">|</span><span class="st"> </span>de <span class="op">==</span><span class="st"> </span><span class="dv">6</span></a></code></pre></div>
+<pre><code>##  [1] FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE FALSE  TRUE</code></pre>
+<p>Pour identifier les éléments du vecteur <code>de</code> non-égaux à 1, 4 ou 6, nous pourrions inverser le vecteur logique précédent avec l’opérateur de négation comme suit.</p>
+<div class="sourceCode" id="cb295"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb295-1" title="1"><span class="op">!</span>(de <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">|</span><span class="st"> </span>de <span class="op">==</span><span class="st"> </span><span class="dv">4</span> <span class="op">|</span><span class="st"> </span>de <span class="op">==</span><span class="st"> </span><span class="dv">6</span>)</a></code></pre></div>
+<pre><code>##  [1]  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE FALSE</code></pre>
+<p>Rappelons qu’en logique mathématique, la <a href="https://fr.wikipedia.org/wiki/Table_de_v%C3%A9rit%C3%A9#NON-OU_logique">négation d’une disjonction est équivalente à la conjonction de négations</a>. L’instruction suivante retourne donc le même résultat que la précédente.</p>
+<div class="sourceCode" id="cb297"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb297-1" title="1">de <span class="op">!=</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>de <span class="op">!=</span><span class="st"> </span><span class="dv">4</span> <span class="op">&amp;</span><span class="st"> </span>de <span class="op">!=</span><span class="st"> </span><span class="dv">6</span></a></code></pre></div>
+<pre><code>##  [1]  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE FALSE</code></pre>
+</div>
+<div id="opérateur-in-de-comparaison-à-un-ensemble-de-valeurs" class="section level3">
+<h3>Opérateur <code>%in%</code> de comparaison à un ensemble de valeurs</h3>
+<p>Pour effectuer une comparaison à un ensemble de valeur, telle que le fait l’instruction <code>de == 1 | de == 4 | de == 6</code>, R offre un opérateur raccourcissant la syntaxe : l’opérateur <code>%in%</code>. Cet opérateur compare les éléments d’un vecteur (placé avant l’opérateur) aux éléments d’un ensemble présenté sous la forme d’un vecteur (placé après). Il retourne <code>TRUE</code> pour un élément égal à n’importe lequel des éléments de l’ensemble, <code>FALSE</code> sinon. L’instruction <code>de == 1 | de == 4 | de == 6</code> est donc équivalent à la suivante.</p>
+<div class="sourceCode" id="cb299"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb299-1" title="1">de <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">6</span>)</a></code></pre></div>
+<pre><code>##  [1] FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE FALSE  TRUE</code></pre>
+<p>Combiné à un opérateur de négation <code>!</code>, l’opérateur <code>%in%</code> permet de facilement tester si les valeurs dans un vecteur sont différentes des valeurs d’un ensemble, comme dans cet exemple.</p>
+<div class="sourceCode" id="cb301"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb301-1" title="1"><span class="op">!</span><span class="st"> </span>de <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">6</span>)</a></code></pre></div>
+<pre><code>##  [1]  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE FALSE</code></pre>
+</div>
+<div id="fonctions-de-comparaison-pour-caractères-spéciaux" class="section level3">
+<h3>Fonctions de comparaison pour caractères spéciaux</h3>
+<p>Notons que tester si un ou des éléments sont égaux à <code>NA</code>, <code>NaN</code> ou <code>Inf</code> (constante pour l’infini), ne se fait pas directement avec l’opérateur <code>==</code> comme suit.</p>
+<div class="sourceCode" id="cb303"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb303-1" title="1"><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="ot">NA</span>, <span class="dv">4</span>, <span class="dv">5</span>) <span class="op">==</span><span class="st"> </span><span class="ot">NA</span></a></code></pre></div>
+<pre><code>## [1] NA NA NA NA NA</code></pre>
+<p>Il faut plutôt utiliser la fonction <code>is.na</code>, <code>is.nan</code> ou <code>is.infinite</code>.</p>
+<div class="sourceCode" id="cb305"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb305-1" title="1"><span class="kw">is.na</span>(<span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="ot">NA</span>, <span class="dv">4</span>, <span class="dv">5</span>))</a></code></pre></div>
+<pre><code>## [1] FALSE FALSE  TRUE FALSE FALSE</code></pre>
+</div>
+</div>
+<div id="conditions-logiques-de-longueur-1" class="section level2">
+<h2>Conditions logiques de longueur 1</h2>
+<p>Lors de l’écriture d’une condition logique, il faut parfois s’assurer de retourner un vecteur logique de longueur 1. C’est le cas lors de l’écriture d’une condition logique dans une structure de contrôle conditionnelle <code>if ... else</code> (que nous verrons plus loin). La condition dans un <code>if</code> doit être obligatoirement de longueur 1.</p>
+<div id="opérateurs-et-fonctions-logiques-non-vectoriels" class="section level3">
+<h3>Opérateurs et fonctions logiques non vectoriels</h3>
+<p>Les opérateurs et fonctions logiques suivants garantissent que le résultat retourné est de longueur 1.</p>
+<ul>
+<li><code>&amp;&amp;</code> : et,</li>
+<li><code>||</code> : ou,</li>
+<li><code>isTRUE</code> et <code>isFALSE</code>.</li>
+</ul>
+<p>Les opérateurs <code>&amp;&amp;</code> et <code>||</code> appliquent les mêmes tables de vérité que les opérateurs <code>&amp;</code> et <code>|</code>, mais ils ne travaillent pas de façon vectorielle. Si, par inadvertance, <code>&amp;&amp;</code> ou <code>||</code> reçoit en entrée des vecteurs de longueurs supérieures à 1, il effectue une opération seulement sur les premiers éléments de ces vecteurs, comme dans cet exemple.</p>
+<div class="sourceCode" id="cb307"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb307-1" title="1">de <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">||</span><span class="st"> </span>de <span class="op">==</span><span class="st"> </span><span class="dv">4</span> <span class="op">||</span><span class="st"> </span>de <span class="op">==</span><span class="st"> </span><span class="dv">6</span></a></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<p>Les fonctions <code>isTRUE</code> et <code>isFALSE</code>, pour leur part, sont des fonctions raccourcies permettant d’effectuer les tests suivants.</p>
+<div class="sourceCode" id="cb309"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb309-1" title="1"><span class="kw">is.logical</span>(x) <span class="op">&amp;&amp;</span><span class="st"> </span><span class="kw">length</span>(x) <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;&amp;</span><span class="st"> </span><span class="op">!</span><span class="kw">is.na</span>(x) <span class="op">&amp;&amp;</span><span class="st"> </span>x   <span class="co"># isTRUE</span></a>
+<a class="sourceLine" id="cb309-2" title="2"><span class="kw">is.logical</span>(x) <span class="op">&amp;&amp;</span><span class="st"> </span><span class="kw">length</span>(x) <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;&amp;</span><span class="st"> </span><span class="op">!</span><span class="kw">is.na</span>(x) <span class="op">&amp;&amp;</span><span class="st"> </span><span class="op">!</span>x  <span class="co"># isFALSE</span></a></code></pre></div>
+<p>Elles permettent donc de s’assurer qu’une condition possède toutes les caractéristiques requises pour être fournie à un <code>if</code> (contenir des données logiques, être de longueur 1 et ne pas prendre la valeur <code>NA</code>).</p>
+</div>
+<div id="fonctions-all-et-any" class="section level3">
+<h3>Fonctions <code>all</code> et <code>any</code></h3>
+<p>Les fonctions <code>all</code> et <code>any</code> font partie des fonctions R retournant toujours une seule valeur logique. La fonction <code>all</code> indique si tous les éléments d’un vecteur logique sont <code>TRUE</code>. Par exemple, pour tester si toutes les valeurs dans le vecteur <code>de</code> sont entières, nous pourrions utiliser la commande suivante.</p>
+<div class="sourceCode" id="cb310"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb310-1" title="1"><span class="kw">all</span>(de <span class="op">%%</span><span class="st"> </span><span class="dv">1</span> <span class="op">==</span><span class="st"> </span><span class="dv">0</span>)</a></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p>La fonction <code>any</code> indique pour sa part si au moins un élément d’un vecteur logique est <code>TRUE</code>. Nous pourrions par exemple vérifier si le vecteur <code>de</code> comporte des valeurs négatives comme suit.</p>
+<div class="sourceCode" id="cb312"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb312-1" title="1"><span class="kw">any</span>(de <span class="op">&lt;</span><span class="st"> </span><span class="dv">0</span>)</a></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+</div>
+<div id="fonctions-de-vérification-de-type" class="section level3">
+<h3>Fonctions de vérification de type</h3>
+<p>Finalement, les fonctions <code>is.numeric</code>, <code>is.character</code>, <code>is.logical</code>, <code>is.vector</code>, <code>is.matrix</code>, <code>is.data.frame</code>, <code>is.factor</code>, <code>is.null</code>, <code>is.function</code>, etc., testent une condition et retournent toujours un logique de longueur unitaire. Par exemple, testons si le vecteur <code>de</code> contient bien des données numériques.</p>
+<div class="sourceCode" id="cb314"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb314-1" title="1"><span class="kw">is.numeric</span>(de)</a></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<hr />
+</div>
+</div>
+</div>
+<div id="comparaison-de-deux-objets-r" class="section level1">
+<h1>Comparaison de deux objets R</h1>
+<p>Les opérateurs de comparaison permettent de comparer les éléments d’objets R. Mais comment comparer des objets entiers? Cela dépend de ce qui doit être comparé.</p>
+<ul>
+<li>Pour comparer tous les éléments, mais pas les attributs : <code>all(x == y)</code>
+<ul>
+<li>retourne <code>TRUE</code> si tous les éléments sont égaux,</li>
+<li><code>FALSE</code> sinon,</li>
+<li><code>NA</code> si un des deux objets comparés contient au moins une valeur manquante et que l’argument <code>na.rm</code> de la fonction <code>all</code> prend la valeur <code>FALSE</code>.</li>
+</ul></li>
+<li>Pour comparer les objets dans leur totalité (éléments, attributs, type de l’objet et de ses éléments) : <code>identical(x, y)</code>
+<ul>
+<li>retourne <code>TRUE</code> si les deux objets comparés sont totalement identiques,</li>
+<li><code>FALSE</code> sinon.</li>
+</ul></li>
+<li>Pour comparer tous les éléments et les attributs, en acceptant des différences dans les valeurs numériques selon une certaine tolérance : <code>all.equal(x, y)</code>
+<ul>
+<li>retourne <code>TRUE</code> en cas d’égalité respectant la tolérance,</li>
+<li>sinon retourne des informations sur les différences.</li>
+</ul></li>
+</ul>
+<p>Voici quelques exemples.</p>
+<div id="éléments-identiques-mais-attributs-différents" class="section level4">
+<h4>Éléments identiques, mais attributs différents</h4>
+
+<div class="sourceCode" id="cb316"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb316-1" title="1"><span class="co"># Objets comparés</span></a>
+<a class="sourceLine" id="cb316-2" title="2">x &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">5</span></a>
+<a class="sourceLine" id="cb316-3" title="3">y &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">5</span></a>
+<a class="sourceLine" id="cb316-4" title="4"><span class="kw">names</span>(x) &lt;-<span class="st"> </span>letters[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>]</a>
+<a class="sourceLine" id="cb316-5" title="5"><span class="kw">str</span>(x)</a></code></pre></div>
+<pre><code>##  Named int [1:5] 1 2 3 4 5
+##  - attr(*, &quot;names&quot;)= chr [1:5] &quot;a&quot; &quot;b&quot; &quot;c&quot; &quot;d&quot; ...</code></pre>
+<div class="sourceCode" id="cb318"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb318-1" title="1"><span class="kw">str</span>(y)</a></code></pre></div>
+<pre><code>##  int [1:5] 1 2 3 4 5</code></pre>
+<p> </p>
+<div style="page-break-after: always;"></div>
+<div class="sourceCode" id="cb320"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb320-1" title="1"><span class="co"># Résultats des différentes comparaisons</span></a>
+<a class="sourceLine" id="cb320-2" title="2"><span class="kw">all</span>(x <span class="op">==</span><span class="st"> </span>y)</a></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<div class="sourceCode" id="cb322"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb322-1" title="1"><span class="kw">identical</span>(x, y)</a></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<div class="sourceCode" id="cb324"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb324-1" title="1"><span class="kw">all.equal</span>(x, y)</a></code></pre></div>
+<pre><code>## [1] &quot;names for target but not for current&quot;</code></pre>
+</div>
+<div id="éléments-équivalents-mais-de-types-différents-attributs-identiques" class="section level4">
+<h4>Éléments équivalents, mais de types différents, attributs identiques</h4>
+
+<div class="sourceCode" id="cb326"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb326-1" title="1"><span class="co"># Objets comparés</span></a>
+<a class="sourceLine" id="cb326-2" title="2">x &lt;-<span class="st"> </span><span class="kw">as.double</span>(x)</a>
+<a class="sourceLine" id="cb326-3" title="3"><span class="kw">str</span>(x)</a></code></pre></div>
+<pre><code>##  num [1:5] 1 2 3 4 5</code></pre>
+<div class="sourceCode" id="cb328"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb328-1" title="1"><span class="kw">str</span>(y)</a></code></pre></div>
+<pre><code>##  int [1:5] 1 2 3 4 5</code></pre>
+<p> </p>
+<div class="sourceCode" id="cb330"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb330-1" title="1"><span class="co"># Résultats des différentes comparaisons</span></a>
+<a class="sourceLine" id="cb330-2" title="2"><span class="kw">all</span>(x <span class="op">==</span><span class="st"> </span>y)</a></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<div class="sourceCode" id="cb332"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb332-1" title="1"><span class="kw">identical</span>(x, y)</a></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<div class="sourceCode" id="cb334"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb334-1" title="1"><span class="kw">all.equal</span>(x, y)</a></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+</div>
+<div id="éléments-numériques-pas-tout-à-fait-identiques-attributs-et-types-identiques" class="section level4">
+<h4>Éléments numériques pas tout à fait identiques, attributs et types identiques</h4>
+
+<div class="sourceCode" id="cb336"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb336-1" title="1"><span class="co"># Objets comparés</span></a>
+<a class="sourceLine" id="cb336-2" title="2">y &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">5</span> <span class="op">+</span><span class="st"> </span><span class="fl">1e-10</span></a>
+<a class="sourceLine" id="cb336-3" title="3"><span class="kw">str</span>(x)</a></code></pre></div>
+<pre><code>##  num [1:5] 1 2 3 4 5</code></pre>
+<div class="sourceCode" id="cb338"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb338-1" title="1"><span class="kw">str</span>(y)</a></code></pre></div>
+<pre><code>##  num [1:5] 1 2 3 4 5</code></pre>
+<p>Bien que les valeurs numériques dans <code>x</code> et <code>y</code> ne soient pas tout à fait identiques, elles semblent identiques à l’affichage de <code>x</code> et <code>y</code>.</p>
+<div class="sourceCode" id="cb340"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb340-1" title="1"><span class="co"># Résultats des différentes comparaisons</span></a>
+<a class="sourceLine" id="cb340-2" title="2"><span class="kw">all</span>(x <span class="op">==</span><span class="st"> </span>y)</a></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<div class="sourceCode" id="cb342"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb342-1" title="1"><span class="kw">identical</span>(x, y)</a></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<div class="sourceCode" id="cb344"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb344-1" title="1"><span class="kw">all.equal</span>(x, y)</a></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p><strong>Rappel</strong> : Il est possible de contrôler le nombre de chiffres composant un nombre affichés dans la console R avec l’option <code>digits</code> de la session R.</p>
+<div class="sourceCode" id="cb346"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb346-1" title="1">optionsDefaut &lt;-<span class="st"> </span><span class="kw">options</span>()</a>
+<a class="sourceLine" id="cb346-2" title="2"><span class="kw">options</span>(<span class="dt">digits =</span> <span class="dv">11</span>)</a>
+<a class="sourceLine" id="cb346-3" title="3">y</a></code></pre></div>
+<pre><code>## [1] 1.0000000001 2.0000000001 3.0000000001 4.0000000001 5.0000000001</code></pre>
+<div class="sourceCode" id="cb348"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb348-1" title="1"><span class="kw">options</span>(<span class="dt">digits =</span> optionsDefaut<span class="op">$</span>digits)</a></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="résumé" class="section level1">
+<h1>Résumé</h1>
+<div id="fonctions-et-opérateurs-mathématiques-et-statistiques-de-base-en-r" class="section level4">
+<h4>Fonctions et opérateurs mathématiques et statistiques de base en R</h4>
+
+<ul>
+<li>fonctionnement vectoriel et règle de recyclage : calculs élément par élément pour un objet, ou encore terme à terme entre des objets;</li>
+</ul>
+<table style="width:100%;">
+<colgroup>
+<col width="19%" />
+<col width="29%" />
+<col width="16%" />
+<col width="18%" />
+<col width="16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Calcul</th>
+<th>opère de façon vectorielle</th>
+<th>combine, retourne une valeur</th>
+<th>combine, retourne valeur(s)</th>
+<th>combine, retourne un vecteur</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>arithmétique</td>
+<td><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>^</code>, <code>%%</code>, <code>%/%</code></td>
+<td><code>sum</code>, <code>prod</code></td>
+<td></td>
+<td><code>cumsum</code>, <code>cumprod</code>, <code>diff</code></td>
+</tr>
+<tr class="even">
+<td>comparaison</td>
+<td><code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>logique</td>
+<td><code>!</code>, <code>&amp;</code>, <code>|</code>, <code>xor</code></td>
+<td><code>&amp;&amp;</code>, <code>||</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr class="odd">
+<td>racine carrée, exponentielle, logarithme, trigonométrie, signe, arrondissement, bêta, gamma</td>
+<td><code>sqrt</code>, <code>exp</code>, <code>log</code>, <code>log10</code>, <code>log2</code>, <code>sin</code>, <code>cos</code>, <code>tan</code>, <code>acos</code>, <code>asin</code>, <code>atan</code>, <code>atan2</code>, <code>abs</code>, <code>sign</code>, <code>ceiling</code>, <code>floor</code>, <code>round</code>, <code>trunc</code>, <code>signif</code>, <code>beta</code>, <code>gamma</code>, <code>factorial</code>, <code>choose</code>, etc.</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr class="odd">
+<td>mesure de position</td>
+<td><code>pmin</code>, <code>pmax</code></td>
+<td><code>min</code>, <code>max</code>, <code>which.min</code>, <code>which.max</code></td>
+<td><code>range</code>, <code>quantile</code>, <code>summary</code></td>
+<td><code>cummin</code>, <code>cummax</code>, <code>rank</code></td>
+</tr>
+<tr class="even">
+<td>tendance centrale</td>
+<td></td>
+<td><code>mean</code>, <code>median</code></td>
+<td><code>summary</code></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>dispersion</td>
+<td></td>
+<td><code>sd</code></td>
+<td><code>var</code>, <code>cov</code>, <code>cor</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>fréquences</td>
+<td></td>
+<td></td>
+<td><code>table</code>, <code>ftable</code>, <code>xtabs</code>, <code>summary</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>opérations sur des ensembles : <code>union</code>, <code>intersect</code>, <code>setdiff</code>, <code>setequal</code>, <code>is.element</code>;</li>
+<li>mots-clés mathématiques : <code>pi</code>, <code>Inf</code>, <code>NaN</code>.</li>
+<li>argument <code>na.rm</code> : spécifie le comportement de la fonction en présence de valeurs manquantes;</li>
+<li>calcul de fréquences marginales ou relatives à partir d’un tableau de fréquences :<br />
+<code>margin.table</code>, <code>addmargins</code>, <code>prop.table</code>.</li>
+<li>énumération de combinaisons : <code>expand.grid</code>, <code>combn</code>;</li>
+<li>traitement des observations dupliquées : <code>duplicated</code>, <code>unique</code>.</li>
+</ul>
+</div>
+<div id="fonctions-de-la-famille-des-apply-1" class="section level4">
+<h4>Fonctions de la famille des <code>apply</code></h4>
+
+<p>Principe de base derrière ces fonctions (qui cachent des boucles) :</p>
+<ul>
+<li>séparer un objet en sous-objets;</li>
+<li>appeler une fonction en lui donnant comme premier argument tous les sous-objets, un à la fois;</li>
+<li>combiner les résultats obtenus.</li>
+</ul>
+<p>Résumé du fonctionnement des fonctions présentées :</p>
+<table>
+<colgroup>
+<col width="12%" />
+<col width="31%" />
+<col width="33%" />
+<col width="22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Fonction</th>
+<th>Objet typique en entrée</th>
+<th>Formation des sous-objets</th>
+<th>Format de la sortie</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>apply</code></td>
+<td>array (matrice)</td>
+<td>selon une ou des dimensions</td>
+<td>vecteur, array, liste</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr class="odd">
+<td><code>lapply</code></td>
+<td>vecteur, liste (data frame)</td>
+<td>éléments de l’objet en entrée</td>
+<td>liste</td>
+</tr>
+<tr class="even">
+<td><code>sapply</code></td>
+<td>vecteur, liste (data frame)</td>
+<td>éléments de l’objet en entrée</td>
+<td>simplifié par défaut</td>
+</tr>
+<tr class="odd">
+<td><code>mapply</code></td>
+<td>vecteurs, listes (data frames)</td>
+<td>éléments des objets en entrée</td>
+<td>simplifié par défaut</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr class="odd">
+<td><code>tapply</code></td>
+<td>vecteur</td>
+<td>selon les niveaux de facteurs</td>
+<td>array ou liste</td>
+</tr>
+<tr class="even">
+<td><code>by</code></td>
+<td>data frame</td>
+<td>selon les niveaux de facteurs</td>
+<td>array ou liste</td>
+</tr>
+<tr class="odd">
+<td><code>aggregate</code></td>
+<td>data frame</td>
+<td>selon les niveaux de facteurs et par colonne du data frame</td>
+<td>data frame</td>
+</tr>
+</tbody>
+</table>
+<p>Description des arguments à donner en entrée à ces fonctions :</p>
+<ul>
+<li><p>1<sup>e</sup> argument (sauf pour <code>mapply</code>) : objet à séparer et sur lequel appliquer la fonction;</p></li>
+<li><p>argument suivant : information pour spécifier comment séparer l’objet en sous-objets (sauf pour les fonctions prenant en entrée une liste, soit pour <code>lapply</code>, <code>sapply</code> et <code>mapply</code>, car dans ce cas les sous-objets sont les éléments de la liste);</p></li>
+<li><p>argument suivant (celui nommé <code>FUN</code>) : la fonction à appliquer (les sous-objets lui seront fournis comme premier argument);</p></li>
+<li><p><code>...</code> : il est possible de passer des arguments supplémentaires à la fonction à appliquer (<code>FUN</code>) simplement en les donnant en argument à la fonction de la famille des <code>apply</code> grâce aux <code>...</code> (rappel : il s’agit de la deuxième utilité de l’argument <code>...</code> mentionnée dans les notes sur les <a href="https://stt4230.rbind.io/introduction/base_r/#largument-...-et-ses-deux-utilites.">concepts de base en R</a>).</p></li>
+</ul>
+<p>Note : La fonction <code>aggregate</code> accepte aussi une formule en entrée.</p>
+</div>
+<div id="écriture-de-conditions-logiques" class="section level4">
+<h4>Écriture de conditions logiques</h4>
+
+<p>Fonctions opérant de façon vectorielle :</p>
+<ul>
+<li>Opérateurs de comparaison :
+<code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&gt;=</code> , <code>&lt;</code>, <code>&lt;=</code>.</li>
+<li>Opérateurs et fonction logiques : <code>!</code> (négation), <code>&amp;</code> (et), <code>|</code> (ou), <code>xor</code> (ou exclusif).</li>
+<li>Opérateur de comparaison à un ensemble de valeurs : <code>%in%</code>.</li>
+<li>Fonctions de comparaison pour caractères spéciaux :
+<code>is.na</code>, <code>is.nan</code>, <code>is.infinite</code>.</li>
+</ul>
+<p>Fonctions retournant toujours un logique de longueur 1 :</p>
+<ul>
+<li>Opérateurs logiques non vectoriels : <code>&amp;&amp;</code> (et), <code>||</code> (ou), <code>isTRUE</code>, <code>isFALSE</code>.</li>
+<li>Fonctions qui condensent un vecteur logique en une seule valeur
+logique : <code>all</code>, <code>any</code>.</li>
+<li>Fonctions de vérification de type :<br />
+<code>is.</code>(<code>numeric</code>/<code>character</code>/<code>logical</code>/<code>vector</code>/<code>matrix</code>/<code>array</code>/<code>list</code>/<code>data.frame</code>/<code>factor</code>/<code>null</code>/…)<br />
+(il en existe beaucoup!).</li>
+</ul>
+<div style="page-break-after: always;"></div>
+</div>
+<div id="comparaison-de-deux-objets-r-1" class="section level4">
+<h4>Comparaison de deux objets R</h4>
+<ul>
+<li>Pour comparer uniquement les valeurs, pas les attributs :
+<code>all(x == y)</code>.</li>
+<li>Pour comparer les objets dans leur totalité (valeurs, attributs, type
+de l’objet ou des éléments) : <code>identical(x, y)</code>.</li>
+<li>Pour comparer les valeurs et les attributs, en acceptant des
+différences dans les valeurs numériques selon une certaine tolérance :
+<code>all.equal(x, y)</code>.</li>
+</ul>
+<hr />
+</div>
+</div>
+<div id="références" class="section level1">
+<h1>Références</h1>
+<p>Livres :</p>
+<ul>
+<li>Cotton, R. (2013). Learning R: A Step-by-Step Function Guide to Data Analysis, O’Reilly Media.</li>
+<li>Teetor, P. (2011). R Cookbook. O’Reilly Media. <a href="http://www.cookbook-r.com/" class="uri">http://www.cookbook-r.com/</a></li>
+<li>Muenchen, R. A. (2011). R for SAS and SPSS Users. Second edition. Springer.</li>
+<li>Zumel, N. et Mount, J. (2014). Practical Data Science with R. Manning Publications Co.</li>
+<li>Zuur, A. F., Ieno, E. N. et Meesters, E. H.W.G. (2009). A Beginner’s Guide to R. Springer.</li>
+</ul>
+<p>Ressource web pour mieux comprendre les fonctions de la famille des <code>apply</code> :</p>
+<ul>
+<li><a href="https://www.datacamp.com/community/tutorials/r-tutorial-apply-family" class="uri">https://www.datacamp.com/community/tutorials/r-tutorial-apply-family</a></li>
+</ul>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Cette définition est tirée du site web suivant : <a href="http://www.alloprof.qc.ca/BV/pages/m1346.aspx" class="uri">http://www.alloprof.qc.ca/BV/pages/m1346.aspx</a><a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
