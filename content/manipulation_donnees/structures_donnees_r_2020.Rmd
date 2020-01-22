@@ -149,9 +149,9 @@ str(dat)
 
 Il pourrait être illustré comme suit : ![](fig/DataFrame.png).
 
-La première dimension d'un data frame typique est la longueur commune des objets qu'il contient (4 dans l'exemple) et sa deuxième dimension est le nombre d'objets qu'il contient (dans l'exemple, le data frame contient 3 vecteurs).
+La taille de la première dimension d'un data frame typique est la longueur commune des objets qu'il contient (4 dans l'exemple) et la taille de sa deuxième dimension est le nombre d'objets qu'il contient (dans l'exemple, le data frame contient 3 vecteurs).
 
-Les data frames ont été créés spécialement pour l'analyse statistique de données. Ils représentent des tableaux de données dans lesquels les lignes sont des observations et les colonnes des variables (des variables au sens statistique et non au sens informatique). Le data frame fait donc penser à une matrice. Ses dimensions sont vues comme un nombre de lignes ou d'observations et un nombre de colonnes ou de variables. Cependant, contrairement à une matrice, les données dans les différentes colonnes d'un data frame n'ont pas à être du même type.
+Les data frames ont été créés spécialement pour l'analyse statistique de données. Ils représentent des tableaux de données dans lesquels les lignes sont des observations et les colonnes des variables (des variables au sens statistique et non au sens informatique). Le data frame fait donc penser à une matrice. Cependant, contrairement à une matrice, les données dans les différentes colonnes d'un data frame n'ont pas à être du même type.
 
 
 ### Exemple de facteur
@@ -186,7 +186,7 @@ Ces fonctions seront illustrées plus loin. Notons que les fonction `typeof` et 
 
 Les structures de données R peuvent posséder des attributs, qui servent à contenir des informations supplémentaires concernant les données stockées dans l'objet. Ces informations supplémentaires sont parfois appelées métadonnées.
 
-Par exemple, une matrice ou un array possède toujours un attribut portant le nom `dim` contenant la dimension de l'objet.
+Par exemple, une matrice ou un array possède toujours un attribut portant le nom `dim` contenant les tailles de toutes les dimensions de l'objet.
 
 ```{r}
 attributes(mat)
@@ -205,6 +205,8 @@ Pour certains attributs communs, tels que `dim`, il existe même des fonctions  
 ```{r}
 dim(mat)
 ```
+
+\newpage
 
 - `nrow` retourne la taille de la première dimension d'un objet,
 
@@ -535,13 +537,13 @@ Il n'a pas ce comportement lors de l'extraction d'une ligne d'un data frame, car
 str(dat[2, ])
 ```
 
-Cependant, avec les objets atomiques, l'opérateur `[` cherche toujours par défaut à  réduire le plus possible la dimension de l'objet retourné. Ainsi, l'extraction suivante retourne un vecteur, alors que l'objet d'origine est un array à 3 dimensions.
+Cependant, avec les objets atomiques, l'opérateur `[` cherche toujours par défaut à réduire le plus possible le nombre de dimensions de l'objet retourné. Ainsi, l'extraction suivante retourne un vecteur, alors que l'objet d'origine est un array à trois dimensions.
 
 ```{r}
 str(arr[, 2, 4])
 ```
 
-Il est possible de contrôler ce comportement grâce à l'argument `drop`. Donner la valeur `FALSE` à cet argument empêche `[` de réduire la dimension du résultat retourné. Ainsi, la commande suivante retourne un array,
+Il est possible de contrôler ce comportement grâce à l'argument `drop`. Donner la valeur `FALSE` à cet argument empêche `[` de réduire le nombre de dimensions du résultat retourné. Ainsi, la commande suivante retourne un array,
 
 ```{r}
 str(arr[, 2, 4, drop = FALSE])
@@ -1181,7 +1183,7 @@ colnames(des) <- paste0("de", 1:2)
 str(des)
 ```
 
-Les noms des lignes et colonnes d'une matrice R sont des attributs de l'objet, tout comme ses dimensions.
+Les noms des lignes et colonnes d'une matrice R sont des attributs de l'objet, tout comme les tailles de ses dimensions.
 
 ```{r}
 attributes(des)
@@ -1257,7 +1259,7 @@ des[, "de1"]
 
 # L'array
 
-Une matrice est en fait un cas particulier d'array, à 2 dimensions.
+Une matrice est en fait un cas particulier d'array, à deux dimensions.
 
 ```{r}
 is.array(mat)
@@ -1290,7 +1292,7 @@ length(arr)
 
 ### Fonction `array`
 
-La fonction `array` sert à créer des arrays. Il faut lui fournir le vecteur des éléments à stocker dans l'array et la dimension de celui-ci, comme dans cet exemple.
+La fonction `array` sert à créer des arrays. Il faut lui fournir le vecteur des éléments à stocker dans l'array et les tailles des dimensions de celui-ci, comme dans cet exemple.
 
 ```{r}
 collection <- array(1:12, dim = c(2, 2, 3))
@@ -1321,7 +1323,7 @@ Même si les affichages des objets `vec` et `array_vec` sont identiques, les deu
 
 ## Ajout de métadonnées dans un array
 
-Pour donner des noms aux dimensions d'un array, il faut utiliser une liste comme suit.
+Pour donner des noms aux éléments selon les dimensions d'un array, il faut utiliser une liste comme suit.
 
 ```{r}
 dimnames(collection) <- list(paste0("ligne", 1:2), 
@@ -1569,7 +1571,7 @@ attributes(dat)
 
 Tout data frame possède ces attributs par défaut. Il s'agit des noms des éléments selon la dimension, ainsi que d'une «&nbsp;classe&nbsp;» identifiant le type de l'objet. Les types d'objets vus précédemment n'ont pas un tel attribut.
 
-En contrepartie, la dimension est un attribut pour les matrices et les arrays, alors qu'elle n'en est pas un pour les data frames. Les fonctions `dim`, `nrow` et `ncol` fonctionnent tout de même avec des data frames.
+En contrepartie, le vecteur des tailles des dimensions est un attribut pour les matrices et les arrays, alors qu'il n'en est pas un pour les data frames. Les fonctions `dim`, `nrow` et `ncol` fonctionnent tout de même avec des data frames.
 
 ```{r}
 dim(dat)
@@ -2076,7 +2078,7 @@ type.convert(vect6, na.strings = "-", dec = ",")
 
 - **données** : valeurs observées de variables aléatoires, valeurs de résultats de calculs (ex.: statistiques descriptives, coefficients d'un modèle), etc.;
 - **métadonnées = attributs** (souvent facultatifs) :  
-nom des éléments (par dimension), nombre d'éléments par dimension pour les matrices et arrays, niveaux d'un facteur, etc.
+nom des éléments (par dimension), taille des dimensions pour les matrices et arrays, niveaux d'un facteur, etc.
 
 
 #### Caractéristiques des structures de données en R
@@ -2171,7 +2173,7 @@ Légende :
 \mbox{}
 
 - Opérateurs d'indiçage : 
-    + `[` : extrait un ou plusieurs éléments, préserve la structure de l'objet, sauf si une simplification est possible et `drop = TRUE` (`TRUE` est la valeur par défaut de l'argument);
+    + `[` : extrait un ou plusieurs éléments, préserve la structure de l'objet, sauf pour un objet à plus d'une dimension si une simplification est possible et `drop = TRUE` (`TRUE` est la valeur par défaut de l'argument);
     + `[[` et `$` : extrait un seul élément, laisse tomber des attributs d'un objet atomique, sort de la structure d'un objet récursif  
     (`$` s'utilise seulement avec des objets récursifs);  
 - Fonctions : `head`, `tail`, `subset`. 
@@ -2302,13 +2304,14 @@ Objet récursif à 1 dimension
 Objet récursif à 2 dimensions, conçu pour stocker :    
 
 - des jeux de données (ligne = observation, colonne = variable)
-    + $\approx$ liste de vecteurs ou facteurs de même longueur;
+    + $\approx$ liste de vecteurs ou facteurs de même longueur (un élément = une colonne);
     + $\approx$ matrice avec données dont le type peut varier entre les colonnes;
 - fonctions de création : 
     + `data.frame`, `as.data.frame`;
 - fonctions d'ajout de valeurs : 
     + par concaténation avec : `data.frame`, `cbind`, `rbind`;
 - comment réaliser une extraction avec un opérateur :
+    + `[` ou `[[` avec 1 argument identifiant une ou des colonnes;
     + `[` ou `[[` avec 2 arguments, soit un par dimension;
     + ou encore $ pour extraire une colonne nommée.
 
