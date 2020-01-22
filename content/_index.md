@@ -28,7 +28,7 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
 * Manipulation de données en R
     * [Structures de données en R]({{< relref "manipulation_donnees/structures_donnees_r_2020.html" >}})
     * [Lecture et écriture dans des fichiers externes à partir de R]({{< relref "manipulation_donnees/lecture_ecriture_r_2020.html" >}})
-    * [Prétraitement de données en R]({{< relref "manipulation_donnees/pretraitement_donnees_r_2019.html" >}})
+    * [Prétraitement de données en R]({{< relref "manipulation_donnees/pretraitement_donnees_r_2020.html" >}})
 * Calculs en R
     * [Calculs de base en R]({{< relref "calculs/calculs_base_r_2020.html" >}})
     * [Calculs statistiques et mathématiques plus avancés en R]({{< relref "calculs/calculs_stat_math_r_2019.html" >}})
