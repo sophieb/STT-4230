@@ -87,6 +87,8 @@ cars2 <- cars
 
 ## Modification ou ajout d'une variable dans un data frame
 
+### Opérateurs d'indiçage et fonction `transform`
+
 Pour remplacer une variable dans un data frame par une transformation de celle-ci, il suffit d'assigner le nouveau vecteur ou facteur contenant les observations de la variable transformée à la colonne contenant la variable à modifier.
 
 Par exemple, dans le jeu de données `cars2`, la distance est exprimée en pieds. Supposons que nous voulons transformer l'échelle de mesure de cette variable pour des mètres. Cette transformation est effectuée par une simple opération mathématique : la multiplication par un facteur de conversion. Ce facteur de conversion est ici 0.3048, car un pied est l'équivalent de 0.3048 mètre.
@@ -682,7 +684,12 @@ dataEx
 
 ## Sélection de sous-ensembles de données
 
-Sélectionner un sous-ensemble de données signifie **extraire** d'un jeu de données une partie des observations (lignes) et/ou des variables (colonnes) qu'il contient. La sélection d'observations répondant à certains critères est aussi parfois appelée **filtrage** de données. La matière couverte dans les notes sur les calculs de base en R concernant les [conditions logiques](https://stt4230.rbind.io/calculs/calculs_base_r/#conditions-logiques) nous sera très utile pour tester des critères. Les principaux outils permettant d'extraire des sous-ensembles de données stockées dans un data frame ont aussi déjà été vus, ceux-ci dans les notes sur les
+Sélectionner un sous-ensemble de données signifie **extraire** d'un jeu de données une partie des observations (lignes) et/ou des variables (colonnes) qu'il contient. La sélection d'observations répondant à certains critères est aussi parfois appelée **filtrage** de données. La matière couverte dans les notes sur les calculs de base en R concernant les [conditions logiques](https://stt4230.rbind.io/calculs/calculs_base_r/#conditions-logiques) nous sera très utile pour tester des critères. 
+
+
+### Opérateur `[` et fonction `select`
+
+Les principaux outils permettant d'extraire des sous-ensembles de données stockées dans un data frame ont déjà été présentés dans les notes sur les
 structures de données en R. Il s'agit de [l'opérateur d'indiçage `[` et de la fonction d'extraction `subset`](https://stt4230.rbind.io/manipulation_donnees/structures_r/#extraction-d%C3%A9l%C3%A9ments). La fonction `subset` a d'ailleurs été utilisée dans les derniers exemples pour sélectionner seulement certaines variables dans l'affichage des résultats.
 
 Pour illustrer l'utilisation de ces outils dans un contexte de sélection de sous-ensembles de données, voyons comment conserver du jeu de données `dataEx` seulement les résultats de lancers de dés effectués par Kim et ne comprenant aucune donnée manquante. Dans ce sous-ensemble, la variable `lanceur` prendra toujours la même valeur. Elle ne sera donc plus vraiment pertinente et sera retirée.
@@ -786,9 +793,11 @@ dataEx %>% filter(lanceur == "Kim") %>% drop_na() %>% select(- lanceur)
 Je ne fais que mentionner cet opérateur ici. Il est recommandé mais pas obligatoire de l'employer lors de l'utilisation de packages du `tidyverse`. J'y reviendrai cependant dans un [prochain cours](https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/#operateur-pipe).
 
 
-### Opérateur `[` du package `data.table`
+### Opérateur `[` et fonction `select` du package `data.table`
 
-Pour effectuer de la sélection de sous-ensembles de données avec la package `data.table`, il faut exploiter son [opérateur `[` et ses arguments `i` et `j`](https://rdatatable.gitlab.io/data.table/reference/data.table.html). Après avoir transformé le data frame `dataEx` en data table, 
+Pour effectuer de la sélection de sous-ensembles de données avec la package `data.table`, nous pouvons exploiter son [opérateur `[` et ses arguments `i` et `j`](https://rdatatable.gitlab.io/data.table/reference/data.table.html) ou encore sa [méthode pour la fonction `subset`](https://rdatatable.gitlab.io/data.table/reference/subset.data.table.html) (qui est en fait une fonction générique) spécifique aux data tables. Illustrons ici l'utilisation de l'opérateur `[`. La fonction `subset` s'utilise à peu près de la même façon avec un data table qu'avec un data frame.
+
+Après avoir transformé le data frame `dataEx` en data table, 
 
 ```{r}
 dataEx_dt <- as.data.table(dataEx)
@@ -803,7 +812,7 @@ dataEx_dt[i = lanceur == "Kim"]
 Dans les commandes suivantes, je vais omettre l'assignation explicite à l'argument `i` puisque ce n'est vraiment pas une pratique courante d'inclure cette assignation dans un appel à `[`. Selon l'odre des arguments de l'opérateur dans sa définition (voir la section Usage de sa [fiche d'aide](https://rdatatable.gitlab.io/data.table/reference/data.table.html)), la première valeur fournie après `[` est assignée à l'argument `i` et la deuxième à l'argument `j` si elles ne sont pas explicitement assignées à un nom d'argument (et si aucune valeur fournie en troisième position ou plus loin n'est assignée à `i` ou `j`, selon les [règles d'assignation implicite de valeurs aux arguments](https://stt4230.rbind.io/introduction/base_r/#comment-sont-interpr%C3%A9t%C3%A9es-les-valeurs-darguments-non-assign%C3%A9es-%C3%A0-un-nom) présentée dans les notes sur les concepts de base en R).
 
 
-Le package `data.table` offre une [méthode pour la fonction `na.omit`](https://rdatatable.gitlab.io/data.table/reference/na.omit.data.table.html) (qui est en fait une fonction générique) spécifique aux data tables.
+Le package `data.table` offre une [méthode pour la fonction `na.omit`](https://rdatatable.gitlab.io/data.table/reference/na.omit.data.table.html) spécifique aux data tables.
 
 ```{r}
 na.omit(dataEx_dt[lanceur == "Kim"])
@@ -1169,8 +1178,6 @@ Tout d'abord, introduisons un peu de terminologie informelle qui nous aidera à 
     + mesures obtenues;
     + chaque valeur est associée à un individu et une variable.
 
-\newpage
-
 #### Mise en forme large (en anglais *wide*) :
 
 \mbox{}
@@ -1315,7 +1322,6 @@ plants_long2 <- data.frame(
 plants_long2
 ```
 
-\newpage
 
 #### Utilisation des deux mises en forme
 
@@ -1651,21 +1657,19 @@ La fonction `dcast` va plus loin que la modification de mise en forme de jeux de
 
 # Résumé
 
-## R de base (principalement les packages `base` et `stats`)
+#### R de base (principalement les packages `base` et `stats`)
 
-#### Transformation de variables
+\mbox{}
+
+##### Transformation de variables
 
 - Ajout ou modification de variables dans un data frame :
     + assignation à une colonne, nouvelle pour un ajout,
-    + concaténation de colonnes avec `cbind` ou `data.frame`,
-    + fonction `transform`;
-    
+    + fonction `transform`,
+    + concaténation de colonnes avec `cbind` ou `data.frame`;
 - Variable conditionnelle à une autre : `ifelse`;
-
 - Catégorisation d'une variable numérique : `cut`, `ave`;
-
 - Normalisation de valeurs : `scale`;
-
 - Manipulation de chaînes de caractères :
     + `paste` : concatène des chaînes de caractères,
     + `nchar` : calcule le nombre de caractères,
@@ -1677,7 +1681,6 @@ La fonction `dcast` va plus loin que la modification de mise en forme de jeux de
     + `grep` et `grepl` : testent la présence d'une certaine sous-chaîne de caractères,
     + `chartr` : remplace des caractères par d'autres,
     + `iconv` : convertit l’encodage de chaîne de caractères;
-    
 - Manipulation de dates :
     + `as.Date` : convertit une chaîne de caractère en format date,
     + `Sys.setlocale` : permet de modifier les paramètres régionaux d'une session R (utile lorsque nous voulons convertir en format `Date` des chaînes de caractères contenant des noms de mois dans une langue autre que celle du système d'exploitation de notre ordinateur),
@@ -1686,20 +1689,26 @@ La fonction `dcast` va plus loin que la modification de mise en forme de jeux de
     + `format` : permet de modifier le format d'une date.
 
 
-#### Manipulation de jeux de données
+##### Manipulation de jeux de données
 
-##### Combinaison de données
+\mbox{}
+
+###### Sélection de sous-ensembles de données
+
+- Sélectionner des observations (lignes) et des variables (colonnes) : opérateur `[`, fonction `subset`.
+- Sélectionner les observations (lignes) ne contenant aucune donnée manquante : `na.omit`.
+
+
+###### Combinaison de données
 
 - Concaténer des vecteurs, matrices ou data frames en lignes (lignes = observations dans un data frame) : `rbind`.
-
 - Concaténer des vecteurs, matrices ou data frames en colonnes  (lignes = variables dans un data frame) : `cbind`, `data.frame`.
-
-- Fusionner par association (ajout de colonnes en identifiant les lignes correspondantes) : `merge`
+- Fusionner par association deux jeux de données (jointure en identifiant les lignes correspondantes) : `merge`
     + argument `by`, ou arguments `by.x` et `by.y`, pour spécifier les variables d'association (celles à partir desquelles établir les correspondances entre les lignes);
     + argument `all`, ou arguments `all.x` et `all.y`, pour spécifier les lignes à conserver (donc le type de jointure à réaliser).
     
 
-##### Modification de l'ordre des données
+###### Modification de l'ordre des données
 
 - `rev` : renverse l'ordre des éléments;
 - `sort` : ordonne les éléments d'un vecteur atomique
@@ -1709,65 +1718,59 @@ $\rightarrow$ pour effectuer l'ordonnancement, il faut fournir le résultat reto
     + argument `decreasing = TRUE` pour ordre décroissant;
 
 
-##### Changement de mise en forme de jeux de données
+###### Changement de mise en forme de jeux de données
 
 - `t` : transpose des matrices
-
 - **Mise en forme « large »** :
     + une seule ligne par individu (lorsque la largeur est maximale),
     + les vecteurs d'observations de certaines variables sont placés dans différentes colonnes.
-  
 - **Mise en forme « longue »** :
     + plus d'une ligne par individu,
     + les vecteurs d'observations de certaines variables sont empilés dans une même colonne, les uns en dessous des autres,
     + comprend une ou des colonnes ayant pour but d'identifier à quelle variable est associée chaque donnée.
+- `stack` et `unstack` : modifient la mise en forme, fonctions simplistes
+- `reshape` : modifie la mise en forme; les arguments de `reshape` sont les suivants
+    - En lien avec le contexte :
+        + `data` : data frame à remettre en forme;
+        + `direction` : direction de la remise en forme.
+    - En lien avec les individus :
+        + `idvar` : nom(s) colonne(s) contenant les identifiants des individus;
+        + `ids` : identifiants des individus.
+    - En lien avec les variables :
+        + `timevar` : nom colonne contenant les identifiants des variables;
+        + `times` : identifiants des variables.
+    - En lien avec les valeurs :
+        + `v.names` : nom(s) colonne(s) contenant les valeurs dans le mise en forme longue ou intermédiaire;
+        + `varying` : noms colonnes contenant les valeurs dans le mise en forme large ou intermédiaire.
 
 
-Fonctions pour la transformation de mise en forme :
-
-Transformation  | Package `utils` | Package `stats` | Package `tidyr` | Package `data.table`
---------------- | --------------- | --------------- | --------------- | --------------------
-large vers long | `stack` | `reshape` (`direction = "long"`) | `pivot_longer` | `melt`
-long vers large | `unstack` | `reshape` (`direction = "wide"`) | `pivot_wider` | `dcast`
-
-##### Arguments de la fonction `reshape`
-
-- En lien avec le contexte :
-    + `data` : data frame à remettre en forme;
-    + `direction` : direction de la remise en forme.
-- En lien avec les individus :
-    + `idvar` : nom(s) colonne(s) contenant les identifiants des individus;
-    + `ids` : identifiants des individus.
-- En lien avec les variables :
-    + `timevar` : nom colonne contenant les identifiants des variables;
-    + `times` : identifiants des variables.
-- En lien avec les valeurs :
-    + `v.names` : nom(s) colonne(s) contenant les valeurs dans le mise en forme longue ou intermédiaire;
-    + `varying` : noms colonnes contenant les valeurs dans le mise en forme large ou intermédiaire.
-
-
-## `tidyverse` (principalement les packages `dplyr` et `tidyr`)
+#### `tidyverse` (principalement les packages `dplyr` et `tidyr`)
 
 - Transformation de variables : `mutate` du package `dplyr`.
 - Variable conditionnelle à une autre : `if_else` du package `dplyr`.
 - Manipulation de chaînes de caractères : package `stringr`.
 - Manipulation de dates : package `lubridate`.
-- Sélection de sous-ensembles de données : `filter` et `select` du package `dplyr`.
+- Sélection de sous-ensembles de données :
+    + sélection de lignes : `filter` du package `dplyr`;
+    + sélection de colonnes : `select` du package `dplyr`;
+    + sélection des lignes ne contenant aucune donnée manquante : `drop_na` du package `tidyr`.
 - Combinaison de données :
     + concaténation de lignes : `bind_rows` ;
     + concaténation de colonnes : `bind_cols` du package `dplyr`;
     + fusion par association : `inner_join`, `full_join`, `left_join`, `right_join`, etc., du package `dplyr`.
 - Modification de l’ordre des données : `arrange` du package `dplyr`,
-    + encadrer les noms de variable d'un appel à la fonction `desc` du package `tidyr` pour obtenir un ordre décroissant.
+    + encadrer les noms de variables (colonnes) d'un appel à la fonction `desc` du package `tidyr` pour obtenir un ordre décroissant.
 - Changement de mise en forme de jeux de données :
     + transformation vers un format plus long : `pivot_longer` du package `tidyr`;
     + transformation vers un format plus large : `pivot_wider` du package `tidyr`.
  
-## Package `data.table`
+#### Package `data.table`
 
 - Transformation de variables : opérateur `:=` (modification par référence).
 - Variable conditionnelle à une autre : `fifelse`.
-- Sélection de sous-ensembles de données : opérateur `[`.
+- Sélection de sous-ensembles de données :
+    + sélection de lignes et de colonnes : opérateur `[`, méthode `subset`;
+    + sélection des lignes ne contenant aucune donnée manquante : méthode `na.omit`.
 - Combinaison de données :
     + concaténation de lignes : `rbindlist`;
     + fusion par association : méthode `merge`.
@@ -1777,6 +1780,14 @@ long vers large | `unstack` | `reshape` (`direction = "wide"`) | `pivot_wider` |
 - Changement de mise en forme de jeux de données :
     + transformation vers un format plus long : `melt`;
     + transformation vers un format plus large : `dcast`.
+
+#### Tableau résumé des fonctions pour la transformation de mise en forme :
+
+Transformation  | Package `utils` | Package `stats` | Package `tidyr` | Package `data.table`
+--------------- | --------------- | --------------- | --------------- | ---------------
+large vers long | `stack` | `reshape` (`direction = "long"`) | `pivot_longer` | `melt`
+long vers large | `unstack` | `reshape` (`direction = "wide"`) | `pivot_wider` | `dcast`
+
     
 ***
 
