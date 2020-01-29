@@ -583,7 +583,7 @@ aujourdui
 ```
 
 ```{r echo = FALSE}
-aujourdui <- as.Date("2020-01-23")
+aujourdui <- as.Date("2020-01-27")
 aujourdui
 ```
 
@@ -637,10 +637,17 @@ head(subset(boxoffice, select = - c(Ranking, Gross)))
 
 Le `tidyverse` offre aussi un outil pour manipuler des dates en R : le package [`lubridate`](https://lubridate.tidyverse.org/). Par exemple, le calcul approximatif de temps en années entre deux dates que nous avons effectué précédemment peut être fait de façon exacte avec `lubridate` comme suit.
 
-```{r message = FALSE, R.options = list(width = 85)}
+```{r eval = FALSE, message = FALSE, R.options = list(width = 85)}
 library(lubridate)
 boxoffice$Date2 <- mdy(boxoffice$Release_Date, locale = "English")
 boxoffice$Age2 <- time_length(interval(start = boxoffice$Date2, end = now()), "years")
+head(subset(boxoffice, select = c(Movie_Distributor, Date, Date2, Age, Age2)))
+```
+
+```{r echo = FALSE, message = FALSE, R.options = list(width = 85)}
+library(lubridate)
+boxoffice$Date2 <- mdy(boxoffice$Release_Date, locale = "English")
+boxoffice$Age2 <- time_length(interval(start = boxoffice$Date2, end = aujourdui), "years")
 head(subset(boxoffice, select = c(Movie_Distributor, Date, Date2, Age, Age2)))
 ```
 
@@ -1232,7 +1239,7 @@ Il peut arriver qu'un jeu de données ait une mise en forme mi-large, mi-longue.
 - Individus = plants (au nombre de 3),
 - Variables = `Hauteur_Temps1`, `Hauteur_Temps2`, `Diametre_Temps1`, `Diametre_Temps2`
 
-##### Format large pur : une ligne par individu, une colonne par variable
+##### Mise en forme large pure : une ligne par individu, une colonne par variable
 
 \mbox{}
 
@@ -1252,7 +1259,7 @@ plants_large <- data.frame(
 plants_large
 ```
 
-##### Format intermédiaire : plus d'une ligne par individu, mais valeurs réparties dans plus d'une colonne
+##### Mise en forme intermédiaire : plus d'une ligne par individu, mais valeurs réparties dans plus d'une colonne
 
 \mbox{}
 
@@ -1272,7 +1279,7 @@ plants_inter
 ```
 
 
-##### Format long pur : toutes les valeurs sont empilées dans une seule colonne
+##### Mise en forme longue pure : toutes les valeurs sont empilées dans une seule colonne
 
 \mbox{}
 
@@ -1735,8 +1742,8 @@ long vers large | `unstack` | `reshape` (`direction = "wide"`) | `pivot_wider` |
     + `timevar` : nom colonne contenant les identifiants des variables;
     + `times` : identifiants des variables.
 - En lien avec les valeurs :
-    + `v.names` : nom(s) colonne(s) contenant les valeurs dans le format long ou intermédiaire;
-    + `varying` : noms colonnes contenant les valeurs dans le format large ou intermédiaire.
+    + `v.names` : nom(s) colonne(s) contenant les valeurs dans le mise en forme longue ou intermédiaire;
+    + `varying` : noms colonnes contenant les valeurs dans le mise en forme large ou intermédiaire.
 
 
 ## `tidyverse` (principalement les packages `dplyr` et `tidyr`)
@@ -1849,7 +1856,7 @@ Package `data.table` :
 
 Voici quelques exemples supplémentaires de changements de mise en forme effectués avec la fonction `reshape` ou avec le package `tidyr`.
 
-#### Format large pur vers format intermédiaire
+#### Mise en forme large pure vers mise en forme intermédiaire
 
 \mbox{}
 
@@ -1893,7 +1900,7 @@ full_join(
 )
 ```
 
-#### Format large pur vers format long pur
+#### Mise en forme large pure vers mise en forme longue pure
 
 \mbox{}
 
@@ -1920,7 +1927,7 @@ pivot_longer(
 )
 ```
 
-#### Format intermédiaire vers format long pur
+#### Mise en forme intermédiaire vers mise en forme longue pure
 
 \mbox{}
 
@@ -1947,7 +1954,7 @@ pivot_longer(
 )
 ```
 
-#### Format long pur vers format intermédiaire
+#### Mise en forme longue pure vers mise en forme intermédiaire
 
 \mbox{}
 
@@ -1973,7 +1980,7 @@ pivot_wider(
 )
 ```
 
-#### Format long pur vers large pur
+#### Mise en forme longue pure vers mise en forme large pure
 
 \mbox{}
 
@@ -1999,7 +2006,7 @@ pivot_wider(
 )
 ```
 
-#### Format intermédiaire pur vers large pur
+#### Mise en forme intermédiaire vers mise en forme large pure
 
 \mbox{}
 
