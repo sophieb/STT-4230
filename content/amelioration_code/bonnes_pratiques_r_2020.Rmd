@@ -2,7 +2,7 @@
 title: "Bonnes pratiques de programmation en R"
 linkTitle: "Bonnes pratiques R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2020-02-15"
+date: "2020-02-16"
 weight: 1
 slug: "bonnes_pratiques_r"
 categories: ["cours_2020-02-25"]
@@ -18,6 +18,9 @@ output:
     toc: yes
     toc_depth: 4
     highlight: tango
+bibliography: references.bib
+csl: custom.csl
+link-citations: true
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
@@ -38,9 +41,7 @@ Qu'est-ce que du bon code ? Un bon code est un code qui **produit les résultats
 
 Dans quels buts adoptons-nous de bonnes pratiques? Afin que notre code soit **réellement utilisé** et que n'importe qui (en particulier soi-même dans le futur) soit capable de comprendre **ce que le code fait** et **comment s'en servir**.
 
-À long terme, les bonnes pratiques apportent une **augmentation de notre productivité**[^1] en évitant les répétitions inutiles.
-
-[^1]: https://nicercode.github.io/blog/2013-04-05-why-nice-code/
+À long terme, les bonnes pratiques apportent une **augmentation de notre productivité** [@nice_code] en évitant les répétitions inutiles.
 
 <!--
 Les trois critères sont décrits dans les sections suivantes. Des outils aidant à respecter ces critères sont présentés. De bonnes habitudes de travail spécifiques à R sont proposées ici et là.
@@ -52,7 +53,7 @@ La priorité lors du développement de tout code informatique est certainement l
 
 Pour s'assurer d'écrire du code qui fonctionne correctement, il faut simplement le **tester**. Il vaut mieux tester fréquemment, à chaque petit ajout, plutôt que de produire beaucoup de code avant de le tester. Ainsi, il y a beaucoup moins de débogage à faire. Un courant de pensée en informatique prône même l'écriture des tests avant l'écriture du code (le [*test driven development*](https://fr.wikipedia.org/wiki/Test_driven_development)).
 
-En R, il est facile de tester interactivement son code dans la console. Cependant, une meilleure pratique est de formaliser ses tests afin de pouvoir facilement les faire rouler de nouveau lors de modifications futures au code. Nous verrons dans un prochain cours comment écrire des tests unitaires en R.
+En R, il est facile de tester interactivement son code dans la console. Cependant, une meilleure pratique est de formaliser ses tests afin de pouvoir facilement les faire rouler de nouveau lors de modifications futures apportées au code. Nous verrons dans un prochain cours comment écrire des tests unitaires en R.
 
 
 # Objectif #2 : Code facile à maintenir
@@ -70,14 +71,21 @@ L'écriture de code R est facilitée par l'utilisation de **bons outils**.
 
 Premièrement, il vaut mieux s'assurer de travailler avec la **dernière version** de R et des packages dont nous avons besoin. Ainsi, nous risquons moins de rencontrer des bogues et nous pouvons profiter des dernières fonctionnalités. De plus, utiliser un **éditeur** de code R ou même un environnement intégré de développement, tel que RStudio, facilite le travail.
 
-Avant de se lancer dans l'écriture d'un bout de code R, il est cependant recommandé de vérifier si un code réalisant ce que nous voulons faire n'a pas déjà été écrit. R est un logiciel libre, la **réutilisation du code des autres** est permise et même encouragée (tant que nous citons nos sources). Nous perdrions notre temps à reprogrammer quelque chose qui existe déjà, à moins que l'implantation existante ne nous convienne pas.
+Avant de se lancer dans l'écriture d'un bout de code R, il est cependant recommandé de vérifier si un code réalisant ce que nous voulons faire a déjà été écrit. R est un logiciel libre, la **réutilisation du code des autres** est permise et même encouragée (tant que nous citons nos sources). Nous perdrions notre temps à reprogrammer quelque chose qui existe déjà, à moins que l'implantation existante ne nous convienne pas.
 
-Finalement, il est primordial de s'assurer de ne pas perdre par accident le code que nous écrivons. Un pépin  informatique est si vite arrivé. Comme pour tout travail effectué à l'ordinateur, il est recommandé de faire des copies de secours (**backups**) de nos fichiers de code R. Nous pouvons simplement utiliser pour ce faire un outil de backups instantanés (avec une connexion internet) tel que [Dropbox](https://www.dropbox.com), [Google Drive](https://www.google.com/drive/), [OneDrive](https://onedrive.live.com) ou autre. Si nous développons du logiciel, soit des packages R, l'utilisation d'un [**logiciel de gestion de versions**](https://fr.wikipedia.org/wiki/Gestion_de_versions) tel que [Git](https://git-scm.com/) ou [Subversion](https://subversion.apache.org/) ([intégrable à RStudio](https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN)) est encore plus approprié.
+Finalement, il est primordial de s'assurer de ne pas perdre par accident le code que nous écrivons. Un pépin  informatique est si vite arrivé. Comme pour tout travail effectué à l'ordinateur, il est recommandé de faire des copies de secours (**backups**) de nos fichiers de code R. Nous pouvons simplement utiliser pour ce faire un outil de backups instantanés (avec une connexion internet) tel que [Dropbox](https://www.dropbox.com), [Google Drive](https://www.google.com/drive/), [OneDrive](https://onedrive.live.com) ou autre.
+
+Pour ceux qui développent du code R destiné à être intégré à un système en production, ou encore qui développent des packages R (donc du logiciel), l'utilisation d'un [**logiciel de gestion de versions**](https://fr.wikipedia.org/wiki/Gestion_de_versions) tel que [Git](https://git-scm.com/) ou [Subversion](https://subversion.apache.org/) est encore plus approprié et même presque essentiel.
+
+**Références** pour obtenir plus d'informations sur l'utilisation de Git (et GitHub) avec RStudio :
+
+- https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN [@vc_with_RStudio]
+- https://happygitwithr.com/ [@git_with_RStudio]
 
 
 ## Code facile à comprendre
 
-Un code facile à comprendre est **clair et se lit bien** (presque comme du texte). Il comporte souvent des instructions qui parlent d'elles-mêmes. Ces instructions sont typiquement succinctes, car une instruction trop longue effectue souvent plusieurs tâches difficilement discernables. Si la lecture d'une instruction ne permet pas à un programmeur initié dans le langage informatique employé de comprendre ce qu'elle réalise, il est alors recommandé d'insérer un commentaire dans le code pour expliquer à quoi sert l'instruction.
+Un code facile à comprendre est **clair** et **se lit bien** (presque comme du texte). Il comporte souvent des instructions qui parlent d'elles-mêmes. Ces instructions sont typiquement succinctes, car une instruction trop longue effectue souvent plusieurs tâches difficilement discernables. Si la lecture d'une instruction ne permet pas à un programmeur initié dans le langage informatique employé de comprendre ce qu'elle réalise, il est alors recommandé d'insérer un **commentaire** dans le code pour expliquer à quoi sert l'instruction.
 
 ### Documentation
 
@@ -107,12 +115,17 @@ Une syntaxe uniforme rend un code beaucoup plus facile à lire.
 
 Voici quelques exemples de guides de style R :
 
-- Google's R style guide : https://google.github.io/styleguide/Rguide.xml
-- The `tidyverse` style guide : https://style.tidyverse.org/
+- Original Google's R style guide : http://web.stanford.edu/class/cs109l/unrestricted/resources/google-style.html [@Google_style_guide]
+- The `tidyverse` style guide : https://style.tidyverse.org/ [@tidyverse_style_guide]
 
-Note : Les espacements proposés dans ces guides de style concordent avec la façon dont R reformate automatiquement le code des fonctions dans des packages avant de les afficher dans la console.
+Note : Le guide de style actuel de Google se base maintenant sur celui du `tidyverse` https://google.github.io/styleguide/Rguide.xml.
+
+Il est possible de modifier rapidement la mise en forme d'un bout de code R avec la fonction `tidy_source` du [package `formatR`](https://yihui.org/formatr/) ou en RStudio par le menu « Code > Reformat Code ». Ces outils de modification de mise en forme appliquent plusieurs des règles énoncées dans les guides de style.
+
 
 #### Retours à la ligne et indentations
+
+\mbox{}
 
 Une façon simple de rendre son code plus lisible est d'y insérer des retours à la ligne et des indentations appropriées. Par exemple, supposons que nous avons la chaîne de caractères suivante :
 
@@ -151,14 +164,15 @@ paste0(
 
 #### Opérateur d'assignation
 
-Voici quelques différences[^2][^3] entre les opérateurs d'assignation `<-` et `=`.
+\mbox{}
 
-[^2]: R Inferno, section 8.2.26 : http://www.burns-stat.com/pages/Tutor/R_inferno.pdf
-[^3]: http://stackoverflow.com/questions/1741820/assignment-operators-in-r-and
+Voici quelques différences [@R_inferno; @stackoverflow; @assignment] entre les opérateurs d'assignation `<-` et `=`.
 
 ##### Passage de valeurs à des arguments dans des appels de fonction :
 
-Pour **passer des valeurs d'arguments dans un appel de fonction**, l'opérateur d'assignation `=` est nettement préférable, car il ne crée pas d'objets dans l'environnement de travail, contrairement à `<-`. Par exemple, supposons que l'on travaille à partir d'un environnement de travail vide.
+\mbox{}
+
+Pour passer des valeurs d'arguments dans un appel de fonction, l'opérateur d'assignation `=` est nettement préférable, car il ne crée pas d'objets dans l'environnement de travail, contrairement à `<-`. Par exemple, supposons que nous travaillons à partir d'un environnement de travail vide.
 
 ```{r echo = FALSE}
 rm(list = ls())
@@ -201,7 +215,9 @@ x
 
 ##### Assignation d'une valeur à un nom (création ou modification d'objets) :
 
-Maintenant, pour **assigner des valeurs à des noms** et ainsi créer ou modifier des objets R, est-ce qu'il y a une différence entre l'utilisation de `<-` et de `=` ?
+\mbox{}
+
+Maintenant, pour assigner des valeurs à des noms et ainsi créer ou modifier des objets R, est-ce qu'il y a une différence entre l'utilisation de `<-` et de `=` ?
 
 Dans la majorité des situations, les deux opérateurs produiront exactement le même résultat. Cependant, l'inclusion d'une assignation avec l'opérateur `=` dans une expression passée en argument à une fonction produira presque toujours une erreur.
 
@@ -236,31 +252,34 @@ Cette erreur est générée parce que R croit que nous tentons de passer un argu
 **Résumé** : Toute erreur est évitée en utilisant
 
 - `<-` (ou `->`) pour l'assignation d'une valeur à un nom (création ou modification d'objets),
-- `=` pour passer des valeurs d'argument dans un appel de fonction.
+- `=` pour passer des valeurs à des arguments dans un appel de fonction.
 
-La page web suivante fournit plus de renseignements concernant les différences entre les opérateurs d'assignation `<-` et `=` : https://colinfay.me/r-assignment/.
 
 #### Conventions de noms
 
-Les noms des fonctions dans les packages de base de R ne suivent pas une unique convention pour les noms[^5]. Voici, par exemple, quelques conventions retrouvées en R :
+\mbox{}
 
-- tout en minuscules (ex. `typeof`, `colnames`),
-- mots séparés par un point (ex. `data.frame`, `read.table`),
-- mots séparés par un trait de soulignement (ex. `seq_along`),
+Les noms des fonctions dans les packages de base de R ne suivent pas une unique convention pour les noms [@R_Journal]. Voici, par exemple, quelques conventions retrouvées en R :
+
+- tout en minuscules (p. ex. `typeof`, `colnames`);
+- mots séparés par un point (p.ex. `data.frame`, `read.table`);
+- mots séparés par un tiret bas (p.ex. `seq_along`), souvent appelé *snake case* en anglais;
 - premières lettres des mots en majuscule, sauf pour le premier mot  
-(ex. `colMeans`, `rowSums`).
+(p.ex. `colMeans`, `rowSums`), souvent appelé *camel case* en anglais;
+- etc.
 
 Une bonne pratique est de **choisir une convention de noms et de la respecter**.
 
 Conseil : Il est préférable d'**éviter les accents** dans les instructions R, donc dans les noms d'objets (ou de sous-objets tels que les colonnes d'un data frame) afin d'éviter des problèmes lors du partage de code ou d'objets R entre des utilisateurs qui ne travaillent pas sous le même système d'exploitation.
 
-[^5]: https://journal.r-project.org/archive/2012-2/RJournal_2012-2_Baaaath.pdf 
 
 #### Organisation du code
 
-Un long code R a avantage a être séparé en plusieurs fichiers, par exemple un pour les fonctions et un autre pour les instructions à soumettre interactivement dans la console, ou encore un fichier par section du code. De plus, un code R dépend souvent d'autres fichiers, par exemple des fichiers de données à importer. Comment organiser intelligemment tous ces fichiers ? Il est recommandé de créer des sous-dossiers regroupant les fichiers de même type, par exemple un sous-dossier pour les données, un autre pour les résultats, un pour les scripts R, etc.[^6] 
+\mbox{}
 
-Chaque fichier devrait avoir un nom judicieusement choisi[^7]. Il devrait idéalement être :
+Un long code R a avantage a être séparé en plusieurs fichiers, par exemple un pour les fonctions et un autre pour les instructions à soumettre interactivement dans la console, ou encore un fichier par section du code. De plus, un code R dépend souvent d'autres fichiers, par exemple des fichiers de données à importer. Comment organiser intelligemment tous ces fichiers ? Il est recommandé [@workflow] de créer des sous-dossiers regroupant les fichiers de même type, par exemple un sous-dossier pour les données, un autre pour les résultats, un pour les scripts R, etc. 
+
+Chaque fichier devrait avoir un nom judicieusement choisi [@file_names]. Il devrait idéalement être :
 
 - significatif : bien décrire ce qu'il contient;
 - facile à traiter dans un programme informatique : ne pas contenir d'espaces, ni d'accents;
@@ -269,13 +288,15 @@ Chaque fichier devrait avoir un nom judicieusement choisi[^7]. Il devrait idéal
 Les projets RStudio, déjà mentionnés dans les [notes sur la lecture et l'écriture dans des fichiers externes à partir de R](https://stt4230.rbind.io/manipulation_donnees/lecture_ecriture_r/#projets-rstudio), sont parfaits pour rassembler au même endroit tous les fichiers relatifs à du code R et pour faciliter le travail sur plusieurs projets simultanément en gérant le passage d'un répertoire de travail à un autre.
 
 
-[^6]: https://andrewbtran.github.io/NICAR/2018/workflow/docs/01-workflow_intro.html
-[^7]: https://speakerdeck.com/jennybc/how-to-name-files
+#### Opérateur «&nbsp;*pipe*&nbsp;»
 
+\mbox{}
 
-#### Opérateur «&nbsp;pipe&nbsp;»
+Le [guide de style du `tidyverse`](https://style.tidyverse.org/pipes.html) recommande l'utilisation d'un opérateur appelé «&nbsp;*pipe*&nbsp;», en faisant référence à la signification «&nbsp;tuyaux&nbsp;». Cet opérateur offre une nouvelle façon d'enchaîner des instructions et de passer des arguments à des fonctions. Il est offert dans le [package `magrittr`](https://magrittr.tidyverse.org). En fait, ce package propose plusieurs opérateurs *pipes*, mais je présente ici seulement l'opérateur principal, le «&nbsp;*forward-pipe operator*&nbsp;» `%>%`.   
 
-Le [guide de style du `tidyverse`](https://style.tidyverse.org/pipes.html) recommande l'utilisation d'un opérateur appelé «&nbsp;pipe&nbsp;», en faisant référence à la signification «&nbsp;tuyaux&nbsp;». Cet opérateur offre une nouvelle façon d'enchaîner des instructions et de passer des arguments à des fonctions. Il est offert dans le package `magrittr`. En fait, ce package propose plusieurs opérateurs «&nbsp;pipes&nbsp;», mais je présente ici seulement l'opérateur principal, le «&nbsp;forward-pipe operator&nbsp;» `%>%`.   
+```{r}
+library(magrittr)
+```
 
 Pour résumer le fonctionnement de cet opérateur, voici comment il transforme quelques appels de fonction :
 
@@ -330,18 +351,16 @@ paste0(gsub(pattern = "example", replacement = "exemple", x = text), ".")
 Cette instruction est un peu difficile à lire en raison de l'appel à la fonction `gsub` imbriqué dans un appel à la fonction `paste0`. Nous pourrions la réécrire comme suit avec l'opérateur `%>%` :
 
 ```{r}
-library(magrittr)
 text %>%
   gsub(pattern = "example", replacement = "exemple", x = .) %>%
   paste0(., ".")
 ```
 
 
-**Références** pour plus d'information sur l'opérateur `%>%` et les autres opérateurs de du package `magrittr` :
+**Références** pour obtenir plus d'informations sur l'opérateur `%>%` et les autres opérateurs de du package `magrittr` :
 
-- https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html
-- https://github.com/tidyverse/magrittr
-- https://www.datacamp.com/community/tutorials/pipe-r-tutorial
+- https://magrittr.tidyverse.org/articles/magrittr.html [@magrittr_vignette]
+- https://www.datacamp.com/community/tutorials/pipe-r-tutorial [@pipe_tutorial]
 
 
 
@@ -359,9 +378,8 @@ Ainsi **créer des fonctions** pour les tâches que nous effectuons souvent est 
 
 De plus, le risque d'erreur est moins grand lors de l'appel d'une fonction que lors de la modification manuellement d'un bout de code copié/collé. 
 
-La création de fonctions est la principale façon en R d'appliquer le principe de programmation informatique DRY (*Don't Repeat Yourself*)[^8]. Lorsque nous appliquons ce principe de ne pas répéter inutilement des bouts de codes, les mises à jour de programmes R sont beaucoup plus rapides à réaliser.
+La création de fonctions est la principale façon en R d'appliquer le [principe de programmation informatique DRY (pour *Don't Repeat Yourself*)](http://fr.wikipedia.org/wiki/Ne_vous_r%C3%A9p%C3%A9tez_pas). Lorsque nous appliquons ce principe de ne pas répéter inutilement des bouts de codes, les mises à jour de programmes R sont beaucoup plus rapides à réaliser.
 
-[^8]: http://fr.wikipedia.org/wiki/Ne_vous_r%C3%A9p%C3%A9tez_pas
 
 
 ### Créer des packages
@@ -393,7 +411,7 @@ Un des derniers cours de la session sera consacré à l'optimisation du temps d'
 - Il est préférable de débuter toute session de travail en R avec un environnement de travail vide. Pour ce faire, il faut empêcher la restauration automatique d'une image de session. En fait, je suis d'avis qu'il vaut mieux ne jamais enregistrer d'images de session.
     + **Erreur évitée** : Ne pas être conscient de la présence de certains objets dans notre environnement de travail et les faire intervenir dans notre code sans s'en rendre compte, ce qui pourrait produire des résultats inattendus et difficiles à comprendre.
 
-- Ne pas utiliser la fonction `load` lorsque notre environnement de travail n'est pas vide, ou du moins être prudent lors de son utilisation.
+- Ne pas utiliser la fonction `load` lorsque notre environnement de travail n'est pas vide, ou du moins, être prudent lors de son utilisation.
     + **Erreur évitée** : Modifier un objet de l'environnement de travail en l'écrasant (sans s'en rendre compte) par un objet portant le même nom.
     
 - Ne pas utiliser la fonction `attach`, ou du moins être prudent lors de son utilisation.
@@ -415,25 +433,27 @@ par(par.defaut)
 - Ne pas utiliser `T` et `F` au lieu de `TRUE` et `FALSE`.
     + **Erreur évitée** : Posséder un objet nommé `T` ou `F` dans notre environnement de travail (R nous empêche de nommer un objet `TRUE` ou `FALSE`, mais pas `T` et `F`), et donc référer à cet objet plutôt qu'à `TRUE` ou `FALSE` lors de l'utilisation de `T` ou `F`. 
 
-\newpage
-
-# Synthèse
+# Résumé
 
 En résumé, pour adopter de bonnes pratiques en programmation R il faut :
 
-1. **tester** fréquemment son code;
-2. **utiliser de bons outils** :
+- **tester** fréquemment son code;
+- **utiliser de bons outils** :
     + version la plus à jour de R et des packages exploités,
-    + éditeur de code R ou environnement intégré de développement R,
+    + éditeur de code R ou environnement intégré de développement R (comme RStudio),
     + code des autres (le réutiliser plutôt que de le réécrire),
     + système effectuant des copies de secours,
-    + logiciel de gestion de versions pour le développement de packages;
-3. **documenter** son code;
-4. **suivre un guide de style**;
+    + logiciel de gestion de versions (comme Git) pour le développement de packages;
+- **documenter** son code;
+- **suivre un guide de style**;
     + utiliser une syntaxe uniforme,
     + adopter une convention de noms,
     + organiser intelligemment ses fichiers;
-5. **créer des fonctions** pour éviter de se répéter (et documenter ses fonctions);
-6. **créer des packages** avec les fonctions à partager;
-6. **optimiser le temps d'exécution** de son code s'il est lent.
+- **créer des fonctions** pour éviter de se répéter (et documenter ses fonctions);
+- **créer des packages** avec les fonctions à partager;
+- **optimiser le temps d'exécution** de son code s'il est trop lent.
+
+
+# Références
+
 

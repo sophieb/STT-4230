@@ -1,0 +1,486 @@
+---
+title: "Bonnes pratiques de programmation en R"
+linkTitle: "Bonnes pratiques R"
+author: "Sophie Baillargeon, Université Laval"
+date: "2020-02-16"
+weight: 1
+slug: "bonnes_pratiques_r"
+categories: ["cours_2020-02-25"]
+categories_weight: 1
+lastmodifierdisplayname : "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 4
+    highlight: tango
+  blogdown::html_page:
+    toc: yes
+    toc_depth: 4
+    highlight: tango
+bibliography: references.bib
+csl: custom.csl
+link-citations: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \renewcommand{\linethickness}{0.05em}
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  { background-color: #f8f8f8; }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#objectif-1-code-qui-produit-les-résultats-escomptés">Objectif #1 : Code qui produit les résultats escomptés</a></li>
+<li><a href="#objectif-2-code-facile-à-maintenir">Objectif #2 : Code facile à maintenir</a><ul>
+<li><a href="#code-facile-à-écrire">Code facile à écrire</a></li>
+<li><a href="#code-facile-à-comprendre">Code facile à comprendre</a><ul>
+<li><a href="#documentation">Documentation</a></li>
+<li><a href="#guide-de-style">Guide de style</a><ul>
+<li><a href="#retours-à-la-ligne-et-indentations">Retours à la ligne et indentations</a></li>
+<li><a href="#opérateur-dassignation">Opérateur d’assignation</a></li>
+<li><a href="#conventions-de-noms">Conventions de noms</a></li>
+<li><a href="#organisation-du-code">Organisation du code</a></li>
+<li><a href="#opérateur-pipe">Opérateur « <em>pipe</em> »</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#code-facile-à-réutiliser">Code facile à réutiliser</a><ul>
+<li><a href="#créer-des-fonctions">Créer des fonctions</a></li>
+<li><a href="#créer-des-packages">Créer des packages</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#objectif-3-code-qui-roule-suffisamment-rapidement">Objectif #3 : Code qui roule suffisamment rapidement</a></li>
+<li><a href="#quelques-bonnes-habitudes-de-travail-spécifiques-à-r">Quelques bonnes habitudes de travail spécifiques à R</a></li>
+<li><a href="#résumé">Résumé</a></li>
+<li><a href="#références">Références</a></li>
+</ul>
+</div>
+
+<hr />
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Peu importe le langage informatique, employer de <strong>bonnes pratiques</strong> de programmation signifie respecter certaines <strong>normes</strong> afin de créer du <strong>bon code</strong>.</p>
+<p>Qu’est-ce que du bon code ? Un bon code est un code qui <strong>produit les résultats escomptés</strong>, <strong>est facile à maintenir</strong> et <strong>roule suffisamment rapidement</strong>.</p>
+<p>Dans quels buts adoptons-nous de bonnes pratiques? Afin que notre code soit <strong>réellement utilisé</strong> et que n’importe qui (en particulier soi-même dans le futur) soit capable de comprendre <strong>ce que le code fait</strong> et <strong>comment s’en servir</strong>.</p>
+<p>À long terme, les bonnes pratiques apportent une <strong>augmentation de notre productivité</strong> <span class="citation">[<a href="#ref-nice_code" role="doc-biblioref">1</a>]</span> en évitant les répétitions inutiles.</p>
+<!--
+Les trois critères sont décrits dans les sections suivantes. Des outils aidant à respecter ces critères sont présentés. De bonnes habitudes de travail spécifiques à R sont proposées ici et là.
+-->
+</div>
+<div id="objectif-1-code-qui-produit-les-résultats-escomptés" class="section level1">
+<h1>Objectif #1 : Code qui produit les résultats escomptés</h1>
+<p>La priorité lors du développement de tout code informatique est certainement l’écriture d’un code qui réalise bien ce qu’il doit réaliser. Donc, un bon code doit produire les bons résultats. Pour y arriver, le code doit d’abord être fonctionnel, c’est-à-dire ne pas contenir de bogues.</p>
+<p>Pour s’assurer d’écrire du code qui fonctionne correctement, il faut simplement le <strong>tester</strong>. Il vaut mieux tester fréquemment, à chaque petit ajout, plutôt que de produire beaucoup de code avant de le tester. Ainsi, il y a beaucoup moins de débogage à faire. Un courant de pensée en informatique prône même l’écriture des tests avant l’écriture du code (le <a href="https://fr.wikipedia.org/wiki/Test_driven_development"><em>test driven development</em></a>).</p>
+<p>En R, il est facile de tester interactivement son code dans la console. Cependant, une meilleure pratique est de formaliser ses tests afin de pouvoir facilement les faire rouler de nouveau lors de modifications futures apportées au code. Nous verrons dans un prochain cours comment écrire des tests unitaires en R.</p>
+</div>
+<div id="objectif-2-code-facile-à-maintenir" class="section level1">
+<h1>Objectif #2 : Code facile à maintenir</h1>
+<p>Maintenir un code informatique signifie de s’assurer qu’il continue de fonctionner correctement dans le futur, malgré les modifications qui lui sont apportées. Un code utilisé fréquemment est un code appelé à être mis à jour, soit pour y ajouter des fonctionnalités ou pour corriger des bogues non détectés par les tests, mais découverts par des utilisateurs.</p>
+<p>Reprendre un code écrit par quelqu’un d’autre, ou écrit par nous-mêmes quelques mois auparavant, n’est pas toujours une tâche facile. Cependant, s’il s’agit d’un bon code, il ne devrait pas être trop difficile à comprendre et à modifier.</p>
+<p>Les sous-sections suivantes présentent des conseils pour faciliter la maintenance de code R en simplifiant son <strong>écriture</strong>, sa <strong>compréhension</strong> et sa <strong>réutilisation</strong>.</p>
+<div id="code-facile-à-écrire" class="section level2">
+<h2>Code facile à écrire</h2>
+<p>L’écriture de code R est facilitée par l’utilisation de <strong>bons outils</strong>.</p>
+<p>Premièrement, il vaut mieux s’assurer de travailler avec la <strong>dernière version</strong> de R et des packages dont nous avons besoin. Ainsi, nous risquons moins de rencontrer des bogues et nous pouvons profiter des dernières fonctionnalités. De plus, utiliser un <strong>éditeur</strong> de code R ou même un environnement intégré de développement, tel que RStudio, facilite le travail.</p>
+<p>Avant de se lancer dans l’écriture d’un bout de code R, il est cependant recommandé de vérifier si un code réalisant ce que nous voulons faire a déjà été écrit. R est un logiciel libre, la <strong>réutilisation du code des autres</strong> est permise et même encouragée (tant que nous citons nos sources). Nous perdrions notre temps à reprogrammer quelque chose qui existe déjà, à moins que l’implantation existante ne nous convienne pas.</p>
+<p>Finalement, il est primordial de s’assurer de ne pas perdre par accident le code que nous écrivons. Un pépin informatique est si vite arrivé. Comme pour tout travail effectué à l’ordinateur, il est recommandé de faire des copies de secours (<strong>backups</strong>) de nos fichiers de code R. Nous pouvons simplement utiliser pour ce faire un outil de backups instantanés (avec une connexion internet) tel que <a href="https://www.dropbox.com">Dropbox</a>, <a href="https://www.google.com/drive/">Google Drive</a>, <a href="https://onedrive.live.com">OneDrive</a> ou autre.</p>
+<p>Pour ceux qui développent du code R destiné à être intégré à un système en production, ou encore qui développent des packages R (donc du logiciel), l’utilisation d’un <a href="https://fr.wikipedia.org/wiki/Gestion_de_versions"><strong>logiciel de gestion de versions</strong></a> tel que <a href="https://git-scm.com/">Git</a> ou <a href="https://subversion.apache.org/">Subversion</a> est encore plus approprié et même presque essentiel.</p>
+<p><strong>Références</strong> pour obtenir plus d’informations sur l’utilisation de Git (et GitHub) avec RStudio :</p>
+<ul>
+<li><a href="https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN" class="uri">https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN</a> <span class="citation">[<a href="#ref-vc_with_RStudio" role="doc-biblioref">2</a>]</span></li>
+<li><a href="https://happygitwithr.com/" class="uri">https://happygitwithr.com/</a> <span class="citation">[<a href="#ref-git_with_RStudio" role="doc-biblioref">3</a>]</span></li>
+</ul>
+</div>
+<div id="code-facile-à-comprendre" class="section level2">
+<h2>Code facile à comprendre</h2>
+<p>Un code facile à comprendre est <strong>clair</strong> et <strong>se lit bien</strong> (presque comme du texte). Il comporte souvent des instructions qui parlent d’elles-mêmes. Ces instructions sont typiquement succinctes, car une instruction trop longue effectue souvent plusieurs tâches difficilement discernables. Si la lecture d’une instruction ne permet pas à un programmeur initié dans le langage informatique employé de comprendre ce qu’elle réalise, il est alors recommandé d’insérer un <strong>commentaire</strong> dans le code pour expliquer à quoi sert l’instruction.</p>
+<div id="documentation" class="section level3">
+<h3>Documentation</h3>
+<p>En plus de commentaires pour expliquer certaines instructions, tout fichier de code R devrait comporter un <strong>entête</strong> pour informer de ce qu’il contient, qui l’a rédigé et quand il a été créé.</p>
+<p>Toute <strong>fonction</strong> créée devrait aussi être documentée afin de comprendre dans le futur ce qu’elle fait. Une documentation de fonction devrait comprendre minimalement une description de :</p>
+<ul>
+<li>ce que fait la fonction,</li>
+<li>les arguments acceptés en entrée,</li>
+<li>les résultats produits (sortie, graphique, écriture dans un fichier, etc.).</li>
+</ul>
+<p>Au besoin, un <strong>guide d’utilisation</strong> du code peut aussi être rédigé.</p>
+</div>
+<div id="guide-de-style" class="section level3">
+<h3>Guide de style</h3>
+<p>Un guide de style énonce des normes pour :</p>
+<ul>
+<li>la syntaxe :
+<ul>
+<li>espacements, indentations, opérateur d’assignation, etc.;</li>
+</ul></li>
+<li>la façon de nommer les objets et fichiers;</li>
+<li>l’organisation du code :
+<ul>
+<li>insertion de commentaires, ordre des éléments dans un programme, répartition du code entre plusieurs fichiers, etc.;</li>
+</ul></li>
+<li>etc.</li>
+</ul>
+<p>Une syntaxe uniforme rend un code beaucoup plus facile à lire.</p>
+<p>Voici quelques exemples de guides de style R :</p>
+<ul>
+<li>Original Google’s R style guide : <a href="http://web.stanford.edu/class/cs109l/unrestricted/resources/google-style.html" class="uri">http://web.stanford.edu/class/cs109l/unrestricted/resources/google-style.html</a> <span class="citation">[<a href="#ref-Google_style_guide" role="doc-biblioref">4</a>]</span></li>
+<li>The <code>tidyverse</code> style guide : <a href="https://style.tidyverse.org/" class="uri">https://style.tidyverse.org/</a> <span class="citation">[<a href="#ref-tidyverse_style_guide" role="doc-biblioref">5</a>]</span></li>
+</ul>
+<p>Note : Le guide de style actuel de Google se base maintenant sur celui du <code>tidyverse</code> <a href="https://google.github.io/styleguide/Rguide.xml" class="uri">https://google.github.io/styleguide/Rguide.xml</a>.</p>
+<p>Il est possible de modifier rapidement la mise en forme d’un bout de code R avec la fonction <code>tidy_source</code> du <a href="https://yihui.org/formatr/">package <code>formatR</code></a> ou en RStudio par le menu « Code &gt; Reformat Code ». Ces outils de modification de mise en forme appliquent plusieurs des règles énoncées dans les guides de style.</p>
+<div id="retours-à-la-ligne-et-indentations" class="section level4">
+<h4>Retours à la ligne et indentations</h4>
+
+<p>Une façon simple de rendre son code plus lisible est d’y insérer des retours à la ligne et des indentations appropriées. Par exemple, supposons que nous avons la chaîne de caractères suivante :</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">text &lt;-<span class="st"> &quot;Ceci est un example&quot;</span></a></code></pre></div>
+<p>et que nous souhaitons corriger deux fautes dans cette phrase : le mot example écrit en anglais plutôt qu’en
+français et le point manquant à la fin de la phrase. Voici une instruction R pour réaliser cette tâche.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">paste0</span>(<span class="kw">gsub</span>(<span class="dt">pattern =</span> <span class="st">&quot;example&quot;</span>, <span class="dt">replacement =</span> <span class="st">&quot;exemple&quot;</span>, <span class="dt">x =</span> text), <span class="st">&quot;.&quot;</span>)</a></code></pre></div>
+<p>Cette instruction comporte un appel de fonction imbriqué dans un autre. Elle serait plus facile à lire comme suit :</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw">paste0</span>(<span class="kw">gsub</span>(<span class="dt">pattern =</span> <span class="st">&quot;example&quot;</span>, </a>
+<a class="sourceLine" id="cb3-2" title="2">            <span class="dt">replacement =</span> <span class="st">&quot;exemple&quot;</span>, </a>
+<a class="sourceLine" id="cb3-3" title="3">            <span class="dt">x =</span> text), </a>
+<a class="sourceLine" id="cb3-4" title="4">       <span class="st">&quot;.&quot;</span>)</a></code></pre></div>
+<p>ou encore comme ça :</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw">paste0</span>(</a>
+<a class="sourceLine" id="cb4-2" title="2">  <span class="kw">gsub</span>(</a>
+<a class="sourceLine" id="cb4-3" title="3">    <span class="dt">pattern =</span> <span class="st">&quot;example&quot;</span>, </a>
+<a class="sourceLine" id="cb4-4" title="4">    <span class="dt">replacement =</span> <span class="st">&quot;exemple&quot;</span>, </a>
+<a class="sourceLine" id="cb4-5" title="5">    <span class="dt">x =</span> text</a>
+<a class="sourceLine" id="cb4-6" title="6">  ),</a>
+<a class="sourceLine" id="cb4-7" title="7">  <span class="st">&quot;.&quot;</span></a>
+<a class="sourceLine" id="cb4-8" title="8">)</a></code></pre></div>
+</div>
+<div id="opérateur-dassignation" class="section level4">
+<h4>Opérateur d’assignation</h4>
+
+<p>Voici quelques différences <span class="citation">[<a href="#ref-R_inferno" role="doc-biblioref">6</a>–<a href="#ref-assignment" role="doc-biblioref">8</a>]</span> entre les opérateurs d’assignation <code>&lt;-</code> et <code>=</code>.</p>
+<div id="passage-de-valeurs-à-des-arguments-dans-des-appels-de-fonction" class="section level5">
+<h5>Passage de valeurs à des arguments dans des appels de fonction :</h5>
+
+<p>Pour passer des valeurs d’arguments dans un appel de fonction, l’opérateur d’assignation <code>=</code> est nettement préférable, car il ne crée pas d’objets dans l’environnement de travail, contrairement à <code>&lt;-</code>. Par exemple, supposons que nous travaillons à partir d’un environnement de travail vide.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">ls</span>()</a></code></pre></div>
+<pre><code>## character(0)</code></pre>
+<p>Soumettons la commande suivante.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">mean</span>(<span class="dt">x =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>)</a></code></pre></div>
+<pre><code>## [1] 3</code></pre>
+<p>La commande a retourné le résultat escompté, sans modifier l’environnement de travail.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">ls</span>()</a></code></pre></div>
+<pre><code>## character(0)</code></pre>
+<p>Tentons d’utiliser l’opérateur <code>&lt;-</code> pour passer la valeur de l’argument <code>x</code>.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">mean</span>(x &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">5</span>)</a></code></pre></div>
+<pre><code>## [1] 3</code></pre>
+<p>Que s’est-il passé?</p>
+<p>Le bon résultat a été retourné par la commande. Cependant, un objet nommé <code>x</code> a été créé dans l’environnement de travail.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="kw">ls</span>()</a></code></pre></div>
+<pre><code>## [1] &quot;x&quot;</code></pre>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1">x</a></code></pre></div>
+<pre><code>## [1] 1 2 3 4 5</code></pre>
+<p><strong>Conclusion</strong> : Utiliser <code>&lt;-</code> pour passer des valeurs aux arguments dans des appels de fonctions n’est pas recommandé. Cette pratique a pour conséquence de polluer l’environnement de travail.</p>
+</div>
+<div id="assignation-dune-valeur-à-un-nom-création-ou-modification-dobjets" class="section level5">
+<h5>Assignation d’une valeur à un nom (création ou modification d’objets) :</h5>
+
+<p>Maintenant, pour assigner des valeurs à des noms et ainsi créer ou modifier des objets R, est-ce qu’il y a une différence entre l’utilisation de <code>&lt;-</code> et de <code>=</code> ?</p>
+<p>Dans la majorité des situations, les deux opérateurs produiront exactement le même résultat. Cependant, l’inclusion d’une assignation avec l’opérateur <code>=</code> dans une expression passée en argument à une fonction produira presque toujours une erreur.</p>
+<p>Par exemple, la fonction <code>system.time</code> est très utile pour évaluer le temps pris pour évaluer une expression R. Considérons par exemple la commande suivante.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1">res &lt;-<span class="st"> </span><span class="kw">apply</span>(<span class="dt">X =</span> <span class="kw">matrix</span>(<span class="dv">1</span>, <span class="dt">nrow =</span> <span class="dv">10000</span>, <span class="dt">ncol =</span> <span class="dv">1000</span>), <span class="dt">MARGIN =</span> <span class="dv">1</span>, <span class="dt">FUN =</span> median)</a></code></pre></div>
+<p>Nous pouvons facilement évaluer son temps d’exécution en encadrant l’expression d’un appel à la fonction <code>system.time</code> comme suit.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1"><span class="kw">system.time</span>(res &lt;-<span class="st"> </span><span class="kw">apply</span>(<span class="dt">X =</span> <span class="kw">matrix</span>(<span class="dv">1</span>, <span class="dt">nrow =</span> <span class="dv">10000</span>, <span class="dt">ncol =</span> <span class="dv">1000</span>), <span class="dt">MARGIN =</span> <span class="dv">1</span>, <span class="dt">FUN =</span> median))</a></code></pre></div>
+<pre><code>##    user  system elapsed 
+##    0.62    0.05    0.74</code></pre>
+<p>Cependant, si dans cette expression l’opérateur d’assignation <code>=</code> avait été utilisé, nous aurions obtenu une erreur.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1"><span class="kw">system.time</span>(<span class="dt">res =</span> <span class="kw">apply</span>(<span class="dt">X =</span> <span class="kw">matrix</span>(<span class="dv">1</span>, <span class="dt">nrow =</span> <span class="dv">10000</span>, <span class="dt">ncol =</span> <span class="dv">1000</span>), <span class="dt">MARGIN =</span> <span class="dv">1</span>, <span class="dt">FUN =</span> median))</a></code></pre></div>
+<pre><code>## Error: in system.time(res = apply(X = matrix(1, nrow = 10000, ncol = 1000),  : 
+##   unused argument (res = apply(X = matrix(1, nrow = 10000, ncol = 1000), MARGIN = 1, FUN = median))</code></pre>
+<p>Cette erreur est générée parce que R croit que nous tentons de passer un argument nommé <code>res</code> à la fonction <code>system.time</code> alors qu’elle n’accepte pas d’argument portant ce nom.</p>
+<p><strong>Résumé</strong> : Toute erreur est évitée en utilisant</p>
+<ul>
+<li><code>&lt;-</code> (ou <code>-&gt;</code>) pour l’assignation d’une valeur à un nom (création ou modification d’objets),</li>
+<li><code>=</code> pour passer des valeurs à des arguments dans un appel de fonction.</li>
+</ul>
+</div>
+</div>
+<div id="conventions-de-noms" class="section level4">
+<h4>Conventions de noms</h4>
+
+<p>Les noms des fonctions dans les packages de base de R ne suivent pas une unique convention pour les noms <span class="citation">[<a href="#ref-R_Journal" role="doc-biblioref">9</a>]</span>. Voici, par exemple, quelques conventions retrouvées en R :</p>
+<ul>
+<li>tout en minuscules (p. ex. <code>typeof</code>, <code>colnames</code>);</li>
+<li>mots séparés par un point (p.ex. <code>data.frame</code>, <code>read.table</code>);</li>
+<li>mots séparés par un tiret bas (p.ex. <code>seq_along</code>), souvent appelé <em>snake case</em> en anglais;</li>
+<li>premières lettres des mots en majuscule, sauf pour le premier mot<br />
+(p.ex. <code>colMeans</code>, <code>rowSums</code>), souvent appelé <em>camel case</em> en anglais;</li>
+<li>etc.</li>
+</ul>
+<p>Une bonne pratique est de <strong>choisir une convention de noms et de la respecter</strong>.</p>
+<p>Conseil : Il est préférable d’<strong>éviter les accents</strong> dans les instructions R, donc dans les noms d’objets (ou de sous-objets tels que les colonnes d’un data frame) afin d’éviter des problèmes lors du partage de code ou d’objets R entre des utilisateurs qui ne travaillent pas sous le même système d’exploitation.</p>
+</div>
+<div id="organisation-du-code" class="section level4">
+<h4>Organisation du code</h4>
+
+<p>Un long code R a avantage a être séparé en plusieurs fichiers, par exemple un pour les fonctions et un autre pour les instructions à soumettre interactivement dans la console, ou encore un fichier par section du code. De plus, un code R dépend souvent d’autres fichiers, par exemple des fichiers de données à importer. Comment organiser intelligemment tous ces fichiers ? Il est recommandé <span class="citation">[<a href="#ref-workflow" role="doc-biblioref">10</a>]</span> de créer des sous-dossiers regroupant les fichiers de même type, par exemple un sous-dossier pour les données, un autre pour les résultats, un pour les scripts R, etc.</p>
+<p>Chaque fichier devrait avoir un nom judicieusement choisi <span class="citation">[<a href="#ref-file_names" role="doc-biblioref">11</a>]</span>. Il devrait idéalement être :</p>
+<ul>
+<li>significatif : bien décrire ce qu’il contient;</li>
+<li>facile à traiter dans un programme informatique : ne pas contenir d’espaces, ni d’accents;</li>
+<li>bien adapté à l’ordonnancement par défaut dans les explorateurs de fichiers : date sous le format année-mois-jour, débuter par un nombre pour forcer un ordre (en s’assurant que les nombres ont tous la même quantité de caractères, en complétant à gauche par des zéros les plus petits nombres).</li>
+</ul>
+<p>Les projets RStudio, déjà mentionnés dans les <a href="https://stt4230.rbind.io/manipulation_donnees/lecture_ecriture_r/#projets-rstudio">notes sur la lecture et l’écriture dans des fichiers externes à partir de R</a>, sont parfaits pour rassembler au même endroit tous les fichiers relatifs à du code R et pour faciliter le travail sur plusieurs projets simultanément en gérant le passage d’un répertoire de travail à un autre.</p>
+</div>
+<div id="opérateur-pipe" class="section level4">
+<h4>Opérateur « <em>pipe</em> »</h4>
+
+<p>Le <a href="https://style.tidyverse.org/pipes.html">guide de style du <code>tidyverse</code></a> recommande l’utilisation d’un opérateur appelé « <em>pipe</em> », en faisant référence à la signification « tuyaux ». Cet opérateur offre une nouvelle façon d’enchaîner des instructions et de passer des arguments à des fonctions. Il est offert dans le <a href="https://magrittr.tidyverse.org">package <code>magrittr</code></a>. En fait, ce package propose plusieurs opérateurs <em>pipes</em>, mais je présente ici seulement l’opérateur principal, le « <em>forward-pipe operator</em> » <code>%&gt;%</code>.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" title="1"><span class="kw">library</span>(magrittr)</a></code></pre></div>
+<p>Pour résumer le fonctionnement de cet opérateur, voici comment il transforme quelques appels de fonction :</p>
+<ul>
+<li><code>f(x)</code> devient <code>x %&gt;% f</code>,</li>
+<li><code>f(x, y)</code> devient <code>x %&gt;% f(y)</code>,</li>
+<li><code>h(g(f(x)))</code> devient <code>x %&gt;% f %&gt;% g %&gt;% h</code>.</li>
+</ul>
+<p>Les auteurs du <code>tidyverse</code> considèrent que cet opérateur permet d’écrire du <strong>code R plus clair</strong>. En lisant de gauche à droite l’instruction <code>h(g(f(x)))</code>, nous voyons d’abord l’appel à la fonction <code>h</code>, puis l’appel à la fonction <code>g</code> et finalement l’appel à la fonction <code>f</code>. Pourtant, pour évaluer cette instruction, R va d’abord :</p>
+<ul>
+<li>évaluer <code>f(x)</code>,</li>
+<li>puis il passera le résultat obtenu à la fonction <code>g</code> et évaluera le résultat,</li>
+<li>qui sera passé à la fonction <code>h</code> et le résultat final sera retourné.</li>
+</ul>
+<p>Ainsi, l’évaluation de l’instruction se réalise dans l’ordre inverse de sa lecture (à condition de lire de gauche à droite).</p>
+<p>Si nous voulions écrire un code qui reflète bien l’ordre des évaluations, nous pourrions écrire :</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" title="1">res1 &lt;-<span class="st"> </span><span class="kw">f</span>(x)</a>
+<a class="sourceLine" id="cb23-2" title="2">res2 &lt;-<span class="st"> </span><span class="kw">g</span>(res1)</a>
+<a class="sourceLine" id="cb23-3" title="3"><span class="kw">h</span>(res2)</a></code></pre></div>
+<p>Mais ce code a le défaut de créer des objets que nous ne souhaitons pas nécessairement conserver. L’opérateur <code>%&gt;%</code> n’a pas ce défaut! <strong>Une instruction écrite en utilisant l’opérateur <code>%&gt;%</code> permet de suivre l’ordre des évaluations</strong>, sans créer inutilement d’objets dans l’environnement de travail.</p>
+<p>Pour encore plus de clarté, certains étendent sur plusieurs lignes une instruction contenant plus d’un opérateur <code>%&gt;%</code> comme suit :</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" title="1">x <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb24-2" title="2"><span class="st">  </span>f <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb24-3" title="3"><span class="st">  </span>g <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb24-4" title="4"><span class="st">  </span>h</a></code></pre></div>
+<p>Si l’argument que nous souhaitons passer avec l’opérateur <code>%&gt;%</code> n’est pas celui en première position, il faut utiliser un <code>.</code> comme suit :</p>
+<ul>
+<li><code>f(y, x)</code> devient <code>x %&gt;% f(y, .)</code>,</li>
+<li><code>f(y, z = x)</code> devient <code>x %&gt;% f(y, z = .)</code>.</li>
+</ul>
+<p>Reprenons un exemple précédent pour illustrer l’utilisation de l’opérateur <code>%&gt;%</code>. Supposons que nous avons la chaîne de caractères suivante :</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" title="1">text &lt;-<span class="st"> &quot;Ceci est un example&quot;</span></a></code></pre></div>
+<p>et que nous souhaitons la corriger avec l’instruction suivante :</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" title="1"><span class="kw">paste0</span>(<span class="kw">gsub</span>(<span class="dt">pattern =</span> <span class="st">&quot;example&quot;</span>, <span class="dt">replacement =</span> <span class="st">&quot;exemple&quot;</span>, <span class="dt">x =</span> text), <span class="st">&quot;.&quot;</span>)</a></code></pre></div>
+<pre><code>## [1] &quot;Ceci est un exemple.&quot;</code></pre>
+<p>Cette instruction est un peu difficile à lire en raison de l’appel à la fonction <code>gsub</code> imbriqué dans un appel à la fonction <code>paste0</code>. Nous pourrions la réécrire comme suit avec l’opérateur <code>%&gt;%</code> :</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" title="1">text <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb28-2" title="2"><span class="st">  </span><span class="kw">gsub</span>(<span class="dt">pattern =</span> <span class="st">&quot;example&quot;</span>, <span class="dt">replacement =</span> <span class="st">&quot;exemple&quot;</span>, <span class="dt">x =</span> .) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb28-3" title="3"><span class="st">  </span><span class="kw">paste0</span>(., <span class="st">&quot;.&quot;</span>)</a></code></pre></div>
+<pre><code>## [1] &quot;Ceci est un exemple.&quot;</code></pre>
+<p><strong>Références</strong> pour obtenir plus d’informations sur l’opérateur <code>%&gt;%</code> et les autres opérateurs de du package <code>magrittr</code> :</p>
+<ul>
+<li><a href="https://magrittr.tidyverse.org/articles/magrittr.html" class="uri">https://magrittr.tidyverse.org/articles/magrittr.html</a> <span class="citation">[<a href="#ref-magrittr_vignette" role="doc-biblioref">12</a>]</span></li>
+<li><a href="https://www.datacamp.com/community/tutorials/pipe-r-tutorial" class="uri">https://www.datacamp.com/community/tutorials/pipe-r-tutorial</a> <span class="citation">[<a href="#ref-pipe_tutorial" role="doc-biblioref">13</a>]</span></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="code-facile-à-réutiliser" class="section level2">
+<h2>Code facile à réutiliser</h2>
+<p>Un code facile à comprendre est aussi plus facile à réutiliser. Mais l’ultime façon de faciliter la réutilisation d’un code est d’en faire des fonctions. Et pour partager ces fonctions, rien de mieux qu’un package.</p>
+<div id="créer-des-fonctions" class="section level3">
+<h3>Créer des fonctions</h3>
+<p>Pour réutiliser un bout de code, nous pouvons le copier/coller, puis le modifier un peu pour l’adapter à la nouvelle tâche à réaliser (par exemple utiliser un nouveau jeu de données, ajuster un modèle un peu différent, etc.). Cette façon de procéder fait souvent très bien l’affaire.</p>
+<p>Cependant, si nous nous retrouvons à copier/coller souvent le même bout de code, c’est le signe que nous aurions avantage à créer une fonction à partir de ce code. Créer la fonction prend un certain temps, mais cet investissement en temps finit par faire sauver du temps si nous utilisons souvent la fonction.</p>
+<p>Ainsi <strong>créer des fonctions</strong> pour les tâches que nous effectuons souvent est une bonne pratique de programmation. Cette pratique rend le code plus facilement réutilisable.</p>
+<p>De plus, le risque d’erreur est moins grand lors de l’appel d’une fonction que lors de la modification manuellement d’un bout de code copié/collé.</p>
+<p>La création de fonctions est la principale façon en R d’appliquer le <a href="http://fr.wikipedia.org/wiki/Ne_vous_r%C3%A9p%C3%A9tez_pas">principe de programmation informatique DRY (pour <em>Don’t Repeat Yourself</em>)</a>. Lorsque nous appliquons ce principe de ne pas répéter inutilement des bouts de codes, les mises à jour de programmes R sont beaucoup plus rapides à réaliser.</p>
+</div>
+<div id="créer-des-packages" class="section level3">
+<h3>Créer des packages</h3>
+<p>Un package permet de regrouper des fonctions R et de les documenter dans un format uniforme. Ensuite, le package peut être facilement partagé avec nos collègues, ou même offert à tous sur le web. Nous reparlerons des avantages des packages et verrons comment en créer dans un prochain cours.</p>
+</div>
+</div>
+</div>
+<div id="objectif-3-code-qui-roule-suffisamment-rapidement" class="section level1">
+<h1>Objectif #3 : Code qui roule suffisamment rapidement</h1>
+<p>Après nous être assurés que notre code fonctionne correctement et qu’il est facilement maintenable, nous pouvons nous préoccuper de son temps d’exécution. Il ne s’agit pas du critère le plus important pour définir ce qu’est du bon code, mais c’est tout de même un critère à ne pas négliger, car un code trop lent risque de ne pas être utilisé.</p>
+<p>Pour produire du code qui roule vite, il faut :</p>
+<ul>
+<li>mettre en pratique quelques trucs simples,</li>
+<li><strong>comparer le temps d’exécution</strong> de différentes façons de programmer une tâche,</li>
+<li>parfois faire du calcul en parallèle,</li>
+<li>parfois programmer des bouts de code dans un autre langage.</li>
+</ul>
+<p>Un des derniers cours de la session sera consacré à l’optimisation du temps d’exécution de programmes R.</p>
+</div>
+<div id="quelques-bonnes-habitudes-de-travail-spécifiques-à-r" class="section level1">
+<h1>Quelques bonnes habitudes de travail spécifiques à R</h1>
+<ul>
+<li>Rédiger son code dans un programme (script) R, et enregistrer ce programme fréquemment.
+<ul>
+<li><strong>Erreur évitée</strong> : Perdre la trace de certaines instructions importantes parce qu’elles ont été écrites directement dans la console.</li>
+</ul></li>
+<li>Il est préférable de débuter toute session de travail en R avec un environnement de travail vide. Pour ce faire, il faut empêcher la restauration automatique d’une image de session. En fait, je suis d’avis qu’il vaut mieux ne jamais enregistrer d’images de session.
+<ul>
+<li><strong>Erreur évitée</strong> : Ne pas être conscient de la présence de certains objets dans notre environnement de travail et les faire intervenir dans notre code sans s’en rendre compte, ce qui pourrait produire des résultats inattendus et difficiles à comprendre.</li>
+</ul></li>
+<li>Ne pas utiliser la fonction <code>load</code> lorsque notre environnement de travail n’est pas vide, ou du moins, être prudent lors de son utilisation.
+<ul>
+<li><strong>Erreur évitée</strong> : Modifier un objet de l’environnement de travail en l’écrasant (sans s’en rendre compte) par un objet portant le même nom.</li>
+</ul></li>
+<li>Ne pas utiliser la fonction <code>attach</code>, ou du moins être prudent lors de son utilisation.
+<ul>
+<li>Nous verrons pourquoi dans un prochain cours.</li>
+</ul></li>
+<li>Avant de modifier des options ou des paramètres graphiques, garder une copie de leurs valeurs par défaut, et réactiver ces valeurs par défaut au moment opportun.
+<ul>
+<li><strong>Erreur évitée</strong> : Oublier qu’une option ou un paramètre graphique n’a plus sa valeur par défaut, qu’il a été modifié.</li>
+</ul></li>
+</ul>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" title="1"><span class="co"># Avant toute modification</span></a>
+<a class="sourceLine" id="cb30-2" title="2">options.default &lt;-<span class="st"> </span><span class="kw">options</span>()</a>
+<a class="sourceLine" id="cb30-3" title="3">par.defaut &lt;-<span class="st"> </span><span class="kw">par</span>(<span class="dt">no.readonly =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb30-4" title="4"></a>
+<a class="sourceLine" id="cb30-5" title="5"><span class="co"># Après le bout de code concerné</span></a>
+<a class="sourceLine" id="cb30-6" title="6"><span class="kw">options</span>(options.default)</a>
+<a class="sourceLine" id="cb30-7" title="7"><span class="kw">par</span>(par.defaut)</a></code></pre></div>
+<ul>
+<li>Ne pas utiliser <code>T</code> et <code>F</code> au lieu de <code>TRUE</code> et <code>FALSE</code>.
+<ul>
+<li><strong>Erreur évitée</strong> : Posséder un objet nommé <code>T</code> ou <code>F</code> dans notre environnement de travail (R nous empêche de nommer un objet <code>TRUE</code> ou <code>FALSE</code>, mais pas <code>T</code> et <code>F</code>), et donc référer à cet objet plutôt qu’à <code>TRUE</code> ou <code>FALSE</code> lors de l’utilisation de <code>T</code> ou <code>F</code>.</li>
+</ul></li>
+</ul>
+</div>
+<div id="résumé" class="section level1">
+<h1>Résumé</h1>
+<p>En résumé, pour adopter de bonnes pratiques en programmation R il faut :</p>
+<ul>
+<li><strong>tester</strong> fréquemment son code;</li>
+<li><strong>utiliser de bons outils</strong> :
+<ul>
+<li>version la plus à jour de R et des packages exploités,</li>
+<li>éditeur de code R ou environnement intégré de développement R (comme RStudio),</li>
+<li>code des autres (le réutiliser plutôt que de le réécrire),</li>
+<li>système effectuant des copies de secours,</li>
+<li>logiciel de gestion de versions (comme Git) pour le développement de packages;</li>
+</ul></li>
+<li><strong>documenter</strong> son code;</li>
+<li><strong>suivre un guide de style</strong>;
+<ul>
+<li>utiliser une syntaxe uniforme,</li>
+<li>adopter une convention de noms,</li>
+<li>organiser intelligemment ses fichiers;</li>
+</ul></li>
+<li><strong>créer des fonctions</strong> pour éviter de se répéter (et documenter ses fonctions);</li>
+<li><strong>créer des packages</strong> avec les fonctions à partager;</li>
+<li><strong>optimiser le temps d’exécution</strong> de son code s’il est trop lent.</li>
+</ul>
+</div>
+<div id="références" class="section level1 unnumbered">
+<h1>Références</h1>
+<div id="refs" class="references">
+<div id="ref-nice_code">
+<p>[1] Falster, D. (2013). Billet de blogue intitulé « Why I want to write nice R code ». <a href="https://nicercode.github.io/blog/2013-04-05-why-nice-code/">https://nicercode.github.io/blog/2013-04-05-why-nice-code/</a></p>
+</div>
+<div id="ref-vc_with_RStudio">
+<p>[2] Stephens, N. (2020). Article de support utilisateur de RStudio intitulé « Version Control with Git and SVN ». <a href="https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN">https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN</a></p>
+</div>
+<div id="ref-git_with_RStudio">
+<p>[3] Bryan, J and Hester, J. (2019). Livre web intitulé « Happy Git and GitHub for the useR ». <a href="https://happygitwithr.com/">https://happygitwithr.com/</a></p>
+</div>
+<div id="ref-Google_style_guide">
+<p>[4] « Original Google’s R style guide ». <a href="http://web.stanford.edu/class/cs109l/unrestricted/resources/google-style.html">http://web.stanford.edu/class/cs109l/unrestricted/resources/google-style.html</a></p>
+</div>
+<div id="ref-tidyverse_style_guide">
+<p>[5] Wickham, H. « The tidyverse style guide ». <a href="https://style.tidyverse.org/">https://style.tidyverse.org/</a></p>
+</div>
+<div id="ref-R_inferno">
+<p>[6] Burns, P. (2011). R inferno, section 8.2.26 intitulée « = is not a synonym of &lt;- ». <a href="http://www.burns-stat.com/pages/Tutor/R_inferno.pdf">http://www.burns-stat.com/pages/Tutor/R_inferno.pdf</a></p>
+</div>
+<div id="ref-stackoverflow">
+<p>[7] Questions sur Stackoverflow intitulée « What are the differences between “=” and “&lt;-” assignment operators in R? ». <a href="http://stackoverflow.com/questions/1741820/assignment-operators-in-r-and">http://stackoverflow.com/questions/1741820/assignment-operators-in-r-and</a></p>
+</div>
+<div id="ref-assignment">
+<p>[8] Fay, C. (2018). Billet de blogue intitulé « Why do we use arrow as an assignment operator? ». <a href="https://colinfay.me/r-assignment/">https://colinfay.me/r-assignment/</a></p>
+</div>
+<div id="ref-R_Journal">
+<p>[9] Bååth, R. (2012). The State of Naming Conventions in R. <em>The R Journal</em>. <strong>4</strong> (2). <a href="https://journal.r-project.org/archive/2012-2/RJournal_2012-2_Baaaath.pdf">https://journal.r-project.org/archive/2012-2/RJournal_2012-2_Baaaath.pdf</a></p>
+</div>
+<div id="ref-workflow">
+<p>[10] Tran, A. (2018). Page web intitulée « File organization best practices ». <a href="https://andrewbtran.github.io/NICAR/2018/workflow/docs/01-workflow_intro.html">https://andrewbtran.github.io/NICAR/2018/workflow/docs/01-workflow_intro.html</a></p>
+</div>
+<div id="ref-file_names">
+<p>[11] Bryan, J. (2015). Présentation intitulée « How to name files ». <a href="https://speakerdeck.com/jennybc/how-to-name-files">https://speakerdeck.com/jennybc/how-to-name-files</a></p>
+</div>
+<div id="ref-magrittr_vignette">
+<p>[12] Bache, S M. (2014). Vignette du package magrittr intitulée « Introducing magrittr ». <a href="https://magrittr.tidyverse.org/articles/magrittr.html">https://magrittr.tidyverse.org/articles/magrittr.html</a></p>
+</div>
+<div id="ref-pipe_tutorial">
+<p>[13] Willems, K. (2017). Tutoriel web intitulé « Pipes in R Tutorial For Beginners ». <a href="https://www.datacamp.com/community/tutorials/pipe-r-tutorial">https://www.datacamp.com/community/tutorials/pipe-r-tutorial</a></p>
+</div>
+</div>
+</div>
