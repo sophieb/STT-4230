@@ -49,12 +49,12 @@ Pourquoi la commande suivante ne retourne-t-elle pas `TRUE`?
 .1 == .3/3
 ```
 
+\newpage
+
 Pourquoi le 4^e^ élément du vecteur suivant n'est-il pas `TRUE`?
 ```{r}
 seq(0,1,0.1) == .3
 ```
-
-\newpage
 
 Pourquoi la longueur de cet objet n'est-elle pas 1?
 ```{r}
@@ -101,9 +101,64 @@ Il semble donc que `table` (ainsi que `xtabs` et `ftable`) et `factor` (ou `as.f
 
 #### Conseils :
 
+\mbox{}
+
 Lors de comparaison de nombres en R, il faut garder en tête que `==`, `identical` et `unique` sont affectés par les imprécisions numériques, car ils font des comparaisons exactes. Cependant, `all.equal`, `table` (ainsi que les autres fonctions de calcul de fréquences du R de base) et `factor` (ou `as.factor`) ne se préoccupent pas de différences inférieures à une certaine tolérance.
 
-Aussi, l'imprécision numérique sur des nombres décimaux implique que R n'arrive pas à garder en mémoire des nombres vraiment très petits en valeur absolue. Ces nombres sont stockés comme s'ils étaient des zéros. Lorsque nous travaillons avec de tels nombres, il est bon de les changer d'échelle afin de les éloigner de 0. Typiquement, c'est une transformation logarithmique qui est utilisée pour arriver à ça. Par exemple, en statistique, il est plus facile de travailler numériquement avec une log-vraisemblance qu’avec une [vraisemblance](https://en.wikipedia.org/wiki/Likelihood_function).
+### Petits nombres en valeur absolue
+
+Aussi, l'imprécision numérique sur des nombres décimaux implique que R n'arrive pas à garder en mémoire des nombres vraiment très petits en valeur absolue. Ces nombres sont stockés comme s'ils étaient des zéros.
+
+Par exemple, sur mon installation de R, le nombre $10^{\text{-}325}$ est ramené à 0 par R.
+
+```{r}
+print(10^(-325))
+```
+
+Le nombre $10^{\text{-}310}$ ne l'est cependant pas.
+
+```{r}
+print(10^(-310))
+```
+
+Si ces deux nombres sont divisés, nous pouvons facilement trouver à la main le résultat de la division :
+
+- $\frac{10^{\text{-}325}}{10^{\text{-}310}} = 10^{(\text{-}325 \ - \ \text{-}310)} = 10^{\text{-}15}$, ou
+- $\frac{10^{\text{-}310}}{10^{\text{-}325}} = 10^{(\text{-}310 \ - \ \text{-}325)} = 10^{15}$.
+
+Cependant, si nous demandons à R de calculer ces quotients, nous obtenons :
+
+```{r}
+10^(-325) / 10^(-310)
+```
+
+car ici R considère que le numérateur vaut 0,
+
+```{r}
+10^(-310) / 10^(-325)
+```
+
+car cette fois R considère que le dénumérateur vaut 0.
+
+\newpage
+
+#### Solution :
+
+\mbox{}
+
+Lorsque nous travaillons avec de tels nombres, il est bon de les **changer d'échelle afin de les éloigner de 0**. Typiquement, c'est une **transformation logarithmique** qui est utilisée pour arriver à ça. Par exemple, en statistique, il est plus facile de travailler numériquement avec une log-vraisemblance qu’avec une [vraisemblance](https://en.wikipedia.org/wiki/Likelihood_function), dont la valeur peut être très proche de zéro étant donné qu'il s'agit d'une fonction de densité conjointe.
+
+Pour revenir à l'exemple précédent, tentons à nouveau de calculer en R le quotient $\frac{10^{\text{-}325}}{10^{\text{-}310}}$, mais cette fois en passant par une transformation logarithmique en base 10. En raison des propriétés des logarithmes, nous savons que
+
+$$\frac{10^{\text{-}325}}{10^{\text{-}310}} = 10^{\log_{10}{ \left( \frac{10^{\text{-}325}}{10^{\text{-}310}} \right) }} = 10^{ \log_{10}{(10^{\text{-}325})} - \log_{10}{(10^{\text{-}310})}} $$
+
+Ainsi, si ce que nous conservons en mémoire est le logarithme en base 10 des nombres à manipuler, soit $\log_{10}{(10^{\text{-}325})}$ et $\log_{10}{(10^{\text{-}310})}$, que nous pouvons simplifier à $\text{-}325$ et $\text{-}310$, calculer le quotient qui nous intéresse revient à effectuer le calcul suivant :
+
+```{r}
+10^(-325 - -310)
+```
+
+qui n'est affecté par aucune imprécision numérique.
 
 ## Grands nombres en valeur absolue
 
@@ -117,43 +172,44 @@ Il faut aussi se méfier lorsque nous manipulons en R de grands nombres en valeu
 
 Le plus grand nombre entier positif représentable en R 64 bits sur mon ordinateur est 2^53. Quel est ce nombre ?
 ```{r}
-2^53
+print(2^53)
 ```
-pour le voir en notation fixe plutôt que scientifique :
+Modifions l'option de la session R relative à la notation scientifique de façon à voir le nombre en notation fixe.
 ```{r}
 options(scipen= 10)
-2^53
+print(2^53)
 ```
 Maintenant, observons un phénomène étonnant. Demandons à R d'afficher le nombre 2^53 + 1, soit 9007199254740993.
 ```{r}
-9007199254740993
+print(9007199254740993)
 ```
 R affiche plutôt le nombre 2^53, soit 9007199254740992.
 Pourtant, ceci est correct :
 ```{r}
-9007199254740994
+print(9007199254740994)
 ```
 Mais pas ceci :
 ```{r}
-9007199254740995
+print(9007199254740995)
 ```
 
-L'explication à cela est que les nombres sont stockés sur la mémoire d'un ordinateur sous forme de [bits](https://fr.wikipedia.org/wiki/Bit). Cependant, le nombre de bits pouvant être utilisé pour stocker un nombre possède une limite maximale. Si le nombre à stocker requière plus de bits pour être représenté dans son intégralité que le nombre maximum de bits utilisables, il est légèrement arrondi. 
+L'explication à ces inexactitudes est que les nombres sont stockés dans la mémoire d'un ordinateur sous forme de [bits](https://fr.wikipedia.org/wiki/Bit). Cependant, le nombre de bits pouvant être utilisé pour stocker un nombre possède une limite maximale. Si le nombre à stocker requière plus de bits pour être représenté dans son intégralité que le nombre maximum de bits utilisables, il est légèrement arrondi. 
 
-La limite dans le nombre de bits utilisables en R pour stocker un nombre dépend du [type de données](https://stt4230.rbind.io/manipulation_donnees/structures_r/#differents-types-de-donnees) utilisé pour le stocker (réel versus entier), du nombre de bits de la version de R utilisée (32 versus 64) ainsi que des spécifications de l'ordinateur utilisé. R 32 bits utilise moins de bits que R 64 bits. 
+La limite dans le nombre de bits utilisables en R pour stocker un nombre dépend du [type de données](https://stt4230.rbind.io/manipulation_donnees/structures_r/#diff%C3%A9rents-types-de-donn%C3%A9es) utilisé pour le stocker (réel versus entier), du nombre de bits de la version de R utilisée (32 versus 64) ainsi que des spécifications de l'ordinateur utilisé. R 32 bits utilise moins de bits que R 64 bits. 
 
 Notez que la plus grande valeur représentable de 2^53 sur mon installation de R 64 bits s'applique à des nombres entiers d'un point de vue mathématique, mais stockés sous le type réel en R. Le type entier ne permet pas de représenter des nombres supérieurs en valeur absolue à l'objet R `.Machine$integer.max` (= `r .Machine$integer.max` sur mon installation de R 64 bits).
 
 ```{r}
 as.integer(-2147483647)
 as.integer(-2147483647-1)
+options(scipen= 0)  # réattribution de sa valeur par défaut à l'option scipen
 ```
 
 ***
 
 # Évaluation d'expressions en R et environnements
 
-Lorsque nous soumettons des instructions dans la console, R doit chercher la valeur des objets nommés dans ces instructions. Ces objets peuvent être de n'importe quel type : des fonctions, des vecteurs, des listes, etc. La façon dont R s'y prend pour trouver les valeurs de ces objets est plutôt complexe. Je ne vais pas expliquer ce point en détail. Une excellente référence pour en apprendre plus sur le sujet est le blogue suivant :  
+Lorsque nous soumettons des instructions dans la console, R doit chercher la valeur des objets nommés dans ces instructions. Ces objets peuvent être de n'importe quel type : des fonctions, des vecteurs, des listes, etc. La façon dont R s'y prend pour trouver les valeurs de ces objets est plutôt complexe. Je ne vais pas expliquer ce point en détail. Une bonne référence pour en apprendre plus sur le sujet est le blogue suivant :  
 http://blog.obeautifulcode.com/R/How-R-Searches-And-Finds-Stuff/
 
 Je vais tout de même expliquer le principe général simplifié derrière l'évaluation d'expressions en R. À l'ouverture d'une session R, certains packages sont automatiquement chargés. Le contenu de chaque package chargé est placé dans ce qui est appelé un *environnement*. Les objets R que nous créons pendant une session R sont aussi conservés dans un environnement : l'environnement de travail (aussi appelé environnement courant ou environnement global). Lorsque R a besoin d'évaluer un objet apparaissant dans une expression soumise dans la console, il démarre une recherche de cet objet dans les environnements ouverts. La recherche débute dans l'environnement de travail. Si l'objet recherché n'est pas trouvé dans cet environnement, la recherche se poursuit dans les environnements des packages chargés, en commençant par les packages les plus récemment chargés.
@@ -171,11 +227,13 @@ Il existe quelques exceptions à cette façon de rechercher la valeur d'expressi
 Lors de l'évaluation du corps d'une fonction (code composant la fonction), des environnements s'ajoutent au début du chemin de recherche décrit ci-dessous, uniquement le temps de l'évaluation de la fonction. Tous les détails seront fournis au prochain cours.
 
 
-## Évaluation d'expressions dans une formule ou dans un appel à la fonction `subset` ou `transform`
+## Évaluation d'expressions dans une formule ou dans un appel à la fonction `subset`, `transform` ou une fonction du `tidyverse` possédant un argument `data` ou `.data`
 
 Les fonctions R prenant en entrée une formule, prennent aussi toutes en entrée un argument `data`. Si un data frame est donné à cet argument, ce data frame devient un environnement de plus, qui s'ajoute à la liste des environnements parcourus lors de la recherche de la valeur d'un objet R. Cet environnement vient en premier dans la liste, la recherche débute donc par lui. Dans une formule, les noms des colonnes de `data` deviennent donc des objets directement accessibles (plus besoin d'utiliser la syntaxe `data$nomColonne`). Il en est de même dans l'expression fournie à l'argument `subset` souvent présent dans les fonctions prenant en entrée une formule.
 
-Les fonctions `subset` et `transform`, que nous avons déjà vues, ont le même genre de comportement. Le data frame donné au premier argument devient l'environnement d'où part la recherche des valeurs associées aux noms d'objets dans les expressions fournies aux arguments suivants. Ainsi, si nous voulons par exemple extraire du jeu de données `iris` les observations de `Petal.Length` et `Petal.Width` pour lesquelles `Sepal.Width` est supérieure à 4, nous pouvons utiliser la commande
+Les fonctions [`subset`](https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#op%C3%A9rateur-et-fonction-select) et [`transform`](https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#op%C3%A9rateurs-dindi%C3%A7age-et-fonction-transform), que nous avons [déjà vues](https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/), ainsi que toutes les fonctions du `tidyverse` possédant un argument `data` ou `.data`, ont le même genre de comportement. Le data frame donné au premier argument devient l'environnement d'où part la recherche des valeurs associées aux noms d'objets dans les expressions fournies aux arguments suivants.
+
+Illustrons ce type d'évaluation avec la fonction `subset`. Supposons que nous voulons extraire du [jeu de données `iris` du package `datasets`](https://stat.ethz.ch/R-manual/R-patched/library/datasets/html/iris.html) les observations de `Petal.Length` et `Petal.Width` pour lesquelles `Sepal.Width` est supérieure à 4, nous pouvons utiliser la commande
 ```{r}
 subset(iris, subset = Sepal.Width > 4, select = c(Petal.Length, Petal.Width))
 ```
@@ -212,20 +270,26 @@ knitr::include_graphics("fig/chemin_with.png")
 ## Les fonctions `with` et `within`
 
 Les fonctions `with` et `within` permettent d'étendre la possibilité d'ajouter un data frame au début de la liste des environnements dans le chemin de recherche à n'importe quelles instructions R. Elles s'emploient avec la syntaxe suivante :  
-`with(data = nom_data_frame, exp = expression)`   
-où `expression` est une commande R, ou encore plusieurs commandes R encadrées de crochets. 
+`with(data = nom_data_frame, expr = expression)`   
+où `expression` est une commande R, ou encore plusieurs commandes R encadrées d'accolades. 
 
 Par exemple, les deux bouts de code suivants retournent le même résultat.
 ```{r eval = FALSE}
-var_catego <- cut(iris$Sepal.Length, right = FALSE,
-                  breaks = c(-Inf, quantile(iris$Sepal.Length, probs = c(1/3, 2/3)), Inf))
+var_catego <- cut(
+  x = iris$Sepal.Length, 
+  breaks = c(-Inf, quantile(iris$Sepal.Length, probs = c(1/3, 2/3)), Inf),
+  right = FALSE
+)
 table(var_catego, iris$Species)
 
 # équivalent à :
 
 with(iris, {
-  var_catego <- cut(Sepal.Length, right = FALSE,
-                    breaks = c(-Inf, quantile(Sepal.Length, probs = c(1/3, 2/3)), Inf))
+  var_catego <- cut(
+    x = Sepal.Length, 
+    breaks = c(-Inf, quantile(Sepal.Length, probs = c(1/3, 2/3)), Inf),
+    right = FALSE
+  )
   table(var_catego, Species)
 })
 ```
@@ -247,7 +311,7 @@ La fonction `within` est pour sa part une sorte d'alternative à la fonction `tr
 ```{r}
 head(women)
 women2 <- 
-  within(women, {
+  within(data = women, expr = {
     height <- height / 12
     weight2 <- weight^2
   })
@@ -285,6 +349,8 @@ Par exemple, le package `dplyr` contient des fonctions portant le même nom que 
 library(dplyr)
 ```
 
+\newpage
+
 Le chargement d'un nouveau package ajoute un environnement dans le chemin de recherche, juste en dessous de l'environnement de travail. Ainsi, la commande `library(dplyr)` a modifié le chemin suivant
 ```{r echo = FALSE, out.width = "25%"}
 knitr::include_graphics(c("fig/chemin.png", "fig/par.png", "fig/chemin_library.png"))
@@ -293,16 +359,16 @@ knitr::include_graphics(c("fig/chemin.png", "fig/par.png", "fig/chemin_library.p
 Un appel à un des noms de fonction en double, par exemple à `union`, va utiliser par défaut la fonction `union` du package `dplyr` puisque l'environnement de ce package est plus haut dans le chemin de recherche que l'environnement du package `base`.
 
 ```{r}
-union  # remarquez le nom de l'environnement de provenant de la fonction
+union  # remarquez le nom de l'environnement de provenance de la fonction
 ```
 
 Pour accéder à la fonction `union` du package `base` avec ce chemin d'accès, il faut utiliser l'opérateur `::` comme suit.
 
 ```{r}
-base::union  # remarquez le nom de l'environnement de provenant de la fonction
+base::union  # remarquez le nom de l'environnement de provenance de la fonction
 ```
 
-Notez que l'auteur du package `dplyr` a délibérément repris des noms de fonctions du R de base. Il s'agit de versions de ces fonctions qu'il juge meilleures.
+Notez que les auteurs du package `dplyr` ont délibérément repris des noms de fonctions du R de base. Il s'agit de versions de ces fonctions qu'ils jugent meilleures.
 
 Un package peut être retiré du chemin de recherche avec la fonction `detach` comme suit :
 
@@ -310,36 +376,53 @@ Un package peut être retiré du chemin de recherche avec la fonction `detach` c
 detach("package:dplyr")
 ```
 
+Notons que l'utilisation d'une fonction d'un package via l'opérateur `::` ne requière pas que ce package soit chargé dans la session R. Il a simplement besoin d'être installé pour la version de R utilisée. Ainsi, même si nous venons de retirer le package `dplyr` du chemin de recherche, nous pouvons encore accéder aux fonctions qu'il contient en utilisant l'opérateur `::`, comme le prouve cet exemple.
+
+```{r error = TRUE}
+arrange
+```
+
+\newpage
+
+```{r}
+dplyr::arrange
+```
+
 
 # Complètement automatique
 
 Ceux qui utilisent `attach`, mentionné précédemment, le font souvent pour que le code soit moins long à taper. Si c'est votre cas, vous pourriez aimer utiliser les capacités de [complètement automatique](https://fr.wikipedia.org/wiki/Compl%C3%A8tement) (en anglais *completion* ou *autocompletion*) d'un éditeur de code R. Cette fonctionnalité a justement pour but d'aider l'utilisateur à programmer plus rapidement, tout en diminuant les risques d'erreur de frappe.
 
-Par exemple, en RStudio, lorsque l'utilisateur saisit une commande dans un script R ou dans la console R, une fenêtre de complètement automatique s'ouvrent souvent automatiquement pour suggérer des suites à la commande. Par exemple, si nous tapons le nom d'un data frame suivi de `$`, la fenêtre de complètement automatique contient tous les noms des colonnes du data frame. Il suffit de sélectionner la colonne désirée avec les flèches, puis d'enfoncer la touche Enter ou Tab, pour que R s'occupe de compléter notre commande.
+Comme il a déjà été mentionné dans les notes sur [concepts de base en R](https://stt4230.rbind.io/introduction/base_r/#caract%C3%A9ristiques-de-rstudio), RStudio offre du complètement automatique. Lorsque l'utilisateur saisit une commande en RStudio, que ce soit dans la console R, dans un script R ou même dans un bloc de code R à l'intérieur du document R Markdown, une fenêtre de complètement automatique s'ouvrent souvent automatiquement pour suggérer des suites à la commande. Par exemple, si nous tapons le nom d'un data frame suivi de l'opérateur `$`, la fenêtre de complètement automatique contient tous les noms des colonnes du data frame. Il suffit de sélectionner la colonne désirée avec les flèches, puis d'enfoncer la touche Enter ou Tab, pour que R s'occupe de compléter notre commande.
 
 Les fenêtres de complètement automatique peuvent aussi être ouvertes avec la touche Tab. S'il y a seulement une possibilité de complètement, la touche Tab ne fait pas qu'ouvrir la fenêtre, elle complète aussi la commande.
 
-Plus d'informations sur les capacités de complètement automatique de R Studio peuvent être trouvées sur la page web suivante : https://support.rstudio.com/hc/en-us/articles/205273297-Code-Completion
+Plus d'informations sur les capacités de complètement automatique de RStudio peuvent être trouvées sur la page web suivante : https://support.rstudio.com/hc/en-us/articles/205273297-Code-Completion
 
 ***
 
-# Synthèse
+# Résumé
 
 
 #### Imprécision numérique
 
+\mbox{}
+
 R ne garde pas en mémoire de façon tout à fait exacte :
 
-- les nombres avec une partie décimale et 
-- les nombres entiers supérieurs à 2^53.
+- certains nombres décimaux et 
+- les nombres plus grands, en valeur absolue, qu'une certaine limite.
 
 $\longrightarrow$ Attention aux comparaison avec `==`, `identical` ou `unique` : elles sont exactes.
 
 Les comparaison avec `all.equal`, `table` et `factor` sont plus souples.
 
+$\longrightarrow$ Attention aux très petits nombres en valeur absolue : ils peuvent être ramenés à zéro par R.
 
 
 #### Évaluation d'expressions en R et environnements
+
+\mbox{}
 
 Chemin de recherche parcouru par R pour évaluer les expressions soumises dans la console :
 
@@ -347,12 +430,13 @@ Chemin de recherche parcouru par R pour évaluer les expressions soumises dans l
 knitr::include_graphics("fig/chemin.png")
 ```
 
-Groupe d'objets = environnement
+Environnement = groupe d'objets
 
 Ajouter un jeu de données **au début** du chemin de recherche :
 
 - argument `data` venant avec un argument `formula`,
 - fonctions `subset` et `transform` (déjà vues),
+- fonctions du `tidyverse` possédant un argument `data` ou `.data`,
 - fonction `with` et `within`.
 
 Ajouter un environnement provenant d'un package dans le chemin de recherche (en d'autres mots, charger un package) : `library`.
@@ -366,12 +450,12 @@ Ajouter un environnement provenant d'un package dans le chemin de recherche (en 
 
 # Références
 
-- Imprécision numérique en R : Burns, P. (2011). The R inferno, chapitre 1. URL :  
+- Imprécision numérique en R : Burns, P. (2011). The R inferno, chapitre 1.   
 http://www.burns-stat.com/pages/Tutor/R_inferno.pdf
 - Représentation en virgules flottantes:
     + http://fr.wikipedia.org/wiki/Virgule_flottante
     + https://en.wikipedia.org/wiki/Double-precision_floating-point_format
 - Évaluation d'expressions en R : http://blog.obeautifulcode.com/R/How-R-Searches-And-Finds-Stuff/
-- Environnements : Wickham, H. (2014). Advanced R. CRC Press. Chapitre 8. http://adv-r.had.co.nz/Environments.html 
-- R Core Team (2018). The R Language Definition.  
+- Environnements : Wickham, H. (2019). *Advanced R. Second Edition*. Chapman and Hall/CRC. Chapitre 7. https://adv-r.hadley.nz/environments.html 
+- R Core Team (2019). The R Language Definition.  
 https://cran.r-project.org/doc/manuals/r-release/R-lang.html
