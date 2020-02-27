@@ -431,7 +431,7 @@ Utilisons encore une fois les données `iris` pour construire un exemple de test
 
 ```{r}
 t.test(
-  Sepal.Width ~ Species,
+  formula = Sepal.Width ~ Species,
   data = iris,
   subset = Species %in% c("versicolor", "virginica")
 )
@@ -450,7 +450,7 @@ pt(q = -3.2058, df = 97.927)*2
 
 ```{r}
 wilcox.test(
-  Sepal.Width ~ Species,
+  formula = Sepal.Width ~ Species,
   data = iris, 
   subset = Species %in% c("versicolor", "virginica"), 
   exact = FALSE
@@ -475,7 +475,7 @@ Par exemple, ajustons quelques modèles sur les données des iris de Fisher.
 \mbox{}
 
 ```{r}
-reg <- lm(Sepal.Width ~ Sepal.Length, data = iris)
+reg <- lm(formula = Sepal.Width ~ Sepal.Length, data = iris)
 reg
 ```
 
@@ -484,7 +484,7 @@ reg
 \mbox{}
 
 ```{r}
-ANOVA <- aov(Sepal.Width ~ Species, data = iris)
+ANOVA <- aov(formula = Sepal.Width ~ Species, data = iris)
 ANOVA
 ```
 
@@ -521,7 +521,7 @@ Oui, c'est possible grâce à la fonction `I`. Il faut encadrer l'opération ari
 
 &nbsp;
 
-Voici quelques exemples :
+Voici quelques exemples, dans lesquels nous omettrons de nommer le premier argument, soit `formula`, pour alléger la présentation et parce qu'il est usuel de ne pas nommer ce premier argument.
 
 ##### Retrait de l'ordonnée à l'origine :
 
@@ -858,14 +858,14 @@ iris_ech_num
 Calculons les distances euclidiennes entre toutes les paires d'observations dans ce jeu de données, basées sur les 4 variables numériques.
 
 ```{r}
-dist(iris_ech_num, method = "euclidean", diag = TRUE)
+dist(x = iris_ech_num, method = "euclidean", diag = TRUE)
 ```
 
 La distance euclidienne est un cas particulier de la [distance de Minkowski](https://fr.wikipedia.org/wiki/Distance_(math%C3%A9matiques)#Exemples_de_distances_classiques), avec un paramètre $p = 2$. 
 
 
 ```{r}
-dist(iris_ech_num, method = "minkowski", p = 2, diag = TRUE)
+dist(x = iris_ech_num, method = "minkowski", p = 2, diag = TRUE)
 ```
 
 La fonction `dist` propose quelques autres distances pour variables numériques (voir la [fiche d'aide de la fonction](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/dist.html) pour la liste complète). Le package `stats` offre aussi la fonction [`mahalanobis`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mahalanobis.html) pour calculer des [distances de Mahalanobis](https://fr.wikipedia.org/wiki/Distance_de_Mahalanobis). 
@@ -878,7 +878,7 @@ La fonction `dist` propose quelques autres distances pour variables numériques 
 Pour faire le tour des fonctions de mesure de distances incluses dans l'installation R de base, mentionnons aussi la fonction [`adist`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/adist.html) du package `utils` qui calcule la [distance de Levenshtein](https://fr.wikipedia.org/wiki/Distance_de_Levenshtein) entre des chaînes de caractères, par exemple :
 
 ```{r}
-adist("Allo", "Hello")
+adist(x = "Allo", y = "Hello")
 ```
 
 La distance de Levenshtein, aussi appelée distance minimale d'édition, compte le nombre minimal d'insertions, de retraits et de substitutions à effectuer pour transformer la première chaîne de caractères en la deuxième. Il est possible d'associer un coût différent à chacune de ces opérations. Par défaut, elles ont toutes un coût de 1. La distance de Levenshtein entre `"Allo"` et `"Hello"` vaut 2 parce que pour transformer `"Allo"` en `"Hello"` il faut au minimum faire les deux opérations suivantes :
@@ -911,16 +911,16 @@ Faisons quelques exemples pour illustrer certaines de ces fonctions.
 
 L'opérateur usuel de multiplication effectue une multiplication terme à terme entre deux matrices.
 ```{r}
-A <- matrix(1:6, 3, 2)
+A <- matrix(1:6, nrow = 3, ncol = 2)
 A
-B <- matrix(6:1, 3, 2)
+B <- matrix(6:1, nrow = 3, ncol = 2)
 B
 A*B
 ```
 Pour effectuer une [multiplication matricielle](https://fr.wikipedia.org/wiki/Produit_matriciel), il faut utiliser l'opérateur `%*%`. Les dimensions des matrices doivent évidemment concorder.
 ```{r, error = TRUE}
 A%*%B
-C <- matrix(c(5,2,3,7), 2, 2)
+C <- matrix(c(5,2,3,7), nrow = 2, ncol = 2)
 C
 A%*%C
 ```
@@ -940,7 +940,7 @@ solve(C)
 
 La fonction `crossprod` sert à calculer $A^T B$ ou $A^T A$.
 ```{r}
-crossprod(A,B)
+crossprod(A, B)
 # équivalent à
 t(A)%*%B
 ```
@@ -963,15 +963,20 @@ Voici des exemples.
 ```{r}
 A <- matrix(12:1, nrow = 3, ncol = 4)
 A
-B <- matrix(c(1,2), 2, 1)
+B <- matrix(c(1,2), nrow = 2, ncol = 1)
 B
 A %o% B
 A %x% B
 ```
+
+
 Les deux opérations se généralisent à l'emploi d'un autre opérateur que le produit, grâce aux fonctions `outer` et `kronecker`.
+
+\newpage
+
 ```{r}
-outer(1:3, 4:5, '+')
-kronecker(1:3, 4:5, '+')
+outer(1:3, 4:5, FUN = '+')
+kronecker(1:3, 4:5, FUN = '+')
 ```
 
 ##### Fonction `diag`
@@ -1008,7 +1013,7 @@ Tout comme les logiciels Maple ou Mathematica, R peut faire du calcul symbolique
 $$\frac{d}{dx}( log(x) + sin(x) ).$$
 
 ```{r}
-df <- deriv(~ log(x) + sin(x), "x")
+df <- deriv(expr = ~ log(x) + sin(x), namevec = "x")
 df
 ```
 L'objet `df` est particulier. Il s'agit d'une expression. La ligne `.grad[, "x"] <- 1/x + cos(x)` permet de constater que R a bien trouvé que la dérivée symbolique de $log(x) + sin(x)$ est $1/x + cos(x)$. Nous pouvons maintenant utiliser `df` pour calculer cette dérivée en certains points. Étant donné que nous avons nommé `x` la variable dans la fonction à dériver, il faut d'abord créer un objet nommé `x` contenant les valeurs en lesquelles nous souhaitons calculer la dérivée.
@@ -1043,7 +1048,7 @@ x <- as.double(-3:3)
 # Valeur de la fonction en ces points
 pnorm(x)
 # Calcul de la dérivée en ces points
-numericDeriv(quote(pnorm(x)), "x")
+numericDeriv(expr = quote(pnorm(x)), theta = "x")
 ```
 
 Nous arrivons au bon résultat, soit la fonction de densité de loi normale standard aux mêmes points.
@@ -1056,7 +1061,7 @@ L'appel de la fonction `numericDeriv` n'est pas standard. Il fait intervenir une
 Nous pourrions aussi programmer à la main une version simpliste de la dérivation numérique comme suit :
 ```{r , R.options= list(width = 100)}
 delta <- .000001
-(pnorm(x+delta) - pnorm(x-delta))/(2*delta)
+(pnorm(x + delta) - pnorm(x - delta)) / (2 * delta)
 ```
 
 
@@ -1067,7 +1072,7 @@ delta <- .000001
 Effectuons maintenant l'opération inverse : intégrons la fonction de densité de la loi normale standard avec la fonction [`integrate`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/integrate.html).
 
 ```{r}
-integrate(dnorm, -Inf, 1)
+integrate(f = dnorm, lower = -Inf, upper = 1)
 ```
 
 Nous arrivons au bon résultat, soit la fonction de répartition de loi normale standard au point 1
@@ -1109,7 +1114,7 @@ optimize(f = dnorm, interval = c(-3, 10), mean = 3, maximum = TRUE)
 
 Oui, pour une loi normale d'espérance 3 et de variance 1, nous arrivons bien numériquement au résultat que le maximum de la densité est atteint en la valeur 3. La fonction `optimize` nous dit aussi que ce maximum vaut :
 ```{r}
-dnorm(x = 3, mean = 3)
+dnorm(3, mean = 3)
 ```
 
 
