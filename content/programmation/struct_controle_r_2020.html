@@ -1,0 +1,721 @@
+---
+title: "Structures de contrôle en R"
+author: "Sophie Baillargeon, Université Laval"
+date: "2020-02-28"
+weight: 2
+slug: "struct_controle_r"
+categories: ["cours_2020-03-17"]
+categories_weight: 1
+lastmodifierdisplayname : "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+    highlight: tango
+  blogdown::html_page:
+    toc: yes
+    toc_depth: 3
+    highlight: tango
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \renewcommand{\linethickness}{0.05em}
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  { background-color: #f8f8f8; }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<div id="TOC">
+<ul>
+<li><a href="#alternatives">Alternatives</a><ul>
+<li><a href="#structure-if-...-else">Structure <code>if ... else</code></a><ul>
+<li><a href="#écriture-générale-dun-if-...-else">Écriture générale d’un <code>if ... else</code></a></li>
+<li><a href="#écriture-condensée-dun-if-...-else">Écriture condensée d’un <code>if ... else</code></a></li>
+<li><a href="#distinction-entre-une-structure-if-...-else-et-la-fonction-ifelse">Distinction entre une structure <code>if ... else</code> et la fonction <code>ifelse</code></a></li>
+</ul></li>
+<li><a href="#fonction-switch">Fonction <code>switch</code></a></li>
+</ul></li>
+<li><a href="#boucles">Boucles</a><ul>
+<li><a href="#boucles-for">Boucles <code>for</code></a></li>
+<li><a href="#enregistrement-des-résultats-dans-une-boucle">Enregistrement des résultats dans une boucle</a></li>
+<li><a href="#affichage-de-résultats-dans-une-boucle">Affichage de résultats dans une boucle</a></li>
+<li><a href="#boucles-while-ou-repeat">Boucles <code>while</code> ou <code>repeat</code></a></li>
+<li><a href="#imbriquer-des-boucles">Imbriquer des boucles</a></li>
+<li><a href="#mots-clés-break-et-next">Mots-clés <code>break</code> et <code>next</code></a></li>
+<li><a href="#interruption-de-lexécution-dune-boucle">Interruption de l’exécution d’une boucle</a></li>
+<li><a href="#éviter-les-boucles">Éviter les boucles</a><ul>
+<li><a href="#calcul-vectoriel-versus-boucle">Calcul vectoriel versus boucle</a></li>
+<li><a href="#fonction-de-la-famille-des-apply-versus-boucle">Fonction de la famille des <code>apply</code> versus boucle</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#résumé">Résumé</a></li>
+<li><a href="#références">Références</a></li>
+</ul>
+</div>
+
+<hr />
+<p>La matière vue jusqu’à maintenant dans le cours traitait principalement de l’utilisation du logiciel R dans le but de faire de la manipulation ou de l’analyse de données. Cette utilisation passe par la soumission de commandes dans la console R. En fait, souvent plus d’une commande est nécessaire pour produire le résultat escompté. Plutôt que de soumettre une après l’autre plusieurs commandes dans la console, nous avons appris qu’il était préférable d’écrire des programmes. Renommons « instructions » les commandes apparaissant dans un programme. Lorsqu’un programme R entier est soumis, les instructions qui le composent sont exécutées séquentiellement, c’est-à-dire l’une après l’autre, en respectant leur ordre d’apparition dans le programme.</p>
+<p>Comme presque tout langage informatique qui adhèrent au <a href="https://fr.wikipedia.org/wiki/Programmation_imp%C3%A9rative">paradigme de programmation impératif</a>, R offre des <a href="https://fr.wikipedia.org/wiki/Structure_de_contr%C3%B4le">structures de contrôles</a> (aussi appelées séquencements). Les structures de contrôle sont des instructions particulières qui contrôlent l’ordre dans lequel d’autres instructions d’un programme informatique sont exécutées. Les appels de fonction, présents dans pratiquement toutes les instructions R étudiées dans ce cours jusqu’à maintenant, sont des structures de contrôle. Elles produisent un saut dans l’exécution des instructions d’un programme vers un sous-programme (le corps de la fonction), suivi d’un saut de retour vers le programme principal.</p>
+<p>Ce document décrit l’utilisation en R des deux autres structures de contrôle les plus courantes en programmation impérative : les alternatives (structures conditionnelles) et les boucles (structures itératives).</p>
+<div id="alternatives" class="section level1">
+<h1>Alternatives</h1>
+<p>Les <a href="https://fr.wikipedia.org/wiki/Structure_de_contr%C3%B4le#Alternatives">alternatives</a> ont pour but d’exécuter des instructions seulement si une certaine condition est satisfaite. Voyons ici deux outils pour créer des alternatives en R : la structure <code>if ... else</code> et la fonction switch.</p>
+<div id="structure-if-...-else" class="section level2">
+<h2>Structure <code>if ... else</code></h2>
+<div id="écriture-générale-dun-if-...-else" class="section level3">
+<h3>Écriture générale d’un <code>if ... else</code></h3>
+<p>Les mots-clés pour écrire des alternatives en R sont <code>if</code> et <code>else</code>. De façon générale, la syntaxe d’une structure de contrôle <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/Control.html"><code>if ... else</code></a> est la suivante.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="cf">if</span> (condition) {</a>
+<a class="sourceLine" id="cb1-2" title="2">  instructions  <span class="co"># exécutées si l&#39;évaluation de condition retourne TRUE</span></a>
+<a class="sourceLine" id="cb1-3" title="3">} <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb1-4" title="4">  instructions  <span class="co"># exécutées si l&#39;évaluation de condition retourne FALSE</span></a>
+<a class="sourceLine" id="cb1-5" title="5">}</a></code></pre></div>
+<p>Il est possible d’avoir un <code>if</code> sans <code>else</code>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="cf">if</span> (condition) {</a>
+<a class="sourceLine" id="cb2-2" title="2">  instructions  <span class="co"># exécutées si l&#39;évaluation de condition retourne TRUE</span></a>
+<a class="sourceLine" id="cb2-3" title="3">}</a></code></pre></div>
+<p>Un <code>if</code> doit être suivi d’une paire de parenthèses dans laquelle est inséré une instruction R retournant une seule valeur logique (<code>TRUE</code> ou <code>FALSE</code>). C’est la condition de l’alternative. Ensuite viennent la ou les instructions à exécuter si la condition est vraie (c’est-à-dire si l’instruction <code>condition</code> produit le résultat <code>TRUE</code>). S’il y a plus d’une instruction à exécuter, les accolades sont nécessaires pour les encadrer. Pour une seule instruction, les accolades sont optionnelles.</p>
+<p>Voici un exemple :</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="co"># Simulation du lancer d&#39;une pièce de monnaie</span></a>
+<a class="sourceLine" id="cb3-2" title="2">lancer &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dt">x =</span> <span class="kw">c</span>(<span class="st">&quot;Pile&quot;</span>, <span class="st">&quot;Face&quot;</span>), <span class="dt">size =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb3-3" title="3"></a>
+<a class="sourceLine" id="cb3-4" title="4"><span class="co"># Structure qui affiche ou non un message, en fonction du résultat du lancer</span></a>
+<a class="sourceLine" id="cb3-5" title="5"><span class="cf">if</span> (lancer <span class="op">==</span><span class="st"> &quot;Pile&quot;</span>)    <span class="co"># sans accolades</span></a>
+<a class="sourceLine" id="cb3-6" title="6">  <span class="kw">print</span>(<span class="st">&quot;Je gagne!&quot;</span>)</a>
+<a class="sourceLine" id="cb3-7" title="7"><span class="co"># ou encore</span></a>
+<a class="sourceLine" id="cb3-8" title="8"><span class="cf">if</span> (lancer <span class="op">==</span><span class="st"> &quot;Pile&quot;</span>) {  <span class="co"># avec accolades</span></a>
+<a class="sourceLine" id="cb3-9" title="9">  <span class="kw">print</span>(<span class="st">&quot;Je gagne!&quot;</span>)</a>
+<a class="sourceLine" id="cb3-10" title="10">}</a></code></pre></div>
+<p>Lorsqu’il y a des instructions à exécuter si la condition est fausse, il faut ajouter un <code>else</code> à l’alternative, suivi des instructions en question. Dans ce cas, il est considéré comme une bonne pratique de toujours encadrer les blocs d’instructions d’accolades (sauf si l’écriture condensée, qui sera présentée plus loin, est utilisée), même s’ils sont composés d’une seule instruction, de façon à retrouver le mot-clé <code>else</code> précédé de <code>}</code> et suivi de <code>{</code> .</p>
+<p>Voici un exemple :</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="cf">if</span> (lancer <span class="op">==</span><span class="st"> &quot;Pile&quot;</span>) {</a>
+<a class="sourceLine" id="cb4-2" title="2">  <span class="kw">print</span>(<span class="st">&quot;Je gagne!&quot;</span>)</a>
+<a class="sourceLine" id="cb4-3" title="3">} <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb4-4" title="4">  <span class="kw">print</span>(<span class="st">&quot;Je perds...&quot;</span>)</a>
+<a class="sourceLine" id="cb4-5" title="5">}</a></code></pre></div>
+<p>Plusieurs structures <code>if ... else</code> peuvent être imbriquées. Pour ce faire, il suffit d’insérer une autre structure <code>if ... else</code> à la place de l’accolade suivant le dernier <code>else</code>, comme suit.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="cf">if</span> (condition_<span class="dv">1</span>) {</a>
+<a class="sourceLine" id="cb5-2" title="2">  instructions  <span class="co"># exécutées si condition_1 retourne TRUE</span></a>
+<a class="sourceLine" id="cb5-3" title="3">} <span class="cf">else</span> <span class="cf">if</span> (condition_<span class="dv">2</span>) {</a>
+<a class="sourceLine" id="cb5-4" title="4">  instructions  <span class="co"># exécutées si condition_1 retourne FALSE, mais condition_2 retourne TRUE</span></a>
+<a class="sourceLine" id="cb5-5" title="5">} <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb5-6" title="6">  instructions  <span class="co"># exécutées si condition_1 et condition_2 retournent FALSE</span></a>
+<a class="sourceLine" id="cb5-7" title="7">}</a></code></pre></div>
+<p>Notons que la syntaxe précédente est préférée à la suivante, qui est équivalente mais plus lourde.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="co"># Syntaxe non allégée de deux structures if ... else imbriquées</span></a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="cf">if</span> (condition_<span class="dv">1</span>) {</a>
+<a class="sourceLine" id="cb6-3" title="3">  instructions  <span class="co"># exécutées si condition_1 retourne TRUE</span></a>
+<a class="sourceLine" id="cb6-4" title="4">} <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb6-5" title="5">  <span class="cf">if</span> (condition_<span class="dv">2</span>) {</a>
+<a class="sourceLine" id="cb6-6" title="6">    instructions  <span class="co"># exécutées si condition_1 retourne FALSE, mais condition_2 retourne TRUE</span></a>
+<a class="sourceLine" id="cb6-7" title="7">  } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb6-8" title="8">    instructions  <span class="co"># exécutées si condition_1 et condition_2 retournent FALSE</span></a>
+<a class="sourceLine" id="cb6-9" title="9">  }</a>
+<a class="sourceLine" id="cb6-10" title="10">}</a></code></pre></div>
+<p>Voici un exemple :</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">x &lt;-<span class="st"> </span>iris<span class="op">$</span>Sepal.Length</a>
+<a class="sourceLine" id="cb7-2" title="2"></a>
+<a class="sourceLine" id="cb7-3" title="3"><span class="co"># Programme qui calcule des statistiques descriptives simples, selon</span></a>
+<a class="sourceLine" id="cb7-4" title="4"><span class="co"># le type des éléments du vecteur sur lequel le calcul est fait</span></a>
+<a class="sourceLine" id="cb7-5" title="5"><span class="cf">if</span> (<span class="kw">is.numeric</span>(x)) {</a>
+<a class="sourceLine" id="cb7-6" title="6">  <span class="kw">c</span>(<span class="dt">min =</span> <span class="kw">min</span>(x), <span class="dt">moy =</span> <span class="kw">mean</span>(x), <span class="dt">max =</span> <span class="kw">max</span>(x))</a>
+<a class="sourceLine" id="cb7-7" title="7">} <span class="cf">else</span> <span class="cf">if</span> (<span class="kw">is.character</span>(x) <span class="op">||</span><span class="st"> </span><span class="kw">is.factor</span>(x)) {</a>
+<a class="sourceLine" id="cb7-8" title="8">  <span class="kw">table</span>(x)</a>
+<a class="sourceLine" id="cb7-9" title="9">} <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb7-10" title="10">  <span class="ot">NA</span></a>
+<a class="sourceLine" id="cb7-11" title="11">}</a></code></pre></div>
+<pre><code>##      min      moy      max 
+## 4.300000 5.843333 7.900000</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="co"># Faisons rouler les instructions de nouveau, après avoir redéfini le vecteur x.</span></a>
+<a class="sourceLine" id="cb9-2" title="2"></a>
+<a class="sourceLine" id="cb9-3" title="3">x &lt;-<span class="st"> </span>iris<span class="op">$</span>Species</a>
+<a class="sourceLine" id="cb9-4" title="4"></a>
+<a class="sourceLine" id="cb9-5" title="5"><span class="cf">if</span> (<span class="kw">is.numeric</span>(x)) {</a>
+<a class="sourceLine" id="cb9-6" title="6">  <span class="kw">c</span>(<span class="dt">min =</span> <span class="kw">min</span>(x), <span class="dt">moy =</span> <span class="kw">mean</span>(x), <span class="dt">max =</span> <span class="kw">max</span>(x))</a>
+<a class="sourceLine" id="cb9-7" title="7">} <span class="cf">else</span> <span class="cf">if</span> (<span class="kw">is.character</span>(x) <span class="op">||</span><span class="st"> </span><span class="kw">is.factor</span>(x)) {</a>
+<a class="sourceLine" id="cb9-8" title="8">  <span class="kw">table</span>(x)</a>
+<a class="sourceLine" id="cb9-9" title="9">} <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb9-10" title="10">  <span class="ot">NA</span></a>
+<a class="sourceLine" id="cb9-11" title="11">}</a></code></pre></div>
+<pre><code>## x
+##     setosa versicolor  virginica 
+##         50         50         50</code></pre>
+<p>Il serait pratique de créer une fonction à partir de ce bout de code. Nous le ferons dans les <a href="https://stt4230.rbind.io/programmation/fonctions_r/">notes sur les fonctions en R</a>.</p>
+</div>
+<div id="écriture-condensée-dun-if-...-else" class="section level3">
+<h3>Écriture condensée d’un <code>if ... else</code></h3>
+<p>Lorsque, dans chaque branche d’une alternative <code>if ... else</code>, il n’y a seulement une instruction courte servant à créer un seul objet, l’écriture condensée suivante peut être pratique :</p>
+<pre><code>nom &lt;- if (condition) instruction else instruction</code></pre>
+<p>Cette écriture est recommandée seulement si elle rend le code plus lisible pour des alternatives très simples.</p>
+<p>Voici un exemple :</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1">message &lt;-<span class="st"> </span><span class="cf">if</span> (lancer <span class="op">==</span><span class="st"> &quot;Pile&quot;</span>) <span class="st">&quot;Je gagne!&quot;</span> <span class="cf">else</span> <span class="st">&quot;Je perds...&quot;</span></a></code></pre></div>
+</div>
+<div id="distinction-entre-une-structure-if-...-else-et-la-fonction-ifelse" class="section level3">
+<h3>Distinction entre une structure <code>if ... else</code> et la fonction <code>ifelse</code></h3>
+<p>Sous sa forme condensée, une structure <code>if ... else</code> fait penser à un appel à la fonction <code>ifelse</code>. Quelles sont les différences entre les deux?</p>
+<p>Premièrement, la condition dans une structure <code>if ... else</code> doit être une instruction qui retourne un seul <code>TRUE</code> ou un seul <code>FALSE</code>, pas un vecteur logique de longueur supérieure à 1. Si la condition est un vecteur logique de longueur supérieure à 1, seul le premier élément est utilisé et un avertissement est affiché comme dans l’exemple suivant :</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1">x &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">10</span></a>
+<a class="sourceLine" id="cb13-2" title="2">xmodif &lt;-<span class="st"> </span><span class="cf">if</span> (x <span class="op">&gt;</span><span class="st"> </span><span class="fl">2.5</span> <span class="op">&amp;</span><span class="st"> </span>x <span class="op">&lt;</span><span class="st"> </span><span class="fl">7.5</span>) <span class="dv">5</span> <span class="cf">else</span> x</a></code></pre></div>
+<pre><code>## Warning in if (x &gt; 2.5 &amp; x &lt; 7.5) 5 else x: the condition has length &gt; 1 and
+## only the first element will be used</code></pre>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1">xmodif</a></code></pre></div>
+<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10</code></pre>
+<p>Si nous avions utilisé l’opérateur logique <code>&amp;&amp;</code> au lieu de <code>&amp;</code>, nous n’aurions pas obtenu cet avertissement, mais exactement le même résultat aurait été obtenu.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1">xmodif &lt;-<span class="st"> </span><span class="cf">if</span> (x <span class="op">&gt;</span><span class="st"> </span><span class="fl">2.5</span> <span class="op">&amp;&amp;</span><span class="st"> </span>x <span class="op">&lt;</span><span class="st"> </span><span class="fl">7.5</span>) <span class="dv">5</span> <span class="cf">else</span> x</a>
+<a class="sourceLine" id="cb17-2" title="2">xmodif</a></code></pre></div>
+<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10</code></pre>
+<p> </p>
+<blockquote>
+<p><strong>Les opérateurs logiques <code>&amp;&amp;</code> et <code>||</code> sont utiles pour écrire une condition d’un <code>if</code>, car ils assurent la production d’une seule valeur logique.</strong></p>
+</blockquote>
+<p> </p>
+<p>Cependant, dans cet exemple, la structure de contrôle <code>if ... else</code> n’est probablement pas ce que nous voulions utiliser. Si notre but est de vérifier pour chaque élément de <code>x</code> si la valeur est comprise entre 2.5 et 7.5, si c’est le cas retourner la valeur 5, sinon retourner l’élément de <code>x</code> inchangé, alors c’est la fonction <code>ifelse</code> que nous devrions utiliser.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1">xmodif &lt;-<span class="st"> </span><span class="kw">ifelse</span>(<span class="dt">test =</span> x <span class="op">&gt;</span><span class="st"> </span><span class="fl">2.5</span> <span class="op">&amp;</span><span class="st"> </span>x <span class="op">&lt;</span><span class="st"> </span><span class="fl">7.5</span>, <span class="dt">yes =</span> <span class="dv">5</span>, <span class="dt">no =</span> x)</a>
+<a class="sourceLine" id="cb19-2" title="2">xmodif</a></code></pre></div>
+<pre><code>##  [1]  1  2  5  5  5  5  5  8  9 10</code></pre>
+<p><a href="https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#variable-conditionnelle-a-une-autre-avec-la-fonction-ifelse">La fonction <code>ifelse</code> agit de façon vectorielle</a>. Elle teste une condition sur tous les éléments d’un objet et retourne une valeur en fonction du résultat. La dimension de la sortie d’un <code>ifelse</code> est la même que la dimension du premier argument qu’elle reçoit.</p>
+<p>Ainsi, la fonction <code>ifelse</code> n’est pas une structure de contrôle.</p>
+</div>
+</div>
+<div id="fonction-switch" class="section level2">
+<h2>Fonction <code>switch</code></h2>
+<p>La fonction <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/switch.html">switch</a> est parfois utile pour remplacer plusieurs structures <code>if ... else</code> imbriquées. La syntaxe générale d’un appel à la fonction <code>switch</code> est la suivante.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1"><span class="cf">switch</span>(</a>
+<a class="sourceLine" id="cb21-2" title="2">  expression,</a>
+<a class="sourceLine" id="cb21-3" title="3">  <span class="st">&quot;resultat_1&quot;</span> =<span class="st"> </span>{</a>
+<a class="sourceLine" id="cb21-4" title="4">    instructions <span class="co"># exécutées si expression retourne &quot;resultat_1&quot;</span></a>
+<a class="sourceLine" id="cb21-5" title="5">  },</a>
+<a class="sourceLine" id="cb21-6" title="6">  <span class="st">&quot;resultat_2&quot;</span> =<span class="st"> </span>{</a>
+<a class="sourceLine" id="cb21-7" title="7">    instructions <span class="co"># exécutées si expression retourne &quot;resultat_2&quot;</span></a>
+<a class="sourceLine" id="cb21-8" title="8">  },</a>
+<a class="sourceLine" id="cb21-9" title="9">  .</a>
+<a class="sourceLine" id="cb21-10" title="10">  .  <span class="co"># autres paires (résultat, instructions à exécuter) s&#39;il y a lieu</span></a>
+<a class="sourceLine" id="cb21-11" title="11">  .</a>
+<a class="sourceLine" id="cb21-12" title="12">  {</a>
+<a class="sourceLine" id="cb21-13" title="13">    instructions <span class="co"># exécutées si expression retourne tout autre résultat</span></a>
+<a class="sourceLine" id="cb21-14" title="14">  }</a>
+<a class="sourceLine" id="cb21-15" title="15">)</a></code></pre></div>
+<p>Dans cette syntaxe générale, la valeur fournie au premier argument, représentée par <code>expression</code>, doit être une instruction R retournant une chaîne de caractères. Les autres arguments de la fonction doivent porter les noms de ce que peut produire en sortie <code>expression</code>. Les valeurs fournies à ces arguments sont les instructions à exécuter si <code>expression</code> retourne une chaîne de caractères égale au nom de l’argument. Si un dernier argument non assigné à un nom est fourni, il sera exécuté si <code>expression</code> retourne une chaîne de caractères ne se retrouvant pas parmi les noms d’arguments présents dans l’appel à la fonction <code>switch</code>. Notons que lorsqu’un résultat doit provoquer l’exécution d’une seule instruction, celle-ci n’a pas à être encadrée d’accolades.</p>
+<p>Voici un exemple :</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" title="1">x &lt;-<span class="st"> </span>iris<span class="op">$</span>Sepal.Length</a>
+<a class="sourceLine" id="cb22-2" title="2"></a>
+<a class="sourceLine" id="cb22-3" title="3"><span class="co"># Structures if ... else imbriquées présentées précédemment, à reproduire</span></a>
+<a class="sourceLine" id="cb22-4" title="4"><span class="cf">if</span> (<span class="kw">is.numeric</span>(x)) {</a>
+<a class="sourceLine" id="cb22-5" title="5">  <span class="kw">c</span>(<span class="dt">min =</span> <span class="kw">min</span>(x), <span class="dt">moy =</span> <span class="kw">mean</span>(x), <span class="dt">max =</span> <span class="kw">max</span>(x))</a>
+<a class="sourceLine" id="cb22-6" title="6">} <span class="cf">else</span> <span class="cf">if</span> (<span class="kw">is.character</span>(x) <span class="op">||</span><span class="st"> </span><span class="kw">is.factor</span>(x)) {</a>
+<a class="sourceLine" id="cb22-7" title="7">  <span class="kw">table</span>(x)</a>
+<a class="sourceLine" id="cb22-8" title="8">} <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb22-9" title="9">  <span class="ot">NA</span></a>
+<a class="sourceLine" id="cb22-10" title="10">}</a></code></pre></div>
+<pre><code>##      min      moy      max 
+## 4.300000 5.843333 7.900000</code></pre>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" title="1"><span class="co"># Appel à la fonction switch équivalent</span></a>
+<a class="sourceLine" id="cb24-2" title="2"><span class="cf">switch</span>(</a>
+<a class="sourceLine" id="cb24-3" title="3">  <span class="kw">class</span>(x),</a>
+<a class="sourceLine" id="cb24-4" title="4">  <span class="st">&quot;numeric&quot;</span>   =<span class="st"> </span><span class="kw">c</span>(<span class="dt">min =</span> <span class="kw">min</span>(x), <span class="dt">moy =</span> <span class="kw">mean</span>(x), <span class="dt">max =</span> <span class="kw">max</span>(x)),</a>
+<a class="sourceLine" id="cb24-5" title="5">  <span class="st">&quot;integer&quot;</span>   =<span class="st"> </span><span class="kw">c</span>(<span class="dt">min =</span> <span class="kw">min</span>(x), <span class="dt">moy =</span> <span class="kw">mean</span>(x), <span class="dt">max =</span> <span class="kw">max</span>(x)),</a>
+<a class="sourceLine" id="cb24-6" title="6">  <span class="st">&quot;character&quot;</span> =<span class="st"> </span><span class="kw">table</span>(x),</a>
+<a class="sourceLine" id="cb24-7" title="7">  <span class="st">&quot;factor&quot;</span>    =<span class="st"> </span><span class="kw">table</span>(x),</a>
+<a class="sourceLine" id="cb24-8" title="8">  <span class="ot">NA</span></a>
+<a class="sourceLine" id="cb24-9" title="9">)</a></code></pre></div>
+<pre><code>##      min      moy      max 
+## 4.300000 5.843333 7.900000</code></pre>
+<p>Dans cet exemple, <code>expression</code> est l’instruction <code>class(x)</code>. Celle-ci retourne <code>"numeric"</code> pour un vecteur <code>x</code> contenant des données de type réel, mais retourne <code>"integer"</code> pour un vecteur <code>x</code> contenant des données de type entier. La condition <code>is.numeric(x)</code> retourne quant à elle <code>TRUE</code> pour tout vecteur numérique <code>x</code>, que ses données soient réelles ou entières. Afin de créer un appel à la fonction <code>switch</code> équivalent aux structures if … else imbriquées à reproduire, il fallait donc définir les résultats <code>"numeric"</code> et <code>"integer"</code>. Les deux solutions implémentent la même alternative aussi parce que <code>is.character(x)</code> est équivalent à <code>class(x) == "character"</code> et <code>is.factor(x)</code> est équivalent à <code>class(x) == "factor"</code>.</p>
+<p>Notons que <code>expression</code> peut aussi retourner un entier, interprété comme le numéro du bloc d’instructions à exécuter. Par exemple, si <code>expression</code> produit le résultat <code>2</code> lorsqu’exécuté, c’est le deuxième bloc d’intructions (troisième argument fourni à la fonction <code>switch</code>) qui sera exécuté. Dans ce cas, les blocs d’instructions n’ont pas besoin d’être assignés à des noms.</p>
+</div>
+</div>
+<div id="boucles" class="section level1">
+<h1>Boucles</h1>
+<p>Les <a href="https://fr.wikipedia.org/wiki/Structure_de_contr%C3%B4le#Boucles">boucles</a> ont pour but de répéter des instructions à plusieurs reprises, c’est donc dire de les itérer. Parfois, le nombre d’itérations à effectuer est connu d’avance. D’autres fois, ce nombre d’itérations n’est pas connu d’avance, car il dépend d’une condition à rencontrer.</p>
+<div id="boucles-for" class="section level2">
+<h2>Boucles <code>for</code></h2>
+<p>Lorsque le nombre d’itérations à effectuer est prédéterminé, une boucle <code>for</code> est tout indiquée.</p>
+<div id="écriture-générale-dune-boucle-for" class="section level4">
+<h4>Écriture générale d’une boucle <code>for</code> :</h4>
+
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" title="1"><span class="cf">for</span> (itérateur <span class="cf">in</span> ensemble) {</a>
+<a class="sourceLine" id="cb26-2" title="2">  instructions  <span class="co"># exécutées à chaque itération de la boucle</span></a>
+<a class="sourceLine" id="cb26-3" title="3">}</a></code></pre></div>
+<p>Ce type de boucle débute par le mot clé <code>for</code>, suivi des éléments suivants, dans l’ordre :</p>
+<ul>
+<li>une parenthèse ouvrante;</li>
+<li>un nom quelconque, représenté par <code>itérateur</code> dans la syntaxe générale;</li>
+<li>le mot-clé <code>in</code>;</li>
+<li>une instruction retournant un vecteur contenant l’ensemble des valeurs sur lesquelles itérer, représenté par <code>ensemble</code> dans la syntaxe générale;</li>
+<li>une parenthèse fermante.</li>
+</ul>
+<p>Ensuite viennent la ou les instructions à répéter. S’il y a plus d’une instruction à répéter, les accolades sont nécessaires pour les encadrer. Dans ces instructions, l’objet nommé <code>itérateur</code> dans la syntaxe générale intervient généralement.</p>
+<p>La boucle effectue autant de répétitions que la longueur du vecteur <code>ensemble</code>.</p>
+<ul>
+<li>Première itération : <code>itérateur</code> prend la valeur <code>ensemble[[1]]</code>.</li>
+<li>Deuxième itération : <code>itérateur</code> prend la valeur <code>ensemble[[2]]</code>.</li>
+<li><span class="math inline">\(\vdots\)</span></li>
+<li>Dernière itération : <code>itérateur</code> prend la valeur <code>ensemble[[length(ensemble)]]</code>.</li>
+</ul>
+<p>Ainsi, de façon générale, pour les itérations <code>i</code> allant de <code>1</code> à <code>length(ensemble)</code>, <code>valeur</code> contient <code>ensemble[[i]]</code>.</p>
+<p>Voici un exemple :</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1"><span class="cf">for</span> (lettre <span class="cf">in</span> LETTERS) {</a>
+<a class="sourceLine" id="cb27-2" title="2">  <span class="kw">cat</span>(lettre, <span class="st">&quot; &quot;</span>)</a>
+<a class="sourceLine" id="cb27-3" title="3">}</a></code></pre></div>
+<pre><code>## A  B  C  D  E  F  G  H  I  J  K  L  M  N  O  P  Q  R  S  T  U  V  W  X  Y  Z</code></pre>
+<p>Dans cet exemple, nous avons effectué 26 itérations, car <code>length(LETTERS)</code> <code>==</code> 26. À l’itération <code>i</code>, nous avons affiché le <code>i</code><sup>e</sup> élément du vecteur <code>LETTERS</code>, soit la <code>i</code><sup>e</sup> lettre de l’alphabet.</p>
+<p>Nous aurions pu effectuer exactement la même boucle en itérant sur les entiers de 1 à 26 comme suit :</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" title="1"><span class="cf">for</span> (i <span class="cf">in</span> <span class="kw">seq_along</span>(LETTERS)) {</a>
+<a class="sourceLine" id="cb29-2" title="2">  <span class="kw">cat</span>(LETTERS[[i]], <span class="st">&quot; &quot;</span>)</a>
+<a class="sourceLine" id="cb29-3" title="3">}</a></code></pre></div>
+<pre><code>## A  B  C  D  E  F  G  H  I  J  K  L  M  N  O  P  Q  R  S  T  U  V  W  X  Y  Z</code></pre>
+<p>Lorsque nous choisissons d’itérer sur les entiers allant de 1 au nombre total d’itérations à effectuer (disons <code>n</code>), il est commun d’utiliser le nom <code>i</code> pour l’objet changeant de valeur au fil des itérations. Le vecteur <code>ensemble</code> est alors souvent créé par l’instruction <code>1:n</code>, mais il est plus prudent d’utiliser <code>seq_len(n)</code> qui retournera une erreur si <code>n</code> est négatif ou un vecteur vide si <code>n == 0</code>. Si le nombre d’itérations à effectuer <code>n</code> est égal à la longueur d’un objet, disons <code>a</code>, il est recommandé de créer le vecteur <code>ensemble</code> par l’instruction <code>seq_along(a)</code>. Pour un objet <code>a</code> de longueur non nulle, les instructions <code>1:length(a)</code> et <code>seq_along(a)</code> retournent exactement le même résultat, comme l’illustre cet exemple.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" title="1"><span class="dv">1</span><span class="op">:</span><span class="kw">length</span>(LETTERS)</a></code></pre></div>
+<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26</code></pre>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" title="1"><span class="kw">seq_along</span>(LETTERS)</a></code></pre></div>
+<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26</code></pre>
+<p>Cependant, si l’objet <code>a</code> s’adonne à être de longueur nulle, l’utilisation de <code>seq_along(a)</code> nous assure que la boucle n’effectue aucune itération. L’utilisation de <code>1:length(a)</code> entraînerait plutôt une itération sur <code>i = 1</code>, puis <code>i = 0</code>, qui risquerait de générer une erreur. Ce comportement s’explique par le fait que <code>1:length(a)</code> retourne dans ce cas particulier le vecteur (1, 0).</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" title="1">a &lt;-<span class="st"> </span><span class="kw">list</span>()  <span class="co"># supposons que a est une liste vide</span></a>
+<a class="sourceLine" id="cb35-2" title="2"><span class="dv">1</span><span class="op">:</span><span class="kw">length</span>(a)</a></code></pre></div>
+<pre><code>## [1] 1 0</code></pre>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" title="1"><span class="kw">seq_along</span>(a)</a></code></pre></div>
+<pre><code>## integer(0)</code></pre>
+<p><strong>Autre exemple</strong>:</p>
+<p>Voici un exemple de boucle <code>for</code>, utilisant le jeu de données <code>attitude</code> (provenant du package <code>datasets</code>)</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" title="1"><span class="kw">str</span>(attitude)</a></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    30 obs. of  7 variables:
+##  $ rating    : num  43 63 71 61 81 43 58 71 72 67 ...
+##  $ complaints: num  51 64 70 63 78 55 67 75 82 61 ...
+##  $ privileges: num  30 51 68 45 56 49 42 50 72 45 ...
+##  $ learning  : num  39 54 69 47 66 44 56 55 67 47 ...
+##  $ raises    : num  61 63 76 54 71 54 66 70 71 62 ...
+##  $ critical  : num  92 73 86 84 83 49 68 66 83 80 ...
+##  $ advance   : num  45 47 48 35 47 34 35 41 31 41 ...</code></pre>
+<p>Ce jeu de données contient 7 variables numériques. Ces données ont été recueillies dans le but d’étudier les variables influençant la cote (<code>rating</code>) reçue par 30 départements d’une grande organisation financière. Supposons que nous souhaitons réaliser 6 régressions linéaires simples sur ces données. Toutes les régressions auraient la même variable réponse, <code>rating</code>, et la variable explicative devrait être tour à tour une des autres variables du jeu de données.</p>
+<p>L’instruction pour réaliser la régression simple avec la variable <code>complaints</code> par exemple, serait la suivante :</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" title="1"><span class="kw">lm</span>(rating <span class="op">~</span><span class="st"> </span>complaints, <span class="dt">data =</span> attitude)</a></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" title="1"><span class="co"># ou</span></a>
+<a class="sourceLine" id="cb42-2" title="2"><span class="kw">lm</span>(rating <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> attitude[, <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>)])</a></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = rating ~ ., data = attitude[, c(1, 2)])
+## 
+## Coefficients:
+## (Intercept)   complaints  
+##     14.3763       0.7546</code></pre>
+<p>Nous souhaitons maintenant insérer cette instruction dans une boucle permettant d’effectuer les 6 régressions simples.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" title="1">modeles &lt;-<span class="st"> </span><span class="kw">vector</span>(<span class="dt">length =</span> <span class="kw">ncol</span>(attitude) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">mode =</span> <span class="st">&quot;list&quot;</span>)</a>
+<a class="sourceLine" id="cb44-2" title="2"><span class="cf">for</span> (i <span class="cf">in</span> <span class="kw">seq_len</span>(<span class="kw">ncol</span>(attitude) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)) {</a>
+<a class="sourceLine" id="cb44-3" title="3">  modeles[[i]] &lt;-<span class="st"> </span><span class="kw">lm</span>(rating <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> attitude[, <span class="kw">c</span>(<span class="dv">1</span>, i <span class="op">+</span><span class="st"> </span><span class="dv">1</span>)])</a>
+<a class="sourceLine" id="cb44-4" title="4">}</a>
+<a class="sourceLine" id="cb44-5" title="5">modeles</a></code></pre></div>
+<pre><code>## [[1]]
+## 
+## Call:
+## lm(formula = rating ~ ., data = attitude[, c(1, i + 1)])
+## 
+## Coefficients:
+## (Intercept)   complaints  
+##     14.3763       0.7546  
+## 
+## 
+## [[2]]
+## 
+## Call:
+## lm(formula = rating ~ ., data = attitude[, c(1, i + 1)])
+## 
+## Coefficients:
+## (Intercept)   privileges  
+##     42.1087       0.4239  
+## 
+## 
+## [[3]]
+## 
+## Call:
+## lm(formula = rating ~ ., data = attitude[, c(1, i + 1)])
+## 
+## Coefficients:
+## (Intercept)     learning  
+##     28.1741       0.6468  
+## 
+## 
+## [[4]]
+## 
+## Call:
+## lm(formula = rating ~ ., data = attitude[, c(1, i + 1)])
+## 
+## Coefficients:
+## (Intercept)       raises  
+##     19.9778       0.6909  
+## 
+## 
+## [[5]]
+## 
+## Call:
+## lm(formula = rating ~ ., data = attitude[, c(1, i + 1)])
+## 
+## Coefficients:
+## (Intercept)     critical  
+##     50.2446       0.1924  
+## 
+## 
+## [[6]]
+## 
+## Call:
+## lm(formula = rating ~ ., data = attitude[, c(1, i + 1)])
+## 
+## Coefficients:
+## (Intercept)      advance  
+##     56.7558       0.1835</code></pre>
+</div>
+</div>
+<div id="enregistrement-des-résultats-dans-une-boucle" class="section level2">
+<h2>Enregistrement des résultats dans une boucle</h2>
+<p>Une affectation de valeur à un endroit précis d’un objet (ex.: <code>modeles[[i]] &lt;- lm(...)</code>) nécessite que l’objet existe préalablement. Ainsi, une boucle est souvent précédée par l’initialisation d’un objet dédié à contenir les résultats calculés dans la boucle. Dans l’exemple précédent, nous avons initialisé la liste <code>modeles</code> avant la boucle par l’instruction :</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb46-1" title="1">modeles &lt;-<span class="st"> </span><span class="kw">vector</span>(<span class="dt">length =</span> <span class="kw">ncol</span>(attitude) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">mode =</span> <span class="st">&quot;list&quot;</span>)</a></code></pre></div>
+<p>Remarquons que la fonction <code>vector</code> crée bien une liste ici, et non un vecteur, grâce à l’argument <code>mode = "list"</code>. Après tout, les listes sont des vecteurs récursifs.</p>
+<p>Nous aurions pu choisir d’itérer sur les noms des variables explicatives plutôt que sur les entiers 1 à 6, comme suit :</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb47-1" title="1">modeles &lt;-<span class="st"> </span><span class="kw">vector</span>(<span class="dt">length =</span> <span class="kw">ncol</span>(attitude) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">mode =</span> <span class="st">&quot;list&quot;</span>)</a>
+<a class="sourceLine" id="cb47-2" title="2"><span class="kw">names</span>(modeles) &lt;-<span class="st"> </span><span class="kw">names</span>(attitude)[<span class="op">-</span><span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb47-3" title="3"></a>
+<a class="sourceLine" id="cb47-4" title="4"><span class="cf">for</span> (variable <span class="cf">in</span> <span class="kw">names</span>(modeles)) {</a>
+<a class="sourceLine" id="cb47-5" title="5">  modeles[[variable]] &lt;-<span class="st"> </span><span class="kw">lm</span>(rating <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> attitude[, <span class="kw">c</span>(<span class="st">&quot;rating&quot;</span>, variable)])</a>
+<a class="sourceLine" id="cb47-6" title="6">}</a></code></pre></div>
+<p>Dans ce cas, nous avons préalablement nommé les éléments de la liste initialement vide. Ainsi, dans la boucle, nous pouvons référer à des éléments spécifiques de la liste <code>modeles</code> par leur nom plutôt que par leur indice.</p>
+</div>
+<div id="affichage-de-résultats-dans-une-boucle" class="section level2">
+<h2>Affichage de résultats dans une boucle</h2>
+<p>Voici une boucle très simple.</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb48-1" title="1"><span class="cf">for</span> (i <span class="cf">in</span> <span class="kw">seq_len</span>(<span class="dv">5</span>)) {</a>
+<a class="sourceLine" id="cb48-2" title="2">  i</a>
+<a class="sourceLine" id="cb48-3" title="3">}</a></code></pre></div>
+<p>Si vous soumettez cette boucle, vous remarquerez qu’elle n’affiche rien. Pourtant, une instruction contenant uniquement le nom d’un objet affiche cet objet lorsque l’instruction est soumise dans la console.</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb49-1" title="1">i</a></code></pre></div>
+<pre><code>## [1] 5</code></pre>
+<p>Ce résultat ne se produit pas dans une boucle. Il faut utiliser les fonctions <code>print</code> ou <code>cat</code> pour qu’un résultat soit affiché dans la console pendant l’exécution d’une boucle.</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb51-1" title="1"><span class="cf">for</span> (i <span class="cf">in</span> <span class="kw">seq_len</span>(<span class="dv">5</span>)) {</a>
+<a class="sourceLine" id="cb51-2" title="2">  <span class="kw">print</span>(i)</a>
+<a class="sourceLine" id="cb51-3" title="3">}</a></code></pre></div>
+<pre><code>## [1] 1
+## [1] 2
+## [1] 3
+## [1] 4
+## [1] 5</code></pre>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb53-1" title="1"><span class="cf">for</span> (i <span class="cf">in</span> <span class="kw">seq_len</span>(<span class="dv">5</span>)) {</a>
+<a class="sourceLine" id="cb53-2" title="2">  <span class="kw">cat</span>(i)</a>
+<a class="sourceLine" id="cb53-3" title="3">}</a></code></pre></div>
+<pre><code>## 12345</code></pre>
+<p><code>cat</code> est utile pour faire afficher une trace des itérations.</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb55-1" title="1"><span class="cf">for</span> (i <span class="cf">in</span> <span class="kw">seq_len</span>(<span class="dv">5</span>)) {</a>
+<a class="sourceLine" id="cb55-2" title="2">  <span class="kw">cat</span>(<span class="st">&quot;itération&quot;</span>, i, <span class="st">&quot;terminée</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb55-3" title="3">}</a></code></pre></div>
+<pre><code>## itération 1 terminée
+## itération 2 terminée
+## itération 3 terminée
+## itération 4 terminée
+## itération 5 terminée</code></pre>
+<p>Rappel : Le caractère <code>\n</code> représente un retour à la ligne.</p>
+</div>
+<div id="boucles-while-ou-repeat" class="section level2">
+<h2>Boucles <code>while</code> ou <code>repeat</code></h2>
+<p>Parfois, le nombre d’itérations dépend d’une condition à rencontrer, il n’est pas prédéterminé. Les boucles R <code>while</code> et <code>repeat</code> sont utiles dans cette situation.</p>
+<p><strong>Écriture générale d’une boucle <code>while</code></strong> :</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb57-1" title="1"><span class="cf">while</span> (condition) {</a>
+<a class="sourceLine" id="cb57-2" title="2">  instructions  <span class="co"># exécutées à chaque itération de la boucle</span></a>
+<a class="sourceLine" id="cb57-3" title="3">}</a></code></pre></div>
+<div style="page-break-after: always;"></div>
+<p><strong>Écriture générale d’une boucle <code>repeat</code></strong> :</p>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb58-1" title="1"><span class="cf">repeat</span> {</a>
+<a class="sourceLine" id="cb58-2" title="2">  instructions  <span class="co"># exécutées à chaque itération de la boucle</span></a>
+<a class="sourceLine" id="cb58-3" title="3">  <span class="cf">if</span> (<span class="op">!</span>condition) {</a>
+<a class="sourceLine" id="cb58-4" title="4">    <span class="cf">break</span></a>
+<a class="sourceLine" id="cb58-5" title="5">  }</a>
+<a class="sourceLine" id="cb58-6" title="6">}</a></code></pre></div>
+<p>Un des intérêts d’une boucle <code>repeat</code> est de tester la condition après avoir exécuté les instructions et non avant comme dans une boucle <code>while</code>. Dans un boucle <code>repeat</code>, le mot-clé <code>break</code> doit être utilisé pour mettre fin aux itérations, sinon la boucle est infinie.</p>
+<p>La <code>condition</code> doit encore une fois être une instruction qui retourne une seule valeur logique (<code>TRUE</code> ou <code>FALSE</code>).</p>
+<p>Dans les écritures générales ci-dessus, remarquez qu’il y a un opérateur logique de négation devant la condition dans la boucle <code>repeat</code>. C’est pour mettre en évidence le fait qu’une boucle <code>while</code> continue d’itérer tant que <code>condition</code> demeure <code>TRUE</code>. Pour une même <code>condition</code>, il faut donc faire arrêter la boucle <code>repeat</code> lorsque <code>condition</code> devient <code>FALSE</code>.</p>
+<p>Voici un exemple.</p>
+<p>Nous souhaitons simuler le lancer d’un dé jusqu’à l’obtention d’un 6 et compter le nombre de lancers.</p>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb59-1" title="1">resultat &lt;-<span class="st"> </span><span class="dv">1</span>   <span class="co"># initialisation à un résultat quelconque, différent de 6</span></a>
+<a class="sourceLine" id="cb59-2" title="2">n_lancers &lt;-<span class="st"> </span><span class="dv">0</span>  <span class="co"># initialisation à 0 du nombre de lancer</span></a>
+<a class="sourceLine" id="cb59-3" title="3"><span class="cf">while</span> (resultat <span class="op">!=</span><span class="st"> </span><span class="dv">6</span>) {              <span class="co"># tant que le résultat n&#39;est pas égal à 6, répéter</span></a>
+<a class="sourceLine" id="cb59-4" title="4">  resultat &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">6</span>, <span class="dt">size =</span> <span class="dv">1</span>)  <span class="co"># simulation du lancer du dé</span></a>
+<a class="sourceLine" id="cb59-5" title="5">  n_lancers &lt;-<span class="st"> </span>n_lancers <span class="op">+</span><span class="st"> </span><span class="dv">1</span>         <span class="co"># incrémentation du nombre de lancers</span></a>
+<a class="sourceLine" id="cb59-6" title="6">}</a>
+<a class="sourceLine" id="cb59-7" title="7">n_lancers       <span class="co"># afficher le résultat final</span></a></code></pre></div>
+<p>La boucle <code>while</code> peut être remplacée par une boucle <code>repeat</code> avec le mot-clé <code>break</code> comme suit.</p>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb60-1" title="1">n_lancers &lt;-<span class="st"> </span><span class="dv">0</span></a>
+<a class="sourceLine" id="cb60-2" title="2"><span class="cf">repeat</span> {</a>
+<a class="sourceLine" id="cb60-3" title="3">  resultat &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">6</span>, <span class="dt">size =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb60-4" title="4">  n_lancers &lt;-<span class="st"> </span>n_lancers <span class="op">+</span><span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb60-5" title="5">  <span class="cf">if</span> (resultat <span class="op">==</span><span class="st"> </span><span class="dv">6</span>) {</a>
+<a class="sourceLine" id="cb60-6" title="6">    <span class="cf">break</span></a>
+<a class="sourceLine" id="cb60-7" title="7">  }</a>
+<a class="sourceLine" id="cb60-8" title="8">}</a>
+<a class="sourceLine" id="cb60-9" title="9">n_lancers</a></code></pre></div>
+<p>Ici, nous n’avons pas besoin d’initialiser <code>resultat</code>, car la condition est évaluée à la fin de la boucle, après avoir calculé <code>resultat</code> au moins une fois.</p>
+<p>Remarque : Si les insctuctions dans une boucle <code>while</code> ou <code>repeat</code> n’ont aucun impact sur la <code>condition</code> et que celle-ci demeure toujours vraie, alors la boucle est infinie. Il est important de s’assurer que la <code>condition</code> devienne éventuellement fausse, afin que la boucle puisse s’arrêter.</p>
+</div>
+<div id="imbriquer-des-boucles" class="section level2">
+<h2>Imbriquer des boucles</h2>
+<p>Dans l’exemple précédent, il serait intéressant de répéter l’expérience un grand nombre de fois et de calculer le nombre moyen de lancers requis pour obtenir un 6. Pour ce faire nous pourrions imbriquer la boucle <code>while</code> ou <code>repeat</code> dans une boucle <code>for</code> comme suit :</p>
+<div style="page-break-after: always;"></div>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb61-1" title="1">n_rep &lt;-<span class="st"> </span><span class="dv">10000</span></a>
+<a class="sourceLine" id="cb61-2" title="2">n_lancers &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="dv">0</span>, n_rep)  <span class="co"># ou vector(length = n_rep, mode = &quot;numeric&quot;)</span></a>
+<a class="sourceLine" id="cb61-3" title="3"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>n_rep) {</a>
+<a class="sourceLine" id="cb61-4" title="4">  resultat &lt;-<span class="st"> </span><span class="dv">1</span> </a>
+<a class="sourceLine" id="cb61-5" title="5">  <span class="cf">while</span> (resultat <span class="op">!=</span><span class="st"> </span><span class="dv">6</span>) {</a>
+<a class="sourceLine" id="cb61-6" title="6">    resultat &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">6</span>, <span class="dt">size =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb61-7" title="7">    n_lancers[i] &lt;-<span class="st"> </span>n_lancers[i] <span class="op">+</span><span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb61-8" title="8">  }</a>
+<a class="sourceLine" id="cb61-9" title="9">}</a>
+<a class="sourceLine" id="cb61-10" title="10"><span class="kw">mean</span>(n_lancers)</a></code></pre></div>
+<pre><code>## [1] 6.0079</code></pre>
+<p>Cet exemple montre une façon empirique d’estimer l’espérance d’une variable aléatoire suivant une <a href="https://fr.wikipedia.org/wiki/Loi_g%C3%A9om%C3%A9trique">distribution géométrique</a> de paramètre p = 1/6. Plus grand est le nombre de répétitions, plus l’estimation est précise (convergence). En théorie, cette espérance vaut 1/p = 6.</p>
+<p>Il est simple d’imbriquer des boucles en R, peu importe leur type (<code>for</code>, <code>while</code> ou <code>repeat</code>). Cependant, nous verrons plus tard que plus l’imbrication possède de niveaux, plus le programme tend à être long à exécuter.</p>
+</div>
+<div id="mots-clés-break-et-next" class="section level2">
+<h2>Mots-clés <code>break</code> et <code>next</code></h2>
+<p>Deux mots-clés existent pour contrôler l’exécution des instructions à l’intérieur d’une boucle :</p>
+<ul>
+<li><p><code>break</code> : pour terminer complètement l’exécution de la boucle (les itérations restantes ne sont pas effectuées).</p></li>
+<li><p><code>next</code> : pour terminer immédiatement une itération (sans exécuter les instructions après le mot-clé <code>next</code>) et reprendre l’exécution de la boucle à la prochaine itération.</p></li>
+</ul>
+<p>Ces deux mot-clés sont pratiquement toujours utilisés dans une structure <code>if</code>.</p>
+<p>Le mot-clé <code>break</code> a déjà été illustré dans une boucle <code>repeat</code>. Notons cependant que nous pouvons l’utiliser dans une boucle de n’importe quel type.</p>
+<p>Illustrons maintenant l’utilisation du mot-clé <code>next</code>. Reprenons l’exemple de l’affichage des lettres de l’alphabet. Supposons que nous souhaitons afficher seulement les consonnes.</p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb63-1" title="1"><span class="cf">for</span> (lettre <span class="cf">in</span> LETTERS) {</a>
+<a class="sourceLine" id="cb63-2" title="2">  <span class="cf">if</span> (lettre <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;E&quot;</span>, <span class="st">&quot;I&quot;</span>, <span class="st">&quot;O&quot;</span>, <span class="st">&quot;U&quot;</span>)) {</a>
+<a class="sourceLine" id="cb63-3" title="3">    <span class="cf">next</span></a>
+<a class="sourceLine" id="cb63-4" title="4">  }</a>
+<a class="sourceLine" id="cb63-5" title="5">  <span class="kw">cat</span>(lettre, <span class="st">&quot; &quot;</span>)</a>
+<a class="sourceLine" id="cb63-6" title="6">}</a></code></pre></div>
+<pre><code>## B  C  D  F  G  H  J  K  L  M  N  P  Q  R  S  T  V  W  X  Y  Z</code></pre>
+<p>Dans ce programme, si la condition <code>lettre %in% c("A", "E", "I", "O", "U")</code> est rencontrée, nous passons à l’itération suivante de la boucle, sans soumettre l’instruction <code>cat(lettre, " ")</code>. Le mot-clé <code>next</code> permet donc d’omettre l’exécution de certaines instructions.</p>
+<p>En fait, le dernier programme fait la même chose que le programme suivant.</p>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb65-1" title="1"><span class="cf">for</span> (lettre <span class="cf">in</span> LETTERS) {</a>
+<a class="sourceLine" id="cb65-2" title="2">  <span class="cf">if</span> (<span class="op">!</span><span class="st"> </span>lettre <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;E&quot;</span>, <span class="st">&quot;I&quot;</span>, <span class="st">&quot;O&quot;</span>, <span class="st">&quot;U&quot;</span>)) {</a>
+<a class="sourceLine" id="cb65-3" title="3">    <span class="kw">cat</span>(lettre, <span class="st">&quot; &quot;</span>)</a>
+<a class="sourceLine" id="cb65-4" title="4">  }</a>
+<a class="sourceLine" id="cb65-5" title="5">}</a></code></pre></div>
+<pre><code>## B  C  D  F  G  H  J  K  L  M  N  P  Q  R  S  T  V  W  X  Y  Z</code></pre>
+<p>Ici, il n’y a plus de mot-clé <code>next</code>, mais l’instruction <code>cat(lettre, " ")</code> est dans le <code>if</code> plutôt qu’après le <code>if</code>.</p>
+<p>Nous avons souvent constaté qu’il y a plusieurs façons de réaliser une même tâche en R. Cette remarque est aussi vraie pour les boucles.</p>
+</div>
+<div id="interruption-de-lexécution-dune-boucle" class="section level2">
+<h2>Interruption de l’exécution d’une boucle</h2>
+<p>Il peut arriver que, par erreur, nous soumettions en R une boucle vraiment longue à rouler, possiblement infinie. En RStudio, l’exécution de n’importe quelle commande, incluant une boucle, peut être interrompue d’une des façons suivantes :</p>
+<ul>
+<li>la touche « Esc »,</li>
+<li>le bouton STOP en entête à droite de la sous-fenêtre de la console R (dans un petit logo de panneau d’arrêt rouge de forme octogonale),</li>
+<li>le menu « Session &gt; Interrupt R ».</li>
+</ul>
+</div>
+<div id="éviter-les-boucles" class="section level2">
+<h2>Éviter les boucles</h2>
+<p>Une des philosophies de base en programmation R est d’utiliser une boucle seulement si celle-ci est vraiment nécessaire pour réaliser la tâche à accomplir. Le fonctionnement vectoriel de plusieurs fonctions R, ainsi que les fonctions de la famille des <code>apply</code>, permettent bien souvent d’éviter l’utilisation d’une boucle.</p>
+<p>Cette philosophie se base sur les faits suivants :</p>
+<ul>
+<li>le calcul vectoriel est plus rapide que les boucles;</li>
+<li>éviter les boucles produit habituellement un code plus court, donc plus rapide à écrire et aussi potentiellement plus facile à comprendre.</li>
+</ul>
+<div id="calcul-vectoriel-versus-boucle" class="section level3">
+<h3>Calcul vectoriel versus boucle</h3>
+<p>Voici un exemple simple d’opération vectorielle. Supposons que nous avons le vecteur numérique <code>x</code> suivant.</p>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb67-1" title="1">x &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">10</span></a></code></pre></div>
+<p>Nous voulons élever au carré toutes les valeurs dans ce vecteur. En R, il est recommandé de réaliser cette tâche comme suit :</p>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb68-1" title="1">z &lt;-<span class="st"> </span>x<span class="op">^</span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb68-2" title="2">z</a></code></pre></div>
+<pre><code>##  [1]   1   4   9  16  25  36  49  64  81 100</code></pre>
+<p>Dans bien des langages informatiques, il aura fallu faire une boucle, telle que celle-ci :</p>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb70-1" title="1">z &lt;-<span class="st"> </span><span class="kw">vector</span>(<span class="dt">length =</span> <span class="kw">length</span>(x), <span class="dt">mode =</span> <span class="st">&quot;numeric&quot;</span>)</a>
+<a class="sourceLine" id="cb70-2" title="2"><span class="cf">for</span> (i <span class="cf">in</span> <span class="kw">seq_along</span>(x)) {</a>
+<a class="sourceLine" id="cb70-3" title="3">  z[i] &lt;-<span class="st"> </span>x[i]<span class="op">^</span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb70-4" title="4">}</a>
+<a class="sourceLine" id="cb70-5" title="5">z</a></code></pre></div>
+<pre><code>##  [1]   1   4   9  16  25  36  49  64  81 100</code></pre>
+<p>Laquelle des deux solutions vous paraît la plus simple à comprendre?</p>
+</div>
+<div id="fonction-de-la-famille-des-apply-versus-boucle" class="section level3">
+<h3>Fonction de la famille des <code>apply</code> versus boucle</h3>
+<p>Voici un exemple simple d’utilisation d’une fonction de la famille des <code>apply</code>. Supposons que nous avons la matrice numérique <code>mat</code> suivante.</p>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb72-1" title="1">mat &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">12</span>, <span class="dt">ncol =</span> <span class="dv">3</span>, <span class="dt">nrow =</span> <span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb72-2" title="2">mat</a></code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    1    5    9
+## [2,]    2    6   10
+## [3,]    3    7   11
+## [4,]    4    8   12</code></pre>
+<p>Nous voulons calculer les sommes des valeurs par colonne. En R, il est recommandé de réaliser cette tâche comme suit :</p>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb74-1" title="1">sommesColonnes &lt;-<span class="st"> </span><span class="kw">colSums</span>(mat)</a>
+<a class="sourceLine" id="cb74-2" title="2">sommesColonnes</a></code></pre></div>
+<pre><code>## [1] 10 26 42</code></pre>
+<p>La fonction <code>colSums</code> revient à un appel à la fonction <code>apply</code> optimisé pour la tâche spécifique du calcul de sommes en colonnes.</p>
+<p>Dans bien des langages informatiques, il aurait fallu faire une boucle, telle que celle-ci :</p>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb76-1" title="1">sommesColonnes &lt;-<span class="st"> </span><span class="kw">vector</span>(<span class="dt">length =</span> <span class="kw">ncol</span>(mat), <span class="dt">mode =</span> <span class="st">&quot;numeric&quot;</span>)</a>
+<a class="sourceLine" id="cb76-2" title="2"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(mat)){</a>
+<a class="sourceLine" id="cb76-3" title="3">  sommesColonnes[i] &lt;-<span class="st"> </span><span class="kw">sum</span>(mat[, i])</a>
+<a class="sourceLine" id="cb76-4" title="4">}</a>
+<a class="sourceLine" id="cb76-5" title="5">sommesColonnes</a></code></pre></div>
+<pre><code>## [1] 10 26 42</code></pre>
+<p>En termes de temps de travail requis pour écrire le code, il est plus rapide d’appeler la fonction <code>colSums</code> que d’écrire cette boucle. Aussi, le code avec l’appel à la fonction <code>colSums</code> est plus succinct, donc potentiellement plus simple à comprendre.</p>
+<hr />
+</div>
+</div>
+</div>
+<div id="résumé" class="section level1">
+<h1>Résumé</h1>
+<div id="alternatives-1" class="section level4">
+<h4>Alternatives</h4>
+<div id="structure-if-...-else-1" class="section level5">
+<h5>Structure <code>if ... else</code></h5>
+
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb78-1" title="1"><span class="cf">if</span> (condition) {</a>
+<a class="sourceLine" id="cb78-2" title="2"> instructions  <span class="co"># exécutées si condition est TRUE</span></a>
+<a class="sourceLine" id="cb78-3" title="3">} <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb78-4" title="4"> instructions  <span class="co"># exécutées si condition est FALSE</span></a>
+<a class="sourceLine" id="cb78-5" title="5">}</a></code></pre></div>
+<ul>
+<li><code>condition</code> = instruction qui retourne <em>un seul logique</em> (<code>TRUE</code> ou <code>FALSE</code>).</li>
+</ul>
+<p>Écriture condensée d’une alternative :</p>
+<pre><code>x &lt;- if (condition) instruction else instruction</code></pre>
+<ul>
+<li>Ce n’est pas la même chose que la fonction <code>ifelse</code>, qui travaille de façon vectorielle.</li>
+</ul>
+<div style="page-break-after: always;"></div>
+</div>
+<div id="fonction-switch-1" class="section level5">
+<h5>Fonction <code>switch</code></h5>
+
+<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb80-1" title="1"><span class="cf">switch</span>(</a>
+<a class="sourceLine" id="cb80-2" title="2">  expression,</a>
+<a class="sourceLine" id="cb80-3" title="3">  <span class="st">&quot;resultat_1&quot;</span> =<span class="st"> </span>{</a>
+<a class="sourceLine" id="cb80-4" title="4">    instructions <span class="co"># exécutées si expression retourne &quot;resultat_1&quot;</span></a>
+<a class="sourceLine" id="cb80-5" title="5">  },</a>
+<a class="sourceLine" id="cb80-6" title="6">  <span class="st">&quot;resultat_2&quot;</span> =<span class="st"> </span>{</a>
+<a class="sourceLine" id="cb80-7" title="7">    instructions <span class="co"># exécutées si expression retourne &quot;resultat_2&quot;</span></a>
+<a class="sourceLine" id="cb80-8" title="8">  },</a>
+<a class="sourceLine" id="cb80-9" title="9">  .</a>
+<a class="sourceLine" id="cb80-10" title="10">  .  <span class="co"># autres paires (résultat, instructions à exécuter) s&#39;il y a lieu</span></a>
+<a class="sourceLine" id="cb80-11" title="11">  .</a>
+<a class="sourceLine" id="cb80-12" title="12">  {</a>
+<a class="sourceLine" id="cb80-13" title="13">    instructions <span class="co"># exécutées si expression retourne tout autre résultat</span></a>
+<a class="sourceLine" id="cb80-14" title="14">  }</a>
+<a class="sourceLine" id="cb80-15" title="15">)</a></code></pre></div>
+</div>
+</div>
+<div id="boucles-1" class="section level4">
+<h4>Boucles</h4>
+
+<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb81-1" title="1"><span class="cf">for</span>(valeur <span class="cf">in</span> ensemble) {</a>
+<a class="sourceLine" id="cb81-2" title="2">  instructions</a>
+<a class="sourceLine" id="cb81-3" title="3">}</a></code></pre></div>
+<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb82-1" title="1"><span class="cf">while</span>(condition) {</a>
+<a class="sourceLine" id="cb82-2" title="2">  instructions</a>
+<a class="sourceLine" id="cb82-3" title="3">}</a></code></pre></div>
+<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb83-1" title="1"><span class="cf">repeat</span> {</a>
+<a class="sourceLine" id="cb83-2" title="2">  instructions</a>
+<a class="sourceLine" id="cb83-3" title="3">  <span class="cf">if</span> (<span class="op">!</span>condition) {</a>
+<a class="sourceLine" id="cb83-4" title="4">    <span class="cf">break</span></a>
+<a class="sourceLine" id="cb83-5" title="5">  }</a>
+<a class="sourceLine" id="cb83-6" title="6">}</a></code></pre></div>
+<ul>
+<li><code>for</code> : boucle ayant un nombre prédéterminé d’itérations,</li>
+<li><code>while</code> : boucle arrêtant lorsqu’une condition n’est plus rencontrée,</li>
+<li><code>repeat</code> : boucle nécessitant le mot-clé <code>break</code> pour arrêter,</li>
+<li><code>break</code> : mot-clé pour terminer l’exécution de la boucle,</li>
+<li><code>next</code> : mot-clé pour sauter à la prochaine itération sans exécuter les instructions après le mot-clé.</li>
+</ul>
+<p><strong>À noter</strong> :</p>
+<ul>
+<li>Une boucle est souvent précédée par l’initialisation d’un objet dédié à contenir les résultats calculés dans la boucle.</li>
+<li>Il faut utiliser les fonctions <code>print</code> ou <code>cat</code> pour qu’un résultat soit affiché dans la console pendant l’exécution d’une boucle.</li>
+<li>Il est recommandé d’utiliser des boucles seulement si nécessaire, de favoriser les calculs vectoriels et l’utilisation des fonctions de la famille des <code>apply</code>.</li>
+</ul>
+<hr />
+<div style="page-break-after: always;"></div>
+</div>
+</div>
+<div id="références" class="section level1">
+<h1>Références</h1>
+<ul>
+<li>Matloff, N. (2011). The Art of R Programming : A Tour of Statistical Software Design. No Starch Press. Chapitre 7.</li>
+<li>Wickham, H. et Grolemund, G. (2016). R for Data Science. O’Reilly Media, Inc. :
+<ul>
+<li>Alternatives : Section 19.4 <a href="http://r4ds.had.co.nz/functions.html#conditional-execution" class="uri">http://r4ds.had.co.nz/functions.html#conditional-execution</a></li>
+<li>Boucles : Chapitre 21 <a href="http://r4ds.had.co.nz/iteration.html" class="uri">http://r4ds.had.co.nz/iteration.html</a></li>
+</ul></li>
+<li>Sections du tutoriel <a href="https://www.datamentor.io/r-programming" class="uri">https://www.datamentor.io/r-programming</a> :
+<ul>
+<li>Alternatives : <a href="https://www.datamentor.io/r-programming/if-else-statement" class="uri">https://www.datamentor.io/r-programming/if-else-statement</a></li>
+<li>Boucles <code>for</code> : <a href="https://www.datamentor.io/r-programming/for-loop" class="uri">https://www.datamentor.io/r-programming/for-loop</a></li>
+<li>Boucles <code>while</code> : <a href="https://www.datamentor.io/r-programming/while-loop" class="uri">https://www.datamentor.io/r-programming/while-loop</a></li>
+<li>Boucles <code>repeat</code> : <a href="https://www.datamentor.io/r-programming/repeat-loop" class="uri">https://www.datamentor.io/r-programming/repeat-loop</a></li>
+</ul></li>
+<li>Fanara, C. (2018). Tutoriel web intitulé « A Tutorial on Loops in R - Usage and Alternatives ». <a href="https://www.datacamp.com/community/tutorials/tutorial-on-loops-in-r" class="uri">https://www.datacamp.com/community/tutorials/tutorial-on-loops-in-r</a></li>
+</ul>
+</div>

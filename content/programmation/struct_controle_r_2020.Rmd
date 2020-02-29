@@ -29,61 +29,59 @@ editor_options:
 
 ***
 
-&nbsp;
 
-&nbsp;
+La matière vue jusqu'à maintenant dans le cours traitait principalement de l'utilisation du logiciel R dans le but de faire de la manipulation ou de l'analyse de données. Cette utilisation passe par la soumission de commandes dans la console R. En fait, souvent plus d'une commande est nécessaire pour produire le résultat escompté. Plutôt que de soumettre une après l'autre plusieurs commandes dans la console, nous avons appris qu'il était préférable d'écrire des programmes. Renommons « instructions » les commandes apparaissant dans un programme. Lorsqu'un programme R entier est soumis, les instructions qui le composent sont exécutées séquentiellement, c'est-à-dire l'une après l'autre, en respectant leur ordre d'apparition dans le programme.
 
-La matière vue jusqu'à maintenant dans le cours traitait principalement de l'utilisation du logiciel R dans le but de faire de la manipulation ou de l'analyse de données, incluant la production de graphique. Cette utilisation passe par la soumission de commandes dans la console de R. En fait, souvent plus d'une commande est nécessaire pour produire le résultat escompté. Plutôt que de soumettre une après l'autre les commandes dans la console, il est alors préférable d'écrire un petit programme (en d'autres mots un bloc de code). Les commandes sont alors plutôt appelées instructions. Lorsque le programme est soumis, les instructions qui le composent sont exécutées séquentiellement, c'est-à-dire l'une après l'autre, en respectant leur ordre d'apparition dans le programme.
+Comme presque tout langage informatique qui adhèrent au [paradigme de programmation impératif](https://fr.wikipedia.org/wiki/Programmation_imp%C3%A9rative), R offre des [structures de contrôles](https://fr.wikipedia.org/wiki/Structure_de_contr%C3%B4le) (aussi appelées séquencements). Les structures de contrôle sont des instructions particulières qui contrôlent l'ordre dans lequel d'autres instructions d'un programme informatique sont exécutées. Les appels de fonction, présents dans pratiquement toutes les instructions R étudiées dans ce cours jusqu'à maintenant, sont des structures de contrôle. Elles produisent un saut dans l'exécution des instructions d'un programme vers un sous-programme (le corps de la fonction), suivi d'un saut de retour vers le programme principal.
 
-Comme pratiquement tout langage de programmation, R offre des **structures de contrôles** (aussi appelées séquencements). Les structures de contrôle sont des instructions particulières qui contrôlent l'ordre dans lequel les autres instructions du programme informatique sont exécutées.
+Ce document décrit l'utilisation en R des deux autres structures de contrôle les plus courantes en programmation impérative : les alternatives (structures conditionnelles) et les boucles (structures itératives).
 
-Ainsi, il est possible de demander à R d'exécuter les instructions d'un programme autrement que séquentiellement. Les deux structures de contrôle de base sont présentées ici :
-
-- les alternatives : structures conditionnelles, 
-- les boucles : structures itératives.
-
-\newpage
 
 # Alternatives
 
-Les alternatives ont pour but d'exécuter des instructions seulement si une certaine condition est satisfaite.
+Les [alternatives](https://fr.wikipedia.org/wiki/Structure_de_contr%C3%B4le#Alternatives) ont pour but d'exécuter des instructions seulement si une certaine condition est satisfaite. Voyons ici deux outils pour créer des alternatives en R : la structure `if ... else` et la fonction switch.
 
-## Écriture générale
+## Structure `if ... else`
+
+### Écriture générale d'un `if ... else`
+
+Les mots-clés pour écrire des alternatives en R sont `if` et `else`. De façon générale, la syntaxe d'une structure de contrôle [`if ... else`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Control.html) est la suivante.
 
 ```{r eval = FALSE}
 if (condition) {
-  instructions  # exécutées si condition est TRUE
+  instructions  # exécutées si l'évaluation de condition retourne TRUE
 } else {
-  instructions  # exécutées si condition est FALSE
+  instructions  # exécutées si l'évaluation de condition retourne FALSE
 }
 ```
 
-Les mots-clés pour écrire des alternatives en R sont `if` et `else`. En fait, il est possible d'avoir un `if` sans `else`.
+Il est possible d'avoir un `if` sans `else`.
 
-Un `if` doit être suivi d'une paire de parenthèses dans laquelle est inséré une instruction R retournant un seul `TRUE` ou un seul `FALSE`. C'est la condition de l'alternative. Ensuite viennent la ou les instructions à exécuter si la condition est vraie (c'est-à-dire si l'instruction `condition` produit le résultat `TRUE`). S'il y a plus d'une instruction à exécuter, les accolades sont nécessaires pour les encadrer. Pour une seule instruction, les accolades sont optionnelles.
+```{r eval = FALSE}
+if (condition) {
+  instructions  # exécutées si l'évaluation de condition retourne TRUE
+}
+```
+
+Un `if` doit être suivi d'une paire de parenthèses dans laquelle est inséré une instruction R retournant une seule valeur logique (`TRUE` ou `FALSE`). C'est la condition de l'alternative. Ensuite viennent la ou les instructions à exécuter si la condition est vraie (c'est-à-dire si l'instruction `condition` produit le résultat `TRUE`). S'il y a plus d'une instruction à exécuter, les accolades sont nécessaires pour les encadrer. Pour une seule instruction, les accolades sont optionnelles.
+
 
 Voici un exemple :
 
-```{r}
+```{r eval = FALSE}
 # Simulation du lancer d'une pièce de monnaie
 lancer <- sample(x = c("Pile", "Face"), size = 1)
-```
 
-```{r eval = FALSE}
-# Structure qui affiche ou non un message, 
-# en fonction du résultat du lancer
-
+# Structure qui affiche ou non un message, en fonction du résultat du lancer
 if (lancer == "Pile")    # sans accolades
   print("Je gagne!")
-
 # ou encore
-
 if (lancer == "Pile") {  # avec accolades
   print("Je gagne!")
 }
 ```
 
-Lorsqu'il y a des instructions à exécuter si la condition est fausse, il faut ajouter un `else` à l'alternative, suivi des instructions en question. Dans ce cas, il est considéré comme une bonne pratique de toujours encadrer les instructions d'accolades (sauf si l'écriture condensée, qui sera présentée plus loin, est utilisée), même s'il n'y a qu'une seule instruction, de façon à retrouver le mot-clé `else` précédé de `}` et suivi de `{` .
+Lorsqu'il y a des instructions à exécuter si la condition est fausse, il faut ajouter un `else` à l'alternative, suivi des instructions en question. Dans ce cas, il est considéré comme une bonne pratique de toujours encadrer les blocs d'instructions d'accolades (sauf si l'écriture condensée, qui sera présentée plus loin, est utilisée), même s'ils sont composés d'une seule instruction, de façon à retrouver le mot-clé `else` précédé de `}` et suivi de `{` .
 
 Voici un exemple :
 
@@ -95,59 +93,70 @@ if (lancer == "Pile") {
 }
 ```
 
-Plusieurs structures `if ... else` peuvent être imbriquées. 
+Plusieurs structures `if ... else` peuvent être imbriquées. Pour ce faire, il suffit d'insérer une autre structure `if ... else` à la place de l'accolade suivant le dernier `else`, comme suit.
+
+```{r eval = FALSE}
+if (condition_1) {
+  instructions  # exécutées si condition_1 retourne TRUE
+} else if (condition_2) {
+  instructions  # exécutées si condition_1 retourne FALSE, mais condition_2 retourne TRUE
+} else {
+  instructions  # exécutées si condition_1 et condition_2 retournent FALSE
+}
+```
+
+Notons que la syntaxe précédente est préférée à la suivante, qui est équivalente mais plus lourde.
+
+```{r eval = FALSE}
+# Syntaxe non allégée de deux structures if ... else imbriquées
+if (condition_1) {
+  instructions  # exécutées si condition_1 retourne TRUE
+} else {
+  if (condition_2) {
+    instructions  # exécutées si condition_1 retourne FALSE, mais condition_2 retourne TRUE
+  } else {
+    instructions  # exécutées si condition_1 et condition_2 retournent FALSE
+  }
+}
+```
 
 Voici un exemple :
 
 ```{r ifelse}
-# Programme qui calcule des statistiques descriptives simples, 
-# selon le type des éléments du vecteur sur lequel le calcul est fait
-
 x <- iris$Sepal.Length
 
+# Programme qui calcule des statistiques descriptives simples, selon
+# le type des éléments du vecteur sur lequel le calcul est fait
 if (is.numeric(x)) {
-  min <- min(x)
-  moy <- mean(x)
-  max <- max(x)
-  stats <- c(min = min, moy = moy, max = max)
+  c(min = min(x), moy = mean(x), max = max(x))
 } else if (is.character(x) || is.factor(x)) {
-  stats <- table(x)
+  table(x)
 } else {
-  stats <- NA
+  NA
 }
-
-stats
 ```
 
 ```{r}
-# Faisons rouler les instructions de nouveau,
-# après avoir redéfini le vecteur x.
+# Faisons rouler les instructions de nouveau, après avoir redéfini le vecteur x.
 
 x <- iris$Species
 
 if (is.numeric(x)) {
-  min <- min(x)
-  moy <- mean(x)
-  max <- max(x)
-  stats <- c(min = min, moy = moy, max = max)
+  c(min = min(x), moy = mean(x), max = max(x))
 } else if (is.character(x) || is.factor(x)) {
-  stats <- table(x)
+  table(x)
 } else {
-  stats <- NA
+  NA
 }
-
-stats
 ```
 
 Il serait pratique de créer une fonction à partir de ce bout de code. Nous le ferons dans les [notes sur les fonctions en R](https://stt4230.rbind.io/programmation/fonctions_r/).
 
 
-Remarque : La fonction `switch` est parfois utile pour remplacer plusieurs `if ... else` imbriqués, mais cette fonction ne sera pas étudiée ici.
 
+### Écriture condensée d'un `if ... else`
 
-## Écriture condensée
-
-Lorsque, dans chaque branche d'une alternative, il n'y a qu'une seule instruction courte servant à créer un objet, l'écriture condensée suivante peut être pratique : 
+Lorsque, dans chaque branche d'une alternative `if ... else`, il n'y a seulement une instruction courte servant à créer un seul objet, l'écriture condensée suivante peut être pratique : 
 ```
 nom <- if (condition) instruction else instruction
 ```
@@ -161,7 +170,7 @@ message <- if (lancer == "Pile") "Je gagne!" else "Je perds..."
 ```
 
 
-## Distinction entre une structure `if ... else` et la fonction `ifelse`
+### Distinction entre une structure `if ... else` et la fonction `ifelse`
 
 Sous sa forme condensée, une structure `if ... else` fait penser à un appel à la fonction `ifelse`. Quelles sont les différences entre les deux?
 
@@ -169,18 +178,22 @@ Premièrement, la condition dans une structure `if ... else` doit être une inst
 
 ```{r}
 x <- 1:10
-xmodif <- if(x > 2.5 & x < 7.5) 5 else x
+xmodif <- if (x > 2.5 & x < 7.5) 5 else x
 xmodif
 ```
 
 Si nous avions utilisé l'opérateur logique `&&` au lieu de `&`, nous n'aurions pas obtenu cet avertissement, mais exactement le même résultat aurait été obtenu.
 
 ```{r}
-xmodif <- if(x > 2.5 && x < 7.5) 5 else x
+xmodif <- if (x > 2.5 && x < 7.5) 5 else x
 xmodif
 ```
 
-Les opérateurs logiques `&&` et `||` sont utiles pour écrire une condition d'un `if`, car elles assurent la production d'une seule valeur logique. 
+&nbsp;
+
+> **Les opérateurs logiques `&&` et `||` sont utiles pour écrire une condition d'un `if`, car ils assurent la production d'une seule valeur logique.** 
+
+&nbsp;
 
 Cependant, dans cet exemple, la structure de contrôle `if ... else` n'est probablement pas ce que nous voulions utiliser. Si notre but est de vérifier pour chaque élément de `x` si la valeur est comprise entre 2.5 et 7.5, si c'est le cas retourner la valeur 5, sinon retourner l'élément de `x` inchangé, alors c'est la fonction `ifelse` que nous devrions utiliser. 
 
@@ -189,16 +202,67 @@ xmodif <- ifelse(test = x > 2.5 & x < 7.5, yes = 5, no = x)
 xmodif
 ```
 
-[`ifelse` est une fonction qui agit de façon vectorielle](https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#variable-conditionnelle-a-une-autre-avec-la-fonction-ifelse). Elle teste une condition sur tous les éléments d'un objet et retourne une valeur en fonction du résultat. La dimension de la sortie d'un `ifelse` est la même que la dimension du premier argument qu'elle reçoit.
+[La fonction `ifelse` agit de façon vectorielle](https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#variable-conditionnelle-a-une-autre-avec-la-fonction-ifelse). Elle teste une condition sur tous les éléments d'un objet et retourne une valeur en fonction du résultat. La dimension de la sortie d'un `ifelse` est la même que la dimension du premier argument qu'elle reçoit.
 
 Ainsi, la fonction `ifelse` n'est pas une structure de contrôle.
 
 
-\newpage
+## Fonction `switch`
+
+La fonction [switch](https://stat.ethz.ch/R-manual/R-devel/library/base/html/switch.html) est parfois utile pour remplacer plusieurs structures `if ... else` imbriquées. La syntaxe générale d'un appel à la fonction `switch` est la suivante.
+
+```{r eval = FALSE}
+switch(
+  expression,
+  "resultat_1" = {
+    instructions # exécutées si expression retourne "resultat_1"
+  },
+  "resultat_2" = {
+    instructions # exécutées si expression retourne "resultat_2"
+  },
+  .
+  .  # autres paires (résultat, instructions à exécuter) s'il y a lieu
+  .
+  {
+    instructions # exécutées si expression retourne tout autre résultat
+  }
+)
+```
+
+Dans cette syntaxe générale, la valeur fournie au premier argument, représentée par `expression`, doit être une instruction R retournant une chaîne de caractères. Les autres arguments de la fonction doivent porter les noms de ce que peut produire en sortie `expression`. Les valeurs fournies à ces arguments sont les instructions à exécuter si `expression` retourne une chaîne de caractères égale au nom de l'argument. Si un dernier argument non assigné à un nom est fourni, il sera exécuté si `expression` retourne une chaîne de caractères ne se retrouvant pas parmi les noms d'arguments présents dans l'appel à la fonction `switch`. Notons que lorsqu'un résultat doit provoquer l'exécution d'une seule instruction, celle-ci n'a pas à être encadrée d'accolades.
+
+Voici un exemple :
+
+```{r}
+x <- iris$Sepal.Length
+
+# Structures if ... else imbriquées présentées précédemment, à reproduire
+if (is.numeric(x)) {
+  c(min = min(x), moy = mean(x), max = max(x))
+} else if (is.character(x) || is.factor(x)) {
+  table(x)
+} else {
+  NA
+}
+
+# Appel à la fonction switch équivalent
+switch(
+  class(x),
+  "numeric"   = c(min = min(x), moy = mean(x), max = max(x)),
+  "integer"   = c(min = min(x), moy = mean(x), max = max(x)),
+  "character" = table(x),
+  "factor"    = table(x),
+  NA
+)
+```
+
+Dans cet exemple, `expression` est l'instruction `class(x)`. Celle-ci retourne `"numeric"` pour un vecteur `x` contenant des données de type réel, mais retourne `"integer"` pour un vecteur `x` contenant des données de type entier. La condition `is.numeric(x)` retourne quant à elle `TRUE` pour tout vecteur numérique `x`, que ses données soient réelles ou entières. Afin de créer un appel à la fonction `switch` équivalent aux structures if ... else imbriquées à reproduire, il fallait donc définir les résultats `"numeric"` et `"integer"`. Les deux solutions implémentent la même alternative aussi parce que `is.character(x)` est équivalent à `class(x) == "character"` et `is.factor(x)` est équivalent à `class(x) == "factor"`.
+
+Notons que `expression` peut aussi retourner un entier, interprété comme le numéro du bloc d'instructions à exécuter. Par exemple, si `expression` produit le résultat `2` lorsqu'exécuté, c'est le deuxième bloc d'intructions (troisième argument fourni à la fonction `switch`) qui sera exécuté. Dans ce cas, les blocs d'instructions n'ont pas besoin d'être assignés à des noms.
 
 # Boucles
 
-Les boucles ont pour but de répéter des instructions à plusieurs reprises, de les itérer. Parfois, le nombre d'itérations à effectuer est connu d'avance. D'autres fois, ce nombre n'est pas connu d'avance, car il dépend d'une condition à rencontrer.
+Les [boucles](https://fr.wikipedia.org/wiki/Structure_de_contr%C3%B4le#Boucles) ont pour but de répéter des instructions à plusieurs reprises, c'est donc dire de les itérer. Parfois, le nombre d'itérations à effectuer est connu d'avance. D'autres fois, ce nombre d'itérations n'est pas connu d'avance, car il dépend d'une condition à rencontrer.
 
 ## Boucles `for`
 
@@ -206,50 +270,67 @@ Lorsque le nombre d'itérations à effectuer est prédéterminé, une boucle `fo
 
 #### Écriture générale d'une boucle `for` :
 
+\mbox{}
+
 ```{r eval = FALSE}
-for (valeur in ensemble) {
+for (itérateur in ensemble) {
   instructions  # exécutées à chaque itération de la boucle
 }
 ```
 
-Ce type de boucle débute par le mot clé `for`, suivi des éléments suivants, dans l'ordre.
+Ce type de boucle débute par le mot clé `for`, suivi des éléments suivants, dans l'ordre :
 
 - une parenthèse ouvrante; 
-- un nom quelconque, représenté par `value` dans la syntaxe générale;
+- un nom quelconque, représenté par `itérateur` dans la syntaxe générale;
 - le mot-clé `in`;
 - une instruction retournant un vecteur contenant l'ensemble des valeurs sur lesquelles itérer, représenté par `ensemble` dans la syntaxe générale;
 - une parenthèse fermante.
 
-Ensuite viennent la ou les instructions à répéter. S'il y a plus d'une instruction à répéter, les accolades sont nécessaires pour les encadrer. Dans ces instructions, l'objet nommé `value` dans la syntaxe générale intervient généralement. 
+Ensuite viennent la ou les instructions à répéter. S'il y a plus d'une instruction à répéter, les accolades sont nécessaires pour les encadrer. Dans ces instructions, l'objet nommé `itérateur` dans la syntaxe générale intervient généralement. 
 
-La boucle effectuera autant de répétitions que la longueur du vecteur `ensemble`. 
+La boucle effectue autant de répétitions que la longueur du vecteur `ensemble`. 
 
-- Première itération : `valeur` contient `ensemble[[1]]`.
-- Deuxième itération : `valeur` contient `ensemble[[2]]`.
+- Première itération : `itérateur` prend la valeur `ensemble[[1]]`.
+- Deuxième itération : `itérateur` prend la valeur `ensemble[[2]]`.
 - $\vdots$
-- Dernière itération : `valeur` contient `ensemble[[length(ensemble)]]`.
+- Dernière itération : `itérateur` prend la valeur `ensemble[[length(ensemble)]]`.
 
 Ainsi, de façon générale, pour les itérations `i` allant de `1` à `length(ensemble)`, `valeur` contient `ensemble[[i]]`.
 
 Voici un exemple :
 
 ```{r}
-for (lettre in LETTERS){
+for (lettre in LETTERS) {
   cat(lettre, " ")
 }
 ```
 
-Dans cet exemple, nous avons effectué 26 itérations, car `length(LETTERS)` = `r length(LETTERS)`. À l'itération `i`, nous avons affiché le `i`^e^ élément du vecteur `LETTERS`, soit la `i`^e^ lettre de l'alphabet.
+Dans cet exemple, nous avons effectué 26 itérations, car `length(LETTERS)` `==` `r length(LETTERS)`. À l'itération `i`, nous avons affiché le `i`^e^ élément du vecteur `LETTERS`, soit la `i`^e^ lettre de l'alphabet.
 
 Nous aurions pu effectuer exactement la même boucle en itérant sur les entiers de 1 à 26 comme suit :
 
 ```{r}
-for (i in 1:length(LETTERS)){
+for (i in seq_along(LETTERS)) {
   cat(LETTERS[[i]], " ")
 }
 ```
 
-Lorsque nous choisissons d'itérer sur les entiers allant de 1 au nombre total d'itérations à effectuer (disons `n`), il est commun d'utiliser le nom `i` pour l'objet changeant de valeur au fil des itérations et de créer le vecteur `ensemble` par l'instruction `1:n`. Dans l'exemple précédent, `n` est remplacé par une instruction retournant le nombre total d'itérations à effectuer, ici `length(LETTERS)`. Nous aurions aussi pu utiliser l'instruction `seq_along(LETTERS)` au lieu de `1:length(LETTERS)`. Les deux instructions produisent exactement le même vecteur.
+Lorsque nous choisissons d'itérer sur les entiers allant de 1 au nombre total d'itérations à effectuer (disons `n`), il est commun d'utiliser le nom `i` pour l'objet changeant de valeur au fil des itérations. Le vecteur `ensemble` est alors souvent créé par l'instruction `1:n`, mais il est plus prudent d'utiliser `seq_len(n)` qui retournera une erreur si `n` est négatif ou un vecteur vide si `n == 0`. Si le nombre d'itérations à effectuer `n` est égal à la longueur d'un objet, disons `a`, il est recommandé de créer le vecteur `ensemble` par l'instruction `seq_along(a)`. Pour un objet `a` de longueur non nulle, les instructions `1:length(a)` et `seq_along(a)` retournent exactement le même résultat, comme l'illustre cet exemple.
+
+```{r R.options = list(width = 90)}
+1:length(LETTERS)
+seq_along(LETTERS)
+```
+
+Cependant, si l'objet `a` s'adonne à être de longueur nulle, l'utilisation de `seq_along(a)` nous assure que la boucle n'effectue aucune itération. L'utilisation de `1:length(a)` entraînerait plutôt une itération sur `i = 1`, puis `i = 0`, qui risquerait de générer une erreur. Ce comportement s'explique par le fait que `1:length(a)` retourne dans ce cas particulier le vecteur (1, 0).
+
+```{r}
+a <- list()  # supposons que a est une liste vide
+1:length(a)
+seq_along(a)
+```
+
+**Autre exemple**:
 
 Voici un exemple de boucle `for`, utilisant le jeu de données `attitude` (provenant du package `datasets`)
 
@@ -273,8 +354,8 @@ lm(rating ~ ., data = attitude[, c(1, 2)])
 Nous souhaitons maintenant insérer cette instruction dans une boucle permettant d'effectuer les 6 régressions simples.
 
 ```{r}
-modeles <- vector(length = 6, mode = "list")
-for (i in 1:6) {
+modeles <- vector(length = ncol(attitude) - 1, mode = "list")
+for (i in seq_len(ncol(attitude) - 1)) {
   modeles[[i]] <- lm(rating ~ ., data = attitude[, c(1, i + 1)])
 }
 modeles
@@ -286,21 +367,20 @@ modeles
 Une affectation de valeur à un endroit précis d'un objet (ex.: `modeles[[i]] <- lm(...)`) nécessite que l'objet existe préalablement. Ainsi, une boucle est souvent précédée par l'initialisation d'un objet dédié à contenir les résultats calculés dans la boucle. Dans l'exemple précédent, nous avons initialisé la liste `modeles` avant la boucle par l'instruction :
 
 ```{r eval = FALSE}
-modeles <- vector(length = 6, mode = "list")
+modeles <- vector(length = ncol(attitude) - 1, mode = "list")
 ```
 
-Remarquez que la fonction `vector` crée bien une liste ici, et non un vecteur, grâce à l'argument `mode = "list"`.
+Remarquons que la fonction `vector` crée bien une liste ici, et non un vecteur, grâce à l'argument `mode = "list"`. Après tout, les listes sont des vecteurs récursifs.
 
 Nous aurions pu choisir d'itérer sur les noms des variables explicatives plutôt que sur les entiers 1 à 6, comme suit :
 
 ```{r eval = FALSE}
-modeles <- vector(length = 6, mode = "list")
+modeles <- vector(length = ncol(attitude) - 1, mode = "list")
 names(modeles) <- names(attitude)[-1]
 
 for (variable in names(modeles)) {
   modeles[[variable]] <- lm(rating ~ ., data = attitude[, c("rating", variable)])
 }
-modeles
 ```
 
 Dans ce cas, nous avons préalablement nommé les éléments de la liste initialement vide. Ainsi, dans la boucle, nous pouvons référer à des éléments spécifiques de la liste `modeles` par leur nom plutôt que par leur indice.
@@ -311,7 +391,7 @@ Dans ce cas, nous avons préalablement nommé les éléments de la liste initial
 Voici une boucle très simple.
 
 ```{r}
-for (i in 1:5) {
+for (i in seq_len(5)) {
   i
 }
 ```
@@ -325,13 +405,13 @@ i
 Ce résultat ne se produit pas dans une boucle. Il faut utiliser les fonctions `print` ou `cat` pour qu'un résultat soit affiché dans la console pendant l'exécution d'une boucle.
 
 ```{r}
-for (i in 1:5) {
+for (i in seq_len(5)) {
   print(i)
 }
 ```
 
 ```{r}
-for (i in 1:5) {
+for (i in seq_len(5)) {
   cat(i)
 }
 ```
@@ -339,12 +419,12 @@ for (i in 1:5) {
 `cat` est utile pour faire afficher une trace des itérations.
 
 ```{r}
-for (i in 1:5) {
+for (i in seq_len(5)) {
   cat("itération", i, "terminée\n")
 }
 ```
 
-Rappel : Le caractère `\n` représente un retour de chariot.
+Rappel : Le caractère `\n` représente un retour à la ligne.
 
 
 ## Boucles `while` ou `repeat`
@@ -359,18 +439,22 @@ while (condition) {
 }
 ```
 
+\newpage
+
 **Écriture générale d'une boucle `repeat`** :
 
 ```{r eval = FALSE}
 repeat {
   instructions  # exécutées à chaque itération de la boucle
-  if (!condition) break
+  if (!condition) {
+    break
+  }
 }
 ```
 
 Un des intérêts d'une boucle `repeat` est de tester la condition après avoir exécuté les instructions et non avant comme dans une boucle `while`. Dans un boucle `repeat`, le mot-clé `break` doit être utilisé pour mettre fin aux itérations, sinon la boucle est infinie.
 
-La `condition` doit encore une fois être une instruction qui retourne un seul `TRUE` ou un seul `FALSE`. 
+La `condition` doit encore une fois être une instruction qui retourne une seule valeur logique (`TRUE` ou `FALSE`). 
 
 Dans les écritures générales ci-dessus, remarquez qu'il y a un opérateur logique de négation devant la condition dans la boucle `repeat`. C'est pour mettre en évidence le fait qu'une boucle `while` continue d'itérer tant que `condition` demeure `TRUE`. Pour une même `condition`, il faut donc faire arrêter la boucle `repeat` lorsque `condition` devient `FALSE`.
 
@@ -379,25 +463,27 @@ Voici un exemple.
 Nous souhaitons simuler le lancer d'un dé jusqu'à l'obtention d'un 6 et compter le nombre de lancers.
 
 ```{r eval = FALSE}
-resultat <- 1     # initialisation à un résultat quelconque, différent de 6
-nbreLancers <- 0  # initialisation à 0 du nombre de lancer
+resultat <- 1   # initialisation à un résultat quelconque, différent de 6
+n_lancers <- 0  # initialisation à 0 du nombre de lancer
 while (resultat != 6) {              # tant que le résultat n'est pas égal à 6, répéter
   resultat <- sample(1:6, size = 1)  # simulation du lancer du dé
-  nbreLancers <- nbreLancers + 1     # incrémentation du nombre de lancers
+  n_lancers <- n_lancers + 1         # incrémentation du nombre de lancers
 }
-nbreLancers       # afficher le résultat final
+n_lancers       # afficher le résultat final
 ```
 
-La boucle `while` peut être remplacée par une boucle `repeat` avec un énoncé `break` comme suit.
+La boucle `while` peut être remplacée par une boucle `repeat` avec le mot-clé `break` comme suit.
 
 ```{r eval = FALSE}
-nbreLancers <- 0
+n_lancers <- 0
 repeat {
   resultat <- sample(1:6, size = 1)
-  nbreLancers <- nbreLancers + 1
-  if (resultat == 6) break
+  n_lancers <- n_lancers + 1
+  if (resultat == 6) {
+    break
+  }
 }
-nbreLancers
+n_lancers
 ```
 
 Ici, nous n'avons pas besoin d'initialiser `resultat`, car la condition est évaluée à la fin de la boucle, après avoir calculé `resultat` au moins une fois.
@@ -408,20 +494,22 @@ Remarque : Si les insctuctions dans une boucle `while` ou `repeat` n'ont aucun i
 
 Dans l'exemple précédent, il serait intéressant de répéter l'expérience un grand nombre de fois et de calculer le nombre moyen de lancers requis pour obtenir un 6. Pour ce faire nous pourrions imbriquer la boucle `while` ou `repeat` dans une boucle `for` comme suit :
 
+\newpage
+
 ```{r}
-nbreRep <- 10000
-nbreLancers <- rep(0, nbreRep)  # ou vector(length = nbreRep, mode = "numeric")
-for (i in 1:nbreRep) {
+n_rep <- 10000
+n_lancers <- rep(0, n_rep)  # ou vector(length = n_rep, mode = "numeric")
+for (i in 1:n_rep) {
   resultat <- 1 
-  while (resultat != 6){
+  while (resultat != 6) {
     resultat <- sample(1:6, size = 1)
-    nbreLancers[i] <- nbreLancers[i] + 1
+    n_lancers[i] <- n_lancers[i] + 1
   }
 }
-mean(nbreLancers)
+mean(n_lancers)
 ```
 
-Cet exemple montre une façon empirique d'estimer l'espérance d'une variable aléatoire géométrique de paramètre p = 1/6. Plus grand est le nombre de répétitions, plus l'estimation est précise (convergence). En théorie, cette espérance vaut 1/p = 6.
+Cet exemple montre une façon empirique d'estimer l'espérance d'une variable aléatoire suivant une [distribution géométrique](https://fr.wikipedia.org/wiki/Loi_g%C3%A9om%C3%A9trique) de paramètre p = 1/6. Plus grand est le nombre de répétitions, plus l'estimation est précise (convergence). En théorie, cette espérance vaut 1/p = 6.
 
 Il est simple d'imbriquer des boucles en R, peu importe leur type (`for`, `while` ou `repeat`). Cependant, nous verrons plus tard que plus l'imbrication possède de niveaux, plus le programme tend à être long à exécuter.
 
@@ -434,15 +522,17 @@ Deux mots-clés existent pour contrôler l'exécution des instructions à l'int�
 
 - `next` : pour terminer immédiatement une itération (sans exécuter les instructions après le mot-clé `next`) et reprendre l'exécution de la boucle à la prochaine itération.
 
-C'est deux mot-clés sont pratiquement toujours utilisés dans une structure `if`.
+Ces deux mot-clés sont pratiquement toujours utilisés dans une structure `if`.
 
 Le mot-clé `break` a déjà été illustré dans une boucle `repeat`. Notons cependant que nous pouvons l'utiliser dans une boucle de n'importe quel type.
 
 Illustrons maintenant l'utilisation du mot-clé `next`. Reprenons l'exemple de l'affichage des lettres de l'alphabet. Supposons que nous souhaitons afficher seulement les consonnes.
 
 ```{r}
-for (lettre in LETTERS){
-  if (lettre %in% c("A", "E", "I", "O", "U")) next
+for (lettre in LETTERS) {
+  if (lettre %in% c("A", "E", "I", "O", "U")) {
+    next
+  }
   cat(lettre, " ")
 }
 ```
@@ -451,8 +541,8 @@ Dans ce programme, si la condition `lettre %in% c("A", "E", "I", "O", "U")` est 
 
 En fait, le dernier programme fait la même chose que le programme suivant.
 ```{r}
-for (lettre in LETTERS){
-  if (! lettre %in% c("A", "E", "I", "O", "U")){
+for (lettre in LETTERS) {
+  if (! lettre %in% c("A", "E", "I", "O", "U")) {
     cat(lettre, " ")
   }
 }
@@ -468,7 +558,7 @@ Nous avons souvent constaté qu'il y a plusieurs façons de réaliser une même 
 Il peut arriver que, par erreur, nous soumettions en R une boucle vraiment longue à rouler, possiblement infinie. En RStudio, l'exécution de n'importe quelle commande, incluant une boucle, peut être interrompue d'une des façons suivantes :
 
 - la touche « Esc »,
-- le bouton STOP en entête à droite de la sous-fenêtre de la console R,
+- le bouton STOP en entête à droite de la sous-fenêtre de la console R (dans un petit logo de panneau d'arrêt rouge de forme octogonale),
 - le menu « Session > Interrupt R ».
 
 
@@ -478,8 +568,8 @@ Une des philosophies de base en programmation R est d'utiliser une boucle seulem
 
 Cette philosophie se base sur les faits suivants :
 
-- Le calcul vectoriel est plus rapide que les boucles.
-- Éviter les boucles produit habituellement un code plus court, donc plus rapide à écrire et aussi potentiellement plus facile à comprendre.
+- le calcul vectoriel est plus rapide que les boucles;
+- éviter les boucles produit habituellement un code plus court, donc plus rapide à écrire et aussi potentiellement plus facile à comprendre.
 
 ### Calcul vectoriel versus boucle
 
@@ -500,7 +590,7 @@ Dans bien des langages informatiques, il aura fallu faire une boucle, telle que 
 
 ```{r}
 z <- vector(length = length(x), mode = "numeric")
-for (i in 1:length(x)){
+for (i in seq_along(x)) {
   z[i] <- x[i]^2
 }
 z
@@ -527,7 +617,7 @@ sommesColonnes
 
 La fonction `colSums` revient à un appel à la fonction `apply` optimisé pour la tâche spécifique du calcul de sommes en colonnes.
 
-Dans bien des langages informatiques, il aura fallu faire une boucle, telle que celle-ci :
+Dans bien des langages informatiques, il aurait fallu faire une boucle, telle que celle-ci :
 
 ```{r}
 sommesColonnes <- vector(length = ncol(mat), mode = "numeric")
@@ -537,13 +627,17 @@ for (i in 1:ncol(mat)){
 sommesColonnes
 ```
 
-Il est plus rapide d’appeler la fonction `colSums` que d'écrire cette boucle.
+En termes de temps de travail requis pour écrire le code, il est plus rapide d’appeler la fonction `colSums` que d'écrire cette boucle. Aussi, le code avec l'appel à la fonction `colSums` est plus succinct, donc potentiellement plus simple à comprendre.
 
 ***
 
-# Synthèse
+# Résumé
 
-#### Structures de contrôle : Alternatives
+#### Alternatives
+
+##### Structure `if ... else`
+
+\mbox{}
 
 ```{r eval = FALSE}
 if (condition) {
@@ -553,7 +647,7 @@ if (condition) {
 }
 ```
 
-- `condition` = instruction qui retourne *un seul* `TRUE` ou *un seul* `FALSE`.
+- `condition` = instruction qui retourne *un seul logique* (`TRUE` ou `FALSE`).
 
 Écriture condensée d'une alternative :
 
@@ -565,7 +659,31 @@ x <- if (condition) instruction else instruction
 
 \newpage
 
-#### Structures de contrôle : Boucles
+##### Fonction `switch`
+
+\mbox{}
+
+```{r eval = FALSE}
+switch(
+  expression,
+  "resultat_1" = {
+    instructions # exécutées si expression retourne "resultat_1"
+  },
+  "resultat_2" = {
+    instructions # exécutées si expression retourne "resultat_2"
+  },
+  .
+  .  # autres paires (résultat, instructions à exécuter) s'il y a lieu
+  .
+  {
+    instructions # exécutées si expression retourne tout autre résultat
+  }
+)
+```
+
+#### Boucles
+
+\mbox{}
 
 ```{r eval = FALSE}
 for(valeur in ensemble) {
@@ -582,7 +700,9 @@ while(condition) {
 ```{r eval = FALSE}
 repeat {
   instructions
-  if (!condition) break
+  if (!condition) {
+    break
+  }
 }
 ```
 
@@ -602,16 +722,18 @@ repeat {
 
 ***
 
+\newpage
+
 # Références
 
 - Matloff, N. (2011). The Art of R Programming : A Tour of Statistical Software Design. No Starch Press. Chapitre 7.
-- http://r4ds.had.co.nz/functions.html#conditional-execution
-- http://r4ds.had.co.nz/iteration.html
-- https://www.datacamp.com/community/tutorials/tutorial-on-loops-in-r
+- Wickham, H. et Grolemund, G. (2016). R for Data Science. O'Reilly Media, Inc. :
+    * Alternatives : Section 19.4 http://r4ds.had.co.nz/functions.html#conditional-execution
+    * Boucles : Chapitre 21 http://r4ds.had.co.nz/iteration.html
 - Sections du tutoriel https://www.datamentor.io/r-programming :
     * Alternatives : https://www.datamentor.io/r-programming/if-else-statement
     * Boucles `for` : https://www.datamentor.io/r-programming/for-loop
     * Boucles `while` : https://www.datamentor.io/r-programming/while-loop
     * Boucles `repeat` : https://www.datamentor.io/r-programming/repeat-loop
-
+- Fanara, C. (2018). Tutoriel web intitulé « A Tutorial on Loops in R - Usage and Alternatives ». https://www.datacamp.com/community/tutorials/tutorial-on-loops-in-r
 
