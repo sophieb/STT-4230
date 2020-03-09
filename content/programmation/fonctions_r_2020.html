@@ -1,0 +1,1022 @@
+---
+title: "Fonctions en R"
+author: "Sophie Baillargeon, Université Laval"
+date: "2020-03-08"
+weight: 3
+slug: "fonctions_r"
+categories: ["cours_2020-03-17"]
+categories_weight: 2
+lastmodifierdisplayname : "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+    highlight: tango
+  blogdown::html_page:
+    toc: yes
+    toc_depth: 3
+    highlight: tango
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \renewcommand{\linethickness}{0.05em}
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  { background-color: #f8f8f8; }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<div id="TOC">
+<ul>
+<li><a href="#syntaxe-générale-dune-fonction-r">Syntaxe générale d’une fonction R</a><ul>
+<li><a href="#composantes-dune-fonction-r">Composantes d’une fonction R</a></li>
+<li><a href="#fonction-anonyme">Fonction anonyme</a></li>
+</ul></li>
+<li><a href="#arguments-en-entrée">Arguments en entrée</a><ul>
+<li><a href="#valeurs-par-défaut-des-arguments">Valeurs par défaut des arguments</a><ul>
+<li><a href="#valeur-par-défaut-pour-un-argument-acceptant-seulement-un-petit-nombre-de-chaînes-de-caractères-spécifiques">Valeur par défaut pour un argument acceptant seulement un petit nombre de chaînes de caractères spécifiques</a></li>
+</ul></li>
+<li><a href="#appel-dune-fonction">Appel d’une fonction</a></li>
+<li><a href="#argument-...">Argument <code>...</code></a><ul>
+<li><a href="#utilité-1-recevoir-un-nombre-indéterminé-dobjets-en-entrée">Utilité 1 : recevoir un nombre indéterminé d’objets en entrée</a></li>
+<li><a href="#utilité-2-passer-des-arguments-à-une-autre-fonction">Utilité 2 : passer des arguments à une autre fonction</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#résultat-produit-par-une-fonction">Résultat produit par une fonction</a><ul>
+<li><a href="#sortie-dune-fonction">Sortie d’une fonction</a></li>
+<li><a href="#retour-de-plusieurs-objets-dans-une-liste">Retour de plusieurs objets dans une liste</a></li>
+<li><a href="#fonction-match.call">Fonction <code>match.call</code></a></li>
+<li><a href="#effets-de-bord-dune-fonction">Effets de bord d’une fonction</a></li>
+</ul></li>
+<li><a href="#évaluation-dun-appel-à-une-fonction-et-environnements-associés">Évaluation d’un appel à une fonction et environnements associés</a><ul>
+<li><a href="#passage-darguments-par-valeur">Passage d’arguments par valeur</a></li>
+<li><a href="#portée-lexicale">Portée lexicale</a></li>
+<li><a href="#chemin-de-recherche-complet">Chemin de recherche complet</a></li>
+<li><a href="#bonnes-pratiques-concernant-les-objets-utilisables-dans-le-corps-dune-fonction">Bonnes pratiques concernant les objets utilisables dans le corps d’une fonction</a></li>
+</ul></li>
+<li><a href="#exemple-de-création-dune-fonction-r">Exemple de création d’une fonction R</a><ul>
+<li><a href="#étapes-de-développement-conseillées">Étapes de développement conseillées</a></li>
+</ul></li>
+<li><a href="#programmation-fonctionnelle">Programmation fonctionnelle</a></li>
+<li><a href="#résumé">Résumé</a></li>
+<li><a href="#références">Références</a></li>
+</ul>
+</div>
+
+<hr />
+<p> </p>
+<p>Lorsqu’un bout de code R est susceptible d’être utilisé à répétition (p. ex. pour faire un même calcul sur des données différentes), il est préférable d’en faire une fonction R. Les fonctions permettent de :</p>
+<ul>
+<li>rédiger du code plus clair et plus court, donc plus facile à comprendre et à partager;</li>
+<li>diminuer les risques de faire des erreurs;</li>
+<li>sauver du temps à long terme.</li>
+</ul>
+<p>Bref, faire des fonctions est une bonne pratique de programmation en R.</p>
+<p>Comme il a déjà été mentionné dans les <a href="https://stt4230.rbind.io/introduction/base_r/#quest-ce-quune-fonction-r">notes sur les concepts de base en R</a>, une fonction R est un bout de code qui produit un certain résultat, lorsqu’exécuté. Pour exécuter le code composant une fonction, celle-ci doit être <em>appelée</em>. Lorsqu’elle est appelée, la fonction prend des valeurs en entrée, qui sont assignées à des <em>arguments</em>. Le code de la fonction réfère à ces arguments de façon à ce que l’appel de la fonction provoque un traitement des valeurs fournies en entrée. En fin de compte, la fonction génère un résultat, qui est la plupart du temps <em>retourné</em> dans un objet en sortie. Ce résultat peut aussi être un <em>effet de bord</em> (p. ex. la production d’un graphique, l’écriture dans un fichier externe, etc.)</p>
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-1"></span>
+<img src="fig/Fonction.png" alt="Représentation schématique de l'exécution d'un appel à une fonction R" width="80%" />
+<p class="caption">
+Figure 1: Représentation schématique de l’exécution d’un appel à une fonction R
+</p>
+</div>
+<p>Voyons maintenant comment écrire nos propres fonctions en R.</p>
+<div id="syntaxe-générale-dune-fonction-r" class="section level1">
+<h1>Syntaxe générale d’une fonction R</h1>
+<p>Pour créer une fonction en R, il faut utiliser le mot-clé <code>function</code> en respectant la syntaxe suivante :</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">nom_fonction &lt;-<span class="st"> </span><span class="cf">function</span>(arg_<span class="dv">1</span>, arg_<span class="dv">2</span>, arg_<span class="dv">3</span>){</a>
+<a class="sourceLine" id="cb1-2" title="2">  instructions  <span class="co"># formant le corps de la fonction</span></a>
+<a class="sourceLine" id="cb1-3" title="3">}</a></code></pre></div>
+<p><code>arg_1</code>, <code>arg_2</code> et <code>arg_3</code> représentent les arguments de la fonction (aussi appelés paramètres dans d’autres langages informatiques), soit les objets qui peuvent être fournis en entrée à la fonction, qui ne sont pas nécessairement au nombre de trois.</p>
+<p>Voici une fonction qui reprend un exemple présenté dans les notes sur les <a href="https://stt4230.rbind.io/programmation/struct_controle_r/#%C3%A9criture-g%C3%A9n%C3%A9rale-dun-if-...-else">structures de contrôle en R</a>. Elle calcule des statistiques descriptives simples selon le type des éléments du vecteur donné en entrée.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1">stats_desc &lt;-<span class="st"> </span><span class="cf">function</span>(x){</a>
+<a class="sourceLine" id="cb2-2" title="2">  <span class="cf">if</span> (<span class="kw">is.numeric</span>(x)) {</a>
+<a class="sourceLine" id="cb2-3" title="3">    stats &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">min =</span> <span class="kw">min</span>(x), <span class="dt">moy =</span> <span class="kw">mean</span>(x), <span class="dt">max =</span> <span class="kw">max</span>(x))</a>
+<a class="sourceLine" id="cb2-4" title="4">  } <span class="cf">else</span> <span class="cf">if</span> (<span class="kw">is.character</span>(x) <span class="op">||</span><span class="st"> </span><span class="kw">is.factor</span>(x)) {</a>
+<a class="sourceLine" id="cb2-5" title="5">    stats &lt;-<span class="st"> </span><span class="kw">table</span>(x)</a>
+<a class="sourceLine" id="cb2-6" title="6">  } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb2-7" title="7">    stats &lt;-<span class="st"> </span><span class="ot">NA</span></a>
+<a class="sourceLine" id="cb2-8" title="8">  }</a>
+<a class="sourceLine" id="cb2-9" title="9">  stats</a>
+<a class="sourceLine" id="cb2-10" title="10">}</a></code></pre></div>
+<p>Après avoir soumis le code de création de cette fonction dans la console, la fonction se retrouve dans l’environnement de travail. Il est alors possible de l’appeler.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw">stats_desc</span>(<span class="dt">x =</span> iris<span class="op">$</span>Species)</a></code></pre></div>
+<pre><code>## x
+##     setosa versicolor  virginica 
+##         50         50         50</code></pre>
+<p>Nous pourrions ajouter un argument à cette fonction. Par exemple, nous pourrions offrir l’option d’une sortie présentée sous la forme d’une matrice plutôt que d’un vecteur.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">stats_desc &lt;-<span class="st"> </span><span class="cf">function</span>(x, sortie_matrice){</a>
+<a class="sourceLine" id="cb5-2" title="2">  <span class="co"># Calcul</span></a>
+<a class="sourceLine" id="cb5-3" title="3">  <span class="cf">if</span> (<span class="kw">is.numeric</span>(x)) {</a>
+<a class="sourceLine" id="cb5-4" title="4">    stats &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">min =</span> <span class="kw">min</span>(x), <span class="dt">moy =</span> <span class="kw">mean</span>(x), <span class="dt">max =</span> <span class="kw">max</span>(x))</a>
+<a class="sourceLine" id="cb5-5" title="5">  } <span class="cf">else</span> <span class="cf">if</span> (<span class="kw">is.character</span>(x) <span class="op">||</span><span class="st"> </span><span class="kw">is.factor</span>(x)) {</a>
+<a class="sourceLine" id="cb5-6" title="6">    stats &lt;-<span class="st"> </span><span class="kw">table</span>(x, <span class="dt">dnn =</span> <span class="ot">NULL</span>)</a>
+<a class="sourceLine" id="cb5-7" title="7">  } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb5-8" title="8">    stats &lt;-<span class="st"> </span><span class="ot">NA</span></a>
+<a class="sourceLine" id="cb5-9" title="9">  }</a>
+<a class="sourceLine" id="cb5-10" title="10">  <span class="co"># Production de la sortie</span></a>
+<a class="sourceLine" id="cb5-11" title="11">  <span class="cf">if</span> (sortie_matrice){</a>
+<a class="sourceLine" id="cb5-12" title="12">    stats &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(stats)</a>
+<a class="sourceLine" id="cb5-13" title="13">    <span class="kw">colnames</span>(stats) &lt;-<span class="st"> </span><span class="cf">if</span> (<span class="kw">is.character</span>(x) <span class="op">||</span><span class="st"> </span><span class="kw">is.factor</span>(x)) <span class="st">&quot;frequence&quot;</span> <span class="cf">else</span> <span class="st">&quot;stat&quot;</span></a>
+<a class="sourceLine" id="cb5-14" title="14">  }</a>
+<a class="sourceLine" id="cb5-15" title="15">  stats</a>
+<a class="sourceLine" id="cb5-16" title="16">}</a></code></pre></div>
+<p>L’argument <code>dnn = NULL</code> a aussi été ajouté dans l’appel à la fonction <code>table</code> afin de retirer le nom de la dimension (ici <code>x</code>) dans la sortie produite par la fonction. Nous pouvons maintenant appeler la fonction comme suit.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">stats_desc</span>(<span class="dt">x =</span> iris<span class="op">$</span>Species, <span class="dt">sortie_matrice =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<pre><code>##            frequence
+## setosa            50
+## versicolor        50
+## virginica         50</code></pre>
+<div id="composantes-dune-fonction-r" class="section level2">
+<h2>Composantes d’une fonction R</h2>
+<p>Les composantes d’une fonction R sont :</p>
+<ul>
+<li>la liste de ses arguments, possiblement avec des valeurs par défaut (nous allons y revenir);</li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="kw">args</span>(stats_desc)</a></code></pre></div>
+<pre><code>## function (x, sortie_matrice) 
+## NULL</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="co"># ou</span></a>
+<a class="sourceLine" id="cb10-2" title="2"><span class="kw">formals</span>(stats_desc)</a></code></pre></div>
+<pre><code>## $x
+## 
+## 
+## $sortie_matrice</code></pre>
+<ul>
+<li>le corps de la fonction, soit les instructions qui la constituent.</li>
+</ul>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="kw">body</span>(stats_desc)</a></code></pre></div>
+<pre><code>## {
+##     if (is.numeric(x)) {
+##         stats &lt;- c(min = min(x), moy = mean(x), max = max(x))
+##     }
+##     else if (is.character(x) || is.factor(x)) {
+##         stats &lt;- table(x, dnn = NULL)
+##     }
+##     else {
+##         stats &lt;- NA
+##     }
+##     if (sortie_matrice) {
+##         stats &lt;- as.matrix(stats)
+##         colnames(stats) &lt;- if (is.character(x) || is.factor(x)) 
+##             &quot;frequence&quot;
+##         else &quot;stat&quot;
+##     }
+##     stats
+## }</code></pre>
+<ul>
+<li>l’environnement englobant de la fonction (défini plus loin).</li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="kw">environment</span>(stats_desc)</a></code></pre></div>
+<pre><code>## &lt;environment: R_GlobalEnv&gt;</code></pre>
+</div>
+<div id="fonction-anonyme" class="section level2">
+<h2>Fonction anonyme</h2>
+<p>Notons qu’une fonction n’a même pas besoin de porter de nom. La grande majorité du temps, une fonction est conçue pour être appelée à plusieurs reprises et il est alors nécessaire qu’elle ait un nom. Cependant, certaines fonctions sont parfois à usage unique.</p>
+<p>Par exemple, il est parfois utile de se créer une fonction pour personnaliser le calcul effectué par une fonction de la famille des <code>apply</code>. Si cette fonction est très courte et a peu de chance d’être réutilisée, il n’est pas nécessaire de la nommer.</p>
+<p>Voici un exemple. Si nous voulions calculer le minimum, la moyenne et le maximum (comme le fait notre fonction <code>stats_desc</code>) de toutes les variables numériques du jeu de données <code>iris</code>, mais selon le niveau de la variable <code>Species</code>, nous pourrions utiliser trois appels à la fonction <code>aggregate</code> comme suit.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="kw">aggregate</span>(<span class="dt">x =</span> iris[, <span class="dv">-5</span>], <span class="dt">by =</span> <span class="kw">list</span>(iris<span class="op">$</span>Species), <span class="dt">FUN =</span> min)</a></code></pre></div>
+<pre><code>##      Group.1 Sepal.Length Sepal.Width Petal.Length Petal.Width
+## 1     setosa          4.3         2.3          1.0         0.1
+## 2 versicolor          4.9         2.0          3.0         1.0
+## 3  virginica          4.9         2.2          4.5         1.4</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1"><span class="kw">aggregate</span>(<span class="dt">x =</span> iris[, <span class="dv">-5</span>], <span class="dt">by =</span> <span class="kw">list</span>(iris<span class="op">$</span>Species), <span class="dt">FUN =</span> mean)</a></code></pre></div>
+<pre><code>##      Group.1 Sepal.Length Sepal.Width Petal.Length Petal.Width
+## 1     setosa        5.006       3.428        1.462       0.246
+## 2 versicolor        5.936       2.770        4.260       1.326
+## 3  virginica        6.588       2.974        5.552       2.026</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1"><span class="kw">aggregate</span>(<span class="dt">x =</span> iris[, <span class="dv">-5</span>], <span class="dt">by =</span> <span class="kw">list</span>(iris<span class="op">$</span>Species), <span class="dt">FUN =</span> max)</a></code></pre></div>
+<pre><code>##      Group.1 Sepal.Length Sepal.Width Petal.Length Petal.Width
+## 1     setosa          5.8         4.4          1.9         0.6
+## 2 versicolor          7.0         3.4          5.1         1.8
+## 3  virginica          7.9         3.8          6.9         2.5</code></pre>
+<p>Nous pourrions aussi créer une fonction qui calcule les trois statistiques et donner cette fonction en entrée à <code>aggregate</code> comme valeur à l’argument <code>FUN</code>.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" title="1"><span class="kw">aggregate</span>(<span class="dt">x   =</span> iris[, <span class="dv">-5</span>], </a>
+<a class="sourceLine" id="cb22-2" title="2">          <span class="dt">by  =</span> <span class="kw">list</span>(iris<span class="op">$</span>Species), </a>
+<a class="sourceLine" id="cb22-3" title="3">          <span class="dt">FUN =</span> <span class="cf">function</span>(x) <span class="kw">c</span>(<span class="dt">min =</span> <span class="kw">min</span>(x), <span class="dt">moy =</span> <span class="kw">mean</span>(x), <span class="dt">max =</span> <span class="kw">max</span>(x)))</a></code></pre></div>
+<pre><code>##      Group.1 Sepal.Length.min Sepal.Length.moy Sepal.Length.max Sepal.Width.min
+## 1     setosa            4.300            5.006            5.800           2.300
+## 2 versicolor            4.900            5.936            7.000           2.000
+## 3  virginica            4.900            6.588            7.900           2.200
+##   Sepal.Width.moy Sepal.Width.max Petal.Length.min Petal.Length.moy Petal.Length.max
+## 1           3.428           4.400            1.000            1.462            1.900
+## 2           2.770           3.400            3.000            4.260            5.100
+## 3           2.974           3.800            4.500            5.552            6.900
+##   Petal.Width.min Petal.Width.moy Petal.Width.max
+## 1           0.100           0.246           0.600
+## 2           1.000           1.326           1.800
+## 3           1.400           2.026           2.500</code></pre>
+<p>Nous n’avons jamais donné de nom à la fonction et cela n’a causé aucun problème. Nous n’avons même pas utilisé d’accolades pour encadrer le corps de la fonction. Ce n’est pas nécessaire lorsque celui-ci est composé d’une seule instruction.</p>
+</div>
+</div>
+<div id="arguments-en-entrée" class="section level1">
+<h1>Arguments en entrée</h1>
+<p>Les arguments d’une fonction sont définis en énumérant leurs noms entre les parenthèses après le mot-clé <code>function</code>.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" title="1">nom_fonction &lt;-<span class="st"> </span><span class="cf">function</span>(arg_<span class="dv">1</span>, arg_<span class="dv">2</span>, arg_<span class="dv">3</span>){</a>
+<a class="sourceLine" id="cb24-2" title="2">  instructions  <span class="co"># formant le corps de la fonction</span></a>
+<a class="sourceLine" id="cb24-3" title="3">}</a></code></pre></div>
+<p>Il n’y a pas de restrictions quant au nombre d’arguments que peut posséder une fonction. Exceptionnellement, une fonction peut même ne posséder aucun argument. C’est le cas par exemple de la fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/getwd.html"><code>getwd</code></a> et de la fonction suivante.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" title="1">HelloWorld &lt;-<span class="st"> </span><span class="cf">function</span>() <span class="kw">cat</span>(<span class="st">&quot;Hello World !&quot;</span>)</a></code></pre></div>
+<p>Comme nous le savons déjà, pour appeler une fonction sans fournir d’arguments, il faut tout de même utiliser les parenthèses.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" title="1"><span class="kw">HelloWorld</span>()</a></code></pre></div>
+<pre><code>## Hello World !</code></pre>
+<p>Omettre les parenthèses retourne le code source de la fonction.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" title="1">HelloWorld</a></code></pre></div>
+<pre><code>## function() cat(&quot;Hello World !&quot;)</code></pre>
+<div id="valeurs-par-défaut-des-arguments" class="section level2">
+<h2>Valeurs par défaut des arguments</h2>
+<p>Afin de définir une valeur par défaut pour un argument, il faut accompagner son nom dans l’énumération des arguments d’un opérateur <code>=</code> et d’une expression R retournant la valeur par défaut. Par exemple, dans la fonction <code>stats_desc</code>, il serait préférable de définir un format par défaut pour la sortie.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" title="1">stats_desc &lt;-<span class="st"> </span><span class="cf">function</span> (x, <span class="dt">sortie_matrice =</span> <span class="ot">FALSE</span>) {</a>
+<a class="sourceLine" id="cb30-2" title="2">  <span class="co"># Calcul</span></a>
+<a class="sourceLine" id="cb30-3" title="3">  <span class="cf">if</span> (<span class="kw">is.numeric</span>(x)) {</a>
+<a class="sourceLine" id="cb30-4" title="4">    stats &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">min =</span> <span class="kw">min</span>(x), <span class="dt">moy =</span> <span class="kw">mean</span>(x), <span class="dt">max =</span> <span class="kw">max</span>(x))</a>
+<a class="sourceLine" id="cb30-5" title="5">  } <span class="cf">else</span> <span class="cf">if</span> (<span class="kw">is.character</span>(x) <span class="op">||</span><span class="st"> </span><span class="kw">is.factor</span>(x)) {</a>
+<a class="sourceLine" id="cb30-6" title="6">    stats &lt;-<span class="st"> </span><span class="kw">table</span>(x, <span class="dt">dnn =</span> <span class="ot">NULL</span>)</a>
+<a class="sourceLine" id="cb30-7" title="7">  } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb30-8" title="8">    stats &lt;-<span class="st"> </span><span class="ot">NA</span></a>
+<a class="sourceLine" id="cb30-9" title="9">  }</a>
+<a class="sourceLine" id="cb30-10" title="10">  <span class="co"># Production de la sortie</span></a>
+<a class="sourceLine" id="cb30-11" title="11">  <span class="cf">if</span> (sortie_matrice){</a>
+<a class="sourceLine" id="cb30-12" title="12">    stats &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(stats)</a>
+<a class="sourceLine" id="cb30-13" title="13">    <span class="kw">colnames</span>(stats) &lt;-<span class="st"> </span><span class="cf">if</span> (<span class="kw">is.character</span>(x) <span class="op">||</span><span class="st"> </span><span class="kw">is.factor</span>(x)) <span class="st">&quot;frequence&quot;</span> <span class="cf">else</span> <span class="st">&quot;stat&quot;</span></a>
+<a class="sourceLine" id="cb30-14" title="14">  }</a>
+<a class="sourceLine" id="cb30-15" title="15">  stats</a>
+<a class="sourceLine" id="cb30-16" title="16">}</a></code></pre></div>
+<p>La liste des arguments de la fonction devient la suivante.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" title="1"><span class="kw">formals</span>(stats_desc)</a></code></pre></div>
+<pre><code>## $x
+## 
+## 
+## $sortie_matrice
+## [1] FALSE</code></pre>
+<p>Les arguments qui ne possèdent pas de valeur par défaut sont obligatoires. Si une fonction est appelée sans donner de valeur en entrée à un paramètre obligatoire, une erreur est produite.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" title="1"><span class="kw">stats_desc</span>(<span class="dt">sortie_matrice =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
+<pre><code>## Error in stats_desc(sortie_matrice = FALSE): argument &quot;x&quot; is missing, with no default</code></pre>
+<p>Les arguments ayant une valeur par défaut peuvent, pour leur part, ne pas être fournis en entrée, auquel cas leur valeur par défaut est utilisée.</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" title="1"><span class="kw">stats_desc</span>(<span class="dt">x =</span> iris<span class="op">$</span>Sepal.Length)</a></code></pre></div>
+<pre><code>##      min      moy      max 
+## 4.300000 5.843333 7.900000</code></pre>
+<div id="valeur-par-défaut-pour-un-argument-acceptant-seulement-un-petit-nombre-de-chaînes-de-caractères-spécifiques" class="section level3">
+<h3>Valeur par défaut pour un argument acceptant seulement un petit nombre de chaînes de caractères spécifiques</h3>
+<p>Attardons-nous maintenant à un cas particulier de valeur par défaut en R. Supposons qu’une fonction possède un argument qui prend en entrée une chaîne de caractères et que seulement un petit nombre de chaînes de caractères distinctes sont acceptées pour cet argument. C’est le cas par exemple de l’argument <code>useNA</code> de la fonction <code>table</code>. La fonction accepte seulement les valeurs <code>"no"</code>, <code>"ifany"</code> ou <code>"always"</code> pour cet argument. Donner une valeur autre à l’argument produit une erreur.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" title="1"><span class="kw">table</span>(iris<span class="op">$</span>Species, <span class="dt">useNA =</span> <span class="st">&quot;test&quot;</span>)</a></code></pre></div>
+<pre><code>## Error in match.arg(useNA): &#39;arg&#39; should be one of &quot;no&quot;, &quot;ifany&quot;, &quot;always&quot;</code></pre>
+<p>Une pratique courante en R pour un argument de ce type est de lui donner comme valeur dans l’énumération des arguments le vecteur de toutes ses valeurs possibles. C’est ce qui est fait dans la fonction table.</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" title="1"><span class="kw">args</span>(table)</a></code></pre></div>
+<pre><code>## function (..., exclude = if (useNA == &quot;no&quot;) c(NA, NaN), useNA = c(&quot;no&quot;, 
+##     &quot;ifany&quot;, &quot;always&quot;), dnn = list.names(...), deparse.level = 1) 
+## NULL</code></pre>
+<p>La valeur par défaut de l’argument n’est pas, dans ce cas, le vecteur complet <code>c("no", "ifany", "always")</code>, mais plutôt le premier élément de ce vecteur, soit <code>"no"</code>. Il en est ainsi, car le corps de la fonction contient l’instruction suivante.</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" title="1">useNA &lt;-<span class="st"> </span><span class="kw">match.arg</span>(useNA)</a></code></pre></div>
+<p>La fonction <code>match.arg</code> vérifie que la valeur donnée en entrée à un argument est bien une valeur acceptée ou retourne le premier élément du vecteur de valeurs possibles si aucune valeur n’a été donnée en entrée à l’argument.</p>
+<p>Nous devrions reproduire cette façon de faire dans nos propres fonctions qui possèdent un argument du même type que l’argument <code>useNA</code> de la fonction <code>table</code>. Par exemple, remplaçons l’argument <code>sortie_matrice</code> de notre fonction <code>stats_desc</code> par l’argument <code>format_sortie</code> comme suit.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" title="1">stats_desc &lt;-<span class="st"> </span><span class="cf">function</span> (x, <span class="dt">format_sortie =</span> <span class="kw">c</span>(<span class="st">&quot;vecteur&quot;</span>, <span class="st">&quot;matrice&quot;</span>, <span class="st">&quot;liste&quot;</span>)) {</a>
+<a class="sourceLine" id="cb42-2" title="2">  <span class="co"># Calcul</span></a>
+<a class="sourceLine" id="cb42-3" title="3">  <span class="cf">if</span> (<span class="kw">is.numeric</span>(x)) {</a>
+<a class="sourceLine" id="cb42-4" title="4">    stats &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">min =</span> <span class="kw">min</span>(x), <span class="dt">moy =</span> <span class="kw">mean</span>(x), <span class="dt">max =</span> <span class="kw">max</span>(x))</a>
+<a class="sourceLine" id="cb42-5" title="5">  } <span class="cf">else</span> <span class="cf">if</span> (<span class="kw">is.character</span>(x) <span class="op">||</span><span class="st"> </span><span class="kw">is.factor</span>(x)) {</a>
+<a class="sourceLine" id="cb42-6" title="6">    stats &lt;-<span class="st"> </span><span class="kw">table</span>(x, <span class="dt">dnn =</span> <span class="ot">NULL</span>)</a>
+<a class="sourceLine" id="cb42-7" title="7">  } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb42-8" title="8">    stats &lt;-<span class="st"> </span><span class="ot">NA</span></a>
+<a class="sourceLine" id="cb42-9" title="9">  }</a>
+<a class="sourceLine" id="cb42-10" title="10">  <span class="co"># Production de la sortie</span></a>
+<a class="sourceLine" id="cb42-11" title="11">  format_sortie &lt;-<span class="st"> </span><span class="kw">match.arg</span>(format_sortie)</a>
+<a class="sourceLine" id="cb42-12" title="12">  <span class="cf">if</span> (format_sortie <span class="op">==</span><span class="st"> &quot;matrice&quot;</span>){</a>
+<a class="sourceLine" id="cb42-13" title="13">    stats &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(stats)</a>
+<a class="sourceLine" id="cb42-14" title="14">    <span class="kw">colnames</span>(stats) &lt;-<span class="st"> </span><span class="cf">if</span> (<span class="kw">is.character</span>(x) <span class="op">||</span><span class="st"> </span><span class="kw">is.factor</span>(x)) <span class="st">&quot;frequence&quot;</span> <span class="cf">else</span> <span class="st">&quot;stat&quot;</span></a>
+<a class="sourceLine" id="cb42-15" title="15">  } <span class="cf">else</span> <span class="cf">if</span> (format_sortie <span class="op">==</span><span class="st"> &quot;liste&quot;</span>) {</a>
+<a class="sourceLine" id="cb42-16" title="16">    stats &lt;-<span class="st"> </span><span class="kw">as.list</span>(stats)</a>
+<a class="sourceLine" id="cb42-17" title="17">  }</a>
+<a class="sourceLine" id="cb42-18" title="18">  stats</a>
+<a class="sourceLine" id="cb42-19" title="19">}</a></code></pre></div>
+<p>La valeur par défaut de l’argument <code>format_sortie</code> est bel et bien <code>"vecteur"</code>.</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" title="1"><span class="kw">stats_desc</span>(<span class="dt">x =</span> iris<span class="op">$</span>Sepal.Length)</a></code></pre></div>
+<pre><code>##      min      moy      max 
+## 4.300000 5.843333 7.900000</code></pre>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb45-1" title="1"><span class="kw">stats_desc</span>(<span class="dt">x =</span> iris<span class="op">$</span>Sepal.Length, <span class="dt">format_sortie =</span> <span class="st">&quot;vecteur&quot;</span>)</a></code></pre></div>
+<pre><code>##      min      moy      max 
+## 4.300000 5.843333 7.900000</code></pre>
+<p>La présence du vecteur des chaînes de caractères possibles dans la définition des arguments est informative, car elle indique à l’utilisateur quelles valeurs sont acceptées par l’argument.</p>
+</div>
+</div>
+<div id="appel-dune-fonction" class="section level2">
+<h2>Appel d’une fonction</h2>
+<p>Les appels à nos propres fonctions respectent les mêmes règles que les <a href="https://stt4230.rbind.io/introduction/base_r/#comment-%C3%A9crire-un-appel-de-fonction-r">appels à n’importe quelle fonction R</a>. En plus du fonctionnement des valeurs par défaut décrit ci-dessus, rappelons que des valeurs peuvent être fournies aux arguments d’une fonction R par nom complet, par nom partiel ou par position. L’assignation de valeurs aux arguments se fait en respectant les règles de préséances suivantes :</p>
+<ol style="list-style-type: decimal">
+<li>d’abord les arguments fournis avec un nom exact se voient assigner une valeur (assignation explicite),</li>
+<li>puis les arguments fournis avec un nom partiel (encore assignation explicite),</li>
+<li>et finalement les arguments non nommés, selon leurs positions (assignation implicite).</li>
+</ol>
+<p>Voici quelques exemples.</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb47-1" title="1">test_appel &lt;-<span class="st"> </span><span class="cf">function</span>(x, option, param, parametre) {</a>
+<a class="sourceLine" id="cb47-2" title="2">  <span class="kw">cat</span>(<span class="st">&quot;l&#39;argument x prend la valeur&quot;</span>, x, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb47-3" title="3">  <span class="kw">cat</span>(<span class="st">&quot;l&#39;argument option prend la valeur&quot;</span>, option, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb47-4" title="4">  <span class="kw">cat</span>(<span class="st">&quot;l&#39;argument param prend la valeur&quot;</span>, param, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb47-5" title="5">  <span class="kw">cat</span>(<span class="st">&quot;l&#39;argument parametre prend la valeur&quot;</span>, parametre, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb47-6" title="6">}</a></code></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb48-1" title="1"><span class="kw">test_appel</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)</a></code></pre></div>
+<pre><code>## l&#39;argument x prend la valeur 1 
+## l&#39;argument option prend la valeur 2 
+## l&#39;argument param prend la valeur 3 
+## l&#39;argument parametre prend la valeur 4</code></pre>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb50-1" title="1"><span class="kw">test_appel</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dt">param =</span> <span class="dv">3</span>, <span class="dt">opt =</span> <span class="dv">4</span>)</a></code></pre></div>
+<pre><code>## l&#39;argument x prend la valeur 1 
+## l&#39;argument option prend la valeur 4 
+## l&#39;argument param prend la valeur 3 
+## l&#39;argument parametre prend la valeur 2</code></pre>
+<p>Le nom partiel <code>opt</code> a été reconnu comme représentant l’argument <code>option</code>. Un nom partiel pouvant représenter plus d’un argument génère cependant une erreur. C’est le cas du nom partiel <code>par</code> dans l’exemple suivant, qui pourrait référer à l’argument <code>param</code> ou encore à l’argument <code>parametre</code>.</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb52-1" title="1"><span class="kw">test_appel</span>(<span class="dv">1</span>, <span class="dt">par =</span> <span class="dv">2</span>, <span class="dt">option =</span> <span class="dv">3</span>, <span class="dv">4</span>)</a></code></pre></div>
+<pre><code>## Error in test_appel(1, par = 2, option = 3, 4): argument 2 matches multiple formal arguments</code></pre>
+<p>Une bonne pratique de programmation en R est d’utiliser l’assignation de valeurs aux arguments par positionnement seulement pour les premiers arguments, ceux les plus souvent utilisés. Les arguments moins communs devraient être nommés, en utilisant leurs noms complets, afin de conserver un code facile à comprendre.</p>
+</div>
+<div id="argument-..." class="section level2">
+<h2>Argument <code>...</code></h2>
+<p>Les deux utilités de l’<a href="https://stt4230.rbind.io/introduction/base_r/#largument-...-et-ses-deux-utilit%C3%A9s.">argument <code>...</code></a> ont été mentionnées lors du premier cours. Nous pouvons utiliser cet argument dans nos propres fonctions, en exploitant l’une ou l’autre de ses utilités.</p>
+<div id="utilité-1-recevoir-un-nombre-indéterminé-dobjets-en-entrée" class="section level3">
+<h3>Utilité 1 : recevoir un nombre indéterminé d’objets en entrée</h3>
+<p>L’argument <code>...</code> peut permettre de prendre un nombre indéterminé d’objets en entrée, comme dans cet exemple.</p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb54-1" title="1">stats_desc_multi &lt;-<span class="st"> </span><span class="cf">function</span>(...){</a>
+<a class="sourceLine" id="cb54-2" title="2">  args &lt;-<span class="st"> </span><span class="kw">list</span>(...)</a>
+<a class="sourceLine" id="cb54-3" title="3">  <span class="kw">lapply</span>(<span class="dt">X =</span> args, <span class="dt">FUN =</span> stats_desc)</a>
+<a class="sourceLine" id="cb54-4" title="4">}</a></code></pre></div>
+<p>Le corps de la fonction doit contenir une instruction pour récupérer les objets. Dans l’exemple précédent, ils sont récupérés par l’instruction <code>list(...)</code>. Voici un exemple d’appel à cette fonction.</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb55-1" title="1"><span class="kw">stats_desc_multi</span>(iris<span class="op">$</span>Sepal.Length, iris<span class="op">$</span>Petal.Width, iris<span class="op">$</span>Species)</a></code></pre></div>
+<pre><code>## [[1]]
+##      min      moy      max 
+## 4.300000 5.843333 7.900000 
+## 
+## [[2]]
+##      min      moy      max 
+## 0.100000 1.199333 2.500000 
+## 
+## [[3]]
+##     setosa versicolor  virginica 
+##         50         50         50</code></pre>
+<p>Il est même possible d’attribuer des noms aux arguments passés. Pour la fonction <code>stats_desc_multi</code>, ces noms deviennent les noms des éléments de la liste retournée en sortie.</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb57-1" title="1"><span class="kw">stats_desc_multi</span>(<span class="dt">Sepal.Length =</span> iris<span class="op">$</span>Sepal.Length, </a>
+<a class="sourceLine" id="cb57-2" title="2">              <span class="dt">Species =</span> iris<span class="op">$</span>Species)</a></code></pre></div>
+<pre><code>## $Sepal.Length
+##      min      moy      max 
+## 4.300000 5.843333 7.900000 
+## 
+## $Species
+##     setosa versicolor  virginica 
+##         50         50         50</code></pre>
+<p>Les objets passés en entrée via <code>...</code> peuvent aussi être référés dans le corps de la fonction par les noms <code>..1</code>, <code>..2</code>, <code>..3</code> et ainsi de suite.</p>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb59-1" title="1">test_trois_points &lt;-<span class="st"> </span><span class="cf">function</span>(...){</a>
+<a class="sourceLine" id="cb59-2" title="2">  <span class="kw">cat</span>(<span class="st">&quot;le premier argument prend la valeur&quot;</span>, ..<span class="dv">1</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb59-3" title="3">  <span class="kw">cat</span>(<span class="st">&quot;le deuxième argument prend la valeur&quot;</span>, ..<span class="dv">2</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb59-4" title="4">}</a></code></pre></div>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb60-1" title="1"><span class="kw">test_trois_points</span>(<span class="st">&quot;a&quot;</span>, <span class="dv">1</span>, <span class="ot">TRUE</span>)</a></code></pre></div>
+<pre><code>## le premier argument prend la valeur a 
+## le deuxième argument prend la valeur 1</code></pre>
+<p>Il vaut cependant mieux s’assurer que suffisamment d’objets ont été passés en entrée avant d’utiliser un de ces noms. Par exemple, si la fonction <code>test_trois_points</code> est appelée en lui fournissant un seul objet en entrée, elle génère une erreur.</p>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb62-1" title="1"><span class="kw">test_trois_points</span>(<span class="st">&quot;a&quot;</span>)</a></code></pre></div>
+<pre><code>## Error in cat(&quot;le deuxième argument prend la valeur&quot;, ..2, &quot;\n&quot;) : 
+##  the ... list contains fewer than 2 elements</code></pre>
+<p>L’instruction <code>...length()</code> retourne le nombre d’objets attrapés par l’argument <code>...</code>. Utilisons cette instruction pour améliorer la fonction <code>test_trois_points</code> comme suit.</p>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb64-1" title="1">test_trois_points &lt;-<span class="st"> </span><span class="cf">function</span>(...){</a>
+<a class="sourceLine" id="cb64-2" title="2">  <span class="cf">if</span> (<span class="kw">...length</span>() <span class="op">&gt;=</span><span class="st"> </span><span class="dv">1</span>) {</a>
+<a class="sourceLine" id="cb64-3" title="3">    <span class="kw">cat</span>(<span class="st">&quot;le premier argument prend la valeur&quot;</span>, ..<span class="dv">1</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb64-4" title="4">  }</a>
+<a class="sourceLine" id="cb64-5" title="5">  <span class="cf">if</span> (<span class="kw">...length</span>() <span class="op">&gt;=</span><span class="st"> </span><span class="dv">2</span>) {</a>
+<a class="sourceLine" id="cb64-6" title="6">    <span class="kw">cat</span>(<span class="st">&quot;le deuxième argument prend la valeur&quot;</span>, ..<span class="dv">2</span>, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb64-7" title="7">  }</a>
+<a class="sourceLine" id="cb64-8" title="8">}</a></code></pre></div>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb65-1" title="1"><span class="kw">test_trois_points</span>(<span class="st">&quot;a&quot;</span>)</a></code></pre></div>
+<pre><code>## le premier argument prend la valeur a</code></pre>
+<p>Nous pouvons faire encore mieux en bouclant sur les objets fournis en entrée, peu importe leur nombre. Dans ce cas, plutôt que d’utiliser les noms <code>..1</code>, <code>..2</code>, <code>..3</code> et ainsi de suite, nous utilisons la fonction <code>...elt</code>, qui prend en entrée un entier spécifiant une position et retourne l’objet attrapé par <code>...</code> à cette position.</p>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb67-1" title="1">test_trois_points &lt;-<span class="st"> </span><span class="cf">function</span>(...){</a>
+<a class="sourceLine" id="cb67-2" title="2">  <span class="cf">for</span> (i <span class="cf">in</span> <span class="kw">seq_len</span>(<span class="kw">...length</span>()))</a>
+<a class="sourceLine" id="cb67-3" title="3">    <span class="kw">cat</span>(<span class="st">&quot;l&#39;argument&quot;</span>, i, <span class="st">&quot;prend la valeur&quot;</span>, <span class="kw">...elt</span>(i), <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb67-4" title="4">}</a></code></pre></div>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb68-1" title="1"><span class="kw">test_trois_points</span>(<span class="st">&quot;a&quot;</span>, <span class="dv">1</span>, <span class="ot">TRUE</span>)</a></code></pre></div>
+<pre><code>## l&#39;argument 1 prend la valeur a 
+## l&#39;argument 2 prend la valeur 1 
+## l&#39;argument 3 prend la valeur TRUE</code></pre>
+<p>En résumé, lorsque l’argument <code>...</code> sert à recevoir un nombre indéterminé d’objets en entrée, les <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/dots.html">instructions suivantes peuvent nous être utiles pour manipuler, dans le corps de la fonction, les objets attrapés par <code>...</code></a> :</p>
+<ul>
+<li><code>list(...)</code>;</li>
+<li><code>..1</code>, <code>..2</code>, <code>..3</code> et ainsi de suite;</li>
+<li><code>...elt(n)</code> où <code>n</code> est un entier;</li>
+<li><code>...length()</code>.</li>
+</ul>
+</div>
+<div id="utilité-2-passer-des-arguments-à-une-autre-fonction" class="section level3">
+<h3>Utilité 2 : passer des arguments à une autre fonction</h3>
+<p>L’argument <code>...</code> permet aussi de passer des arguments à une fonction appelée dans le corps de la fonction. Par exemple, l’argument <code>...</code> serait utile à notre fonction <code>stats_desc</code> pour contrôler le traitement des valeurs manquantes. Dans le corps de la fonction, les appels aux fonctions auxquelles nous souhaitons permettre le passage d’arguments doivent contenir l’argument <code>...</code>, comme dans l’exemple suivant.</p>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb70-1" title="1">stats_desc &lt;-<span class="st"> </span><span class="cf">function</span> (x, <span class="dt">format_sortie =</span> <span class="kw">c</span>(<span class="st">&quot;vecteur&quot;</span>, <span class="st">&quot;matrice&quot;</span>, <span class="st">&quot;liste&quot;</span>), ...) {</a>
+<a class="sourceLine" id="cb70-2" title="2">  <span class="co"># Calcul</span></a>
+<a class="sourceLine" id="cb70-3" title="3">  <span class="cf">if</span> (<span class="kw">is.numeric</span>(x)) {</a>
+<a class="sourceLine" id="cb70-4" title="4">    stats &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dt">min =</span> <span class="kw">min</span>(x, ...), <span class="dt">moy =</span> <span class="kw">mean</span>(x, ...), <span class="dt">max =</span> <span class="kw">max</span>(x, ...))  <span class="co"># ... ici</span></a>
+<a class="sourceLine" id="cb70-5" title="5">  } <span class="cf">else</span> <span class="cf">if</span> (<span class="kw">is.character</span>(x) <span class="op">||</span><span class="st"> </span><span class="kw">is.factor</span>(x)) {</a>
+<a class="sourceLine" id="cb70-6" title="6">    stats &lt;-<span class="st"> </span><span class="kw">table</span>(x, <span class="dt">dnn =</span> <span class="ot">NULL</span>)</a>
+<a class="sourceLine" id="cb70-7" title="7">  } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb70-8" title="8">    stats &lt;-<span class="st"> </span><span class="ot">NA</span></a>
+<a class="sourceLine" id="cb70-9" title="9">  }</a>
+<a class="sourceLine" id="cb70-10" title="10">  <span class="co"># Production de la sortie</span></a>
+<a class="sourceLine" id="cb70-11" title="11">  format_sortie &lt;-<span class="st"> </span><span class="kw">match.arg</span>(format_sortie)</a>
+<a class="sourceLine" id="cb70-12" title="12">  <span class="cf">if</span> (format_sortie <span class="op">==</span><span class="st"> &quot;matrice&quot;</span>){</a>
+<a class="sourceLine" id="cb70-13" title="13">    stats &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(stats)</a>
+<a class="sourceLine" id="cb70-14" title="14">    <span class="kw">colnames</span>(stats) &lt;-<span class="st"> </span><span class="cf">if</span> (<span class="kw">is.character</span>(x) <span class="op">||</span><span class="st"> </span><span class="kw">is.factor</span>(x)) <span class="st">&quot;frequence&quot;</span> <span class="cf">else</span> <span class="st">&quot;stat&quot;</span></a>
+<a class="sourceLine" id="cb70-15" title="15">  } <span class="cf">else</span> <span class="cf">if</span> (format_sortie <span class="op">==</span><span class="st"> &quot;liste&quot;</span>) {</a>
+<a class="sourceLine" id="cb70-16" title="16">    stats &lt;-<span class="st"> </span><span class="kw">as.list</span>(stats)</a>
+<a class="sourceLine" id="cb70-17" title="17">  }</a>
+<a class="sourceLine" id="cb70-18" title="18">  stats</a>
+<a class="sourceLine" id="cb70-19" title="19">}</a></code></pre></div>
+<p>Dans cet exemple, l’argument <code>...</code> permet de passer des arguments aux fonctions <code>min</code>, <code>mean</code> et <code>max</code>.</p>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb71-1" title="1"><span class="kw">stats_desc</span>(<span class="dt">x =</span> <span class="kw">c</span>(iris<span class="op">$</span>Sepal.Length, <span class="ot">NA</span>))</a></code></pre></div>
+<pre><code>## min moy max 
+##  NA  NA  NA</code></pre>
+<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb73-1" title="1"><span class="kw">stats_desc</span>(<span class="dt">x =</span> <span class="kw">c</span>(iris<span class="op">$</span>Sepal.Length, <span class="ot">NA</span>), <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<pre><code>##      min      moy      max 
+## 4.300000 5.843333 7.900000</code></pre>
+</div>
+</div>
+</div>
+<div id="résultat-produit-par-une-fonction" class="section level1">
+<h1>Résultat produit par une fonction</h1>
+<p>Une fonction R peut retourner un objet en sortie et/ou produire un effet de bord, telles une impression, la production d’un graphique, l’écriture dans un fichier externe, la modification d’un paramètre de session, etc.</p>
+<div id="sortie-dune-fonction" class="section level2">
+<h2>Sortie d’une fonction</h2>
+<p>Une fonction retourne en sortie :</p>
+<ul>
+<li>ce que retourne l’expression donnée en argument à la fonction <code>return</code> dans le corps de la fonction (retour explicite);</li>
+<li>ou, en l’absence d’appel à la fonction <code>return</code>, ce que retourne la dernière expression évaluée dans le corps de la fonction (retour implicite).</li>
+</ul>
+<p>Si cette dernière expression ne retourne rien, alors la fonction ne produit aucune sortie. Dans les exemples précédents, la fonction <code>HelloWorld</code> et les fonctions dont le nom débute par <code>test</code> ne contiennent aucun appel à la fonction <code>return</code> et possèdent un appel à la fonction <code>cat</code> comme dernière expression évaluée. La fonction <code>cat</code> imprime (en d’autres mots affiche) un résultat, ce qui constitue un type d’effet de bord, mais ne retourne rien.</p>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb75-1" title="1">sortie_cat &lt;-<span class="st"> </span><span class="kw">cat</span>(<span class="st">&quot;ceci est un test</span><span class="ch">\n</span><span class="st">&quot;</span>)</a></code></pre></div>
+<pre><code>## ceci est un test</code></pre>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb77-1" title="1">sortie_cat</a></code></pre></div>
+<pre><code>## NULL</code></pre>
+<p>Nous constatons que l’objet <code>sortie_cat</code> prend la valeur <code>NULL</code>. Ne rien retourner en sortie signifie en réalité, pour une fonction R, retourner l’objet spécial <code>NULL</code>.</p>
+<p>Les fonctions <code>test_appel</code> et <code>test_trois_points</code> ne produisent aucune sortie puisque qu’elles retournent implicitement ce qu’un appel à la fonction <code>cat</code> retourne, c’est à dire rien. Elles provoquent cependant une impression comme effet de bord.</p>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb79-1" title="1">sortie_test &lt;-<span class="st"> </span><span class="kw">test_trois_points</span>(<span class="st">&quot;oui&quot;</span>)</a></code></pre></div>
+<pre><code>## l&#39;argument 1 prend la valeur oui</code></pre>
+<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb81-1" title="1">sortie_test</a></code></pre></div>
+<pre><code>## NULL</code></pre>
+<p>Aucune fonction des exemples précédents n’utilise la fonction <code>return</code> pour produire une sortie. La fonction <code>stats_desc</code> retourne l’objet <code>stats</code> et la fonction <code>stats_desc_multi</code> retourne le résultat de <code>lapply(X = args, FUN = stats_desc)</code>. Modifions cette dernière fonction pour expérimenter l’utilisation de la fonction <code>return</code>.</p>
+<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb83-1" title="1">stats_desc_multi &lt;-<span class="st"> </span><span class="cf">function</span>(...){</a>
+<a class="sourceLine" id="cb83-2" title="2">  args &lt;-<span class="st"> </span><span class="kw">list</span>(...)</a>
+<a class="sourceLine" id="cb83-3" title="3">  <span class="kw">return</span>(args)</a>
+<a class="sourceLine" id="cb83-4" title="4">  <span class="kw">cat</span>(<span class="st">&quot;Est-ce que cette instruction est évaluée ?&quot;</span>)</a>
+<a class="sourceLine" id="cb83-5" title="5">  <span class="kw">lapply</span>(<span class="dt">X =</span> args, <span class="dt">FUN =</span> stats_desc)</a>
+<a class="sourceLine" id="cb83-6" title="6">}</a></code></pre></div>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb84-1" title="1"><span class="kw">stats_desc_multi</span>(<span class="dt">rating =</span> attitude<span class="op">$</span>rating, <span class="dt">complaints =</span> attitude<span class="op">$</span>complaints)</a></code></pre></div>
+<pre><code>## $rating
+##  [1] 43 63 71 61 81 43 58 71 72 67 64 67 69 68 77 81 74 65 65 50 50 64 53 40 63
+## [26] 66 78 48 85 82
+## 
+## $complaints
+##  [1] 51 64 70 63 78 55 67 75 82 61 53 60 62 83 77 90 85 60 70 58 40 61 66 37 54
+## [26] 77 75 57 85 82</code></pre>
+<p>Cette version de la fonction <code>stats_desc_multi</code> retourne la liste des arguments fournis en entrée plutôt que le résultat de l’appel à <code>lapply</code> à cause de la présence de la fonction <code>return</code>. Les instructions suivant l’appel à la fonction <code>return</code> ne semblent même pas avoir été évaluées puisque l’impression demandée par l’appel à la fonction <code>cat</code> ajouté au corps de la fonction n’a pas été produite.</p>
+</div>
+<div id="retour-de-plusieurs-objets-dans-une-liste" class="section level2">
+<h2>Retour de plusieurs objets dans une liste</h2>
+<p>Une fonction ne peut retourner qu’un seul objet. Pour retourner plusieurs objets, il faut les combiner en un seul objet (typiquement dans une liste), comme dans l’exemple suivant.</p>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb86-1" title="1">stats_desc_multi &lt;-<span class="st"> </span><span class="cf">function</span>(...){</a>
+<a class="sourceLine" id="cb86-2" title="2">  call &lt;-<span class="st"> </span><span class="kw">match.call</span>()</a>
+<a class="sourceLine" id="cb86-3" title="3">  args &lt;-<span class="st"> </span><span class="kw">list</span>(...)</a>
+<a class="sourceLine" id="cb86-4" title="4">  stats &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dt">X =</span> args, <span class="dt">FUN =</span> stats_desc)</a>
+<a class="sourceLine" id="cb86-5" title="5">  <span class="kw">list</span>(<span class="dt">stats =</span> stats, <span class="dt">call =</span> call)</a>
+<a class="sourceLine" id="cb86-6" title="6">}</a></code></pre></div>
+<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb87-1" title="1"><span class="kw">stats_desc_multi</span>(<span class="dt">rating =</span> attitude<span class="op">$</span>rating, <span class="dt">complaints =</span> attitude<span class="op">$</span>complaints)</a></code></pre></div>
+<pre><code>## $stats
+## $stats$rating
+##      min      moy      max 
+## 40.00000 64.63333 85.00000 
+## 
+## $stats$complaints
+##  min  moy  max 
+## 37.0 66.6 90.0 
+## 
+## 
+## $call
+## stats_desc_multi(rating = attitude$rating, complaints = attitude$complaints)</code></pre>
+<p>Pour faciliter la réutilisation des résultats, il est souhaitable de toujours nommer les éléments d’une liste retournée en sortie.</p>
+</div>
+<div id="fonction-match.call" class="section level2">
+<h2>Fonction <code>match.call</code></h2>
+<p>L’exemple précédent fait intervenir la fonction <code>match.call</code>. Il est commun pour des fonctions d’ajustement de modèle telles que <code>lm</code> de retourner dans la sortie une copie de l’appel de la fonction.</p>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb89-1" title="1">exemple &lt;-<span class="st"> </span><span class="kw">lm</span>(rating <span class="op">~</span><span class="st"> </span>raises, <span class="dt">data =</span> attitude)</a>
+<a class="sourceLine" id="cb89-2" title="2">exemple<span class="op">$</span>call</a></code></pre></div>
+<pre><code>## lm(formula = rating ~ raises, data = attitude)</code></pre>
+<p>C’est la fonction <code>match.call</code> qui permet de créer cet élément de la sortie.</p>
+<p>Les fonctions <code>match.call</code> et <code>return</code> sont des exemples de fonctions seulement utiles dans le corps d’une fonction. Les appeler directement dans la console retourne une erreur ou une sortie sans intérêt.</p>
+</div>
+<div id="effets-de-bord-dune-fonction" class="section level2">
+<h2>Effets de bord d’une fonction</h2>
+<p>Comme pour les fonctions <code>Hello World</code>, <code>test_appel</code> et <code>test_trois_points</code>, l’exécution d’une fonction peut produire des « <a href="https://fr.wikipedia.org/wiki/Effet_de_bord_(informatique)">effets de bord</a> » (en anglais <em>side effects</em>). Ces effets de bords peuvent être en réalité le but principal de la fonction.</p>
+<p>En plus de la <strong>production d’une impression</strong> avec une fonction telle que <code>print</code> ou <code>cat</code>, un exemple courant d’effet de bord est la <strong>production d’un graphique</strong>.</p>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb91-1" title="1">sortie_plot &lt;-<span class="st"> </span><span class="kw">plot</span>(rating <span class="op">~</span><span class="st"> </span>raises, <span class="dt">data =</span> attitude)</a></code></pre></div>
+<p><img src="/programmation/fonctions_r_2020_files/figure-html/unnamed-chunk-48-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<p>Certaines fonctions graphiques ne retournent pas d’objet.</p>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb92-1" title="1">sortie_plot</a></code></pre></div>
+<pre><code>## NULL</code></pre>
+<p>Nous savons déjà cependant que d’autres fonctions graphiques retournent un objet en plus de produire un graphique. Il est donc possible pour une fonction R de produire à la fois un effet de bord et une sortie.</p>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb94-1" title="1">sortie_boxplot &lt;-<span class="st"> </span><span class="kw">boxplot</span>(<span class="dt">x =</span> attitude<span class="op">$</span>rating, <span class="dt">xlab =</span> <span class="st">&quot;rating&quot;</span>)</a></code></pre></div>
+<p><img src="/programmation/fonctions_r_2020_files/figure-html/unnamed-chunk-50-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb95-1" title="1">sortie_boxplot</a></code></pre></div>
+<pre><code>## $stats
+##      [,1]
+## [1,] 40.0
+## [2,] 58.0
+## [3,] 65.5
+## [4,] 72.0
+## [5,] 85.0
+## 
+## $n
+## [1] 30
+## 
+## $conf
+##          [,1]
+## [1,] 61.46146
+## [2,] 69.53854
+## 
+## $out
+## numeric(0)
+## 
+## $group
+## numeric(0)
+## 
+## $names
+## [1] &quot;&quot;</code></pre>
+<p>Un autre exemple d’effet de bord est <strong>l’écriture dans un fichier externe</strong>. Par exemple, la fonction <code>write.table</code> ne retourne rien dans l’environnement de travail de la session R, mais enregistre des données dans un fichier externe, sur le disque de l’ordinateur.</p>
+<p>Finalement, toute <strong>interaction avec l’environnement de travail ou la session R</strong> peut être considérée comme un effet de bord. Les fonctions suivantes sont toutes des exemples de fonctions ayant des effets de bord :</p>
+<ul>
+<li><code>library</code> : charge un package, ce qui modifie le chemin de recherche de R;</li>
+<li><code>setwd</code> : modifie le répertoire de travail;</li>
+<li><code>options</code> : modifie les options de la session R;</li>
+<li><code>par</code> : modifie les paramètres graphiques;</li>
+<li>etc.</li>
+</ul>
+</div>
+</div>
+<div id="évaluation-dun-appel-à-une-fonction-et-environnements-associés" class="section level1">
+<h1>Évaluation d’un appel à une fonction et environnements associés</h1>
+<p>Lorsqu’une fonction R est appelée, un environnement est créé spécifiquement pour l’évaluation du corps de la fonction, puis <strong>détruit lorsque l’exécution est terminée</strong>. Rappelons que l’évaluation est simplement la façon dont R s’y prend pour comprendre ce qu’une instruction R signifie. Attardons-nous à comprendre comment R fait pour trouver la valeur d’un objet lorsqu’il évalue les instructions dans le corps d’une fonction.</p>
+<p>Au départ, l’environnement créé lors de l’appel d’une fonction contient seulement des <em>promesses d’évaluation</em>, car R utilise une évaluation d’arguments dite <em>paresseuse</em>. Il évalue un argument seulement lorsqu’une instruction du corps de la fonction le fait intervenir pour une première fois. Ainsi, au fur et à mesure que les instructions constituant le corps de la fonction sont évaluées, les arguments de la fonction deviennent des objets dans l’environnement temporaire créé spécifiquement pour l’évaluation de la fonction.</p>
+<p>La valeur d’un argument auquel une expression a été assignée (explicitement ou implicitement) lors de l’appel de la fonction est obtenue en évaluant cette expression. La valeur d’un argument auquel aucune expression n’a été assignée est pour sa part obtenue en évaluant l’expression fournie comme valeur par défaut dans la définition de la fonction.</p>
+<p>Les instructions formant le corps de la fonction créent parfois de nouveaux objets. Ceux-ci sont créés dans l’environnement d’évaluation de la fonction. En informatique, ces objets sont appelés <strong>variables locales</strong>.</p>
+<div id="passage-darguments-par-valeur" class="section level2">
+<h2>Passage d’arguments par valeur</h2>
+<p>Lors de l’appel de la plupart des fonctions R, lorsqu’un objet est assigné à un argument, une copie de cet objet est créée et l’évaluation des instructions du corps de la fonction affecte cette copie et non l’objet d’origine. Ce mécanisme est appelé en informatique le « <a href="https://fr.wikipedia.org/wiki/Param%C3%A8tre_(programmation_informatique)">passage d’arguments par valeur</a> ».</p>
+<p>Un autre mécanisme possible de passage d’arguments est le « <a href="https://fr.wikipedia.org/wiki/Param%C3%A8tre_(programmation_informatique)">passage par référence</a> ». Avec ce type de passage, les objets passés ne sont pas recopiés et les instructions du corps d’une fonction peuvent modifier l’objet d’origine. En R, ce type de passage est très rare. Une exception notable à cette observation est le package <a href="https://rdatatable.gitlab.io/data.table/"><code>data.table</code></a>, qui utilise le passage par référence pour certaines de ses fonctions (notamment l’opérateur <code>:=</code>, les fonctions <code>setorder</code> et <code>setcolorder</code>), comme nous l’avons mentionné dans les <a href="https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#op%C3%A9rateur-du-package-data.table">notes sur le prétraitement de données en R</a>.</p>
+<p>Illustrons ici le passage d’argument de loin le plus usuel en R : le passage d’arguments par valeur. Supposons que notre environnement de travail comporte un objet nommé <code>x</code> contenant le nombre 5.</p>
+<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb97-1" title="1">x &lt;-<span class="st"> </span><span class="dv">5</span></a>
+<a class="sourceLine" id="cb97-2" title="2">x</a></code></pre></div>
+<pre><code>## [1] 5</code></pre>
+<p>Créons une simple fonction R qui ajoute une unité à des nombres.</p>
+<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb99-1" title="1">ajoute_<span class="dv">1</span> &lt;-<span class="st"> </span><span class="cf">function</span>(x) x <span class="op">+</span><span class="st"> </span><span class="dv">1</span></a></code></pre></div>
+<p>Maintenant, appelons cette fonction en lui donnant en entrée l’objet <code>x</code> de notre environnement de travail.</p>
+<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb100-1" title="1"><span class="kw">ajoute_1</span>(<span class="dt">x =</span> x)</a></code></pre></div>
+<pre><code>## [1] 6</code></pre>
+<p>La fonction retourne le résultat de <code>x + 1</code>, soit 6. Mais est-ce que l’objet <code>x</code> a pour autant changé?</p>
+<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb102-1" title="1">x</a></code></pre></div>
+<pre><code>## [1] 5</code></pre>
+<p>Non. Il contient toujours la valeur 5.</p>
+<p>Remarquez qu’ici le nom <code>x</code> a été utilisé pour deux entités distinctes :</p>
+<ul>
+<li>un objet dans notre environnement de travail,</li>
+<li>un argument de la fonction <code>ajoute_1</code>.</li>
+</ul>
+<p>Dans l’instruction <code>ajoute_1(x = x)</code>, nous avons assigné la valeur contenue dans l’objet <code>x</code> à l’argument portant le même nom.</p>
+<p>Comment pourrions-nous modifier l’objet <code>x</code> de notre environnement de travail à l’aide de la fonction <code>ajoute_1</code> ? Il faudrait assigner le résultat de l’instruction <code>ajoute_1(x = x)</code> au nom <code>x</code> comme suit.</p>
+<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb104-1" title="1">x &lt;-<span class="st"> </span><span class="kw">ajoute_1</span>(<span class="dt">x =</span> x)</a></code></pre></div>
+<p>En fait, cette commande écrase l’ancien objet <code>x</code> par un nouveau, contenant la valeur retournée par<br />
+<code>ajoute_1(x = x)</code>.</p>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb105-1" title="1">x</a></code></pre></div>
+<pre><code>## [1] 6</code></pre>
+</div>
+<div id="portée-lexicale" class="section level2">
+<h2>Portée lexicale</h2>
+<p>Trouver la valeur des arguments et des variables locales en cours d’évaluation d’une fonction est simple pour R. Ces objets se trouvent directement dans l’environnement d’évaluation de la fonction. On dit en informatique qu’ils ont une <strong>portée locale</strong>.</p>
+<p>Mais comment R trouve-t-il la valeur des objets appelés à l’intérieur d’une fonction, qui ne sont ni des arguments ni des variables locales?</p>
+<p>Chaque langage de programmation suit une certaine règle pour résoudre ce problème. Les deux règles les plus courantes sont l’utilisation d’une <strong>portée lexicale</strong> (en anglais <em>lexical scoping</em>) ou encore d’une <strong>portée dynamique</strong> (en anglais <em>dynamic scoping</em>).</p>
+<p>Avec une portée lexicale, si un objet appelé n’est pas trouvé dans l’environnement d’évaluation d’une fonction, le programme va le chercher dans l’environnement d’où la fonction a été <strong>créée</strong>, nommé <strong>environnement englobant</strong> (en anglais <em>enclosing environment</em>). Avec une portée dynamique, le programme va plutôt le chercher dans l’environnement d’où la fonction a été <strong>appelée</strong>, nommé <strong>environnement d’appel</strong> (en anglais <em>calling environment</em>).</p>
+<p><strong>R utilise la portée lexicale.</strong></p>
+<p>Voici un petit exemple pour illustrer la portée lexicale.</p>
+<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb107-1" title="1">a &lt;-<span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb107-2" title="2">b &lt;-<span class="st"> </span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb107-3" title="3">f &lt;-<span class="st"> </span><span class="cf">function</span>(x) {</a>
+<a class="sourceLine" id="cb107-4" title="4">  a<span class="op">*</span>x <span class="op">+</span><span class="st"> </span>b</a>
+<a class="sourceLine" id="cb107-5" title="5">}</a></code></pre></div>
+<p>Quelle valeur sera retournée par <code>f(x = 2)</code>? Est-ce 1*2 + 2 = 4? Oui!</p>
+<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb108-1" title="1"><span class="kw">f</span>(<span class="dt">x =</span> <span class="dv">2</span>)</a></code></pre></div>
+<pre><code>## [1] 4</code></pre>
+<p>Les objets nommés <code>a</code> et <code>b</code> ne se retrouvaient pas dans l’environnement d’exécution de la fonction. Alors R a cherché leurs valeurs dans l’environnement englobant de la fonction <code>f</code>, qui est ici l’environnement de travail.</p>
+<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb110-1" title="1"><span class="kw">environment</span>(f)</a></code></pre></div>
+<pre><code>## &lt;environment: R_GlobalEnv&gt;</code></pre>
+<p>Il a trouvé <code>a</code> = 1 et <code>b</code> = 2. La fonction <code>environment</code> retourne l’environnement englobant d’une fonction.</p>
+<p>Modifions maintenant l’exemple comme suit.</p>
+<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb112-1" title="1">g &lt;-<span class="st"> </span><span class="cf">function</span>(x) {</a>
+<a class="sourceLine" id="cb112-2" title="2">  a &lt;-<span class="st"> </span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb112-3" title="3">  b &lt;-<span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb112-4" title="4">  <span class="kw">f</span>(<span class="dt">x =</span> x)</a>
+<a class="sourceLine" id="cb112-5" title="5">}</a></code></pre></div>
+<p>Quelle valeur sera retournée par <code>g(x = 2)</code>? Est-ce 2*2 + 1 = 5? Non!</p>
+<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb113-1" title="1"><span class="kw">g</span>(<span class="dt">x =</span> <span class="dv">2</span>)</a></code></pre></div>
+<pre><code>## [1] 4</code></pre>
+<p>La fonction <code>g</code> est appelée dans l’environnement de travail. Elle appelle elle-même <code>f</code>. L’environnement d’appel de <code>f</code> est donc l’environnement d’exécution de <code>g</code>. Par contre, l’environnement englobant de <code>f</code> n’a pas changé. Il est encore l’environnement de travail, car c’est dans cet environnement que la fonction a été définie.</p>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb115-1" title="1"><span class="kw">environment</span>(f)</a></code></pre></div>
+<pre><code>## &lt;environment: R_GlobalEnv&gt;</code></pre>
+<p>La portée lexicale permet de s’assurer que le fonctionnement de l’évaluation d’une fonction ne dépende pas du contexte dans lequel la fonction est appelée. Il dépend seulement de l’environnement d’où la fonction a été créée.</p>
+<p>Si la portée en R était par défaut dynamique, <code>g(x = 2)</code> aurait retourné la valeur 5.</p>
+<p>Et si <code>f</code> était créée à l’intérieur de la fonction <code>g</code>?</p>
+<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb117-1" title="1">g&lt;-<span class="cf">function</span>(x) {</a>
+<a class="sourceLine" id="cb117-2" title="2">  f&lt;-<span class="cf">function</span>(x) {</a>
+<a class="sourceLine" id="cb117-3" title="3">    a<span class="op">*</span>x <span class="op">+</span><span class="st"> </span>b</a>
+<a class="sourceLine" id="cb117-4" title="4">  }</a>
+<a class="sourceLine" id="cb117-5" title="5">  a &lt;-<span class="st"> </span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb117-6" title="6">  b &lt;-<span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb117-7" title="7">  <span class="kw">f</span>(<span class="dt">x =</span> x)</a>
+<a class="sourceLine" id="cb117-8" title="8">}</a></code></pre></div>
+<p>Que retourne <code>g(x = 2)</code> maintenant?</p>
+<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb118-1" title="1"><span class="kw">g</span>(<span class="dt">x =</span> <span class="dv">2</span>)</a></code></pre></div>
+<pre><code>## [1] 5</code></pre>
+<p>L’environnement englobant de <code>f</code> est maintenant l’environnement d’exécution de <code>g</code>, car <code>f</code> a été défini dans le corps de la fonction <code>g</code>.</p>
+<p>Notons que l’environnement englobant des fonctions disponibles en R autres que celles que nous avons créées en cours de session est l’espace de noms du package d’où provient la fonction. Par exemple, l’environnement englobant de la fonction <code>mean</code> est l’espace de noms du package <code>base</code>. Nous verrons plus tard ce qu’est un espace de noms.</p>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb120-1" title="1"><span class="kw">environment</span>(mean)</a></code></pre></div>
+<pre><code>## &lt;environment: namespace:base&gt;</code></pre>
+</div>
+<div id="chemin-de-recherche-complet" class="section level2">
+<h2>Chemin de recherche complet</h2>
+<p>Le chemin de recherche des valeurs des objets lors de l’évaluation d’une fonction en R ne s’arrête pas à l’environnement d’exécution de la fonction suivi de l’environnement englobant de la fonction. Si l’environnement englobant est l’environnement d’exécution d’une autre fonction, alors la recherche se poursuit dans l’environnement englobant de cette fonction. Plusieurs environnements englobants peuvent ainsi être imbriqués. Ensuite, l’environnement de travail est toujours ajouté au chemin de recherche s’il n’est pas directement l’environnement englobant (potentiellement à la base d’une hiérarchie d’environnements englobants). Et de là, le chemin de recherche se poursuit par les environnements de tous les packages chargés, tel que vu dans les notes sur des <a href="https://stt4230.rbind.io/programmation/infos_techniques_r/#%C3%A9valuation-dexpressions-en-r-et-environnements">informations techniques concernant R</a>. Nous pouvons donc utiliser, dans les fonctions que nous créons, des fonctions provenant d’autres packages. Il faut seulement s’assurer que ces packages soient chargés pour que nos fonctions roulent sans erreur.</p>
+Dans le dernier exemple, le chemin de recherche complet lors de l’évaluation de l’appel à la fonction <code>f</code>, dans le corps de la fonction <code>g</code>, alors que <code>f</code> a aussi été créé dans le corps de <code>g</code>, est le suivant.
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-66"></span>
+<img src="fig/chemin_fonction.png" alt="Exemple de chemin de recherche lors de l'évaluation d'une fonction R" width="25%" />
+<p class="caption">
+Figure 2: Exemple de chemin de recherche lors de l’évaluation d’une fonction R
+</p>
+</div>
+</div>
+<div id="bonnes-pratiques-concernant-les-objets-utilisables-dans-le-corps-dune-fonction" class="section level2">
+<h2>Bonnes pratiques concernant les objets utilisables dans le corps d’une fonction</h2>
+<p>Il est recommandé d’utiliser dans une fonction uniquement des objets que nous sommes certains de pouvoir atteindre. L’idéal est de se limiter aux arguments de la fonction, aux objets créés dans la fonction (variables locales) ainsi qu’aux objets se trouvant dans des packages <em>chargés</em>.</p>
+<p>Ceux qui comprennent bien le concept de portée lexical peuvent aussi s’amuser à utiliser des objets dans l’environnement englobant d’une fonction.</p>
+<p>Cependant, il est risqué d’utiliser les objets de l’environnement de travail, même si cet environnement se retrouve toujours dans le chemin de recherche de valeurs des objets lors de l’évaluation d’une fonction. Le contenu de l’environnement de travail est constamment modifié au fil de nos sessions. Aussi, si nous partageons nos fonctions avec une autre personne, nous ne contrôlons pas le contenu de l’environnement de travail pendant la session R de cette personne.</p>
+<p>Ces recommandations s’appliquent au code dans le corps d’une fonction, mais aussi aux instructions définissant les valeurs par défaut des arguments. Nous avons appris que ces instructions sont évaluées dans le corps de la fonction. Elles peuvent donc contenir sans problème d’autres arguments de la fonction. Cependant, nous devrions éviter d’utiliser des objets provenant de l’environnement de travail dans ces instructions.</p>
+</div>
+</div>
+<div id="exemple-de-création-dune-fonction-r" class="section level1">
+<h1>Exemple de création d’une fonction R</h1>
+<p>Nous allons créer ensemble une fonction qui compte combien de nombres entiers impairs contient un vecteur numérique<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
+<div id="étapes-de-développement-conseillées" class="section level2">
+<h2>Étapes de développement conseillées</h2>
+<ol style="list-style-type: decimal">
+<li><strong>Planifier</strong> le travail (pas de programmation encore) :
+<ul>
+<li>définir clairement la tâche à accomplir par la fonction et la sortie qu’elle doit produire,</li>
+<li>prévoir les étapes à suivre afin d’effectuer cette tâche,</li>
+<li>identifier les arguments devant être fournis en entrée à la fonction.</li>
+</ul></li>
+<li><strong>Développer le corps de la fonction</strong>
+<ul>
+<li>2.1 Écrire le programme par étapes, d’abord sans former la fonction, en commentant bien le code et en travaillant sur des mini-données test.</li>
+<li>2.2 Pour chaque petite étape ou sous-tâche, tester interactivement si le programme produit le résultat escompté (tester souvent en cours de travail, ainsi il y a moins de débogage à faire).</li>
+</ul></li>
+<li><strong>Créer la fonction</strong> à partir du programme développé.</li>
+<li><strong>Documenter</strong> la fonction.</li>
+</ol>
+<p>D’autres étapes de développement seront abordées au prochain cours.</p>
+<div id="planifier-le-travail" class="section level4">
+<h4>1. Planifier le travail :</h4>
+
+<ul>
+<li>entrée = un vecteur de nombres (= 1 seul argument)</li>
+<li>sortie = le dénombrement (une seule valeur)</li>
+<li>utiliser l’opérateur modulo pour tester si un nombre est impair</li>
+<li>nous pourrions travailler de façon vectorielle ou encore utiliser une boucle sur les éléments du vecteur</li>
+</ul>
+</div>
+<div id="développer-le-corps-de-la-fonction" class="section level4">
+<h4>2. Développer le corps de la fonction :</h4>
+
+<p>Création de mini-données test</p>
+<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb122-1" title="1">x &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">6</span>, <span class="dv">3</span>, <span class="fl">5.5</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">-5</span>)</a></code></pre></div>
+<p>Ce vecteur contient 3 nombres entiers impairs. C’est le résultat que nous visons obtenir.</p>
+<p>Code le plus simple qui me vient en tête :</p>
+<div class="sourceCode" id="cb123"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb123-1" title="1"><span class="kw">sum</span>(x <span class="op">%%</span><span class="st"> </span><span class="dv">2</span> <span class="op">==</span><span class="st"> </span><span class="dv">1</span>)</a></code></pre></div>
+<pre><code>## [1] 3</code></pre>
+<p>Nous obtenons bien 3. Ça marche pour les mini-données test.</p>
+<p>Ce code est équivalent à la boucle suivante :</p>
+<div class="sourceCode" id="cb125"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb125-1" title="1">k &lt;-<span class="st"> </span><span class="dv">0</span></a>
+<a class="sourceLine" id="cb125-2" title="2"><span class="cf">for</span> (n <span class="cf">in</span> x){</a>
+<a class="sourceLine" id="cb125-3" title="3">  <span class="cf">if</span> (n <span class="op">%%</span><span class="st"> </span><span class="dv">2</span> <span class="op">==</span><span class="st"> </span><span class="dv">1</span>) k &lt;-<span class="st"> </span>k <span class="op">+</span><span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb125-4" title="4">}</a>
+<a class="sourceLine" id="cb125-5" title="5">k</a></code></pre></div>
+<pre><code>## [1] 3</code></pre>
+<div style="page-break-after: always;"></div>
+</div>
+<div id="créer-la-fonction-à-partir-du-programme-développé" class="section level4">
+<h4>3. Créer la fonction à partir du programme développé :</h4>
+
+<div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb127-1" title="1">compte_impair_vectoriel &lt;-<span class="st"> </span><span class="cf">function</span>(x) {</a>
+<a class="sourceLine" id="cb127-2" title="2">  <span class="kw">sum</span>(x <span class="op">%%</span><span class="st"> </span><span class="dv">2</span> <span class="op">==</span><span class="st"> </span><span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb127-3" title="3">}</a>
+<a class="sourceLine" id="cb127-4" title="4"></a>
+<a class="sourceLine" id="cb127-5" title="5">compte_impair_boucle &lt;-<span class="st"> </span><span class="cf">function</span>(x) {</a>
+<a class="sourceLine" id="cb127-6" title="6">  k &lt;-<span class="st"> </span><span class="dv">0</span></a>
+<a class="sourceLine" id="cb127-7" title="7">  <span class="cf">for</span> (n <span class="cf">in</span> x){</a>
+<a class="sourceLine" id="cb127-8" title="8">    <span class="cf">if</span> (n <span class="op">%%</span><span class="st"> </span><span class="dv">2</span> <span class="op">==</span><span class="st"> </span><span class="dv">1</span>) k &lt;-<span class="st"> </span>k <span class="op">+</span><span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb127-9" title="9">  }</a>
+<a class="sourceLine" id="cb127-10" title="10">  k</a>
+<a class="sourceLine" id="cb127-11" title="11">}</a></code></pre></div>
+</div>
+<div id="documenter-la-fonction." class="section level4">
+<h4>4. Documenter la fonction.</h4>
+
+<p><strong>Option 1</strong> : Documentation en commentaire dans le corps de la fonction.</p>
+<div class="sourceCode" id="cb128"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb128-1" title="1">compte_impair_vectoriel &lt;-<span class="st"> </span><span class="cf">function</span>(x) {</a>
+<a class="sourceLine" id="cb128-2" title="2">  <span class="co"># Fonction qui compte combien de nombres entiers impairs contient un vecteur numérique</span></a>
+<a class="sourceLine" id="cb128-3" title="3">  <span class="co"># Argument en entrée : x = vecteur numérique</span></a>
+<a class="sourceLine" id="cb128-4" title="4">  <span class="co"># Sortie : le nombre de nombres entiers impairs dans x</span></a>
+<a class="sourceLine" id="cb128-5" title="5">  <span class="kw">sum</span>(x <span class="op">%%</span><span class="st"> </span><span class="dv">2</span> <span class="op">==</span><span class="st"> </span><span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb128-6" title="6">}</a></code></pre></div>
+<p><strong>Option 2</strong> : Documentation en commentaire avant la définition de la fonction.</p>
+<div class="sourceCode" id="cb129"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb129-1" title="1"><span class="co"># Fonction qui compte combien de nombres entiers impairs contient un vecteur numérique</span></a>
+<a class="sourceLine" id="cb129-2" title="2"><span class="co"># Argument en entrée : x = vecteur numérique</span></a>
+<a class="sourceLine" id="cb129-3" title="3"><span class="co"># Sortie : le nombre de nombres entiers impairs dans x</span></a>
+<a class="sourceLine" id="cb129-4" title="4">compte_impair_boucle &lt;-<span class="st"> </span><span class="cf">function</span>(x) {</a>
+<a class="sourceLine" id="cb129-5" title="5">  k &lt;-<span class="st"> </span><span class="dv">0</span></a>
+<a class="sourceLine" id="cb129-6" title="6">  <span class="cf">for</span> (n <span class="cf">in</span> x){</a>
+<a class="sourceLine" id="cb129-7" title="7">    <span class="cf">if</span> (n <span class="op">%%</span><span class="st"> </span><span class="dv">2</span> <span class="op">==</span><span class="st"> </span><span class="dv">1</span>) k &lt;-<span class="st"> </span>k <span class="op">+</span><span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb129-8" title="8">  }</a>
+<a class="sourceLine" id="cb129-9" title="9">  k</a>
+<a class="sourceLine" id="cb129-10" title="10">}</a></code></pre></div>
+<p><strong>Options supplémentaires</strong> : Nous verrons d’autres options dans le cours sur les packages.</p>
+</div>
+<div id="comparaison-des-2-fonctions" class="section level4">
+<h4>Comparaison des 2 fonctions :</h4>
+
+<p>Nous avons créé 2 fonctions qui, à première vue, retournent toutes les deux le résultat escompté. Nous devrions par contre les tester sur plus de données pour en être certains. Ce sera fait dans les notes sur les tests et exceptions en R. Pour l’instant, tenons pour acquis que ces fonctions accomplissent correctement leur tâche.</p>
+<p>Dans ce cas, laquelle des 2 fonctions devrions-nous utiliser?</p>
+<p>Réponse : la plus rapide.</p>
+<p>Créons un vecteur très grand pour comparer le temps d’exécution des deux fonctions.</p>
+<div class="sourceCode" id="cb130"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb130-1" title="1">x &lt;-<span class="st"> </span><span class="kw">round</span>(<span class="kw">runif</span>(<span class="dv">1000000</span>, <span class="dv">-10</span>, <span class="dv">10</span>))</a></code></pre></div>
+<p>Utilisons la fonction <code>system.time</code> pour évaluer les temps d’exécution.</p>
+<div class="sourceCode" id="cb131"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb131-1" title="1"><span class="kw">system.time</span>(<span class="kw">compte_impair_vectoriel</span>(x))</a></code></pre></div>
+<pre><code>##    user  system elapsed 
+##    0.04    0.00    0.05</code></pre>
+<div class="sourceCode" id="cb133"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb133-1" title="1"><span class="kw">system.time</span>(<span class="kw">compte_impair_boucle</span>(x))</a></code></pre></div>
+<pre><code>##    user  system elapsed 
+##    0.30    0.00    0.32</code></pre>
+<p>L’écart dans les temps d’exécution des deux fonctions se creuse encore plus si nous augmentons la longueur du vecteur <code>x</code>.</p>
+<p>Nous devrions donc choisir d’utiliser <code>compte_impair_vectoriel</code> plutôt que <code>compte_impair_boucle</code>.</p>
+<p>Nous allons revenir plus tard sur l’optimisation des temps d’exécution de nos fonctions.</p>
+</div>
+</div>
+</div>
+<div id="programmation-fonctionnelle" class="section level1">
+<h1>Programmation fonctionnelle</h1>
+<p>Maintenant que vous savez écrire des fonctions en R, vous pouvez exploiter tout le potentiel de la <a href="https://en.wikipedia.org/wiki/Functional_programming">programmation fonctionnelle</a>, paradigme de programmation exploité par R. En fait, nous avons déjà parlé de ce paradigme dans ce cours. L’<a href="https://stt4230.rbind.io/calculs/calculs_base_r/#fonctions-de-la-famille-des-apply">utilisation de fonctions de la famille des <code>apply</code></a> est une forme de programmation fonctionnelle. Contentons nous ici de parler de cet aspect de la programmation fonctionnelle : les fonctions de haut niveau qui prennent d’autres fonctions en entrée, comme les fonctions de la famille des <code>apply</code>.</p>
+<p>Nous avons déjà donné dans les <a href="https://stt4230.rbind.io/programmation/struct_controle_r/#fonction-de-la-famille-des-apply-versus-boucle">notes sur les structures de contrôle</a> un exemple de boucle <code>for</code> remplacé par un appel à une fonction de la famille des <code>apply</code>. En fait, pratiquement n’importe quelle boucle <code>for</code> en R peut être remplacée par un appel à une fonction de la famille des <code>apply</code> une fois que nous savons comment créer de nouvelles fonctions. Par exemple, reprenons l’exemple de boucle suivant, aussi tiré des <a href="https://stt4230.rbind.io/programmation/struct_controle_r/#enregistrement-des-r%C3%A9sultats-dans-une-boucle">notes sur les structures de contrôle</a>.</p>
+<div class="sourceCode" id="cb135"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb135-1" title="1">modeles &lt;-<span class="st"> </span><span class="kw">vector</span>(<span class="dt">length =</span> <span class="kw">ncol</span>(attitude) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">mode =</span> <span class="st">&quot;list&quot;</span>)</a>
+<a class="sourceLine" id="cb135-2" title="2"><span class="kw">names</span>(modeles) &lt;-<span class="st"> </span><span class="kw">names</span>(attitude)[<span class="op">-</span><span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb135-3" title="3"></a>
+<a class="sourceLine" id="cb135-4" title="4"><span class="cf">for</span> (variable <span class="cf">in</span> <span class="kw">names</span>(modeles)) {</a>
+<a class="sourceLine" id="cb135-5" title="5">  modeles[[variable]] &lt;-<span class="st"> </span><span class="kw">lm</span>(rating <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> attitude[, <span class="kw">c</span>(<span class="st">&quot;rating&quot;</span>, variable)])</a>
+<a class="sourceLine" id="cb135-6" title="6">}</a></code></pre></div>
+<p>Il s’agit d’une boucle ajustant plusieurs modèles de régression linéaire simple avec les variables du jeu de données <code>attitude</code>. Modifions un peu cet exemple pour conserver des modèles uniquement les coefficients de détermination, non ajustés et ajustés.</p>
+<div class="sourceCode" id="cb136"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb136-1" title="1">R2 &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="ot">NA</span>, <span class="dt">nrow =</span> <span class="dv">2</span>, <span class="dt">ncol =</span> <span class="kw">ncol</span>(attitude) <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb136-2" title="2"><span class="kw">colnames</span>(R2) &lt;-<span class="st"> </span><span class="kw">names</span>(attitude)[<span class="op">-</span><span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb136-3" title="3"><span class="kw">rownames</span>(R2) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;r.squared&quot;</span>, <span class="st">&quot;adj.r.squared&quot;</span>)</a>
+<a class="sourceLine" id="cb136-4" title="4"></a>
+<a class="sourceLine" id="cb136-5" title="5"><span class="cf">for</span> (variable <span class="cf">in</span> <span class="kw">colnames</span>(R2)) {</a>
+<a class="sourceLine" id="cb136-6" title="6">  reg &lt;-<span class="st"> </span><span class="kw">lm</span>(rating <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> attitude[, <span class="kw">c</span>(<span class="st">&quot;rating&quot;</span>, variable)])</a>
+<a class="sourceLine" id="cb136-7" title="7">  R2[<span class="st">&quot;r.squared&quot;</span>, variable] &lt;-<span class="st"> </span><span class="kw">summary</span>(reg)<span class="op">$</span>r.squared</a>
+<a class="sourceLine" id="cb136-8" title="8">  R2[<span class="st">&quot;adj.r.squared&quot;</span>, variable] &lt;-<span class="st"> </span><span class="kw">summary</span>(reg)<span class="op">$</span>adj.r.squared</a>
+<a class="sourceLine" id="cb136-9" title="9">}</a>
+<a class="sourceLine" id="cb136-10" title="10"></a>
+<a class="sourceLine" id="cb136-11" title="11">R2</a></code></pre></div>
+<pre><code>##               complaints privileges  learning    raises    critical     advance
+## r.squared      0.6813142  0.1815756 0.3889745 0.3482640  0.02447321  0.02405175
+## adj.r.squared  0.6699325  0.1523461 0.3671521 0.3249877 -0.01036703 -0.01080355</code></pre>
+<p>À l’aide de la bonne fonction, nous allons obtenir exactement le même résultat avec un code plus court, qui n’utilise pas de boucle, mais qui utilise la fonction <code>sapply</code>. Voici une fonction qui extrait les deux statistiques à conserver pour un seul modèle de régression.</p>
+<div class="sourceCode" id="cb138"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb138-1" title="1">R2_reg_rating_vs_var &lt;-<span class="st"> </span><span class="cf">function</span>(variable){</a>
+<a class="sourceLine" id="cb138-2" title="2">  reg &lt;-<span class="st"> </span><span class="kw">lm</span>(rating <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span> attitude[, <span class="kw">c</span>(<span class="st">&quot;rating&quot;</span>, variable)])</a>
+<a class="sourceLine" id="cb138-3" title="3">  <span class="kw">summary</span>(reg)[<span class="kw">c</span>(<span class="st">&quot;r.squared&quot;</span>, <span class="st">&quot;adj.r.squared&quot;</span>)]</a>
+<a class="sourceLine" id="cb138-4" title="4">}</a></code></pre></div>
+<p>Cette fonction prend en entrée le nom d’une variable provenant de <code>attitude</code>, mais autre que la variable réponse <code>rating</code>. Nous pouvons itérer sur tous les noms de variables possibles comme suit :</p>
+<div class="sourceCode" id="cb139"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb139-1" title="1"><span class="kw">sapply</span>(<span class="dt">X =</span> <span class="kw">names</span>(attitude)[<span class="op">-</span><span class="dv">1</span>], <span class="dt">FUN =</span> R2_reg_rating_vs_var)</a></code></pre></div>
+<pre><code>##               complaints privileges learning  raises    critical    advance    
+## r.squared     0.6813142  0.1815756  0.3889745 0.348264  0.02447321  0.02405175 
+## adj.r.squared 0.6699325  0.1523461  0.3671521 0.3249877 -0.01036703 -0.01080355</code></pre>
+<p>Un des avantages de l’utilisation de fonctions de la famille des <code>apply</code> en remplacement de boucles est que nous n’avons pas à initialiser préalablement un objet pour stocker les résultats. La fonction de haut niveau gère cet aspect pour nous. Les adeptes de la programmation fonctionnelle sont également d’avis que l’utilisation de fonction de la famille des <code>apply</code> produit un code plus clair qu’une boucle.</p>
+<p>Il existe en R d’autres fonctions de haut niveau, qui appliquent itérativement une fonction sur les éléments d’un objet. Pour les intéressés, la fiche d’aide ouverte par la commande <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/funprog.html"><code>help(funprog)</code></a> présente ces fonctions (<code>Map</code>, <code>Filter</code>, <code>Reduce</code>, etc.). Un package R se spécialise aussi dans ce genre de fonctions, il s’agit du <a href="https://purrr.tidyverse.org/">package <code>purrr</code></a>.</p>
+<hr />
+</div>
+<div id="résumé" class="section level1">
+<h1>Résumé</h1>
+<div id="syntaxe-générale-dune-fonction" class="section level4">
+<h4>Syntaxe générale d’une fonction</h4>
+
+<div class="sourceCode" id="cb141"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb141-1" title="1">nom_fonction &lt;-<span class="st"> </span><span class="cf">function</span>(arg_<span class="dv">1</span>, arg_<span class="dv">2</span>, arg_<span class="dv">3</span>){</a>
+<a class="sourceLine" id="cb141-2" title="2">  instructions  <span class="co"># formant le corps de la fonction</span></a>
+<a class="sourceLine" id="cb141-3" title="3">}</a></code></pre></div>
+<p>Les composantes d’une fonction R sont :</p>
+<ul>
+<li>la liste de ses arguments, possiblement avec des valeurs par défaut;</li>
+<li>le corps de la fonction, soit le code qui la constitue;</li>
+<li>l’environnement englobant de la fonction.</li>
+</ul>
+<p><strong>Note</strong> : Il n’est pas obligatoire pour une fonction de porter un nom, ni de posséder des arguments.</p>
+</div>
+<div id="valeurs-par-défaut-des-arguments-1" class="section level4">
+<h4>Valeurs par défaut des arguments</h4>
+
+<p>Les valeurs par défaut sont <strong>définies dans la liste des arguments</strong>, en accompagnant le nom d’un argument d’un <strong>opérateur <code>=</code></strong> et d’une <strong>instruction R retournant la valeur par défaut</strong>.</p>
+<p><strong>Cas particulier</strong> : argument qui prend en entrée <strong>une seule chaîne de caractères</strong> et que seulement un <strong>petit nombre de chaînes de caractères distinctes sont acceptées</strong> comme valeur de cet argument :</p>
+<ul>
+<li>valeur à droite de l’opérateur <code>=</code> dans la liste des arguments : vecteur de toutes les valeurs acceptées,</li>
+<li>valeur par défaut : élément en position 1 dans le vecteur de toutes les valeurs acceptées,</li>
+<li>dans le corps de la fonction : <code>arg &lt;- match.arg(arg)</code>.</li>
+</ul>
+</div>
+<div id="appel-dune-fonction-1" class="section level4">
+<h4>Appel d’une fonction</h4>
+
+<p>L’assignation de valeurs aux arguments se fait en respectant les règles de préséances suivantes :</p>
+<div style="page-break-after: always;"></div>
+<ol style="list-style-type: decimal">
+<li>d’abord les arguments fournis avec un nom exact se voient assigner une valeur (assignation explicite),</li>
+<li>puis les arguments fournis avec un nom partiel (encore assignation explicite),</li>
+<li>et finalement les arguments non nommés, selon leurs positions (assignation implicite).</li>
+</ol>
+<p><strong>Bonne pratique</strong> :</p>
+<ul>
+<li>utiliser l’association par positionnement seulement pour les premiers arguments,</li>
+<li>arguments moins communs nommés (code plus facile à comprendre).</li>
+</ul>
+</div>
+<div id="argument" class="section level4">
+<h4>Argument <code>…</code></h4>
+
+<p>Nous pouvons insérer l’argument <code>…</code> dans la liste des arguments des fonctions que nous créons. Dans le corps de la fonction, le traitement de cet argument dépend de son utilité.</p>
+<ul>
+<li>Pour <strong>prendre un nombre indéterminé d’objets en entrée</strong> :
+<ul>
+<li>Le corps de la fonction doit contenir des instructions pour récupérer les objets :
+<ul>
+<li><code>list(...)</code> ou;</li>
+<li><code>..1</code>, <code>..2</code>, <code>..3</code> et ainsi de suite ou;</li>
+<li><code>...elt(n)</code> où <code>n</code> est un entier.<br />
+(<code>...length()</code> retourne le nombre d’objets attrapés par <code>...</code>)</li>
+</ul></li>
+</ul></li>
+<li>Pour <strong>permettre le passage d’arguments</strong> à une autre fonction :
+<ul>
+<li>Dans le corps de la fonction, les appels à la ou aux fonctions auxquelles nous souhaitons permettre le passage d’arguments doivent contenir l’argument <code>...</code>.</li>
+</ul></li>
+</ul>
+</div>
+<div id="résultat-produit" class="section level4">
+<h4>Résultat produit</h4>
+
+<p>Une fonction <strong>retourne en sortie</strong> :</p>
+<ul>
+<li>ce que retourne l’expression donnée en argument à la fonction <code>return</code> dans le corps de la fonction (retour explicite);</li>
+<li>ou, en l’absence d’appel à la fonction <code>return</code>, ce que retourne la dernière expression évaluée dans le corps de la fonction (retour implicite).</li>
+</ul>
+<p>Une fonction <strong>ne peut retourner qu’un seul objet</strong>. Pour retourner plusieurs objets, il faut les combiner dans un seul objet (typiquement dans une liste).</p>
+<p>La fonction <code>match.call</code> permet d’obtenir une copie de l’appel de la fonction.</p>
+<p>Une fonction peut également produire un ou des <strong>effets de bord</strong> : une impression, la production d’un graphique, l’écriture dans un fichier externe, une interaction avec l’environnement de travail ou la session R, etc.</p>
+</div>
+<div id="évaluation-dun-appel-à-une-fonction" class="section level4">
+<h4>Évaluation d’un appel à une fonction</h4>
+
+<p>Lorsqu’une fonction R est appelée, un environnement est créé spécifiquement pour l’évaluation du corps de la fonction, puis détruit lorsque l’exécution est terminée.</p>
+<p><span class="math inline">\(\longrightarrow\)</span> <strong>environnement d’exécution</strong> (ou d’évaluation) = temporaire</p>
+<p>Cet environnement contient :</p>
+<ul>
+<li>des objets pour les arguments fournis dans l’appel;</li>
+<li>des objets pour les arguments non fournis dans l’appel, qui prennent leur valeur par défaut;</li>
+<li>des objets créés dans les instructions du corps de la fonction (variables locales).</li>
+</ul>
+<p><strong>Évaluation paresseuse</strong> : Les objets associés aux arguments sont créés uniquement lorsqu’une instruction du corps de la fonction les faisant intervenir doit être évaluée. À sa création, l’environnement d’exécution contient uniquement des promesses d’évaluation.</p>
+</div>
+<div id="passage-des-arguments-par-valeur" class="section level4">
+<h4>Passage des arguments par valeur</h4>
+
+<p>La grande majorité du temps en R, les objets assignés à des arguments dans un appel à une fonction R sont recopiés et l’évaluation de la fonction affecte ces copies. Elle n’affecte pas les objets d’origine.</p>
+</div>
+<div id="portée-lexicale-1" class="section level4">
+<h4>Portée lexicale</h4>
+
+<p>Comment R trouve-t-il la valeur des objets appelés dans les instructions du corps d’une fonction qui ne sont ni des arguments ni des variables locales?</p>
+<p>Il les cherche dans l’<strong>environnement englobant</strong> de la fonction = <em>environnement dans lequel la fonction a été créée</em>. R utilise donc une <strong>portée lexicale</strong>.</p>
+<p>À ne pas confondre : R ne cherche pas dans l’<strong>environnement d’appel</strong> = <em>environnement dans lequel la fonction est appelée</em> (à moins que l’environnement englobant soit le même que l’environnement d’appel).</p>
+</div>
+<div id="chemin-de-recherche-complet-lors-de-lexécution-dune-fonction" class="section level4">
+<h4>Chemin de recherche complet lors de l’exécution d’une fonction</h4>
+
+<ul>
+<li>environnement d’exécution,</li>
+<li>environnement englobant ou hiérarchie d’environnements englobants,</li>
+<li>environnement de travail,</li>
+<li>environnements des packages chargés.</li>
+</ul>
+<p><strong>Bonne pratique</strong> : Utiliser dans une fonction uniquement des objets que nous sommes certains de pouvoir atteindre, soit</p>
+<ul>
+<li>les arguments de la fonction,</li>
+<li>les objets créés dans la fonction (variables locales),</li>
+<li>les objets se trouvant dans des packages chargés,</li>
+<li>les objets dans l’environnement englobant (si nous comprenons bien le concept de portée lexicale).</li>
+</ul>
+<p><strong>Ne pas utiliser les objets de l’environnement de travail</strong>, car le contenu de cet environnement est constamment modifié.</p>
+<hr />
+</div>
+</div>
+<div id="références" class="section level1">
+<h1>Références</h1>
+<ul>
+<li>Matloff, N. (2011). The Art of R Programming : A Tour of Statistical Software Design. No Starch Press. Chapitre 7.</li>
+<li>Wickham, H. (2019). Advanced R, Second Edition. Chapman and Hall/CRC.
+<ul>
+<li>Fonctions : Chapitre 6 <a href="https://adv-r.hadley.nz/functions.html" class="uri">https://adv-r.hadley.nz/functions.html</a></li>
+<li>Environnements : Chapitre 7 <a href="https://adv-r.hadley.nz/environments.html" class="uri">https://adv-r.hadley.nz/environments.html</a></li>
+</ul></li>
+<li>Fanara, C. (2019). Tutoriel web intitulé « A Tutorial on Using Functions in R! ». <a href="https://www.datacamp.com/community/tutorials/functions-in-r-a-tutorial" class="uri">https://www.datacamp.com/community/tutorials/functions-in-r-a-tutorial</a></li>
+<li>Passage d’arguments par valeur versus par référence : <a href="http://www.mathwarehouse.com/programming/passing-by-value-vs-by-reference-visual-explanation.php" class="uri">http://www.mathwarehouse.com/programming/passing-by-value-vs-by-reference-visual-explanation.php</a></li>
+<li>Pour en apprendre davantage concernant la programmation fonctionnelle :
+<ul>
+<li><a href="https://adv-r.hadley.nz/fp.html" class="uri">https://adv-r.hadley.nz/fp.html</a></li>
+<li><a href="https://r4ds.had.co.nz/iteration.html#for-loops-vs.functionals" class="uri">https://r4ds.had.co.nz/iteration.html#for-loops-vs.functionals</a></li>
+<li><a href="https://purrr.tidyverse.org/" class="uri">https://purrr.tidyverse.org/</a></li>
+<li><a href="https://speakerdeck.com/hadley/the-joy-of-functional-programming" class="uri">https://speakerdeck.com/hadley/the-joy-of-functional-programming</a></li>
+</ul></li>
+</ul>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Cet exemple est tiré de Matloff, N. (2011). The Art of R Programming : A Tour of Statistical Software Design. No Starch Press. Sections 1.3 et 7.4.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
+</div>

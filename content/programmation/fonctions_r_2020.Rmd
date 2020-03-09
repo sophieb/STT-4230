@@ -30,39 +30,40 @@ editor_options:
 
 &nbsp;
 
-Lorsqu'un bout de code R est susceptible d'être utilisé à répétition (par exemple pour faire un même calcul sur des données différentes), il est préférable d'en faire une fonction R.
+Lorsqu'un bout de code R est susceptible d'être utilisé à répétition (p. ex. pour faire un même calcul sur des données différentes), il est préférable d'en faire une fonction R. Les fonctions permettent de :
 
-Avantages des fonctions :
-
-- sauver du temps,
-- diminuer les risques de faire des erreurs,
-- rédiger du code plus clair et plus court, donc plus facile à comprendre et à partager.
+- rédiger du code plus clair et plus court, donc plus facile à comprendre et à partager;
+- diminuer les risques de faire des erreurs;
+- sauver du temps à long terme.
 
 Bref, faire des fonctions est une bonne pratique de programmation en R.
 
-\newpage
+Comme il a déjà été mentionné dans les [notes sur les concepts de base en R](https://stt4230.rbind.io/introduction/base_r/#quest-ce-quune-fonction-r), une fonction R est un bout de code qui produit un certain résultat, lorsqu'exécuté. Pour exécuter le code composant une fonction, celle-ci doit être *appelée*. Lorsqu'elle est appelée, la fonction prend des valeurs en entrée, qui sont assignées à des *arguments*. Le code de la fonction réfère à ces arguments de façon à ce que l'appel de la fonction provoque un traitement des valeurs fournies en entrée. En fin de compte, la fonction génère un résultat, qui est la plupart du temps *retourné* dans un objet en sortie. Ce résultat peut aussi être un *effet de bord* (p. ex. la production d'un graphique, l'écriture dans un fichier externe, etc.)
+
+```{r echo = FALSE, out.width = "80%", fig.pos = 'h', fig.align = 'center', fig.cap = "Représentation schématique de l'exécution d'un appel à une fonction R"}
+knitr::include_graphics("fig/Fonction.png")
+```
+
+Voyons maintenant comment écrire nos propres fonctions en R.
 
 # Syntaxe générale d'une fonction R
 
 Pour créer une fonction en R, il faut utiliser le mot-clé `function` en respectant la syntaxe suivante :
 
 ```{r eval = FALSE}
-nomFonction <- function(arg1, arg2, arg3){
+nom_fonction <- function(arg_1, arg_2, arg_3){
   instructions  # formant le corps de la fonction
 }
 ```
 
-`arg1`, `arg2` et `arg3` représentent les arguments de la fonction, soit les objets qui peuvent être fournis en entrée à la fonction, qui ne sont pas nécessairement au nombre de trois.
+`arg_1`, `arg_2` et `arg_3` représentent les arguments de la fonction (aussi appelés paramètres dans d'autres langages informatiques), soit les objets qui peuvent être fournis en entrée à la fonction, qui ne sont pas nécessairement au nombre de trois.
 
-Voici une fonction qui reprend un exemple présenté dans les notes sur les [structures de contrôle en R](https://stt4230.rbind.io/programmation/struct_controle_r/#ecriture-generale). Elle calcule des statistiques descriptives simples selon le type des éléments du vecteur donné en entrée.
+Voici une fonction qui reprend un exemple présenté dans les notes sur les [structures de contrôle en R](https://stt4230.rbind.io/programmation/struct_controle_r/#%C3%A9criture-g%C3%A9n%C3%A9rale-dun-if-...-else). Elle calcule des statistiques descriptives simples selon le type des éléments du vecteur donné en entrée.
 
 ```{r}
-statDesc <- function(x){
+stats_desc <- function(x){
   if (is.numeric(x)) {
-    min <- min(x)
-    moy <- mean(x)
-    max <- max(x)
-    stats <- c(min = min, moy = moy, max = max)
+    stats <- c(min = min(x), moy = mean(x), max = max(x))
   } else if (is.character(x) || is.factor(x)) {
     stats <- table(x)
   } else {
@@ -75,13 +76,13 @@ statDesc <- function(x){
 Après avoir soumis le code de création de cette fonction dans la console, la fonction se retrouve dans l'environnement de travail. Il est alors possible de l'appeler. 
 
 ```{r}
-statDesc(x = iris$Species)
+stats_desc(x = iris$Species)
 ```
 
 Nous pourrions ajouter un argument à cette fonction. Par exemple, nous pourrions offrir l'option d'une sortie présentée sous la forme d'une matrice plutôt que d'un vecteur.
 
 ```{r}
-statDesc <- function(x, sortieMatrice){
+stats_desc <- function(x, sortie_matrice){
   # Calcul
   if (is.numeric(x)) {
     stats <- c(min = min(x), moy = mean(x), max = max(x))
@@ -91,7 +92,7 @@ statDesc <- function(x, sortieMatrice){
     stats <- NA
   }
   # Production de la sortie
-  if (sortieMatrice){
+  if (sortie_matrice){
     stats <- as.matrix(stats)
     colnames(stats) <- if (is.character(x) || is.factor(x)) "frequence" else "stat"
   }
@@ -99,10 +100,10 @@ statDesc <- function(x, sortieMatrice){
 }
 ```
 
-Le code de la fonction a aussi été un peu reformaté. Nous pouvons maintenant appeler la fonction comme suit.
+L'argument `dnn = NULL` a aussi été ajouté dans l'appel à la fonction `table` afin de retirer le nom de la dimension (ici `x`) dans la sortie produite par la fonction. Nous pouvons maintenant appeler la fonction comme suit.
 
 ```{r}
-statDesc(x = iris$Species, sortieMatrice = TRUE)
+stats_desc(x = iris$Species, sortie_matrice = TRUE)
 ```
 
 
@@ -113,29 +114,31 @@ Les composantes d'une fonction R sont :
 - la liste de ses arguments, possiblement avec des valeurs par défaut (nous allons y revenir);
 
 ```{r}
-args(statDesc)
+args(stats_desc)
+# ou
+formals(stats_desc)
 ```
 
 - le corps de la fonction, soit les instructions qui la constituent.
 
 ```{r}
-body(statDesc)
+body(stats_desc)
 ```
 
 - l'environnement englobant de la fonction (défini plus loin).
 
 ```{r}
-environment(statDesc)
+environment(stats_desc)
 ```
 
 
-## Fonction sans nom
+## Fonction anonyme
 
 Notons qu'une fonction n'a même pas besoin de porter de nom. La grande majorité du temps, une fonction est conçue pour être appelée à plusieurs reprises et il est alors nécessaire qu'elle ait un nom. Cependant, certaines fonctions sont parfois à usage unique. 
 
 Par exemple, il est parfois utile de se créer une fonction pour personnaliser le calcul effectué par une fonction de la famille des `apply`. Si cette fonction est très courte et a peu de chance d'être réutilisée, il n'est pas nécessaire de la nommer.
 
-Voici un exemple. Si nous voulions calculer le minimum, la moyenne et le maximum (comme le fait notre fonction `statDesc`) de toutes les variables numériques du jeu de données `iris`, mais selon le niveau de la variable `Species`, nous pourrions utiliser trois appels à la fonction `aggregate` comme suit.
+Voici un exemple. Si nous voulions calculer le minimum, la moyenne et le maximum (comme le fait notre fonction `stats_desc`) de toutes les variables numériques du jeu de données `iris`, mais selon le niveau de la variable `Species`, nous pourrions utiliser trois appels à la fonction `aggregate` comme suit.
 
 ```{r}
 aggregate(x = iris[, -5], by = list(iris$Species), FUN = min)
@@ -157,15 +160,15 @@ Nous n'avons jamais donné de nom à la fonction et cela n'a causé aucun probl�
 
 # Arguments en entrée
 
-Les arguments sont définis en énumérant leurs noms entre les parenthèses après le mot-clé `function`.
+Les arguments d'une fonction sont définis en énumérant leurs noms entre les parenthèses après le mot-clé `function`.
 
 ```{r eval = FALSE}
-nomFonction <- function(arg1, arg2, arg3){
+nom_fonction <- function(arg_1, arg_2, arg_3){
   instructions  # formant le corps de la fonction
 }
 ```
 
-Il n'y a pas de restrictions quant au nombre d'arguments que peut posséder une fonction. Exceptionnellement, une fonction peut même ne posséder aucun argument. C'est la cas par exemple de la fonction [`getwd`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/getwd.html) et de la fonction suivante.
+Il n'y a pas de restrictions quant au nombre d'arguments que peut posséder une fonction. Exceptionnellement, une fonction peut même ne posséder aucun argument. C'est le cas par exemple de la fonction [`getwd`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/getwd.html) et de la fonction suivante.
 
 ```{r}
 HelloWorld <- function() cat("Hello World !")
@@ -187,11 +190,11 @@ HelloWorld
 ## Valeurs par défaut des arguments
 
 
-Afin de définir une valeur par défaut pour un argument, il faut accompagner son nom dans l'énumération des arguments d'un opérateur `=` et d'une instruction R retournant la valeur par défaut. Par exemple, dans la fonction `statDesc`, il serait préférable de définir un format par défaut pour la sortie.
+Afin de définir une valeur par défaut pour un argument, il faut accompagner son nom dans l'énumération des arguments d'un opérateur `=` et d'une expression R retournant la valeur par défaut. Par exemple, dans la fonction `stats_desc`, il serait préférable de définir un format par défaut pour la sortie.
 
 
 ```{r}
-statDesc <- function (x, sortieMatrice = FALSE) {
+stats_desc <- function (x, sortie_matrice = FALSE) {
   # Calcul
   if (is.numeric(x)) {
     stats <- c(min = min(x), moy = mean(x), max = max(x))
@@ -201,7 +204,7 @@ statDesc <- function (x, sortieMatrice = FALSE) {
     stats <- NA
   }
   # Production de la sortie
-  if (sortieMatrice){
+  if (sortie_matrice){
     stats <- as.matrix(stats)
     colnames(stats) <- if (is.character(x) || is.factor(x)) "frequence" else "stat"
   }
@@ -209,23 +212,28 @@ statDesc <- function (x, sortieMatrice = FALSE) {
 }
 ```
 
+La liste des arguments de la fonction devient la suivante.
+
+```{r}
+formals(stats_desc)
+```
+
+
 Les arguments qui ne possèdent pas de valeur par défaut sont obligatoires. Si une fonction est appelée sans donner de valeur en entrée à un paramètre obligatoire, une erreur est produite. 
 
 ```{r, error = TRUE}
-statDesc(sortieMatrice = FALSE)
+stats_desc(sortie_matrice = FALSE)
 ```
 
 Les arguments ayant une valeur par défaut peuvent, pour leur part, ne pas être fournis en entrée, auquel cas leur valeur par défaut est utilisée.
 
 ```{r, error = TRUE, R.options= list(width = 90)}
-statDesc(x = iris$Sepal.Length)
+stats_desc(x = iris$Sepal.Length)
 ```
-
-\newpage
 
 ### Valeur par défaut pour un argument acceptant seulement un petit nombre de chaînes de caractères spécifiques
 
-Attardons-nous maintenant à un cas particulier de valeur par défaut en R. Supposons qu'une fonction possède un argument qui prend en entrée une chaîne de caractères et que seulement un petit nombre de chaînes de caractères distinctes sont acceptées par cet argument. C'est le cas par exemple pour l'argument `useNA` de la fonction `table`.  La fonction accepte seulement les valeurs `"no"`, `"ifany"` ou `"always"` pour cet argument. Donner une valeur autre à l'argument produira une erreur.
+Attardons-nous maintenant à un cas particulier de valeur par défaut en R. Supposons qu'une fonction possède un argument qui prend en entrée une chaîne de caractères et que seulement un petit nombre de chaînes de caractères distinctes sont acceptées pour cet argument. C'est le cas par exemple de l'argument `useNA` de la fonction `table`.  La fonction accepte seulement les valeurs `"no"`, `"ifany"` ou `"always"` pour cet argument. Donner une valeur autre à l'argument produit une erreur.
 
 ```{r, error = TRUE}
 table(iris$Species, useNA = "test")
@@ -245,10 +253,10 @@ useNA <- match.arg(useNA)
 
 La fonction `match.arg` vérifie que la valeur donnée en entrée à un argument est bien une valeur acceptée ou retourne le premier élément du vecteur de valeurs possibles si aucune valeur n'a été donnée en entrée à l'argument.
 
-Nous devrions reproduire cette façon de faire dans nos propres fonctions qui possèdent un argument du même type que l'argument `useNA` de la fonction `table`. Par exemple, remplaçons l'argument `sortieMatrice` de notre fonction `statDesc` par l'argument `formatSortie` comme suit.
+Nous devrions reproduire cette façon de faire dans nos propres fonctions qui possèdent un argument du même type que l'argument `useNA` de la fonction `table`. Par exemple, remplaçons l'argument `sortie_matrice` de notre fonction `stats_desc` par l'argument `format_sortie` comme suit.
 
 ```{r}
-statDesc <- function (x, formatSortie = c("vecteur", "matrice", "liste")) {
+stats_desc <- function (x, format_sortie = c("vecteur", "matrice", "liste")) {
   # Calcul
   if (is.numeric(x)) {
     stats <- c(min = min(x), moy = mean(x), max = max(x))
@@ -258,22 +266,22 @@ statDesc <- function (x, formatSortie = c("vecteur", "matrice", "liste")) {
     stats <- NA
   }
   # Production de la sortie
-  formatSortie <- match.arg(formatSortie)
-  if (formatSortie == "matrice"){
+  format_sortie <- match.arg(format_sortie)
+  if (format_sortie == "matrice"){
     stats <- as.matrix(stats)
     colnames(stats) <- if (is.character(x) || is.factor(x)) "frequence" else "stat"
-  } else if (formatSortie == "liste") {
+  } else if (format_sortie == "liste") {
     stats <- as.list(stats)
   }
   stats
 }
 ```
 
-La valeur par défaut de l'argument `formatSortie` est bel et bien `"vecteur"`.
+La valeur par défaut de l'argument `format_sortie` est bel et bien `"vecteur"`.
 
 ```{r}
-statDesc(x = iris$Sepal.Length)
-statDesc(x = iris$Sepal.Length, formatSortie = "vecteur")
+stats_desc(x = iris$Sepal.Length)
+stats_desc(x = iris$Sepal.Length, format_sortie = "vecteur")
 ```
 
 La présence du vecteur des chaînes de caractères possibles dans la définition des arguments est informative, car elle indique à l'utilisateur quelles valeurs sont acceptées par l'argument.
@@ -282,16 +290,16 @@ La présence du vecteur des chaînes de caractères possibles dans la définitio
 
 ## Appel d'une fonction
 
-Les appels à nos propres fonctions respectent les mêmes règles que les [appels à n'importe quelle fonction R](https://stt4230.rbind.io/introduction/base_r/#comment-ecrire-un-appel-de-fonction-r). En plus du fonctionnement des valeurs par défaut décrit ci-dessus, rappelons que les arguments peuvent être fournis à une fonction R par position, par nom complet ou même par nom partiel. L'association des arguments à leurs valeurs se fait en respectant les règles de préséances suivantes :
+Les appels à nos propres fonctions respectent les mêmes règles que les [appels à n'importe quelle fonction R](https://stt4230.rbind.io/introduction/base_r/#comment-%C3%A9crire-un-appel-de-fonction-r). En plus du fonctionnement des valeurs par défaut décrit ci-dessus, rappelons que des valeurs peuvent être fournies aux arguments d'une fonction R par nom complet, par nom partiel ou par position. L'assignation de valeurs aux arguments se fait en respectant les règles de préséances suivantes :
 
-1. d'abord les arguments fournis avec un nom exact se voient attribuer une valeur,
-2. puis les arguments fournis avec un nom partiel,
-3. et finalement les arguments non nommés, selon leurs positions.
+1. d'abord les arguments fournis avec un nom exact se voient assigner une valeur (assignation explicite),
+2. puis les arguments fournis avec un nom partiel (encore assignation explicite),
+3. et finalement les arguments non nommés, selon leurs positions (assignation implicite).
 
 Voici quelques exemples.
 
 ```{r}
-testAppel <- function(x, option, param, parametre) {
+test_appel <- function(x, option, param, parametre) {
   cat("l'argument x prend la valeur", x, "\n")
   cat("l'argument option prend la valeur", option, "\n")
   cat("l'argument param prend la valeur", param, "\n")
@@ -300,102 +308,115 @@ testAppel <- function(x, option, param, parametre) {
 ```
 
 ```{r}
-testAppel(1, 2, 3, 4)
+test_appel(1, 2, 3, 4)
 ```
 
 ```{r}
-testAppel(1, 2, param = 3, opt = 4)
+test_appel(1, 2, param = 3, opt = 4)
 ```
+
+Le nom partiel `opt` a été reconnu comme représentant l'argument `option`. Un nom partiel pouvant représenter plus d'un argument génère cependant une erreur. C'est le cas du nom partiel `par` dans l'exemple suivant, qui pourrait référer à l'argument `param` ou encore à l'argument `parametre`.
 
 ```{r, error = TRUE, R.options= list(width = 60)}
-testAppel(1, par = 2, option = 3, 4)
+test_appel(1, par = 2, option = 3, 4)
 ```
 
-Une bonne pratique de programmation en R est d'utiliser l'association par positionnement seulement pour les premiers arguments, ceux les plus souvent utiliser. Les arguments moins communs devraient être nommés afin de conserver un code facile à comprendre.
+Une bonne pratique de programmation en R est d'utiliser l'assignation de valeurs aux arguments par positionnement seulement pour les premiers arguments, ceux les plus souvent utilisés. Les arguments moins communs devraient être nommés, en utilisant leurs noms complets, afin de conserver un code facile à comprendre.
 
-\newpage
 
-## Passage d'arguments par valeur
-
-Lors de l'appel d'une fonction R, lorsque nous assignons à un argument un objet de notre environnement de travail, une copie de cet objet est créé et les instructions du corps de la fonction affectent cette copie et non l'objet d'origine. En terminologie informatique, on dit que R utilise toujours du passage d'arguments par valeur. 
-
-Un autre type de passage d'arguments utilisé par d'autres languages informatiques est le passage par référence. Avec ce type de passage, les objets passés ne sont pas recopiés et les instructions du corps d'une fonction peuvent modifier l'objet d'origine. Cependant, cela n'arrive jamais en R.
-
-Par exemple, supposons que notre environnement de travail comporte un objet nommé `x` contenant le nombre 5.
-```{r}
-x <- 5
-x
-```
-Créons une simple fonction R qui ajoute une unité à des nombres.
-```{r}
-ajoute1 <- function(x) x + 1
-```
-Maintenant, appelons cette fonction en lui donnant en entrée l'objet `x` de notre environnement de travail.
-```{r}
-ajoute1(x = x)
-```
-La fonction retourne le résultats de `x + 1`, soit 6. Mais est-ce que l'objet `x` a pour autant changé?
-```{r}
-x
-```
-Non. Il contient toujours la valeur 5.
-
-Remarquez qu'ici le nom `x` a été utilisé pour deux entités distinctes : 
-
-- un objet dans notre environnement de travail,
-- un argument de la fonction `ajoute1`.
-
-Dans l'instruction `ajoute1(x = x)`, nous avons cependant assigné la valeur contenu dans l'objet `x` à l'argument portant le même nom.
-
-Comment pourrions-nous modifier l'objet `x` de notre environnement de travail à l'aide de la fonction `ajoute1` ? Il faudrait assigner le résultat de l'instruction `ajoute1(x = x)` au nom `x` comme suit.
-```{r}
-x <- ajoute1(x = x)
-```
-En fait, cette commande écrase l'ancien objet `x` par un nouveau, contenant la valeur retournée par  
-`ajoute1(x = x)`.
-```{r}
-x
-```
-
-\newpage
 
 ## Argument `...`
 
-Les deux utilités de l'[argument `...`](https://stt4230.rbind.io/introduction/base_r/#largument-...-et-ses-deux-utilites.) ont été mentionnées lors du premier cours. Nous pouvons utiliser cet argument dans nos propres fonctions, en exploitant l'une ou l'autre de ses utilités.
+Les deux utilités de l'[argument `...`](https://stt4230.rbind.io/introduction/base_r/#largument-...-et-ses-deux-utilit%C3%A9s.) ont été mentionnées lors du premier cours. Nous pouvons utiliser cet argument dans nos propres fonctions, en exploitant l'une ou l'autre de ses utilités.
 
-### Utilité 1 : recevoir un nombre indéterminé d’arguments
+### Utilité 1 : recevoir un nombre indéterminé d'objets en entrée
 
 L'argument `...` peut permettre de prendre un nombre indéterminé d'objets en entrée, comme dans cet exemple.
 
 ```{r}
-statDescMulti <- function(...){
+stats_desc_multi <- function(...){
   args <- list(...)
-  lapply(X = args, FUN = statDesc)
+  lapply(X = args, FUN = stats_desc)
 }
 ```
 
-Le corps de la fonction doit contenir une instruction telle que `list(...)` pour récupérer tous les objets.
-
-Voici un exemple d'appel à cette fonction.
+Le corps de la fonction doit contenir une instruction pour récupérer les objets. Dans l'exemple précédent, ils sont récupérés par l'instruction `list(...)`. Voici un exemple d'appel à cette fonction.
     
 ```{r}
-statDescMulti(iris$Sepal.Length, iris$Petal.Width, iris$Species)
+stats_desc_multi(iris$Sepal.Length, iris$Petal.Width, iris$Species)
 ```
 
-Il est même possible d'attribuer un nom aux arguments passés. Ces noms deviennent les noms des éléments de la liste retournée en sortie.
+Il est même possible d'attribuer des noms aux arguments passés. Pour la fonction `stats_desc_multi`, ces noms deviennent les noms des éléments de la liste retournée en sortie.
 
 ```{r}
-statDescMulti(Sepal.Length = iris$Sepal.Length, 
+stats_desc_multi(Sepal.Length = iris$Sepal.Length, 
               Species = iris$Species)
 ```
 
+Les objets passés en entrée via `...` peuvent aussi être référés dans le corps de la fonction par les noms `..1`, `..2`, `..3` et ainsi de suite.
+
+```{r}
+test_trois_points <- function(...){
+  cat("le premier argument prend la valeur", ..1, "\n")
+  cat("le deuxième argument prend la valeur", ..2, "\n")
+}
+```
+```{r}
+test_trois_points("a", 1, TRUE)
+```
+
+Il vaut cependant mieux s'assurer que suffisamment d'objets ont été passés en entrée avant d'utiliser un de ces noms. Par exemple, si la fonction `test_trois_points` est appelée en lui fournissant un seul objet en entrée, elle génère une erreur.
+
+```{r eval = FALSE}
+test_trois_points("a")
+```
+```
+## Error in cat("le deuxième argument prend la valeur", ..2, "\n") : 
+##  the ... list contains fewer than 2 elements
+```
+
+L'instruction `...length()` retourne le nombre d'objets attrapés par l'argument `...`. Utilisons cette instruction pour améliorer la fonction `test_trois_points` comme suit.
+
+```{r}
+test_trois_points <- function(...){
+  if (...length() >= 1) {
+    cat("le premier argument prend la valeur", ..1, "\n")
+  }
+  if (...length() >= 2) {
+    cat("le deuxième argument prend la valeur", ..2, "\n")
+  }
+}
+```
+```{r}
+test_trois_points("a")
+```
+
+Nous pouvons faire encore mieux en bouclant sur les objets fournis en entrée, peu importe leur nombre. Dans ce cas, plutôt que d'utiliser les noms `..1`, `..2`, `..3` et ainsi de suite, nous utilisons la fonction `...elt`, qui prend en entrée un entier spécifiant une position et retourne l'objet attrapé par `...` à cette position.
+
+```{r}
+test_trois_points <- function(...){
+  for (i in seq_len(...length()))
+    cat("l'argument", i, "prend la valeur", ...elt(i), "\n")
+}
+```
+```{r}
+test_trois_points("a", 1, TRUE)
+```
+
+En résumé, lorsque l'argument `...` sert à recevoir un nombre indéterminé d'objets en entrée, les [instructions suivantes peuvent nous être utiles pour manipuler, dans le corps de la fonction, les objets attrapés par `...`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/dots.html) :
+
+- `list(...)`;
+- `..1`, `..2`, `..3` et ainsi de suite;
+- `...elt(n)` où `n` est un entier;
+- `...length()`.
+
 ### Utilité 2 : passer des arguments à une autre fonction
 
-L'argument `...` permet aussi de passer des arguments à une fonction appelée dans le corps de la fonction. Par exemple, l'argument `...` serait utile à notre fonction `statDesc` pour contrôler le traitement des valeurs manquantes. Dans le corps de la fonction, les appels aux fonctions auxquelles nous souhaitons permettre le passage d'arguments doivent contenir l'argument `...`, comme dans l'exemple suivant.
+L'argument `...` permet aussi de passer des arguments à une fonction appelée dans le corps de la fonction. Par exemple, l'argument `...` serait utile à notre fonction `stats_desc` pour contrôler le traitement des valeurs manquantes. Dans le corps de la fonction, les appels aux fonctions auxquelles nous souhaitons permettre le passage d'arguments doivent contenir l'argument `...`, comme dans l'exemple suivant.
 
 
 ```{r}
-statDesc <- function (x, formatSortie = c("vecteur", "matrice", "liste"), ...) {
+stats_desc <- function (x, format_sortie = c("vecteur", "matrice", "liste"), ...) {
   # Calcul
   if (is.numeric(x)) {
     stats <- c(min = min(x, ...), moy = mean(x, ...), max = max(x, ...))  # ... ici
@@ -405,61 +426,85 @@ statDesc <- function (x, formatSortie = c("vecteur", "matrice", "liste"), ...) {
     stats <- NA
   }
   # Production de la sortie
-  formatSortie <- match.arg(formatSortie)
-  if (formatSortie == "matrice"){
+  format_sortie <- match.arg(format_sortie)
+  if (format_sortie == "matrice"){
     stats <- as.matrix(stats)
     colnames(stats) <- if (is.character(x) || is.factor(x)) "frequence" else "stat"
-  } else if (formatSortie == "liste") {
+  } else if (format_sortie == "liste") {
     stats <- as.list(stats)
   }
   stats
 }
 ```
 
-
 Dans cet exemple, l'argument `...` permet de passer des arguments aux fonctions `min`, `mean` et `max`.
 
 ```{r}
-statDesc(x = c(iris$Sepal.Length, NA))
-statDesc(x = c(iris$Sepal.Length, NA), na.rm = TRUE)
+stats_desc(x = c(iris$Sepal.Length, NA))
+stats_desc(x = c(iris$Sepal.Length, NA), na.rm = TRUE)
 ```
 
 
 
-# Sortie d'une fonction
+# Résultat produit par une fonction
 
-Une fonction retourne :
+Une fonction R peut retourner un objet en sortie et/ou produire un effet de bord, telles une impression, la production d'un graphique, l'écriture dans un fichier externe, la modification d'un paramètre de session, etc.
 
-- l'objet donné en argument à la fonction `return` dans le corps de la fonction, 
-- ou, en l'absence d'appel à la fonction `return`, la dernière expression évaluée dans le corps de la fonction.
+## Sortie d'une fonction
 
-Par exemple, la version suivante de la fonction `statDescMulti` retourne la liste des arguments fournis en entrée plutôt que le résultat de l'appel à `lapply` à cause de la présence de la fonction `return`.
+Une fonction retourne en sortie :
+
+- ce que retourne l'expression donnée en argument à la fonction `return` dans le corps de la fonction (retour explicite); 
+- ou, en l'absence d'appel à la fonction `return`, ce que retourne la dernière expression évaluée dans le corps de la fonction (retour implicite).
+
+Si cette dernière expression ne retourne rien, alors la fonction ne produit aucune sortie. Dans les exemples précédents, la fonction `HelloWorld` et les fonctions dont le nom débute par `test` ne contiennent aucun appel à la fonction `return` et possèdent un appel à la fonction `cat` comme dernière expression évaluée. La fonction `cat` imprime (en d'autres mots affiche) un résultat, ce qui constitue un type d'effet de bord, mais ne retourne rien.
 
 ```{r}
-statDescMulti <- function(...){
+sortie_cat <- cat("ceci est un test\n")
+sortie_cat
+```
+
+Nous constatons que l'objet `sortie_cat` prend la valeur `NULL`. Ne rien retourner en sortie signifie en réalité, pour une fonction R, retourner l'objet spécial `NULL`.
+
+Les fonctions `test_appel` et `test_trois_points` ne produisent aucune sortie puisque qu'elles retournent implicitement ce qu'un appel à la fonction `cat` retourne, c'est à dire rien. Elles provoquent cependant une impression comme effet de bord.
+
+```{r}
+sortie_test <- test_trois_points("oui")
+sortie_test
+```
+
+Aucune fonction des exemples précédents n'utilise la fonction `return` pour produire une sortie. La fonction `stats_desc` retourne l'objet `stats` et la fonction `stats_desc_multi` retourne le résultat de `lapply(X = args, FUN = stats_desc)`. Modifions cette dernière fonction pour expérimenter l'utilisation de la fonction `return`.
+
+```{r}
+stats_desc_multi <- function(...){
   args <- list(...)
   return(args)
-  lapply(X = args, FUN = statDesc)
+  cat("Est-ce que cette instruction est évaluée ?")
+  lapply(X = args, FUN = stats_desc)
 }
 ```
 
 ```{r}
-statDescMulti(rating = attitude$rating, complaints = attitude$complaints)
+stats_desc_multi(rating = attitude$rating, complaints = attitude$complaints)
 ```
 
-Une fonction ne peut retourner qu'un seul objet. Pour retourner plusieurs objets, il faut les combiner dans un seul objet (typiquement dans une liste), comme dans l'exemple suivant.
+Cette version de la fonction `stats_desc_multi` retourne la liste des arguments fournis en entrée plutôt que le résultat de l'appel à `lapply` à cause de la présence de la fonction `return`. Les instructions suivant l'appel à la fonction `return` ne semblent même pas avoir été évaluées puisque l'impression demandée par l'appel à la fonction `cat` ajouté au corps de la fonction n'a pas été produite.
+
+## Retour de plusieurs objets dans une liste
+
+Une fonction ne peut retourner qu'un seul objet. Pour retourner plusieurs objets, il faut les combiner en un seul objet (typiquement dans une liste), comme dans l'exemple suivant.
 
 ```{r}
-statDescMulti <- function(...){
+stats_desc_multi <- function(...){
   call <- match.call()
   args <- list(...)
-  stats <- lapply(X = args, FUN = statDesc)
+  stats <- lapply(X = args, FUN = stats_desc)
   list(stats = stats, call = call)
 }
 ```
 
 ```{r}
-statDescMulti(rating = attitude$rating, complaints = attitude$complaints)
+stats_desc_multi(rating = attitude$rating, complaints = attitude$complaints)
 ```
 
 Pour faciliter la réutilisation des résultats, il est souhaitable de toujours nommer les éléments d'une liste retournée en sortie.
@@ -479,21 +524,30 @@ Les fonctions `match.call` et `return` sont des exemples de fonctions seulement 
 
 ## Effets de bord d'une fonction
 
-En plus de potentiellement retourner un objet, l'exécution d'une fonction peut produire des «&nbsp;effets de bord&nbsp;» (en anglais *side effects*). Ces effets de bords peuvent être en réalité le but principal de la fonction.
+Comme pour les fonctions `Hello World`, `test_appel` et `test_trois_points`, l'exécution d'une fonction peut produire des «&nbsp;[effets de bord](https://fr.wikipedia.org/wiki/Effet_de_bord_(informatique))&nbsp;» (en anglais *side effects*). Ces effets de bords peuvent être en réalité le but principal de la fonction.
 
-L'exemple le plus courant d'effet de bord est la **production d'un graphique**. Les fonctions graphiques ont un effet puisqu'elles créent ou ajoutent des éléments à un graphique. Cependant, certaines fonctions graphiques ne retournent pas d'objet.
+En plus de la **production d'une impression** avec une fonction telle que `print` ou `cat`, un exemple courant d'effet de bord est la **production d'un graphique**.
 
-```{r out.width = "50%", fig.align = "center"}
-test <- plot(rating ~ raises, data = attitude)
+```{r out.width = "70%", fig.align = "center"}
+sortie_plot <- plot(rating ~ raises, data = attitude)
 ```
 
+Certaines fonctions graphiques ne retournent pas d'objet.
+
 ```{r}
-test
+sortie_plot
+```
+
+Nous savons déjà cependant que d'autres fonctions graphiques retournent un objet en plus de produire un graphique. Il est donc possible pour une fonction R de produire à la fois un effet de bord et une sortie.
+
+```{r out.width = "70%", fig.align = "center"}
+sortie_boxplot <- boxplot(x = attitude$rating, xlab = "rating")
+sortie_boxplot
 ```
 
 Un autre exemple d'effet de bord est **l'écriture dans un fichier externe**. Par exemple, la fonction `write.table` ne retourne rien dans l'environnement de travail de la session R, mais enregistre des données dans un fichier externe, sur le disque de l'ordinateur.
 
-Finalement toute interaction avec l'environnement de travail ou la session R autre que celle de créer un objet contenant la sortie de la fonction peut être considérée comme un effet de bord. Les fonctions suivantes sont toutes des exemples de fonctions ayant des effets de bord :
+Finalement, toute **interaction avec l'environnement de travail ou la session R** peut être considérée comme un effet de bord. Les fonctions suivantes sont toutes des exemples de fonctions ayant des effets de bord :
 
 - `library` : charge un package, ce qui modifie le chemin de recherche de R; 
 - `setwd` : modifie le répertoire de travail;
@@ -501,19 +555,58 @@ Finalement toute interaction avec l'environnement de travail ou la session R aut
 - `par` : modifie les paramètres graphiques;
 - etc.
 
-Cependant, l'effet de bord d'une fonction R ne peut jamais être de modifier un objet de notre environnement de travail puisque R utilise la passage d'arguments par valeur et non par référence.
 
+# Évaluation d'un appel à une fonction et environnements associés
 
-# Exécution d'une fonction et environnements associés
+Lorsqu'une fonction R est appelée, un environnement est créé spécifiquement pour l'évaluation du corps de la fonction, puis **détruit lorsque l'exécution est terminée**. Rappelons que l'évaluation est simplement la façon dont R s'y prend pour comprendre ce qu'une instruction R signifie. Attardons-nous à comprendre comment R fait pour trouver la valeur d'un objet lorsqu'il évalue les instructions dans le corps d'une fonction.
 
-Lorsqu'une fonction R est appelée, un environnement est créé spécifiquement pour l'évaluation du corps de la fonction, puis **détruit lorsque l'exécution est terminée**. Rappelons que l'évaluation est simplement la façon dont R s'y prend pour comprendre ce qu'une commande R signifie. Attardons-nous à comprendre comment R fait pour trouver la valeur d'un objet lorsqu'il évalue les instructions dans le corps d'une fonction.
+Au départ, l'environnement créé lors de l'appel d'une fonction contient seulement des *promesses d'évaluation*, car R utilise une évaluation d'arguments dite *paresseuse*. Il évalue un argument seulement lorsqu'une instruction du corps de la fonction le fait intervenir pour une première fois. Ainsi, au fur et à mesure que les instructions constituant le corps de la fonction sont évaluées, les arguments de la fonction deviennent des objets dans l'environnement temporaire créé spécifiquement pour l'évaluation de la fonction.
 
-Au départ, l'environnement créé lors de l'appel d'une fonction contient seulement des *promesses d'évaluation*, car R utilise une évaluation d'arguments dite *paresseuse*. Il évalue un argument seulement lorsqu'une instruction du corps de la fonction le fait intervenir pour une première fois. Ainsi, au fur et à mesure que les instructions constituant le corps de la fonction sont évaluées, les arguments de la fonction deviennent des objets dans l'environnement créé spécifiquement pour l'évaluation de la fonction.
-
-Un objet associé à un argument donné en entrée lors de l'appel de la fonction est créé en évaluant la valeur qui lui a été attribuée. Pour créer les objets associés aux arguments auxquels aucune valeur n'a été fournie dans l'appel de la fonction, R évalue l'instruction fournie comme valeur par défaut dans la définition de la fonction.
+La valeur d'un argument auquel une expression a été assignée (explicitement ou implicitement) lors de l'appel de la fonction est obtenue en évaluant cette expression. La valeur d'un argument auquel aucune expression n'a été assignée est pour sa part obtenue en évaluant l'expression fournie comme valeur par défaut dans la définition de la fonction.
 
 Les instructions formant le corps de la fonction créent parfois de nouveaux objets. Ceux-ci sont créés dans l'environnement d'évaluation de la fonction. En informatique, ces objets sont appelés **variables locales**.
 
+## Passage d'arguments par valeur
+
+Lors de l'appel de la plupart des fonctions R, lorsqu'un objet est assigné à un argument, une copie de cet objet est créée et l'évaluation des instructions du corps de la fonction affecte cette copie et non l'objet d'origine. Ce mécanisme est appelé en informatique le « [passage d'arguments par valeur](https://fr.wikipedia.org/wiki/Param%C3%A8tre_(programmation_informatique)) ». 
+
+Un autre mécanisme possible de passage d'arguments est le « [passage par référence](https://fr.wikipedia.org/wiki/Param%C3%A8tre_(programmation_informatique)) ». Avec ce type de passage, les objets passés ne sont pas recopiés et les instructions du corps d'une fonction peuvent modifier l'objet d'origine. En R, ce type de passage est très rare. Une exception notable à cette observation est le package [`data.table`](https://rdatatable.gitlab.io/data.table/), qui utilise le passage par référence pour certaines de ses fonctions (notamment l'opérateur `:=`, les fonctions `setorder` et `setcolorder`), comme nous l'avons mentionné dans les [notes sur le prétraitement de données en R](https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#op%C3%A9rateur-du-package-data.table).
+
+Illustrons ici le passage d'argument de loin le plus usuel en R : le passage d'arguments par valeur. Supposons que notre environnement de travail comporte un objet nommé `x` contenant le nombre 5.
+```{r}
+x <- 5
+x
+```
+Créons une simple fonction R qui ajoute une unité à des nombres.
+```{r}
+ajoute_1 <- function(x) x + 1
+```
+Maintenant, appelons cette fonction en lui donnant en entrée l'objet `x` de notre environnement de travail.
+```{r}
+ajoute_1(x = x)
+```
+La fonction retourne le résultat de `x + 1`, soit 6. Mais est-ce que l'objet `x` a pour autant changé?
+```{r}
+x
+```
+Non. Il contient toujours la valeur 5.
+
+Remarquez qu'ici le nom `x` a été utilisé pour deux entités distinctes : 
+
+- un objet dans notre environnement de travail,
+- un argument de la fonction `ajoute_1`.
+
+Dans l'instruction `ajoute_1(x = x)`, nous avons assigné la valeur contenue dans l'objet `x` à l'argument portant le même nom.
+
+Comment pourrions-nous modifier l'objet `x` de notre environnement de travail à l'aide de la fonction `ajoute_1` ? Il faudrait assigner le résultat de l'instruction `ajoute_1(x = x)` au nom `x` comme suit.
+```{r}
+x <- ajoute_1(x = x)
+```
+En fait, cette commande écrase l'ancien objet `x` par un nouveau, contenant la valeur retournée par  
+`ajoute_1(x = x)`.
+```{r}
+x
+```
 
 ## Portée lexicale
 
@@ -525,7 +618,7 @@ Chaque langage de programmation suit une certaine règle pour résoudre ce probl
 
 Avec une portée lexicale, si un objet appelé n'est pas trouvé dans l'environnement d'évaluation d'une fonction, le programme va le chercher dans l'environnement d'où la fonction a été **créée**, nommé **environnement englobant** (en anglais *enclosing environment*). Avec une portée dynamique, le programme va plutôt le chercher dans l'environnement d'où la fonction a été **appelée**, nommé **environnement d'appel** (en anglais *calling environment*). 
 
-**R utilise par défaut la portée lexicale.**
+**R utilise la portée lexicale.**
 
 Voici un petit exemple pour illustrer la portée lexicale. 
 
@@ -537,10 +630,10 @@ f <- function(x) {
 }
 ```
 
-Quelle valeur sera retournée par `f(2)`? Est-ce 1*2 + 2 = 4? Oui!
+Quelle valeur sera retournée par `f(x = 2)`? Est-ce 1*2 + 2 = 4? Oui!
 
 ```{r}
-f(2)
+f(x = 2)
 ```
 
 Les objets nommés `a` et `b` ne se retrouvaient pas dans l'environnement d'exécution de la fonction. Alors R a cherché leurs valeurs dans l'environnement englobant de la fonction `f`, qui est ici l'environnement de travail.
@@ -557,14 +650,14 @@ Modifions maintenant l'exemple comme suit.
 g <- function(x) {
   a <- 2
   b <- 1
-  f(x)
+  f(x = x)
 }
 ```
 
-Quelle valeur sera retournée par `g(2)`? Est-ce 2*2 + 1 = 5? Non!
+Quelle valeur sera retournée par `g(x = 2)`? Est-ce 2*2 + 1 = 5? Non!
 
 ```{r}
-g(2)
+g(x = 2)
 ```
 
 La fonction `g` est appelée dans l'environnement de travail. Elle appelle elle-même `f`. L'environnement d'appel de `f` est donc l'environnement d'exécution de `g`. Par contre, l'environnement englobant de `f` n'a pas changé. Il est encore l'environnement de travail, car c'est dans cet environnement que la fonction a été définie.
@@ -575,7 +668,7 @@ environment(f)
 
 La portée lexicale permet de s'assurer que le fonctionnement de l'évaluation d'une fonction ne dépende pas du contexte dans lequel la fonction est appelée. Il dépend seulement de l'environnement d'où la fonction a été créée.
 
-Si la portée en R était par défaut dynamique, `g(2)` aurait retourné la valeur 5.
+Si la portée en R était par défaut dynamique, `g(x = 2)` aurait retourné la valeur 5.
 
 Et si `f` était créée à l'intérieur de la fonction `g`?
 
@@ -586,28 +679,34 @@ g<-function(x) {
   }
   a <- 2
   b <- 1
-  f(x)
+  f(x = x)
 }
 ```
 
-Que retourne `g(2)` maintenant?
+Que retourne `g(x = 2)` maintenant?
 
 ```{r}
-g(2)
+g(x = 2)
 ```
 
 L'environnement englobant de `f` est maintenant l'environnement d'exécution de `g`, car `f` a été défini dans le corps de la fonction `g`.
 
-Notons que l'environnement englobant des fonctions disponibles en R autres que celles que nous avons créées en cours de session est l'espace de noms du package d'où provient la fonction. Par exemple, l'environnement englobant de la fonction `mean` est l'espace de noms du package `base`. Nous verrons plus en détail ce qu'est un espace de noms plus tard.
+Notons que l'environnement englobant des fonctions disponibles en R autres que celles que nous avons créées en cours de session est l'espace de noms du package d'où provient la fonction. Par exemple, l'environnement englobant de la fonction `mean` est l'espace de noms du package `base`. Nous verrons plus tard ce qu'est un espace de noms.
 
 ```{r}
 environment(mean)
 ```
 
 
+
 ## Chemin de recherche complet
 
-Le chemin de recherche de valeurs des objets lors de l'évaluation d'une fonction en R ne s'arrête pas à l'environnement d'exécution de la fonction suivi de l'environnement englobant de la fonction. Il remonte toujours jusqu'à l'environnement de travail. Parfois, l'environnement englobant est directement l'environnement de travail. Si l'environnement englobant est plutôt l'environnement d'exécution d'une autre fonction, alors la recherche se poursuit dans l'environnement englobant de cette fonction. En remontant ainsi le chemin des environnements englobants, R finit toujours par retomber sur l'environnement de travail. Et de là, le chemin de recherche se poursuit par les environnements de tous les packages chargés, tel que vu dans les notes sur des [informations techniques concernant R](https://stt4230.rbind.io/programmation/infos_techniques_r/#evaluation-dexpressions-en-r-et-environnements). Nous pouvons donc utiliser, dans les fonctions que nous créons, des fonctions provenant d'autres packages. Il faut seulement s'assurer que ces packages soient chargés pour que nos fonctions roulent sans erreur.
+Le chemin de recherche des valeurs des objets lors de l'évaluation d'une fonction en R ne s'arrête pas à l'environnement d'exécution de la fonction suivi de l'environnement englobant de la fonction. Si l'environnement englobant est l'environnement d'exécution d'une autre fonction, alors la recherche se poursuit dans l'environnement englobant de cette fonction. Plusieurs environnements englobants peuvent ainsi être imbriqués. Ensuite, l'environnement de travail est toujours ajouté au chemin de recherche s'il n'est pas directement l'environnement englobant (potentiellement à la base d'une hiérarchie d'environnements englobants). Et de là, le chemin de recherche se poursuit par les environnements de tous les packages chargés, tel que vu dans les notes sur des [informations techniques concernant R](https://stt4230.rbind.io/programmation/infos_techniques_r/#%C3%A9valuation-dexpressions-en-r-et-environnements). Nous pouvons donc utiliser, dans les fonctions que nous créons, des fonctions provenant d'autres packages. Il faut seulement s'assurer que ces packages soient chargés pour que nos fonctions roulent sans erreur.
+
+Dans le dernier exemple, le chemin de recherche complet lors de l'évaluation de l'appel à la fonction `f`, dans le corps de la fonction `g`, alors que `f` a aussi été créé dans le corps de `g`, est le suivant.
+```{r echo = FALSE, out.width = "25%", fig.align = 'center', fig.cap = "Exemple de chemin de recherche lors de l'évaluation d'une fonction R"}
+knitr::include_graphics("fig/chemin_fonction.png")
+```
 
 
 ## Bonnes pratiques concernant les objets utilisables dans le corps d'une fonction
@@ -622,9 +721,9 @@ Ces recommandations s'appliquent au code dans le corps d'une fonction, mais auss
 
 # Exemple de création d'une fonction R
 
-Nous allons créer ensemble une fonction qui compte combien de nombres entiers impairs contient un vecteur numérique. Cet exemple est tiré de 
+Nous allons créer ensemble une fonction qui compte combien de nombres entiers impairs contient un vecteur numérique[^1].  
 
-- Matloff, N. (2011). The Art of R Programming : A Tour of Statistical Software Design. No Starch Press. Sections 1.3 et 7.4.
+[^1]: Cet exemple est tiré de Matloff, N. (2011). The Art of R Programming : A Tour of Statistical Software Design. No Starch Press. Sections 1.3 et 7.4.
 
 ## Étapes de développement conseillées 
 
@@ -643,12 +742,16 @@ D'autres étapes de développement seront abordées au prochain cours.
 
 #### 1. Planifier le travail :
 
+\mbox{}
+
 - entrée = un vecteur de nombres (= 1 seul argument)
 - sortie = le dénombrement (une seule valeur)
 - utiliser l'opérateur modulo pour tester si un nombre est impair
 - nous pourrions travailler de façon vectorielle ou encore utiliser une boucle sur les éléments du vecteur
 
 #### 2. Développer le corps de la fonction :
+
+\mbox{}
 
 Création de mini-données test
 
@@ -668,8 +771,6 @@ Nous obtenons bien 3. Ça marche pour les mini-données test.
 
 Ce code est équivalent à la boucle suivante :
 
-\newpage
-
 ```{r}
 k <- 0
 for (n in x){
@@ -678,14 +779,18 @@ for (n in x){
 k
 ```
 
+\newpage
+
 #### 3. Créer la fonction à partir du programme développé :
 
+\mbox{}
+
 ```{r}
-compteImpair1 <- function(x) {
+compte_impair_vectoriel <- function(x) {
   sum(x %% 2 == 1)
 }
 
-compteImpair2 <- function(x) {
+compte_impair_boucle <- function(x) {
   k <- 0
   for (n in x){
     if (n %% 2 == 1) k <- k + 1
@@ -696,10 +801,12 @@ compteImpair2 <- function(x) {
 
 #### 4. Documenter la fonction.
 
+\mbox{}
+
 **Option 1** : Documentation en commentaire dans le corps de la fonction.
 
 ```{r}
-compteImpair1 <- function(x) {
+compte_impair_vectoriel <- function(x) {
   # Fonction qui compte combien de nombres entiers impairs contient un vecteur numérique
   # Argument en entrée : x = vecteur numérique
   # Sortie : le nombre de nombres entiers impairs dans x
@@ -713,7 +820,7 @@ compteImpair1 <- function(x) {
 # Fonction qui compte combien de nombres entiers impairs contient un vecteur numérique
 # Argument en entrée : x = vecteur numérique
 # Sortie : le nombre de nombres entiers impairs dans x
-compteImpair2 <- function(x) {
+compte_impair_boucle <- function(x) {
   k <- 0
   for (n in x){
     if (n %% 2 == 1) k <- k + 1
@@ -726,6 +833,8 @@ compteImpair2 <- function(x) {
 
 
 #### Comparaison des 2 fonctions :
+
+\mbox{}
 
 Nous avons créé 2 fonctions qui, à première vue, retournent toutes les deux le résultat escompté. Nous devrions par contre les tester sur plus de données pour en être certains. Ce sera fait dans les notes sur les tests et exceptions en R. Pour l'instant, tenons pour acquis que ces fonctions accomplissent correctement leur tâche.
 
@@ -742,13 +851,13 @@ x <- round(runif(1000000, -10, 10))
 Utilisons la fonction `system.time` pour évaluer les temps d'exécution.
 
 ```{r}
-system.time(compteImpair1(x))
-system.time(compteImpair2(x))
+system.time(compte_impair_vectoriel(x))
+system.time(compte_impair_boucle(x))
 ```
 
 L'écart dans les temps d'exécution des deux fonctions se creuse encore plus si nous augmentons la longueur du vecteur `x`.
 
-Nous devrions donc choisir d'utiliser `compteImpair1` plutôt que `compteImpair2`.
+Nous devrions donc choisir d'utiliser `compte_impair_vectoriel` plutôt que `compte_impair_boucle`.
 
 Nous allons revenir plus tard sur l'optimisation des temps d'exécution de nos fonctions.
 
@@ -757,10 +866,10 @@ Nous allons revenir plus tard sur l'optimisation des temps d'exécution de nos f
 
 Maintenant que vous savez écrire des fonctions en R, vous pouvez exploiter tout le potentiel de la [programmation fonctionnelle](https://en.wikipedia.org/wiki/Functional_programming), paradigme de programmation exploité par R. En fait, nous avons déjà parlé de ce paradigme dans ce cours. L'[utilisation de fonctions de la famille des `apply`](https://stt4230.rbind.io/calculs/calculs_base_r/#fonctions-de-la-famille-des-apply) est une forme de programmation fonctionnelle. Contentons nous ici de parler de cet aspect de la programmation fonctionnelle : les fonctions de haut niveau qui prennent d'autres fonctions en entrée, comme les fonctions de la famille des `apply`.
 
-Nous avons déjà donné dans les [notes sur les structures de contrôle](https://stt4230.rbind.io/programmation/struct_controle_r/#fonction-de-la-famille-des-apply-versus-boucle) un exemple de boucle `for` remplacé par un appel à une fonction de la famille des `apply`. En fait, pratiquement n'importe quelle boucle `for` en R peut être remplacée par un appel à une fonction de la famille des `apply` une fois que nous savons comment créer de nouvelles fonctions. Par exemple, reprenons l'exemple de boucle suivant, aussi tiré des [notes sur les structures de contrôle](https://stt4230.rbind.io/programmation/struct_controle_r/#enregistrement-des-resultats-dans-une-boucle).
+Nous avons déjà donné dans les [notes sur les structures de contrôle](https://stt4230.rbind.io/programmation/struct_controle_r/#fonction-de-la-famille-des-apply-versus-boucle) un exemple de boucle `for` remplacé par un appel à une fonction de la famille des `apply`. En fait, pratiquement n'importe quelle boucle `for` en R peut être remplacée par un appel à une fonction de la famille des `apply` une fois que nous savons comment créer de nouvelles fonctions. Par exemple, reprenons l'exemple de boucle suivant, aussi tiré des [notes sur les structures de contrôle](https://stt4230.rbind.io/programmation/struct_controle_r/#enregistrement-des-r%C3%A9sultats-dans-une-boucle).
 
 ```{r}
-modeles <- vector(length = 6, mode = "list")
+modeles <- vector(length = ncol(attitude) - 1, mode = "list")
 names(modeles) <- names(attitude)[-1]
 
 for (variable in names(modeles)) {
@@ -771,7 +880,7 @@ for (variable in names(modeles)) {
 Il s'agit d'une boucle ajustant plusieurs modèles de régression linéaire simple avec les variables du jeu de données `attitude`. Modifions un peu cet exemple pour conserver des modèles uniquement les coefficients de détermination, non ajustés et ajustés.
 
 ```{r R.options = list(width = 85)}
-R2 <- matrix(NA, nrow = 2, ncol = 6)
+R2 <- matrix(NA, nrow = 2, ncol = ncol(attitude) - 1)
 colnames(R2) <- names(attitude)[-1]
 rownames(R2) <- c("r.squared", "adj.r.squared")
 
@@ -789,8 +898,7 @@ R2
 ```{r}
 R2_reg_rating_vs_var <- function(variable){
   reg <- lm(rating ~ ., data = attitude[, c("rating", variable)])
-  c(r.squared = summary(reg)$r.squared, 
-    adj.r.squared = summary(reg)$adj.r.squared)
+  summary(reg)[c("r.squared", "adj.r.squared")]
 }
 ```
 
@@ -802,17 +910,19 @@ sapply(X = names(attitude)[-1], FUN = R2_reg_rating_vs_var)
 
 Un des avantages de l'utilisation de fonctions de la famille des `apply` en remplacement de boucles est que nous n'avons pas à initialiser préalablement un objet pour stocker les résultats. La fonction de haut niveau gère cet aspect pour nous. Les adeptes de la programmation fonctionnelle sont également d'avis que l'utilisation de fonction de la famille des `apply` produit un code plus clair qu'une boucle.
 
-Il existe en R d'autres fonctions de haut niveau, qui appliquent itérativement une fonction sur les éléments d'un objet. Pour les intéressés, la fiche d'aide ouverte par la commande [`help(funprog)`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/funprog.html) présente ces fonctions (`Map`, `Filter`, `Reduce`, etc.). Un package R se spécialise aussi dans ce genre de fonctions, il s'agit du [package `purrr`](https://purrr.tidyverse.org/).
+Il existe en R d'autres fonctions de haut niveau, qui appliquent itérativement une fonction sur les éléments d'un objet. Pour les intéressés, la fiche d'aide ouverte par la commande [`help(funprog)`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/funprog.html) présente ces fonctions (`Map`, `Filter`, `Reduce`, etc.). Un package R se spécialise aussi dans ce genre de fonctions, il s'agit du [package `purrr`](https://purrr.tidyverse.org/).
 
 
 ***
 
-# Synthèse
+# Résumé
 
 #### Syntaxe générale d'une fonction
 
+\mbox{}
+
 ```{r eval = FALSE}
-nomFonction <- function(arg1, arg2, arg3){
+nom_fonction <- function(arg_1, arg_2, arg_3){
   instructions  # formant le corps de la fonction
 }
 ```
@@ -828,9 +938,9 @@ Les composantes d'une fonction R sont :
 
 #### Valeurs par défaut des arguments
 
-Les valeurs par défaut sont **définies dans la liste des arguments**, en accompagnant le nom d'un argument d'un **opérateur `=`** et d'une **instruction R retournant la valeur par défaut**.
+\mbox{}
 
-\newpage
+Les valeurs par défaut sont **définies dans la liste des arguments**, en accompagnant le nom d'un argument d'un **opérateur `=`** et d'une **instruction R retournant la valeur par défaut**.
 
 **Cas particulier** : argument qui prend en entrée **une seule chaîne de caractères** et que seulement un **petit nombre de chaînes de caractères distinctes sont acceptées** comme valeur de cet argument :
 
@@ -840,44 +950,57 @@ Les valeurs par défaut sont **définies dans la liste des arguments**, en accom
 
 #### Appel d'une fonction
 
-L'association des arguments à leurs valeurs se fait en respectant les règles de préséances suivantes :
+\mbox{}
 
-1. d'abord les arguments fournis avec un nom exact se voient attribuer une valeur,
-2. puis les arguments fournis avec un nom partiel,
-3. et finalement les arguments non nommés, selon leurs positions.
+L'assignation de valeurs aux arguments se fait en respectant les règles de préséances suivantes :
+
+\newpage
+
+1. d'abord les arguments fournis avec un nom exact se voient assigner une valeur (assignation explicite),
+2. puis les arguments fournis avec un nom partiel (encore assignation explicite),
+3. et finalement les arguments non nommés, selon leurs positions (assignation implicite).
+
 
 **Bonne pratique** : 
 
 - utiliser l'association par positionnement seulement pour les premiers arguments,
 - arguments moins communs nommés (code plus facile à comprendre).
 
-#### Passage des arguments par valeur
-
-Les objets assignés à des arguments dans un appel à une fonction R sont recopiés et l'évaluation de la fonction affecte ces copies. Elle n'affecte jamais les objets d'origine.
 
 #### Argument `…`
 
-Nous pouvons insérer l'argument `…` dans la liste des arguments des fonctions que nous créons.
+\mbox{}
 
-Dans le corps de la fonction, le traitement de cet argument dépend de son utilité.
+Nous pouvons insérer l'argument `…` dans la liste des arguments des fonctions que nous créons. Dans le corps de la fonction, le traitement de cet argument dépend de son utilité.
 
 - Pour **prendre un nombre indéterminé d'objets en entrée** :
-    + Le corps de la fonction doit contenir une instruction telle que `list(...)` pour récupérer tous les objets.
+    + Le corps de la fonction doit contenir des instructions pour récupérer les objets :
+        + `list(...)` ou;
+        + `..1`, `..2`, `..3` et ainsi de suite ou;
+        + `...elt(n)` où `n` est un entier.  
+(`...length()` retourne le nombre d'objets attrapés par `...`)
 - Pour **permettre le passage d'arguments** à une autre fonction :
     + Dans le corps de la fonction, les appels à la ou aux fonctions auxquelles nous souhaitons permettre le passage d'arguments doivent contenir l'argument `...`.
     
 
-#### Sortie
+#### Résultat produit
 
-Une fonction retourne :
+\mbox{}
 
-- l'objet donné en argument à la fonction `return` dans le corps de la fonction, 
-- ou, en l'absence d'appel à la fonction `return`, la dernière expression évaluée dans le corps de la fonction.
+Une fonction **retourne en sortie** :
+
+- ce que retourne l'expression donnée en argument à la fonction `return` dans le corps de la fonction (retour explicite); 
+- ou, en l'absence d'appel à la fonction `return`, ce que retourne la dernière expression évaluée dans le corps de la fonction (retour implicite).
 
 Une fonction **ne peut retourner qu'un seul objet**. Pour retourner plusieurs objets, il faut les combiner dans un seul objet (typiquement dans une liste).
 
+La fonction `match.call` permet d'obtenir une copie de l'appel de la fonction.
 
-#### Exécution d'une fonction
+Une fonction peut également produire un ou des **effets de bord** : une impression, la production d'un graphique, l'écriture dans un fichier externe, une interaction avec l'environnement de travail ou la session R, etc.
+
+#### Évaluation d'un appel à une fonction
+
+\mbox{}
 
 Lorsqu'une fonction R est appelée, un environnement est créé spécifiquement pour l'évaluation du corps de la fonction, puis détruit lorsque l'exécution est terminée. 
 
@@ -892,23 +1015,32 @@ Cet environnement contient :
 **Évaluation paresseuse** : Les objets associés aux arguments sont créés uniquement lorsqu'une instruction du corps de la fonction les faisant intervenir doit être évaluée. À sa création, l'environnement d'exécution contient uniquement des promesses d'évaluation.
 
 
+#### Passage des arguments par valeur
+
+\mbox{}
+
+La grande majorité du temps en R, les objets assignés à des arguments dans un appel à une fonction R sont recopiés et l'évaluation de la fonction affecte ces copies. Elle n'affecte pas les objets d'origine.
+
 #### Portée lexicale
 
-> Comment R trouve-t-il la valeur des objets appelés dans les instructions du corps d'une fonction qui ne sont ni des arguments ni des variables locales?
+\mbox{}
 
-Il les cherche dans l'**environnement englobant** de la fonction = *environnement dans lequel la fonction a été créée*.  
+Comment R trouve-t-il la valeur des objets appelés dans les instructions du corps d'une fonction qui ne sont ni des arguments ni des variables locales?
 
-> **R utilise par défaut la portée lexicale.**
+Il les cherche dans l'**environnement englobant** de la fonction = *environnement dans lequel la fonction a été créée*. R utilise donc une **portée lexicale**.
 
-À ne pas confondre : il ne cherche pas dans l'**environnement d'appel** = *environnement dans lequel la fonction est appelée* (à moins que l'environnement englobant soit le même que l'environnement d'appel).
+À ne pas confondre : R ne cherche pas dans l'**environnement d'appel** = *environnement dans lequel la fonction est appelée* (à moins que l'environnement englobant soit le même que l'environnement d'appel).
 
 
 #### Chemin de recherche complet lors de l'exécution d'une fonction
 
+\mbox{}
+
 - environnement d'exécution,
-- chemin des environnements englobants jusqu'à :
+- environnement englobant ou hiérarchie d'environnements englobants,
 - environnement de travail,
 - environnements des packages chargés.
+
 
 **Bonne pratique** : Utiliser dans une fonction uniquement des objets que nous sommes certains de pouvoir atteindre, soit
 
@@ -926,14 +1058,15 @@ Il les cherche dans l'**environnement englobant** de la fonction = *environnemen
 # Références
 
 - Matloff, N. (2011). The Art of R Programming : A Tour of Statistical Software Design. No Starch Press. Chapitre 7.
-- http://adv-r.had.co.nz/Functions.html
-- http://adv-r.had.co.nz/Environments.html
-- https://www.datacamp.com/community/tutorials/functions-in-r-a-tutorial
+- Wickham, H. (2019). Advanced R, Second Edition. Chapman and Hall/CRC.
+    + Fonctions : Chapitre 6 https://adv-r.hadley.nz/functions.html
+    + Environnements : Chapitre 7 https://adv-r.hadley.nz/environments.html
+- Fanara, C. (2019). Tutoriel web intitulé « A Tutorial on Using Functions in R! ». https://www.datacamp.com/community/tutorials/functions-in-r-a-tutorial
 - Passage d'arguments par valeur versus par référence : http://www.mathwarehouse.com/programming/passing-by-value-vs-by-reference-visual-explanation.php
-- Programmation fonctionnelle :
-    + http://adv-r.had.co.nz/Functional-programming.html
-    + http://adv-r.had.co.nz/Functionals.html
+- Pour en apprendre davantage concernant la programmation fonctionnelle :
+    + https://adv-r.hadley.nz/fp.html
     + https://r4ds.had.co.nz/iteration.html#for-loops-vs.functionals
     + https://purrr.tidyverse.org/
+    + https://speakerdeck.com/hadley/the-joy-of-functional-programming
 
 
