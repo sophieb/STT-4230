@@ -51,7 +51,7 @@ Voyons maintenant comment écrire nos propres fonctions en R.
 Pour créer une fonction en R, il faut utiliser le mot-clé `function` en respectant la syntaxe suivante :
 
 ```{r eval = FALSE}
-nom_fonction <- function(arg_1, arg_2, arg_3){
+nom_fonction <- function(arg_1, arg_2, arg_3) {
   instructions  # formant le corps de la fonction
 }
 ```
@@ -61,7 +61,7 @@ nom_fonction <- function(arg_1, arg_2, arg_3){
 Voici une fonction qui reprend un exemple présenté dans les notes sur les [structures de contrôle en R](https://stt4230.rbind.io/programmation/struct_controle_r/#%C3%A9criture-g%C3%A9n%C3%A9rale-dun-if-...-else). Elle calcule des statistiques descriptives simples selon le type des éléments du vecteur donné en entrée.
 
 ```{r}
-stats_desc <- function(x){
+stats_desc <- function(x) {
   if (is.numeric(x)) {
     stats <- c(min = min(x), moy = mean(x), max = max(x))
   } else if (is.character(x) || is.factor(x)) {
@@ -82,7 +82,7 @@ stats_desc(x = iris$Species)
 Nous pourrions ajouter un argument à cette fonction. Par exemple, nous pourrions offrir l'option d'une sortie présentée sous la forme d'une matrice plutôt que d'un vecteur.
 
 ```{r}
-stats_desc <- function(x, sortie_matrice){
+stats_desc <- function(x, sortie_matrice) {
   # Calcul
   if (is.numeric(x)) {
     stats <- c(min = min(x), moy = mean(x), max = max(x))
@@ -92,7 +92,7 @@ stats_desc <- function(x, sortie_matrice){
     stats <- NA
   }
   # Production de la sortie
-  if (sortie_matrice){
+  if (sortie_matrice) {
     stats <- as.matrix(stats)
     colnames(stats) <- if (is.character(x) || is.factor(x)) "frequence" else "stat"
   }
@@ -163,7 +163,7 @@ Nous n'avons jamais donné de nom à la fonction et cela n'a causé aucun probl�
 Les arguments d'une fonction sont définis en énumérant leurs noms entre les parenthèses après le mot-clé `function`.
 
 ```{r eval = FALSE}
-nom_fonction <- function(arg_1, arg_2, arg_3){
+nom_fonction <- function(arg_1, arg_2, arg_3) {
   instructions  # formant le corps de la fonction
 }
 ```
@@ -204,7 +204,7 @@ stats_desc <- function (x, sortie_matrice = FALSE) {
     stats <- NA
   }
   # Production de la sortie
-  if (sortie_matrice){
+  if (sortie_matrice) {
     stats <- as.matrix(stats)
     colnames(stats) <- if (is.character(x) || is.factor(x)) "frequence" else "stat"
   }
@@ -267,7 +267,7 @@ stats_desc <- function (x, format_sortie = c("vecteur", "matrice", "liste")) {
   }
   # Production de la sortie
   format_sortie <- match.arg(format_sortie)
-  if (format_sortie == "matrice"){
+  if (format_sortie == "matrice") {
     stats <- as.matrix(stats)
     colnames(stats) <- if (is.character(x) || is.factor(x)) "frequence" else "stat"
   } else if (format_sortie == "liste") {
@@ -334,7 +334,7 @@ Les deux utilités de l'[argument `...`](https://stt4230.rbind.io/introduction/b
 L'argument `...` peut permettre de prendre un nombre indéterminé d'objets en entrée, comme dans cet exemple.
 
 ```{r}
-stats_desc_multi <- function(...){
+stats_desc_multi <- function(...) {
   args <- list(...)
   lapply(X = args, FUN = stats_desc)
 }
@@ -356,7 +356,7 @@ stats_desc_multi(Sepal.Length = iris$Sepal.Length,
 Les objets passés en entrée via `...` peuvent aussi être référés dans le corps de la fonction par les noms `..1`, `..2`, `..3` et ainsi de suite.
 
 ```{r}
-test_trois_points <- function(...){
+test_trois_points <- function(...) {
   cat("le premier argument prend la valeur", ..1, "\n")
   cat("le deuxième argument prend la valeur", ..2, "\n")
 }
@@ -378,7 +378,7 @@ test_trois_points("a")
 L'instruction `...length()` retourne le nombre d'objets attrapés par l'argument `...`. Utilisons cette instruction pour améliorer la fonction `test_trois_points` comme suit.
 
 ```{r}
-test_trois_points <- function(...){
+test_trois_points <- function(...) {
   if (...length() >= 1) {
     cat("le premier argument prend la valeur", ..1, "\n")
   }
@@ -394,7 +394,7 @@ test_trois_points("a")
 Nous pouvons faire encore mieux en bouclant sur les objets fournis en entrée, peu importe leur nombre. Dans ce cas, plutôt que d'utiliser les noms `..1`, `..2`, `..3` et ainsi de suite, nous utilisons la fonction `...elt`, qui prend en entrée un entier spécifiant une position et retourne l'objet attrapé par `...` à cette position.
 
 ```{r}
-test_trois_points <- function(...){
+test_trois_points <- function(...) {
   for (i in seq_len(...length()))
     cat("l'argument", i, "prend la valeur", ...elt(i), "\n")
 }
@@ -427,7 +427,7 @@ stats_desc <- function (x, format_sortie = c("vecteur", "matrice", "liste"), ...
   }
   # Production de la sortie
   format_sortie <- match.arg(format_sortie)
-  if (format_sortie == "matrice"){
+  if (format_sortie == "matrice") {
     stats <- as.matrix(stats)
     colnames(stats) <- if (is.character(x) || is.factor(x)) "frequence" else "stat"
   } else if (format_sortie == "liste") {
@@ -476,7 +476,7 @@ sortie_test
 Aucune fonction des exemples précédents n'utilise la fonction `return` pour produire une sortie. La fonction `stats_desc` retourne l'objet `stats` et la fonction `stats_desc_multi` retourne le résultat de `lapply(X = args, FUN = stats_desc)`. Modifions cette dernière fonction pour expérimenter l'utilisation de la fonction `return`.
 
 ```{r}
-stats_desc_multi <- function(...){
+stats_desc_multi <- function(...) {
   args <- list(...)
   return(args)
   cat("Est-ce que cette instruction est évaluée ?")
@@ -495,7 +495,7 @@ Cette version de la fonction `stats_desc_multi` retourne la liste des arguments 
 Une fonction ne peut retourner qu'un seul objet. Pour retourner plusieurs objets, il faut les combiner en un seul objet (typiquement dans une liste), comme dans l'exemple suivant.
 
 ```{r}
-stats_desc_multi <- function(...){
+stats_desc_multi <- function(...) {
   call <- match.call()
   args <- list(...)
   stats <- lapply(X = args, FUN = stats_desc)
@@ -673,8 +673,8 @@ Si la portée en R était par défaut dynamique, `g(x = 2)` aurait retourné la 
 Et si `f` était créée à l'intérieur de la fonction `g`?
 
 ```{r}
-g<-function(x) {
-  f<-function(x) {
+g <- function(x) {
+  f <- function(x) {
     a*x + b
   }
   a <- 2
@@ -773,7 +773,7 @@ Ce code est équivalent à la boucle suivante :
 
 ```{r}
 k <- 0
-for (n in x){
+for (n in x) {
   if (n %% 2 == 1) k <- k + 1
 }
 k
@@ -792,7 +792,7 @@ compte_impair_vectoriel <- function(x) {
 
 compte_impair_boucle <- function(x) {
   k <- 0
-  for (n in x){
+  for (n in x) {
     if (n %% 2 == 1) k <- k + 1
   }
   k
@@ -822,7 +822,7 @@ compte_impair_vectoriel <- function(x) {
 # Sortie : le nombre de nombres entiers impairs dans x
 compte_impair_boucle <- function(x) {
   k <- 0
-  for (n in x){
+  for (n in x) {
     if (n %% 2 == 1) k <- k + 1
   }
   k
@@ -896,7 +896,7 @@ R2
 À l'aide de la bonne fonction, nous allons obtenir exactement le même résultat avec un code plus court, qui n'utilise pas de boucle, mais qui utilise la fonction `sapply`. Voici une fonction qui extrait les deux statistiques à conserver pour un seul modèle de régression.
 
 ```{r}
-R2_reg_rating_vs_var <- function(variable){
+R2_reg_rating_vs_var <- function(variable) {
   reg <- lm(rating ~ ., data = attitude[, c("rating", variable)])
   summary(reg)[c("r.squared", "adj.r.squared")]
 }
@@ -922,7 +922,7 @@ Il existe en R d'autres fonctions de haut niveau, qui appliquent itérativement 
 \mbox{}
 
 ```{r eval = FALSE}
-nom_fonction <- function(arg_1, arg_2, arg_3){
+nom_fonction <- function(arg_1, arg_2, arg_3) {
   instructions  # formant le corps de la fonction
 }
 ```
