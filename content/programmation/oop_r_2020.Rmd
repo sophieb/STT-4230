@@ -38,24 +38,24 @@ La programmation orientée objet est un paradigme de programmation basé sur le 
 
 À chaque fois que nous avons effleuré le sujet de la programmation orientée objet dans ce cours, nous parlions toujours du système S3. Nous l'avons mentionné dans les notes sur :
 
-- [les concepts de base](https://stt4230.rbind.io/introduction/base_r/#est-ce-que-de-la-programmation-orientee-objet-est-possible-en-r);
-- [les graphiques](https://stt4230.rbind.io/communication_resultats/graphiques_r/#fonction-generique-plot);
-- [les calculs statistiques et mathématiques en R](https://stt4230.rbind.io/calculs/calculs_stat_math_r/#manipulation-de-la-sortie-dune-fonction-dajustement-de-modele).
+- les concepts de base, à la section « [Est-ce que de la programmation orientée objet est possible en R ?](https://stt4230.rbind.io/introduction/base_r/#est-ce-que-de-la-programmation-orient%C3%A9e-objet-est-possible-en-r) »;
+- les graphiques, à la section « [Fonction générique plot](https://stt4230.rbind.io/communication_resultats/graphiques_r/#fonction-g%C3%A9n%C3%A9rique-plot) »;
+- les calculs statistiques et mathématiques, à la section« [Manipulation de la sortie d’une fonction d’ajustement de modèle](https://stt4230.rbind.io/calculs/calculs_stat_math_r/#manipulation-de-la-sortie-dune-fonction-dajustement-de-mod%C3%A8le) ».
 
 
 Le fonctionnement de ce système est très simple. Il est possible d'attribuer des *classes* de type S3 aux objets R. Ces classes déterminent comment les *fonctions génériques* se comportent en recevant en entrée un certain objet. Une fonction générique est dite *polymorphe*. Elle possède plusieurs définitions, appelées *méthodes*, pour des objets de différentes classes. Techniquement, une fonction générique R ne fait que rediriger les arguments qui lui sont fournis en entrée vers la méthode associée à la classe de l'objet assigné à son premier argument. 
 
-Voyons plus en détails le fonctionnement du système S3, puis apprenons comment créer une nouvelle méthode pour une fonction générique existante. Nous ne verrons pas comment créer de nouvelles fonctions génériques.
+Voyons plus en détail le fonctionnement du système S3, puis apprenons comment créer une nouvelle méthode pour une fonction générique existante. Nous ne verrons pas comment créer de nouvelles fonctions génériques.
 
 ## Fonctionnement du système S3
 
-Nous avons déjà mentionné que les fonctions suivantes sont génériques : `plot`, `print`, `summary`, `coef` et plusieurs autres fonctions d’extraction d’informations de la sortie d’une fonction d’ajustement de modèle. La fonction `print` est probablement la fonction de cette liste que nous utilisons le plus souvent, puisqu'elle est appelée à chaque fois que nous affichons un objet dans la console. La définition de cette fonction est la suivante :
+Nous avons déjà mentionné que les fonctions suivantes sont génériques : `plot`, `print`, `summary`, `coef` et plusieurs autres fonctions d’extraction d’informations de la sortie d’une fonction d’ajustement de modèle. La [fonction `print`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/print.html) est probablement la fonction de cette liste que nous utilisons le plus souvent, puisqu'elle est appelée à chaque fois que nous soumettons dans la console une commande contenant uniquement le nom d'un objet. La définition de cette fonction est la suivante :
 
 ```{r}
 print
 ```
 
-Il n'y a qu'une seule instruction dans le corps de cette fonction : un appel à la fonction `UseMethod`. Toutes les fonctions génériques ont cette forme. De plus, la plupart d'entre elles possèdent un argument `...`.
+Il n'y a qu'une seule instruction dans le corps de cette fonction : un appel à la [fonction `UseMethod`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/UseMethod.html). Toutes les fonctions génériques ont cette forme. De plus, la plupart d'entre elles possèdent un argument « `...` ».
 
 Lorsqu'une fonction générique est appelée, la fonction `UseMethod` vérifie d'abord la classe de l'objet fourni au premier argument, ici `x`. Ensuite, elle appelle la méthode correspondant à la classe obtenue, si elle existe, en lui fournissant en entrée les arguments qui ont été fournis dans l'appel à la fonction générique.
 
@@ -83,13 +83,13 @@ R va d'abord vérifier la classe de l'objet assigné au premier argument dans l'
 class(women)
 ```
 
-Puis R va vérifier si une méthode `print` est définie pour cette classe. La fonction `methods` nous permet de connaître toutes les méthodes définies pour une fonction générique.
+Puis R va vérifier si une méthode `print` est définie pour cette classe. La [fonction `methods`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/methods.html) nous permet de connaître toutes les méthodes définies pour une fonction générique présente dans le chemin de recherche de notre session R.
 
 ```{r results = 'hide'}
 methods(print)
 ```
 
-Le résultat n'est pas affiché en entier, car le nombre de méthodes pour la fonction générique `print` est trop grand. Voici cependant un extrait de la sortie obtenue.
+Le résultat n'est pas affiché en entier, car le nombre de méthodes pour la fonction générique `print` est trop grand. Voici cependant un extrait de la sortie que j'obtiens.
 
 ```
 ## . . .
@@ -101,7 +101,7 @@ Le résultat n'est pas affiché en entier, car le nombre de méthodes pour la fo
 ## see '?methods' for accessing help and source code
 ```
 
-Pour une classe spécifique, une méthode de type S3 portera le nom :  `nomFonctionGenerique.nomClasse`. Nous voyons ici que la méthode `print.data.frame` existe. Celle-ci est une fonction, dont la définition est la suivante :
+Pour une classe spécifique, une méthode de type S3 portera le nom :  `nom_fonction_generique.nom_classe`. Nous voyons ici que la méthode `print.data.frame` existe. Celle-ci est une fonction, dont la définition est la suivante :
 
 ```{r}
 print.data.frame
@@ -149,21 +149,23 @@ En toute circonstance, la fonction `class` doit retourner une classe pour permet
 Par exemple, créons une copie de `women` pour laquelle nous allons retirer l'attribut `class` avec la fonction `unclass`.
 
 ```{r}
-women2 <- unclass(women)
-attr(women2, which = "class")
+women_2 <- unclass(women)
+attr(women_2, which = "class")
 ```
 
-L'objet `women2` n'a pas d'attribut `class`, mais il possède tout de même une classe implicite. 
+L'objet `women_2` n'a pas d'attribut `class`, mais il possède tout de même une classe implicite. 
 
 ```{r}
-class(women2)
+class(women_2)
 ```
 
-L'objet `women2` possède la classe implicite `"list"`. Ce résultat est cohérent avec le fait qu'un data frame est un type particulier de liste.
+L'objet `women_2` possède la classe implicite `"list"`. Ce résultat est cohérent avec le fait qu'un data frame est un type particulier de liste.
 
 Bref, la fonction `class` fonctionne comme suit. Elle vérifie d'abord si l'objet qu'elle reçoit en entrée possède une classe explicite, soit un attribut nommé `"class"`. Si c'est le cas, elle retourne cet attribut. Sinon, elle retourne la classe implicite de l'objet.
 
 #### Remarque
+
+\mbox{}
 
 Notons que, alors que les listes ont la classe implicite `list`, les arrays ont la classe implicite `array`, les matrices ont la classe implicite `matrix` et les vecteurs ont une classe implicite correspondant au type de données qu'ils contiennent, par exemple :
 
@@ -183,19 +185,19 @@ class(x_factor)
 ```
 
 
-### Situation particulière 2 : la méthode `nomFonctionGenerique.nomClasse` n'existe pas
+### Situation particulière 2 : la méthode `nom_fonction_generique.nom_classe` n'existe pas
 
-Qu'arrive-t-il si la fonction générique `nomFonctionGenerique` reçoit comme premier argument en entrée un objet de classe `nomClasse`, mais que la méthode `nomFonctionGenerique.nomClasse` n'existe pas ?
+Qu'arrive-t-il si la fonction générique `nom_fonction_generique` reçoit comme premier argument en entrée un objet de classe `nom_classe`, mais que la méthode `nom_fonction_generique.nom_classe` n'existe pas ?
 
-Dans ce cas, R utilise la méthode `nomFonctionGenerique.default`, si elle existe, sinon il retourne une erreur.
+Dans ce cas, R utilise la méthode par défaut, si elle existe, sinon il retourne une erreur. La méthode par défaut d'une fonction générique se nomme toujours `nom_fonction_generique.default`, où `nom_fonction_generique` est le nom de la fonction générique.
 
-Par exemple, reprenons l'objet `women2` de classe implicite `"list"`. Comment agit la fonction générique `print` avec cet objet ?
+Par exemple, reprenons l'objet `women_2` de classe implicite `"list"`. Comment agit la fonction générique `print` avec cet objet ?
 
 ```{r}
-print(women2)
+print(women_2)
 ```
 
-Lors de l'évaluation de la commande `print(women2)`, R cherche d'abord à appler la méthode `print.list`, mais celle-ci n'existe pas.
+Lors de l'évaluation de la commande `print(women_2)`, R cherche d'abord à appeler la méthode `print.list`, mais celle-ci n'existe pas.
 
 ```{r}
 any(methods(print) == "print.list")
@@ -204,7 +206,7 @@ any(methods(print) == "print.list")
 Il se rabat donc sur la méthode `print` par défaut et évalue l'appel de fonction suivant :
 
 ```{r}
-print.default(women2)
+print.default(women_2)
 ```
 
 Cependant, certaines fonctions génériques ne possèdent pas de méthode par défaut. Par exemple, c'est le cas de la fonction générique `anova`.
@@ -216,7 +218,7 @@ methods(anova)
 Si nous donnons en entrée à la fonction `anova` un objet qui n'est pas de classe `glm`, `glmlist`, `lm`, `lmlist`, `loess`, `mlm` ou `nls`, une erreur est retournée.
 
 ```{r eval = FALSE}
-anova(women2)
+anova(women_2)
 ```
 ```
 ## Error in UseMethod("anova") : 
@@ -225,7 +227,10 @@ anova(women2)
 
 #### Remarque
 
-Notons que la fonction `methods` permet aussi d'énumérer toutes les fonctions génériques possédant une méthode associée à une classe en particulier, par exemple :
+\mbox{}
+
+Notons que la fonction `methods` permet aussi d'énumérer les fonctions génériques possédant une méthode associée à une classe en particulier. Par exemple, les méthodes associées à la classe `lm` présentes dans le chemin de recherche de ma session R sont les suivantes :
+
 ```{r R.options = list(width = 90)}
 methods(class = "lm")
 ```
@@ -242,19 +247,19 @@ class(model)
 
 Qu'arrive-t-il lorsque `class` retourne plus d'une classe ?
 
-Si un objet possédant plus d'une classe est fourni en entrée à une fonction générique, R cherche d'abord à utiliser la méthode associée à la première classe de la liste. Si celle-ci n'existe pas, R utilise la méthode associée à le seconde classe. Si celle-ci n'existe pas, R continue à parcourir le vecteur des noms de classe jusqu'à ce qu'il trouve une méthode pour une classe. S'il n'existe de méthode pour aucune classe de la liste, c'est la méthode par défaut qui est employée. Et, comme nous venons de le voir, s'il n'y a même pas de méthode par défaut, alors une erreur est générée.
+Si un objet possédant plus d'une classe est fourni en entrée à une fonction générique, R cherche d'abord à utiliser la méthode associée à la première classe de la liste. Si celle-ci n'existe pas, R utilise la méthode associée à le seconde classe. Si celle-ci n'existe pas, R continue à parcourir le vecteur des noms de classe jusqu'à ce qu'il trouve une méthode pour une classe. S'il n'existe de méthode pour aucune classe de la liste, c'est la méthode par défaut qui est employée, si elle existe, sinon une erreur est générée, comme nous venons de le voir.
 
 ### Situation particulière 4 : la fonction générique possède plus d'un argument 
 
-Certaines fonctions génériques, telle que la fonction `plot`, possède plus d'un argument.
+Certaines fonctions génériques, telle que la fonction `plot`, possèdent plus d'un argument.
 
 ```{r}
 plot
 ```
 
-Quel impact ont ces autres arguments sur le choix de la méthode à utilisée ? 
+Quel impact ont ces autres arguments sur le choix de la méthode à utiliser ? 
 
-Ils n'ont aucun impact sur le choix de la méthode. Cette méthode peut cependant utiliser ces autres arguments pour déterminer ce qu'elle va faire. Par exemple, le corps de la méthode `plot.factor` contient une série de `if` .. `else` qui servent à sélectionner la fonction graphique à appeler en fonction des caractéristiques de l'objet assigné au deuxième argument, soit `y`.
+Ils n'ont aucun impact sur le choix de la méthode. Cette méthode peut cependant utiliser ces autres arguments pour déterminer ce qu'elle va faire. Par exemple, le corps de la méthode `plot.factor` contient une série de `if` ... `else` qui servent à sélectionner la fonction graphique à appeler en fonction des caractéristiques de l'objet assigné au deuxième argument, soit `y`.
 
 ```{r}
 graphics:::plot.factor
@@ -263,10 +268,14 @@ graphics:::plot.factor
 
 ## Création de classes et de méthodes de type S3
 
-Il est facile de créer de nouvelles méthodes pour des fonctions génériques existantes, telles que `print`, `plot` et `summary`. Par exemple, supposons que nous voulons modifier l'affichage de l'objet suivant.
+Il est facile de créer de nouvelles méthodes pour des fonctions génériques existantes, telles que `print`, `plot` et `summary`. Par exemple, supposons que nous voulons modifier l'impression de l'objet suivant.
+
+```{r echo = FALSE}
+set.seed(22313)
+```
 
 ```{r}
-valeurs_aleatoires <- rnorm(5)
+valeurs_aleatoires <- rnorm(7)
 print(valeurs_aleatoires)
 ```
 
@@ -280,30 +289,31 @@ Est-ce qu'une méthode de la fonction générique `print` existe pour cette clas
 
 ```{r}
 methods(class = "numeric")
+any(methods(class = "numeric") == "numeric")
 ```
 
-Non. Ainsi, l'affichage produit par la commande `print(valeurs_aleatoires)` provient d'un appel à la méthode `print.default`. 
+Non. Ainsi, l'impression produite par la commande `print(valeurs_aleatoires)` provient d'un appel à la méthode `print.default`. 
 
-Pour modifier l'affichage de l'objet `valeurs_aleatoires`, nous pourrions créer une méthode `print` pour la classe `"numeric"`. Cette façon de faire fonctionnerait, mais est-ce une bonne idée ?
+Pour modifier l'impression de l'objet `valeurs_aleatoires`, nous pourrions créer une méthode `print` pour la classe `"numeric"`. Cette façon de faire fonctionnerait, mais est-ce une bonne idée ?
 
-Non. Procéder de cette façon aurait un désavantage majeur : l'affichage de tous les objets de classe `"numeric"` serait modifié. Nous ne souhaitons pas changer le comportement général de R avec les objets de classe `"numeric"`. Nous souhaitons changer l'affichage d'un seul objet : `valeurs_aleatoires`.
+Non. Procéder de cette façon aurait un désavantage majeur : l'impression de tous les objets de classe `"numeric"` serait modifiée. Nous ne souhaitons pas changer le comportement général de R avec les objets de classe `"numeric"`. Nous souhaitons changer l'impression d'un seul objet : `valeurs_aleatoires`.
 
 Il est donc préférable d'assigner une toute nouvelle classe à l'objet `valeurs_aleatoires`, puis d'écrire une méthode `print` pour cette classe.
 
-### Assignation d'une nouvelle classe à un objet
+### Assignation d'une classe à un objet
 
-Pour assigner une classe à un objet R, il suffit de l'encadrer d'un appel à la fonction `class`, suivi d'un opérateur d'assignation et du nom de la classe sous forme de chaîne de caractère. Un nom de classe ne doit pas comporter d’espaces. Voici un exemple avec l'objet `valeurs_aleatoires`.
+Pour assigner une classe à un objet R, il suffit de l'encadrer d'un appel à la [fonction `class`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/class.html), suivi d'un opérateur d'assignation et du nom de la classe sous forme de chaîne de caractère. Un nom de classe ne doit pas comporter d’espaces. Voici un exemple avec l'objet `valeurs_aleatoires`.
 
 ```{r}
 class(valeurs_aleatoires) <- "mon_vecteur"
 print(valeurs_aleatoires)
 ```
 
-### Conception de la méthode pour la nouvelle classe
+### Conception d'une méthode pour une classe
 
 Les méthodes sont des fonctions. Alors créer une méthode signifie simplement créer une fonction. C'est le nom d'une fonction qui détermine si elle est une simple fonction ou une méthode associée à une fonction générique. 
 
-Une fonction dont le nom est de la forme `nomFonctionGenerique.nomClasse` est une méthode associée à la fonction générique nommée `nomFonctionGenerique`, pour la classe nommée `nomClasse`. Il faut évidemment que `nomFonctionGenerique` soit le nom d'une fonction générique. La fonction `data.frame` n'est pas une méthode associée à la fonction générique `data` pour la classe `frame`. Alors la simple présence d'un point dans le nom d'une fonction n'implique pas nécessairement qu'il s'agisse d'une méthode de type S3.
+Une fonction dont le nom est de la forme `nom_fonction_generique.nom_classe` est une méthode associée à la fonction générique nommée `nom_fonction_generique`, pour la classe nommée `nom_classe`. Il faut évidemment que `nom_fonction_generique` soit le nom d'une fonction générique. La fonction `data.frame` n'est pas une méthode associée à la fonction générique `data` pour la classe `frame`. Alors la simple présence d'un point dans le nom d'une fonction n'implique pas nécessairement qu'il s'agisse d'une méthode de type S3.
 
 Une méthode comporte typiquement les arguments suivants :
 
@@ -312,7 +322,7 @@ Une méthode comporte typiquement les arguments suivants :
 - arguments supplémentaires, au besoin;
 - l'argument `...` (même s'il n'est pas utilisé).
 
-Il est important que le premier argument de la méthode concorde avec le premier argument de la fonction générique, car lorsque la fonction générique appelera la méthode, elle assignera comme valeur à son premier argument ce qu'elle a reçu comme valeur pour son propre premier argument.
+Il est important que le premier argument de la méthode concorde avec le premier argument de la fonction générique, car lorsque la fonction générique appellera la méthode, elle assignera comme valeur à son premier argument ce qu'elle a reçu comme valeur pour son propre premier argument.
 
 L'ordre des autres arguments n'est cependant pas tellement important. Par exemple, la fonction générique `aggregate` possède 2 arguments : `x` et `...` :
 
@@ -335,16 +345,17 @@ args(getS3method("aggregate", "formula"))
 args(aggregate.ts)
 ```
 
-L'argument `...` est toujours présent, mais il n'est pas toujours placé en dernier. La méthode `aggregate.formula` ne possède pas d'arguments supplémentaires, contrairement aux autes méthodes. De plus, une de ces méthodes (`aggregate.formula`) ne possède même pas d'argument nommé `x`.
+L'argument `...` est toujours présent, mais il n'est pas toujours placé en dernier. La méthode `aggregate.default` ne possède pas d'arguments supplémentaires, contrairement aux autres méthodes. De plus, une de ces méthodes (`aggregate.formula`) ne possède même pas d'argument nommé `x`.
 
-\newpage
 
 #### Exemple avec la méthode générique `print`
+
+\mbox{}
 
 Créons une méthode `print` pour la classe `mon_vecteur`.
 
 ```{r}
-print.mon_vecteur <- function(x, ..., intro = TRUE){
+print.mon_vecteur <- function(x, ..., intro = TRUE) {
   if (intro) {
     cat("Voici le vecteur :\n")
   }
@@ -353,7 +364,7 @@ print.mon_vecteur <- function(x, ..., intro = TRUE){
 }
 ```
 
-Voyons l'affichage produit par notre nouvelle méthode.
+Voyons l'impression produit par notre nouvelle méthode.
 
 ```{r}
 print(valeurs_aleatoires)
@@ -362,11 +373,15 @@ print(valeurs_aleatoires, intro = FALSE)
 
 ##### Utilité de l'appel à la fonction `unclass`
 
-Vous remarquerez que le corps de la méthode `print.mon_vecteur` comporte un appel à la fonction `unclass` dans l'instruction `print(unclass(x), ...)`. L'appel à `unclass` est important. Sans lui, une boucle sans fin serait exécutée lors de l'appel de la fonction `print` en lui donnant un objet de classe `mon_vecteur` en entrée : la fonction générique `print` appelerait la méthode `print.mon_vecteur`, qui appellerait la fonction générique `print`, qui appelerait la méthode `print.mon_vecteur` et ainsi de suite.
+\mbox{}
 
-L'appel à la fonction `unclass` dans `print(unclass(x), ...)` permet de fournir en entrée à `print` l'objet `x` sans sont attribut `"class"`. Ainsi, `print` appelera le méthode correspondant à la classe implicite de `x`. 
+Vous remarquerez que le corps de la méthode `print.mon_vecteur` comporte un appel à la [fonction `unclass`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/class.html) dans l'instruction `print(unclass(x), ...)`. L'appel à `unclass` est important. Sans lui, une boucle sans fin serait exécutée lors de l'appel de la fonction `print` en lui donnant un objet de classe `mon_vecteur` en entrée : la fonction générique `print` appellerait la méthode `print.mon_vecteur`, qui appellerait la fonction générique `print`, qui appellerait la méthode `print.mon_vecteur` et ainsi de suite.
+
+L'appel à la fonction `unclass` dans `print(unclass(x), ...)` permet de fournir en entrée à `print` l'objet `x` sans sont attribut `"class"`. Ainsi, `print` appellera la méthode correspondant à la classe implicite de `x`. 
 
 ##### Impact du positionnement de l'argument `...`
+
+\mbox{}
 
 Dans cet exemple, nous avons placé l'argument `...` avant les arguments supplémentaires dans la déclaration de la méthode. Dans le corps de la fonction, nous avons passé l'argument `...` à un appel à la fonction `print`. En conséquence, si nous appelons `print.mon_vecteur` (via `print` ou  non) en passant une deuxième valeur sans l'assigner à un nom d'argument, cette valeur sera automatiquement assignée au deuxième argument de la méthode `print` appelée et non à l'argument `intro` de la méthode `print.mon_vecteur`.
 
@@ -376,25 +391,51 @@ Voici un exemple.
 print(valeurs_aleatoires, FALSE)
 ```
 
-Ici, `print` appelle sa méthode `print.mon_vecteur`, qui appelle de nouveau la méthode `print`, qui chsoisit d'appeler sa méthode `print.default` (car `class(unclass(valeurs_aleatoires)) == "numeric"`). Le deuxième argument de [`print.default`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/print.default.html) est `digits`. Il reçoit la valeur `FALSE`, qui est alors transformée la valeur numérique 0, et les nombre affichés sont arrondis à l'unité près.
+Ici, `print` appelle sa méthode `print.mon_vecteur`, qui appelle de nouveau la méthode `print`, qui choisit d'appeler sa méthode `print.default` (car `class(unclass(valeurs_aleatoires)) == "numeric"` et `print.numeric` n'existe pas). Le deuxième argument de [`print.default`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/print.default.html) est `digits`. Il reçoit la valeur `FALSE`, qui est alors transformée en la valeur numérique 0 et les nombres affichés sont arrondis à l'unité près.
 
 
-##### Utilité de l'appel à la fonction invisible
+##### Utilité de l'appel à la fonction `invisible`
 
-Il est courant pour une méthode `print` de terminer par la commande `invisible(x)`. La fonction `invisible` provoque le retour d'une valeur par la fonction, tout comme la fonction `return`. Cependant, contrairement à `return`, `invisible` ne provoque pas un affichage lorsque l'appel de la fonction n'est pas assigné à un nom, évitant ainsi un affichage double suite à une commande comme la suivante :
+\mbox{}
+
+Il est courant pour une méthode `print` de terminer par la commande `invisible(x)`. La [fonction `invisible`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/invisible.html) provoque le retour d'une valeur par la fonction, tout comme la [fonction `return`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/function.html). Cependant, contrairement à `return`, `invisible` ne provoque pas une impression lorsque l'appel de la fonction n'est pas assigné à un nom, évitant ainsi une impression double suite à une commande comme la suivante :
 
 ```{r}
-sortie <- print(valeurs_aleatoires)
+print(valeurs_aleatoires)
 ```
 
+Si `invisible` était remplacé par `return` dans le corps  de la méthode `print.mon_vecteur` comme suit
+
+```{r}
+print.mon_vecteur <- function(x, ..., intro = TRUE) {
+  if (intro) {
+    cat("Voici le vecteur :\n")
+  }
+  print(unclass(x), ...)
+  return(x)
+}
+```
+
+nous obtiendrions plutôt :
+
+```{r}
+print(valeurs_aleatoires)
+```
+
+Une autre option serait de ne rien faire retourner à la méthode, mais le R code team juge qu'il est plus pratique qu'une méthode `print` retourne silencieusement une copie de l'objet qu'elle imprime. 
 
 #### Exemple avec la méthode générique `plot`
 
-Tentons maintenant de créer une méthode `plot` pour un objet de la  classe `mon_vecteur`. La fonction générique `plot` a deux arguments, mais notre méthode reprendra uniquement son premier argument, auquel un argument supplémentaire sera ajouté. Elle générera un histogramme.
+\mbox{}
+
+Tentons maintenant de créer une méthode `plot` pour un objet de la  classe `mon_vecteur`. La [fonction générique `plot`](https://stat.ethz.ch/R-manual/R-patched/library/graphics/html/plot.html) possède deux arguments, mais notre méthode reprendra uniquement son premier argument, auquel un argument supplémentaire sera ajouté. Elle générera un histogramme.
 
 ```{r}
-plot.mon_vecteur <- function(x, main = "Nouveau vecteur", ...){
-  hist(x, main = main)
+plot.mon_vecteur <- function(x, main = "Distribution de x", ...) {
+  par.default <- par(mar = c(5, 5, 4, 1) + 0.1)
+  on.exit(par(par.default), add = TRUE)
+  out <- hist(x = x, main = main, ylab = "fréquence")
+  invisible(out)
 }
 ```
 
@@ -417,26 +458,32 @@ valeurs_aleatoires <- unclass(valeurs_aleatoires)
 plot(valeurs_aleatoires)
 ```
 
-Cet exemple illustre le fait qu'une méthode ne doit pas obligatoirement reprendre tous les arguments de la fonction générique associée. 
+Cet exemple illustre le fait qu'une méthode ne doit pas obligatoirement reprendre tous les arguments de la fonction générique associée.
 
 
+##### Utilité de l'appel à la fonction `on.exit`
+
+\mbox{}
+
+La [fonction `on.exit`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/on.exit.html) permet de s'assurer qu'une instruction est évaluée avant de terminer l'exécution d'un appel à une fonction, et ce, même si une erreur provoque l'arrêt de cette exécution avant la fin du corps de la fonction. Dans l'exemple de la méthode `plot.mon_vecteur`, le paramètre graphique `mar` (largeur des marges internes) a été modifié par un appel à la fonction `par`. Nous savons qu'une bonne pratique est de remettre les paramètres graphiques modifiés avec `par` à leurs valeurs par défaut à la fin d'un code de production d'un graphique. Lorsque ce code est dans le corps d'une fonction, il est plus prudent de programmer la remise aux valeurs par défaut par un appel à la fonction `on.exit` placé juste après l'appel à la fonction `par`.
+
+De plus, spécifier l'argument `add = TRUE` dans l'appel à la fonction `on.exit` [est recommandé](https://adv-r.hadley.nz/functions.html#on-exit) afin de permettre le cumul des instructions de fin d'exécution. Notons qu'avec un seul appel à `on.exit` dans le corps d'une fonction, c'est argument n'a cependant aucun impact. 
 
 
+### Méthode `print` pour formater l'impression des sorties de nos fonctions
 
-### Méthode `print` pour formater l'affichage des sorties de nos fonctions
-
-Il est souvent utile de créer des méthodes `print` pour formater l'affichage des sorties de nos fonctions. Pour ce faire, il suffit de compléter les deux étapes suivantes.
+Il est souvent utile de créer des méthodes `print` pour formater l'impression des sorties de nos fonctions. Pour ce faire, il suffit de compléter les deux étapes suivantes.
 
 1. D'abord, dans le corps de la fonction, il **faut attribuer une nouvelle classe**, avec la fonction `class`, à l'objet retourné en sortie.
 
-Il est pratique courante en R d'utiliser comme nom de la classe de l'objet retourné en sortie d'une fonction le nom de la fonction. C'est que ce fait par exemple la fonction `lm`. Ce n'est cependant pas obligatoire de reprendre le nom de la fonction. Le nom de la classe peut être quelconque, pourvu qu'il ne soit pas déjà utilisé par d'autres fonctions dans un package chargé afin d'éviter de modifier l'affichage d'autres objets.
+Il est pratique courante en R d'utiliser comme nom de la classe de l'objet retourné en sortie d'une fonction le nom de la fonction. C'est ce que fait par exemple la fonction `lm`. Ce n'est cependant pas obligatoire de reprendre le nom de la fonction. Le nom de la classe peut être quelconque, pourvu qu'il ne soit pas déjà utilisé par d'autres fonctions dans un package chargé afin d'éviter de modifier l'impression d'autres objets.
 
-2. Il faut ensuite créer une fonction nommée : `print.nomClasse`.
+2. Il faut ensuite créer une fonction nommée : `print.nom_classe`.
 
-Pour illustrer ces étapes, créons une méthode `print` pour un objet retourné par la fonction `statDesc` créée dans le notes de cours sur les [fonctions](https://stt4230.rbind.io/programmation/fonctions_r). Tout d'abord, attribuons une nouvelle classe à la sortie de `statDesc`.
+Pour illustrer ces étapes, créons une méthode `print` pour un objet retourné par la fonction `stats_desc` créée dans les notes de cours sur les [fonctions](https://stt4230.rbind.io/programmation/fonctions_r). Tout d'abord, attribuons une nouvelle classe à la sortie de `stats_desc`.
 
 ```{r}
-statDesc <- function (x, formatSortie = c("vecteur", "matrice", "liste"), ...) {
+stats_desc <- function(x, format_sortie = c("vecteur", "matrice", "liste"), ...) {
   # Calcul
   if (is.numeric(x)) {
     stats <- c(min = min(x, ...), moy = mean(x, ...), max = max(x, ...))
@@ -446,60 +493,61 @@ statDesc <- function (x, formatSortie = c("vecteur", "matrice", "liste"), ...) {
     stats <- NA
   }
   # Production de la sortie
-  formatSortie <- match.arg(formatSortie)
-  if (formatSortie == "matrice"){
+  format_sortie <- match.arg(format_sortie)
+  if (format_sortie == "matrice") {
     stats <- as.matrix(stats)
     colnames(stats) <- if (is.character(x) || is.factor(x)) "frequence" else "stat"
-  } else if (formatSortie == "liste") {
+  } else if (format_sortie == "liste") {
     stats <- as.list(stats)
   }
   out <- list(stats = stats)
-  class(out) <- "statDesc"
+  class(out) <- "stats_desc"
   out
 }
 ```
 
-Dans cet exemple, en plus de l'instruction `class(out) <- "statDesc"` ajoutée pour attribuer une classe à la sortie de la fonction, l'objet retourné en sortie a été formaté en liste contenant tout ce qu'il y a à retourner (ici un seul objet). Il n'est pas obligatoire qu'une sortie de fonction qui possède une classe soit une liste, mais c'est une pratique très courante. 
+Dans cet exemple, en plus de l'instruction `class(out) <- "stats_desc"` ajoutée pour attribuer une classe à la sortie de la fonction, l'objet retourné en sortie a été formaté en liste contenant tout ce qu'il y a à retourner (ici un seul objet). Il n'est pas obligatoire qu'une sortie de fonction qui possède une classe soit une liste, mais, encore là, c'est une pratique très courante. 
 
 Notons que les instructions
 
 ```{r eval = FALSE}
   out <- list(stats = stats)
-  class(out) <- "statDesc"
+  class(out) <- "stats_desc"
   out
 ```
 
 auraient pu être remplacées par
 
 ```{r eval = FALSE}
-  structure(list(stats = stats),  class = "statDesc")
+  structure(list(stats = stats),  class = "stats_desc")
 ```
 
-Maintenant, écrivons le code de notre nouvelle méthode `print`, pour un objet de classe `statDesc`.
+Maintenant, écrivons le code de notre nouvelle méthode `print`, pour un objet de classe `stats_desc`.
 
 ```{r}
-print.statDesc <- function(x, ...){
+print.stats_desc <- function(x, ...) {
   cat("Statistiques descriptives :\n")
+  cat("***************************\n")
   print(x$stats, ...)
+  cat("***************************\n")
   invisible(x)
 }
 ```
 
-Si la méthode `print.statDesc` est appelée par `print`, c'est que l'objet donné comme premier argument à `print` est assurément de classe `statDesc`. Ainsi, dans le corps de la méthode `print.statDesc`, nous pouvons exploiter les caractéristiques des objets de cette classe. Nous savons qu'un objet de cette classe est une liste comportant un élément nommé `stats`. L'instruction `print(x$stats, ...)` exploite cette caractéristique.
+Si la méthode `print.stats_desc` est appelée par `print`, c'est que l'objet donné comme premier argument à `print` est assurément de classe `stats_desc`. Ainsi, dans le corps de la méthode `print.stats_desc`, nous pouvons exploiter les caractéristiques des objets de cette classe. Nous savons qu'un objet de cette classe est une liste comportant un élément nommé `stats`. L'instruction `print(x$stats, ...)` exploite cette caractéristique.
 
-Mais pourquoi cette instruction ne comporte-t-elle pas d'appel à la fonction `unclass` comme dans le corps de la méthode `print.mon_vecteur` ? Cette instruction ne provoquera-t-elle pas un appel en boucle à la méthode `print.statDesc` ?
+Mais pourquoi cette instruction ne comporte-t-elle pas d'appel à la fonction `unclass` comme dans le corps de la méthode `print.mon_vecteur` ? Cette instruction ne provoquera-t-elle pas un appel en boucle à la méthode `print.stats_desc` ?
 
-Non, parce que dans le corps de la méthode `print.statDesc` l'objet `x` possède la classe `print.statDesc`, mais pas le sous-objet `stats` dans `x`.
+Non, parce que dans le corps de la méthode `print.stats_desc` l'objet `x` possède la classe `print.stats_desc`, mais pas le sous-objet `stats` dans `x`.
 
-Pour une fonction qui retourne une très longue liste, attribuer une classe à sa sortie et écrire une méthode `print` pour cette classe permet d'éviter l'affichage dans la console de la liste entière retournée en sortie.
+Pour une fonction qui retourne une très longue liste, attribuer une classe à sa sortie et écrire une méthode `print` pour cette classe permet d'éviter l'impression dans la console de la liste entière retournée en sortie.
 
-Voici un exemple d'affichage produit par la méthode `print.statDesc`.
+Voici un exemple d'impression produit par la méthode `print.stats_desc`.
 
 ```{r}
-statDesc(x = iris$Species, formatSortie = "matrice")
+stats_desc(x = iris$Species, format_sortie = "matrice")
 ```
 
-\newpage
 
 # Système S4
 
@@ -517,9 +565,9 @@ Voici un exemple d'utilisation d'une fonction de ce package, tiré d'une fiche d
 
 ```{r, warning = FALSE}
 library(sp)
-x = c(1,2,3,4,5)
-y = c(3,2,5,1,4)
-S <- SpatialPoints(cbind(x,y))
+x = c(1, 2, 3, 4, 5)
+y = c(3, 2, 5, 1, 4)
+S <- SpatialPoints(cbind(x, y))
 S
 str(S)
 ```
@@ -531,7 +579,7 @@ isS4(S)
 class(S)
 ```
 
-Pour atteindre les éléments dans l'objet, il est possible d'utiliser une méthode conçue à cet effet. Par exemple, la fiche d'aide ouverte par la commande `help("SpatialPoints-class")` nous informe qu'une méthode `coordinates` est définie pour les objets de la classe `"SpatialPoints"`. Nous pouvons aussi énumérer toutes les fonction génériques possédant une méthode définie pour une certaine classe de type S4 avec la fonctions `methods` comme suit.
+Pour atteindre les éléments dans l'objet, il est possible d'utiliser une méthode conçue à cet effet. Par exemple, la fiche d'aide ouverte par la commande [`help("SpatialPoints-class")`](https://www.rdocumentation.org/packages/sp/versions/1.4-0/topics/SpatialPoints-class) nous informe qu'une méthode `coordinates` est définie pour les objets de la classe `"SpatialPoints"`. Nous pouvons aussi énumérer toutes les fonctions génériques possédant une méthode définie pour une certaine classe de type S4 avec la fonction `methods` comme suit.
 
 ```{r R.options = list(width = 90)}
 methods(class = "SpatialPoints")
@@ -578,7 +626,7 @@ slot(S, "coords")
 
 Ainsi, utiliser des classes de type S4 est simple. Il suffit de d'abord bien identifier que nous manipulons un objet dont la classe est de type S4. La mention `Formal class` dans la sortie de `str` nous l'indique. La fonction `isS4` peut aussi nous le confirmer. Ensuite, nous pouvons manipuler l'objet avec les fonctions génériques possédant des méthodes pour sa classe et nous pouvons extraire des éléments de l'objet avec l'opérateur `@` ou la fonction `slot`. 
  
-Notons qu'un des intérêts du package `sp` est la production facilitée de graphiques représentant des données spatiales, par exemple des coordonnées géographiques, en s'assurant d'utiliser des axes sur la même échelle.
+Notons qu'un des intérêts du package `sp` est la production facilitée de graphiques représentant des données spatiales, par exemple des coordonnées géographiques.
 
 ```{r, out.width = "65%", fig.height=4, fig.width = 6, fig.align = "center"}
 plot(S, main = "Axes sur la même échelle", axes=TRUE)
@@ -587,11 +635,13 @@ plot(x, y, main = "Axes non contrôlés")
 
 ***
 
-\newpage
 
-# Synthèse
+
+# Résumé
 
 #### Systèmes de programmation orientée objet en R :
+
+\mbox{}
 
 $\bullet$ **S3** : le plus ancien, le moins formel, mais encore le plus utilisé.
 
@@ -612,8 +662,10 @@ $\rightarrow$ pas encore beaucoup utilisé, pas couvert dans le cours.
 
 #### Fonctionnement du système S3
 
+\mbox{}
+
 - fonction générique de type S3 : appelle la fonction `UseMethod`
-- méthode de type S3 = fonction dont le nom a la forme `nomFonctionGenerique.nomClasse`
+- méthode de type S3 = fonction dont le nom a la forme `nom_fonction_generique.nom_classe`
 
 C'est la valeur retournée par la fonction `class` sur l'objet fourni comme premier argument en entrée à une fonction générique qui détermine quelle méthode est utilisée.
 
@@ -627,47 +679,64 @@ C'est la valeur retournée par la fonction `class` sur l'objet fourni comme prem
 
 #### Création de classes et de méthodes de type S3
 
+\mbox{}
+
 **Création de classe de type S3** = ajout d'un attribut `class` à un objet
 
 ```{r eval = FALSE}
-class(objet) <- "nomClasse"
+class(objet) <- "nom_classe"
 ```
 
-Pratique courante = attribuer une classe à l'objet retourné par une de nos fonctions (permet notamment de contrôler l'affichage de la sortie grâce à une méthode `print`).
+Pratique courante = attribuer une classe à l'objet retourné par une de nos fonctions (permet notamment de contrôler l'impression de la sortie grâce à une méthode `print`).
 
 **Création de méthode de type S3** = création de fonctions avec bon nom
 
 ```{r eval = FALSE}
-nomFonctionGenerique.nomClasse <- function(x, ...){
+nom_fonction_generique.nom_classe <- function(x, ...) {
   # corps de la méthode
 }
 ```
 
-où `nomClasse` peut être une classe existante ou une nouvelle classe. 
+où `nom_classe` peut être le nom d'une classe existante ou celui d'une nouvelle classe que nous avons créée. 
+
+Une méthode comporte typiquement les arguments suivants :
+
+- même premier argument que la fonction générique (portant idéalement le même nom)
+- autres arguments de la fonction générique, au besoin;
+- arguments supplémentaires, au besoin;
+- l'argument `...` (même s'il n'est pas utilisé).
+
+**Fonctions utiles** :
+
+- `unclass` : pour retirer l'argument `"class"` d'un objet;
+- `invisible` : remplacement de `return` pour faire retourner un objet à une fonction sans provoquer l'impression de l'objet lorsque la fonction est appelée sans assignation (typiquement utilisé dans les méthodes pour les fonctions génériques `print` et `plot`);
+- `on.exit` : pour s'assurer qu'une instruction est évaluée avant de terminer l'exécution d’un
+appel à une fonction (p. ex. utile pour remettre à leurs valeurs par défaut des paramètres graphiques).
 
 
 #### Manipulation d'objets dont la classe est de type S4
 
+\mbox{}
 
 - Caractéristiques des **objets possédant une classe de type S4** : 
     + possèdent un attribut `class`;
     + `isS4(objet)` retourne `TRUE`;
     + la sortie de `str(objet)` contient « `Formal class` »;
-    + contiennent des éléments (*slots*) qui peuvent être extrait :
+    + contiennent des éléments (*slots*) qui peuvent être extraits :
         + avec des méthodes conçues à cet effet,
         + avec l'opérateur `@`,
         + avec la fonction `slot`.
 - Caractéristiques des **fonctions génériques de type S4** :
     + appellent la fonction `standardGeneric`
 - Caractéristiques des **méthodes de type S4** :
-    + code source affiché avec `getMethod(nomFonctionGenerique, signature = "nomClasse")`
-    + l'affichage code source contient « `Method Definition` ».
+    + code source affiché avec `getMethod(nom_fonction_generique, signature = "nom_classe")`
+    + l'impression code source contient « `Method Definition` ».
 
 
 ***
 
 # Références
 
-- Matloff, N. (2011). *The Art of R Programming : A Tour of Statistical Software Design*. No Starch Press, chapitre 9.
-- Wickham, H. (2014). Advanced R. CRC Press. URL de la deuxième édition en développement : https://adv-r.hadley.nz/oo.html
+- Matloff, N. (2011). *The Art of R Programming : A Tour of Statistical Software Design*. No Starch Press. Chapitre 9.
+- Wickham, H. (2019). *Advanced R, Second Edition*. Chapman and Hall/CRC. Chapitres 12 à 16. URL https://adv-r.hadley.nz/oo.html
 
