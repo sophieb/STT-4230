@@ -289,7 +289,7 @@ Est-ce qu'une méthode de la fonction générique `print` existe pour cette clas
 
 ```{r}
 methods(class = "numeric")
-any(methods(class = "numeric") == "print")
+any(methods(class = "numeric") == "print.numeric")
 ```
 
 Non. Ainsi, l'impression produite par la commande `print(valeurs_aleatoires)` provient d'un appel à la méthode `print.default`. 
@@ -391,7 +391,7 @@ Voici un exemple.
 print(valeurs_aleatoires, FALSE)
 ```
 
-Ici, `print` appelle sa méthode `print.mon_vecteur`, qui appelle de nouveau la méthode `print`, qui choisit d'appeler sa méthode `print.default` (car `class(unclass(valeurs_aleatoires)) == "numeric"` et `print.numeric` n'existe pas). Le deuxième argument de [`print.default`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/print.default.html) est `digits`. Il reçoit la valeur `FALSE`, qui est alors transformée en la valeur numérique 0 et les nombres affichés sont arrondis à l'unité près.
+Ici, `print` appelle sa méthode `print.mon_vecteur`, qui appelle de nouveau la méthode `print`, qui choisit d'appeler sa méthode `print.default` (car `class(unclass(valeurs_aleatoires))` retourne `"numeric"` et `print.numeric` n'existe pas). Le deuxième argument de [`print.default`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/print.default.html) est `digits`. Il reçoit la valeur `FALSE`, qui est alors transformée en la valeur numérique 0 et les nombres affichés sont arrondis à l'unité près.
 
 
 ##### Utilité de l'appel à la fonction `invisible`
@@ -431,10 +431,10 @@ Une autre option serait de ne rien faire retourner à la méthode, mais le R cod
 Tentons maintenant de créer une méthode `plot` pour un objet de la  classe `mon_vecteur`. La [fonction générique `plot`](https://stat.ethz.ch/R-manual/R-patched/library/graphics/html/plot.html) possède deux arguments, mais notre méthode reprendra uniquement son premier argument, auquel un argument supplémentaire sera ajouté. Elle générera un histogramme.
 
 ```{r}
-plot.mon_vecteur <- function(x, main = "Distribution de x", ...) {
+plot.mon_vecteur <- function(x, main = "Distribution de x", ylab = "fréquence", ...) {
   par.default <- par(mar = c(5, 5, 4, 1) + 0.1)
   on.exit(par(par.default), add = TRUE)
-  out <- hist(x = x, main = main, ylab = "fréquence")
+  out <- hist(x = x, main = main, ylab = ylab, ...)
   invisible(out)
 }
 ```
@@ -454,8 +454,7 @@ plot(valeurs_aleatoires)
 Si `valeurs_aleatoires` n'était pas de classe `mon_vecteur`, nous obtiendrions plutôt ce graphique.
 
 ```{r out.width = "65%", fig.height=4, fig.width = 6, fig.align = "center"}
-valeurs_aleatoires <- unclass(valeurs_aleatoires)
-plot(valeurs_aleatoires)
+plot(unclass(valeurs_aleatoires))
 ```
 
 Cet exemple illustre le fait qu'une méthode ne doit pas obligatoirement reprendre tous les arguments de la fonction générique associée.
@@ -467,7 +466,7 @@ Cet exemple illustre le fait qu'une méthode ne doit pas obligatoirement reprend
 
 La [fonction `on.exit`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/on.exit.html) permet de s'assurer qu'une instruction est évaluée avant de terminer l'exécution d'un appel à une fonction, et ce, même si une erreur provoque l'arrêt de cette exécution avant la fin du corps de la fonction. Dans l'exemple de la méthode `plot.mon_vecteur`, le paramètre graphique `mar` (largeur des marges internes) a été modifié par un appel à la fonction `par`. Nous savons qu'une bonne pratique est de remettre les paramètres graphiques modifiés avec `par` à leurs valeurs par défaut à la fin d'un code de production d'un graphique. Lorsque ce code est dans le corps d'une fonction, il est plus prudent de programmer la remise aux valeurs par défaut par un appel à la fonction `on.exit` placé juste après l'appel à la fonction `par`.
 
-De plus, spécifier l'argument `add = TRUE` dans l'appel à la fonction `on.exit` [est recommandé](https://adv-r.hadley.nz/functions.html#on-exit) afin de permettre le cumul des instructions de fin d'exécution. Notons qu'avec un seul appel à `on.exit` dans le corps d'une fonction, c'est argument n'a cependant aucun impact. 
+De plus, spécifier l'argument `add = TRUE` dans l'appel à la fonction `on.exit` [est recommandé](https://adv-r.hadley.nz/functions.html#on-exit) afin de permettre le cumul des instructions de fin d'exécution. Notons qu'avec un seul appel à `on.exit` dans le corps d'une fonction, cet argument n'a cependant aucun impact. 
 
 
 ### Méthode `print` pour formater l'impression des sorties de nos fonctions
@@ -681,7 +680,7 @@ C'est la valeur retournée par la fonction `class` sur l'objet fourni comme prem
 
 \mbox{}
 
-**Création de classe de type S3** = ajout d'un attribut `class` à un objet
+**Assignation d'une classe à un objet** = ajout d'un attribut `class` à un objet
 
 ```{r eval = FALSE}
 class(objet) <- "nom_classe"
