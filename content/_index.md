@@ -42,7 +42,7 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
     * [Programmation orientée objet en R]({{< relref "programmation/oop_r_2020.html" >}})
     * [Tests et exceptions en R]({{< relref "programmation/tests_exceptions_r_2020.html" >}})
 * Packages R
-    * [Utilisation de packages R]({{< relref "packages/utilisation_packages_r_2019.html" >}})
+    * [Utilisation de packages R]({{< relref "packages/utilisation_packages_r_2020.html" >}})
     * [Développement de packages R]({{< relref "packages/developpement_packages_r_2019.html" >}})
 * Amélioration de code R
     * [Bonnes pratiques en R]({{< relref "amelioration_code/bonnes_pratiques_r_2020.html" >}})
