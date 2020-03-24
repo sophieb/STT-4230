@@ -1,10 +1,10 @@
 ---
 title: "Développement de packages R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2019-03-21"
+date: "2020-03-24"
 weight: 2
 slug: "devel_packages_r"
-categories: ["cours_2019-04-02"]
+categories: ["cours_2020-03-31"]
 categories_weight: 2
 lastmodifierdisplayname : "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
@@ -12,12 +12,16 @@ output:
   pdf_document:
     toc: yes
     toc_depth: 3
+    highlight: tango
   blogdown::html_page:
-    toc: true
+    toc: yes
+    toc_depth: 3
+    highlight: tango
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
 - \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \renewcommand{\linethickness}{0.05em}
 editor_options: 
   chunk_output_type: console
 ---
@@ -26,35 +30,98 @@ editor_options:
 
 
 
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  { background-color: #f8f8f8; }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
 <div id="TOC">
 <ul>
-<li><a href="#etape-1.-ecrire-les-fonctions">Étape 1. Écrire les fonctions</a></li>
-<li><a href="#etape-2.-creer-la-structure-de-fichiers-du-package">Étape 2. Créer la structure de fichiers du package</a><ul>
-<li><a href="#repertoire-principal-portant-le-nom-du-package">Répertoire principal portant le nom du package</a></li>
-<li><a href="#sous-repertoire-nomme-r">Sous-répertoire nommé <code>R</code></a></li>
-<li><a href="#sous-repertoire-nomme-man">Sous-répertoire nommé <code>man</code></a></li>
-<li><a href="#fichier-nomme-description">Fichier nommé <code>DESCRIPTION</code></a></li>
-<li><a href="#fichier-nomme-namespace">Fichier nommé <code>NAMESPACE</code></a></li>
-<li><a href="#autres-fichiers-et-repertoires">Autres fichiers et répertoires</a></li>
+<li><a href="#étape-1.-écrire-les-fonctions">Étape 1. Écrire les fonctions</a></li>
+<li><a href="#étape-2.-créer-la-structure-de-fichiers-du-package">Étape 2. Créer la structure de fichiers du package</a><ul>
+<li><a href="#répertoire-principal-portant-le-nom-du-package">Répertoire principal portant le nom du package</a></li>
+<li><a href="#sous-répertoire-nommé-r">Sous-répertoire nommé <code>R</code></a></li>
+<li><a href="#sous-répertoire-nommé-man">Sous-répertoire nommé <code>man</code></a></li>
+<li><a href="#fichier-nommé-description">Fichier nommé <code>DESCRIPTION</code></a></li>
+<li><a href="#fichier-nommé-namespace">Fichier nommé <code>NAMESPACE</code></a></li>
+<li><a href="#autres-fichiers-et-répertoires">Autres fichiers et répertoires</a></li>
 </ul></li>
-<li><a href="#etape-3.-ecrire-la-documentation-des-fonctions-et-du-package">Étape 3. Écrire la documentation des fonctions et du package</a><ul>
-<li><a href="#comment-ecrire-de-la-documentation-avec-roxygen2">Comment écrire de la documentation avec <code>roxygen2</code> ?</a></li>
-<li><a href="#comment-generer-les-fichiers-.rd-et-le-fichier-namespace">Comment générer les fichiers .Rd et le fichier <code>NAMESPACE</code> ?</a></li>
+<li><a href="#étape-3.-écrire-la-documentation-des-fonctions-et-du-package">Étape 3. Écrire la documentation des fonctions et du package</a><ul>
+<li><a href="#comment-écrire-de-la-documentation-avec-roxygen2">Comment écrire de la documentation avec <code>roxygen2</code> ?</a></li>
+<li><a href="#comment-générer-les-fichiers-.rd-et-le-fichier-namespace">Comment générer les fichiers .Rd et le fichier <code>NAMESPACE</code> ?</a></li>
 </ul></li>
-<li><a href="#etape-4.-construire-et-verifier-le-package">Étape 4. Construire et vérifier le package</a><ul>
-<li><a href="#lancement-des-commandes-de-construction-et-de-verification-en-rstudio">Lancement des commandes de construction et de vérification en RStudio</a><ul>
-<li><a href="#sous-etape-a-creer-un-projet-rstudio-avec-le-repertoire-principal-du-package">Sous-étape a) Créer un projet RStudio avec le répertoire principal du package</a></li>
-<li><a href="#sous-etape-b-configurer-les-options-de-rstudio">Sous-étape b) Configurer les options de RStudio</a></li>
-<li><a href="#sous-etape-c-construire-a-partir-du-menu-build-de-rstudio">Sous-étape c) Construire à partir du menu « Build » de RStudio</a></li>
+<li><a href="#étape-4.-construire-et-vérifier-le-package">Étape 4. Construire et vérifier le package</a><ul>
+<li><a href="#lancement-des-commandes-de-construction-et-de-vérification-en-rstudio">Lancement des commandes de construction et de vérification en RStudio</a><ul>
+<li><a href="#sous-étape-a-créer-un-projet-rstudio-avec-le-répertoire-principal-du-package">Sous-étape a) Créer un projet RStudio avec le répertoire principal du package</a></li>
+<li><a href="#sous-étape-b-configurer-les-options-de-rstudio">Sous-étape b) Configurer les options de RStudio</a></li>
+<li><a href="#sous-étape-c-construire-à-partir-du-menu-build-de-rstudio">Sous-étape c) Construire à partir du menu « Build » de RStudio</a></li>
 </ul></li>
-<li><a href="#lancement-des-commandes-de-construction-et-de-verification-avec-devtools">Lancement des commandes de construction et de vérification avec <code>devtools</code></a></li>
+<li><a href="#lancement-des-commandes-de-construction-et-de-vérification-avec-devtools">Lancement des commandes de construction et de vérification avec <code>devtools</code></a></li>
 </ul></li>
-<li><a href="#etape-5.-si-desire-partager-le-package">Étape 5. Si désiré, partager le package</a></li>
-<li><a href="#etape-6.-au-besoin-mettre-a-jour-le-package">Étape 6. Au besoin, mettre à jour le package</a></li>
-<li><a href="#synthese">Synthèse</a></li>
-<li><a href="#references">Références</a></li>
+<li><a href="#étape-5.-si-désiré-partager-le-package">Étape 5. Si désiré, partager le package</a></li>
+<li><a href="#étape-6.-au-besoin-mettre-à-jour-le-package">Étape 6. Au besoin, mettre à jour le package</a></li>
+<li><a href="#résumé">Résumé</a></li>
+<li><a href="#références">Références</a></li>
 <li><a href="#annexe">Annexe</a><ul>
-<li><a href="#resolution-de-problemes-deja-rencontres">Résolution de problèmes déjà rencontrés</a></li>
+<li><a href="#résolution-de-problèmes-déjà-rencontrés">Résolution de problèmes déjà rencontrés</a></li>
 </ul></li>
 </ul>
 </div>
@@ -68,8 +135,7 @@ editor_options:
 </ul>
 <p>L’exemple utilisé ici, soit le package <code>ggplot2</code>, est un gros package. Seuls certains de ses fichiers et répertoires sont nécessaires dans tout package R.</p>
 <p>Après avoir développé les fichiers sources, qui incluent du code et de la documentation, il faut construire le package. Nous verrons ici comment réaliser cette construction avec RStudio.</p>
-
-<div id="etape-1.-ecrire-les-fonctions" class="section level1">
+<div id="étape-1.-écrire-les-fonctions" class="section level1">
 <h1>Étape 1. Écrire les fonctions</h1>
 <p>Cette étape fait appel à ce que nous avons appris dans toutes les notes de cours précédentes, en particulier celles sur les <a href="https://stt4230.rbind.io/programmation/fonctions_r/">fonctions en R</a>.</p>
 <p>Lorsque nous créons des fonctions dans le but de les inclure dans un package, il faut garder en tête le chemin de recherche complet qu’utilisera R lors de l’exécution de ces fonctions. Ce chemin est le suivant :</p>
@@ -98,9 +164,8 @@ editor_options:
 <li>toujours utiliser comme valeurs logiques <code>TRUE</code> ou <code>FALSE</code> (donc pas de <code>T</code> ou <code>F</code>) :<br />
 <em>parce qu’un objet R nommé</em> <code>T</code> <em>ou</em> <code>F</code> <em>peut être défini, écrasant du coup les définitions</em> <code>T &lt;- TRUE</code> <em>et</em> <code>F &lt;- FALSE</code><em>, alors qu’il est impossible de créer un nouvel objet R nommé</em> <code>TRUE</code> <em>ou</em> <code>FALSE</code> <em>(mots-clés protégés)</em>.</li>
 </ul>
-
 </div>
-<div id="etape-2.-creer-la-structure-de-fichiers-du-package" class="section level1">
+<div id="étape-2.-créer-la-structure-de-fichiers-du-package" class="section level1">
 <h1>Étape 2. Créer la structure de fichiers du package</h1>
 <p>Un package, dans sa version source, est simplement un répertoire de fichiers compressés. Cependant, ce répertoire doit comprendre des fichiers et des sous-répertoires portant des noms précis.</p>
 <p>Nous pouvons créer cette structure de fichiers à l’aide de :</p>
@@ -116,25 +181,25 @@ editor_options:
 <li>fichier nommé <code>DESCRIPTION</code>,</li>
 <li>fichier nommé <code>NAMESPACE</code>.</li>
 </ul>
-<div id="repertoire-principal-portant-le-nom-du-package" class="section level2">
+<div id="répertoire-principal-portant-le-nom-du-package" class="section level2">
 <h2>Répertoire principal portant le nom du package</h2>
 <p>Premièrement, un nom doit être choisi pour le package. Ce nom peut contenir uniquement les caractères <a href="https://fr.wikipedia.org/wiki/American_Standard_Code_for_Information_Interchange">ASCII</a> suivants : lettres, chiffres et <code>.</code> (point). Il ne peut donc pas contenir de lettres accentuées, ni le caractère <code>_</code> (tiret bas ou <em>underscore</em> en anglais). Il doit être composé d’au moins 2 caractères, débuter par une lettre et ne pas terminer par un point<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
 <p>Ensuite, il faut créer un répertoire portant ce nom. Par exemple, si nous voulions créer un package nommé <code>manhattan</code>, il faudrait d’abord créer un répertoire nommé <code>manhattan</code> sur notre ordinateur. Ce pourrait être par exemple le répertoire <code>"C:/coursR/manhattan"</code>.</p>
 </div>
-<div id="sous-repertoire-nomme-r" class="section level2">
+<div id="sous-répertoire-nommé-r" class="section level2">
 <h2>Sous-répertoire nommé <code>R</code></h2>
 <p>Le sous-répertoire <code>R</code> doit comprendre des fichiers de scripts R (portant l’extension <code>.R</code>) contenant le code de création des fonctions ainsi que les commentaires <code>roxygen2</code>, si c’est l’outil que nous utilisons pour générer la documentation (nous y reviendrons plus loin). Le développeur peut choisir les noms qu’il veut pour ces fichiers et il peut y répartir le code source comme il le veut. Évidemment, une bonne pratique est de répartir le code source de façon à ce que ce soit facile de s’y retrouver. Certains préconisent la stratégie « un fichier par fonction, portant le nom de la fonction », mais ce n’est pas obligatoire. La stratégie opposée, « un seul fichier contenant toutes les fonctions », représente rarement une bonne répartition du code, à moins que les fonctions soient très peu nombreuses.</p>
 </div>
-<div id="sous-repertoire-nomme-man" class="section level2">
+<div id="sous-répertoire-nommé-man" class="section level2">
 <h2>Sous-répertoire nommé <code>man</code></h2>
 <p>Le sous-répertoire <code>man</code> doit comprendre des fichiers sources de fiches d’aide R (portant l’extension <code>.Rd</code>). Nous allons voir à la prochaine étape comment générer ces fichiers à l’aide du package <code>roxygen2</code>.</p>
 </div>
-<div id="fichier-nomme-description" class="section level2">
+<div id="fichier-nommé-description" class="section level2">
 <h2>Fichier nommé <code>DESCRIPTION</code></h2>
 <p>L fichier `DESCRIPTION est très important pour la construction du package. C’est un fichier court, comportant de l’information de base sur le package. Ce fichier doit respecter une syntaxe précise.</p>
-
 <div id="exemple" class="section level4">
 <h4>Exemple :</h4>
+
 <pre><code>Package: manhattan
 Version: 1.0.0
 Date: 2019-03-21
@@ -166,11 +231,11 @@ LazyData: true</code></pre>
 <a href="http://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file" class="uri">http://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file</a></p>
 </div>
 </div>
-<div id="fichier-nomme-namespace" class="section level2">
+<div id="fichier-nommé-namespace" class="section level2">
 <h2>Fichier nommé <code>NAMESPACE</code></h2>
 <p>Le fichier <code>NAMESPACE</code> permet de définir quels objets sont accessibles dans un package, c’est-à-dire exportés de l’espace de noms du package. Ce fichier permet aussi d’identifier quels objets provenant d’autres packages sont utilisés dans le package, donc de définir le contenu de l’environnement des objets importés par le package. Nous allons voir comment utiliser <code>roxygen2</code> pour générer ce fichier.</p>
 </div>
-<div id="autres-fichiers-et-repertoires" class="section level2">
+<div id="autres-fichiers-et-répertoires" class="section level2">
 <h2>Autres fichiers et répertoires</h2>
 <p>Un package peut contenir plusieurs autres fichiers et sous-répertoires. Voici quelques autres répertoires parfois nécessaires :</p>
 <ul>
@@ -186,7 +251,7 @@ LazyData: true</code></pre>
 </ul>
 </div>
 </div>
-<div id="etape-3.-ecrire-la-documentation-des-fonctions-et-du-package" class="section level1">
+<div id="étape-3.-écrire-la-documentation-des-fonctions-et-du-package" class="section level1">
 <h1>Étape 3. Écrire la documentation des fonctions et du package</h1>
 <p>Documenter ses fonctions est une étape intégrée au développement des fonctions. Cependant, il faut maintenant écrire la documentation dans un format qui produira correctement les fiches d’aide qui doivent être incluses dans le package.</p>
 <p>Ces fiches d’aide proviennent en fait de fichiers portant l’extension <code>.Rd</code>. Cependant, nous ne verrons pas comment éditer directement ces fichiers. Nous allons plutôt apprendre à utiliser le package <code>roxygen2</code>, qui permet de générer des fichiers <code>.Rd</code>, ainsi que le fichier <code>NAMESAPCE</code>, de façon automatique, à partir de commentaires intégrés au code.</p>
@@ -198,19 +263,23 @@ LazyData: true</code></pre>
 <p>Rappelons que dans un package il faut obligatoirement documenter :</p>
 <div id="les-fonctions-publiques" class="section level4">
 <h4>Les fonctions publiques</h4>
+
 <p>Il est essentiel de faire des fiches d’aide pour ces fonctions, afin que tout utilisateur comprenne comment appeler correctement la fonction. Si un utilisateur a mal compris la documentation et fournit par erreur une valeur d’argument invalide en entrée, il est aussi souhaitable que la fonction retourne une erreur informative. Le code de ces fonctions publiques comporte donc typiquement de la <strong>validation des arguments fournis en entrée</strong>.</p>
 <p>À l’opposé, les <strong>fonctions privées ou internes</strong> ne sont pas conçues pour être appelées par n’importe quel utilisateur. Ces fonctions ne sont pas exportées de l’espace de noms et elles ne sont pas documentées officiellement. Il est tout de même bon de documenter minimalement ces fonctions pour nous-mêmes, mais nous n’avons pas à produire de fiches d’aide pour elles. De plus, pour ne pas alourdir ces fonctions, elles comportent typiquement peu ou pas de validation d’arguments.</p>
 </div>
-<div id="les-jeux-de-donnees-dans-le-repertoire-data" class="section level4">
+<div id="les-jeux-de-données-dans-le-répertoire-data" class="section level4">
 <h4>Les jeux de données dans le répertoire <code>data</code></h4>
+
 <p>Chaque jeu de données dans le répertoire <code>data</code> d’un package doit être décrit dans une fiche d’aide pour expliquer son contenu.</p>
 </div>
-<div id="les-classes-et-methodes-s4-ou-rc-publiques" class="section level4">
+<div id="les-classes-et-méthodes-s4-ou-rc-publiques" class="section level4">
 <h4>Les classes et méthodes S4 ou RC publiques</h4>
+
 <p>Les packages exploitant le système de programmation orientée objet S4<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> ou le système RC<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> doivent fournir des fiches d’aide pour les classes et méthodes publiques.</p>
 </div>
-<div id="il-est-aussi-recommande-de-documenter" class="section level4">
+<div id="il-est-aussi-recommandé-de-documenter" class="section level4">
 <h4>Il est aussi recommandé de documenter :</h4>
+
 <ul>
 <li>Les méthodes S3 pour des fonctions génériques :</li>
 </ul>
@@ -220,144 +289,146 @@ LazyData: true</code></pre>
 </ul>
 <p>Il est utile de créer une fiche d’aide présentant le package.</p>
 </div>
-<div id="comment-ecrire-de-la-documentation-avec-roxygen2" class="section level2">
+<div id="comment-écrire-de-la-documentation-avec-roxygen2" class="section level2">
 <h2>Comment écrire de la documentation avec <code>roxygen2</code> ?</h2>
 <p>Il suffit d’insérer des « commentaires » <code>roxygen2</code> dans le code source des fonctions, donc dans les scripts situés dans le sous-répertoire <code>R</code>. Un commentaire <code>roxygen2</code> débute par <code>#'</code>, ce qui le distingue d’un commentaire ordinaire, qui débute par <code>#</code>.</p>
 <div id="exemples" class="section level4">
 <h4>Exemples :</h4>
+
 <p>D’abord, voici des exemples de scripts R contenant des commentaires <code>roxygen2</code>. Des explications se retrouvent après les exemples. Ces exemples poursuivent l’exemple de création d’une fonction qui calcule la distance de Manhattan entre deux points provenant des notes <a href="https://stt4230.rbind.io/programmation/tests_exceptions_r/">Tests et exceptions en R</a>.</p>
 <p> </p>
 <p>Fichier <code>C:/coursR/manhattan/R/distman.R</code> :</p>
-<pre class="r"><code>#&#39; Distance de Manhattan
-#&#39; 
-#&#39; Calcule la distance de Manhattan entre deux points
-#&#39; 
-#&#39; @param point1 Un vecteur numerique des coordonnees du premier point.
-#&#39; @param point2 Un vecteur numerique des coordonnees du deuxieme point.
-#&#39; @return une seule valeur : la distance de Manhattan entre 
-#&#39;                            \code{point1} et \code{point2}
-#&#39; @author Sophie Baillargeon
-#&#39; @export
-#&#39; @examples
-#&#39; distman(point1 = c(0,-5), point2 = c(0,-15))
-distman &lt;- function(point1, point2) {
-  # Validation des arguments
-  if (length(point1) != length(point2)) 
-    stop(&quot;&#39;point1&#39; and &#39;point2&#39; must have the same length&quot;)
-  if (!is.null(dim(point1)) || !is.null(dim(point2)))
-    warning(&quot;&#39;point1&#39; and &#39;point2&#39; are treated as dimension 1 vectors&quot;)
-  # Calculs
-  out &lt;- list(dist = sum(abs(point1 - point2)))
-  # Sortie
-  class(out) &lt;- &quot;distman&quot;
-  return(out)
-}</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="co">#&#39; Distance de Manhattan</span></a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="co">#&#39; </span></a>
+<a class="sourceLine" id="cb3-3" title="3"><span class="co">#&#39; Calcule la distance de Manhattan entre deux points</span></a>
+<a class="sourceLine" id="cb3-4" title="4"><span class="co">#&#39; </span></a>
+<a class="sourceLine" id="cb3-5" title="5"><span class="co">#&#39; @param point1 Un vecteur numerique des coordonnees du premier point.</span></a>
+<a class="sourceLine" id="cb3-6" title="6"><span class="co">#&#39; @param point2 Un vecteur numerique des coordonnees du deuxieme point.</span></a>
+<a class="sourceLine" id="cb3-7" title="7"><span class="co">#&#39; @return une seule valeur : la distance de Manhattan entre </span></a>
+<a class="sourceLine" id="cb3-8" title="8"><span class="co">#&#39;                            \code{point1} et \code{point2}</span></a>
+<a class="sourceLine" id="cb3-9" title="9"><span class="co">#&#39; @author Sophie Baillargeon</span></a>
+<a class="sourceLine" id="cb3-10" title="10"><span class="co">#&#39; @export</span></a>
+<a class="sourceLine" id="cb3-11" title="11"><span class="co">#&#39; @examples</span></a>
+<a class="sourceLine" id="cb3-12" title="12"><span class="co">#&#39; distman(point1 = c(0,-5), point2 = c(0,-15))</span></a>
+<a class="sourceLine" id="cb3-13" title="13">distman &lt;-<span class="st"> </span><span class="cf">function</span>(point1, point2) {</a>
+<a class="sourceLine" id="cb3-14" title="14">  <span class="co"># Validation des arguments</span></a>
+<a class="sourceLine" id="cb3-15" title="15">  <span class="cf">if</span> (<span class="kw">length</span>(point1) <span class="op">!=</span><span class="st"> </span><span class="kw">length</span>(point2)) </a>
+<a class="sourceLine" id="cb3-16" title="16">    <span class="kw">stop</span>(<span class="st">&quot;&#39;point1&#39; and &#39;point2&#39; must have the same length&quot;</span>)</a>
+<a class="sourceLine" id="cb3-17" title="17">  <span class="cf">if</span> (<span class="op">!</span><span class="kw">is.null</span>(<span class="kw">dim</span>(point1)) <span class="op">||</span><span class="st"> </span><span class="op">!</span><span class="kw">is.null</span>(<span class="kw">dim</span>(point2)))</a>
+<a class="sourceLine" id="cb3-18" title="18">    <span class="kw">warning</span>(<span class="st">&quot;&#39;point1&#39; and &#39;point2&#39; are treated as dimension 1 vectors&quot;</span>)</a>
+<a class="sourceLine" id="cb3-19" title="19">  <span class="co"># Calculs</span></a>
+<a class="sourceLine" id="cb3-20" title="20">  out &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">dist =</span> <span class="kw">sum</span>(<span class="kw">abs</span>(point1 <span class="op">-</span><span class="st"> </span>point2)))</a>
+<a class="sourceLine" id="cb3-21" title="21">  <span class="co"># Sortie</span></a>
+<a class="sourceLine" id="cb3-22" title="22">  <span class="kw">class</span>(out) &lt;-<span class="st"> &quot;distman&quot;</span></a>
+<a class="sourceLine" id="cb3-23" title="23">  <span class="kw">return</span>(out)</a>
+<a class="sourceLine" id="cb3-24" title="24">}</a></code></pre></div>
 <p> </p>
 <p>Fichier <code>C:/coursR/manhattan/R/distman2.R</code> :</p>
-<pre class="r"><code>#&#39; Distance de Manhattan
-#&#39; 
-#&#39; Calcule la distance de Manhattan entre deux points
-#&#39; 
-#&#39; Utilise la fonction \code{\link[stats]{dist}} du package \pkg{stats}.
-#&#39; 
-#&#39; @param point1 Un vecteur numerique des coordonnees du premier point.
-#&#39; @param point2 Un vecteur numerique des coordonnees du deuxieme point.
-#&#39; @return \item{dist}{ la distance de Manhattan entre \code{point1} et \code{point2} }
-#&#39; @return \item{call}{ une copie de l&#39;appel de la fonction }
-#&#39; @author Sophie Baillargeon
-#&#39; @export
-#&#39; @importFrom stats dist
-#&#39; @examples
-#&#39; distman2(point1 = c(0,-5), point2 = c(0,-15)) 
-distman2 &lt;- function(point1, point2) {
-  call &lt;- match.call()
-  dist &lt;- stats::dist(rbind(point1, point2), method = &quot;manhattan&quot;)
-  out &lt;- list(dist = as.vector(dist), call = call)
-  class(out) &lt;- &quot;distman&quot;
-  return(out)
-}</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="co">#&#39; Distance de Manhattan</span></a>
+<a class="sourceLine" id="cb4-2" title="2"><span class="co">#&#39; </span></a>
+<a class="sourceLine" id="cb4-3" title="3"><span class="co">#&#39; Calcule la distance de Manhattan entre deux points</span></a>
+<a class="sourceLine" id="cb4-4" title="4"><span class="co">#&#39; </span></a>
+<a class="sourceLine" id="cb4-5" title="5"><span class="co">#&#39; Utilise la fonction \code{\link[stats]{dist}} du package \pkg{stats}.</span></a>
+<a class="sourceLine" id="cb4-6" title="6"><span class="co">#&#39; </span></a>
+<a class="sourceLine" id="cb4-7" title="7"><span class="co">#&#39; @param point1 Un vecteur numerique des coordonnees du premier point.</span></a>
+<a class="sourceLine" id="cb4-8" title="8"><span class="co">#&#39; @param point2 Un vecteur numerique des coordonnees du deuxieme point.</span></a>
+<a class="sourceLine" id="cb4-9" title="9"><span class="co">#&#39; @return \item{dist}{ la distance de Manhattan entre \code{point1} et \code{point2} }</span></a>
+<a class="sourceLine" id="cb4-10" title="10"><span class="co">#&#39; @return \item{call}{ une copie de l&#39;appel de la fonction }</span></a>
+<a class="sourceLine" id="cb4-11" title="11"><span class="co">#&#39; @author Sophie Baillargeon</span></a>
+<a class="sourceLine" id="cb4-12" title="12"><span class="co">#&#39; @export</span></a>
+<a class="sourceLine" id="cb4-13" title="13"><span class="co">#&#39; @importFrom stats dist</span></a>
+<a class="sourceLine" id="cb4-14" title="14"><span class="co">#&#39; @examples</span></a>
+<a class="sourceLine" id="cb4-15" title="15"><span class="co">#&#39; distman2(point1 = c(0,-5), point2 = c(0,-15)) </span></a>
+<a class="sourceLine" id="cb4-16" title="16">distman2 &lt;-<span class="st"> </span><span class="cf">function</span>(point1, point2) {</a>
+<a class="sourceLine" id="cb4-17" title="17">  call &lt;-<span class="st"> </span><span class="kw">match.call</span>()</a>
+<a class="sourceLine" id="cb4-18" title="18">  dist &lt;-<span class="st"> </span>stats<span class="op">::</span><span class="kw">dist</span>(<span class="kw">rbind</span>(point1, point2), <span class="dt">method =</span> <span class="st">&quot;manhattan&quot;</span>)</a>
+<a class="sourceLine" id="cb4-19" title="19">  out &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">dist =</span> <span class="kw">as.vector</span>(dist), <span class="dt">call =</span> call)</a>
+<a class="sourceLine" id="cb4-20" title="20">  <span class="kw">class</span>(out) &lt;-<span class="st"> &quot;distman&quot;</span></a>
+<a class="sourceLine" id="cb4-21" title="21">  <span class="kw">return</span>(out)</a>
+<a class="sourceLine" id="cb4-22" title="22">}</a></code></pre></div>
 <p> </p>
 <p>Fichier <code>C:/coursR/manhattan/R/print.distman.R</code> :</p>
-<pre class="r"><code>#&#39; @describeIn distman Affiche un objet de classe \code{&quot;distman&quot;}
-#&#39; @param x Un objet produit par la fonction \code{distman}, a afficher.
-#&#39; @param \dots D&#39;autres arguments passes a d&#39;autres methodes. 
-#&#39; @export
-print.distman &lt;- function(x, ...) {
-  cat(&quot;Manhattan distance between &#39;point1&#39; and &#39;point2&#39; :&quot;, x$dist, &quot;\n&quot;)
-  invisible(x)
-}</code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="co">#&#39; @describeIn distman Affiche un objet de classe \code{&quot;distman&quot;}</span></a>
+<a class="sourceLine" id="cb5-2" title="2"><span class="co">#&#39; @param x Un objet produit par la fonction \code{distman}, a afficher.</span></a>
+<a class="sourceLine" id="cb5-3" title="3"><span class="co">#&#39; @param \dots D&#39;autres arguments passes a d&#39;autres methodes. </span></a>
+<a class="sourceLine" id="cb5-4" title="4"><span class="co">#&#39; @export</span></a>
+<a class="sourceLine" id="cb5-5" title="5">print.distman &lt;-<span class="st"> </span><span class="cf">function</span>(x, ...) {</a>
+<a class="sourceLine" id="cb5-6" title="6">  <span class="kw">cat</span>(<span class="st">&quot;Manhattan distance between &#39;point1&#39; and &#39;point2&#39; :&quot;</span>, x<span class="op">$</span>dist, <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb5-7" title="7">  <span class="kw">invisible</span>(x)</a>
+<a class="sourceLine" id="cb5-8" title="8">}</a></code></pre></div>
 <p> </p>
 <p>Fichier <code>C:/coursR/manhattan/R/manhattan.R</code> :</p>
-<pre class="r"><code>#&#39; @details
-#&#39; \tabular{ll}{
-#&#39; Package: \tab manhattan\cr
-#&#39; Type: \tab Package\cr
-#&#39; Version: \tab 1.0.0\cr
-#&#39; Date: \tab 2019-04-02\cr
-#&#39; License: \tab GPL-3\cr
-#&#39; }
-&quot;_PACKAGE&quot;
-
-#&#39; Points aleatoires
-#&#39;
-#&#39; Coordonnes en deux dimensions de 10 points aleatoires.
-#&#39;
-#&#39; @format Une matrice contenant 10 points designes par les
-#&#39;         coordonnees suivantes.
-#&#39; \describe{
-#&#39;   \item{\code{X}}{ coordonnee en X }
-#&#39;   \item{\code{Y}}{ coordonnee en Y }
-#&#39; }
-#&#39; @examples
-#&#39; distman(point1 = points[4, ], point2 = points[8, ])
-#&#39;
-#&#39; # Note : Ces donnees ont ete crees par les instructions suivantes
-#&#39; points &lt;- matrix(sample(1:10, size = 20, replace = TRUE),
-#&#39;                  nrow = 10, ncol = 2)
-#&#39; colnames(points) &lt;- c(&quot;X&quot;, &quot;Y&quot;)
-&quot;points&quot;</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="co">#&#39; @details</span></a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="co">#&#39; \tabular{ll}{</span></a>
+<a class="sourceLine" id="cb6-3" title="3"><span class="co">#&#39; Package: \tab manhattan\cr</span></a>
+<a class="sourceLine" id="cb6-4" title="4"><span class="co">#&#39; Type: \tab Package\cr</span></a>
+<a class="sourceLine" id="cb6-5" title="5"><span class="co">#&#39; Version: \tab 1.0.0\cr</span></a>
+<a class="sourceLine" id="cb6-6" title="6"><span class="co">#&#39; Date: \tab 2019-04-02\cr</span></a>
+<a class="sourceLine" id="cb6-7" title="7"><span class="co">#&#39; License: \tab GPL-3\cr</span></a>
+<a class="sourceLine" id="cb6-8" title="8"><span class="co">#&#39; }</span></a>
+<a class="sourceLine" id="cb6-9" title="9"><span class="st">&quot;_PACKAGE&quot;</span></a>
+<a class="sourceLine" id="cb6-10" title="10"></a>
+<a class="sourceLine" id="cb6-11" title="11"><span class="co">#&#39; Points aleatoires</span></a>
+<a class="sourceLine" id="cb6-12" title="12"><span class="co">#&#39;</span></a>
+<a class="sourceLine" id="cb6-13" title="13"><span class="co">#&#39; Coordonnes en deux dimensions de 10 points aleatoires.</span></a>
+<a class="sourceLine" id="cb6-14" title="14"><span class="co">#&#39;</span></a>
+<a class="sourceLine" id="cb6-15" title="15"><span class="co">#&#39; @format Une matrice contenant 10 points designes par les</span></a>
+<a class="sourceLine" id="cb6-16" title="16"><span class="co">#&#39;         coordonnees suivantes.</span></a>
+<a class="sourceLine" id="cb6-17" title="17"><span class="co">#&#39; \describe{</span></a>
+<a class="sourceLine" id="cb6-18" title="18"><span class="co">#&#39;   \item{\code{X}}{ coordonnee en X }</span></a>
+<a class="sourceLine" id="cb6-19" title="19"><span class="co">#&#39;   \item{\code{Y}}{ coordonnee en Y }</span></a>
+<a class="sourceLine" id="cb6-20" title="20"><span class="co">#&#39; }</span></a>
+<a class="sourceLine" id="cb6-21" title="21"><span class="co">#&#39; @examples</span></a>
+<a class="sourceLine" id="cb6-22" title="22"><span class="co">#&#39; distman(point1 = points[4, ], point2 = points[8, ])</span></a>
+<a class="sourceLine" id="cb6-23" title="23"><span class="co">#&#39;</span></a>
+<a class="sourceLine" id="cb6-24" title="24"><span class="co">#&#39; # Note : Ces donnees ont ete crees par les instructions suivantes</span></a>
+<a class="sourceLine" id="cb6-25" title="25"><span class="co">#&#39; points &lt;- matrix(sample(1:10, size = 20, replace = TRUE),</span></a>
+<a class="sourceLine" id="cb6-26" title="26"><span class="co">#&#39;                  nrow = 10, ncol = 2)</span></a>
+<a class="sourceLine" id="cb6-27" title="27"><span class="co">#&#39; colnames(points) &lt;- c(&quot;X&quot;, &quot;Y&quot;)</span></a>
+<a class="sourceLine" id="cb6-28" title="28"><span class="st">&quot;points&quot;</span></a></code></pre></div>
 </div>
 <div id="explications" class="section level4">
 <h4>Explications :</h4>
+
 <p>Pour les fonctions et les méthodes associées à des fonctions génériques, il suffit de mettre en entête au code source les commentaires <code>roxygen2</code> qui généreront la documentation. Pour le package et les jeux de données, il faut ajouter un fichier d’extension <code>.R</code> dans le répertoire <code>R</code>. Ce fichier doit contenir les commentaires <code>roxygen2</code> pour documenter globalement le package, suivi de l’instruction <code>"_PACKAGE"</code>, et les commentaires pour documenter les jeux de données, chaque bloc suivi du nom du jeu de données sous forme de chaîne de caractères (par exemple <code>"points"</code>) .</p>
 <p>La première phrase de ces commentaires doit être le <strong>titre</strong> de la fiche d’aide. Ce titre peut optionnellement être précédé du tag <code>@title</code>.</p>
 <p>Cette phrase doit être suivie d’une ligne de commentaire <code>roxygen2</code> vide, puis du texte à mettre dans la section <strong>Description</strong>. Ce paragraphe peut optionnellement être précédé du tag <code>@description</code>.</p>
 <p>Si nous souhaitons avoir une section <strong>Details</strong>, il faut mettre à la suite de ce texte une ligne de commentaire <code>roxygen2</code> vide. Tout le texte après cette ligne vide, mais avant les lignes débutant par un tag <code>roxygen2</code> formera la section <strong>Details</strong>. Ces paragraphes peuvent optionnellement être précédés du tag <code>@details</code>.</p>
 <p>Ainsi, les deux documentations suivantes sont équivalentes :</p>
-<pre class="r"><code>#&#39; Distance de Manhattan
-#&#39; 
-#&#39; Calcule la distance de Manhattan entre deux points
-#&#39; 
-#&#39; Utilise la fonction \code{\link[stats]{dist}} du package \pkg{stats}.
-#&#39; 
-#&#39; @param point1 Un vecteur numerique des coordonnees du premier point.
-#&#39; @param point2 Un vecteur numerique des coordonnees du deuxieme point.
-#&#39; @return \item{dist}{ la distance de Manhattan entre \code{point1} et \code{point2} }
-#&#39; @return \item{call}{ une copie de l&#39;appel de la fonction }
-#&#39; @author Sophie Baillargeon
-#&#39; @export
-#&#39; @importFrom stats dist
-#&#39; @examples
-#&#39; distman2(point1 = c(0,-5), point2 = c(0,-15)) 
-distman2 &lt;- function(point1, point2) {
-  ... (code omis ici)
-}</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="co">#&#39; Distance de Manhattan</span></a>
+<a class="sourceLine" id="cb7-2" title="2"><span class="co">#&#39; </span></a>
+<a class="sourceLine" id="cb7-3" title="3"><span class="co">#&#39; Calcule la distance de Manhattan entre deux points</span></a>
+<a class="sourceLine" id="cb7-4" title="4"><span class="co">#&#39; </span></a>
+<a class="sourceLine" id="cb7-5" title="5"><span class="co">#&#39; Utilise la fonction \code{\link[stats]{dist}} du package \pkg{stats}.</span></a>
+<a class="sourceLine" id="cb7-6" title="6"><span class="co">#&#39; </span></a>
+<a class="sourceLine" id="cb7-7" title="7"><span class="co">#&#39; @param point1 Un vecteur numerique des coordonnees du premier point.</span></a>
+<a class="sourceLine" id="cb7-8" title="8"><span class="co">#&#39; @param point2 Un vecteur numerique des coordonnees du deuxieme point.</span></a>
+<a class="sourceLine" id="cb7-9" title="9"><span class="co">#&#39; @return \item{dist}{ la distance de Manhattan entre \code{point1} et \code{point2} }</span></a>
+<a class="sourceLine" id="cb7-10" title="10"><span class="co">#&#39; @return \item{call}{ une copie de l&#39;appel de la fonction }</span></a>
+<a class="sourceLine" id="cb7-11" title="11"><span class="co">#&#39; @author Sophie Baillargeon</span></a>
+<a class="sourceLine" id="cb7-12" title="12"><span class="co">#&#39; @export</span></a>
+<a class="sourceLine" id="cb7-13" title="13"><span class="co">#&#39; @importFrom stats dist</span></a>
+<a class="sourceLine" id="cb7-14" title="14"><span class="co">#&#39; @examples</span></a>
+<a class="sourceLine" id="cb7-15" title="15"><span class="co">#&#39; distman2(point1 = c(0,-5), point2 = c(0,-15)) </span></a>
+<a class="sourceLine" id="cb7-16" title="16">distman2 &lt;-<span class="st"> </span><span class="cf">function</span>(point1, point2) {</a>
+<a class="sourceLine" id="cb7-17" title="17">  <span class="kw">...</span> (code omis ici)</a>
+<a class="sourceLine" id="cb7-18" title="18">}</a></code></pre></div>
 <p>et</p>
-<pre class="r"><code>#&#39; @title Distance de Manhattan
-#&#39; @description Calcule la distance de Manhattan entre deux points
-#&#39; @details Utilise la fonction \code{\link[stats]{dist}} du package \pkg{stats}.
-#&#39; @param point1 Un vecteur numerique des coordonnees du premier point.
-#&#39; @param point2 Un vecteur numerique des coordonnees du deuxieme point.
-#&#39; @return \item{dist}{ la distance de Manhattan entre \code{point1} et \code{point2} }
-#&#39; @return \item{call}{ une copie de l&#39;appel de la fonction }
-#&#39; @author Sophie Baillargeon
-#&#39; @export
-#&#39; @importFrom stats dist
-#&#39; @examples
-#&#39; distman2(point1 = c(0,-5), point2 = c(0,-15)) 
-distman2 &lt;- function(point1, point2) {
-  ... (code omis ici)
-}</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="co">#&#39; @title Distance de Manhattan</span></a>
+<a class="sourceLine" id="cb8-2" title="2"><span class="co">#&#39; @description Calcule la distance de Manhattan entre deux points</span></a>
+<a class="sourceLine" id="cb8-3" title="3"><span class="co">#&#39; @details Utilise la fonction \code{\link[stats]{dist}} du package \pkg{stats}.</span></a>
+<a class="sourceLine" id="cb8-4" title="4"><span class="co">#&#39; @param point1 Un vecteur numerique des coordonnees du premier point.</span></a>
+<a class="sourceLine" id="cb8-5" title="5"><span class="co">#&#39; @param point2 Un vecteur numerique des coordonnees du deuxieme point.</span></a>
+<a class="sourceLine" id="cb8-6" title="6"><span class="co">#&#39; @return \item{dist}{ la distance de Manhattan entre \code{point1} et \code{point2} }</span></a>
+<a class="sourceLine" id="cb8-7" title="7"><span class="co">#&#39; @return \item{call}{ une copie de l&#39;appel de la fonction }</span></a>
+<a class="sourceLine" id="cb8-8" title="8"><span class="co">#&#39; @author Sophie Baillargeon</span></a>
+<a class="sourceLine" id="cb8-9" title="9"><span class="co">#&#39; @export</span></a>
+<a class="sourceLine" id="cb8-10" title="10"><span class="co">#&#39; @importFrom stats dist</span></a>
+<a class="sourceLine" id="cb8-11" title="11"><span class="co">#&#39; @examples</span></a>
+<a class="sourceLine" id="cb8-12" title="12"><span class="co">#&#39; distman2(point1 = c(0,-5), point2 = c(0,-15)) </span></a>
+<a class="sourceLine" id="cb8-13" title="13">distman2 &lt;-<span class="st"> </span><span class="cf">function</span>(point1, point2) {</a>
+<a class="sourceLine" id="cb8-14" title="14">  <span class="kw">...</span> (code omis ici)</a>
+<a class="sourceLine" id="cb8-15" title="15">}</a></code></pre></div>
 <p>Les sections qui suivent le titre et la description, qui sont obligatoires, et les informations détaillées (cette section est optionnelle), débutent toutes par des tags. Il faut obligatoirement décrire, si la fonction en possède :</p>
 <ul>
 <li>les arguments en entrée avec le tag <code>@param</code> :<br />
@@ -373,12 +444,14 @@ si la fonction retourne une liste, il est recommandé d’avoir une description 
 <li>des liens vers les fiches d’aide de fonction en lien avec la fonction documentée avec le tag <code>@seealso</code>,</li>
 <li>etc. (Il ne semble pas encore exister de liste formelle de tous les tags <code>roxygens</code>, mais ces tags sont présentés via les vignettes du package <code>roxygen2</code> : <a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html" class="uri">https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html</a>.)</li>
 </ul>
-<div id="documenter-plusieurs-fonctions-dans-la-meme-fiche" class="section level5">
+<div id="documenter-plusieurs-fonctions-dans-la-même-fiche" class="section level5">
 <h5>Documenter plusieurs fonctions dans la même fiche</h5>
+
 <p>Les tags <code>@rdname</code> et <code>@describeIn</code> servent à présenter plusieurs fonctions dans la même fiche d’aide. Dans l’exemple, la fonction <code>distman</code> et la méthode <code>print.distman</code> sont documentées dans la même fiche d’aide grâce au tag <code>@describeIn</code>. Ce tag doit être suivi du nom de la fiche dans laquelle de l’information doit être ajouté, puis d’une courte description à propos de la fonction ou méthode documentée.</p>
 </div>
-<div id="documenter-des-jeux-de-donnees" class="section level5">
+<div id="documenter-des-jeux-de-données" class="section level5">
 <h5>Documenter des jeux de données</h5>
+
 <p>Pour documenter des jeux de données, deux tags supplémentaires sont disponibles :</p>
 <ul>
 <li><code>@format</code> pour décrire la structure R qui contient les données,</li>
@@ -387,15 +460,18 @@ si la fonction retourne une liste, il est recommandé d’avoir une description 
 </div>
 <div id="nom-des-fiches-daide" class="section level5">
 <h5>Nom des fiches d’aide</h5>
+
 <p>Nous pouvons contrôler le nom des fiches d’aide avec le tag <code>@name</code>. Sans ce tag, la fiche d’aide porte le nom de la fonction ou le nom du jeu de données qui suit le bloc de documentation <code>roxygen2</code>. Pour une documentation de package, l’instruction <code>"_PACKAGE"</code> qui suit le bloc de documentation indique à <code>roxygen2</code> d’utiliser le nom du package suivi de <code>-package</code> comme nom de fiche d’aide. Dans l’exemple, le nom de la fiche d’aide du package est donc <code>manhattan-package</code>. Cependant, <code>roxygen2</code> crée aussi un alias pour le nom de la fiche d’aide qui est le nom du package.</p>
 <p>Pour ouvrir une fiche d’aide avec la fonction <code>help</code> ou l’opérateur <code>?</code>, il faut lui donner en entrée le nom de la fiche ou un alias du nom de la fiche. Il est donc important de nommer intelligemment nos fiches d’aide. La norme est de donner à une fiche d’aide le nom de l’objet principal qu’elle documente et d’ajouter des alias pour les noms des autres objets documentés dans la fiche (c’est ce que fait <code>roxygen2</code> de façon automatique lorsque les tags <code>@rdname</code> et <code>@describeIn</code> sont utilisés).</p>
 </div>
-<div id="texte-formate-dans-des-fiche-daide" class="section level5">
+<div id="texte-formaté-dans-des-fiche-daide" class="section level5">
 <h5>Texte formaté dans des fiche d’aide</h5>
+
 <p>Dans les commentaires <code>roxygen2</code>, il est possible de formater du texte en utilisant les tags de mises en forme acceptés dans les fichiers <code>.Rd</code>. Ces tags, par exemple <code>\code{}</code>, <code>\pkg{}</code>, <code>\item{}</code>, <code>\link{}</code>, <code>\dots</code>, etc., sont documentés sur la page web suivante : <a href="https://cran.r-project.org/web/packages/roxygen2/vignettes/formatting.html" class="uri">https://cran.r-project.org/web/packages/roxygen2/vignettes/formatting.html</a>.</p>
 </div>
-<div id="tags-pour-definir-le-namespace" class="section level5">
+<div id="tags-pour-définir-le-namespace" class="section level5">
 <h5>Tags pour définir le <code>NAMESPACE</code></h5>
+
 <p>Il est aussi essentiel de mettre les tags pour l’écriture du <code>NAMESPACE</code> :</p>
 <ul>
 <li>le tag <code>@export</code> exporte une fonction du <code>NAMESPACE</code> (donc la rend publique),</li>
@@ -404,10 +480,10 @@ si la fonction retourne une liste, il est recommandé d’avoir une description 
 </div>
 </div>
 </div>
-<div id="comment-generer-les-fichiers-.rd-et-le-fichier-namespace" class="section level2">
+<div id="comment-générer-les-fichiers-.rd-et-le-fichier-namespace" class="section level2">
 <h2>Comment générer les fichiers .Rd et le fichier <code>NAMESPACE</code> ?</h2>
 <p>Pour générer les fichiers <code>.Rd</code> et le fichier <code>NAMESPACE</code>, il suffit de lancer la commande <code>roxygenize</code> du package <code>roxygen2</code>. La commande peut être lancée directement dans la console. Par exemple</p>
-<pre class="r"><code>roxygenize(&quot;C:/coursR/manhattan&quot;)</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">roxygenize</span>(<span class="st">&quot;C:/coursR/manhattan&quot;</span>)</a></code></pre></div>
 <p>Elle peut aussi être lancée par l’intermédiaire d’un menu de RStudio (voir prochaine section).</p>
 <p>Dans l’exemple présenté précédemment, les commentaires <code>roxygen2</code> des fichiers <code>"distman.R"</code>, <code>"distman2.R"</code>, <code>"print.distman.R"</code> et <code>"manhattan.R"</code>, du sous-répertoire <code>"C:/coursR/manhattan/R"</code>, ont produit les fichiers suivants :</p>
 <ul>
@@ -416,59 +492,57 @@ si la fonction retourne une liste, il est recommandé d’avoir une description 
 </ul>
 <p>Le fichier <code>C:/coursR/manhattan/NAMESPACE</code> est le suivant :</p>
 <p> </p>
-<pre class="r"><code># Generated by roxygen2: do not edit by hand
-
-S3method(print,distman)
-export(distman)
-export(distman2)
-importFrom(stats,dist)</code></pre>
-
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="co"># Generated by roxygen2: do not edit by hand</span></a>
+<a class="sourceLine" id="cb10-2" title="2"></a>
+<a class="sourceLine" id="cb10-3" title="3"><span class="kw">S3method</span>(print,distman)</a>
+<a class="sourceLine" id="cb10-4" title="4"><span class="kw">export</span>(distman)</a>
+<a class="sourceLine" id="cb10-5" title="5"><span class="kw">export</span>(distman2)</a>
+<a class="sourceLine" id="cb10-6" title="6"><span class="kw">importFrom</span>(stats,dist)</a></code></pre></div>
 <p>Voici de quoi a l’air un des fichiers d’extension <code>.Rd</code> généré.</p>
 <p>Fichier <code>"C:/coursR/manhattan/man/distman.Rd"</code> :</p>
-<pre class="tikz"><code>% Generated by roxygen2: do not edit by hand
-% Please edit documentation in R/distman.R, R/print.distman.R
-\name{distman}
-\alias{distman}
-\alias{print.distman}
-\title{Distance de Manhattan}
-\usage{
-distman(point1, point2)
-
-\method{print}{distman}(x, ...)
-}
-\arguments{
-\item{point1}{Un vecteur numerique des coordonnees du premier point.}
-
-\item{point2}{Un vecteur numerique des coordonnees du deuxieme point.}
-
-\item{x}{Un objet produit par la fonction \code{distman}, a afficher.}
-
-\item{\dots}{D&#39;autres arguments passes a d&#39;autres methodes.}
-}
-\value{
-une seule valeur : la distance de Manhattan entre
-                           \code{point1} et \code{point2}
-}
-\description{
-Calcule la distance de Manhattan entre deux points
-}
-\section{Methods (by generic)}{
-\itemize{
-\item \code{print}: Affiche un objet de classe \code{&quot;distman&quot;}
-}}
-
-\examples{
-distman(point1 = c(0,-5), point2 = c(0,-15))
-}
-\author{
-Sophie Baillargeon
-}</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode tikz"><code class="sourceCode latex"><a class="sourceLine" id="cb11-1" title="1"><span class="co">% Generated by roxygen2: do not edit by hand</span></a>
+<a class="sourceLine" id="cb11-2" title="2"><span class="co">% Please edit documentation in R/distman.R, R/print.distman.R</span></a>
+<a class="sourceLine" id="cb11-3" title="3"><span class="fu">\name</span>{distman}</a>
+<a class="sourceLine" id="cb11-4" title="4"><span class="fu">\alias</span>{distman}</a>
+<a class="sourceLine" id="cb11-5" title="5"><span class="fu">\alias</span>{print.distman}</a>
+<a class="sourceLine" id="cb11-6" title="6"><span class="fu">\title</span>{Distance de Manhattan}</a>
+<a class="sourceLine" id="cb11-7" title="7"><span class="fu">\usage</span>{</a>
+<a class="sourceLine" id="cb11-8" title="8">distman(point1, point2)</a>
+<a class="sourceLine" id="cb11-9" title="9"></a>
+<a class="sourceLine" id="cb11-10" title="10"><span class="fu">\method</span>{print}{distman}(x, ...)</a>
+<a class="sourceLine" id="cb11-11" title="11">}</a>
+<a class="sourceLine" id="cb11-12" title="12"><span class="fu">\arguments</span>{</a>
+<a class="sourceLine" id="cb11-13" title="13"><span class="fu">\item</span>{point1}{Un vecteur numerique des coordonnees du premier point.}</a>
+<a class="sourceLine" id="cb11-14" title="14"></a>
+<a class="sourceLine" id="cb11-15" title="15"><span class="fu">\item</span>{point2}{Un vecteur numerique des coordonnees du deuxieme point.}</a>
+<a class="sourceLine" id="cb11-16" title="16"></a>
+<a class="sourceLine" id="cb11-17" title="17"><span class="fu">\item</span>{x}{Un objet produit par la fonction <span class="fu">\code</span>{distman}, a afficher.}</a>
+<a class="sourceLine" id="cb11-18" title="18"></a>
+<a class="sourceLine" id="cb11-19" title="19"><span class="fu">\item</span>{<span class="fu">\dots</span>}{D&#39;autres arguments passes a d&#39;autres methodes.}</a>
+<a class="sourceLine" id="cb11-20" title="20">}</a>
+<a class="sourceLine" id="cb11-21" title="21"><span class="fu">\value</span>{</a>
+<a class="sourceLine" id="cb11-22" title="22">une seule valeur : la distance de Manhattan entre</a>
+<a class="sourceLine" id="cb11-23" title="23">                           <span class="fu">\code</span>{point1} et <span class="fu">\code</span>{point2}</a>
+<a class="sourceLine" id="cb11-24" title="24">}</a>
+<a class="sourceLine" id="cb11-25" title="25"><span class="fu">\description</span>{</a>
+<a class="sourceLine" id="cb11-26" title="26">Calcule la distance de Manhattan entre deux points</a>
+<a class="sourceLine" id="cb11-27" title="27">}</a>
+<a class="sourceLine" id="cb11-28" title="28"><span class="kw">\section</span>{Methods (by generic)}{</a>
+<a class="sourceLine" id="cb11-29" title="29"><span class="fu">\itemize</span>{</a>
+<a class="sourceLine" id="cb11-30" title="30"><span class="fu">\item</span> <span class="fu">\code</span>{print}: Affiche un objet de classe <span class="fu">\code</span>{&quot;distman&quot;}</a>
+<a class="sourceLine" id="cb11-31" title="31">}}</a>
+<a class="sourceLine" id="cb11-32" title="32"></a>
+<a class="sourceLine" id="cb11-33" title="33"><span class="fu">\examples</span>{</a>
+<a class="sourceLine" id="cb11-34" title="34">distman(point1 = c(0,-5), point2 = c(0,-15))</a>
+<a class="sourceLine" id="cb11-35" title="35">}</a>
+<a class="sourceLine" id="cb11-36" title="36"><span class="fu">\author</span>{</a>
+<a class="sourceLine" id="cb11-37" title="37">Sophie Baillargeon</a>
+<a class="sourceLine" id="cb11-38" title="38">}</a></code></pre></div>
 <p> </p>
 <p>Ces fichiers utilisent une syntaxe inspirée de la syntaxe de LaTeX. Lorsque nous utilisons <code>roxygen2</code>, nous n’avons pas besoin d’éditer directement ces fichiers, donc nous n’avons pas besoin de comprendre leur syntaxe. La syntaxe de <code>roxygen2</code> est plus simple.</p>
-
 </div>
 </div>
-<div id="etape-4.-construire-et-verifier-le-package" class="section level1">
+<div id="étape-4.-construire-et-vérifier-le-package" class="section level1">
 <h1>Étape 4. Construire et vérifier le package</h1>
 <p>Une fois les étapes 1 à 3 complétées, nous sommes prêts à construire le fichier compressé du package à partir du répertoire contenant les fichiers source. En fait, nous allons aussi à cette étape vérifier le répertoire afin de s’assurer qu’il produira un package conforme.</p>
 <p>Ces tâches se réalisent avec les utilitaires :</p>
@@ -485,8 +559,8 @@ Sophie Baillargeon
 <li><p>Unix / Linux : il faut s’assurer d’avoir installé R accompagné des ses « development tools » (<code>r-base-dev</code>).</p></li>
 </ul>
 <p>Le package <code>pkgbuild</code> comporte une fonction pour tester si tout le nécessaire au développement de package est installé et fonctionne correctement.</p>
-<pre class="r"><code>library(pkgbuild)
-has_build_tools()</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="kw">library</span>(pkgbuild)</a>
+<a class="sourceLine" id="cb12-2" title="2"><span class="kw">has_build_tools</span>()</a></code></pre></div>
 <p>Si cet appel à la fonction <code>has_build_tools</code> retourne <code>TRUE</code>, alors tout est fonctionnel.</p>
 <p>De plus, une des commandes R pour le développement de packages, soit <code>R CMD check</code>, a besoin d’une installation de LaTeX pour tester la création de la documentation des packages en format PDF. Pour développer des packages, vous avez donc le choix entre :</p>
 <ul>
@@ -498,11 +572,10 @@ has_build_tools()</code></pre>
 </ul></li>
 <li>omettre la création de la documentation PDF lors de la soumission de la commande <code>R CMD check</code> grâce à l’option <code>--no-manual</code> (plus d’informations à venir en temps opportun).</li>
 </ul>
-<div id="lancement-des-commandes-de-construction-et-de-verification-en-rstudio" class="section level2">
+<div id="lancement-des-commandes-de-construction-et-de-vérification-en-rstudio" class="section level2">
 <h2>Lancement des commandes de construction et de vérification en RStudio</h2>
 <p><strong>RStudio</strong> peut <a href="https://support.rstudio.com/hc/en-us/articles/200486488?version=1.1.423&amp;mode=desktop">lancer pour nous les commandes de construction et de vérification de packages</a>. Le logiciel rend le processus vraiment plus simple que de lancer les commandes manuellement dans le <em>terminal</em> ou l’<em>invite de commandes</em>. Nous apprendrons donc seulement comment construire et vérifier un package avec <strong>RStudio</strong>.</p>
-
-<div id="sous-etape-a-creer-un-projet-rstudio-avec-le-repertoire-principal-du-package" class="section level3">
+<div id="sous-étape-a-créer-un-projet-rstudio-avec-le-répertoire-principal-du-package" class="section level3">
 <h3>Sous-étape a) Créer un projet RStudio avec le répertoire principal du package</h3>
 <p>Il faut tout d’abord créer un projet RStudio avec le répertoire principal de notre package. Pour ce faire, nous pouvons procéder comme suit :</p>
 <ul>
@@ -514,11 +587,12 @@ has_build_tools()</code></pre>
 <p>Le projet sera créé et ouvert. Ça ajoute des fichiers dans le répertoire de notre package. Nous ne nous préoccuperons pas de ces fichiers. Ils sont automatiquement ignorés lors de la construction du package avec RStudio.</p>
 <p><strong>Note</strong> : Si nous sélectionnons « New Directory » plutôt que « Existing Directory », puis « R package », RStudio crée un squelette de répertoire de fichiers source de package.</p>
 </div>
-<div id="sous-etape-b-configurer-les-options-de-rstudio" class="section level3">
+<div id="sous-étape-b-configurer-les-options-de-rstudio" class="section level3">
 <h3>Sous-étape b) Configurer les options de RStudio</h3>
 <p>Voici quelques configurations de RStudio que je conseille d’utiliser.</p>
 <div id="options-globales" class="section level4">
 <h4>Options globales :</h4>
+
 <p>(à modifier une seule fois)</p>
 <ul>
 <li>par le menu « Tools &gt; Global Options… »,</li>
@@ -528,6 +602,7 @@ has_build_tools()</code></pre>
 </div>
 <div id="options-du-projet" class="section level4">
 <h4>Options du projet :</h4>
+
 <p>(à modifier pour chaque nouveau projet)</p>
 <ul>
 <li>par le menu « Tools &gt; Project Options… »;</li>
@@ -547,7 +622,7 @@ has_build_tools()</code></pre>
 <p><strong>Note</strong> : Si vous n’avez pas de compilateur LaTeX sur votre ordinateur, ajoutez l’option suivante à <code>R CMD check</code> : <code>--no-manual</code>. Cette fonction indique à <code>R CMD check</code> de ne pas vérifier la compilation de la version PDF de la documentation du package.</p>
 </div>
 </div>
-<div id="sous-etape-c-construire-a-partir-du-menu-build-de-rstudio" class="section level3">
+<div id="sous-étape-c-construire-à-partir-du-menu-build-de-rstudio" class="section level3">
 <h3>Sous-étape c) Construire à partir du menu « Build » de RStudio</h3>
 <p>Il est préférable de toujours d’abord s’assurer que le package passe sans erreur ou avertissements problématiques la vérification faite par la commande <code>R CMD check</code>. Ensuite, nous pouvons construire le package, soit dans sa version source, soit dans sa version binaire. Voici comment faire tout ça facilement en RStudio.</p>
 <ul>
@@ -565,22 +640,23 @@ menu « <strong>Build &gt; Build Binary Package</strong> » (lance en fait la 
 <p>Vous trouverez en annexe des solutions à certains problèmes techniques déjà rencontrés lors du lancement d’une commande <code>R CMD</code>.</p>
 </div>
 </div>
-<div id="lancement-des-commandes-de-construction-et-de-verification-avec-devtools" class="section level2">
+<div id="lancement-des-commandes-de-construction-et-de-vérification-avec-devtools" class="section level2">
 <h2>Lancement des commandes de construction et de vérification avec <code>devtools</code></h2>
 <p>Nous ne couvrirons pas cette option ici, mais les commandes de construction et de vérification d’un package peuvent aussi être soumises à l’aide de fonctions du package <code>devtools</code> (<a href="https://github.com/hadley/devtools" class="uri">https://github.com/hadley/devtools</a>). Comme les utilitaires de RStudio, ces fonctions permettent de soumettre des commandes <code>R CMD</code> sans passer nous-mêmes par le terminal ou l’invite de commandes. Avec <code>devtools</code>, tout se réalise via des commandes soumises dans la console R.</p>
 </div>
 </div>
-<div id="etape-5.-si-desire-partager-le-package" class="section level1">
+<div id="étape-5.-si-désiré-partager-le-package" class="section level1">
 <h1>Étape 5. Si désiré, partager le package</h1>
 <p>Notre package est maintenant prêt à être utilisé. Si nous souhaitons le partager avec le grand public, nous pouvons le rendre disponible sur le CRAN. Pour ce faire, il faut d’abord s’assurer de respecter les politiques du CRAN : <a href="http://cran.r-project.org/web/packages/policies.html" class="uri">http://cran.r-project.org/web/packages/policies.html</a>. Comme mentionné précédemment, il faut donc que notre package passe le <code>R CMD check --as-cran</code> sans erreurs ni avertissements.</p>
 <p>Une fois s’être assuré de respecter les politiques du CRAN, nous pouvons soumettre notre package au CRAN en ligne par l’intermédiaire de l’interface web suivante : <a href="https://cran.r-project.org/submit.html" class="uri">https://cran.r-project.org/submit.html</a></p>
 <p>Il suffit de suivre les instructions.</p>
 </div>
-<div id="etape-6.-au-besoin-mettre-a-jour-le-package" class="section level1">
+<div id="étape-6.-au-besoin-mettre-à-jour-le-package" class="section level1">
 <h1>Étape 6. Au besoin, mettre à jour le package</h1>
 <p>Mettre à jour un package signifie de le modifier pour ajouter des fonctionnalités et/ou corriger des bogues. Lors d’une mise à jour, il faut suivre les étapes suivantes.</p>
-<div id="sous-etape-a-incrementer-le-numero-de-version" class="section level4">
+<div id="sous-étape-a-incrémenter-le-numéro-de-version" class="section level4">
 <h4>Sous-étape a) Incrémenter le numéro de version :</h4>
+
 <p>Cette incrémentation doit être effectuée dans le fichier <code>DESCRIPTION</code>, ainsi que dans tout commentaire <code>roxygen2</code> mentionnant la date de construction du package, par exemple dans la fiche d’aide du package.</p>
 <p>Rappelons qu’un numéro de version est une séquence d’au minimum 2 (souvent 3) nombres entiers non négatifs séparés par un seul caractère caractère <code>.</code> (point) ou <code>-</code> (tiret). Ces nombres ne sont pas contraints à être compris entre 0 et 9.</p>
 <p>Voici les règles que plusieurs développeurs de packages R suivent dans la numérotation des versions de leurs packages. Ils forment les numéros de version de 3 nombres entiers séparés par un point. En cours de développement, soit avant d’avoir une version qu’ils considèrent suffisamment testée, ils utilisent un 0 comme premier nombre dans le numéro de version (par exemple 0.9.12). Lorsqu’ils jugent leur package assez fiable pour être rendu disponible à plus grande échelle qu’à l’interne, ils changent le premier nombre dans le numéro de version pour 1, ce qui fait retomber à zéro les nombres suivants. La première version officielle porte donc le numéro de version 1.0.0.</p>
@@ -592,12 +668,14 @@ menu « <strong>Build &gt; Build Binary Package</strong> » (lance en fait la 
 </ul>
 <p>La page Wikipédia <a href="https://en.wikipedia.org/wiki/Software_versioning" class="uri">https://en.wikipedia.org/wiki/Software_versioning</a> traite de ce sujet et propose d’autres règles.</p>
 </div>
-<div id="sous-etape-b-faire-les-mises-a-jour-dans-le-code" class="section level4">
+<div id="sous-étape-b-faire-les-mises-à-jour-dans-le-code" class="section level4">
 <h4>Sous-étape b) Faire les mises à jour dans le code :</h4>
+
 <p>L’ajout de fonctionnalités ou la correction de bogues impliquent des modifications à apporter au code.</p>
 </div>
-<div id="sous-etape-c-documenter-les-modifications" class="section level4">
+<div id="sous-étape-c-documenter-les-modifications" class="section level4">
 <h4>Sous-étape c) Documenter les modifications :</h4>
+
 <p>Les commentaires <code>roxygen2</code> produisant les fiches d’aide doivent être mis à jour de façon à refléter les modifications apportées au code. Une correction d’un bogue ne nécessite pas toujours de mise à jour des fiches d’aide, mais un ajout de fonctionnalités en nécessite toujours.</p>
 <p>Je conseille vivement aussi de documenter les mises à jour dans un fichier <code>NEWS</code>. Ce fichier est un point de repère pour un utilisateur d’un package qui souhaite identifier ce qui a changé lors d’une mise à jour, donc ce qui pourrait affecter son utilisation du package.</p>
 <p>Il n’y a pas de consensus en R à propos de comment rédiger le fichier <code>NEWS</code>, ni de l’endroit où le placer dans les fichiers source. Nous pouvons observer, notamment, les pratiques suivantes :</p>
@@ -609,36 +687,37 @@ menu « <strong>Build &gt; Build Binary Package</strong> » (lance en fait la 
 </ul>
 <p>La première des pratiques est probablement la plus répandue.</p>
 <p>Voici à quoi pourrait ressembler un fichier <code>NEWS</code> en format texte simple pour l’exemple du package <code>manhattan</code>, après l’avoir mis à jour.</p>
-
 <p>Fichier <code>"C:/coursR/manhattan/NEWS"</code> :</p>
-<pre class="tikz"><code>Changements dans manhattan version 1.1.0 (2019-04-02)
- 
-* modifications des fonctions distman et distman2 afin qu&#39;elles
-  puissent calculer la distance entre plusieurs points
-
-* ajout d&#39;une methode plot pour un objet de classe &quot;distman&quot;
- 
-
-Changements dans manhattan version 1.0.0 (2019-03-21)
-
-* premiere version du package manhattan</code></pre>
+<div class="sourceCode" id="cb13"><pre class="sourceCode tikz"><code class="sourceCode latex"><a class="sourceLine" id="cb13-1" title="1">Changements dans manhattan version 1.1.0 (2019-04-02)</a>
+<a class="sourceLine" id="cb13-2" title="2"> </a>
+<a class="sourceLine" id="cb13-3" title="3">* modifications des fonctions distman et distman2 afin qu&#39;elles</a>
+<a class="sourceLine" id="cb13-4" title="4">  puissent calculer la distance entre plusieurs points</a>
+<a class="sourceLine" id="cb13-5" title="5"></a>
+<a class="sourceLine" id="cb13-6" title="6">* ajout d&#39;une methode plot pour un objet de classe &quot;distman&quot;</a>
+<a class="sourceLine" id="cb13-7" title="7"> </a>
+<a class="sourceLine" id="cb13-8" title="8"></a>
+<a class="sourceLine" id="cb13-9" title="9">Changements dans manhattan version 1.0.0 (2019-03-21)</a>
+<a class="sourceLine" id="cb13-10" title="10"></a>
+<a class="sourceLine" id="cb13-11" title="11">* premiere version du package manhattan</a></code></pre></div>
 <p> </p>
 <p>Si nous installions la version 1.1.0 du package et que nous chargions le package en R avec la commande <code>library</code>, nous pourrions afficher son fichier <code>NEWS</code> dans la console avec la instructions suivantes :</p>
-<pre class="r"><code>nouvelles &lt;- news(package = &quot;manhattan&quot;)
-print(nouvelles, doBrowse = FALSE)</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1">nouvelles &lt;-<span class="st"> </span><span class="kw">news</span>(<span class="dt">package =</span> <span class="st">&quot;manhattan&quot;</span>)</a>
+<a class="sourceLine" id="cb14-2" title="2"><span class="kw">print</span>(nouvelles, <span class="dt">doBrowse =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
 <p>Nous pouvons aussi voir le fichier <code>NEWS</code> des packages distribués sur le CRAN directement sur leur page web du CRAN.</p>
 </div>
-<div id="sous-etape-d-reconstruire-et-reverifier-le-package" class="section level4">
+<div id="sous-étape-d-reconstruire-et-revérifier-le-package" class="section level4">
 <h4>Sous-étape d) Reconstruire et revérifier le package</h4>
+
 <p>Il faut finalement construire et vérifier de nouveau le package. Un nouveau fichier compressé sera produit, portant le nom du package accompagné du nouveau numéro de version.</p>
 <hr />
 </div>
 </div>
-<div id="synthese" class="section level1">
-<h1>Synthèse</h1>
+<div id="résumé" class="section level1">
+<h1>Résumé</h1>
 <p>Étapes de création d’un package R</p>
-<div id="ecrire-les-fonctions" class="section level4">
+<div id="écrire-les-fonctions" class="section level4">
 <h4>1. Écrire les fonctions</h4>
+
 <p>Objets utilisables dans le corps des fonctions d’un package :</p>
 <ul>
 <li>arguments et variables locales,</li>
@@ -648,8 +727,9 @@ print(nouvelles, doBrowse = FALSE)</code></pre>
 </ul>
 <p>Si but = mettre sur le CRAN : respecter les politiques <a href="http://cran.r-project.org/web/packages/policies.html" class="uri">http://cran.r-project.org/web/packages/policies.html</a></p>
 </div>
-<div id="creer-la-structure-de-fichiers-du-package" class="section level4">
+<div id="créer-la-structure-de-fichiers-du-package" class="section level4">
 <h4>2. Créer la structure de fichiers du package</h4>
+
 <p>Répertoire principal, portant le nom du package, contenant :</p>
 <ul>
 <li>sous-répertoire nommé <code>R</code> : répertoire des fichiers contenant le code source R des fonctions,</li>
@@ -659,8 +739,9 @@ print(nouvelles, doBrowse = FALSE)</code></pre>
 <li>autres éléments, selon les besoins : fichier <code>NEWS</code>, sous-répertoire <code>data</code>, sous-répertoire <code>src</code>, etc.</li>
 </ul>
 </div>
-<div id="ecrire-la-documentation-des-fonctions-et-du-package" class="section level4">
+<div id="écrire-la-documentation-des-fonctions-et-du-package" class="section level4">
 <h4>3. Écrire la documentation des fonctions et du package</h4>
+
 <p>Éléments à documenter :</p>
 <ul>
 <li>les fonctions publiques,</li>
@@ -692,8 +773,9 @@ print(nouvelles, doBrowse = FALSE)</code></pre>
 </ul></li>
 </ul>
 </div>
-<div id="construire-et-verifier-le-package" class="section level4">
+<div id="construire-et-vérifier-le-package" class="section level4">
 <h4>4. Construire et vérifier le package</h4>
+
 <p>Outils nécessaires :</p>
 <ul>
 <li>R,</li>
@@ -719,7 +801,6 @@ print(nouvelles, doBrowse = FALSE)</code></pre>
 <li>créer le package binaire : menu « <strong>Build &gt; Build Binary Package</strong> ».</li>
 </ul></li>
 </ul>
-
 <p>La compilation « <strong>Install and Restart</strong> » est pratique en cours de travail. Elle permet de</p>
 <ul>
 <li>compiler le package dans le bon format pour notre système d’exploitation,</li>
@@ -727,12 +808,14 @@ print(nouvelles, doBrowse = FALSE)</code></pre>
 <li>charger de nouveau le package (avec la commande <code>library</code>).</li>
 </ul>
 </div>
-<div id="si-desire-partager-le-package" class="section level4">
+<div id="si-désiré-partager-le-package" class="section level4">
 <h4>5. Si désiré, partager le package</h4>
+
 <p>Il n’est pas compliqué de soumettre un package au CRAN : <a href="https://cran.r-project.org/submit.html" class="uri">https://cran.r-project.org/submit.html</a></p>
 </div>
-<div id="au-besoin-mettre-a-jour-le-package" class="section level4">
+<div id="au-besoin-mettre-à-jour-le-package" class="section level4">
 <h4>6. Au besoin, mettre à jour le package</h4>
+
 <p>Mise à jour = modification pour ajouter des fonctionnalités et/ou corriger des bogues :</p>
 <ul>
 <li>Sous-étape a) Incrémenter le numéro de version
@@ -752,7 +835,7 @@ print(nouvelles, doBrowse = FALSE)</code></pre>
 <hr />
 </div>
 </div>
-<div id="references" class="section level1">
+<div id="références" class="section level1">
 <h1>Références</h1>
 <ul>
 <li>R Core Team (2019). <em>Writing R Extensions</em>. R Foundation for Statistical Computing. Chapitre 4.<br />
@@ -783,15 +866,15 @@ Documentation for R. R package version 6.1.1.
 <li><a href="https://rawgit.com/rstudio/cheatsheets/master/package-development.pdf" class="uri">https://rawgit.com/rstudio/cheatsheets/master/package-development.pdf</a></li>
 </ul>
 <hr />
-
 </div>
 <div id="annexe" class="section level1">
 <h1>Annexe</h1>
-<div id="resolution-de-problemes-deja-rencontres" class="section level2">
+<div id="résolution-de-problèmes-déjà-rencontrés" class="section level2">
 <h2>Résolution de problèmes déjà rencontrés</h2>
 <p>Voici des problèmes déjà rencontrés par des étudiants du cours lors de la construction ou la vérification d’un package et leurs solutions.</p>
 <div id="erreur-installation-failed" class="section level4">
 <h4>Erreur « Installation failed »</h4>
+
 <p>PROBLÈME : Une erreur de ce type est produite par l’outil « <strong>Check Package</strong> » :</p>
 <pre><code>   * checking whether package &#39;manhattan&#39; can be installed ... ERROR
    Installation failed.
@@ -800,8 +883,9 @@ Documentation for R. R package version 6.1.1.
 <p>SOLUTION : Utiliser un répertoire dont le nom complet ne comprend aucun accent, ni aucun espace.</p>
 <p> </p>
 </div>
-<div id="erreur-de-permission-decriture-dans-un-repertoire-dinstallation" class="section level4">
+<div id="erreur-de-permission-décriture-dans-un-répertoire-dinstallation" class="section level4">
 <h4>Erreur de permission d’écriture dans un répertoire d’installation</h4>
+
 <p>PROBLÈME : Une erreur de ce type est produite par l’outil « <strong>Build Binary Package</strong> », « <strong>Install and Restart</strong> » ou « <strong>Clean and Rebuild</strong> » :</p>
 <pre><code>   ERREUR : pas de permission pour installer dans le répertoire 
    &#39;C:/Program Files/R/R-3.5.2/library&#39;</code></pre>
@@ -809,9 +893,9 @@ Documentation for R. R package version 6.1.1.
 <p>SOLUTION : Modifier les options des outils de construction pour demander l’installation dans un autre répertoire, un pour lequel le compte utilisateur à une permission en écriture.</p>
 <p>Étape 1 : trouver le bon répertoire à utiliser</p>
 <p>Il faut utiliser un des répertoires dans lesquels R recherche des installations de packages. Un vecteur contenant tous ces répertoires est retourné par la commande suivante dans la console R :</p>
-<pre class="r"><code>.libPaths()</code></pre>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1"><span class="kw">.libPaths</span>()</a></code></pre></div>
 <pre><code>## [1] &quot;C:/Users/Sophie/Documents/R/win-library/3.6&quot;
-## [2] &quot;C:/Program Files/R/R-3.6.0/library&quot;</code></pre>
+## [2] &quot;C:/Program Files/R/R-3.6.2/library&quot;</code></pre>
 <p>Dans mon cas, le premier répertoire énuméré, soit <code>"C:/Users/Sophie/Documents/R/win-library/3.5"</code>, est localisé dans les fichiers du compte utilisateur. J’y ai donc assurément une permission en écriture. C’est lui que je vais utiliser.</p>
 <p>Étape 2 : ajouter une option aux outils de construction</p>
 <ol style="list-style-type: lower-alpha">
@@ -824,8 +908,9 @@ Documentation for R. R package version 6.1.1.
 </ul>
 <p> </p>
 </div>
-<div id="verification-qui-gele-a-letape-checking-pdf-version-of-manual" class="section level4">
+<div id="vérification-qui-gèle-à-létape-checking-pdf-version-of-manual" class="section level4">
 <h4>Vérification qui gèle à l’étape « checking PDF version of manual »</h4>
+
 <p>PROBLÈME : Outil « <strong>Check Package</strong> » qui n’arrive pas à terminer son check, qui gèle à l’étape « checking PDF version of manual ».</p>
 <p>CAUSE : Je ne sais pas exactement… Ça ressemble à un bogue.</p>
 <p>SOLUTION : Modifier les options de l’outil « <strong>Check Package</strong> »</p>

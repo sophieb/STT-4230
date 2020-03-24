@@ -1,10 +1,10 @@
 ---
 title: "Développement de packages R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2019-03-21"
+date: "2020-03-24"
 weight: 2
 slug: "devel_packages_r"
-categories: ["cours_2019-04-02"]
+categories: ["cours_2020-03-31"]
 categories_weight: 2
 lastmodifierdisplayname : "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
@@ -12,12 +12,16 @@ output:
   pdf_document:
     toc: yes
     toc_depth: 3
+    highlight: tango
   blogdown::html_page:
-    toc: true
+    toc: yes
+    toc_depth: 3
+    highlight: tango
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
 - \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \renewcommand{\linethickness}{0.05em}
 editor_options: 
   chunk_output_type: console
 ---
@@ -35,7 +39,6 @@ L'exemple utilisé ici, soit le package `ggplot2`, est un gros package. Seuls ce
 
 Après avoir développé les fichiers sources, qui incluent du code et de la documentation, il faut construire le package. Nous verrons ici comment réaliser cette construction avec RStudio.
 
-\newpage
 
 # Étape 1. Écrire les fonctions
 
@@ -69,7 +72,6 @@ Aussi, si notre but est éventuellement de rendre notre package public sur le CR
 - toujours utiliser comme valeurs logiques `TRUE` ou `FALSE` (donc pas de `T` ou `F`) :  
 *parce qu'un objet R nommé* `T` *ou* `F` *peut être défini, écrasant du coup les définitions* `T <- TRUE` *et* `F <- FALSE`*, alors qu'il est impossible de créer un nouvel objet R nommé* `TRUE` *ou* `FALSE` *(mots-clés protégés)*.  
 
-\newpage
 
 # Étape 2. Créer la structure de fichiers du package
 
@@ -110,9 +112,10 @@ Le sous-répertoire `man` doit comprendre des fichiers sources de fiches d'aide 
 
 L fichier `DESCRIPTION est très important pour la construction du package. C'est un fichier court, comportant de l'information de base sur le package. Ce fichier doit respecter une syntaxe précise.
 
-\newpage
 
 #### Exemple :
+
+\mbox{}
 
 ```
 Package: manhattan
@@ -193,15 +196,21 @@ Rappelons que dans un package il faut obligatoirement documenter :
 
 #### Les fonctions publiques
 
+\mbox{}
+
 Il est essentiel de faire des fiches d'aide pour ces fonctions, afin que tout utilisateur comprenne comment appeler correctement la fonction. Si un utilisateur a mal compris la documentation et fournit par erreur une valeur d'argument invalide en entrée, il est aussi souhaitable que la fonction retourne une erreur informative. Le code de ces fonctions publiques comporte donc typiquement de la **validation des arguments fournis en entrée**.
 
 À l'opposé, les **fonctions privées ou internes** ne sont pas conçues pour être appelées par n'importe quel utilisateur. Ces fonctions ne sont pas exportées de l'espace de noms et elles ne sont pas documentées officiellement. Il est tout de même bon de documenter minimalement ces fonctions pour nous-mêmes, mais nous n'avons pas à produire de fiches d'aide pour elles. De plus, pour ne pas alourdir ces fonctions, elles comportent typiquement peu ou pas de validation d'arguments.
 
 #### Les jeux de données dans le répertoire `data`
 
+\mbox{}
+
 Chaque jeu de données dans le répertoire `data` d'un package doit être décrit dans une fiche d'aide pour expliquer son contenu.
 
 #### Les classes et méthodes S4 ou RC publiques
+
+\mbox{}
 
 Les packages exploitant le système de programmation orientée objet S4[^2] ou le système RC[^3] doivent fournir des fiches d'aide pour les classes et méthodes publiques.
 
@@ -209,6 +218,8 @@ Les packages exploitant le système de programmation orientée objet S4[^2] ou l
 [^3]: https://r-pkgs.org/man.html#man-classes
 
 #### Il est aussi recommandé de documenter :
+
+\mbox{}
 
 - Les méthodes S3 pour des fonctions génériques :
 
@@ -225,6 +236,8 @@ Il suffit d'insérer des « commentaires » `roxygen2` dans le code source des f
 
 
 #### Exemples :
+
+\mbox{}
 
 D'abord, voici des exemples de scripts R contenant des commentaires `roxygen2`. Des explications se retrouvent après les exemples. Ces exemples poursuivent l'exemple de création d'une fonction qui calcule la distance de Manhattan entre deux points provenant des notes [Tests et exceptions en R](https://stt4230.rbind.io/programmation/tests_exceptions_r/).
 
@@ -340,6 +353,8 @@ Fichier `C:/coursR/manhattan/R/manhattan.R` :
 
 #### Explications :
 
+\mbox{}
+
 Pour les fonctions et les méthodes associées à des fonctions génériques, il suffit de mettre en entête au code source les commentaires `roxygen2` qui généreront la documentation. Pour le package et les jeux de données, il faut ajouter un fichier d'extension `.R` dans le répertoire `R`. Ce fichier doit contenir les commentaires `roxygen2` pour documenter globalement le package, suivi de l'instruction `"_PACKAGE"`, et les commentaires pour documenter les jeux de données, chaque bloc suivi du nom du jeu de données sous forme de chaîne de caractères (par exemple `"points"`) .
 
 La première phrase de ces commentaires doit être le **titre** de la fiche d'aide. Ce titre peut optionnellement être précédé du tag `@title`.
@@ -411,9 +426,13 @@ Nous pouvons aussi ajouter les informations suivantes :
 
 ##### Documenter plusieurs fonctions dans la même fiche
 
+\mbox{}
+
 Les tags `@rdname` et `@describeIn` servent à présenter plusieurs fonctions dans la même fiche d'aide. Dans l'exemple, la fonction `distman` et la méthode `print.distman` sont documentées dans la même fiche d'aide grâce au tag `@describeIn`. Ce tag doit être suivi du nom de la fiche dans laquelle de l'information doit être ajouté, puis d'une courte description à propos de la fonction ou méthode documentée. 
 
 ##### Documenter des jeux de données
+
+\mbox{}
 
 Pour documenter des jeux de données, deux tags supplémentaires sont disponibles :
 
@@ -423,15 +442,21 @@ Pour documenter des jeux de données, deux tags supplémentaires sont disponible
 
 ##### Nom des fiches d'aide
 
+\mbox{}
+
 Nous pouvons contrôler le nom des fiches d'aide avec le tag `@name`. Sans ce tag, la fiche d'aide porte le nom de la fonction ou le nom du jeu de données qui suit le bloc de documentation `roxygen2`. Pour une documentation de package, l'instruction `"_PACKAGE"` qui suit le bloc de documentation indique à `roxygen2` d'utiliser le nom du package suivi de `-package` comme nom de fiche d'aide. Dans l'exemple, le nom de la fiche d'aide du package est donc `manhattan-package`. Cependant, `roxygen2` crée aussi un alias pour le nom de la fiche d'aide qui est le nom du package.
 
 Pour ouvrir une fiche d'aide avec la fonction `help` ou l'opérateur `?`, il faut lui donner en entrée le nom de la fiche ou un alias du nom de la fiche. Il est donc important de nommer intelligemment nos fiches d'aide. La norme est de donner à une fiche d'aide le nom de l'objet principal qu'elle documente et d'ajouter des alias pour les noms des autres objets documentés dans la fiche (c'est ce que fait `roxygen2` de façon automatique lorsque les tags `@rdname` et `@describeIn` sont utilisés).
 
 ##### Texte formaté dans des fiche d'aide
 
+\mbox{}
+
 Dans les commentaires `roxygen2`, il est possible de formater du texte en utilisant les tags de mises en forme acceptés dans les fichiers `.Rd`. Ces tags, par exemple `\code{}`, `\pkg{}`, `\item{}`, `\link{}`, `\dots`, etc., sont documentés sur la page web suivante : https://cran.r-project.org/web/packages/roxygen2/vignettes/formatting.html.
 
 ##### Tags pour définir le `NAMESPACE` 
+
+\mbox{}
 
 Il est aussi essentiel de mettre les tags pour l'écriture du `NAMESPACE` :
 
@@ -466,8 +491,6 @@ export(distman)
 export(distman2)
 importFrom(stats,dist)
 ```
-
-\newpage
 
 Voici de quoi a l'air un des fichiers d'extension `.Rd` généré.
 
@@ -518,7 +541,6 @@ Sophie Baillargeon
 
 Ces fichiers utilisent une syntaxe inspirée de la syntaxe de LaTeX. Lorsque nous utilisons `roxygen2`, nous n'avons pas besoin d'éditer directement ces fichiers, donc nous n'avons pas besoin de comprendre leur syntaxe. La syntaxe de `roxygen2` est plus simple.
 
-\newpage
 
 # Étape 4. Construire et vérifier le package
 
@@ -562,7 +584,6 @@ De plus, une des commandes R pour le développement de packages, soit `R CMD che
 
 **RStudio** peut [lancer pour nous les commandes de construction et de vérification de packages](https://support.rstudio.com/hc/en-us/articles/200486488?version=1.1.423&mode=desktop). Le logiciel rend le processus vraiment plus simple que de lancer les commandes manuellement dans le *terminal* ou l'*invite de commandes*. Nous apprendrons donc seulement comment construire et vérifier un package avec **RStudio**.
 
-\newpage
 
 ### Sous-étape a) Créer un projet RStudio avec le répertoire principal du package
 
@@ -584,6 +605,8 @@ Voici quelques configurations de RStudio que je conseille d'utiliser.
 
 #### Options globales :
 
+\mbox{}
+
 (à modifier une seule fois)
 
 - par le menu «&nbsp;Tools > Global Options...&nbsp;»,
@@ -593,6 +616,8 @@ Les répertoires générés par la commande `R CMD check` ne seront ainsi pas ef
 
 
 #### Options du projet :
+
+\mbox{}
 
 (à modifier pour chaque nouveau projet)
 
@@ -652,6 +677,8 @@ Mettre à jour un package signifie de le modifier pour ajouter des fonctionnalit
 
 #### Sous-étape a) Incrémenter le numéro de version :
 
+\mbox{}
+
 Cette incrémentation doit être effectuée dans le fichier `DESCRIPTION`, ainsi que dans tout commentaire `roxygen2` mentionnant la date de construction du package, par exemple dans la fiche d'aide du package.
 
 Rappelons qu'un numéro de version est une séquence d'au minimum 2 (souvent 3) nombres entiers non négatifs séparés par un seul caractère caractère `.` (point) ou `-` (tiret). Ces nombres ne sont pas contraints à être compris entre 0 et 9.
@@ -671,9 +698,13 @@ La page Wikipédia https://en.wikipedia.org/wiki/Software_versioning traite de c
 
 #### Sous-étape b) Faire les mises à jour dans le code :
 
+\mbox{}
+
 L'ajout de fonctionnalités ou la correction de bogues impliquent des modifications à apporter au code.
 
 #### Sous-étape c) Documenter les modifications :
+
+\mbox{}
 
 Les commentaires `roxygen2` produisant les fiches d'aide doivent être mis à jour de façon à refléter les modifications apportées au code. Une correction d'un bogue ne nécessite pas toujours de mise à jour des fiches d'aide, mais un ajout de fonctionnalités en nécessite toujours.
 
@@ -690,7 +721,6 @@ La première des pratiques est probablement la plus répandue.
 
 Voici à quoi pourrait ressembler un fichier `NEWS` en format texte simple pour l'exemple du package `manhattan`, après l'avoir mis à jour.
 
-\newpage
 
 Fichier `"C:/coursR/manhattan/NEWS"` :
 
@@ -722,15 +752,19 @@ Nous pouvons aussi voir le fichier `NEWS` des packages distribués sur le CRAN d
 
 #### Sous-étape d) Reconstruire et revérifier le package
 
+\mbox{}
+
 Il faut finalement construire et vérifier de nouveau le package. Un nouveau fichier compressé sera produit, portant le nom du package accompagné du nouveau numéro de version.
 
 ****
 
-# Synthèse
+# Résumé
 
 Étapes de création d'un package R
 
 #### 1. Écrire les fonctions
+
+\mbox{}
 
 Objets utilisables dans le corps des fonctions d'un package :
 
@@ -743,6 +777,8 @@ Si but = mettre sur le CRAN : respecter les politiques http://cran.r-project.org
 
 #### 2. Créer la structure de fichiers du package
 
+\mbox{}
+
 Répertoire principal, portant le nom du package, contenant :
 
 - sous-répertoire nommé `R` : répertoire des fichiers contenant le code source R des fonctions,
@@ -753,6 +789,8 @@ Répertoire principal, portant le nom du package, contenant :
 
 
 #### 3. Écrire la documentation des fonctions et du package
+
+\mbox{}
 
 Éléments à documenter :
 
@@ -784,6 +822,8 @@ Commentaires dans le code source R pour générer les fiches d'aide (contenu du 
     
 #### 4. Construire et vérifier le package
 
+\mbox{}
+
 Outils nécessaires :
 
 - R, 
@@ -814,7 +854,6 @@ Construit le package binaire (.zip sous Windows, .tgz sous Mac OS X / OS X / mac
     + créer le package source : menu «&nbsp;**Build > Build Source Package**&nbsp;»,
     + créer le package binaire : menu «&nbsp;**Build > Build Binary Package**&nbsp;».
 
-\newpage
 
 La compilation «&nbsp;**Install and Restart**&nbsp;» est pratique en cours de travail. Elle permet de
 
@@ -825,9 +864,13 @@ La compilation «&nbsp;**Install and Restart**&nbsp;» est pratique en cours de 
 
 #### 5. Si désiré, partager le package
 
+\mbox{}
+
 Il n'est pas compliqué de soumettre un package au CRAN : https://cran.r-project.org/submit.html
 
 #### 6. Au besoin, mettre à jour le package
+
+\mbox{}
 
 Mise à jour = modification pour ajouter des fonctionnalités et/ou corriger des bogues :
 
@@ -870,7 +913,6 @@ Pour le développement en utilisant le package `devtools` :
 
 ***
 
-\newpage
 
 # Annexe
 
@@ -879,6 +921,8 @@ Pour le développement en utilisant le package `devtools` :
 Voici des problèmes déjà rencontrés par des étudiants du cours lors de la construction ou la vérification d'un package et leurs solutions.
 
 #### Erreur « Installation failed »
+
+\mbox{}
 
 PROBLÈME : Une erreur de ce type est produite par l'outil «&nbsp;**Check Package**&nbsp;» :
 
@@ -895,6 +939,8 @@ SOLUTION : Utiliser un répertoire dont le nom complet ne comprend aucun accent,
 &nbsp;
 
 #### Erreur de permission d'écriture dans un répertoire d'installation
+
+\mbox{}
 
 PROBLÈME : Une erreur de ce type est produite par l'outil «&nbsp;**Build Binary Package**&nbsp;», «&nbsp;**Install and Restart**&nbsp;» ou «&nbsp;**Clean and Rebuild**&nbsp;» :
 
@@ -928,6 +974,8 @@ b) ajouter l'option `--library="C:/Users/Sophie/Documents/R/win-library/3.5"` (�
 &nbsp;
 
 #### Vérification qui gèle à l'étape « checking PDF version of manual »
+
+\mbox{}
 
 PROBLÈME : Outil «&nbsp;**Check Package**&nbsp;» qui n'arrive pas à terminer son check, qui gèle à l'étape « checking PDF version of manual ».
 
