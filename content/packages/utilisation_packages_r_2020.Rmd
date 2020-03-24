@@ -28,34 +28,27 @@ editor_options:
 
 ***
 
-Lors de l'ouverture d'une session R, nous avons accès à un bon nombre de fonctions et de jeux de données. Ces objets R sont accessibles, car ils proviennent de packages R chargés automatiquement à l'ouverture de session.
+Lors de l'ouverture d'une session R, nous avons accès à un bon nombre de fonctions et de jeux de données. Les objets accessibles sont ceux contenus dans les packages R chargés automatiquement à l'ouverture de la session.
 
 > Un package R est simplement un **regroupement de fonctions et de données documentées**. 
 
 # Installation et chargement d'un package R
 
-Il est simple de charger en R des packages supplémentaires à ceux chargés par défaut. Il suffit d'utiliser la commande `library` comme dans cet exemple :
+Il est simple de charger en R des packages supplémentaires à ceux chargés par défaut. Il suffit d'utiliser la [fonction `library`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/library.html) comme dans cet exemple :
 
-```{r message = FALSE}
+```{r message = FALSE, warning = FALSE}
 library(ggplot2)
 ```
 
-Cette commande fonctionne uniquement si le package a été préalablement installé sur notre ordinateur. **L'installation d'un package et le chargement d'un package sont donc deux étapes distinctes.** L'installation n'a pas à être faite à chaque fois que le package est chargé. 
+Cette commande fonctionne uniquement si le package a été préalablement installé sur notre ordinateur. **L'installation d'un package et le chargement d'un package sont deux étapes distinctes.** L'installation n'a pas à être faite à chaque fois que le package est chargé. 
 
 Certains packages R sont installés automatiquement lors de l'installation de R. Ils ne sont pas pour autant tous chargés lors d'une ouverture de session.
 
 La fonction `installed.packages` retourne des informations à propos des packages R installés sur l'ordinateur local. Voici un exemple obtenu sur mon ordinateur.
 
-```{r eval = FALSE}
-i <- installed.packages()
-head(i)
-```
-
-\newpage
-
-```{r, echo = FALSE, R.options = list(width = 90)}
-i <- installed.packages()
-head(i)
+```{r R.options = list(width = 90)}
+ip <- installed.packages()
+head(ip, n = 3)
 ```
 
 La commande `library()` (donc la fonction `library` appelée sans lui fournir d'arguments), ouvre une fenêtre contenant aussi une liste des packages installés sur l'ordinateur local, mais moins détaillée. En **RStudio**, nous avons également accès à la liste des packages installés à partir de la sous-fenêtre nommée «&nbsp;Packages&nbsp;». 
@@ -63,8 +56,8 @@ La commande `library()` (donc la fonction `library` appelée sans lui fournir d'
 Parmi ces packages, ceux qui étaient inclus dans les fichiers d'installation de R sont les suivants :
 
 ```{r}
-i[
-  i[, "Priority"] %in% c("base","recommended"), 
+ip[
+  ip[, "Priority"] %in% c("base","recommended"), 
   c("Package", "Priority")
 ]
 ```
@@ -79,7 +72,7 @@ L'installation de package a déjà été abordée dans le [Guide d'installation 
 
 ### À partir du CRAN :
 
-Le [CRAN](http://cran.r-project.org/mirrors.html) est le dépôt informatique de packages R géré par le *R core team*. C'est là que la majorité des packages R sont rendus disponibles publiquement. Pour installer un package à partir d'un des miroirs du CRAN, il suffit d’utiliser la  fonction `install.packages` comme dans cet exemple :
+Le [CRAN](http://cran.r-project.org/mirrors.html) est le dépôt informatique de packages R géré par le *R core team*. C'est là que la majorité des packages R sont rendus disponibles publiquement. Pour installer un package à partir d'un des miroirs du CRAN, il suffit d’utiliser la  [fonction `install.packages`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/install.packages.html) comme dans cet exemple :
 ```{r, eval = FALSE}
 install.packages("ggplot2")
 ```
@@ -104,13 +97,13 @@ Sur mon ordinateur, les packages provenant de l'installation de R sont installé
 
 ### À partir d'un dépôt informatique autre que le CRAN :
 
-En plus du CRAN, des packages R sont paratagés à d'autres endroits sur le web, notamment sur :
+En plus du CRAN, des packages R sont partagés à d'autres endroits sur le web, notamment sur :
 
-- le dépôt informatique de packages en bio-informatique [Bioconductor](http://www.bioconductor.org/) :  
-des instructions d'installation sont disponibles sur la page web : http://www.bioconductor.org/install/,
-- un service web d'hébergement et de gestion de développement de logiciels tel que
-[Github](https://github.com/topics/r) ou [Bitbucket](https://bitbucket.org/repo/all?name=R&language=r) :  
-le [package `devtools`](https://github.com/r-lib/devtools) offre des fonctions pour télécharger et installer directement à partir de ces sites (ex. fonctions `install_github` et `install_bitbucket`).
+- le dépôt informatique de packages en bio-informatique [Bioconductor](http://www.bioconductor.org/),
+- un service web d'hébergement et de gestion de versions tel que
+[GitHub](https://github.com/topics/r), [GitLab](https://gitlab.com/explore) ou [BitBucket](https://bitbucket.org/repo/all?name=R&language=r).
+
+Le [package `remotes`](https://remotes.r-lib.org/index.html) offre des fonctions pour télécharger et installer directement à partir de ces sites (p. ex. fonctions [`install_bioc`](https://remotes.r-lib.org/reference/install_bioc.html), [`install_github`](https://remotes.r-lib.org/reference/install_github.html), [`install_gitlab`](https://remotes.r-lib.org/reference/install_gitlab.html) et [`install_bitbucket`](https://remotes.r-lib.org/reference/install_bitbucket.html)).
 
 
 ### À partir d'un fichier compressé d'installation :
@@ -119,37 +112,35 @@ La fonction `install.packages` permet aussi d'installer des packages à partir d
 
 Si nous possédons le fichier compressé d'installation correspondant au système d'exploitation de notre ordinateur, le package peut être installé comme dans cet exemple :
 ```{r, eval = FALSE}
-install.packages("C:/coursR/ggplot2_2.1.0.zip", repos = NULL)
+install.packages("C:/coursR/ggplot2_3.3.0.zip", repos = NULL)
 ```
 
 Si nous possédons uniquement le *package source* (.tar.gz), il est aussi possible d'installer le package à partir d'une plateforme Windows ou Mac OS X / OS X / macOS, mais à la condition d’avoir le nécessaire au développement de packages  (voir le [Guide d'installation ou de mise à jour de R et RStudio](https://stt4230.rbind.io/introduction/installation_r_rstudio/#tools)). Dans l'appel à la fonction `install.packages`,  l'argument `type = "source"` doit être ajouté comme suit.
 ```{r, eval = FALSE}
-install.packages("C:/coursR/ggplot2_2.1.0.tar.gz", type = "source", repos = NULL)
+install.packages("C:/coursR/ggplot2_3.3.0.tar.gz", type = "source", repos = NULL)
 ```
 
 Toute installation à partir d'un fichier compressé peut aussi se réaliser par le menu «&nbsp;Install&nbsp;» de la sous-fenêtre «&nbsp;Packages&nbsp;» de **RStudio**, en sélectionnant : «&nbsp;Install from: > Package Archive File (...)&nbsp;».
 
 L'installation à partir d'un fichier compressé est utile lorsque nous devons télécharger manuellement le fichier compressé d'installation du package. Ça arrive par exemple lorsqu'un package est seulement disponible à partir du site web personnel de l'auteur du package.
 
-Nous pouvons aussi procéder à un téléchargement manuel lorsque nous avons besoin d'une ancienne version d'un package. Si nous laissons `install.packages` télécharger du CRAN un package, il téléchargera la dernière version. Il est possible que des mises à jour d'un package rendent certains de nos programmes non fonctionnels et qu'en conséquence nous souhaitions continuer d'utiliser une version antérieure du package. Pour obtenir une version d'un package qui n'est pas sa dernière version, nous pouvons aller sur sa page web du CRAN (par exemple http://CRAN.R-project.org/package=ggplot2), et télécharger manuellement la version dont nous avons besoin dans «&nbsp;Old Sources&nbsp;». Le [package `devtools`](https://github.com/r-lib/devtools) offre aussi la fonction `install_version` pour automatiser l'installation d'une version précise d'une package, qui n'est pas la version la plus récente.
+Nous pouvons aussi procéder à un téléchargement manuel lorsque nous avons besoin d'une ancienne version d'un package. Si nous laissons `install.packages` télécharger du CRAN un package, il téléchargera la dernière version. Il est possible que des mises à jour d'un package rendent certains de nos programmes non fonctionnels et qu'en conséquence nous souhaitions continuer d'utiliser une version antérieure du package. Pour obtenir une version d'un package qui n'est pas sa dernière version, nous pouvons aller sur sa page web du CRAN (par exemple http://CRAN.R-project.org/package=ggplot2), et télécharger manuellement la version dont nous avons besoin dans «&nbsp;Old Sources&nbsp;». Le [package `remotes`](https://remotes.r-lib.org/) offre aussi la fonction [`install_version`](https://remotes.r-lib.org/reference/install_version.html) pour automatiser l'installation d'une version précise d'un package, qui n'est pas la version la plus récente.
 
 
 
 # Accéder au contenu d'un package R chargé
 
-Une fois un package chargé en R avec la commande `library`, son contenu est accessible dans la session R. Nous avons vu dans des notes précédentes comment fonctionne l'[évaluation d'expressions en R](https://stt4230.rbind.io/programmation/infos_techniques_r/#evaluation-dexpressions-en-r-et-environnements). Nous savons donc que le chargement d'un nouveau package ajoute un environnement dans le chemin de recherche de R, juste en dessous de l'environnement de travail.
+Une fois un package chargé en R avec la commande `library`, son contenu est accessible dans la session R. Nous avons vu dans des notes précédentes comment fonctionne l'[évaluation d'expressions en R](https://stt4230.rbind.io/programmation/infos_techniques_r/#%C3%A9valuation-dexpressions-en-r-et-environnements). Nous savons donc que le chargement d'un nouveau package ajoute un environnement dans le chemin de recherche de R, juste en dessous de l'environnement de travail.
 
 Le chargement de certains packages provoque aussi le chargement de packages dont ils dépendent. Ainsi, parfois plus d'un environnement est ajouté au chemin de recherche de R lors du chargement d'un package.
 
 L'environnement d'un package contient les fonctions publiques et les données du package.
 
-\newpage
-
 ## Fonctions publiques versus privées
 
 Dans la phrase précédente, le mot «&nbsp;publiques&nbsp;» n'est pas anodin. Les fonctions publiques d'un package sont celles destinées à être appelées par des utilisateurs. Un package peut aussi contenir des fonctions privées (ou internes, ou cachées) qui sont uniquement destinées à être appelées par d'autres fonctions du package.
 
-Les fonctions privées sont très utiles pour partitionner du code en bloc de calculs indépendants et éviter de répéter des bouts de code. Si un calcul doit être exécuté fréquemment par les fonctions d'un package, le développeur peut choisir de répéter un même bout de code pour ce calcul aux endroits appropriés dans le code source. Cependant, la présence de bouts de code identiques dans un programme est une mauvaise pratique de programmation. Si nous avons besoin de modifier le calcul fait dans ces bouts de code, il faut penser à aller faire les modifications à tous les endroits où le code est répété. Il est risqué d'oublier de modifier un des bouts. Si au contraire, nous avons créé une fonction pour faire le calcul, la modification doit être faite à un seul endroit. Nous gagnons du temps à long terme, le code est plus clair et les risques d'erreur sont minimisés. Il s'agit du principe [*Don't Repeat Yourself*](http://fr.wikipedia.org/wiki/Ne_vous_r%C3%A9p%C3%A9tez_pas), mentionné dans les notes sur les [bonnes pratiques de programmation](https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/#creer-des-fonctions).
+Les fonctions privées sont très utiles pour partitionner du code en bloc de calculs indépendants et éviter de répéter des bouts de code. Si un calcul doit être exécuté fréquemment par les fonctions d'un package, le développeur peut choisir de répéter un même bout de code pour ce calcul aux endroits appropriés dans le code source. Cependant, la présence de bouts de code identiques dans un programme est une mauvaise pratique de programmation. Si nous avons besoin de modifier le calcul fait dans ces bouts de code, il faut penser à aller faire les modifications à tous les endroits où le code est répété. Il est risqué d'oublier de modifier un des bouts. Si, au contraire, nous avons créé une fonction pour faire le calcul, la modification doit être faite à un seul endroit. Nous gagnons du temps à long terme, le code est plus clair et les risques d'erreur sont minimisés. Il s'agit du principe [*Don't Repeat Yourself*](http://fr.wikipedia.org/wiki/Ne_vous_r%C3%A9p%C3%A9tez_pas), mentionné dans les notes sur les [bonnes pratiques de programmation](https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/#cr%C3%A9er-des-fonctions).
 
 
 ### Environnement d'un package dans le chemin de recherche :
@@ -168,7 +159,7 @@ head(ls(getNamespace("stats")), n = 10)
 ```
 Seulement les 10 premiers éléments de la liste sont affichés ici, car cette liste compte en réalité `r length(ls(getNamespace("stats")))` éléments.
 
-Cet environnement, où tout le contenu d'un package est présent, à l'exception des jeux de données, se nomme **espace de noms** (en anglais *namespace*). L'espace de nom n'est pas dans le chemin de recherche de R, mais son contenu est tout de même accessible grâce à l'opérateur `:::` (triple deux-points) et à des fonctions telles que `getAnywhere` et `getS3method`.
+Cet environnement, où tout le contenu d'un package est présent, à l'exception des jeux de données, se nomme **espace de noms** (en anglais *namespace*). L'espace de nom n'est pas dans le chemin de recherche de R, mais son contenu est tout de même accessible grâce à l'[opérateur `:::`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/ns-dblcolon.html) (triple deux-points) et à des fonctions telles que [`getAnywhere`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/getAnywhere.html) et [`getS3method`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/getS3method.html).
 
 Par exemple, le package `stats` contient la fonction privée `Tr` qui permet de calculer la trace d'une matrice. Il n'est pas possible d'accéder directement à cette fonction, c'est-à-dire à partir du chemin de recherche.
 
@@ -200,7 +191,7 @@ Nous aurions aussi pu y accéder avec `:::` ou `getAnywhere`.
 
 ### Environnement englobant des fonctions d'un package :
 
-Dans les notes sur les fonctions en R, le sujet de l'[exécution d'une fonction](https://stt4230.rbind.io/programmation/fonctions_r/#execution-dune-fonction-et-environnements-associes) est abordé. L'environnement englobant d'une fonction y est défini. Il permet de déterminer le chemin de recherche utilisé lors de l'exécution d'une fonction. Quel est l'environnement englobant des fonctions d'un package? Il s'agit de l'espace de noms du package, comme en fait foi l'exemple suivant.
+Dans les notes sur les fonctions en R, le sujet de l'[évaluation d’un appel à une fonction](https://stt4230.rbind.io/programmation/fonctions_r/#%C3%A9valuation-dun-appel-%C3%A0-une-fonction-et-environnements-associ%C3%A9s) est abordé. L'environnement englobant d'une fonction y est défini. Il permet de déterminer le chemin de recherche utilisé lors de l'exécution d'une fonction. Quel est l'environnement englobant des fonctions d'un package? Il s'agit de l'espace de noms du package, comme en fait foi l'exemple suivant.
 ```{r}
 environment(var)
 ```
@@ -215,13 +206,13 @@ head(ls("package:datasets"), n = 10)
 ```
 Seulement les 10 premiers éléments de la liste sont affichés ici, car cette liste compte en réalité `r length(ls("package:datasets"))` éléments.
 
-Cependant, les jeux de données sont parfois cachés. Ils sont traités différemment des fonctions privées et ne se retrouvent même pas dans l'espace de noms du package. C'est le cas par exemple dans le package `copula`.
+Cependant, les jeux de données sont parfois cachés. Ils sont alors traités différemment des fonctions privées et ne se retrouvent même pas dans l'espace de noms du package. C'est le cas par exemple dans le package `copula`.
 
 ```{r warning = FALSE}
 library(copula)
 ```
 
-La fonction `data` est très utile dans ce cas. Cette fonction a en fait plusieurs utilités. Premièrement, elle permet d'énumérer tous les jeux de données contenus dans un package.
+La [fonction `data`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/data.html) est très utile dans ce cas. Cette fonction a en fait plusieurs utilités. Premièrement, elle permet d'énumérer tous les jeux de données contenus dans un package.
 
 ```{r, eval = FALSE}
 data(package = "copula")
@@ -240,7 +231,7 @@ data(uranium)
 str(uranium)
 ```
 
-Cette pratique de cacher les jeux de données d'un package tend à disparaître, mais il est bon de la connaître, car certains packages l'utilisent encore.
+Cette pratique de cacher les jeux de données d'un package tend à disparaître, mais il est bon de la connaître, car certains packages l'utilisent encore. Le désavantage de cette façon de faire est que le chargement d'un jeu de données avec la fonction `data` écrase tout objet portant le même nom que le jeu de données qui se trouverait dans notre environnement de travail.
 
 
 
@@ -260,13 +251,11 @@ La documentation complète d'un package s'ouvre en passant par :
 
 > `help.start()` > Packages > nom du package.
 
-Nous avons ainsi accès à l'*index* du package, contenant des liens vers les fiches d'aide, mais aussi vers un fichier descriptif du package, parfois vers des guides d'utilisation (souvent appelées vignettes), parfois vers un fichier *NEWS* documentant les changements apportés au package lors de mises à jour, etc.
-
-Notons que toute fiche d'aide comporte en pied de page un lien vers l'index de son package.
+Nous avons ainsi accès à l'*index* du package, contenant des liens vers les fiches d'aide, mais aussi vers un fichier descriptif du package, parfois vers des guides d'utilisation (souvent appelées vignettes), parfois vers un fichier *NEWS* documentant les changements apportés au package lors de mises à jour, etc. Notons que toute fiche d'aide comporte en pied de page un lien vers l'index de son package.
 
 Pour les packages sur le CRAN, toutes les fiches d'aide et le fichier descriptifs sont regroupés dans un fichier PDF. Ce PDF se retrouve directement sur le CRAN (dans *Reference manual*), mais pas dans la fenêtre d'aide de R (par exemple http://cran.r-project.org/web/packages/ggplot2/ggplot2.pdf).
 
-La documentation sert à décrire ce que permettent de faire les fonctions et expliquer comment les utiliser. En plus d'exemples dans les fiches d'aide, certains packages possèdent des démonstrations, qui se démarrent avec la commande `demo`, comme dans cet exemple :
+La documentation sert à décrire ce que permettent de faire les fonctions et expliquer comment les utiliser. En plus d'exemples dans les fiches d'aide, certains packages possèdent des démonstrations, qui se démarrent avec la [fonction `demo`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/demo.html), comme dans cet exemple :
 
 ```{r eval = FALSE}
 demo(lm.glm, package = "stats", ask = TRUE)
@@ -279,21 +268,21 @@ Il arrive (assez fréquemment malheureusement) que les fiches d'aide soient peu 
 
 ## Code source
 
-Étant donné que R est un logiciel libre, le code source de tout package R est accessible. Accéder au code source est parfois simple. Il suffit de soumettre le nom d'une fonction dans la console (sans parenthèses) pour que le code source de la fonction soit affiché. Le code peut aussi être affiché dans une fenêtre indépendante avec les fonctions `View` ou `edit`. Pour les fonctions cachées, il faut utiliser `:::` ou `getAnywhere` comme mentionné ci-dessus.
+Étant donné que R est un logiciel libre, le code source de tout package R est accessible. Accéder au code source est parfois simple. Il suffit de soumettre le nom d'une fonction dans la console (sans parenthèses) pour que le code source de la fonction soit affiché. Le code peut aussi être affiché dans une fenêtre indépendante avec les fonctions [`View`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/View.html) ou [`edit`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/edit.html). Pour les fonctions cachées, il faut utiliser `:::` ou `getAnywhere` comme mentionné ci-dessus.
 
-Pour certaines fonctions, le code source est par contre écrit dans un autre langage que R. Par exemple, le code R de la fonction `var` du package `stats` contient uniquement de la validation d'arguments. 
+Pour certaines fonctions, le code source est par contre écrit dans un autre langage que R. Par exemple, le code R de la fonction `var` du package `stats` contient uniquement de la validation d'arguments, mis à part la dernière instruction qui appelle une fonction écrite en langage C. Cette fonction C nommée `C_cov`, qui réalise le coeur du calcul, est appelée en R à l'aide de la fonction d'interface `.Call`.
+
 ```{r}
 var
 ```
-Le coeur du calcul est fait dans une fonction C, appelée à la dernière ligne du corps de la fonction à l'aide de la fonction `.Call`. Il est aussi possible de voir ce code C. Il se trouve dans les fichiers source de R (voir Ligges (2006)[^1] pour des explications). Ces fichiers sont téléchargeables sur le site web suivant :  
+
+Il est possible de voir le code C de la fonction `C_cov`. Il se trouve dans les fichiers source de R (voir Ligges (2006) pour des explications). Ces fichiers sont téléchargeables sur le site web suivant :  
 https://cran.r-project.org/sources.html
 
-[^1]: Ligges, U. (2006). R Help Desk: Accessing the Sources. *R News*, vol. 6, no. 4, p. 43-45. URL  
-http://cran.r-project.org/doc/Rnews/Rnews_2006-4.pdf
 
 ***
 
-# Synthèse
+# Résumé
 
 
 > Un package R est un **regroupement de fonctions et de données documentées**. 
@@ -301,35 +290,35 @@ http://cran.r-project.org/doc/Rnews/Rnews_2006-4.pdf
 #### Installation et chargement d'un package R
 
 - Étape 1 : Installation 
-    + appel à la fonction `install.packages` pour installer un package à partir :
+    + appel à la [fonction `install.packages`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/install.packages.html) pour installer un package à partir :
         + du CRAN (provenance utilisée par défaut),
-        + d'un fichier binaire compressé (.zip pour Windows, .tgz pour Mac OS X / OS X / macOS): argument `repos = NULL`,
-        + d'un fichier source compressé (.tar.gz) :  
+        + d'un fichier binaire compressé que nous possédons localement (.zip pour Windows, .tgz pour Mac OS X / OS X / macOS): argument `repos = NULL`,
+        + d'un fichier source compressé (.tar.gz) que nous possédons localement :  
         arguments `repos = NULL` et `type = "source"`  
         (+ [nécessaire au développement de packages R installé](https://stt4230.rbind.io/introduction/installation_r_rstudio/#tools));
     + ou utilisation des fonctionnalités de **RStudio**;
-    + ou utilisation d'une fonction du [package `devtools`](https://github.com/r-lib/devtools) telle que `install_github`, `install_bitbucket` ou `install_version`.
+    + ou utilisation d'une fonction du [package `remotes`](https://remotes.r-lib.org/index.html) telle que [`install_bioc`](https://remotes.r-lib.org/reference/install_bioc.html), [`install_github`](https://remotes.r-lib.org/reference/install_github.html), [`install_gitlab`](https://remotes.r-lib.org/reference/install_gitlab.html), [`install_bitbucket`](https://remotes.r-lib.org/reference/install_bitbucket.html)) ou [`install_version`](https://remotes.r-lib.org/reference/install_version.html).
 - Étape 2 (à répéter dans toute nouvelle session R) : Chargement 
-    + appel à la fonction `library`.
+    + appel à la [fonction `library`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/library.html).
 
-Où se trouvent les fichiers du package ?  `.libPaths()`
+Où se trouvent les fichiers du package ?  [`.libPaths()`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/libPaths.html)
 
 
 #### Accéder au contenu d'un package R chargé
 
 - Fonctions publiques : 
     + directement accessibles par leur nom,
-    + `::` peut être utile en cas de conflit de nom;
+    + [`::`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/ns-dblcolon.html) peut être utile en cas de conflit de nom;
 - Fonctions privées : 
-    + `:::`, 
-    + `getAnywhere` et 
-    + `getS3method` pour les méthodes S3;
+    + [`:::`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/ns-dblcolon.html), 
+    + [`getAnywhere`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/getAnywhere.html) et 
+    + [`getS3method`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/getS3method.html) pour les méthodes S3;
 - Jeux de données : 
     + directement accessibles
-    + ou accessibles grâce à la fonction `data`;
-- Documentation :  `?`, `help`, `help.start`.
+    + ou accessibles grâce à la [fonction `data`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/data.html);
+- Documentation :  `?`, `help`, `help.start`,  [`demo`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/demo.html).
 - Code source :
-    + code R : afficher la fonction (sans l'appeler), dans la console ou les fonctions `View` ou `edit`,
+    + code R : afficher la fonction (sans l'appeler), dans la console ou les fonctions [`View`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/View.html) ou [`edit`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/edit.html),
     + code dans un autre langage : fichiers sources.
 
 
@@ -339,13 +328,16 @@ Où se trouvent les fichiers du package ?  `.libPaths()`
     + fonctions publiques seulement,
     + souvent jeux de données, mais pas toujours.
 - Espace de noms (*namespace*) d'un package :
-    + tout le contenu, public et privé, du package (à l'exception des  jeux de données)
+    + tout le contenu, public et privé, du package (à l'exception des  jeux de données).
 
 
 ***
 
 # Références
 
+- Ligges, U. (2006). R Help Desk: Accessing the Sources. *R News*, vol. 6, no. 4, p. 43-45. URL  
+http://cran.r-project.org/doc/Rnews/Rnews_2006-4.pdf
 - Wickham, H. (2015). *R packages*. O'Reilly Media, Inc. URL http://r-pkgs.had.co.nz/
-- https://www.datacamp.com/community/tutorials/r-packages-guide
+- Alvarez, A. (2019). Tutoriel web intitulé « R Packages: A Beginner's Guide ». URL
+https://www.datacamp.com/community/tutorials/r-packages-guide
 
