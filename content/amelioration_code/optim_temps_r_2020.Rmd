@@ -2,12 +2,12 @@
 title: "Optimisation de temps d'exécution en R"
 linkTitle: "Optimisation temps exécution R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2020-03-30"
+date: "2020-03-31"
 weight: 2
 slug: "optim_temps_r"
 categories: ["cours_2020-04-07"]
 categories_weight: 1
-lastmodifierdisplayname : "Sophie Baillargeon"
+lastmodifierdisplayname: "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
 output:
   pdf_document:
@@ -23,51 +23,420 @@ header-includes:
 - \frenchbsetup{StandardLayout}
 - \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
 - \renewcommand{\linethickness}{0.05em}
-- \DeclareUnicodeCharacter{2714}{-}
-- \DeclareUnicodeCharacter{221A}{-}
-- \DeclareUnicodeCharacter{25CF}{*}
 editor_options: 
   chunk_output_type: console
 ---
 
 
-`r knitr::opts_chunk$set(cache = TRUE)`
+`r knitr::opts_chunk$set(cache = TRUE, R.options = list(width = 85), bench.all_columns = TRUE)`
 
 ***
 
-Lorsque nous écrivons du code, notre but premier est évidemment que ce code fonctionne correctement. Après avoir vérifié que le code [produit le résultat escompté et gère correctement les exceptions](https://stt4230.rbind.io/programmation/tests_exceptions_r/), nous devrions, selon les [bonnes pratiques](https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/), nous assurer que le code est facile à maintenir (écriture, compréhension et réutilisation aisées). Si notre code rencontre toutes les conditions énumérées ci-dessus, mais que son temps d'exécution est long, nous devrions envisager de le rendre plus rapide. Cette amélioration pourrait faire la différence entre un programme peu ou pas utilisé et un programme fréquemment utilisé. Cependant, n'oublions pas qu'il est inutile d'optimiser le temps d'exécution d'un programme roulant déjà suffisamment rapidement.
+Lorsque nous écrivons du code, notre but premier est évidemment que ce code fonctionne correctement. Après avoir vérifié que le code [produit les résultats escomptés et gère correctement les exceptions](https://stt4230.rbind.io/programmation/tests_exceptions_r/), nous devrions, selon les [bonnes pratiques](https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/), nous assurer que le code est facile à maintenir (écriture, compréhension et réutilisation aisées). Si notre code remplit toutes les conditions énumérées ci-dessus, mais que son temps d'exécution est long, nous devrions envisager de le rendre plus rapide, sans quoi il risque d'être peu ou pas utilisé. Cependant, n'oublions pas qu'il est inutile d'optimiser le temps d'exécution d'un programme roulant déjà suffisamment rapidement.
 
 Pour réduire le temps d'exécution d'un programme, il faut d'abord cerner la partie du programme responsable des lenteurs. Pour ce faire, il est conseillé d'utiliser des outils qui analysent la performance du code. Après avoir cerné les instructions problématiques, il faut les modifier de façon à effectuer le calcul plus rapidement. Certains outils d'analyse de performance sont présentés dans ce qui suit. Ensuite, nous verrons des stratégies d'optimisation de temps d'exécution.
 
+\newpage
 
 # Outils d'analyse de la performance d'un programme R
 
-Une analyse de la performance d'un programme informatique est appelée profilage de code (en anglais *code profiling*). Il est possible de profiler l'utilisation du processeur et l'utilisation de la mémoire. Nous nous concentrerons ici sur le profilage de l'utilisation du processeur, qui vise principalement à évaluer le temps d'exécution d'un programme. Le R de base propose deux outils pour évaluer le temps d'exécution d'un programme R :
+Une analyse de la performance d'un programme informatique est appelée [profilage de code](https://fr.wikipedia.org/wiki/Profilage_de_code) (en anglais *code profiling*). Il est possible de profiler l'utilisation du processeur et l'utilisation de la mémoire. Nous nous attarderons surtout ici au profilage de l'utilisation du processeur, qui vise principalement à évaluer le temps d'exécution d'un programme. Cependant, nous parlerons aussi un peu de profilage d'utilisation de la mémoire, car la gestion de la mémoire a un impact sur le temps d'exécution.
 
-\newpage
+Le R de base propose deux outils pour effectuer du profilage d'utilisation du processeur&nbsp;: 
 
-- la fonction `system.time`,
-- les fonctions `Rprof` et `summaryRprof`.
+- la fonction `system.time` : pour le calcul de temps global d'exécution;
+- les fonctions `Rprof` et `summaryRprof` : pour décortiquer la provenance des lenteurs dans un code R.
 
-Cependant, ces fonctions ne sont parfois pas suffisantes. Les packages suivants nous seront aussi utiles :
+Cependant, ces fonctions sont souvent insuffisantes pour réaliser une analyse approfondie. Nous utiliserons aussi les packages suivants&nbsp;: 
 
-- `microbenchmark` et 
-- `profvis`. 
+- `bench` : pour le calcul de temps global d'exécution et un suivi de la gestion de la mémoire;
+- `profvis` : pour visualiser le résultat produit par `Rprof`. 
 
-Pour illustrer l'utilisation de ces fonctions, nous allons utiliser un exemple tiré de [Peng et de Leeuw, (2002)](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf). Nous allons étudier les temps d'exécution de fonctions R ayant pour but d'estimer la fonction de densité d'une variable aléatoire par la méthode du noyau à partir d'observations de la variable aléatoire. De l'information sur cette méthode, appelée en anglais *Kernel density estimation*, peut être trouvée sur la page Wikipédia suivante : https://fr.wikipedia.org/wiki/Estimation_par_noyau.
+Pour illustrer l'utilisation de ces fonctions, nous allons reprendre un exemple des [notes sur les fonctions en R](https://stt4230.rbind.io/programmation/fonctions_r/#exemple-de-cr%C3%A9ation-dune-fonction-r). Nous avions créé les deux fonctions suivantes pour compter combien de nombres entiers impairs contient un vecteur numérique[^1].  
 
-Il existe en fait déjà une fonction dans le package `stats` pour faire de l'estimation de densité par noyau. Il s'agit de la fonction `density`. Voici un exemple de ce qu'il est possible de réaliser avec cette fonction.
+[^1]: Cet exemple était tiré de Matloff, N. (2011). The Art of R Programming : A Tour of Statistical Software Design. No Starch Press. Sections 1.3 et 7.4.
+
+```{r}
+#' @title Compte le nombre d'entiers impairs dans un vecteur numérique
+#' @description Version avec calcul vectoriel
+#' @param x vecteur numérique
+#' @return le nombre de nombres entiers impairs dans x
+compte_impair_vectoriel <- function(x) {
+  sum(x %% 2 == 1)
+}
+```
+
+
+```{r}
+#' @title Compte le nombre d'entiers impairs dans un vecteur numérique
+#' @description Version avec boucle
+#' @inherit compte_impair_vectoriel params return
+compte_impair_boucle <- function(x) {
+  k <- 0
+  for (n in x) {
+    if (n %% 2 == 1) {
+      k <- k + 1
+    }
+  }
+  k
+}
+```
+
+Des [tags `roxygen2`](https://stt4230.rbind.io/packages/devel_packages_r/#comment-ecrire-de-la-documentation-avec-roxygen2) sont utilisés pour documenter les fonctions. Cependant, les commentaires `roxygen2` écrits ici ne formeraient pas des fiches d'aide complètes. Ce n'est pas un problème puisque nous n'avons pas l'intention de créer un package avec ces fonctions. Notons que le [tag `@inherit`](https://roxygen2.r-lib.org/articles/rd.html#do-repeat-yourself) permet de reprendre telles quelles des sections d'une autre fiche d'aide, ici la description des arguments et de la sortie.
+
+Avant de profiler ces fonctions, assurons-nous qu'elles retournent le même résultat. Pour ce faire, donnons-leur en entrée un vecteur `obs` contenant un million d'observations générées aléatoirement.
+
+```{r echo = FALSE}
+set.seed(530)
+```
+
+```{r}
+# Génération aléatoire d'un million d'observations
+obs <- round(runif(1000000, -10, 10))
+```
+
+```{r}
+# Appels aux fonctions à comparer
+compte_1 <- compte_impair_vectoriel(x = obs)
+compte_2 <- compte_impair_boucle(x = obs)
+```
+
+```{r}
+# Comparaison des sorties retournées
+compte_1 == compte_2
+```
+
+Les deux fonctions retournent bien dans cet exemple la même valeur numérique. Notons cependant que la première fonction (`compte_impair_vectoriel`) retourne le résultat sous la forme d'un entier (*integer*) et la deuxième (`compte_impair_boucle`) sous la forme d'un réel (*double*). Cette différence de type de donnée retournée n'est pas un problème ici.
+
+
+## Fonction `system.time`
+
+Mesurons combien de temps prennent les exécutions d'appels aux fonctions `compte_impair_vectoriel` et `compte_impair_boucle` lorsque nous leur donnons en entrée le vecteur `obs`. Pour ce faire, utilisons d'abord la [fonction `system.time`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/system.time.html), comme nous l'avions fait dans les [notes sur les fonctions en R](https://stt4230.rbind.io/programmation/fonctions_r/#exemple-de-cr%C3%A9ation-dune-fonction-r).
+
+```{r}
+temps_1 <- system.time(compte_1 <- compte_impair_vectoriel(x = obs))
+temps_2 <- system.time(compte_2 <- compte_impair_boucle(x = obs))
+```
+
+Il faut donner en entrée à `system.time` une instruction R, contenant ou non une assignation, ou encore des instructions R encadrées d'accolades. Cet ensemble d'instruction(s) est appelé *expression*. La fonction retourne le temps, en secondes, d'utilisation du CPU (*Central Processing Unit*) pour l'exécution de l'expression. Notons que le terme « exécution » pourrait être remplacé par le terme « évaluation ». Ils ont ici la même signification. 
+
+J'obtiens les temps suivants, qui indiquent que `compte_impair_vectoriel` est plus rapide que `compte_impair_boucle`&nbsp;: 
+
+```{r}
+temps_1
+temps_2
+```
+
+Les trois temps dans une sortie produite par `system.time` peuvent être définis ainsi&nbsp;: 
+
+- `user`&nbsp;:  temps écoulé par le logiciel R (*calling process*) pour évaluer l'expression;
+- `system`&nbsp;:  temps écoulé par le système d'exploitation de notre ordinateur, mais pour le compte du logiciel R, pendant l'exécution de l'expression;
+- `elapsed`&nbsp;:  temps total écoulé entre la soumission de l'expression et le retour du résultat (possiblement plus grand que la somme des deux autres temps, car le système a peut-être dû accorder du temps à d'autres processus actifs sur l'ordinateur pendant l'exécution de l'expression)
+
+Les temps d'exécution obtenus dépendent des spécifications de l'ordinateur utilisé, en particulier de la puissance de son CPU. De plus, nous n'obtiendrons probablement pas exactement les mêmes temps si nous évaluons à nouveau l'expression. Il y a une petite variation normale du temps d'exécution, causée notamment par les autres processus utilisant le CPU de notre ordinateur au moment où la commande est lancée.
+
+
+## Package `bench`
+
+La fonction `system.time` est plutôt minimaliste. Elle mesure le temps pris par une seule exécution d'une expression. Pour évaluer plus justement le temps d'exécution d'une expression, il est préférable de l'exécuter à quelques reprises, puis de calculer le temps médian d'exécution. La médiane est plus appropriée que la moyenne pour cette mesure de tendance centrale, car elle est robuste aux valeurs extrêmes, qui ne sont pas si rares parmi des temps d'exécution. Aussi, étant donné qu'il y a un lien entre le temps d'exécution et la gestion de la mémoire, il serait pertinent de récolter, en plus du temps, des informations concernant la mémoire utilisée pendant les exécutions. Voilà le but du [package `bench`](http://bench.r-lib.org/). Dans ces notes, nous allons utiliser la [fonction `mark`](http://bench.r-lib.org/reference/mark.html) de ce package pour effectuer du profilage de plusieurs fonctions R.
+
+Comparativement à la fonction `system.time`, la fonction `mark` possède plusieurs avantages, notamment&nbsp;:
+
+- profilage de plus d'une expression à la fois;
+- chronométrage plus précis grâce aux répétitions et à une unité de mesure de temps plus fine;
+- suivi de la gestion de la mémoire.
+
+Voici un premier exemple d'utilisation de cette fonction&nbsp;: 
+
+```{r warning = FALSE}
+library(bench)
+```
+
+```{r}
+sortie_mark <- mark(
+  vectoriel = compte_impair_vectoriel(obs), 
+  boucle = compte_impair_boucle(obs)
+)
+```
+
+Un avertissement a été émis. Nous y reviendrons.
+
+Il faut fournir en entrée à cette fonction une série d'expressions à profiler (ce pourrait être une seule expression). Ces expressions sont à fournir en arguments distincts, attrapés par l'argument `...`, qui permet le passage d'autant d'expressions à profiler que souhaité. Les expressions peuvent être assignées à des noms avec l'opérateur `=` (comme dans l'exemple), ou non. Le nom fourni à gauche de l'opérateur `=` pour une expression est celui utilisé pour identifier l'expression dans la sortie, ce qui peut aider à alléger l'affichage des résultats.
+
+La sortie retournée par la fonction `mark` a un format particulier. Il s'agit d'un objet possédant 4 classes, dont celle de data frame, mais pour lequel les éléments ne sont pas tous de simples vecteurs ou facteur.
+
+```{r}
+class(sortie_mark)
+sortie_mark
+```
+
+Pour simplifier l'analyse des résultats retournés par `mark`, je vais utiliser la fonction suivante pour imprimer les sorties produites par cette fonction dans le reste de ces notes.
+
+```{r}
+#' @title Impression simplifiée d'une sortie de bench::mark
+#' @description Conserve six éléments et imprime sous forme de data frame
+#' @param x sortie produite par bench::mark
+print_bench_mark <- function(x){
+  df <- data.frame(
+    expression = as.character(x$expression),
+    n_itr = x$n_itr,
+    min = if (inherits(x$min, "bench_time")) as.character(x$min) else x$min,
+    median = if (inherits(x$min, "bench_time")) as.character(x$median) else x$median,
+    mem_alloc = as.character(x$mem_alloc),
+    n_gc = x$n_gc,
+    stringsAsFactors = FALSE
+  )
+  print(df)
+  invisible(df)
+}
+```
+
+```{r}
+print_bench_mark(sortie_mark)
+```
+
+Dans cette sortie, possédant une ligne par expression à profiler, les différentes colonnes contiennent&nbsp;:
+
+- `expression` : identifiant de l'expression,
+- `n_itr` : nombre de répétitions (ou itérations) de l'exécution de l'expression,
+- `min` :  temps pris par l'exécution la plus rapide de l'expression,
+- `median` : temps médian d'exécution parmi les répétitions,
+- `mem_alloc` :  quantité totale de mémoire allouée pendant une exécution de l'expression,
+- `n_gc` : nombre total de récupérations de mémoire (en anglais *garbage collections*, d'où l'abréviation `gc`) effectuées pendant toutes les répétitions d'exécution.
+
+```{r echo = FALSE, results = "hide"}
+print_mark <- print_bench_mark(sortie_mark)
+```
+
+Dans cet exemple, la fonction `compte_impair_vectoriel` est beaucoup plus rapide que la fonction `compte_impair_boucle` (temps médians de `r print_mark$median[1]` = `r round(sortie_mark$median[1], 4)` secondes versus `r print_mark$median[2]` = `r round(sortie_mark$median[2], 4)` secondes), mais elle utilise plus de mémoire (`r print_mark$mem_alloc[1]` = `r sortie_mark$mem_alloc[1]` bytes versus `r print_mark$mem_alloc[2]` = `r sortie_mark$mem_alloc[2]` bytes).
+
+Les unités de temps et de mémoire sont adaptées de façon à ce que les nombres imprimés ne soient pas trop gros, ni trop petits. Ici, la fonction `mark` a choisi de mesurer le temps en millisecondes (ms). 
+Nous aurions pu demander à `mark` d'utiliser des unités de temps aussi petites que des nanosecondes (ns) via son argument `time_unit`. Remarquez que ces unités peuvent varier d'une expression à l'autre, comme c'est le cas pour les unités de mémoire dans l'exemple. 
+
+La fonction `mark` sélectionne de façon automatique le nombre de fois qu'est répétée (ou itérée) l'exécution de chacune des expressions. Nous pouvons aussi contrôler ce nombre de répétitions à l'aide des arguments `iterations`, `min_iterations` et `max_iterations`. Pour nous assurer d'effectuer toujours au moins 10 répétitions, nous utiliserons à l'avenir l'argument `min_iterations = 10`. 
+
+```{r}
+sortie_mark <- mark(
+  compte_impair_vectoriel(obs), 
+  compte_impair_boucle(obs),
+  min_iterations = 10
+)
+print_bench_mark(sortie_mark)
+```
+
+Le message d'avertissement `"Some expressions had a GC in every iteration; so filtering is disabled."`, obtenu lors des deux appels précédents à la fonction `mark` n'est pas problématique. Dans le calcul du temps médian, la fonction `mark` cherche à considérer seulement les exécutions pendant lesquelles de la récupération de mémoire n'a pas eu lieu, car celle-ci ralentit l'exécution. Elle est contrainte à ne pas effectuer ce filtrage si toutes les exécutions d'une expression ont subi de la récupération de mémoire. La section suivante explique ce qu'est la récupération de mémoire.
+
+Avant de terminer, le package `bench` offre même une [méthode pour la fonction générique `plot`](http://bench.r-lib.org/reference/autoplot.bench_mark.html) permettant de représenter graphiquement les résultats du profilage.
+
+```{r message = FALSE}
+plot(sortie_mark)
+```
+
+Pour plus d'informations concernant ce graphique et d'autres possibilités du package `bench`, le lecteur est référé à la documentation du package : http://bench.r-lib.org/.
+
+
+## Liens entre gestion de la mémoire et temps d’exécution 
+
+Il n'est pas rare en R que des solutions soient rapides, mais utilisent beaucoup de mémoire. Comme illustré dans l'exemple précédent, et comme nous l'illustrerons une autre fois plus loin dans ces notes, les calculs matriciels et vectoriels sont souvent des options de calcul optimisés en R. Cependant, ils impliquent la création de matrices ou de vecteurs contenant potentiellement un grand nombre d'éléments. Ainsi, la rapidité a parfois un envers : l'utilisation d'une grande quantité de mémoire. Nous verrons que cette contrepartie peut devenir problématique lors du traitement d'une grande quantité de données. Il faut parfois gérer un compromis entre temps d’exécution et quantité de mémoire utilisée. 
+
+Aussi, l'opération d'allouer de l'espace dans la mémoire d'un ordinateur pour stocker des données prend un certain temps à être réalisée. Un programme R qui génère de nombreuses allocations en mémoire aura tendance à être lent. Une des stratégies présentées ici identifie des opérations à éviter en raison du grand nombre d'allocations en mémoire qu'elles provoquent.
+
+### Récupération de mémoire (*garbage collection*)
+
+Étant donné que les allocations et désallocations de mémoire en R sont réalisées de façon implicite plutôt qu'explicitement par l'utilisateur comme dans certains langages informatiques (p. ex. en C), R doit s'occuper de libérer périodiquement de façon automatique la mémoire qui n'est plus utilisée. Cette opération s'appelle « [récupération de mémoire](https://fr.wikipedia.org/wiki/Ramasse-miettes_(informatique)) », en anglais *garbage collection* ou *gc*. Il s'agit d'une opération essentielle pour ne pas saturer la mémoire de l'ordinateur pendant une session R.
+
+Tout comme l'allocation de mémoire, la récupération de mémoire prend un peu de temps à être réalisée. Il est donc pertinent de savoir si le récupérateur de mémoire (*garbage collector*), aussi appelé ramasse-miettes, a été lancé pendant l'exécution d'une expression. Cette opération, dont nous ne contrôlons pas le déclenchement, ralentit légèrement les exécutions.
+
+
+## Fonctions `Rprof` et `summaryRprof`
+
+Les fonctions `system.time` et `mark` sont bien pratiques pour évaluer un temps global d'exécution. Cependant, elles ne nous aident pas à identifier les parties d'un programme R, typiquement le corps d'une fonction, qui sont les plus lentes. Pour arriver à identifier les instructions causant des lenteurs, il faut plutôt utiliser un outil telles que les fonctions [`Rprof`](http://stat.ethz.ch/R-manual/R-devel/library/utils/html/Rprof.html) et [`summaryRprof`](http://stat.ethz.ch/R-manual/R-devel/library/utils/html/summaryRprof.html). 
+
+Pour utiliser ces fonctions, il faut ajouter la commande `Rprof()` avant le bout de code à minuter et ajouter `Rprof(NULL)` après le bout de code, comme dans cet exemple&nbsp;:
+
+```{r eval = FALSE}
+Rprof(interval = 0.001)
+compte_impair_boucle(obs)
+Rprof(NULL)
+```
+
+Un fichier a est créé dans notre répertoire de travail. Il se nomme par défaut `Rprof.out`, mais nous pouvons changer ce nom avec l'argument `filename` de la fonction `Rprof`. À chaque 0.001 seconde (argument `interval`), R a écrit dans ce fichier le nom de la fonction ou des fonctions dont un appel est en cours d'exécution. La fonction `Rprof` conserve donc une trace de la [pile d'exécution](https://fr.wikipedia.org/wiki/Pile_d%27ex%C3%A9cution) (en anglais *call stack*) à intervalle de temps fixes. 
+
+Typiquement, nous n'allons pas voir directement le contenu de ce fichier. Nous en affichons plutôt un résumé avec la fonction `summaryRprof` comme suit&nbsp;: 
+
+```{r eval = FALSE}
+summaryRprof("Rprof.out")
+```
+
+```
+## $by.self
+##                        self.time self.pct total.time total.pct
+## "compte_impair_boucle"     0.095    52.49      0.181    100.00
+## "%%"                       0.086    47.51      0.086     47.51
+## 
+## $by.total
+##                        total.time total.pct self.time self.pct
+## "compte_impair_boucle"      0.181    100.00     0.095    52.49
+## "%%"                        0.086     47.51     0.086    47.51
+## 
+## $sample.interval
+## [1] 0.001
+## 
+## $sampling.time
+## [1] 0.181
+```
+
+Dans cette sortie, les éléments `by.self` et `by.total` contiennent les mêmes valeurs, mais pas dans le même ordre (colonnes interchangées). Les colonnes `total.time` et `total.pct` réfèrent au temps total passé à l'exécution de l'appel à une fonction. Pour les colonnes `self.time` et `self.pct`, le temps d'exécution des appels de fonctions imbriqués dans l'appel de la fonction en question est retiré du temps total.
+
+Dans l'exemple, la commande `compte_impair_boucle(x)` prend un total de 0.181 seconde à être évaluée. Exécuter un appel à la fonction `compte_impair_boucle` signifie exécuter le corps de la fonction avec les valeurs d'arguments fournis en entrée. De l'exécution du corps de la fonction `compte_impair_boucle`, seul l'appel à l'opérateur `%%` apparaît dans la sortie de `summaryRprof`. Les appels aux autres fonctions ou opérateurs sont ici tellement rapides qu'ils n'ont pas été détectés par `Rprof`. Le temps passé à évaluer les appels à l'opérateur `%%` est de 0.086 seconde. Ainsi, le `self.time` de `compte_impair_boucle` est 0.181 - 0.086 = 0.095 seconde.
+
+Afin de mieux expliquer l'interprétation de la sortie de `summaryRprof`, voyons aussi un autre exemple qui produit une sortie un plus longue. Les arguments `memory.profiling` et `gc.profiling` de la fonction `Rprof` sont illustrés. 
+
+```{r eval = FALSE}
+# Facteur généré aléatoirement pour l'exemple
+facteur <- sample(x = 1:10, size = length(obs), replace = TRUE)
+
+# Profilage du temps d'exécution et de la gestion de la mémoire 
+# d'un appel à aggregate avec les données simulées
+Rprof(interval = 0.01, memory.profiling = TRUE, gc.profiling = TRUE)
+res <- aggregate(x = obs, by = list(facteur), FUN = median)
+Rprof(NULL)
+
+# Résumé de la sortie de Rprof
+summaryRprof("Rprof.out", memory = "both")
+```
+
+```
+## $by.self
+##                         self.time self.pct total.time total.pct mem.total
+## "[.data.frame"               0.07    24.14       0.18     62.07      77.4
+## "<GC>"                       0.06    20.69       0.06     20.69      15.3
+## "<Anonymous>"                0.04    13.79       0.05     17.24       7.6
+## "anyDuplicated.default"      0.03    10.34       0.03     10.34       8.0
+## "unique.default"             0.02     6.90       0.07     24.14      23.6
+## "match"                      0.01     3.45       0.07     24.14      27.5
+## "split.default"              0.01     3.45       0.02      6.90      34.7
+## "as.character.factor"        0.01     3.45       0.01      3.45       0.0
+## "complete.cases"             0.01     3.45       0.01      3.45       3.9
+## "f"                          0.01     3.45       0.01      3.45       0.0
+## "factor"                     0.01     3.45       0.01      3.45      23.3
+## "is.na"                      0.01     3.45       0.01      3.45       8.5
+## 
+## $by.total
+##                         total.time total.pct mem.total self.time self.pct
+## "aggregate"                   0.28     96.55     144.0      0.00     0.00
+## "aggregate.data.frame"        0.28     96.55     144.0      0.00     0.00
+## "aggregate.default"           0.28     96.55     144.0      0.00     0.00
+## "[.data.frame"                0.18     62.07      77.4      0.07    24.14
+## "["                           0.18     62.07      77.4      0.00     0.00
+## "unique.default"              0.07     24.14      23.6      0.02     6.90
+## "match"                       0.07     24.14      27.5      0.01     3.45
+## "sort"                        0.07     24.14      20.3      0.00     0.00
+## "<GC>"                        0.06     20.69      15.3      0.06    20.69
+## "unique"                      0.06     20.69      11.8      0.00     0.00
+## "<Anonymous>"                 0.05     17.24       7.6      0.04    13.79
+## "do.call"                     0.05     17.24       7.6      0.00     0.00
+## "FUN"                         0.04     13.79      55.1      0.00     0.00
+## "lapply"                      0.04     13.79      55.1      0.00     0.00
+## "anyDuplicated.default"       0.03     10.34       8.0      0.03    10.34
+## "anyDuplicated"               0.03     10.34       8.0      0.00     0.00
+## "split.default"               0.02      6.90      34.7      0.01     3.45
+## "as.factor"                   0.02      6.90      35.1      0.00     0.00
+## "sort.int"                    0.02      6.90      20.3      0.00     0.00
+## "split"                       0.02      6.90      34.7      0.00     0.00
+## "unname"                      0.02      6.90      34.7      0.00     0.00
+## "as.character.factor"         0.01      3.45       0.0      0.01     3.45
+## "complete.cases"              0.01      3.45       3.9      0.01     3.45
+## "f"                           0.01      3.45       0.0      0.01     3.45
+## "factor"                      0.01      3.45      23.3      0.01     3.45
+## "is.na"                       0.01      3.45       8.5      0.01     3.45
+## ".rs.callAs"                  0.01      3.45       0.0      0.00     0.00
+## "as.character"                0.01      3.45       0.0      0.00     0.00
+## "doTryCatch"                  0.01      3.45       0.0      0.00     0.00
+## "mean"                        0.01      3.45       8.5      0.00     0.00
+## "median.default"              0.01      3.45       8.5      0.00     0.00
+## "Rprof"                       0.01      3.45       0.0      0.00     0.00
+## "sort.default"                0.01      3.45       8.5      0.00     0.00
+## "tryCatch"                    0.01      3.45       0.0      0.00     0.00
+## "tryCatchList"                0.01      3.45       0.0      0.00     0.00
+## "tryCatchOne"                 0.01      3.45       0.0      0.00     0.00
+## "withCallingHandlers"         0.01      3.45       0.0      0.00     0.00
+## 
+## $sample.interval
+## [1] 0.01
+## 
+## $sampling.time
+## [1] 0.29
+```
+
+Dans cet exemple, les éléments `by.self` et `by.total` ne contiennent pas les mêmes lignes. Les fonctions dont les `self.time` sont nuls n’apparaissent pas dans l'élément `by.self`. Nous voyons aussi que les lignes sont ordonnées en ordre décroissant de `self.time` dans l'élément `by.self` et en ordre décroissant de `total.time` dans l'élément `by.total`.
+
+La colonne `mem.total` a été ajoutée comparativement à la sortie obtenue dans l'exemple précédent. Elle indique la quantité de mémoire utilisée. Elle est présente en raison de l'argument `memory.profiling = TRUE`. L'argument `gc.profiling = TRUE` à quant à lui pour effet de rapporter les temps d'appel au récupréateur de mémoire, identifié par `"<GC>"`, si celui-ci a été lancé.  
+
+Nous constatons que le code de la méthode `aggregate.data.frame` fait appel à un grand nombre de fonctions. Nous n'analyserons pas cette sortie davantage ici. Mentionnons seulement que les méthodes de la fonction générique `aggregate` ne sont pas vraiment conçues pour être rapides.
+
+## Package `profvis`
+
+Pour identifier encore plus facilement les lignes les plus lentes de notre code, nous pouvons utiliser le [package `profvis`](https://CRAN.R-project.org/package=profvis). Ce package offre en fait une façon de visualiser le résultat produit par `Rprof`. Voici un exemple de son utilisation.
+
+```{r eval = FALSE}
+library(profvis)
+profvis({
+  compte_impair_boucle <- function(x) {
+    k <- 0
+    for (n in x) {
+      if (n %% 2 == 1){
+        k <- k + 1
+      } 
+    }
+    k
+  }
+  compte_impair_boucle(obs)
+})
+```
+
+Pour obtenir le détail du temps d'exécution par ligne du corps d'une de nos fonctions, il faut fournir, dans l'appel à la fonction `profvis`, le code définissant la fonction en plus de l'instruction appelant la fonction. Remarquez les accolades nécessaires lorsque l'expression à profiler s'étend sur plus d'une ligne. Le résultat obtenu est ouvert dans une fenêtre indépendante, dont voici une copie&nbsp;:  
+
+```{r echo = FALSE, out.width = "100%", fig.align = 'center', fig.cap = "Fenêtre de profilage ouverte par l'exemple  d'appel à la fonction profvis précédent", fig.pos= "h"}
+knitr::include_graphics("fig/profvis.png")
+```
+
+RStudio intègre particulièrement bien la fenêtre affichant les résultats d'un appel à la fonction `profvis`. La figure précédente ne montre qu'un des deux onglets de cette fenêtre, soit l'onglet `Flame Graph`. La fonction `profvis` profile à la fois l'utilisation de la mémoire (colonne `Memory`) et du temps d'exécution (colonne `Time`).
+
+Dans l'exemple, nous voyons encore clairement que ce sont les appels à l'opérateur `%%` qui prennent le plus de temps à être évalués dans le corps de la fonction `compte_impair_boucle`. 
+
+Le site web suivant documente l’utilisation du package profvis : http://rstudio.github.io/profvis/.
+
+# Stratégies d'optimisation du temps d'exécution
+
+Il y a différentes stratégies utiles à connaître pour écrire du code R rapide. Voici une énumération de ces stratégies, qui sont présentées dans les sous-sections suivantes.
+
+1. Utiliser des fonctions optimisées.
+2. Faire seulement ce qui est nécessaire.
+3. Exploiter les calculs matriciels et vectoriels.
+4. Éviter les allocations de mémoire inutiles.
+5. Faire du calcul en parallèle.
+6. Reprogrammer en C ou C++ les bouts de code les plus lents.
+
+Pour illustrer ces astuces, nous allons souvent utiliser un exemple tiré de [Peng et de Leeuw (2002)](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf). Il s'agit des fonctions R ayant pour but d'estimer la fonction de densité d'une variable aléatoire par la méthode du noyau à partir d'observations de la variable aléatoire. De l'information sur cette méthode, appelée en anglais *Kernel density estimation*, peut être trouvée sur la page Wikipédia suivante&nbsp;:  https://fr.wikipedia.org/wiki/Estimation_par_noyau.
+
+Il existe en fait déjà une fonction dans le package `stats` pour faire de l'estimation de densité par noyau. Il s'agit de la [fonction `density`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/density.html). Voici un exemple de ce qu'il est possible de réaliser avec cette fonction.
 
 ```{r fig.align = "center", out.width = "80%"}
-dens <- density(faithful$eruptions)  # faithful est un jeu de données du package datasets
-hist(faithful$eruptions, freq = FALSE, ylab = "densité", cex.main = 0.9,
-     main = "Densité empirique des durées des éruptions du geyser Old Faithful")
+dens <- density(x = faithful$eruptions)  # faithful provient du package datasets
+hist(
+  x = faithful$eruptions, 
+  freq = FALSE, 
+  ylab = "densité",
+  main = "Densité empirique des durées des éruptions du geyser Old Faithful",
+  cex.main = 0.9
+)
 lines(dens)
 ```
 
 Un histogramme est aussi une méthode d'estimation de densité. Ici, nous avons superposé une courbe de densité estimée par la méthode du noyau (aussi appelée densité Kernel) à un histogramme.
 
-Nous allons écrire une version moins puissante de la fonction `density`. L'estimation de densité par noyau au point $x$ se fait par la formule suivante :
+Nous allons écrire une version moins puissante de la fonction `density`. L'estimation de densité par noyau au point $x$ se fait par la formule suivante&nbsp;: 
 $$\hat{f}(x) = \frac{1}{nh} \sum_{i = 1}^n K \left( \frac{x - x_i}{h} \right)$$
 où $x_i$ pour $i=1, 2, \ldots, n$ sont les observations, $K$ est une fonction noyau (en anglais *kernel*) à définir et $h$ est un paramètre de lissage (parfois appelée fenêtre). Plus la valeur de $h$ est grande, plus la courbe obtenue est lisse.
 
@@ -76,18 +445,14 @@ La fonction `density` permet l'utilisation de plusieurs fonctions noyau via l'ar
 Voici la première fonction proposée. 
 
 ```{r}
-#' Estimation de densité par noyau gaussien
-#'
-#' Version 1 : utilisation de 2 boucles imbriquées
-#'
+#' @title Estimation de densité par noyau gaussien
+#' @description Version 1 : utilisation de 2 boucles imbriquées
 #' @param x vecteur numérique contenant les observations
 #' @param xpts vecteur numérique contenant les points en lesquels l'estimation de la 
 #'             densité doit être effectuée
 #' @param h nombre réel > 0 : la valeur du paramètre de lissage
-#'
 #' @return vecteur numérique contenant la densité estimée en tous les points de xpts
-#'
-ksmooth1 <- function(x, xpts, h) 
+ksmooth_double_loop <- function(x, xpts, h) 
 {
   dens <- double(length(xpts))
   n <- length(x)
@@ -103,327 +468,56 @@ ksmooth1 <- function(x, xpts, h)
 }
 ```
 
-Des [tags `roxygen2`](https://stt4230.rbind.io/packages/devel_packages_r/#comment-ecrire-de-la-documentation-avec-roxygen2) sont utilisés pour documenter la fonction. Cependant, les commentaires `roxygen2` écrits ici ne formeraient pas une fiche d'aide complète. Ce n'est pas un problème puisque nous n'avons pas l'intention de créer un package avec cette fonction. 
+Dans la fonction `ksmooth_double_loop`, le premier argument, nommé `x`, n'est pas équivalent au $x$ de la formule. Le $x$ de la formule représente un point en lequel nous souhaitons faire l'estimation. Son équivalent dans la fonction `ksmooth_double_loop` est donc un élément du vecteur `xpts`. Ce sont les $x_i$ de la formule que nous retrouvons dans le vecteur `x`. Dans la boucle, ce vecteur `x` est parcouru en utilisant l'indice `j`. Alors, en fait, `x[j]` dans le corps de la fonction représente un $x_i$ dans la formule. Le code aurait pu coller davantage à la notation dans la formule pour être encore plus clair, mais j'ai choisi de le conserver tel qu'il a été proposé dans [Peng et de Leeuw (2002)](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf). Tout ce que j'ai changé ici par rapport à cette référence est le nom de la fonction. J'ai renommé `ksmooth_double_loop` la fonction que [Peng et de Leeuw (2002)](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf) ont nommé `ksmooth1`.
 
-Dans la fonction `ksmooth1`, le premier argument, nommé `x`, n'est pas équivalent au $x$ de la formule. Le $x$ de la formule représente un point en lequel nous souhaitons faire l'estimation. Son équivalent dans la fonction `ksmooth1` est donc un élément du vecteur `xpts`. Ce sont les $x_i$ de la formule que nous retrouvons dans le vecteur `x`. Dans la boucle, ce vecteur `x` est parcouru en utilisant l'indice `j`. Alors, en fait, `x[j]` dans le corps de la fonction représente un $x_i$ dans la formule. Le code aurait pu coller davantage à la notation dans la formule pour être encore plus clair, mais j'ai choisi de le conserver tel qu'il a été proposé dans [Peng et de Leeuw, (2002)](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf).
+Notons que nous pouvons considérer ici que la fonction `ksmooth_double_loop` a d'abord été testée. Nous supposons donc qu'elle retourne un résultat valide. Voici d'ailleurs ce qu'elle retourne si elle reçoit en entrée dix mille observations générées aléatoirement selon une loi normale standard et que nous lui demandons d'effectuer une estimation de densité en 17 points entre -4 et 4 (la séquence des nombres entre -4 et 4 inclusivement, par bonds de 0.5).
 
-## Fonction `system.time`
+```{r echo = FALSE}
+set.seed(1047)
+```
 
-Si nous donnons en entrée à la fonction `ksmooth1` un vecteur d'observations `x` de longueur 10000, mesurons combien de temps prendra l'évaluation d'un appel à la fonction. Pour ce faire, utilisons d'abord la [fonction `system.time`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/system.time.html).
-
-
-```{r R.options = list(width = 90)}
+```{r fig.align = "center", R.options = list(width = 85), out.width = "80%"}
 # Simulation des observations
 x <- rnorm(10000)
 # Points pour lesquels nous souhaitons estimer la densité
 xpts <- seq(from = -4, to = 4, length.out = 17)
-xpts
-# Estimation de la densité
-temps1 <- system.time(dens1 <- ksmooth1(x = x, xpts = xpts, h = 1))
-```
-
-Il faut donner en entrée à `system.time` une instruction R, contenant ou non une affectation, ou encore des instructions R encadrées d'accolades. Cet ensemble d'instruction(s) est appelé *expression*. La fonction retourne le temps, en secondes, d'utilisation du CPU (*Central Processing Unit*) pour l'évaluation de l'expression. Le terme « évaluation » a ici la même signification que « exécution ». 
-
-Ici, j'obtiens les temps suivants :
-
-```{r}
-temps1
-```
-
-Les trois temps dans une sortie produite par `system.time` peuvent être définis ainsi :
-
-- `user` : temps écoulé par le logiciel R (*calling process*) pour évaluer l'expression;
-- `system` : temps écoulé par le système d'exploitation de notre ordinateur, mais pour le compte du logiciel R, pendant l'évaluation de l'expression;
-- `elapsed` : temps total écoulé entre la soumission de l'expression et le retour du résultat (possiblement plus grand que la somme des deux autres temps, car le système a peut-être dû accorder du temps à d'autres processus actifs sur l'ordinateur pendant l'évaluation de l'expression)
-
-Les temps d'exécution obtenus dépendent des spécifications de l'ordinateur utilisé, en particulier de la puissance de son CPU. De plus, nous n'obtiendrons probablement pas exactement les mêmes si nous évaluons à nouveau l'expression. Il y a une petite variation normale du temps d'exécution, causée notamment par les autres processus utilisant le CPU de notre ordinateur au moment où la commande est lancée.
-
-## Package `microbenchmark`
-
-Pour évaluer plus précisément le temps d'évaluation d'une expression, il est préférable de l'évaluer plusieurs fois, puis de calculer le temps moyen ou médian d'évaluation. La médiane est la statistique que je recommande d'utiliser ici, car elle est robuste aux valeurs extrêmes.
-
-Le [package `microbenchmark`](https://CRAN.R-project.org/package=microbenchmark) s'utilise comme suit :
-
-```{r  R.options = list(width = 85)}
-library(microbenchmark)
-microbenchmark(dens1 <- ksmooth1(x = x, xpts = xpts, h = 1), unit = "ms")
-```
-
-Ici, la fonction `microbenchmark` du package du même nom a été utilisée. Par défaut, cette fonction évalue 100 fois l'expression. Dans la commande précédente, nous avons fourni la valeur `"ms"` à l'argument `unit`. Le temps a donc été mesuré en millisecondes. Nous aurions pu aller jusqu'à des unités aussi petites que des nanosecondes, ce qui est impossible avec la fonction `system.time`.
-
-Le premier argument fourni dans l'appel à la fonction `microbenchmark` précédent est l'expression dont le temps d'évaluation est à mesurer, comme dans l'appel à la fonction `system.time`. Cependant, nous verrons plus loin que la fonction `microbenchmark` accepte en entrée plusieurs expressions, dont les temps d'exécution sont à comparer, alors que la fonction `system.time` est limitée au chronométrage d'une expression à la fois. 
-
-Notons que nous pouvons considérer ici que la fonction `ksmooth1` a d'abord été testée. Nous supposons donc qu'elle retourne un résultat valide. Voici d'ailleurs ce qu'elle retourne pour l'exemple précédent.
-
-```{r fig.align = "center", R.options = list(width = 85), out.width = "80%"}
 # Résultat obtenu
-dens1
+densite_kdl <- ksmooth_double_loop(x = x, xpts = xpts, h = 1)
 # Graphique
-hist(x, freq=FALSE, ylab = "densité", cex.main = 0.9,
-     main = "Densité empirique d'un échantillon aléatoire tiré d'une distribution N(0,1)")
-lines(xpts, dens1)
+hist(
+  x = x, 
+  freq = FALSE, 
+  ylab = "densité",
+  main = "Densité empirique d'un échantillon aléatoire tiré d'une distribution N(0, 1)",
+  cex.main = 0.9
+)
+lines(x = xpts, y = densite_kdl)
 ```
 
-## Fonctions `Rprof` et `summaryRprof`
-
-Les fonctions `system.time` et `microbenchmark` sont bien pratiques pour évaluer un temps global d'exécution. Cependant, elles ne nous aident pas à identifier les parties du corps de la fonction `ksmooth1` qui sont les plus lentes. Pour ce faire, nous pouvons utiliser les fonctions [`Rprof`](http://stat.ethz.ch/R-manual/R-devel/library/utils/html/Rprof.html) et [`summaryRprof`](http://stat.ethz.ch/R-manual/R-devel/library/utils/html/summaryRprof.html). 
-
-Pour utiliser ces fonctions, il faut ajouter la commande `Rprof()` avant le bout de code à minuter et ajouter `Rprof(NULL)` après le bout de code.
-
-Pour faire un exemple avec la fonction `ksmooth1`, nous allons d'abord créer un nouveau vecteur d'observations et un nouveau vecteur de points en lesquels effectuer une estimation.
-```{r}
-x_long <- rnorm(250000)
-xpts_long <- seq(from = -4, to = 4,length.out = 101)
-```
-Ces vecteurs sont plus longs que les anciens afin que l'appel à la fonction prenne plus de temps à être évalué, ce qui permettra à `Rprof` de mieux analyser la performance du code.
-
-```{r eval = FALSE}
-Rprof(interval = 0.01)
-dens1 <- ksmooth1(x = x_long, xpts = xpts_long, h = 1)
-Rprof(NULL)
-```
-
-Un fichier a est créé dans notre répertoire de travail. Il se nomme par défaut *Rprof.out*, mais nous pouvons changer ce nom avec l'argument `filename` de la fonction `Rprof`. Toutes les 0.01 seconde (argument `interval`), R a écrit dans ce fichier le nom de la fonction ou des fonctions dont un appel est en cours d'évaluation.
-
-Typiquement, nous n'allons pas voir directement le contenu de ce fichier. Nous en affichons plutôt un résumé avec la fonction `summaryRprof` comme suit :
-
-```{r eval = FALSE}
-summaryRprof("Rprof.out")
-```
-
-```
-## $by.self
-##            self.time self.pct total.time total.pct
-## "ksmooth1"     12.26    50.12      24.46    100.00
-## "dnorm"        12.20    49.88      12.20     49.88
-## 
-## $by.total
-##            total.time total.pct self.time self.pct
-## "ksmooth1"      24.46    100.00     12.26    50.12
-## "dnorm"         12.20     49.88     12.20    49.88
-## 
-## $sample.interval
-## [1] 0.01
-## 
-## $sampling.time
-## [1] 24.46
-```
-
-Dans cette sortie, les éléments `by.self` et `by.total` contiennent les mêmes valeurs, mais pas dans le même ordre (colonnes interchangées). Les colonnes `total.time` et `total.pct` réfèrent au temps total passé à l'évaluation de l'appel à une fonction. Pour les colonnes `self.time` et `self.pct`, le temps d'évaluation des appels de fonctions imbriqués dans l'appel de la fonction en question est retiré du temps total.
-
-Dans l'exemple, la commande `dens1 <- ksmooth1(x = x_long, xpts = xpts_long, h = 1)` prend un total de 24.46 secondes à être évaluée. Cette commande comprend une assignation et un appel à la fonction `ksmooth1`. Les assignations simples ne sont pas retracées par `Rprof`, car il s'agit d'appels à un opérateur interne. Elles n'apparaissent donc pas dans la sortie de `summaryRprof`. Ici, les 24.46 secondes du temps total d'exécution sont 24.46 secondes à évaluer un appel à la fonction `ksmooth1`.
-
-Évaluer un appel à la fonction `ksmooth1` signifie évaluer le corps de la fonction avec les valeurs d'arguments fournis en entrée. De l'évaluation du corps de la fonction `ksmooth1`, seul l'appel à la fonction `dnorm` apparaît dans la sortie de `summaryRprof`. Les appels aux autres fonctions ou opérateurs sont ici tellement rapides qu'ils n'ont pas été détectés par `Rprof`. Le temps passé à évaluer les appels à la fonction `dnorm` est de 12.20 secondes. Ainsi, le `self.time` de `ksmooth1` est 24.46 - 12.20 = 12.26 secondes.
-
-Afin de mieux expliquer l'interprétation de la sortie de `summaryRprof`, voyons aussi un autre exemple qui produit une sortie un peu plus longue.
-
-```{r eval = FALSE}
-# Facteur généré aléatoirement pour l'exemple
-fac_long <- sample(x = 1:10, size = length(x_long), replace = TRUE)
-
-# Profilage du temps d'exécution d'un appel à aggregate avec les données simulées
-Rprof(interval = 0.01)
-res <- aggregate(x = x_long, by = list(fac_long), FUN = median)
-Rprof(NULL)
-
-# Résumé de la sortie de Rprof
-summaryRprof("Rprof.out")
-```
-
-\newpage
-
-```
-## $by.self
-##                         self.time self.pct total.time total.pct
-## ".row_names_info"            0.07    29.17       0.07     29.17
-## "anyDuplicated.default"      0.07    29.17       0.07     29.17
-## "as.character.factor"        0.04    16.67       0.04     16.67
-## "aggregate.data.frame"       0.01     4.17       0.24    100.00
-## "[.data.frame"               0.01     4.17       0.09     37.50
-## "<Anonymous>"                0.01     4.17       0.01      4.17
-## "factor"                     0.01     4.17       0.01      4.17
-## "levels<-.factor"            0.01     4.17       0.01      4.17
-## "unique.default"             0.01     4.17       0.01      4.17
-## 
-## $by.total
-##                         total.time total.pct self.time self.pct
-## "aggregate.data.frame"        0.24    100.00      0.01     4.17
-## "aggregate"                   0.24    100.00      0.00     0.00
-## "aggregate.default"           0.24    100.00      0.00     0.00
-## "[.data.frame"                0.09     37.50      0.01     4.17
-## "["                           0.09     37.50      0.00     0.00
-## ".row_names_info"             0.07     29.17      0.07    29.17
-## "anyDuplicated.default"       0.07     29.17      0.07    29.17
-## "anyDuplicated"               0.07     29.17      0.00     0.00
-## "dim"                         0.07     29.17      0.00     0.00
-## "dim.data.frame"              0.07     29.17      0.00     0.00
-## "ncol"                        0.07     29.17      0.00     0.00
-## "FUN"                         0.06     25.00      0.00     0.00
-## "lapply"                      0.06     25.00      0.00     0.00
-## "as.character.factor"         0.04     16.67      0.04    16.67
-## "as.character"                0.04     16.67      0.00     0.00
-## "<Anonymous>"                 0.01      4.17      0.01     4.17
-## "factor"                      0.01      4.17      0.01     4.17
-## "levels<-.factor"             0.01      4.17      0.01     4.17
-## "unique.default"              0.01      4.17      0.01     4.17
-## "as.factor"                   0.01      4.17      0.00     0.00
-## "do.call"                     0.01      4.17      0.00     0.00
-## "levels<-"                    0.01      4.17      0.00     0.00
-## "match"                       0.01      4.17      0.00     0.00
-## "sort"                        0.01      4.17      0.00     0.00
-## "split"                       0.01      4.17      0.00     0.00
-## "split.default"               0.01      4.17      0.00     0.00
-## "unique"                      0.01      4.17      0.00     0.00
-## 
-## $sample.interval
-## [1] 0.01
-## 
-## $sampling.time
-## [1] 0.24
-```
-
-Dans cet exemple, les éléments `by.self` et `by.total` ne contiennent pas les mêmes lignes. Les fonctions dont les `self.time` sont nuls n’apparaissent pas dans l'élément `by.self`. Nous voyons aussi que les lignes sont ordonnées en ordre décroissant de `self.time` dans l'élément `by.self` et en ordre décroissant de `total.time` dans l'élément `by.total`.
-
-Nous constatons que le code de la méthode `aggregate.data.frame` fait appel à un grand nombre de fonctions. Nous n'analyserons pas cette sortie davantage ici. Mentionnons seulement que les méthodes de la fonction générique `aggegate` ne sont pas vraiment conçues pour être rapides.
-
-## Package `profvis`
-
-Pour identifier encore plus facilement les lignes les plus lentes de notre code, nous allons utiliser le [package `profvis`](https://CRAN.R-project.org/package=profvis). Voici un exemple de son utilisation.
-
-```{r eval = FALSE}
-library(profvis)
-profvis({
-  ksmooth1 <- function(x, xpts, h) 
-  {
-    dens <- double(length(xpts))
-    n <- length(x)
-    for(i in 1:length(xpts)) {
-      ksum <- 0
-      for(j in 1:length(x)) {
-        d <- xpts[i] - x[j]
-        ksum <- ksum + dnorm(d / h)
-      }
-      dens[i] <- ksum / (n * h)
-    }
-    dens
-  }
-  dens1 <- ksmooth1(x = x_long, xpts = xpts_long, h = 1)
-})
-```
-
-Pour obtenir le détail du temps d'exécution par ligne du corps d'une de nos fonctions, il faut fournir, dans l'appel à la fonction `profvis`, le code définissant la fonction en plus de l'instruction appelant la fonction. Remarquez les accolades nécessaires lorsque l'expression à profiler s'étend sur plus d'une ligne. Le résultat obtenu est ouvert dans une fenêtre indépendante, dont voici une copie : 
-
-```{r echo = FALSE, out.width = "100%", fig.align = 'center', fig.cap = "Fenêtre de profilage ouverte par l'exemple  d'appel à la fonction profvis précédent", fig.pos= "h"}
-knitr::include_graphics("fig/profvis.png")
-```
-
-RStudio intègre particulièrement bien la fenêtre affichant les résultats d'un appel à la fonction `profvis`. La figure précédente ne montre qu'un des deux onglets de cette fenêtre, soit l'onglet `Flame Graph`. La fonction `profvis` profile à la fois l'utilisation de la mémoire (colonne `Memory`) et du temps d'exécution (colonne `Time`). Nous nous intéressons ici seulement à la colonne `Time`.
-
-Dans cet exemple, c'est la deuxième boucle, celle imbriquée dans la première, qui prend du temps à être évaluée. Et dans cette boucle, les appels à la fonction `dnorm` sont particulièrement lents. N'oublions pas qu’ici `dnorm` est appelé au total `length(xpts_long)` $\times$ `length(x_long)` fois (`r length(xpts_long)` $\times$  `r length(x_long)` = 25 250 000 fois dans l'exemple). 
-
-Le site web suivant documente l'utilisation du package `profvis` : http://rstudio.github.io/profvis/index.html.
-
-
-## Comparaison de temps d'exécution avec la fonction `microbenchmark`
-
-Étudions maintenant la performance d'une autre fonction d'estimation de densité par noyau gaussien tirée de [Peng et de Leeuw, (2002)](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf). Le corps de cette fonction ne contient aucune boucle. Il fait plutôt du calcul vectoriel en utilisant, notamment, la fonction `outer`.
-
-
-```{r}
-#' Estimation de densité par noyau gaussien
-#'
-#' Version 2 : utilisation de calcul vectoriel seulement
-#'
-#' mêmes arguments et même sortie que ksmooth1
-#'
-ksmooth2 <- function(x, xpts, h) 
-{
-  n <- length(x)
-  D <- outer(x, xpts, "-")
-  K <- dnorm(D / h)
-  dens <- colSums(K) / (h * n)
-}
-```
-
-
-Assurons-nous d'abord que cette fonction retourne exactement les mêmes valeurs que `ksmooth1`.
-
-```{r}
-dens1 <- ksmooth1(x = x, xpts = xpts, h = 1)
-dens2 <- ksmooth2(x = x, xpts = xpts, h = 1)
-all.equal(dens1, dens2)
-```
-
-C'est bien le cas.
-
-Comparons maintenant le temps d'exécution de cette fonction à celui de `ksmooth1`. 
-```{r  R.options = list(width = 100)}
-microbenchmark(dens1 = ksmooth1(x = x, xpts = xpts, h = 1), 
-               dens2 = ksmooth2(x = x, xpts = xpts, h = 1),
-               unit = "ms")
-```
-
-Dans cet appel à la fonction `microbenchmark`, les deux instructions à comparer sont fournies en deux arguments distincts. Grâce à l'argument `...` de la [fonction `microbenchmark`](https://www.rdocumentation.org/packages/microbenchmark/versions/1.4-4/topics/microbenchmark), cette fonction peut prendre autant d'expressions à chronométrer que souhaité.
-
-Débuter ces expressions par une assignation avec l'opérateur `=` aide à alléger l'affichage des résultats. Le nom fourni à gauche de l'opérateur `=` pour une expression est celui utilisé pour identifier l'expression dans la sortie.
-
-```{r echo = FALSE}
-out <- microbenchmark(dens1 = ksmooth1(x = x, xpts = xpts, h = 1), 
-                      dens2 = ksmooth2(x = x, xpts = xpts, h = 1),
-                      unit = "ms")
-out_medians <- aggregate(out$time, list(out$expr), median)
-```
-
-La fonction `ksmooth2` est environ `r round(out_medians[1, "x"]/out_medians[2, "x"])` fois plus rapide que la fonction `ksmooth1`. Cependant, elle utilise beaucoup plus de mémoire. Une matrice de dimension `length(x)` par `length(xpts)` est créée par la fonction. R impose une limite sur la taille des objets créés (pour plus de détails voir la [fiche d'aide `help("Memory-limits")`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Memory-limits.html)). Ainsi, la fonction `ksmooth2` retourne une erreur sur mon ordinateur si je lui donne en entrée des arguments `x` et `xpts` trop grands, par exemple :
-
-```{r error = TRUE}
-x_test <- rnorm(1000000)
-xpts_test <- seq(from = -4, to = 4, length.out = 1000000)
-test_memoire <- ksmooth2(x = x_test, xpts = xpts_test, h = 1)
-```
-
-alors que la fonction `ksmooth1` est capable de traiter ces vecteurs.
-
-```{r eval = FALSE}
-# Attention, long à exécuter
-test_memoire <- ksmooth1(x = x_test, xpts = xpts_test, h = 1)
-```
-
-Il y  donc un compromis à gérer entre le temps d'exécution et la quantité de mémoire utilisée pour faire des calculs. Un programme peut être très rapide, mais créer un objet potentiellement de taille trop grande pour être stocké en mémoire. Étant donné que notre priorité est un code fonctionnel, il faut s'assurer de ne pas aller au-delà des limites de la mémoire de notre ordinateur. Alors, dans l'optimisation du temps d'exécution, il ne faut pas oublier de garder le contrôle sur la taille des objets créés par notre programme.
-
-
-# Stratégies d'optimisation du temps d'exécution
-
-Il y a différentes stratégies utiles à connaître pour écrire du code R rapide. Voici une énumération de ces stratégies, qui sont présentées dans les sous-sections suivantes.
-
-1. Utiliser des fonctions optimisées
-2. Faire seulement ce qui est nécessaire
-3. Exploiter les calculs matriciels et vectoriels
-4. Éviter les allocations de mémoire inutiles
-5. Faire du calcul en parallèle
-6. Reprogrammer en C ou C++ les bouts de code les plus lents
-
-
-## Truc 1 : Utiliser des fonctions optimisées
+## Astuce 1&nbsp;:  Utiliser des fonctions optimisées
 
 Lorsque nous devons effectuer une tâche pour laquelle une fonction optimisée en temps de calcul existe déjà, il est préférable d'utiliser cette fonction. R est un logiciel libre. Le partage de code fait partie de la philosophie première du logiciel. Et cette réutilisation peut nous faire économiser beaucoup de temps. 
 
-Par exemple, R possède déjà une fonction pour l'estimation de densité par noyau. Est-ce que la fonction `density`, provenant du package `stats`, est plus rapide que la fonction `ksmooth1`?
 
-Premièrement, convainquons-nous que les deux fonctions peuvent effectuer le même calcul. La commande suivante :
+Par exemple, est-ce que la fonction `density`, provenant du package `stats`, est plus rapide que la fonction `ksmooth_double_loop`?
 
-```{r}
-dens1 <- ksmooth1(x = x, xpts = xpts, h = 1)
-```
-
-lance pratiquement le même calcul que cette commande :
+Premièrement, convainquons-nous que les deux fonctions peuvent effectuer le même calcul. Réutilisons les vecteurs `x` et `xpts` créés ci-dessus. La commande suivante&nbsp;: 
 
 ```{r}
-densd <- density(x = x, bw = 1, kernel = "gaussian",
-                 from = -4, to = 4, n = 17)
+densite_kdl <- ksmooth_double_loop(x = x, xpts = xpts, h = 1)
 ```
 
-Rappelons que `xpts` avait été défini comme suit :
+lance pratiquement le même calcul que cette commande&nbsp;: 
+
+```{r}
+densite_d <- density(
+  x = x,
+  bw = 1, kernel = "gaussian",
+  from = -4, to = 4, n = 17
+)
+```
+
+Rappelons que `xpts` avait été défini comme suit&nbsp;: 
 
 ```{r eval = FALSE}
 xpts <- seq(from = -4, to = 4, length.out = 17)
@@ -434,80 +528,99 @@ d'où le choix des valeurs fournies aux arguments `from`, `to` et `n` de `densit
 Comparons maintenant les valeurs obtenues.
 
 ```{r}
-all.equal(dens1, densd$y)
+all.equal(densite_kdl, densite_d$y)
 ```
 
-Il y a de très petites différences ente les valeurs, parce que le paramètre de lissage `h` de `ksmooth1` n'est pas tout à fait définit comme le paramètre `bw` de la fonction `density`. Cependant, ces différences sont tellement petites que nous pouvons tout de même considérer que les deux fonctions effectuent le même calcul.
+Il y a de très petites différences entre les valeurs, parce que le paramètre de lissage `h` de `ksmooth_double_loop` n'est pas tout à fait définit comme le paramètre `bw` de la fonction `density`. Cependant, ces différences sont tellement petites que nous pouvons tout de même considérer que les deux fonctions effectuent le même calcul.
 
 Comparons les temps d'exécution des deux fonctions. 
 
 ```{r  R.options = list(width = 100)}
-microbenchmark(densd = density(x = x, bw = 1, kernel = "gaussian", from = -4, to = 4, n = 17), 
-               dens1 = ksmooth1(x = x, xpts = xpts, h = 1),
-               unit = "ms")
+ex_astuce_1 <- mark(
+  ksmooth_double_loop = ksmooth_double_loop(x = x, xpts = xpts, h = 1),
+  density = density(x = x, bw = 1, kernel = "gaussian", from = -4, to = 4, n = 17), 
+  min_iterations = 10, time_unit = "ms", check = FALSE
+)
+print_bench_mark(ex_astuce_1)
 ```
 
-La fonction `density` retourne presque instantanément le résultat, alors que la fonction `ksmooth1` doit rouler pendant plusieurs secondes pour effectuer une estimation en 17 points, à partir de 10000 observations.
+La fonction `density` retourne presque instantanément le résultat, alors que la fonction `ksmooth_double_loop` doit rouler pendant plusieurs secondes pour effectuer une estimation en 17 points, à partir de 10000 observations.
 
-Le coeur du calcul de la fonction `density` est effectué par du code en langage C. C'est pour cette raison qu'elle est à ce point plus rapide que la fonction `ksmooth1`. Nous allons y revenir au truc 6.
+Le coeur du calcul de la fonction `density` est effectué par du code en langage C. C'est pour cette raison qu'elle est à ce point plus rapide que la fonction `ksmooth_double_loop`. Nous allons y revenir à l'astuce 6.
 
 
-## Truc 2 : Faire seulement ce qui est nécessaire
+## Astuce 2&nbsp;:  Faire seulement ce qui est nécessaire
 
-L'idée derrière ce truc est simplement de ne pas alourdir un code d'évaluations inutiles. 
+L'idée derrière cette astuce est simplement de ne pas alourdir un code d'évaluations inutiles. 
 
 Par exemple, si nous voulons calculer la somme des valeurs dans chacune des colonnes d'une matrice, la fonction `colSums` est plus rapide que la fonction `apply`.
 
 ```{r R.options = list(width = 100)}
-mat <- matrix(x_long, nrow = 100, ncol = 1000)
-microbenchmark(
-  colSums(mat), 
-  apply(mat, 2, sum))
+mat <- matrix(rnorm(100 * 1000), nrow = 100, ncol = 1000)
+ex_astuce_2 <- mark(
+  colSums(x = mat), 
+  apply(X = mat, MARGIN = 2, FUN = sum),
+  min_iterations = 10, time_unit = "us"
+)
+print_bench_mark(ex_astuce_2)
 ```
 
 Ce résultat s'explique par le fait que la fonction `colSums` est spécialisée dans la tâche que nous cherchions à effectuer. Son code est simplifié, par rapport au code de `apply` qui peut appliquer n'importe quelle fonction sur n'importe quelle dimension d'un array. Nous pourrions aussi dire que la fonction `colSums` est une fonction optimisée.
 
-C'est ce truc, de faire seulement ce qui est nécessaire, qui pousse certains programmeurs R à ne pas utiliser la fonction `return` pour retourner la sortie de leurs fonctions. L'appel à la fonction `return` amène une évaluation de plus à effectuer, sans être nécessaire. Pour faire un test, ajoutons un appel à la fonction `return` à la fin de la fonction `ksmooth2`.
+Remarquons que la fonction `apply` utilise ici beaucoup plus de mémoire que la fonction `colSums`.
+
+<!-- Retiré, car pas vraiment de gain en temps.
+
+C'est cette astuce, de faire seulement ce qui est nécessaire, qui pousse certains programmeurs R à ne pas utiliser la fonction `return` pour retourner la sortie de leurs fonctions. L'appel à la fonction `return` amène une évaluation de plus à effectuer, sans être nécessaire. Pour faire un test, ajoutons un appel à la fonction `return` à la fin de la fonction `compte_impair_vectoriel`.
+
+```{r eval = FALSE}
+compte_impair_vectoriel_return <- function(x) {
+  return(sum(x %% 2 == 1))
+}
+```
+
+Maintenant, comparons les temps d'exécution des fonctions `compte_impair_vectoriel` et `compte_impair_vectoriel_return`.
+
+```{r eval = FALSE, R.options = list(width = 100)}
+ex_return <- mark(
+  sans_return = compte_impair_vectoriel(x),
+  avec_return = compte_impair_vectoriel_return(x),
+  min_iterations = 100,
+  time_unit = "us"
+)
+print_bench_mark(ex_return)
+```
+
+La fonction `compte_impair_vectoriel_return` est effectivement légèrement plus lente que la fonction `compte_impair_vectoriel`. Mais la différence entre les temps d'exécution médians des deux fonctions est à peine de l'ordre de quelques microsecondes. Alors d'autres programmeurs R préfèrent utiliser `return`, même s'il ralentit très légèrement les fonctions, dans le but d'avoir un code le plus clair possible.
+
+-->
+
+## Astuce 3&nbsp;:  Exploiter les calculs matriciels et vectoriels
+
+Nous avons déjà vu qu'en effectuant des calculs matriciels et vectoriels en R, comme avec la fonction `compte_impair_vectoriel`, nous arrivons à faire un calcul beaucoup plus rapidement qu'avec une boucle, comme avec la fonction `compte_impair_boucle`. Le calcul matriciel ou vectoriel en R est optimisé pour être très rapide. En fait, ces types de calculs font intervenir des boucles, mais programmées et compilées dans un langage informatique de plus bas niveau (et donc plus rapide) que R tel que le langage C ou Fortran. 
+
+Pour illustrer une fois de plus cette astuce, étudions la performance d'une autre fonction d'estimation de densité par noyau gaussien tirée de [Peng et de Leeuw (2002)](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf) : la fonction `ksmooth2`, ici renommée `ksmooth_outer`. Le corps de cette fonction ne contient aucune boucle. Il fait plutôt du calcul vectoriel en utilisant, notamment, la fonction `outer`.
 
 ```{r}
-ksmooth2return <- function(x, xpts, h) 
+#' @title Estimation de densité par noyau gaussien
+#' @description Version 2 : utilisation de calcul vectoriel seulement
+#' @inherit ksmooth_double_loop params return
+ksmooth_outer <- function(x, xpts, h) 
 {
   n <- length(x)
   D <- outer(x, xpts, "-")
   K <- dnorm(D / h)
   dens <- colSums(K) / (h * n)
-  return(dens)
 }
 ```
-
-Maintenant, comparons les temps d'exécution des fonctions `ksmooth2` et `ksmooth2return`.
-
-```{r R.options = list(width = 100)}
-microbenchmark(dens2 = ksmooth2(x = x, xpts = xpts, h = 1), 
-               dens2return = ksmooth2return(x = x, xpts = xpts, h = 1),
-               unit = "us", times = 1000)
-```
-
-La fonction `ksmooth2return` est effectivement légèrement plus lente que la fonction `ksmooth2`. Mais la différence entre les temps d'exécution médians des deux fonctions est à peine de l'ordre de quelques microsecondes. Alors d'autres programmeurs R préfèrent utiliser `return`, même s'il ralentit très légèrement les fonctions, dans le but d'avoir un code le plus clair possible.
-
-
-
-## Truc 3 : Exploiter les calculs matriciels et vectoriels
-
-
-
-Nous avons déjà vu qu'en effectuant des calculs matriciels et vectoriels en R, comme dans la fonction `ksmooth2`, nous arrivons à faire un calcul beaucoup plus rapidement qu'avec une boucle, comme dans la fonction `ksmooth1`. Le calcul matriciel ou vectoriel en R est optimisé pour être très rapide. Il faut cependant faire attention à l'utilisation de la mémoire.
 
 Nous aurions aussi pu coder la fonction `ksmooth` ainsi. 
 
 ```{r}
-#' Estimation de densité par noyau gaussien
-#'
-#' Version 3 : utilisation d'une boucle et d'un calcul vectoriel
-#'
-#' mêmes arguments et même sortie que ksmooth1
-#'
-ksmooth3 <- function(x, xpts, h) 
+#' @title Estimation de densité par noyau gaussien
+#' @description Version 3 : utilisation d'une boucle et d'un calcul vectoriel
+#' @inherit ksmooth_double_loop params return
+ksmooth_loop <- function(x, xpts, h) 
 {
   n <- length(x)
   dens <- double(length(xpts))
@@ -523,14 +636,11 @@ Cette version remplace la deuxième boucle par un calcul vectoriel.
 Nous aurions même pu procéder comme suit.
 
 ```{r}
-#' Estimation de densité par noyau gaussien
-#'
-#' Version 4 : utilisation d'une fonction de la famille des
-#'             apply et d'un calcul vectoriel
-#'
-#' mêmes arguments et même sortie que ksmooth1
-#'
-ksmooth4 <- function(x, xpts, h) 
+#' @title Estimation de densité par noyau gaussien
+#' @description Version 4 : utilisation d'une fonction de la
+#'              famille des apply et d'un calcul vectoriel
+#' @inherit ksmooth_double_loop params return
+ksmooth_apply <- function(x, xpts, h) 
 {
   n <- length(x)
   sapply(
@@ -544,75 +654,103 @@ ksmooth4 <- function(x, xpts, h)
 
 Cette version remplace la seule boucle restante par l'utilisation d'une fonction de la famille des `apply`. 
 
-Ces deux nouvelles versions effectuent bien le même calcul que `ksmooth1`.
+Ces trois versions effectuent bien le même calcul que `ksmooth_double_loop`.
 
 ```{r}
-dens1 <- ksmooth1(x = x, xpts = xpts, h = 1)
-dens3 <- ksmooth3(x = x, xpts = xpts, h = 1)
-dens4 <- ksmooth4(x = x, xpts = xpts, h = 1)
+densite_kdl <- ksmooth_double_loop(x = x, xpts = xpts, h = 1)
+densite_ko <- ksmooth_outer(x = x, xpts = xpts, h = 1)
+densite_kl <- ksmooth_loop(x = x, xpts = xpts, h = 1)
+densite_ka <- ksmooth_apply(x = x, xpts = xpts, h = 1)
 
-all.equal(dens1, dens3)
-all.equal(dens1, dens4)
+all.equal(densite_kdl, densite_ko)
+all.equal(densite_kdl, densite_kl)
+all.equal(densite_kdl, densite_ka)
 ```
 
 Comparons maintenant les temps d'exécution des quatre versions de `ksmooth` écrites jusqu'à maintenant.
 
 ```{r R.options = list(width = 100)}
-microbenchmark(unit = "ms",
-              doubleBoucle_v1 = ksmooth1(x = x, xpts = xpts, h = 1), 
-  calculVectorielSeulement_v2 = ksmooth2(x = x, xpts = xpts, h = 1),
-   boucleEtCalculVectoriel_v3 = ksmooth3(x = x, xpts = xpts, h = 1),
-    applyEtCalculVectoriel_v4 = ksmooth4(x = x, xpts = xpts, h = 1))
+ex_astuce_3 <- mark(min_iterations = 10, time_unit = "ms",
+               v1_double_boucle = ksmooth_double_loop(x = x, xpts = xpts, h = 1), 
+  v2_calcul_vectoriel_seulement = ksmooth_outer(x = x, xpts = xpts, h = 1),
+  v3_boucle_et_calcul_vectoriel = ksmooth_loop(x = x, xpts = xpts, h = 1),
+   v4_apply_et_calcul_vectoriel = ksmooth_apply(x = x, xpts = xpts, h = 1)
+)
+print_bench_mark(ex_astuce_3)
 ```
 
-Nous constatons que les deux dernières versions sont encore plus rapides que la version 2! 
+Nous constatons que les deux dernières versions sont encore plus rapides que la version 2 utilisant seulement du calcul vectoriel! 
 
-Ce qu'il faut retenir de ces exemples est ceci :
+Ce qu'il faut retenir de ces exemples est ceci&nbsp;: 
 
-- **Le code le plus rapide n'est pas toujours celui que nous croyons**. Il est parfois difficile de prédire quel bout de code sera le plus rapide. Ici, nous aurions pu croire que le calcul totalement vectoriel (`ksmooth2`) serait plus rapide qu'une boucle jumelée à un calcul vectoriel (`ksmooth3`). Pourtant, `ksmooth3` est légèrement plus rapide que `ksmooth2`. Il est donc toujours recommandé, lors de l'optimisation du temps d'exécution d'une fonction, d'essayer les différentes programmations possibles et de mesurer leurs temps d'exécution.
+- **Le code le plus rapide n'est pas toujours celui que nous croyons**. Il est parfois difficile de prédire quel bout de code sera le plus rapide. Ici, nous aurions pu croire que le calcul totalement vectoriel (`ksmooth_outer`) serait plus rapide qu'une boucle jumelée à un calcul vectoriel (`ksmooth_loop`). Pourtant, `ksmooth_loop` est légèrement plus rapide que `ksmooth_outer`. Il est donc toujours recommandé, lors de l'optimisation du temps d'exécution d'une fonction, d'essayer les différentes solutions possibles et de mesurer leurs temps d'exécution.
 
 - **Les fonctions de la famille des `apply` ne sont pas nécessairement plus rapides qu'une boucle**. Ces fonctions cachent littéralement des boucles et ne représentent pas une sorte de calcul vectoriel. Leur utilisation est recommandée principalement parce qu'elles mènent à du code plus court et plus clair selon plusieurs programmeurs R, pas à du code nécessairement plus rapide.
 
 
+#### Remarque concernant l'utilisation de la mémoire
 
-## Truc 4 : Éviter les allocations de mémoire inutiles
+\mbox{}
 
-Allouer de l'espace dans la mémoire d'un ordinateur est une opération coûteuse en temps. À chaque fois qu'un nouvel objet est créé, une allocation en mémoire est effectuée. 
+```{r echo = FALSE, results = "hide"}
+print_mark_a3 <- print_bench_mark(ex_astuce_3)
+```
 
-Deux opérations plutôt anodines sont à éviter dans une boucle R, car elles provoquent une allocation en mémoire et ralentissent donc beaucoup la boucle. Il s'agit de :
+La fonction `ksmooth_outer` est environ `r round(ex_astuce_3$median[1]/ex_astuce_3$median[2])` fois plus rapide que la fonction `ksmooth_double_loop`. Cependant, elle utilise beaucoup plus de mémoire (`r print_mark_a3$mem_alloc[2]` versus `r print_mark_a3$mem_alloc[1]`). Une matrice de dimension `length(x)` par `length(xpts)` est créée par la fonction. R impose une limite sur la taille des objets créés (pour plus de détails voir la [fiche d'aide `help("Memory-limits")`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Memory-limits.html)). Ainsi, la fonction `ksmooth_outer` retourne une erreur sur mon ordinateur si je lui donne en entrée des arguments `x` et `xpts` trop grands, par exemple&nbsp;: 
 
-\newpage
+```{r error = TRUE}
+x_test <- rnorm(1000000)
+xpts_test <- seq(from = -4, to = 4, length.out = 1000000)
+test_memoire <- ksmooth_outer(x = x_test, xpts = xpts_test, h = 1)
+```
+
+alors que la fonction `ksmooth_double_loop` est capable de traiter ces vecteurs.
+
+```{r eval = FALSE}
+# Attention : ne pas rouler, long à exécuter
+test_memoire <- ksmooth_double_loop(x = x_test, xpts = xpts_test, h = 1)
+```
+
+C'est un bon exemple de compromis à gérer entre le temps d'exécution et la quantité de mémoire utilisée pour faire des calculs. Un programme peut être très rapide, mais créer un objet potentiellement de taille trop grande pour être stocké en mémoire. Étant donné que notre priorité est un code fonctionnel, il faut s'assurer de ne pas aller au-delà des limites de la mémoire de notre ordinateur. Alors, dans l'optimisation du temps d'exécution, il ne faut pas oublier de garder le contrôle sur la taille des objets créés par notre programme.
+
+## Astuce 4&nbsp;:  Éviter les allocations de mémoire inutiles
+
+Allouer de l'espace dans la mémoire d'un ordinateur est une opération coûteuse en temps. Deux opérations plutôt anodines sont à éviter dans une boucle R, car elles provoquent une ou des allocations en mémoire à chaque itération et ralentissent donc beaucoup la boucle. Il s'agit de&nbsp;: 
 
 1. l'utilisation d'un objet de dimension croissante,
 2. l'assignation de valeur(s) à un ou des éléments d'un data frame.
 
-### Objets de dimension croissante :
+### Objets de dimension croissante
 
-Un objet de dimension croissante est, par exemple, une matrice à laquelle nous ajoutons, à chaque itération d'une boucle, une ligne avec `rbind` ou une colonne avec `cbind`, comme le fait l'instruction suivante :
-
-```{r eval = FALSE}
-matrice <- rbind(matrice, nouvelleLigne)
-```
-
-Avec un vecteur, une instruction similaire ferait plutôt appel à la fonction `c` ou `append` comme suit :
+Un objet de dimension croissante est, par exemple, une matrice à laquelle nous ajoutons, à chaque itération d'une boucle, une ligne avec `rbind` ou une colonne avec `cbind`, comme le fait l'instruction suivante&nbsp;: 
 
 ```{r eval = FALSE}
-vecteur <- c(vecteur, nouvelElement)
+matrice <- rbind(matrice, nouvelle_ligne)
 ```
 
-Le problème avec ces assignations est qu'elles modifient la dimension d'un objet. L'objet ne requière donc plus la même quantité d'espace mémoire. Il ne serait pas une bonne idée de simplement utiliser les cases mémoires adjacentes pour agrandir l'objet, car ces cases mémoires sont potentiellement utilisées pour stocker d'autres objets R ou n'importe quelle valeur nécessaire à un processus en cours d'exécution sur l'ordinateur. L'ordinateur doit plutôt complètement déplacer l'objet dans de nouvelles cases mémoire qu'il sait être inutilisées afin de ne pas entrer en conflit avec quoi que ce soit. Ainsi, avec les commandes précédentes, nous avons peut-être l'impression de modifier le contenu de certaines cases mémoire alors qu'en réalité nous provoquons une nouvelle allocation de mémoire.
+Avec un vecteur, une instruction similaire ferait plutôt appel à la fonction `c` ou `append` comme suit&nbsp;: 
 
-**Exemple** : 
+```{r eval = FALSE}
+vecteur <- c(vecteur, nouvel_element)
+```
 
-Simulons une expérience aléatoire pour compter le nombre de fois qu'un dé doit être tiré afin d'atteindre une somme des valeurs obtenues supérieure ou égale à 50000. Nous voulons conserver en mémoire toutes les valeurs obtenues.
+Le problème avec ces assignations est qu'elles modifient la dimension d'un objet. L'objet ne requiert donc plus la même quantité d'espace mémoire. Il ne serait pas une bonne idée de simplement utiliser les cases mémoires adjacentes pour agrandir l'objet, car ces cases mémoires sont potentiellement utilisées pour stocker d'autres objets R ou n'importe quelle valeur nécessaire à un processus en cours d'exécution sur l'ordinateur. L'ordinateur doit plutôt complètement déplacer l'objet dans de nouvelles cases mémoire qu'il sait être inutilisées afin de ne pas entrer en conflit avec quoi que ce soit. Ainsi, avec les commandes précédentes, nous avons peut-être l'impression de modifier le contenu de certaines cases mémoire alors qu'en réalité nous provoquons une nouvelle allocation de mémoire.
+
+**Exemple**&nbsp;:  
+
+Simulons une expérience aléatoire dans laquelle nous lançons un dé et additionnons les valeurs obtenues. L'expérience s'arrête lorsqu'une certaine somme cumulative des résultats a été atteinte.
 
 La première fonction que nous allons créer pour simuler cette expérience va utiliser un objet de dimension croissante pour garder une trace des résultats.
 
 ```{r}
-sommeDe1 <- function(sommeVisee = 50000){
+#' @title Simulation de lancers d'un dé pour atteindre une somme visée
+#' @description Version utilisant un vecteur de taille croissante pour stocker les résultats
+#' @param somme_visee somme cumulative de valeurs obtenues à atteindre (par défaut 50000)
+#' @return vecteur des résultats de tous les lancers de dé
+somme_de_vecteur_croissant <- function(somme_visee = 50000){
   somme <- 0
   resultats <- integer(length = 0)  # ou resultats <- NULL
-  while(somme < sommeVisee) {
+  while(somme < somme_visee) {
     tirage <- sample(1:6, size = 1)
     somme <- somme + tirage
     resultats <- c(resultats, tirage)
@@ -621,15 +759,17 @@ sommeDe1 <- function(sommeVisee = 50000){
 }
 ```
 
-
 La deuxième fonction que nous allons créer pour simuler cette expérience va plutôt utiliser un grand objet de taille fixe pour stocker les résultats.
 
 ```{r}
-sommeDe2 <- function(sommeVisee = 50000){
+#' @title Simulation de lancers d'un dé pour atteindre une somme visée
+#' @description Version utilisant un vecteur de taille fixe pour stocker les résultats
+#' @inherit somme_de_vecteur_croissant params return
+somme_de_vecteur_fixe <- function(somme_visee = 50000){
   somme <- 0
-  resultats <- integer(sommeVisee)
+  resultats <- integer(somme_visee)
   i <- 0
-  while(somme < sommeVisee) {
+  while(somme < somme_visee) {
     tirage <- sample(1:6, size = 1)
     somme <- somme + tirage
     i <- i + 1
@@ -639,37 +779,42 @@ sommeDe2 <- function(sommeVisee = 50000){
 }
 ```
 
-Nous ne savons pas d'avance combien de lancés du dé devront être effectués pour atteindre une somme de `sommeVisee`, mais nous savons que ce sera au maximum `sommeVisee` lancés, puisque le plus petit résultat du lancé d'un dé est 1. Ainsi, nous créons d'abord un très grand vecteur, de longueur `sommeVisee`, et nous allons modifier les éléments de ce vecteur à chaque itération de la boucle (une itération = un lancé de dé). Nous modifions d'abord le premier élément puis le deuxième et ainsi de suite, grâce à l'indicateur de position `i` que nous incrémentons de 1 à chaque itération. À la fin, nous retournons seulement les éléments du vecteur de résultat qui ont été modifiés.
+Nous ne savons pas d'avance combien de lancers de dé devront être effectués pour atteindre une somme de `somme_visee`, mais nous savons que ce sera au maximum `somme_visee` lancers, puisque le plus petit résultat du lancer d'un dé est 1. Ainsi, nous créons d'abord un très grand vecteur, de longueur `somme_visee`, et nous allons modifier les éléments de ce vecteur à chaque itération de la boucle (une itération = un lancer de dé). Nous modifions d'abord le premier élément puis le deuxième et ainsi de suite, grâce à l'indicateur de position `i` que nous incrémentons de 1 à chaque itération. À la fin, nous retournons seulement les éléments du vecteur de résultat qui ont été modifiés.
 
-Comparons les temps d'exécution des deux fonctions.
+Comparons les temps d'exécution des deux fonctions pour l'atteinte d'une somme de 50000.
 
 ```{r R.options = list(width = 100)}
-microbenchmark(sommeDe1(), sommeDe2(), unit = "ms")
+ex_dim_crois <- mark(
+  somme_de_vecteur_croissant(), 
+  somme_de_vecteur_fixe(),
+  min_iterations = 10, time_unit = "ms", check = FALSE
+)
+print_bench_mark(ex_dim_crois)
 ```
 
-Nous constatons donc qu'en termes de temps de calcul, il est préférable de créer un très grand objet, de le remplir, puis de mettre de côté les éléments inutilisés que de faire croître la taille d'un objet. C'est de la préallocation de mémoire. Par contre, encore là, il y a une limite à la grandeur de l'objet qui peut être créé.
-
+Nous constatons donc qu'en termes de temps de calcul, et même en termes de quantité de mémoire utilisée, il est ici préférable de créer un très grand objet, de le remplir, puis de mettre de côté les éléments inutilisés que de faire croître la taille d'un objet. C'est de la préallocation de mémoire. Par contre, encore là, il y a une limite à la grandeur de l'objet qui peut être créé.
 
 
 ### Modification d'éléments dans un data frame
 
-Lorsque nous modifions les éléments d'un objet R dans une boucle, comme nous avons fait dans la fonction `sommeDe2` par l'instruction suivante :
+Lorsque nous modifions les éléments d'un objet R dans une boucle, comme nous avons fait dans la fonction `somme_de_vecteur_fixe` par l'instruction suivante&nbsp;: 
 
 ```{r eval = FALSE}
 resultats[i] <- tirage
 ```
 
-la modification s'effectue sans réallocation de mémoire à chaque itération si :
+la modification s'effectue sans réallocation de mémoire à chaque itération si&nbsp;: 
 
 - l'objet en question est un objet atomique (vecteur, matrice ou array) ou une liste;
-- la valeur assignée est du même type que les éléments de l'objet initialisé (dans le cas d'un objet atomique).
+- la valeur assignée est du même type que les éléments de l'objet initialisé (dans le cas d'un objet atomique);
+- l'objet possède au moins autant d'éléments que le nombre d'itérations effectuées.
 
 Pour nous en convaincre, faisons quelques tests en utilisant la fonction `tracemem` qui affiche un message à chaque fois qu'un objet est copié en mémoire.
 
 Voici une boucle qui modifie les éléments d'une matrice.
 
 ```{r eval = FALSE}
-matrice <- matrix(integer(20), 4, 5)
+matrice <- matrix(NA_integer_, 4, 5)
 tracemem(matrice)
 ```
 ```
@@ -746,7 +891,7 @@ untracemem(liste)
 Cependant, R se comporte différemment lors de la modification d'un élément dans un data frame
 
 ```{r eval = FALSE}
-df <- as.data.frame(matrix(integer(20), 4, 5))
+df <- as.data.frame(matrix(NA_integer_, 4, 5))
 tracemem(df)
 ```
 ```
@@ -780,101 +925,133 @@ untracemem(df)
 
 À chaque itération de cette boucle, l'objet `df` est recopié 3 fois. Ces allocations de mémoire répétées prennent du temps.
 
-Reprenons l'exemple de la simulation d'une expérience aléatoire pour compter le nombre de fois qu'un dé doit être tiré afin d'atteindre une somme des valeurs obtenues supérieure ou égale à 50000. Voici deux autres fonctions réalisant cette expérience, qui diffèrent seulement par le type de l'objet utilisé pour stocker les résultats. La fonction `sommeDe3` utilise une matrice et la fonction `sommeDe4` un data frame. Quelle fonction est la plus rapide?
+La lenteur des opérations de manipulation de data frame est bien connue en R. Des alternatives plus rapides existent, notamment les data tables offerts par le [package `data.table`]( https://CRAN.R-project.org/package=data.table). Ce package a été mentionné à quelques reprises dans ce cours, notamment dans les notes sur le [prétraitement de données en R](https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/). Certaines fonctions de ce package permettent la modification de data table « par référence », donc sans créer de copies de l'objet et nécessiter des allocations de mémoire.
+
+Reprenons l'exemple de la simulation d'une expérience aléatoire de lancers d'un dé jusqu'à l'atteinte d'une certaine somme cumulative des valeurs obtenues. Voici deux autres fonctions réalisant cette expérience, qui diffèrent seulement par le type de l'objet utilisé pour stocker les résultats. La fonction `somme_de_data_frame` utilise un data frame, la fonction `somme_de_matrice` une matrice et la fonction `somme_de_date_table` un data table.
+
+```{r}
+#' @title Simulation de lancers d'un dé pour atteindre une somme visée
+#' @description Version utilisant un data frame pour stocker les résultats
+#' @param somme_visee somme cumulative de valeurs obtenues à atteindre (par défaut 50000)
+#' @return data frame possédant une ligne par lancer, contenant le numéro de lancer
+#'         dans la première colonne et le résultat obtenu dans la deuxième colonne
+somme_de_data_frame <- function(somme_visee = 50000){
+  resultats <- as.data.frame(matrix(NA_integer_, ncol = 2, nrow = somme_visee))
+  resultats[, 1] <- 1:somme_visee  # Colonne 1 = numéro de l'itération
+  somme <- 0
+  i <- 0
+  while(somme < somme_visee) {
+    tirage <- sample(1:6, size = 1)
+    somme <- somme + tirage
+    i <- i + 1
+    resultats[i, 2] <- tirage  # Colonne 2 = résultat obtenu au lancer du dé
+  }
+  resultats[1:i, ]
+}
+```
 
 ```{r R.options = list(width = 100)}
-# En utilisant une matrice pour stocker les résultats
-sommeDe3 <- function(sommeVisee = 50000){
-  resultats <- matrix(NA, ncol = 2, nrow = sommeVisee)
-  # Colonne 1 : numéro de l'itération
-  resultats[, 1] <- 1:sommeVisee
-  # Boucle
+#' @title Simulation de lancers d'un dé pour atteindre une somme visée
+#' @description Version utilisant une matrice pour stocker les résultats
+#' @param somme_visee somme cumulative de valeurs obtenues à atteindre (par défaut 50000)
+#' @return matrice possédant une ligne par lancer, contenant le numéro de lancer
+#'         dans la première colonne et le résultat obtenu dans la deuxième colonne
+somme_de_matrice <- function(somme_visee = 50000){
+  resultats <- matrix(NA_integer_, ncol = 2, nrow = somme_visee)
+  resultats[, 1] <- 1:somme_visee  # Colonne 1 = numéro de l'itération
   somme <- 0
   i <- 0
-  while(somme < sommeVisee) {
+  while(somme < somme_visee) {
     tirage <- sample(1:6, size = 1)
     somme <- somme + tirage
     i <- i + 1
-    # Colonne 2 : résultat obtenu au lancé du dé
-    resultats[i, 2] <- tirage
+    resultats[i, 2] <- tirage  # Colonne 2 = résultat obtenu au lancer du dé
   }
   resultats[1:i, ]
 }
+```
 
-# En utilisant un data frame pour stocker les résultats
-sommeDe4 <- function(sommeVisee = 50000){
-  resultats <- as.data.frame(matrix(NA, ncol = 2, nrow = sommeVisee))
-  # Colonne 1 : numéro de l'itération
-  resultats[, 1] <- 1:sommeVisee
-  # Boucle
-  somme <- 0
-  i <- 0
-  while(somme < sommeVisee) {
+```{r}
+#' @title Simulation de lancers d'un dé pour atteindre une somme visée
+#' @description Version utilisant un data table pour stocker les résultats
+#' @param somme_visee somme cumulative de valeurs obtenues à atteindre (par défaut 50000)
+#' @return data table possédant une ligne par lancer, contenant le numéro de lancer
+#'         dans la première colonne et le résultat obtenu dans la deuxième colonne
+somme_de_data_table <- function(somme_visee = 50000){
+  resultats <- as.data.table(matrix(NA_integer_, ncol = 2, nrow = somme_visee))
+  set(resultats, j = 1L, value = 1:somme_visee)
+  somme <- 0L
+  i <- 0L
+  while(somme < somme_visee) {
     tirage <- sample(1:6, size = 1)
     somme <- somme + tirage
-    i <- i + 1
-    # Colonne 2 : résultat obtenu au lancé du dé
-    resultats[i, 2] <- tirage
+    i <- i + 1L
+    set(resultats, i = i, j = 2L, value = tirage)
   }
   resultats[1:i, ]
 }
-
-microbenchmark(sommeDe3(), sommeDe4(), unit = "ms")
 ```
 
+Dans la fonction `somme_de_data_table`, nous avons pris soin de modifier le data table par référence en utilisant la [fonction `set`](https://rdatatable.gitlab.io/data.table/reference/assign.html) du package `data.table`.
 
-```{r echo = FALSE}
-out2 <- microbenchmark(sommeDe3(), sommeDe4(), unit = "ms")
-out2_medians <- aggregate(out$time, list(out$expr), median)
+Quelle fonction est la plus rapide?
+
+```{r}
+library(data.table)
+ex_compar_df <- mark(
+  somme_de_data_frame(),
+  somme_de_matrice(),
+  somme_de_data_table(),
+  min_iterations = 10, time_unit = "ms", check = FALSE
+)
+print_bench_mark(ex_compar_df)
 ```
 
-Ici, l'utilisation du data frame est environ `r round(out2_medians[1, "x"]/out2_medians[2, "x"])` fois plus lente que l'utilisation d'une matrice!
+Ici, l'utilisation du data frame est environ `r round(ex_compar_df$median[1]/ex_compar_df$median[2])` fois plus lente que l'utilisation d'une matrice (et utilise plus de mémoire)! L'utilisation d'un data table est juste un peu plus lente que l'utilisation d'une matrice, mais le data table a l'avantage de pouvoir stocker des données de types différents entre ses colonnes.
 
-Bref, autant que possible, il vaut mieux **éviter d'utiliser une data frame pour stocker des résultats générés dans une boucle**. 
-
-La lenteur des opérations de manipulation de data frame est bien connue en R. Des alternatives plus rapides existent, notamment les objets de classe `data.table` offerts par le [package `data.table`]( https://CRAN.R-project.org/package=data.table). Ce package avait été mentionné dans les notes sur les [structures de données en R](https://stt4230.rbind.io/manipulation_donnees/structures_r/#le-data-table).
+Le message à retenir ici est, qu'autant que possible, il vaut mieux **éviter d'utiliser un data frame pour stocker des résultats générés dans une boucle**. 
 
 
 <!---
-## Truc 6 : Utiliser de la compilation en bytecode
+## Astuce 6&nbsp;:  Utiliser de la compilation en bytecode
 
-La compilation en bytecode (en anglais *byte code compilation*) consiste en une étape de compilation intermédiaire entre les instructions-machine et le code source. En R, le package `compiler` permet de faire facilement de la compilation en bytecode. Ce package vient avec l'installation de base de R (il est donc déjà installé pour vous, comme la package `parallel`).
+La compilation en bytecode (en anglais *byte code compilation*) consiste en une étape de compilation intermédiaire entre les instructions-machine et le code source. En R, le package `compiler` permet de faire facilement de la compilation en bytecode. Ce package vient avec l'installation de base de R (il est donc déjà installé pour vous, comme le package `parallel`).
 
 En fait, depuis la version 3.4.0 de R, de la compilation bytecode est réalisée par défaut, dès que possible, sans que l'utilisateur ait à appeler lui-même une fonction du package `compiler`. Pour illustrer les gains apportés par la compilation en bytecode, commençons par demander à R de ne pas en réaliser par défaut avec la commande suivante.
 
-```{r results = "hide"}
+```{r eval = FALSE, results = "hide"}
 library(compiler)
 enableJIT(0)
 ```
 
-Retournons à l'exemple des fonctions `ksmooth` pour estimer une densité par la méthode du noyau pour illustrer la compilation bytecode. Nous allons créé des versions « bytecode compilées » de notre fonction originale, `ksmooth1`, et de notre fonction la plus rapide `ksmooth3`. 
+Retournons à l'exemple des fonctions `ksmooth` pour estimer une densité par la méthode du noyau pour illustrer la compilation bytecode. Nous allons créé des versions « bytecode compilées » de notre fonction originale, `ksmooth_double_loop`, et de notre fonction la plus rapide `ksmooth_loop`. 
 
-```{r}
-ksmooth1_byte <- cmpfun(ksmooth1)
-ksmooth3_byte <- cmpfun(ksmooth3)
+```{r eval = FALSE, }
+ksmooth_double_loop_byte <- cmpfun(ksmooth_double_loop)
+ksmooth_loop_byte <- cmpfun(ksmooth_loop)
 ```
 
 Maintenant, comparons les temps d'exécution de ces fonctions avec leurs versions non « bytecode compilées ».
 
-```{r R.options = list(width = 100)}
+```{r eval = FALSE, R.options = list(width = 100)}
 microbenchmark(unit = "ms",
-       dens_ksmooth1 = ksmooth1(x = x, xpts = xpts, h = 1), 
-  dens_ksmooth1_byte = ksmooth1_byte(x = x, xpts = xpts, h = 1),
-       dens_ksmooth3 = ksmooth3(x = x, xpts = xpts, h = 1),
-  dens_ksmooth3_byte = ksmooth3_byte(x = x, xpts = xpts, h = 1))
+       dens_ksmooth_double_loop = ksmooth_double_loop(x = x, xpts = xpts, h = 1), 
+  dens_ksmooth_double_loop_byte = ksmooth_double_loop_byte(x = x, xpts = xpts, h = 1),
+       dens_ksmooth_loop = ksmooth_loop(x = x, xpts = xpts, h = 1),
+  dens_ksmooth_loop_byte = ksmooth_loop_byte(x = x, xpts = xpts, h = 1))
 ```
 
-Bon, cette technique n'est pas magique, mais c'est mieux que rien. Avec à peu près aucun effort de programmation (seul un appel à fonction `cmpfun` a été nécessaire), nous avons réduit de moitié le temps d'exécution de la double boucle dans `ksmooth1`. Par contre, avec du calcul vectoriel, cette technique n'apporte pas toujours de gain en temps d'exécution, comme nous pouvons le constater avec la fonction `ksmooth3`.
+Bon, cette technique n'est pas magique, mais c'est mieux que rien. Avec à peu près aucun effort de programmation (seul un appel à fonction `cmpfun` a été nécessaire), nous avons réduit de moitié le temps d'exécution de la double boucle dans `ksmooth_double_loop`. Par contre, avec du calcul vectoriel, cette technique n'apporte pas toujours de gain en temps d'exécution, comme nous pouvons le constater avec la fonction `ksmooth_loop`.
 
 Le R core team cherche toujours à rendre R le plus rapide possible. Effectuer de la compilation bytecode par défaut est un exemple de modification du logiciel qui l'a rendu plus rapide. Redonnons à R son comportement par défaut avec la commande suivante.
 
-```{r results = "hide"}
+```{r eval = FALSE, results = "hide"}
 enableJIT(3)
 ```
 
 --->
 
-## Truc 5 : Faire du calcul en parallèle
+## Astuce 5&nbsp;:  Faire du calcul en parallèle
 
 
 Une importante technique pour réaliser des calculs informatiques plus rapidement est le calcul en parallèle. Il s'agit d'un type de calcul qui, dans sa version la plus simple, 
@@ -913,16 +1090,13 @@ Notons que la première fois que j'ai soumis cette commande, Windows m'a demand�
 
 Remarquons aussi que je n'ai utilisé que 3 des 4 coeurs disponibles sur mon ordinateur dans le but de laisser un coeur libre pour les autres processus actifs.
 
-Ensuite, je vais comparer la fonction `ksmooth4`, qui utilise `sapply`, à une autre version de `ksmooth` qui utilise la version parallèle du `sapply`, offerte par le package `parallel`, nommée `parSapply`.
+Ensuite, je vais comparer la fonction `ksmooth_apply`, qui utilise `sapply`, à une autre version de `ksmooth` qui utilise la version parallèle du `sapply` offerte par le package `parallel`, nommée `parSapply`.
 
 ```{r}
-#' Estimation de densité par noyau gaussien
-#'
-#' Version 5 : utilisation de parSapply et d'un calcul vectoriel
-#'
-#' mêmes arguments et même sortie que ksmooth1
-#'
-ksmooth5 <- function(grappe, x, xpts, h)
+#' @title Estimation de densité par noyau gaussien
+#' @description Version 5 : utilisation de parSapply et d'un calcul vectoriel
+#' @inherit ksmooth_double_loop params return
+ksmooth_parallel <- function(grappe, x, xpts, h)
 {
   n <- length(x)
   parSapply(
@@ -938,23 +1112,23 @@ ksmooth5 <- function(grappe, x, xpts, h)
 Ces fonctions effectuent bien le même calcul.
 
 ```{r}
-dens4 <- ksmooth4(x = x, xpts = xpts, h = 1)
-dens5 <- ksmooth5(grappe = grappe, x = x, xpts = xpts, h = 1)
+densite_ka <- ksmooth_apply(x = x, xpts = xpts, h = 1)
+densite_kp <- ksmooth_parallel(grappe = grappe, x = x, xpts = xpts, h = 1)
 
-all.equal(dens4, dens5)
+all.equal(densite_ka, densite_kp)
 ```
 
 Laquelle est la plus rapide?
 
-\newpage
-
 ```{r R.options = list(width = 100)}
-microbenchmark(unit = "ms",
-     sapply_v4 = ksmooth4(x = x, xpts = xpts, h = 1), 
-  parSapply_v5 = ksmooth5(grappe = grappe, x = x, xpts = xpts, h = 1))
+ex_astuce_5 <- mark(min_iterations = 10, time_unit = "ms",
+     v4_sapply = ksmooth_apply(x = x, xpts = xpts, h = 1), 
+  v5_parSapply = ksmooth_parallel(grappe = grappe, x = x, xpts = xpts, h = 1)
+)
+print_bench_mark(ex_astuce_5)
 ```
 
-Le calcul en parallèle a permis de réduire un peu le temps d'exécution. Même si 3 coeurs ont été exploités, le calcul n'est pas 3 fois plus rapide, car :
+Le calcul en parallèle a permis de réduire un peu le temps d'exécution. Même si 3 coeurs ont été exploités, le calcul n'est pas 3 fois plus rapide, car&nbsp;: 
 
 - mon ordinateur possède en fait 2 coeurs physiques, chacun séparé en 2 coeurs logiques (pour un total de 4 coeurs logiques), et des coeurs logiques ne sont pas aussi rapides que des coeurs physiques;
 - toutes les communications entre les coeurs et R requièrent aussi un peu de temps.
@@ -965,25 +1139,23 @@ Une fois le calcul terminé, il est recommandé de fermer les connexions entre R
 stopCluster(grappe)
 ```
 
-Nous aurions pu aller chercher une amélioration plus importante du temps de calcul en utilisant plus d'unités de calcul. Le département de mathématiques et de statistique possède une grappe de calcul pouvant être utilisée par les étudiants du département pour faire du calcul en parallèle. [Calcul Québec](http://www.calculquebec.ca/fr/) gère aussi des supercalculateurs pour le calcul en parallèle utilisable gratuitement par tout chercheur (et ses étudiants) admissible aux subventions provenant des conseils de recherche canadiens, à la condition d'avoir obtenu des accès aux ressources : http://www.calculquebec.ca/fr/acces-aux-ressources. Finalement, plusieurs plateformes de [*cloud computing*](https://fr.wikipedia.org/wiki/Cloud_computing) permettent d'utiliser des serveurs de calculs à faible coût (par exemple [Amazon Web Services](https://aws.amazon.com), [Microsoft Azure](https://azure.microsoft.com), [Google Cloud Platform](https://cloud.google.com/)).
+Nous aurions pu aller chercher une amélioration plus importante du temps de calcul en utilisant plus d'unités de calcul. Le département de mathématiques et de statistique possède une grappe de calcul pouvant être utilisée par les étudiants du département pour faire du calcul en parallèle. [Calcul Québec](http://www.calculquebec.ca/fr/) gère aussi des supercalculateurs pour le calcul en parallèle utilisable gratuitement par tout chercheur (et ses étudiants) admissible aux subventions provenant des conseils de recherche canadiens, à la condition d'avoir obtenu des accès aux ressources&nbsp;:  http://www.calculquebec.ca/fr/acces-aux-ressources. Finalement, plusieurs plateformes de [*cloud computing*](https://fr.wikipedia.org/wiki/Cloud_computing) permettent d'utiliser des serveurs de calculs à faible coût (par exemple [Amazon Web Services](https://aws.amazon.com), [Microsoft Azure](https://azure.microsoft.com), [Google Cloud Platform](https://cloud.google.com/)).
 
-Lancer des calculs en parallèle sur une grappe de calcul ne s'effectue pas tout à fait comme le lancement de calculs en parallèle sur une seule machine. La communication avec la grappe s'effectue typiquement via des protocoles SSH et les programmes R se lancent en mode batch grâce à la commande `Rscript`. Ce sujet ne sera pas couvert ici, car il est plutôt complexe et la mise en oeuvre de calculs en parallèle dépend des ressources à notre disposition. Pour plus d'informations, je vous réfère à un document que j'ai écrit sur le sujet, qui est disponible ici : https://stt4230.rbind.io/autre_materiel/calcul_parallele_r/.
+Lancer des calculs en parallèle sur une grappe de calcul ne s'effectue pas tout à fait comme le lancement de calculs en parallèle sur une seule machine. La communication avec la grappe s'effectue typiquement via des protocoles SSH et les programmes R se lancent en mode batch grâce à la commande `Rscript`. Ce sujet ne sera pas couvert ici, car il est plutôt complexe et la mise en oeuvre de calculs en parallèle dépend des ressources à notre disposition. Pour plus d'informations, je vous réfère à un document que j'ai écrit sur le sujet, qui est disponible ici&nbsp;:  https://stt4230.rbind.io/autre_materiel/calcul_parallele_r/.
 
 
 
-## Truc 6 : Reprogrammer en C ou C++ les bouts de code les plus lents
+## Astuce 6&nbsp;:  Reprogrammer en C ou C++ les bouts de code les plus lents
 
-*Note : La matière présentée dans cette section ne sera pas évaluée.*
+*Note&nbsp;:  La matière présentée dans cette section ne sera pas évaluée.*
 
-Un dernier truc pour rendre du code R plus rapide est de reprogrammer ses bouts les plus lents en C ou C++. Le langage R étant un langage interprété, il n'est pas aussi rapide que du C ou du C++, qui sont des langages plus près du langage machine.
+Une dernière astuce pour rendre du code R plus rapide est de reprogrammer ses bouts les plus lents en C ou C++. Le langage R étant un langage interprété, il n'est pas aussi rapide que du C ou du C++, qui sont des langages de plus bas niveau, plus près du langage machine.
 
-Nous n'utilisons pas ce truc pour réaliser des analyses de données plus rapidement, mais plutôt pour créer une fonction qui réalise rapidement un certain calcul.
+Nous n'utilisons pas cette astuce pour réaliser des analyses de données plus rapidement, mais plutôt pour créer une fonction qui réalise rapidement un certain calcul.
 
 Il existe quelques outils pour intégrer du code C ou C++ en R. Un outil très populaire pour intégrer du code C++ en R est le package `Rcpp` (http://www.rcpp.org/). Le R de base offre pour sa part les fonctions `.C`, `.Call` et `.External` pour ce faire (voir le manuel [*Writing R Extensions*, chapitre 5)](http://cran.r-project.org/doc/manuals/r-release/R-exts.html#System-and-foreign-language-interfaces). Je vais me contenter ici d'illustrer l'utilisation de la fonction `.C`, qui est la méthode la plus simple, mais la moins puissante. 
 
-La fonction `ksmooth1` peut être reprogrammée en C comme suit ([Peng et de Leeuw, 2002](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf)) :
-
-\newpage
+La fonction `ksmooth_double_loop` peut être reprogrammée en C comme suit ([Peng et de Leeuw, 2002](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf))&nbsp;: 
 
 ```
 #include <R.h>
@@ -1008,17 +1180,17 @@ void kernel_smooth(double *x, int *n, double *xpts,
 }
 ```
 
-Du code C destiné à être appelé en R avec la fonction `.C` se doit de respecter les propriétés suivantes ([Peng et de Leeuw, 2002](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf)) :
+Du code C destiné à être appelé en R avec la fonction `.C` se doit de respecter les propriétés suivantes ([Peng et de Leeuw, 2002](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf))&nbsp;: 
 
 - Les fonctions C appelées en R doivent être de type « void ». Elles doivent retourner les résultats des calculs par leurs arguments.
 
 - Les arguments passés aux fonctions C sont des pointeurs à un nombre ou à un tableau. Il faut donc correctement déréférencer les pointeurs dans le code C afin d'obtenir la valeur d'un élément dont l'adresse est contenue dans le pointeur. Un pointeur est déréférencé en ajoutant `*` devant celui-ci.
 
-- Il est préférable d'inclure dans tout fichier contenant du code C à être appelé en R le fichier d'en-tête R.h en ajoutant au début du fichier de code C la ligne :
+- Il est préférable d'inclure dans tout fichier contenant du code C à être appelé en R le fichier d'en-tête R.h en ajoutant au début du fichier de code C la ligne&nbsp;: 
 ```
 #include <R.h> 
 ```
-De plus, il est possible d'utiliser en C certaines fonctions mathématiques R en incluant le fichier d'en-tête Rmath.h dans le fichier de code C par la ligne : 
+De plus, il est possible d'utiliser en C certaines fonctions mathématiques R en incluant le fichier d'en-tête Rmath.h dans le fichier de code C par la ligne&nbsp;:  
 ```
 #include <Rmath.h>
 ```
@@ -1033,31 +1205,28 @@ Une fois le code C écrit, il reste trois étapes à compléter pour intégrer d
 2. Charger en R l'objet partagé ou le DLL créé à l'étape précédente avec la fonction `dyn.load` ;
 3. Appeler en R les fonctions créées dans le code C avec la fonction d'interface `.C`.
 
-Retournons donc à l'exemple. Supposons que le code C ci-dessus se trouve dans le fichier `C:/coursR/ksmoothC.c`. Dans le *terminal* sous Linux ou Mac OS X et dans une *fenêtre invite de commandes* sous Windows, il faut se positionner dans le répertoire contenant le fichier et lancer la commande suivante :
+Retournons donc à l'exemple. Supposons que le code C ci-dessus se trouve dans le fichier `C:/coursR/ksmoothC.c`. Dans le *terminal* sous Linux ou Mac OS X et dans une *fenêtre invite de commandes* sous Windows, il faut se positionner dans le répertoire contenant le fichier et lancer la commande suivante&nbsp;: 
 
 ```
 R CMD SHLIB ksmoothC.c
 ```
 
-Notez qu'en RStudio, nous pouvons facilement ouvrir un terminal ou une fenêtre invite de commandes par le menu *Tools > Shell...*.
+Notons qu'en RStudio, nous pouvons facilement ouvrir un terminal ou une fenêtre invite de commandes par le menu *Tools > Shell...*.
 
 Cette commande fonctionnera seulement si un compilateur C/C++ est installé sur l'ordinateur. Les [outils nécessaires au développement de packages R](https://stt4230.rbind.io/introduction/installation_r_rstudio/#tools) en fournissent un. Si la commande a fonctionné, l'objet partagé ou le DLL sera créé. Sur Windows, il s'agit d'un fichier portant l'extension *.dll*.
 
-Maintenant, chargeons cet objet en R avec la fonction `dyn.load`, comme dans cet exemple réalisé sur Windows :
+Maintenant, chargeons cet objet en R avec la fonction `dyn.load`, comme dans cet exemple réalisé sur Windows&nbsp;: 
 
 ```{r}
 dyn.load("C:/coursR/ksmoothC.dll")
 ```
 
-Il ne reste plus qu'à écrire la « fonction R enveloppe », qui appelle la fonction écrite en C, comme dans cet exemple :
+Il ne reste plus qu'à écrire la « fonction R enveloppe », qui appelle la fonction écrite en C, comme dans cet exemple (fonction `ksmooth3` de [Peng et de Leeuw 2002](http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf) renommée ici `ksmooth_C`)&nbsp;: 
 
 ```{r}
-#' Estimation de densité par noyau gaussien
-#'
-#' Version _C : code C + appel à la fonction .C
-#'
-#' mêmes arguments et même sortie que ksmooth1
-#'
+#' @title Estimation de densité par noyau gaussien
+#' @description Version 6 : code C + appel à la fonction .C
+#' @inherit ksmooth_double_loop params return
 ksmooth_C <- function(x, xpts, h) {
   n <- length(x)
   nxpts <- length(xpts)
@@ -1070,13 +1239,13 @@ ksmooth_C <- function(x, xpts, h) {
 
 Dans l'appel à la fonction `.C`, le nom de la fonction doit obligatoirement être entre guillemets. Il est préférable de s'assurer que chaque argument passé à la fonction C est du bon type en appliquant aux arguments une fonction telle `as.integer`, `as.double`, `as.character` ou `as.logical`.
 
-Est-ce que la fonction `ksmooth_C` effectue bien le même calcul que `ksmooth1`?
+Est-ce que la fonction `ksmooth_C` effectue bien le même calcul que `ksmooth_double_loop`?
 
 ```{r}
-dens1 <- ksmooth1(x = x, xpts = xpts, h = 1)
-densC <- ksmooth_C(x = x, xpts = xpts, h = 1)
+densite_kdl <- ksmooth_double_loop(x = x, xpts = xpts, h = 1)
+densite_kC <- ksmooth_C(x = x, xpts = xpts, h = 1)
 
-all.equal(dens1, densC)
+all.equal(densite_kdl, densite_kC)
 ```
 
 Oui.
@@ -1084,57 +1253,66 @@ Oui.
 Maintenant, voyons si cette nouvelle version de `ksmooth` est plus rapide que certaines des autres fonctions que nous avons développées. Comparons aussi `ksmooth_C` à la fonction `density`
 
 <!--
-Le bloc suivant n'est pas évalué, car il provoque une erreur lorsqu'évalué
+Le bloc suivant n'était pas évalué, car il provoquait une erreur lorsqu'évalué
 à partir du doc RMarkdown, mais pas lorsqu'évalué dans la console.
 -->
 
-```{r eval = FALSE}
-microbenchmark(unit = "ms",
-  ksmooth1 = ksmooth1(x = x, xpts = xpts, h = 1), 
-  ksmooth2 = ksmooth2(x = x, xpts = xpts, h = 1),
-  ksmooth3 = ksmooth3(x = x, xpts = xpts, h = 1),
+```{r}
+ex_astuce_6 <- mark(
+  ksmooth_double_loop = ksmooth_double_loop(x = x, xpts = xpts, h = 1), 
+  ksmooth_outer = ksmooth_outer(x = x, xpts = xpts, h = 1),
+  ksmooth_loop = ksmooth_loop(x = x, xpts = xpts, h = 1),
   ksmooth_C = ksmooth_C(x = x, xpts = xpts, h = 1),
-  density = density(x = x, bw = 1, kernel = "gaussian", from = -4, to = 4, n = 17))
+  density = density(x = x, bw = 1, kernel = "gaussian", from = -4, to = 4, n = 17),
+  min_iterations = 10, time_unit = "ms", check = FALSE
+)
+print_bench_mark(ex_astuce_6)
 ```
 
-
+<!---
 ```
 ## Unit: milliseconds
 ##       expr        min         lq        mean      median          uq        max neval
-##   ksmooth1 160.018944 164.591159 170.1964157 167.9260415 170.7282935 220.236163   100
-##   ksmooth2  13.402644  13.713477  15.6816264  14.8917480  16.5846660  61.744760   100
-##   ksmooth3  12.471381  12.584219  14.0803544  12.7721640  14.8104705  58.695675   100
+##   ksmooth_double_loop 160.018944 164.591159 170.1964157 167.9260415 170.7282935 220.236163   100
+##   ksmooth_outer  13.402644  13.713477  15.6816264  14.8917480  16.5846660  61.744760   100
+##   ksmooth_loop  12.471381  12.584219  14.0803544  12.7721640  14.8104705  58.695675   100
 ##  ksmooth_C  10.264700  10.315124  10.6443776  10.3643150  10.5529655  13.869510   100
 ##    density   0.513059   0.635065   0.6897806   0.6770265   0.7061175   1.384377   100
 ```
+--->
 
-La fonction `ksmooth_C` bat `ksmooth1` (double boucle), `ksmooth2` (calcul vectoriel seul avec `outer`) et `ksmooth3` (boucle et calcul vectoriel), quoiqu'elle n'est pas beaucoup plus rapide que cette dernière. Cependant, `density` demeure beaucoup plus rapide que tout ce que nous avons programmé.
+La fonction `ksmooth_C` bat `ksmooth_double_loop` (double boucle), `ksmooth_outer` (calcul vectoriel seul avec `outer`) et `ksmooth_loop` (boucle et calcul vectoriel), quoiqu'elle n'est pas beaucoup plus rapide que ces deux dernières. Cependant, `density` demeure beaucoup plus rapide que tout ce que nous avons programmé.
 
-Mais pourquoi `density` est-il tellement plus rapide alors qu'il fait appel à du code C, tout comme `ksmooth_C`? Premièrement, parce que ce code C est interfacé en R par la fonction `.Call` plutôt que `.C`. L'interface `.Call` est plus compliquée d'utilisation que `.C`, mais plus efficace. La fonction `density` est aussi plus rapide parce que son code C a lui aussi été optimisé.
+Mais pourquoi `density` est-il tellement plus rapide alors qu'elle fait appel à du code C, tout comme `ksmooth_C`? Premièrement, parce que ce code C est interfacé en R par la fonction `.Call` plutôt que `.C`. L'interface `.Call` est plus compliquée d'utilisation que `.C`, mais plus efficace. La fonction `density` est aussi plus rapide parce que son code C a lui aussi été optimisé.
 
 ***
 
-# Synthèse
+# Résumé
 
 #### Optimisation de temps d'exécution
 
-Outils pour analyser la performance d'un programme R :
+\mbox{}
 
-- calcul global de temps d'exécution :
+Outils pour analyser la performance d'un programme R&nbsp;: 
+
+- calcul global de temps d'exécution&nbsp;: 
     + la fonction `system.time` (R de base),
-    + la fonction `microbenchmark` (package du même nom);
-- calcul plus détaillé de temps d'exécution :
-    + par fonction appelée (*call stack*) : les fonctions `Rprof` et `summaryRprof` (R de base),
-    + par ligne de code : la fonction `profvis` (package du même nom).
+    + la fonction `mark` du package `bench`;
+- calcul plus détaillé de temps d'exécution&nbsp;: 
+    + par fonction appelée (*call stack*)&nbsp;:  les fonctions `Rprof` et `summaryRprof` (R de base),
+    + par ligne de code&nbsp;:  la fonction `profvis` (package du même nom).
 
-**Conseil** : comparaison de différentes options  
+**Conseil**&nbsp;:  comparaison de différentes options.  
 $\longrightarrow$ Le code le plus rapide n'est pas toujours celui que nous croyons. 
 
+Contrainte&nbsp;:  **compromis temps d'exécution - quantité de mémoire utilisée**
 
 #### Stratégies d’optimisation du temps d’exécution
 
+\mbox{}
 
-**Trucs** pour du code R plus rapide :
+
+**Astuces** pour du code R plus rapide&nbsp;: 
 
 1. Utiliser des fonctions optimisées
 2. Faire seulement ce qui est nécessaire
@@ -1143,54 +1321,64 @@ $\longrightarrow$ Le code le plus rapide n'est pas toujours celui que nous croyo
 5. Faire du calcul en parallèle
 6. Reprogrammer en C ou C++ les bouts de code les plus lents
 
-Contrainte : **compromis temps d'exécution / mémoire utilisée**
 
+##### Astuce 1&nbsp;:  Utiliser des fonctions optimisées
 
-##### Truc 1 : Utiliser des fonctions optimisées
+\mbox{}
 
 Profiter du travail des autres
 
-Le web regorge de fonctions R : la distribution de base de R, le CRAN, Bioconductor, etc.
+Le web regorge de fonctions R&nbsp;:  la distribution de base de R, le CRAN, Bioconductor, etc.
 
-##### Truc 2 : Faire seulement ce qui est nécessaire
+##### Astuce 2&nbsp;:  Faire seulement ce qui est nécessaire
+
+\mbox{}
 
 Ne pas alourdir son code d'évaluations inutiles
 
 
-##### Truc 3 : Exploiter les calculs matriciels et vectoriels
+##### Astuce 3&nbsp;:  Exploiter les calculs matriciels et vectoriels
+
+\mbox{}
 
 R est optimisé pour le calcul vectoriel
 
 (fonctions de la famille des `apply` = boucles, pas calcul vectoriel)
 
 
-##### Truc 4 : Éviter les allocations de mémoire inutiles
+##### Astuce 4&nbsp;:  Éviter les allocations de mémoire inutiles
+
+\mbox{}
 
 Allouer de l'espace dans la mémoire d'un ordinateur = opération coûteuse en temps
 
-Opérations à éviter dans une boucle R :
+Opérations à éviter dans une boucle R&nbsp;: 
 
-1. utilisation d'un objet de dimension croissante,
-2. assignation de valeur(s) dans un data frame.
+1. utilisation d'un objet de dimension croissante : utiliser plutôt un objet de taille fixe;
+2. assignation de valeur(s) dans un data frame : utiliser plutôt un objet atomique ou un data table.
 
 
-##### Truc 5 : Faire du calcul en parallèle
+##### Astuce 5&nbsp;:  Faire du calcul en parallèle
 
-Version la plus simple du calcul en parallèle : 
+\mbox{}
+
+Version la plus simple du calcul en parallèle&nbsp;:  
 
 - brise un long calcul en petits blocs de calcul indépendants;
 - réalise ces blocs de calcul sur plusieurs unités de calcul (coeurs d'un processeur) simultanément (donc en parallèle);
 - rassemble à la fin tous les résultats.
 
-Domaine très large : https://cran.r-project.org/web/views/HighPerformanceComputing.html
+Domaine très large&nbsp;:  https://cran.r-project.org/web/views/HighPerformanceComputing.html
 
-Domaine très technique : dépend des ressources à notre portée (CPU versus GPU, plusieurs coeurs sur notre ordinateur, grappe de serveurs de calcul, plateforme de cloud computing, etc.)
-
-
-Point de départ en R : package `parallel`
+Domaine très technique&nbsp;:  dépend des ressources à notre portée (CPU versus GPU, plusieurs coeurs sur notre ordinateur, grappe de serveurs de calcul, plateforme de cloud computing, etc.)
 
 
-##### Truc 6 : Reprogrammer en C ou C++ les bouts de code les plus lents
+Point de départ en R&nbsp;:  package `parallel`
+
+
+##### Astuce 6&nbsp;:  Reprogrammer en C ou C++ les bouts de code les plus lents
+
+\mbox{}
 
 Meilleure solution pour développer une fonction très rapide, pas pour réaliser rapidement des analyses de données.
 
@@ -1204,36 +1392,31 @@ Meilleure solution pour développer une fonction très rapide, pas pour réalise
 # Références
 
 - **Outils d'analyse de la performance d'un programme R**
-    + package `microbenchmark` :  https://CRAN.R-project.org/package=microbenchmark 
-    + Alternatives au package `microbenchmark` : package `bench` https://github.com/r-lib/bench
-    + package `profvis` : https://rstudio.github.io/profvis/
-
-&nbsp;
-
+    + Hester, J. (2020). `bench`: *High Precision Timing of R Expressions*. R package version 1.1.1. URL
+  https://CRAN.R-project.org/package=bench
+        + URL documentation en ligne http://bench.r-lib.org/
+    + Chang, W., Luraschi, J. et Mastny, T. (2019). `profvis`: *Interactive Visualizations for Profiling R Code*. R package version 0.3.6. URL https://CRAN.R-project.org/package=profvis
+        + URL documentation en ligne https://rstudio.github.io/profvis/  
 - **Optimisation de temps d'exécution**
-    + Wickham, H. (2014). *Advanced R*. CRC Press. 
-        + Édition 1, Chapitre 17, URL http://adv-r.had.co.nz/Profiling.html
-        + Édition 2, Chapitre 24, URL https://adv-r.hadley.nz/perf-improve.html#code-organisation
-    + Matloff, N. (2011). *The Art of R Programming : A Tour of Statistical Software Design*, No Starch Press. Chapitre 14.
-    + Adler, J. (2012). *R in a Nutshell*, Second edition. O'Reilly. Chapitre 24.
-    + http://www.noamross.net/blog/2014/4/16/vectorization-in-r--why.html  
-
-&nbsp;
-
+    + Wickham, H. (2019). *Advanced R, Second Edition*. Chapman and Hall/CRC.
+        + Chapitre 2 *Names and values*, URL https://adv-r.hadley.nz/names-values.html
+        + Chapitre 23 *Measuring performance*, URL https://adv-r.hadley.nz/perf-measure.html
+        + Chapitre 24 *Improving performance*, URL https://adv-r.hadley.nz/perf-improve.html
+    + Matloff, N. (2011). *The Art of R Programming: A Tour of Statistical Software Design*, No Starch Press. Chapitre 14.
+    + Ross, N. (2014). Tutoriel web intitulé « Vectorization in R: Why? »  
+    URL http://www.noamross.net/blog/2014/4/16/vectorization-in-r--why.html
+    + Adler, J. (2012). *R in a Nutshell*, Second edition. O'Reilly. Chapitre 24.  
 - **Interfacer du code dans un autre langage (en particulier C ou C++)**
     + Peng, R. D., & de Leeuw, J. (2002). An Introduction to the .C Interface to R. UCLA: Academic Technology Services, Statistical Consulting Group. URL http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf
-    + R Core Team (2018). *Writing R Extensions*. R Foundation for Statistical Computing. Chapitre 5. URL http://cran.r-project.org/doc/manuals/r-release/R-exts.html#System-and-foreign-language-interfaces
-    + Matloff, N. (2011). *The Art of R Programming : A Tour of Statistical Software Design*, No Starch Press. Chapitre 15.
-    + Utilisation du package `Rcpp` :
+    + R Core Team (2020). *Writing R Extensions*. R Foundation for Statistical Computing. Chapitre 5. URL http://cran.r-project.org/doc/manuals/r-release/R-exts.html#System-and-foreign-language-interfaces
+    + Matloff, N. (2011). *The Art of R Programming: A Tour of Statistical Software Design*, No Starch Press. Chapitre 15.
+    + Utilisation du package `Rcpp`&nbsp;: 
         + http://www.rcpp.org/
-        + Wickham, H. (2014). *Advanced R*. CRC Press. Chapitre 19. URL http://adv-r.had.co.nz/Rcpp.html  
-    
-&nbsp;
-
+        + Wickham, H. (2019). *Advanced R, Second Edition*. Chapman and Hall/CRC. Chapitre 19. *Rewriting R code in C++* URL https://adv-r.hadley.nz/rcpp.html  
 - **Calcul en parallèle**
-    + https://stt4230.rbind.io/autre_materiel/calcul_parallele_r/
+    + Baillargeon, S. (2017). Tutoriel intitulé « Calcul en parallèle sur CPU avec R ». URL https://stt4230.rbind.io/autre_materiel/calcul_parallele_r/
     + McCallum, E., & Weston, S. (2011). *Parallel R*. O'Reilly.
-    + Matloff, N. (2011). *The Art of R Programming : A Tour of Statistical Software Design, No Starch Press*.  Chapitre 16.
+    + Matloff, N. (2011). *The Art of R Programming: A Tour of Statistical Software Design, No Starch Press*.  Chapitre 16.  
 
 
 
