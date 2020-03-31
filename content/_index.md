@@ -47,7 +47,7 @@ Le reste du matériel de cours (exemples, exercices, évaluations) se trouve sur
 * Amélioration de code R
     * [Bonnes pratiques en R]({{< relref "amelioration_code/bonnes_pratiques_r_2020.html" >}})
     * [Optimisation de temps d'exécution en R]({{< relref "amelioration_code/optim_temps_r_2020.html" >}})
-    * [Métaprogrammation en R]({{< relref "amelioration_code/metaprogrammation_r_2019.html" >}})
+    * [Métaprogrammation en R]({{< relref "amelioration_code/metaprogrammation_r_2020.html" >}})
 * [Tutoriels d'étudiants]({{< relref "tutoriels_etudiants" >}})
 * Autre matériel
     * [Atelier sur la visualisation de données en R]({{< relref "autre_materiel/atelier_visualisation_donnees_r_2017.html" >}})
