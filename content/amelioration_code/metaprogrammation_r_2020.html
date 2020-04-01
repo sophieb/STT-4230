@@ -1,0 +1,508 @@
+---
+title: "Métaprogrammation en R"
+author: "Sophie Baillargeon, Université Laval"
+date: "2020-03-31"
+weight: 3
+slug: "metaprogrammation_r"
+categories: ["cours_2020-04-07"]
+categories_weight: 2
+lastmodifierdisplayname : "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+    highlight: tango
+  blogdown::html_page:
+    toc: yes
+    toc_depth: 3
+    highlight: tango
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \renewcommand{\linethickness}{0.05em}
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  { background-color: #f8f8f8; }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<div id="TOC">
+<ul>
+<li><a href="#assignation-dune-valeur-à-un-nom-avec-assign">Assignation d’une valeur à un nom avec <code>assign</code></a></li>
+<li><a href="#retour-de-la-valeur-assignée-à-un-nom-avec-get">Retour de la valeur assignée à un nom avec <code>get</code></a></li>
+<li><a href="#appel-dune-fonction-avec-do.call">Appel d’une fonction avec <code>do.call</code></a></li>
+<li><a href="#manipulation-de-formules">Manipulation de formules</a><ul>
+<li><a href="#fonction-as.formula">Fonction <code>as.formula</code></a></li>
+<li><a href="#méthode-update.formula">Méthode <code>update.formula</code></a></li>
+</ul></li>
+<li><a href="#manipulation-dinstructions">Manipulation d’instructions</a><ul>
+<li><a href="#fonction-quote">Fonction <code>quote</code></a></li>
+<li><a href="#fonction-eval">Fonction <code>eval</code></a></li>
+<li><a href="#fonction-call">Fonction <code>call</code></a></li>
+<li><a href="#fonction-parse">Fonction <code>parse</code></a></li>
+</ul></li>
+<li><a href="#manipulation-de-lappel-dune-fonction">Manipulation de l’appel d’une fonction</a><ul>
+<li><a href="#fonctions-substitute-et-deparse">Fonctions <code>substitute</code> et <code>deparse</code></a></li>
+<li><a href="#fonction-match.call">Fonction <code>match.call</code></a></li>
+</ul></li>
+<li><a href="#résumé">Résumé</a></li>
+<li><a href="#références">Références</a></li>
+</ul>
+</div>
+
+<hr />
+<p> </p>
+<p>La métaprogrammation se définit par <strong>l’écriture d’un programme qui écrit lui-même un programme</strong>. Par exemple, en R, il est possible d’écrire un bout de code qui compose d’abord une ou des instructions sous forme d’expressions ou de chaînes de caractères, puis qui évalue ces instructions dans un deuxième temps. La métaprogrammation est typiquement utilisée pour rendre un programme plus succinct, donc potentiellement plus facile à comprendre, ou pour automatiser certaines tâches.</p>
+<p>Les sections qui suivent décrivent quelques outils en R pour manipuler des éléments de langage sans les évaluer, ce qui permet de réaliser de la métaprogrammation.</p>
+<div id="assignation-dune-valeur-à-un-nom-avec-assign" class="section level1">
+<h1>Assignation d’une valeur à un nom avec <code>assign</code></h1>
+<p>Voici un exemple d’instruction R qui utilise la façon usuelle d’écrire une assignation en R :</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">obj &lt;-<span class="st"> </span><span class="kw">head</span>(letters)</a></code></pre></div>
+<p>Dans cette instruction, qui utilise l’opérateur d’assignation <code>&lt;-</code>,</p>
+<ul>
+<li><code>obj</code> est le nom référant à l’objet créé en mémoire;</li>
+<li><code>head(letters)</code> est l’expression dont la valeur, obtenue après évaluation, est enregistrée dans l’objet créé en mémoire.</li>
+</ul>
+<p>Un nom est en fait un symbole relié à un objet.</p>
+<p>Mais comment assigner une valeur à un nom stocké dans un objet sous forme de chaîne de caractères ? Par exemple, supposons que ce nom est stocké dans l’objet <code>nom</code>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1">nom &lt;-<span class="st"> &quot;nom_objet&quot;</span></a></code></pre></div>
+<p>Nous voulons assigner une valeur au nom stocké dans <code>nom</code>, peu importe la chaîne de caractères que <code>nom</code> contient. Cette assignation peut être réalisée avec la fonction <code>assign</code> comme dans cet exemple :</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw">assign</span>(<span class="dt">x =</span> nom, <span class="dt">value =</span> <span class="kw">head</span>(letters))</a></code></pre></div>
+<p>Que contient notre environnement de travail maintenant?</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw">ls</span>()</a></code></pre></div>
+<pre><code>## [1] &quot;nom&quot;       &quot;nom_objet&quot; &quot;obj&quot;</code></pre>
+<p>Nous y trouvons un objet nommé <code>nom_objet</code>, ce qui correspond à la chaîne de caractères stockée dans <code>nom</code>. Cet objet contient la valeur (a, b, c, d, e, f), soit le vecteur des six premières lettres de l’alphabet latin créé par l’expression <code>head(letters)</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">nom_objet</a></code></pre></div>
+<pre><code>## [1] &quot;a&quot; &quot;b&quot; &quot;c&quot; &quot;d&quot; &quot;e&quot; &quot;f&quot;</code></pre>
+<p>Voici un autre exemple d’utilisation de la fonction <code>assign</code>. Supposons que nous souhaitons créer 5 objets, nommés <code>obj1</code> à <code>obj5</code>. Ces objets doivent contenir un vecteur d’entiers allant de 1 à <code>x</code> où <code>x</code> est le numéro de l’objet.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="cf">for</span> (i <span class="cf">in</span> <span class="kw">seq_len</span>(<span class="dv">5</span>)) {</a>
+<a class="sourceLine" id="cb8-2" title="2">  <span class="kw">assign</span>(<span class="dt">x =</span> <span class="kw">paste0</span>(<span class="st">&quot;obj&quot;</span>, i), <span class="dt">value =</span> <span class="dv">1</span><span class="op">:</span>i)</a>
+<a class="sourceLine" id="cb8-3" title="3">}</a></code></pre></div>
+<p>Vérifions que ces objets ont bien été créés dans notre environnement de travail.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">ls</span>()</a></code></pre></div>
+<pre><code>## [1] &quot;i&quot;         &quot;nom&quot;       &quot;nom_objet&quot; &quot;obj&quot;       &quot;obj1&quot;      &quot;obj2&quot;     
+## [7] &quot;obj3&quot;      &quot;obj4&quot;      &quot;obj5&quot;</code></pre>
+</div>
+<div id="retour-de-la-valeur-assignée-à-un-nom-avec-get" class="section level1">
+<h1>Retour de la valeur assignée à un nom avec <code>get</code></h1>
+<p>Pour atteindre la valeur assignée à un nom, nous sommes habitués à passer directement par ce nom, comme dans cet exemple.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">str</span>(nom_objet)</a></code></pre></div>
+<pre><code>##  chr [1:6] &quot;a&quot; &quot;b&quot; &quot;c&quot; &quot;d&quot; &quot;e&quot; &quot;f&quot;</code></pre>
+<p>Mais comment procéder avec un nom stocké dans un objet sous forme de chaîne de caractères ? Il faut utiliser la fonction <code>get</code> comme suit.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="kw">str</span>(<span class="kw">get</span>(nom))</a></code></pre></div>
+<pre><code>##  chr [1:6] &quot;a&quot; &quot;b&quot; &quot;c&quot; &quot;d&quot; &quot;e&quot; &quot;f&quot;</code></pre>
+<p>Ce qui ne retourne pas la même chose que ceci.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="kw">str</span>(nom)</a></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="co"># Équivalent à</span></a>
+<a class="sourceLine" id="cb16-2" title="2"><span class="kw">str</span>(<span class="st">&quot;nom_objet&quot;</span>)</a></code></pre></div>
+<pre><code>##  chr &quot;nom_objet&quot;</code></pre>
+<p>Par exemple, pour afficher le contenu des objets nommés <code>obj1</code> à <code>obj5</code>, nous pouvons procéder comme suit.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>) {</a>
+<a class="sourceLine" id="cb18-2" title="2">  <span class="kw">cat</span>(<span class="kw">paste0</span>(<span class="st">&quot;obj&quot;</span>, i, <span class="st">&quot; =&quot;</span>), <span class="kw">get</span>(<span class="kw">paste0</span>(<span class="st">&quot;obj&quot;</span>, i)), <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb18-3" title="3">}</a></code></pre></div>
+<pre><code>## obj1 = 1 
+## obj2 = 1 2 
+## obj3 = 1 2 3 
+## obj4 = 1 2 3 4 
+## obj5 = 1 2 3 4 5</code></pre>
+</div>
+<div id="appel-dune-fonction-avec-do.call" class="section level1">
+<h1>Appel d’une fonction avec <code>do.call</code></h1>
+<p>Nous venons d’apprendre comment manipuler un nom que nous possédons sous forme de chaîne de caractères. Comment procéder lorsque ce nom est celui d’une fonction que nous souhaitons appeler?</p>
+<p>Il est alors possible d’utiliser <code>get</code>, mais une autre fonction peut aussi nous être utile : <code>do.call</code>.</p>
+<p>Par exemple, les trois instructions suivantes provoquent toute l’évaluation du même appel à la fonction <code>median</code>.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1"><span class="kw">median</span>(<span class="dt">x =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)</a></code></pre></div>
+<pre><code>## [1] 5.5</code></pre>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" title="1"><span class="kw">get</span>(<span class="st">&quot;median&quot;</span>)(<span class="dt">x =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)</a></code></pre></div>
+<pre><code>## [1] 5.5</code></pre>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" title="1"><span class="kw">do.call</span>(<span class="st">&quot;median&quot;</span>, <span class="dt">args =</span> <span class="kw">list</span>(<span class="dt">x =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>))</a></code></pre></div>
+<pre><code>## [1] 5.5</code></pre>
+<p>En fait, l’avantage de <code>do.call</code> n’est pas qu’il soit capable de manipuler une fonction dont le nom est sous forme de chaîne de caractères. D’ailleurs, <code>do.call</code> accepte comme premier argument la fonction directement. Sa principale utilité est plutôt d’accepter sous forme de liste les arguments à inclure dans l’appel à une fonction. Cette liste peut être construite par étapes, potentiellement conditionnelles.</p>
+<p>Voici un exemple de fonction qui exploite le potentiel de la fonction <code>do.call</code>.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" title="1"><span class="co">#&#39; Calcul de statistiques descriptives</span></a>
+<a class="sourceLine" id="cb26-2" title="2"><span class="co">#&#39;</span></a>
+<a class="sourceLine" id="cb26-3" title="3"><span class="co">#&#39; Cette fonction permet de calculer des statistiques descriptives au choix</span></a>
+<a class="sourceLine" id="cb26-4" title="4"><span class="co">#&#39;</span></a>
+<a class="sourceLine" id="cb26-5" title="5"><span class="co">#&#39; @param x vecteur d&#39;observations</span></a>
+<a class="sourceLine" id="cb26-6" title="6"><span class="co">#&#39; @param choix une chaîne de caractères spécifiant le nom de la fonction à appeler pour</span></a>
+<a class="sourceLine" id="cb26-7" title="7"><span class="co">#&#39;              le calcul, soit &quot;table&quot; (par défaut), &quot;mean&quot;, &quot;median&quot;, &quot;sd&quot; ou &quot;mad&quot;</span></a>
+<a class="sourceLine" id="cb26-8" title="8"><span class="co">#&#39; @param retirer_NA un logique spécifiant si les valeurs manquantes (NA)</span></a>
+<a class="sourceLine" id="cb26-9" title="9"><span class="co">#&#39;                   doivent être retirées avant le calcul (par défaut TRUE)</span></a>
+<a class="sourceLine" id="cb26-10" title="10"><span class="co">#&#39;</span></a>
+<a class="sourceLine" id="cb26-11" title="11"><span class="co">#&#39; @return le résultat de l&#39;appel à la fonction choisie</span></a>
+<a class="sourceLine" id="cb26-12" title="12"><span class="co">#&#39;</span></a>
+<a class="sourceLine" id="cb26-13" title="13">choixstat &lt;-<span class="st"> </span><span class="cf">function</span>(x, <span class="dt">choix =</span> <span class="kw">c</span>(<span class="st">&quot;table&quot;</span>, <span class="st">&quot;mean&quot;</span>, <span class="st">&quot;median&quot;</span>, <span class="st">&quot;sd&quot;</span>, <span class="st">&quot;mad&quot;</span>),</a>
+<a class="sourceLine" id="cb26-14" title="14">                      <span class="dt">retirer_NA =</span> <span class="ot">TRUE</span>) {</a>
+<a class="sourceLine" id="cb26-15" title="15">  choix &lt;-<span class="st"> </span><span class="kw">match.arg</span>(choix)</a>
+<a class="sourceLine" id="cb26-16" title="16">  arguments &lt;-<span class="st"> </span><span class="kw">list</span>(x)</a>
+<a class="sourceLine" id="cb26-17" title="17">  <span class="cf">if</span> (choix <span class="op">==</span><span class="st"> &quot;table&quot;</span>){</a>
+<a class="sourceLine" id="cb26-18" title="18">    arguments<span class="op">$</span>useNA &lt;-<span class="st"> </span><span class="cf">if</span> (retirer_NA) <span class="st">&quot;no&quot;</span> <span class="cf">else</span> <span class="st">&quot;ifany&quot;</span></a>
+<a class="sourceLine" id="cb26-19" title="19">  } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb26-20" title="20">    arguments<span class="op">$</span>na.rm &lt;-<span class="st"> </span>retirer_NA</a>
+<a class="sourceLine" id="cb26-21" title="21">  }</a>
+<a class="sourceLine" id="cb26-22" title="22">  <span class="kw">do.call</span>(<span class="dt">what =</span> choix, <span class="dt">args =</span> arguments)</a>
+<a class="sourceLine" id="cb26-23" title="23">}</a></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1"><span class="kw">choixstat</span>(<span class="dt">x =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="ot">NA</span>, <span class="dv">3</span>), <span class="dt">choix =</span> <span class="st">&quot;median&quot;</span>, <span class="dt">retirer_NA =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" title="1"><span class="co"># Équivalent</span></a>
+<a class="sourceLine" id="cb28-2" title="2"><span class="kw">median</span>(<span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="ot">NA</span>, <span class="dv">3</span>), <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<pre><code>## [1] 3</code></pre>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" title="1"><span class="kw">choixstat</span>(<span class="dt">x =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="ot">NA</span>, <span class="dv">3</span>), <span class="dt">choix =</span> <span class="st">&quot;median&quot;</span>, <span class="dt">retirer_NA =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" title="1"><span class="co"># Équivalent à </span></a>
+<a class="sourceLine" id="cb31-2" title="2"><span class="kw">median</span>(<span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="ot">NA</span>, <span class="dv">3</span>), <span class="dt">na.rm =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
+<pre><code>## [1] NA</code></pre>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" title="1"><span class="kw">choixstat</span>(<span class="dt">x =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="ot">NA</span>, <span class="dv">3</span>), <span class="dt">choix =</span> <span class="st">&quot;table&quot;</span>, <span class="dt">retirer_NA =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" title="1"><span class="co"># Équivalent à </span></a>
+<a class="sourceLine" id="cb34-2" title="2"><span class="kw">table</span>(<span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="ot">NA</span>, <span class="dv">3</span>), <span class="dt">useNA =</span> <span class="st">&quot;no&quot;</span>)</a></code></pre></div>
+<pre><code>## 
+## 2 3 4 
+## 2 4 1</code></pre>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" title="1"><span class="kw">choixstat</span>(<span class="dt">x =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="ot">NA</span>, <span class="dv">3</span>), <span class="dt">choix =</span> <span class="st">&quot;table&quot;</span>, <span class="dt">retirer_NA =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" title="1"><span class="co"># Équivalent à </span></a>
+<a class="sourceLine" id="cb37-2" title="2"><span class="kw">table</span>(<span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="ot">NA</span>, <span class="dv">3</span>), <span class="dt">useNA =</span> <span class="st">&quot;ifany&quot;</span>)</a></code></pre></div>
+<pre><code>## 
+##    2    3    4 &lt;NA&gt; 
+##    2    4    1    1</code></pre>
+</div>
+<div id="manipulation-de-formules" class="section level1">
+<h1>Manipulation de formules</h1>
+<p>Les formules sont des éléments de langage R particuliers. Ils servent à spécifier des modèles statistiques. L’instruction suivante est un exemple de création d’une formule en R.</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" title="1">f1 &lt;-<span class="st"> </span>y <span class="op">~</span><span class="st"> </span>x1 <span class="op">+</span><span class="st"> </span>x2</a></code></pre></div>
+<p>Une formule contient un opérateur <code>~</code>, possiblement avec un argument à gauche pour spécifier la ou les variables réponses du modèle et un argument à droite pour spécifier la ou les variables explicatives du modèle. Des informations sur les formules ont été fournies dans le cours sur les <a href="https://stt4230.rbind.io/calculs/calculs_stat_math_r/#formules">calculs statistiques et mathématiques en R</a>.</p>
+<p>R reconnaît que <code>f1</code> est bien une formule. Il la décompose même en trois parties : l’opérateur <code>~</code>, la partie de gauche du modèle (en anglais <em>LHS</em> pour <em>left hand side</em>) et la partie de droite du modèle (en anglais <em>RHS</em> pour <em>right hand side</em>).</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" title="1"><span class="kw">str</span>(f1)</a></code></pre></div>
+<pre><code>## Class &#39;formula&#39;  language y ~ x1 + x2
+##   ..- attr(*, &quot;.Environment&quot;)=&lt;environment: R_GlobalEnv&gt;</code></pre>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" title="1">f1[<span class="dv">1</span>]</a></code></pre></div>
+<pre><code>## `~`()</code></pre>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" title="1">f1[<span class="dv">2</span>]</a></code></pre></div>
+<pre><code>## y()</code></pre>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb46-1" title="1">f1[<span class="dv">3</span>]</a></code></pre></div>
+<pre><code>## (x1 + x2)()</code></pre>
+<div id="fonction-as.formula" class="section level2">
+<h2>Fonction <code>as.formula</code></h2>
+<p>La fonction <code>as.formula</code> permet de créer une formule à partir d’une chaîne de caractères.</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb48-1" title="1"><span class="kw">str</span>(<span class="st">&quot;y ~ x1 + x2&quot;</span>)</a></code></pre></div>
+<pre><code>##  chr &quot;y ~ x1 + x2&quot;</code></pre>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb50-1" title="1">f2 &lt;-<span class="st"> </span><span class="kw">as.formula</span>(<span class="st">&quot;y ~ x1 + x2&quot;</span>)</a>
+<a class="sourceLine" id="cb50-2" title="2"><span class="kw">str</span>(f2)</a></code></pre></div>
+<pre><code>## Class &#39;formula&#39;  language y ~ x1 + x2
+##   ..- attr(*, &quot;.Environment&quot;)=&lt;environment: R_GlobalEnv&gt;</code></pre>
+<p>Cette possibilité de transformer une chaîne de caractères en formule s’avère pratique, par exemple, lorsque nous avons besoin de construire une formule comprenant un grand nombre de termes identifiables de façon automatique.</p>
+<p>Voici un exemple de fonction qui utilise <code>as.formula</code> pour construire un modèle de régression polynomial.</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb52-1" title="1"><span class="co">#&#39; Régression polynomiale</span></a>
+<a class="sourceLine" id="cb52-2" title="2"><span class="co">#&#39;</span></a>
+<a class="sourceLine" id="cb52-3" title="3"><span class="co">#&#39; Ajustement d&#39;un modèle de régression polynomial entre deux variables</span></a>
+<a class="sourceLine" id="cb52-4" title="4"><span class="co">#&#39;</span></a>
+<a class="sourceLine" id="cb52-5" title="5"><span class="co">#&#39; @param y vecteur des observations de la variable réponse</span></a>
+<a class="sourceLine" id="cb52-6" title="6"><span class="co">#&#39; @param x vecteur des observations de la variable explicative</span></a>
+<a class="sourceLine" id="cb52-7" title="7"><span class="co">#&#39; @param dg degré du modèle polynomial à ajuster</span></a>
+<a class="sourceLine" id="cb52-8" title="8"><span class="co">#&#39;</span></a>
+<a class="sourceLine" id="cb52-9" title="9"><span class="co">#&#39; @return sortie de la fonction lm pour le modèle demandé</span></a>
+<a class="sourceLine" id="cb52-10" title="10"><span class="co">#&#39;</span></a>
+<a class="sourceLine" id="cb52-11" title="11">reg_poly &lt;-<span class="st"> </span><span class="cf">function</span>(y, x, dg){</a>
+<a class="sourceLine" id="cb52-12" title="12">  formule &lt;-<span class="st"> </span><span class="kw">paste</span>(</a>
+<a class="sourceLine" id="cb52-13" title="13">    <span class="st">&quot;y ~&quot;</span>, </a>
+<a class="sourceLine" id="cb52-14" title="14">    <span class="kw">paste</span>(<span class="kw">paste0</span>(<span class="st">&quot;I(x^&quot;</span>, <span class="dv">1</span><span class="op">:</span>dg, <span class="st">&quot;)&quot;</span>), <span class="dt">collapse =</span> <span class="st">&quot; + &quot;</span>)</a>
+<a class="sourceLine" id="cb52-15" title="15">  )</a>
+<a class="sourceLine" id="cb52-16" title="16">  <span class="kw">lm</span>(<span class="kw">as.formula</span>(formule))</a>
+<a class="sourceLine" id="cb52-17" title="17">}</a></code></pre></div>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb53-1" title="1"><span class="kw">reg_poly</span>(<span class="dt">y =</span> cars<span class="op">$</span>dist, <span class="dt">x =</span> cars<span class="op">$</span>speed, <span class="dt">dg =</span> <span class="dv">3</span>)</a></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = as.formula(formule))
+## 
+## Coefficients:
+## (Intercept)       I(x^1)       I(x^2)       I(x^3)  
+##   -19.50505      6.80111     -0.34966      0.01025</code></pre>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb55-1" title="1"><span class="kw">reg_poly</span>(<span class="dt">y =</span> cars<span class="op">$</span>dist, <span class="dt">x =</span> cars<span class="op">$</span>speed, <span class="dt">dg =</span> <span class="dv">5</span>)</a></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = as.formula(formule))
+## 
+## Coefficients:
+## (Intercept)       I(x^1)       I(x^2)       I(x^3)       I(x^4)       I(x^5)  
+##   -2.650053     5.484259    -1.426123     0.194049    -0.010040     0.000179</code></pre>
+</div>
+<div id="méthode-update.formula" class="section level2">
+<h2>Méthode <code>update.formula</code></h2>
+<p>La méthode <code>update.formula</code> permet de partir d’un modèle et de le modifier. Par exemple, reprenons la formule <code>f1</code>.</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb57-1" title="1">f1</a></code></pre></div>
+<pre><code>## y ~ x1 + x2</code></pre>
+<p>Ajoutons-y une variable explicative.</p>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb59-1" title="1"><span class="kw">update</span>(f1, . <span class="op">~</span><span class="st"> </span>. <span class="op">+</span><span class="st"> </span>x3)</a></code></pre></div>
+<pre><code>## y ~ x1 + x2 + x3</code></pre>
+<p>Ou encore, retirons une variable.</p>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb61-1" title="1"><span class="kw">update</span>(f1, . <span class="op">~</span><span class="st"> </span>. <span class="op">-</span><span class="st"> </span>x2)</a></code></pre></div>
+<pre><code>## y ~ x1</code></pre>
+<p>Nous pourrions aussi transformer une variable.</p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb63-1" title="1"><span class="kw">update</span>(f1, <span class="kw">sqrt</span>(.) <span class="op">~</span><span class="st"> </span>.)</a></code></pre></div>
+<pre><code>## sqrt(y) ~ x1 + x2</code></pre>
+<p>La fonction <code>update</code> est générique. Si le premier argument qu’elle reçoit est une formule, elle appelle la méthode <code>update.formula</code>. Dans un appel à <code>update.formula</code>, un <code>.</code> représente une partie de la formule originale. Le <code>.</code> à gauche du <code>~</code> représente le LHS du modèle fourni comme premier argument et le <code>.</code> à droite du <code>~</code> le RHS du modèle fourni comme premier argument.</p>
+</div>
+</div>
+<div id="manipulation-dinstructions" class="section level1">
+<h1>Manipulation d’instructions</h1>
+<p>Il est possible d’écrire des instructions R complètes, sous forme d’expression R ou de chaîne de caractères, sans les évaluer.</p>
+<p>Prenons par exemple l’instruction R suivante : <code>median(x = 1:10)</code>. Il s’agit d’un appel à la fonction <code>median</code>. Si nous soumettons cette instruction dans la console, elle est évaluée et sa valeur, ici l’objet retourné en sortie par la fonction <code>median</code>, est imprimée.</p>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb65-1" title="1"><span class="kw">median</span>(<span class="dt">x =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)</a></code></pre></div>
+<pre><code>## [1] 5.5</code></pre>
+<p>Si nous ajoutons une assignation au début de l’instruction comme suit :</p>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb67-1" title="1">out &lt;-<span class="st"> </span><span class="kw">median</span>(<span class="dt">x =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)</a></code></pre></div>
+<p>la sortie retournée par l’appel à la fonction <code>median</code> n’est pas imprimée. Elle est plutôt assignée au nom <code>out</code>, qui pointe donc maintenant vers un objet contenant la sortie produite.</p>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb68-1" title="1">out</a></code></pre></div>
+<pre><code>## [1] 5.5</code></pre>
+<p>Mais comment stocker dans un objet l’instruction elle-même ?</p>
+<div id="fonction-quote" class="section level2">
+<h2>Fonction <code>quote</code></h2>
+<p>La fonction <code>quote</code> retourne une instruction R non évaluée, que nous pouvons appeler « expression ».</p>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb70-1" title="1">out_quote &lt;-<span class="st"> </span><span class="kw">quote</span>(<span class="kw">median</span>(<span class="dt">x =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>))</a>
+<a class="sourceLine" id="cb70-2" title="2"><span class="kw">str</span>(out_quote)</a></code></pre></div>
+<pre><code>##  language median(x = 1:10)</code></pre>
+<p>C’est un « élément de langage ».</p>
+</div>
+<div id="fonction-eval" class="section level2">
+<h2>Fonction <code>eval</code></h2>
+<p>Lorsque nous désirons évaluer une expression R, nous pouvons la fournir en entrée à la fonction <code>eval</code>.</p>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb72-1" title="1"><span class="kw">eval</span>(out_quote)</a></code></pre></div>
+<pre><code>## [1] 5.5</code></pre>
+</div>
+<div id="fonction-call" class="section level2">
+<h2>Fonction <code>call</code></h2>
+<p>Si l’instruction que nous souhaitons manipuler est un appel à une fonction, nous pouvons aussi créer l’expression non évaluée de l’instruction avec la fonction <code>call</code>.</p>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb74-1" title="1">out_call &lt;-<span class="st"> </span><span class="kw">call</span>(<span class="st">&quot;median&quot;</span>, <span class="dt">x =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)</a>
+<a class="sourceLine" id="cb74-2" title="2"><span class="kw">str</span>(out_call)</a></code></pre></div>
+<pre><code>##  language median(x = 1:10)</code></pre>
+<p>Les objets <code>out_call</code> et <code>out_quote</code> sont équivalents.</p>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb76-1" title="1"><span class="kw">all.equal</span>(out_quote, out_call)</a></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p>Évaluer <code>out_call</code> se réalise de la même façon qu’évaluer <code>out_quote</code>.</p>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb78-1" title="1"><span class="kw">eval</span>(out_call)</a></code></pre></div>
+<pre><code>## [1] 5.5</code></pre>
+</div>
+<div id="fonction-parse" class="section level2">
+<h2>Fonction <code>parse</code></h2>
+<p>Étant donné que les chaînes de caractères se manipulent facilement, il serait utile de pouvoir transformer une chaîne de caractères en expression. C’est ce que nous permet de faire la fonction <code>parse</code>.</p>
+<p>Par exemple, si nous avons la chaîne de caractère suivante :</p>
+<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb80-1" title="1">instruc_car &lt;-<span class="st"> &quot;median(x = 1:10)&quot;</span></a>
+<a class="sourceLine" id="cb80-2" title="2"><span class="kw">str</span>(instruc_car)</a></code></pre></div>
+<pre><code>##  chr &quot;median(x = 1:10)&quot;</code></pre>
+<p>nous pouvons la transformer en expression non évaluée avec <code>parse</code> comme suit.</p>
+<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb82-1" title="1">out_parse &lt;-<span class="st"> </span><span class="kw">parse</span>(<span class="dt">text =</span> instruc_car)</a>
+<a class="sourceLine" id="cb82-2" title="2"><span class="kw">str</span>(out_parse)</a></code></pre></div>
+<pre><code>##   expression(median(x = 1:10))</code></pre>
+<p>L’objet <code>out_parse</code> n’a pas tout à fait la même structure que <code>out_quote</code> ou <code>out_call</code>, mais il s’évalue de la même façon, avec la fonction <code>eval</code>.</p>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb84-1" title="1"><span class="kw">eval</span>(out_parse)</a></code></pre></div>
+<pre><code>## [1] 5.5</code></pre>
+<p>Nous avons donc parcouru le chemin de transformation suivant :</p>
+<blockquote>
+<p>instruction sous forme de chaîne de caractères,<br />
+<span class="math inline">\(\rightarrow\)</span> expression non évaluée avec <code>parse</code>,<br />
+<span class="math inline">\(\rightarrow\)</span> évaluation de l’expression avec <code>eval</code>.</p>
+</blockquote>
+<p>Grâce à ces outils, nous pourrions améliorer la fonction <code>reg_poly</code>. Vous aurez peut-être remarqué que dans l’impression de la sortie de cette fonction, le <code>Call</code> a toujours la même allure : <code>lm(formula = as.formula(formule))</code>. Ce n’est pas très informatif. Voici une deuxième version de cette fonction, utilisant <code>parse</code> et <code>eval</code> plutôt que <code>as.formula</code>, qui produit un affichage amélioré.</p>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb86-1" title="1"><span class="co">#&#39; @inherit reg_poly title description params return</span></a>
+<a class="sourceLine" id="cb86-2" title="2">reg_poly_<span class="dv">2</span> &lt;-<span class="st"> </span><span class="cf">function</span>(y, x, dg){</a>
+<a class="sourceLine" id="cb86-3" title="3">  instruc &lt;-<span class="st"> </span><span class="kw">paste0</span>(</a>
+<a class="sourceLine" id="cb86-4" title="4">    <span class="st">&quot;lm(y ~ &quot;</span>, </a>
+<a class="sourceLine" id="cb86-5" title="5">    <span class="kw">paste</span>(<span class="kw">paste0</span>(<span class="st">&quot;I(x^&quot;</span>, <span class="dv">1</span><span class="op">:</span>dg, <span class="st">&quot;)&quot;</span>), <span class="dt">collapse =</span> <span class="st">&quot; + &quot;</span>),</a>
+<a class="sourceLine" id="cb86-6" title="6">    <span class="st">&quot;)&quot;</span></a>
+<a class="sourceLine" id="cb86-7" title="7">  )</a>
+<a class="sourceLine" id="cb86-8" title="8">  <span class="kw">eval</span>(<span class="kw">parse</span>(<span class="dt">text =</span> instruc))</a>
+<a class="sourceLine" id="cb86-9" title="9">}</a></code></pre></div>
+<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb87-1" title="1"><span class="kw">reg_poly_2</span>(<span class="dt">y =</span> cars<span class="op">$</span>dist, <span class="dt">x =</span> cars<span class="op">$</span>speed, <span class="dt">dg =</span> <span class="dv">3</span>)</a></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = y ~ I(x^1) + I(x^2) + I(x^3))
+## 
+## Coefficients:
+## (Intercept)       I(x^1)       I(x^2)       I(x^3)  
+##   -19.50505      6.80111     -0.34966      0.01025</code></pre>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb89-1" title="1"><span class="kw">reg_poly_2</span>(<span class="dt">y =</span> cars<span class="op">$</span>dist, <span class="dt">x =</span> cars<span class="op">$</span>speed, <span class="dt">dg =</span> <span class="dv">5</span>)</a></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = y ~ I(x^1) + I(x^2) + I(x^3) + I(x^4) + I(x^5))
+## 
+## Coefficients:
+## (Intercept)       I(x^1)       I(x^2)       I(x^3)       I(x^4)       I(x^5)  
+##   -2.650053     5.484259    -1.426123     0.194049    -0.010040     0.000179</code></pre>
+</div>
+</div>
+<div id="manipulation-de-lappel-dune-fonction" class="section level1">
+<h1>Manipulation de l’appel d’une fonction</h1>
+<p>Dans le corps d’une fonction, il est parfois utile de pouvoir manipuler l’appel de la fonction.</p>
+<p>Par exemple, la fonction <code>hist</code> utilise la façon dont la fonction a été appelée pour écrire le titre du graphique et le nom de l’axe des x.</p>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb91-1" title="1"><span class="kw">hist</span>(<span class="kw">rnorm</span>(<span class="dv">100</span>))</a></code></pre></div>
+<p><img src="/amelioration_code/metaprogrammation_r_2020_files/figure-html/unnamed-chunk-45-1.png" width="60%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb92-1" title="1">x &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">100</span>)</a>
+<a class="sourceLine" id="cb92-2" title="2"><span class="kw">hist</span>(x)</a></code></pre></div>
+<p><img src="/amelioration_code/metaprogrammation_r_2020_files/figure-html/unnamed-chunk-45-2.png" width="60%" style="display: block; margin: auto;" /></p>
+<p>Comment arriver à faire pareil ?</p>
+<div id="fonctions-substitute-et-deparse" class="section level2">
+<h2>Fonctions <code>substitute</code> et <code>deparse</code></h2>
+<p>Essayons de trouver dans le corps de la fonction <code>hist</code> comment elle procède. En fait, la fonction <code>hist</code> étant générique, allons voir dans le corps de sa méthode par défaut.</p>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb93-1" title="1"><span class="kw">View</span>(hist.default)</a>
+<a class="sourceLine" id="cb93-2" title="2"><span class="co"># résultat non affiché ici, soumettre la commande dans la console pour le voir</span></a></code></pre></div>
+<p>Les fonctions <code>substitute</code> et <code>deparse</code> sont utilisées pour créer l’objet <code>xname</code>, qui est ensuite utilisé dans les valeurs par défaut des arguments <code>main</code> et <code>xlab</code>.</p>
+<div id="exemples-pour-mieux-comprendre-substitute-et-deparse" class="section level4">
+<h4>Exemples pour mieux comprendre <code>substitute</code> et <code>deparse</code> :</h4>
+
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb94-1" title="1">fct1 &lt;-<span class="st"> </span><span class="cf">function</span>(x){</a>
+<a class="sourceLine" id="cb94-2" title="2">  x</a>
+<a class="sourceLine" id="cb94-3" title="3">}</a>
+<a class="sourceLine" id="cb94-4" title="4">test &lt;-<span class="st"> </span><span class="kw">fct1</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)</a>
+<a class="sourceLine" id="cb94-5" title="5"><span class="kw">str</span>(test)</a></code></pre></div>
+<pre><code>##  int [1:10] 1 2 3 4 5 6 7 8 9 10</code></pre>
+<p>La fonction <code>fct1</code> retourne ici un vecteur, soit le résultat de l’évaluation de l’expression fournie en entrée à l’argument <code>x</code>.</p>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb96-1" title="1">fct2 &lt;-<span class="st"> </span><span class="cf">function</span>(x){</a>
+<a class="sourceLine" id="cb96-2" title="2">  <span class="kw">substitute</span>(x)</a>
+<a class="sourceLine" id="cb96-3" title="3">}</a>
+<a class="sourceLine" id="cb96-4" title="4">test &lt;-<span class="st"> </span><span class="kw">fct2</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)</a>
+<a class="sourceLine" id="cb96-5" title="5"><span class="kw">str</span>(test)</a></code></pre></div>
+<pre><code>##  language 1:10</code></pre>
+<p>Lorsque <code>substitute</code> est utilisée dans le corps d’une fonction et qu’elle reçoit en entrée le nom d’un argument, elle retourne l’expression non évaluée fournie en entrée à cet argument dans l’appel de la fonction. La fonction <code>fct2</code> retourne donc une expression non évaluée (comme <code>quote</code> ou <code>call</code>).</p>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb98-1" title="1">fct3 &lt;-<span class="st"> </span><span class="cf">function</span>(x){</a>
+<a class="sourceLine" id="cb98-2" title="2">  <span class="kw">deparse</span>(<span class="kw">substitute</span>(x))</a>
+<a class="sourceLine" id="cb98-3" title="3">}</a>
+<a class="sourceLine" id="cb98-4" title="4">test &lt;-<span class="st"> </span><span class="kw">fct3</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)</a>
+<a class="sourceLine" id="cb98-5" title="5"><span class="kw">str</span>(test)</a></code></pre></div>
+<pre><code>##  chr &quot;1:10&quot;</code></pre>
+<p>Dans le corps de la fonction <code>fct3</code>, l’expression non évaluée retournée par <code>substitute</code> est transformée en chaîne de caractères par la fonction <code>deparse</code>. La fonction <code>deparse</code> permet de faire l’inverse de la fonction <code>parse</code> :</p>
+<ul>
+<li><code>deparse</code> : expression <span class="math inline">\(\rightarrow\)</span> chaîne de caractères,</li>
+<li><code>parse</code>: chaîne de caractères <span class="math inline">\(\rightarrow\)</span> expression.</li>
+</ul>
+</div>
+</div>
+<div id="fonction-match.call" class="section level2">
+<h2>Fonction <code>match.call</code></h2>
+<p>Avec <code>substitute</code>, nous pouvons accéder à une expression assignée à un argument dans l’appel d’une fonction. La fonction <code>match.call</code>, que nous avons déjà mentionnée dans les notes sur les <a href="https://stt4230.rbind.io/programmation/fonctions_r/#fonction-match.call">fonctions</a>, permet quant à elle d’accéder à l’appel complet de la fonction.</p>
+<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb100-1" title="1">fct4 &lt;-<span class="st"> </span><span class="cf">function</span>(x){</a>
+<a class="sourceLine" id="cb100-2" title="2">  <span class="kw">match.call</span>()</a>
+<a class="sourceLine" id="cb100-3" title="3">}</a>
+<a class="sourceLine" id="cb100-4" title="4">test &lt;-<span class="st"> </span><span class="kw">fct4</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)</a>
+<a class="sourceLine" id="cb100-5" title="5"><span class="kw">str</span>(test)</a></code></pre></div>
+<pre><code>##  language fct4(x = 1:10)</code></pre>
+<p>La fonction <code>match.call</code> retourne une expression non évaluée, comme <code>substitute</code>. Dans cette expression, il est possible d’accéder à des arguments en particulier.</p>
+<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb102-1" title="1">fct5 &lt;-<span class="st"> </span><span class="cf">function</span>(x, y){</a>
+<a class="sourceLine" id="cb102-2" title="2">  appel &lt;-<span class="st"> </span><span class="kw">match.call</span>()</a>
+<a class="sourceLine" id="cb102-3" title="3">  <span class="kw">list</span>(</a>
+<a class="sourceLine" id="cb102-4" title="4">    <span class="dt">appel_complet =</span> appel, </a>
+<a class="sourceLine" id="cb102-5" title="5">    <span class="dt">arg_x_exp =</span> appel<span class="op">$</span>x,</a>
+<a class="sourceLine" id="cb102-6" title="6">    <span class="dt">arg_y_car =</span> <span class="kw">deparse</span>(appel<span class="op">$</span>x),</a>
+<a class="sourceLine" id="cb102-7" title="7">    <span class="dt">arg_y_exp =</span> appel<span class="op">$</span>y</a>
+<a class="sourceLine" id="cb102-8" title="8">  )</a>
+<a class="sourceLine" id="cb102-9" title="9">}</a>
+<a class="sourceLine" id="cb102-10" title="10">test &lt;-<span class="st"> </span><span class="kw">fct5</span>(<span class="dt">x =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, <span class="dt">y =</span> <span class="st">&quot;a&quot;</span>)</a>
+<a class="sourceLine" id="cb102-11" title="11"><span class="kw">str</span>(test)</a></code></pre></div>
+<pre><code>## List of 4
+##  $ appel_complet: language fct5(x = 1:10, y = &quot;a&quot;)
+##  $ arg_x_exp    : language 1:10
+##  $ arg_y_car    : chr &quot;1:10&quot;
+##  $ arg_y_exp    : chr &quot;a&quot;</code></pre>
+<p>Dans cet exemple, la valeur fournie à l’argument <code>y</code> ne contient pas un appel à une fonction ou un opérateur. Il s’agit d’un seul élément, de type caractère. Son expression non évaluée est donc la valeur en caractères elle-même.</p>
+<hr />
+</div>
+</div>
+<div id="résumé" class="section level1">
+<h1>Résumé</h1>
+<p><strong>Manipuler des éléments de langage sans les évaluer</strong></p>
+<ul>
+<li>assignation d’une valeur à un nom : <code>assign</code>;</li>
+<li>retour de la valeur assignée à un nom : <code>get</code>;</li>
+<li>appel à une fonction en fournissant les arguments dans une liste : <code>do.call</code>;</li>
+<li>manipulation de formules :
+<ul>
+<li>créer une formule à partir d’une chaîne de caractères : <code>as.formula</code>,</li>
+<li>mettre à jour une formule : <code>update.formula</code>;</li>
+</ul></li>
+<li>manipulation d’instructions :
+<ul>
+<li>capturer une instruction sans l’évaluer : <code>quote</code>,</li>
+<li>évaluer une expression : <code>eval</code>,</li>
+<li>écrire un appel de fonction sous forme d’expression (non évaluée) : <code>call</code>,</li>
+<li>créer une expression (non évaluée) à partir d’une chaîne de caractères : <code>parse</code> (argument <code>text</code>);</li>
+</ul></li>
+<li>manipulation de l’appel d’une fonction :
+<ul>
+<li>capturer sans l’évaluer l’expression assignée à un argument dans un appel de fonction : <code>substitute</code>,</li>
+<li>transformer une expression en chaîne de caractères : <code>deparse</code>,</li>
+<li>capturer sous forme d’expression un appel de fonction : <code>match.call</code>.</li>
+</ul></li>
+</ul>
+<hr />
+</div>
+<div id="références" class="section level1">
+<h1>Références</h1>
+<ul>
+<li>R Core Team (2020). <em>R Language Definition</em>. R Foundation for Statistical Computing. Chapitre 6. URL <a href="http://cran.r-project.org/doc/manuals/r-patched/R-lang.html#Computing-on-the-language" class="uri">http://cran.r-project.org/doc/manuals/r-patched/R-lang.html#Computing-on-the-language</a></li>
+<li>Wickham, H. (2014). <em>Advanced R</em>. CRC Press. Chapitres 13 et 14. URLs <a href="http://adv-r.had.co.nz/Computing-on-the-language.html" class="uri">http://adv-r.had.co.nz/Computing-on-the-language.html</a>, <a href="http://adv-r.had.co.nz/Expressions.html" class="uri">http://adv-r.had.co.nz/Expressions.html</a></li>
+<li>Wickham, H. (2019). <em>Advanced R, Second Edition.</em> Chapman and Hall/CRC. Section 4. URL <a href="https://adv-r.hadley.nz/metaprogramming.html" class="uri">https://adv-r.hadley.nz/metaprogramming.html</a></li>
+</ul>
+</div>
