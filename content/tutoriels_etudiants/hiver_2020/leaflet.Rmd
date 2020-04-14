@@ -1,0 +1,265 @@
+---
+title: 'Package leaflet'
+linkTitle: "leaflet - cartes interactives"
+author: "Marc-Antoine Paré"
+weight: 4
+date: '2020-03-18'
+output: 
+  blogdown::html_page:
+    toc: yes
+    toc_depth: 3
+    highlight: tango
+editor_options:
+  chunk_output_type: console
+---
+ 
+`r knitr::opts_chunk$set(comment = NA)`
+
+# Introduction
+
+Le package `leaflet` permet de créer des cartes géographiques interactives avec `R`. Les cartes sont générées avec la librairie `Leaflet` de `JavaScript`. Les cartes s'affichent rapidement et permettent de montrer de l'information de plusieurs façons. Ce package ressemble un peu à celui de `ggplot2`, dans le sens que chaque information supplémentaire ajoutée correpond à une ligne de code généralement simple.
+
+Plusieurs options sont disponibles, comme ajouter des marqueurs ou des surfaces afin de mieux visualiser les données. Les résultats produits sont faits avec `OpenStreetMap`, qui est facile d'utilisation et qui permet de créer des cartes libres de droits.
+
+# Installation et utilisation
+
+Pour installer le package, il suffit d'exécuter la ligne suivante:
+
+```{r eval=FALSE}
+install.packages("leaflet")
+```
+
+Afin d'utiliser le package, il faut exécuter la ligne suivante:
+
+```{r}
+library(leaflet)
+```
+
+# Fonctionnement général du package
+
+Le package `leaflet` fonctionne par étapes. Tout d'abord, il faut créer une carte (nommée `widget` dans la documentation) en faisant appel à la fonction `leaflet()`. Pour contrôler la grandeur de la carte, il faut modifier les paramètres de la fonction `leaflet`. Par la suite, on ajoute des couches à cette carte de base. Plusieurs options sont possibles: marqueurs, polygones, points colorés, boutons, etc. 
+
+Le tableau suivant contient certaines fonctions utiles pour personnaliser les cartes:
+
+| Fonction | Description |
+|----------|-----------------------------------|
+| addProviderTiles addTiles | Choisir la couche de fond | 
+| addMarkers addAwesomeMarkers addCircleMarkers | Ajoute des marqueurs personnalisés | 
+| addPopups | Ajoute une bulle avec de l'information |
+| addPolygons addCircles addRectangles | Ajoute des surfaces en forme de polygones, de cercles ou rectangles |
+| addLegend | Ajoute une légende |
+| addMeasure | Ajoute un bouton qui permet de mesurer des distances et des surfaces |
+| addEasyButton | Ajoute un bouton avec un niveau de zoom prédéfini |
+
+Souvent, les premiers arguments utilisés pour ces fonctions sont le nom de carte, la
+longitude et la latitude des points à visualiser. Pour visualiser la carte, il faut simplement faire appel à l’objet
+dans lequel la carte est stockée.
+
+
+# Exemples de cartes
+Cette section contient des exemples de cartes qu'il est possible de réaliser avec le package `leaflet`.
+
+## Point sur une carte
+
+Il est plutôt simple de mettre en évidence un point sur une carte lorsqu'on connait les coordonnées GPS. Prenons un exemple avec le pavillon Pouliot de l'Université Laval. 
+
+Tout d'abord, on garde les coordonnées du pavillon dans l'objet `pouliot`.
+```{r}
+pouliot <- c(latitude = 46.779495, longitude = -71.275398)
+```
+
+Ensuite, on stocke la carte dans l'objet `carte_pouliot`. À l'aide de la fonction `leaflet`, on modifie la largeur et la hauteur par défaut.
+
+```{r}
+carte_pouliot <- leaflet(width = 910, height = 240)
+```
+
+Avec la fonction `addTiles`, on ajoute les tuiles de fond provenant de `OpenStreetMap`.
+```{r}
+carte_pouliot <- addTiles(carte_pouliot)    
+```
+
+La fonction `addMarkers` permet d'ajouter du texte en glissant le curseur sur le point.
+```{r}
+carte_pouliot <- addMarkers(
+  map = carte_pouliot,
+  lng = pouliot["longitude"],
+  lat = pouliot["latitude"],
+  label = "Université Laval, Pavillon Pouliot"  # Texte en glissant le curseur
+)
+```
+
+Voici une autre façon d'ajouter du texte avec la fonction `addPopups`. Il s'agit d'un popup qui disparaît lorsqu'on clique quelque part dans la carte.
+```{r}
+carte_pouliot <- addPopups(
+  map = carte_pouliot,
+  lng = pouliot["longitude"],
+  lat = pouliot["latitude"],
+  popup = "Université Laval, Pavillon Pouliot",  # Texte qui apparaît au début
+  options = popupOptions(closeButton = FALSE)
+)
+```
+
+On ajoute aussi un bouton permettant de mesurer des distances et des superficies. La fonction `addMeasure` ajoute un bouton avec une équerre dessus. On choisit le mètre et le mètre carré pour les unités de mesures.
+```{r}
+carte_pouliot <- addMeasure(
+  map = carte_pouliot,
+  position = "bottomleft",
+  primaryLengthUnit = "meters",
+  primaryAreaUnit = "sqmeters",
+  activeColor = "#FF0000",
+  completedColor = "#7D4479"
+)
+```
+
+Finalement, on affiche la carte.
+```{r}
+carte_pouliot
+```
+
+
+## Grouper des points par couleur
+
+Il est parfois pratique de montrer plusieurs points sur une même carte. L'exemple qui suit a été produit avec le data frame `quakes` du package `datasets`. Ces données représentent la position géographique, la magnitude et la profondeur de plusieurs séismes près des îles Fidji. Une variable contient aussi le nombre de stations sismiques qui ont rapporté chaque tremblement de terre. La colonne `region` a été ajoutée selon la longitude.
+
+Dans cet exemple, on peut obtenir d'autres informations sur les points. En glissant le curseur, on obtient la magnitude du séisme et en cliquant on obtient les coordonnées GPS.
+
+Tout d'abord, on appelle le package `datasets` et on ajoute la variable.
+```{r}
+library(datasets)
+
+quakes$region <- factor(quakes$long >= 175, labels = c("Ouest", "Est"))
+```
+
+On ajoute ensuite la couleur en fonction de la région avec la fonction `colorFactor`.
+```{r}
+quake_couleur <- colorFactor(c("blue", "red"), domain = c("Est", "Ouest"))
+```
+
+On stocke ensuite la carte dans l'objet `carte_quake`.
+```{r}
+carte_quake <- leaflet()
+```
+
+On utilise la fonction `addTiles` pour le fond de carte.
+```{r}
+carte_quake <- addTiles(carte_quake)
+```
+
+Avec la fonction `addCircleMarkers`, on ajoute des marqueurs en forme de cercle. On ajoute également un popup qui contient la magnitude en glissant le curseur et les coordonnées en cliquant.
+```{r}
+carte_quake <- addCircleMarkers(
+  map = carte_quake,
+  lng = quakes$long,
+  lat = quakes$lat,
+  popup = paste("Latitude:", quakes$lat, ", longitude:", quakes$long),
+  label = paste("Magnitude", quakes$mag),
+  color = quake_couleur(quakes$region),
+  radius = quakes$depth/100  # Rayon des points. On divise par 100, sinon les points sont trop gros.
+)
+```
+
+La fonction `addProviderTiles` permet de changer le fond de la carte.
+```{r}
+carte_quake <- addProviderTiles(
+  map = carte_quake,
+  provider = providers$Stamen.Watercolor
+)
+```
+
+On ajoute ensuite la légende des couleurs avec la fonction `addLegend`.
+```{r}
+carte_quake <- addLegend(
+  map = carte_quake,
+  position = "topright",
+  pal = quake_couleur,
+  values = quakes$region,
+  title = "Région",
+  opacity = 1
+)
+```
+
+Finalement, on affiche le résultat.
+```{r}
+carte_quake
+```
+
+Il existe plusieurs fonds de carte. Pour avoir la liste complète disponible, il suffit d'exécuter la commande suivante:
+```{r eval=FALSE}
+names(providers)
+```
+
+## Groupes avec nombres variables
+
+Lorsqu'il y a plusieurs points à montrer à la fois, il est possible de faire une carte avec des groupes qui varient selon le niveau de zoom.
+
+On stocke la carte dans l'objet `carte_groupe`.
+```{r}
+carte_groupe <- leaflet()
+```
+
+On ajoute ensuite le fond de carte `OpenStreetMap`.
+```{r}
+carte_groupe <- addTiles(carte_groupe)
+```
+
+Avec la fonction `addMarkers`, on ajoute des points qui sont groupés selon le niveau de zoom. On ajoute également le nombre de stations ayant détecté le séisme lorsqu'on clique sur un point.
+```{r}
+carte_groupe <- addMarkers(
+  map = carte_groupe,
+  lng = quakes$long,
+  lat = quakes$lat,
+  popup = paste(quakes$stations, "stations ont détecté le séisme"),
+  clusterOptions = markerClusterOptions()
+)
+```
+
+On change le fond de la carte avec la fonction `addProviderTiles`.
+```{r}
+carte_groupe <- addProviderTiles(
+  map = carte_groupe, 
+  provider = providers$Stamen.TonerLite
+)
+```
+
+On ajoute un bouton qui permet de revenir au zoom initial. Le niveau utilisé est 4 et le bouton est en forme de planète.
+```{r}
+carte_groupe <- addEasyButton(
+  map = carte_groupe,
+  button = easyButton(
+    icon = "fa-globe",
+    title = "Zoom initial",
+    onClick = JS("function(btn, map){ map.setZoom(4); }")
+  )
+)
+```
+
+On affiche la carte.
+```{r}
+carte_groupe
+```
+
+# Appréciation générale
+
+Le package `leaflet` fonctionne similairement au package `ggplot2`. On ajoute des éléments une étape à la fois, un peu comme on le fait avec des graphiques.
+
+Il y a énormément d'options de personnalisation des cartes, que ce soit la couche de fond ou la couleur des points. Les cartes générées sont également très intuitives à utiliser.
+
+Un des points négatifs à ce package est que la documentation manque souvent de clarté. Plusieurs essais et erreurs sont faits avant d'obtenir exactement ce qu'on veut au début. On apprend assez vite comment ça fonctionne toutefois.
+
+Également, bien qu'il y ait plusieurs exemples avec des fonds de carte différents de celui par défaut, il y a plusieurs cas que je n'ai pas réussi à faire fonctionner et je ne sais pas pourquoi.
+
+# Références
+
+Informations supplémentaires sur le package:
+
+* https://rstudio.github.io/leaflet/
+
+* https://cran.r-project.org/web/packages/leaflet/leaflet.pdf
+
+* https://www.earthdatascience.org/courses/earth-analytics/get-data-using-apis/leaflet-r/
+
+Exemples de fonds de carte:
+
+* http://leaflet-extras.github.io/leaflet-providers/preview/index.html
+

@@ -1,0 +1,374 @@
+---
+title: 'Package gganimate'
+linkTitle: "gganimate - graphiques ggplot2 animés"
+author: "Pascale Caissy & Jacob Lessard-Lord"
+weight: 3
+date: '2020-03-16'
+output: 
+  blogdown::html_page:
+    toc: yes
+    toc_depth: 3
+    highlight: tango
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = '', fig.align = 'center', out.width = "100%")
+```
+
+# Introduction à `gganimate`
+
+R est un logiciel très puissant permettant la création de graphiques, ceux-ci étant à la base de la présentation de données statistiques. Un package très utilisé pour la création de graphiques est `ggplot2`, sa popularité s'expliquant par sa facilité d'utilisation et la répétitivité de ses commandes. Une extension de `ggplot2` très appréciée des fans de visualisation graphique est le package `gganimate`. 
+
+Le package `gganimate` a d'abord été développé par David Robinson au début de 2016. Cependant, cette version n'a jamais été publiée sur les serveurs du CRAN. À l'automne 2017, Thomas Lin Pedersen a pris en charge la maintenance du package `gganimate`. Des changements majeurs ont ensuite été apportés au package, ce qui a mené à une nouvelle version de `gganimate` à l'été 2018. Le package `gganimate` est maintenant disponible sur les serveurs du CRAN. La dernière version (1.0.5) a été déposée le 9 février 2020.
+
+Ce package permet d'ajouter des animations aux graphiques statiques produits à l'aide de `ggplot2`. Une animation est en fait une image générée à partir d'une série d'images (tableaux ou *frames* en anglais) superposées rapidement pour donner l'illusion d'un mouvement continu. Ces animations peuvent entre autres être visualisées sur des pages html ou enregistrées sous forme de gif. Ainsi, ce package permet d'attirer l'attention sur les graphiques d'une présentation ou d'aider à représenter une multitude de données dans un même graphique. Ici, nous nous amuserons à créer des graphiques animés à l'aide de `gganimate` en utilisant deux jeux de données du R de base, soit `quakes` et `WorldPhones`.  
+
+# Présentation et préparation des deux jeux de données
+
+## `quakes`
+
+Le jeu de données `quakes` du package `datasets` du R de base contient les données de 1000 séismes de magnitude 4.0 et plus s'étant produits près des îles Fidji depuis 1964. Chaque observation inclut la latitude (`lat`), la longitude (`long`), la profondeur (`depth`), la magnitude (`mag`) et le nombre de stations à proximité (`stations`) ayant rapporté une activité sismique. 
+
+Ajoutons à ce jeu de données une variable factorielle prénommée `region`. Ce facteur déterminera si chaque observation a été observée à l'ouest ou à l'est de la longitude 175°. Créons également un facteur nommé `mag_catego`. Ce dernier servira à créer des classes de magnitude du séisme arrondie à l’entier inférieur (4, 5 ou 6).
+
+```{r quakes}
+quakes$region <- factor(quakes$long >= 175, labels = c("Ouest", "Est"))
+quakes$mag_catego <- factor(floor(quakes$mag))
+str(quakes)
+```
+
+## `WorldPhones`
+
+Le jeu de données `WorldPhones` du package `datasets` du R de base contient les données du nombre de lignes téléphoniques enregistrées entre 1951 et 1961 sur chaque continent sous forme de matrice. Dans cette matrice, le nom des colonnes indique le nom du continent où les données ont été enregistrées alors que le nom des rangées représente l'année à laquelle le nombre de lignes téléphoniques a été calculé. 
+
+Transformons d'abord cette matrice en dataframe avec le nom des rangées, donc l'année, inclus dans une colonne à part (`Year`).  
+
+```{r WorldPhones}
+WorldPhones <- data.frame(WorldPhones)
+WorldPhones$Year <- as.numeric(rownames(WorldPhones))
+head(WorldPhones, n = 3)
+```
+
+Nous pouvons constater que le dataframe `WorldPhones` a une mise en forme large. Afin de pouvoir utiliser ce dataframe pour produire un graphique animé plus tard, transférons-le dans une mise en forme longue. Pour ce faire, nous utiliserons la fonction `pivot_longer` du package `tidyr`. 
+
+```{r WorldPhones long}
+library(tidyr)
+WorldPhones_long <- pivot_longer(
+  data = WorldPhones, 
+  cols = c(N.Amer, Europe, Asia, S.Amer, Oceania, Africa, Mid.Amer), 
+  names_to = "Region", 
+  values_to = "Nbr.Phones")
+
+head(WorldPhones_long, n = 5)
+```
+  
+# Exploration de `gganimate`  
+
+## Installation de `gganimate`
+
+Une fois le package installé dans notre librairie à l'aide de la fonction `install.packages`, chargeons-le dans notre espace de travail. À noter que `gganimate` charge automatiquement le package `ggplot2` à notre session.
+
+```{r charger gganimate, results='hide', warning=FALSE, message = TRUE, comment=''}
+library(gganimate)
+```
+
+**NOTE:** L'installation du package [`gifski`](https://cran.r-project.org/web/packages/gifski/index.html) avec la fonction `install.packages` peut être nécessaire pour le bon fonctionnement des animations. Le package `gifski` permet d'assembler les différents tableaux produits en un GIF. Par la suite, même si l'installation en soi est requise, vous n'aurez pas besoin de le charger dans votre espace de travail.
+
+## Fonctions de base
+
+| Fonction | Possibilités de fonctions (*) |              Rôle              | S'intègre directement aux commandes `ggplot2` |
+|:---------|:-----------------|:-------------------------------|:----------------------|
+| [`transition_*`](https://gganimate.com/reference/transition_states.html) | states / time / reveal / events / filter / layers / components / manual / null | Contrôle les données à animer | Oui |
+| [`view_*`](https://gganimate.com/reference/view_follow.html)  | follow / step / step_manual / zoom / zoom_manual / static | Contrôle le mouvement du plan de vue | Oui |
+| [`shadow_*`](https://gganimate.com/reference/shadow_mark.html) | wake / trail / mark / null |Contrôle la persistance des données | Oui |
+| [`enter/exit_*`](https://gganimate.com/reference/enter_exit.html) | manual / appear / disappear / fade / grow / shrink / recolour / recolor / fly / drift / reset | Contrôlent la façon dont les données apparaissent et disparaissent | Oui |
+| [`animate`](https://gganimate.com/reference/animate.html) | - | Contrôle la visualisation des tableaux (*frames*) de l'animation et leur nombre | Non |
+| [`anim_save`](https://gganimate.com/reference/anim_save.html) | - | Permet la sauvegarde de l'objet animé dans un fichier | Non |
+
+Table: **Tableau 1.** Liste des fonctions les plus couramment utilisées du package `gganimate` avec un hyperlien vers la documentation pertinente pour chacune d'entre elle. Comme il n'existe pas de documentation spécifique pour expliquer la fonction générique des fonctions de type `fonction_*` (sauf `enter/exit_*`), les hyperliens mènent à un exemple de fonction.
+
+**NOTE:** L'ajout de la fonction `view_*` ou `transition_*` à une série de commandes suivant la syntaxe de `ggplot2` permet d'animer n'importe quel graphique.
+
+**NOTE 2:** La description exhaustive de chaque fonction du package `gganimate` est disponible sur le [site web de gganimate](https://gganimate.com/reference/index.html).
+
+## Premier exemple avec `quakes`
+
+Explorons maintenant le package `gganimate`. Nous débuterons en créant un graphique statique avec `ggplot2` à partir du jeu de données `quakes`. Nous voulons mettre sous forme d'un nuage de points la latitude et la longitude où un séisme a été enregistré. Ces points seront colorés selon un gradient de la profondeur du séisme.
+
+```{r graphique statique}
+p <- ggplot(data = quakes) +
+  geom_point(mapping = aes(x = long, 
+                           y = lat,
+                           colour = depth,
+                           group = region)) +
+  ggtitle("1000 séismes près de Fidji") +
+  xlab("longitude") + 
+  ylab("latitude") +
+  labs(colour = "profondeur") +
+  scale_color_gradient(low = "paleturquoise", 
+                       high = "#008080") +
+  theme_classic() +
+  coord_quickmap()
+
+p
+```
+
+Nous allons maintenant ajouter un peu de mouvement. Pour faciliter la visualisation du gradient de couleur, nous voulons que chaque point apparaisse graduellement en fonction de la profondeur à laquelle les séismes ont été enregistrés. Nous nous attarderons au rôle de chacune des fonctions plus bas.
+
+```{r animationON}
+panim <- p + 
+  transition_time(depth) +
+  shadow_mark(past = TRUE, 
+              future = FALSE) + 
+  enter_fade() +
+  exit_fade()
+ 
+animate(panim, nframes = 100, end_pause = 15, rewind = TRUE) 
+
+```
+
+Nous constatons que la syntaxe s'intègre très bien à celle de `ggplot2`. Explorons chacune des fonctions ci-haut, en les appliquant une à une au graphique `p`.
+
+```{r animationON1}
+panim1 <- p + 
+  transition_time(depth)
+
+panim1
+
+```
+
+[`transion_time`](https://gganimate.com/reference/transition_time.html) permet que chaque état soit défini comme une période de temps et chaque transition se fasse selon la durée entre les différents états. Bien que la profondeur (`depth`) ne soit pas une mesure de temps, nous voulions ici que chaque point apparaisse graduellement *dans le temps* selon la profondeur. Avec cette seule fonction, le graphique est un peu chaotique: les points disparaissent les uns après les autres. Nous aurons donc besoin d'une fonction de type `shadow_*` pour la suite.
+
+```{r animationON2}
+panim2 <- p + 
+  transition_time(depth) +
+  shadow_mark(past = TRUE, 
+              future = FALSE)
+ 
+panim2
+
+```
+
+[`shadow_mark`](https://gganimate.com/reference/shadow_mark.html) permet d'afficher les données des animations passées et futures  à l'aide de ses arguments logiques `past` et `future`. En donnant la valeur `TRUE` à `past` et la valeur `FALSE` à `future` (qui sont d'ailleurs les valeurs par défaut), les données des animations passées restent visibles jusqu'à la fin de l'animation, tandis que les données des animations futures ne sont pas affichées. Toutefois, la transition entre les points est un peu abrupte. Tentons d'intégrer une fonction de type `enter/exit_*`.
+
+```{r animationON3}
+panim3 <- p + 
+  transition_time(depth) +
+  shadow_mark(past = TRUE, 
+              future = FALSE) + 
+  enter_fade() +
+  exit_fade()
+
+```
+
+[`enter_fade`](https://gganimate.com/reference/enter_exit.html) et [`exit_fade`](https://gganimate.com/reference/enter_exit.html) nous permettent de faire apparaître et disparaître les points de façon graduelle. Cependant, l'animation se réinitialise lorsque l'intégralité des données ont apparu. Il nous faudra donc contrôler l'enchaînement des tableaux avec `animate`. 
+
+```{r animationON4}
+panim <- p + 
+  transition_time(depth) +
+  shadow_mark(past = TRUE, 
+              future = FALSE) + 
+  enter_fade() +
+  exit_fade()
+ 
+animate(panim, nframes = 100, end_pause = 15, rewind = TRUE) 
+
+```
+
+[`animate`](https://gganimate.com/reference/animate.html) nous permet de contrôler la visualisation des tableaux (*frames*) de l'animation et leur nombre (argument `nframes`). L'argument `rewind` permet de "rembobiner" notre animation `panim` en faisant rejouer les différents tableaux dans l'ordre inverse. De plus, nous avons pu ajouter une pause à la fin de l'animation (argument `end_pause`) d'une durée de 15 tableaux afin d'augmenter la période de temps où on peut voir tous les points de l'animation.
+
+<!--
+L'argument `width` permet de contrôler la taille du graphique, car l'usage d'`animate` outrepasse les options de tailles mises avec R Markdown. Toutefois, l'usage de l'argument `width` modifie aussi la taille des titres et annotations du graphique.
+-->
+
+
+### Sous-exemples
+
+Nous pourrions aussi changer l'animation en modifiant le type de transition. Par exemple, nous pourrions vouloir voir apparaître les séismes s'étant produits à l'est et à l'ouest de la longitude 175° en alternance. Nous pourrions alors utiliser la fonction `transition_states` au lieu de `transition_times`. 
+
+```{r animation2}
+p2 <- p + 
+  transition_states(region, 
+                    wrap = FALSE, 
+                    transition_length = 3, 
+                    state_length = 0.5) +
+  shadow_mark(past = FALSE, 
+              future = FALSE) + 
+  enter_fade() +
+  exit_fade()
+ 
+animate(p2, nframes = 100, rewind = TRUE) 
+
+```
+
+- Avec la fonction [`transition_states`](https://gganimate.com/reference/transition_states.html), les données sont séparées en différents états. Ici, les données ont été séparées selon la région en deux états : est et ouest. Nous avons pu définir le temps entre les transitions, donc à quelle vitesse les points d'une région s'effacent, avec l'argument `transition_length`. Nous avons également raccourci le temps entre lequel on voit les points d'une région individuelle en modifiant la valeur de l'argument `state_length`. 
+
+- Avec la fonction [`shadow_mark`](https://gganimate.com/reference/shadow_mark.html), nous avons empêché que les points d'une seule région apparaissent et disparaissent en mettant les deux arguments `past` et `future` à `FALSE`. Finalement, avec la fonction `animate`, nous avons retiré la pause (argument `end_pause`) à la fin de l'animation pour que le tout soit fluide.  
+
+### Pour s'amuser encore un peu avec `quakes`
+
+Une autre fonction intéressante du package `gganimate` est [`transition_layers`](https://gganimate.com/reference/transition_layers.html). Cette dernière permet d'ajouter graduellement chaque couche du graphique. Par exemple, il est possible de faire apparaître des diagrammes en boîte, puis d'ajouter les points qui les constituent par la suite.
+
+```{r animationBP}
+
+bp <- ggplot(data = quakes, 
+             mapping = aes(x = mag_catego, y = stations)) +
+  geom_boxplot() +
+  geom_jitter(mapping = aes(colour = region),
+              alpha = 0.4) +
+  ggtitle("Nombre de stations ayant rapporté des séismes\nd'une certaine classe de magnitudes") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  xlab("Classe de magnitude") +
+  ylab("Nombre de stations") +
+  labs(colour = "Région")+
+  theme_classic()+
+  scale_color_manual(values = c("darkcyan", "#FF69B4"))
+  
+
+bpanim <- bp + 
+  transition_layers(layer_length = 0.5, 
+                    transition_length = 1) +
+  enter_grow() + 
+  enter_fade()
+
+animate(bpanim, rewind = TRUE)
+
+```
+
+- [`transition_layers`](https://gganimate.com/reference/transition_layers.html) permet de faire apparaître les diagrammes en boîte, puis les points qui les constituent. Dans cet exemple, `geom_boxplot` est une couche et `geom_jitter` est une autre couche. L'argument `layer_length` permet de déterminer le temps de pause avant l'ajout de la prochaine couche et l'argument `transition_length` permet de contrôler la durée de l'entrée d'une nouvelle couche.
+
+- [`enter_grow`](https://gganimate.com/reference/enter_exit.html) et [`enter_fade`](https://gganimate.com/reference/enter_exit.html) permettent de contrôler l'apparition des différentes couches. Comme dans cet exemple, il est possible de combiner plusieurs fonctions de type [`enter_*`](https://gganimate.com/reference/enter_exit.html) afin d'obtenir l'animation souhaitée.
+
+- [`animate`](https://gganimate.com/reference/animate.html) permet ici d'utiliser l'argument `rewind` afin de rendre l'animation plus intéressante visuellement.
+
+## Deuxième exemple avec `WorldPhones`
+
+Nous voulons ici que le nombre de lignes téléphoniques change en fonction des années et des régions. Nous utiliserons alors un diagramme à barres.
+
+```{r animationWP}
+WP <- ggplot(data = WorldPhones_long) +
+  geom_col(mapping = aes(x = Region, y = Nbr.Phones), 
+           fill = "darkcyan") +
+  theme_classic() +
+  xlab("Région") +
+  ylab("Nombre de téléphones (en milliers)") +
+  transition_states(Year,
+                    transition_length = 2,
+                    state_length = 1, 
+                    wrap = TRUE) +
+  ggtitle("Année : {closest_state}")
+
+WP
+
+```
+
+- Cet exemple fait appel à la fonction [`transition_states`](https://gganimate.com/reference/transition_states.html) pour animer le graphique. Chaque état représente une année différente. Encore une fois, nous avons pu définir le temps entre les transitions, donc la vitesse à laquelle on change d'année avec l'argument `transition_length`. Aussi, nous avons laissé la valeur par défaut pour l'argument `state_length`, qui permet de contrôler le temps que les données de chaque année restent visibles. En donnant la valeur `TRUE` à l'argument logique `wrap`, on ajoute une transition entre le dernier état et le premier état, ce qui permet d'avoir une animation plus fluide lorsqu'elle se termine.
+
+- Il est possible d'afficher de façon interactive l'année représentée à chaque état de l'animation grâce à la variable `closest_state`. Cette variable permet de définir le nom de l'état le plus près du tableau représenté (*frame*).
+
+### Sous-exemple
+
+En reprenant l'exemple précédent, nous allons mettre en couleur les nouvelles données qui apparaissent passé 1951. Cela nécessitera la superposition d'un graphique de l'état initial, soit l'année 1951, sur les données des années qui suivent, celles-ci affichées d'une différente couleur. 
+
+```{r animationWP2}
+
+WP2 <- ggplot(data = WorldPhones_long) +
+  geom_col(mapping = aes(x = Region, y = Nbr.Phones), 
+           fill = "cyan3") +
+  geom_col(data = WorldPhones_long[WorldPhones_long$Year == 1951,], 
+           mapping = aes(x = Region, y = Nbr.Phones), 
+           fill = "darkcyan", 
+           show.legend = TRUE) +
+  theme_classic() +
+  xlab("Région") +
+  ylab("Nombre de téléphones (en milliers)") +
+  transition_states(Year,
+                    transition_length = 2,
+                    state_length = 1, 
+                    wrap = TRUE) +
+  ggtitle("Année : {closest_state}") +
+  shadow_mark()
+
+WP2
+
+```
+
+- Nous avons d'abord eu à définir dans ggplot l'argument `data` comme étant `WorldPhones_long`.
+- Nous avons ensuite généré le graphique à animer en premier. `gganimate` le reconnaitra, car il reprend l'argument `data` de la fonction `ggplot`.
+- Nous superposons ensuite le deuxième graphique, qui utilise seulement les données de 1951 dans `WorldPhones_long`, soit des données différentes que ce qui a été entré dans `ggplot`. Ce graphique demeurera alors statique, `gganimate` ne le reconnaissant pas.
+- Les arguments `fill` dans `geom_col` pour les deux graphiques ne retournent pas les mêmes teintes.
+- Pour l'animation, nous avons simplement repris notre usage précédent de `transition_states` et `closest_states`, mais avons ajouté la fonction `shadow_mark` pour que le graphique statique apparaisse par-dessus le graphique animé durant toute la durée de l'animation.
+
+### Pour s'amuser encore un peu avec `WorldPhones`
+
+Les diagrammes à barres peuvent être intéressants pour comparer les données d'une seule année à la fois entre elles, mais ne permettent pas de comparer la progression du nombre de lignes téléphoniques par année sur un seul plan de vue. Nous pourrions alors créer un graphique à lignes avec `geom_line`. Pour l'animation, nous utiliserons pour la première fois une fonction de type `view_*` ainsi que la fonction [`transition_reveal`](https://gganimate.com/reference/transition_reveal.html). 
+
+```{r animationWP3}
+
+WP3 <- ggplot(data = WorldPhones_long, aes(x = Year, y = Nbr.Phones, group=Region, color=Region)) +
+    geom_line() +
+    geom_point() +
+    ggtitle("Nombre de téléphones (en milliers) entre 1951 et 1961") +
+    ylab("Nombre de téléphones") +
+    xlab("Année")+
+    theme_classic()+
+    view_follow(fixed_x = TRUE, 
+                fixed_y = FALSE) +
+    transition_reveal(Year)
+    
+
+WP3 <- animate(WP3, end_pause = 15)
+
+WP3
+```
+
+- [`transition_reveal`](https://gganimate.com/reference/transition_reveal.html) calcule des états intermédiaires entre les années (`Year`) pour tracer une ligne en continu.
+- [`view_follow`](https://gganimate.com/reference/view_follow.html) initie un mouvement du plan de vue selon la progression des axes. Ici, nous ne voulions pas que le plan de vue suive l'axe des abscisses. Nous avons donc donné la valeur `FALSE` à l'argument `fixed_x`.
+
+
+## Sauvegarder une animation (`anim_save`)
+
+Les animations produites par `gganimate` peuvent soit être visualisées en RStudio (fenêtre *Viewer*), intégrées directement dans des documents HTML avec la syntaxe R Markdown ou sauvegardées à l'aide de la fonction `anim_save` en fournissant une chaîne de caractères pour le nom de fichier (argument `filename`) et en désignation quelle animation enregistrer (argument `animation`). Sauvegardées ainsi, ces animations peuvent ensuite être implémentées dans d'autres documents.
+
+```{r sauvegarder, eval = FALSE}
+anim_save(filename = "WP3.gif", animation = WP3)
+```
+
+
+# Appréciation du package
+
+Le package `gganimate` permet d'ajouter un peu de vie aux figures graphiques classiques. Ainsi, quelqu'un qui adore la visualisation de données graphiques pourra facilement y trouver son compte pour rendre ses graphiques plus interactifs et attirer l'œil de son audience.
+
+## Points forts
+
+- La syntaxe est compatible avec `ggplot2`, donc facile à intégrer rapidement dans une série de commandes.
+- Animer un graphique `ggplot2` est très simple, et nécessite dans bien des cas seulement l'ajout d'une fonction ou deux.
+- Un nombre limité de fonctions permet d'arriver à une panoplie de résultats.
+- Qui n'aime pas les animations, sincèrement?
+
+## Limitations
+
+- On ne peut pas superposer deux types de transition, ce qui peut limiter les possibilités de création ou demander de passer par des chemins plus complexes pour arriver à un résultat donné.
+- Les graphiques sont lents à produire selon la puissance de l'ordinateur. Cela rend l'exploration du package plus difficile.
+- La combinaison de certaines fonctions peut produire des résultats inattendus. Animer un graphique exactement comme on l'imagine peut alors devenir complexe.
+- Les tailles des graphiques sont difficiles à contrôler, surtout lorsqu'on les intègre à des documents en utilisant R Markdown. 
+- La documentation R des différentes fonctions manque de clarté, car elle ne donne pas d'exemples visuels de ses commandes. Il faut souvent faire rouler le code qui est fourni, et celui-ci ne fonctionne pas toujours. Il faut alors avoir recours à des forums ou à des pages webs afin de mieux comprendre l'intégration des différentes fonctions.
+
+# Ressources utiles
+
+Aide-mémoire: https://github.com/rstudio/cheatsheets/blob/master/gganimate.pdf
+
+# Références
+
+https://gganimate.com/reference/index.html
+
+https://CRAN.R-project.org/package=gganimate 
+
+https://www.datanovia.com/en/blog/gganimate-how-to-create-plots-with-beautiful-animation-in-r/
+
+https://www.data-imaginist.com/2019/gganimate-has-transitioned-to-a-state-of-release/
+
+
+
