@@ -1,0 +1,431 @@
+---
+title: "Package patchwork et fonction ggMarginal du package ggExtra"
+linkTitle: "patchwork et ggMarginal de ggExtra"
+author: "Mélissa Rochette et Anne-Marie Sauvageau"
+weight: 2
+date: '2020-03-22'
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
+  blogdown::html_page:
+    toc: yes
+    toc_depth: 2
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \renewcommand{\linethickness}{0.05em}
+editor_options:
+  chunk_output_type: console
+---
+
+
+
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#description-des-données">Description des données</a></li>
+<li><a href="#le-package-patchwork">Le package <code>patchwork</code></a><ul>
+<li><a href="#démarrage">Démarrage</a></li>
+<li><a href="#éléments-de-base">Éléments de base</a></li>
+<li><a href="#ajouts-à-un-patchwork-existant">Ajouts à un <code>patchwork</code> existant</a></li>
+<li><a href="#modifications-dun-patchwork-existant">Modifications d’un <code>patchwork</code> existant</a></li>
+<li><a href="#contrôler-la-mise-en-forme-dun-patchwork">Contrôler la mise en forme d’un <code>patchwork</code></a></li>
+<li><a href="#ajouter-des-éléments-textuels-à-un-patchwork">Ajouter des éléments textuels à un <code>patchwork</code></a></li>
+</ul></li>
+<li><a href="#la-fonction-ggmarginal-de-ggextra">La fonction <code>ggMarginal</code> de <code>ggExtra</code></a><ul>
+<li><a href="#démarrage-1">Démarrage</a></li>
+<li><a href="#graphiques-possibles">Graphiques possibles</a></li>
+<li><a href="#modifier-ou-afficher-un-seul-des-graphiques-marginaux">Modifier ou afficher un seul des graphiques marginaux</a></li>
+</ul></li>
+<li><a href="#combinaison-de-patchwork-et-de-ggmarginal-de-ggextra">Combinaison de <code>patchwork</code> et de <code>ggMarginal</code> de <code>ggExtra</code></a></li>
+<li><a href="#commentaires-et-observations-sur-le-package-patchwork-et-la-fonction-ggmarginal">Commentaires et observations sur le package <code>patchwork</code> et la fonction <code>ggMarginal</code></a></li>
+<li><a href="#références">Références</a></li>
+</ul>
+</div>
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p><code>ggplot2</code> est un package très puissant en R devenu populaire au courant des dernières années grâce à sa capacité de créer des graphiques en utilisant sa propre grammaire graphique. C’est cette approche qui lui permet de créer des graphiques complexes plus simplement. Le package est aussi reconnu pour son automatisation de certaines configurations graphiques comme les légendes ainsi que pour ses sorties plus esthétiques. Cette fiche présente donc deux extensions de <code>ggplot2</code> qui visent l’amélioration de l’expérience de l’utilisateur du package en rendant possibles certaines manipulations de graphiques autrement impossibles. Ces deux extensions sont <code>patchwork</code>, un package permettant la combinaison de « ggplots » (graphiques créés avec le package <code>ggplot2</code> ) au sein d’un même graphique, et la fonction <code>ggMarginal</code> de <code>ggExtra</code>, une fonction pour ajouter des graphiques marginaux à un diagramme de dispersion. Nous documentons dans un premier temps <code>patchwork</code> et dans un deuxième, la fonction <code>ggMarginal</code> de <code>ggExtra</code>.</p>
+</div>
+<div id="description-des-données" class="section level1">
+<h1>Description des données</h1>
+<p>Les exemples présents dans cette fiche seront réalisés à partir du data frame <code>quakes</code> du package <code>datasets</code> qui est chargé par défaut à l’ouverture d’une session R. Nous retrouvons au sein de ce data frame des données portant sur des évènements sismiques de magnitude supérieure à 4 sur l’échelle de Richter ayant été enregistrés aux îles Fidji depuis 1964. Ces 1000 observations de séismes sont décrites par cinq variables: latitude, longitude, profondeur, magnitude et le nombre de stations sismiques ayant rapporté l’événement. Nous ajoutons à ce data frame une nouvelle variable catégorique, la région, qui peut prendre deux valeurs : Est ou Ouest.</p>
+<pre class="r"><code># Ajout de la variable region au jeu de données
+quakes$region &lt;- factor(quakes$long &gt;= 175, labels = c(&quot;Ouest&quot;, &quot;Est&quot;))
+str(quakes)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    1000 obs. of  6 variables:
+##  $ lat     : num  -20.4 -20.6 -26 -18 -20.4 ...
+##  $ long    : num  182 181 184 182 182 ...
+##  $ depth   : int  562 650 42 626 649 195 82 194 211 622 ...
+##  $ mag     : num  4.8 4.2 5.4 4.1 4 4 4.8 4.4 4.7 4.3 ...
+##  $ stations: int  41 15 43 19 11 12 43 15 35 19 ...
+##  $ region  : Factor w/ 2 levels &quot;Ouest&quot;,&quot;Est&quot;: 2 2 2 2 2 2 1 2 2 2 ...</code></pre>
+<p>À partir de ces données, nous produisons avec <code>ggplot2</code> quatre graphiques qui seront utilisés pour illustrer les différentes fonctionnalités du package <code>patchwork</code> ainsi que de la fonction <code>ggMarginal</code> du package <code>ggExtra</code>.</p>
+<p>Nous devons donc commencer par installer et charger le package <code>ggplot2</code> disponible à partir de CRAN.</p>
+<pre class="r"><code># install.packages(&quot;ggplot2&quot;)
+library(ggplot2)</code></pre>
+<p>Nous créons ensuite les quatre graphiques : un histogramme, un diagramme en boîte, un diagramme quantile-quantile et un diagramme de dispersion.</p>
+<pre class="r"><code> p1 &lt;- ggplot(
+   data = quakes, 
+   mapping = aes(x = mag, fill = region, alpha = 0.5)
+) +
+  geom_histogram( 
+    mapping = aes(y=stat(density)), 
+    position =&quot;identity&quot;, 
+    alpha=.5, 
+    center = 0,
+    binwidth = 0.1
+  ) +
+  labs(y = &quot;densité&quot;) +
+  labs(x = NULL ) + 
+  labs(fill = &quot;région&quot;)
+p1 </code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/quakes-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>p2 &lt;- ggplot(
+  data = quakes,
+  mapping = aes(x = region, y = mag,fill=region)
+) +
+  geom_boxplot(
+    aes(group = cut_width(region, 0.50)),
+    outlier.alpha = 0.4,
+    alpha=0.5, 
+    show.legend = FALSE
+  ) +
+  coord_flip() +
+  labs(x=NULL)+
+  labs(y=&quot;magnitude du séisme&quot;)
+p2 </code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/quakes-2.png" width="70%" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>p3 &lt;- ggplot(
+  data = quakes, 
+  mapping = aes(sample = mag, colour = region)
+) +
+  stat_qq(show.legend = FALSE)+
+  stat_qq_line(show.legend = FALSE) +
+  labs(y = &quot;quantiles empiriques de la magnitude&quot;) +
+  labs(x = &quot;quantiles théoriques normaux&quot;)
+p3</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/quakes-3.png" width="70%" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>p4 &lt;-ggplot(
+  data = quakes, 
+  mapping = aes(x = mag, y = stations)
+) +
+  geom_point( 
+    mapping = aes(colour = region) 
+  ) +
+  labs(x = &quot;magnitude du séisme&quot;) +
+  labs(y = &quot;nombre de stations rapportant le séisme&quot;) + 
+  labs(colour = &quot;région&quot;)
+p4</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/quakes-4.png" width="70%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="le-package-patchwork" class="section level1">
+<h1>Le package <code>patchwork</code></h1>
+<p>La production de graphiques en R est très utile lorsque vient le temps de communiquer nos résultats. Le package <code>ggplot2</code> a été conçu pour rendre cette opération plus simple et obtenir des graphiques transmettant leurs messages de façon plus efficace. Cependant, une des lacunes de <code>ggplot2</code> est qu’il ne prévoit pas une façon simple pour combiner plusieurs graphiques dans une même fenêtre. Le package <code>patchwork</code> offre une solution à cette problématique. Il propose une approche intuitive pour facilement combiner des graphiques, et ce même dans une composition complexe. Il existe d’autres packages qui tentent de combler ce besoin en passant par d’autres chemins comme <code>gridExtra</code> ou encore <code>cowplot</code>.</p>
+<div id="démarrage" class="section level2">
+<h2>Démarrage</h2>
+<p>Le package <code>patchwork</code> doit être installé, puis chargé dans la session R.</p>
+<pre class="r"><code># install.packages(&quot;patchwork&quot;)
+library(patchwork)</code></pre>
+</div>
+<div id="éléments-de-base" class="section level2">
+<h2>Éléments de base</h2>
+<p>Une fois le package <code>patchwork</code> chargé, l’utilisation de l’opérateur <code>+</code> permet de placer deux graphes ou plus dans la même fenêtre graphique.</p>
+<pre class="r"><code>p1 + p2</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-4-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Si on ajoute plus de graphiques avec l’opérateur <code>+</code>, ils seront ajoutés par défaut à la même ligne puis à la ligne inférieure. Le package <code>patchwork</code> essaie de conserver une mise en forme carrée. Il est aussi possible d’ajouter les graphiques colonne par colonne et de modifier la mise en forme de base à l’aide de <code>plot_layout</code> dont nous parlerons plus tard dans le document.</p>
+<div style="page-break-after: always;"></div>
+<p>L’utilisation des opérateurs <code>/</code> et <code>|</code> permettent aussi à l’utilisateur d’avoir plus de contrôle, et ce de façon très intuitive.</p>
+<pre class="r"><code>(p2 | p1 | p4 ) /
+      p3</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-5-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>L’opérateur <code>|</code> ajoute le graphique ou le groupe de graphiques le suivant en ligne, alors que l’opérateur <code>/</code> ajoute le graphique ou le groupe de graphiques le suivant en colonne. En effet, dans l’exemple précédent, le graphique <code>p1</code> suivait un opérateur <code>|</code>, donc il s’ajoute sur la même ligne que le précédent (<code>p2</code>). Il en est de même pour le graphique <code>p4</code> qui suit un opérateur <code>|</code> et donc, il est sur la même ligne que les graphiques <code>p1</code> et <code>p2</code>. Les parenthèses servent à faire un groupe de graphique. Ce groupe sera ensuite traité comme un seul «graphique». Puis, l’opérateur <code>/</code> précède le graphique <code>p3</code>, donc <code>p3</code> est mis en colonne en dessous du groupe de graphiques comportant <code>p1</code>, <code>p2</code> et <code>p4</code>.</p>
+<div style="page-break-after: always;"></div>
+<pre class="r"><code>p1 | (p2 / p3)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-6-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Dans cet exemple, nous devons en premier lieu porter notre attention sur les parenthèses tel qu’il est fait normalement en terme de priorité d’opérations. Dans ces parenthèses, nous avons <code>p3</code> précédé d’un opérateur <code>/</code>, donc <code>p3</code> est ajouté en colonne en dessous de <code>p2</code>. Ensuite, <code>p2</code> et <code>p3</code> forment un groupe et est traité comme un seul «graphique». Ce groupe est précédé de l’opérateur <code>|</code>, donc le groupe est mis en ligne à droite de <code>p1</code>.</p>
+<div style="page-break-after: always;"></div>
+</div>
+<div id="ajouts-à-un-patchwork-existant" class="section level2">
+<h2>Ajouts à un <code>patchwork</code> existant</h2>
+<p>Le mot «patchwork» réfère à une technique de couture où l’on assemble plusieurs morceaux de tissus hétérogènes afin de réaliser différents types d’ouvrages comme la courtepointe par exemple. Les graphiques étant ici nos morceaux de tissus, il est possible de continuer le travail en ajoutant un simple morceau de tissu à un assemblage existant.</p>
+<div id="ajout-dun-graphique-ggplot2" class="section level3">
+<h3>Ajout d’un graphique <code>ggplot2</code></h3>
+<p>Si le morceau de tissu en question est un autre graphique, il est facile de le lier à un «patchwork» existant. L’ajout d’un nouveau graphique se fait toujours du côté gauche avec l’opérateur <code>+</code>.</p>
+<pre class="r"><code>courtepointe &lt;- p1 / p2
+
+p3 + courtepointe</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-7-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+<p>Si l’on souhaite ajouter notre nouveau graphique du côté droit, c’est un peu plus compliqué.</p>
+<pre class="r"><code>courtepointe + p3</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-8-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<p>On remarque que le nouveau graphique a été ajouté en dessous plutôt que du côté droit et il est de la même taille que chacun des graphiques de notre assemblage existant. Nous voulions plutôt avoir ce nouveau graphique <code>p3</code> du côté droit de <code>courtepointe</code> et que l’espace de <code>p3</code> soit de la même taille que l’espace de <code>courtepointe</code>. Pour ce faire, il faut utiliser l’opérateur <code>-</code> plutôt que <code>+</code>. L’opérateur <code>-</code> jouera ici le rôle d’un trait d’union.</p>
+<div style="page-break-after: always;"></div>
+<pre class="r"><code>courtepointe - p3</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-9-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+<p>Il est aussi possible d’utiliser la fonction <code>wrap_plots</code> pour combiner plusieurs graphiques. Cette fonction va conserver les tailles (proportions) des graphiques mis en entrée, et ce peu importe leur ordre contrairement à l’opérateur <code>+</code>.</p>
+<p>Du côté gauche :</p>
+<pre class="r"><code># Équivalent à la commande : p3 + courtpointe
+wrap_plots(p3, courtepointe) </code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-10-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+<p>Du côté droit :</p>
+<pre class="r"><code># Équivalent à la commande : courtpointe - p3
+courtepointe2 &lt;- wrap_plots(courtepointe, p3)
+courtepointe2</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-11-1.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="ajout-de-contenus-autres-que-des-graphiques-ggplot2" class="section level3">
+<h3>Ajout de contenus autres que des graphiques <code>ggplot2</code></h3>
+<p>Il est également possible de composer notre «patchwork» d’autres éléments que des graphiques <code>ggplot2</code>. Nous pouvons ajouter :</p>
+<ul>
+<li>des graphiques produits avec le système graphique R de base en utilisant la fonction <a href="https://patchwork.data-imaginist.com/reference/wrap_elements.html"><code>wrap_elements</code></a> (à la condition que le <a href="https://CRAN.R-project.org/package=gridGraphics">package <code>gridGraphics</code></a> soit installé);</li>
+<li>des zones de textes avec la <a href="https://stat.ethz.ch/R-manual/R-patched/library/grid/html/grid.text.html">fonction <code>textGrob</code></a> du package <code>grid</code>;</li>
+<li>des tableaux avec le fonction <code>tableGrob</code> du package <a href="https://CRAN.R-project.org/package=gridExtra"><code>gridExra</code></a>.</li>
+</ul>
+<p>Des exemples de tels ajouts sont présentés ici : <a href="https://patchwork.data-imaginist.com/articles/guides/assembly.html" class="uri">https://patchwork.data-imaginist.com/articles/guides/assembly.html</a></p>
+</div>
+</div>
+<div id="modifications-dun-patchwork-existant" class="section level2">
+<h2>Modifications d’un <code>patchwork</code> existant</h2>
+<p>Le package <code>patchwork</code> permet de modifier des graphiques <code>ggplot2</code> parmi un «patchwork» existant. En d’autres mots, nous pouvons modifier des morceaux de tissus de notre courtepointe.</p>
+<div id="modifications-dun-graphique" class="section level3">
+<h3>Modifications d’un graphique</h3>
+<p>Avec l’opérateur <code>+</code>, il est possible de modifier un graphique d’un «patchwork». Si nous ajoutons une commande pour modifier le thème d’un graphique à un «patchwork», cette commande sera appliquée sur le dernier graphique. Dans notre première courtepointe produite, le dernier graphique joint est le diagramme en boîte.</p>
+<p>Si nous désirons modifier le dernier graphique inclus dans un «patchwork», il est possible d’utiliser l’opérateur <code>+</code> comme suit :</p>
+<pre class="r"><code>courtepointe + theme_dark()</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-12-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<p>Il est également possible de modifier les autres graphiques dans notre courtepointe en utilisant l’opérateur doubles crochets <code>[[</code>. En effet, il est possible d’extraire un graphique d’un «patchwork» avec cet opérateur comme il est possible pour extraire un élément d’un objet.</p>
+<pre class="r"><code>courtepointe[[1]]</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-13-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<p>Puis, il est possible de faire des modifications à un graphique et de le remplacer dans le <code>patchwork</code>.</p>
+<pre class="r"><code>courtepointeCopie &lt;- courtepointe
+courtepointeCopie[[1]] &lt;- courtepointeCopie[[1]] + theme_dark()
+courtepointeCopie</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-14-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+<p>Dans le cas où le «patchwork» est plus complexe, cela peut nécessiter plusieurs extractions en séquence. En effet, supposons que nous souhaitons modifier le thème du graphique en haut à gauche de <code>courtepointe2</code>, l’extraction du premier élément extrait les deux graphiques de gauche.</p>
+<pre class="r"><code>#Extraction du premier élément
+courtepointe2[[1]]</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-15-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+<p>Ainsi, pour extraire le graphique en haut à gauche de <code>courtepointe2</code>, il faudra extraire à nouveau le premier élément du dernier «patchwork».</p>
+<pre class="r"><code>courtepointe2Copie &lt;- courtepointe2
+courtepointe2Copie[[1]][[1]] &lt;- courtepointe2Copie[[1]][[1]] + theme_dark()
+courtepointe2Copie</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-16-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+</div>
+<div id="modifier-lensemble-des-graphiques" class="section level3">
+<h3>Modifier l’ensemble des graphiques</h3>
+<p>Pour modifier tous les graphiques en même temps, l’opérateur <code>&amp;</code> doit être utilisé.</p>
+<pre class="r"><code>courtepointe2 &amp; theme_dark()</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-17-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+</div>
+</div>
+<div id="contrôler-la-mise-en-forme-dun-patchwork" class="section level2">
+<h2>Contrôler la mise en forme d’un <code>patchwork</code></h2>
+<p>Le package <code>patchwork</code> permet également de modifier l’affichage et l’organisation des éléments du «patchwork».</p>
+<div id="la-fonction-plot_spacer" class="section level3">
+<h3>La fonction <code>plot_spacer</code></h3>
+<p>Il est possible d’ajouter des espaces vides à un «patchwork» avec la fonction <code>plot_spacer</code>. La taille de l’espace correspond à la taille d’un graphique.</p>
+<pre class="r"><code>p1 + plot_spacer() + p2</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-18-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Nous détaillons dans les prochaines lignes des façons de moduler davantage la taille des fenêtres pour chacun des graphiques ou des espaces vides d’un «patchwork».</p>
+</div>
+<div id="la-fonction-plot_layout" class="section level3">
+<h3>La fonction <code>plot_layout</code></h3>
+<p>Comme mentionné précédemment, par défaut, <code>patchwork</code> rend les fenêtres et les graphiques le plus carrés possible. La fonction <code>plot_layout</code> permet à l’utilisateur de davantage contrôler la mise en forme des «patchwork».</p>
+<div id="les-arguments-ncol-nrow-widths-et-heights-de-plot_layout" class="section level4">
+<h4>Les arguments <code>ncol</code>, <code>nrow</code>, <code>widths</code> et <code>heights</code> de <code>plot_layout</code></h4>
+
+<p>Les arguments <code>ncol</code> et <code>nrow</code> permettent de modifier respectivement le nombre de lignes et de colonnes de la fenêtre. Les arguments <code>widths</code> et <code>heights</code> permettent de modifier la taille des fenêtres graphiques, soient respectivement la largeur et la hauteur.</p>
+<div style="page-break-after: always;"></div>
+<pre class="r"><code># Une colonne plutôt que 2.
+courtepointe2 + plot_layout(ncol = 1) </code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-19-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+<pre class="r"><code># Élargissement de la première colonne par deux fois la deuxième.
+courtepointe2 + plot_layout(widths = c(2, 1))</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-20-1.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="largument-design" class="section level3">
+<h3>L’argument <code>design</code></h3>
+<p>Il est possible de contrôler davantage la fenêtre des graphiques en créant de façon textuelle ses propres formats de présentation des fenêtres avec l’argument <code>design</code> de <code>plot_layout</code>. Le cadre d’écriture de ces formats est simple. Des dièses <code>#</code> signifient un espace vide comme la fonction <code>plot_spacer</code> présenté précédemment et un ensemble de lettres pareil représente l’espace d’un graphique.</p>
+<pre class="r"><code>format1 &lt;- &quot;
+AAA##
+DDDCC
+DDDCC
+BBB##
+&quot;
+p1 + p2 + p3 + p4 + plot_layout(design = format1)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-21-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>À noter, les graphiques subséquents sont insérés en ordre alphabétique. Dans l’exemple ci-dessus, le premier graphique <code>p1</code> a pris la place de l’ensemble des lettres A, le deuxième <code>p2</code>, des lettres B, et ainsi de suite jusqu’à D.</p>
+<div style="page-break-after: always;"></div>
+</div>
+<div id="largument-guides" class="section level3">
+<h3>L’argument <code>guides</code></h3>
+<p>L’argument <code>guides</code> permet de contrôler l’affichage des légendes.</p>
+<pre class="r"><code>courtepointe2 + plot_layout(guides = &quot;collect&quot;)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-22-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Assigner la valeur <code>"collect"</code> à et argument permet de rassembler les légendes du côté droit du «patchwork» et d’en afficher une seule si une légende est répétée.</p>
+<pre class="r"><code># p1 avec les données de la profondeur plutôt que de la magnitude
+p1_profondeur &lt;- ggplot(
+  data = quakes, 
+  mapping = aes(x = depth, fill = region)
+) +
+  geom_histogram( 
+    mapping = aes(y = stat(density)),
+    alpha = 0.5,
+    position =&quot;identity&quot;,
+    center = 0
+  ) +
+  labs(y = &quot;densité&quot;) +
+  labs(x = &quot;profondeur&quot; ) + 
+  labs(fill = &quot;région&quot;)
+# p3 avec la légende
+p3_avec_legende &lt;- p3 + 
+  stat_qq(show.legend = TRUE) + 
+  labs(colour = &quot;région&quot;)</code></pre>
+<div style="page-break-after: always;"></div>
+<pre class="r"><code># un «patchwork» sans guides = &quot;collect&quot;
+(((p1 + labs(x = &quot;magnitude&quot;)) / p1_profondeur) | p3_avec_legende)</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-24-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+<pre class="r"><code># un «patchwork» avec guides = &quot;collect&quot;
+(((p1 + labs(x = &quot;magnitude&quot;)) / p1_profondeur) | p3_avec_legende) +
+  plot_layout(guides = &quot;collect&quot;)</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-25-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+<p>Il est également possible de placer les légendes à l’endroit désiré dans le «patchwork» en utilisant la fonction <code>guide_area</code> qui s’utilise similairement à <code>plot_spacer</code>. Les légendes présentes dans le «patchwork» seront toutes regroupées à l’endroit où <code>guide_area</code> est placé.</p>
+<pre class="r"><code>(p1 + labs(x=&quot;magnitude&quot;)) + 
+  p1_profondeur +
+  p3_avec_legende +
+  guide_area() + 
+  plot_layout(guides = &quot;collect&quot;, heights = c(1,2))</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-26-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+</div>
+</div>
+<div id="ajouter-des-éléments-textuels-à-un-patchwork" class="section level2">
+<h2>Ajouter des éléments textuels à un <code>patchwork</code></h2>
+<p>Il est également pertinent de pouvoir ajouter différents éléments textuels à un «patchwork» tels qu’un titre, un sous-titre, des notes et des identifiants aux graphiques. Ceci est possible avec la fonction <code>plot_annotation</code> de <code>patchwork</code>.</p>
+<div id="la-fonction-plot_annotation" class="section level3">
+<h3>La fonction <code>plot_annotation</code></h3>
+<p>Pour ajouter un titre, il faut simplement utiliser l’argument <code>title</code> de <code>plot_annotation</code>.</p>
+<pre class="r"><code>courtepointe2T &lt;- courtepointe2 + 
+  plot_layout(guides =&quot;collect&quot;) +
+  plot_annotation(title = &quot;Distribution de la magnitude de 1000 séismes près de Fidji&quot;)
+courtepointe2T</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-27-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+<p>Pour ajouter un sous-titre et une note, les arguments à utiliser sont <code>subtitle</code> et <code>caption</code>. Le sous-titre apparaît sous le titre principal avec une police de caractère inférieure à celui-ci. Il peut être utilisé pour donner des précisions sur le titre. La note, quant à elle, apparaît avec une police encore plus petite, mais cette fois-ci en bas à droite de la page. Elle peut servir à commenter les graphiques, donner un avertissement ou autre.</p>
+<pre class="r"><code>courtepointe2T + plot_annotation(subtitle = &quot;sous-titre&quot;, caption = &quot;note&quot;)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-28-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+<p>Il est également facilement possible d’identifier les graphiques avec les arguments <code>tag_levels</code>, <code>tag_prefix</code> et <code>tag_suffix</code>. Ce qui est intéressant avec <code>tag_levels</code>, c’est que cet argument va automatiquement identifier chacun des graphiques sous forme d’énumération. Il prend en entrée <code>a</code> (l’alphabet en minuscule), <code>A</code> (l’alphabet en majuscule), <code>1</code> (les nombres), <code>i</code> (les chiffres romains en minuscule) et <code>I</code> (les chiffres romains en majuscule).</p>
+<pre class="r"><code>courtepointe2t_identifier &lt;- courtepointe2T + 
+  plot_annotation(tag_levels = &quot;1&quot;, tag_prefix = &quot;Graphique &quot;, tag_suffix = &quot;.&quot;)
+courtepointe2t_identifier</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-29-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+<p>Par défaut, les identifiants des graphiques sont placés à gauche du graphique en question et dans leur propre colonne. Si nous voulons plutôt qu’ils soient affichés au-dessus de la région graphique, la fonction <code>theme</code> doit être utilisée avec l’argument <code>plot.tag.position</code>, puis pour modifier la taille et l’apparence de l’identifiant, l’argument <code>plot.tag</code> est utilisé.</p>
+<pre class="r"><code>courtepointe2t_identifier &amp; theme(
+  plot.tag.position = &quot;top&quot;,
+  plot.tag = element_text(size = 10, color = &quot;blue&quot;, face = &quot;italic&quot;)
+)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-30-1.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+</div>
+<div id="la-fonction-ggmarginal-de-ggextra" class="section level1">
+<h1>La fonction <code>ggMarginal</code> de <code>ggExtra</code></h1>
+<p>La fonction <code>ggMarginal</code>est utile pour ajouter des graphiques marginaux en <code>x</code> et en <code>y</code> à un diagramme de dispersion <code>ggplot2</code> existant. Les graphiques marginaux peuvent être de plusieurs types.</p>
+<div id="démarrage-1" class="section level2">
+<h2>Démarrage</h2>
+<p>Le package <code>ggExtra</code> doit être installé, puis chargé dans la session R.</p>
+<pre class="r"><code># install.packages(&quot;ggExtra&quot;)
+library(ggExtra)</code></pre>
+</div>
+<div id="graphiques-possibles" class="section level2">
+<h2>Graphiques possibles</h2>
+<p>La fonction <code>ggMarginal</code> est facile d’utilisation. Seulement un argument est nécessaire pour pouvoir l’utiliser. En effet, <code>ggMarginal</code> demande seulement un diagramme de dispersion <code>ggplot2</code> en entré. Les arguments supplémentaires serviront à modifier le ou les graphiques en marges</p>
+<p>Par défaut, la densité marginale est produite.</p>
+<pre class="r"><code>ggMarginal(p4)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-32-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>L’argument <code>type</code> permet de sélectionner les autres types de densité marginale. Les types possibles sont : densité, histogramme, diagramme en boîte, diagramme en violon et «densigramme». (Un «densigramme» est une juxtaposition de la densité sur l’histogramme).</p>
+<pre class="r"><code>ggMarginal(p4, type = &quot;boxplot&quot;)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-33-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Il est également possible d’afficher les graphiques marginaux selon la catégorie d’un facteur.</p>
+<pre class="r"><code>graphggM &lt;- ggMarginal(p4, groupColour = TRUE, groupFill = TRUE)
+graphggM</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-34-1.png" width="80%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="modifier-ou-afficher-un-seul-des-graphiques-marginaux" class="section level2">
+<h2>Modifier ou afficher un seul des graphiques marginaux</h2>
+<p>Il est possible d’afficher un seul des graphiques marginaux à la fois. Pour ce faire, il faut donner la valeur <code>"y"</code> ou <code>"x"</code> à l’argument <code>margins</code> pour identifier la marge dans laquelle un graphique marginal doit être affiché</p>
+<pre class="r"><code>ggMarginal(p4, type = &quot;histogram&quot;, margins = &quot;y&quot;)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-35-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>Nous pouvons modifier l’apparence des graphiques marginaux. Par exemple, nous pourrions donner une nouvelle couleur aux histogrammes en utilisant l’argument <code>fill</code> .</p>
+<pre class="r"><code>ggMarginal(p4, type=&quot;histogram&quot;, fill = &quot;green&quot;)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-36-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+<p>Si nous voulions afficher les deux graphiques marginaux, mais seulement attribuer cette nouvelle couleur à un des deux graphiques, ce serait aussi possible. En effet, il est possible d’utiliser le <code>xparams</code> et le <code>yparams</code>. Comme leurs noms laissent entendre, ceux-ci nous permettent de sélectionner les paramètres qui seront appliqués à chacune des marges.</p>
+<pre class="r"><code>ggMarginal(
+  p4,
+  type = &quot;histogram&quot;,
+  xparams = list(binwidth = 0.2, size = 1.5, color = &quot;blue&quot;, fill = &quot;green&quot;)
+)</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-37-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+</div>
+</div>
+<div id="combinaison-de-patchwork-et-de-ggmarginal-de-ggextra" class="section level1">
+<h1>Combinaison de <code>patchwork</code> et de <code>ggMarginal</code> de <code>ggExtra</code></h1>
+<p>Nous pouvons insérer des graphiques de <code>ggMarginal</code> dans un «patchwork».</p>
+<pre class="r"><code>(courtepointe | graphggM ) + plot_layout(widths = c(1, 2))</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2020/patchwork_ggExtra_files/figure-html/unnamed-chunk-38-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<div style="page-break-after: always;"></div>
+</div>
+<div id="commentaires-et-observations-sur-le-package-patchwork-et-la-fonction-ggmarginal" class="section level1">
+<h1>Commentaires et observations sur le package <code>patchwork</code> et la fonction <code>ggMarginal</code></h1>
+<p>Le principal avantage du package <code>patchwork</code> est qu’il est très intuitif. Grâce aux opérateurs <code>|</code>, <code>/</code> et <code>+</code>, il est facile de placer les graphiques dans une composition complexe et parfaitement alignée que nous sommes capables de visualiser avant même d’exécuter le code. Nous avons pu comprendre les bases du package rapidement et sans difficulté. Ceci nous aurait permis de l’utiliser directement sans pousser plus nos recherches si nous l’avions désiré. Il ne nécessite pas une compréhension exhaustive de ses fonctionnalités pour pouvoir en retirer de nombreux avantages.</p>
+<p>Un désavantage de <code>patchwork</code> est qu’il ne permet pas, à lui seul, d’ajouter du contenu «non <code>ggplot2</code>» tel que du texte ou des graphiques du système R de base. Le package <code>cowplot</code>, qui offre des fonctionnalités équivalentes, a aussi cette limite. Puis, en utilisant <code>patchwork</code> en combinaison avec <code>gridGraphics</code>, ce n’est pas une tâche aussi intuitive que <code>patchwork</code>. Il est assez difficile d’obtenir un alignement exact et aussi esthétique que ceux obtenus lors de l’ajout de contenu <code>ggplot2</code>.</p>
+<p>De plus, il a été difficile de comprendre le fonctionnement d’ajout de graphiques et de modifications d’un graphique d’un «patchwork». En effet, ces éléments ne sont pas toujours intuitifs. Le résultat obtenu par certaines modifications nous a quelques fois surpris. Par exemple, nous nous attendions qu’une modification que nous avions apportée à un «patchwork» soit appliquée à un certain graphique, mais la modification était appliquée à un ou plusieurs autres graphiques.</p>
+<p>Pour ce qui est de la fonction <code>ggMarginal</code> du package <code>ggExtra</code>, nous avons trouvé qu’elle était facile à utiliser. Il faut simplement porter attention au fait que <code>ggMarginal</code>prend le graphique en entrée ce qui diffère de la syntaxe traditionnelle de <code>ggplot2</code> qui propose normalement d’ajouter une «couche» à l’aide de l’opérateur <code>+</code>.</p>
+</div>
+<div id="références" class="section level1">
+<h1>Références</h1>
+<div id="sources-principales-pour-le-package-patchwork-et-la-fonction-ggmarginal-de-ggextra" class="section level4">
+<h4>Sources principales pour le package <code>patchwork</code> et la fonction <code>ggMarginal</code> de <code>ggExtra</code></h4>
+
+<p><a href="https://patchwork.data-imaginist.com/" class="uri">https://patchwork.data-imaginist.com/</a></p>
+<p><a href="https://github.com/daattali/ggExtra" class="uri">https://github.com/daattali/ggExtra</a></p>
+</div>
+<div id="notes-du-cours-stt-4230" class="section level4">
+<h4>Notes du cours STT-4230</h4>
+
+<p><a href="https://stt4230.rbind.io/communication_resultats/graphiques_r/" class="uri">https://stt4230.rbind.io/communication_resultats/graphiques_r/</a></p>
+<p><a href="https://stt4230.rbind.io/communication_resultats/redaction_r_markdown/" class="uri">https://stt4230.rbind.io/communication_resultats/redaction_r_markdown/</a></p>
+</div>
+<div id="références-utiles-pour-la-construction-de-graphiques-en-ggplot2" class="section level4">
+<h4>Références utiles pour la construction de graphiques en <code>ggplot2</code></h4>
+
+<p><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="uri">https://ggplot2.tidyverse.org/reference/geom_boxplot.html</a></p>
+<p><a href="https://ggplot2.tidyverse.org/reference/geom_histogram.html" class="uri">https://ggplot2.tidyverse.org/reference/geom_histogram.html</a></p>
+<p><a href="http://www.cookbook-r.com/Graphs/Plotting_distributions_(ggplot2)/" class="uri">http://www.cookbook-r.com/Graphs/Plotting_distributions_(ggplot2)/</a></p>
+<p><a href="https://www.datanovia.com/en/fr/blog/gpplot-comment-supprimer-la-legende/#ggplot-sans-legende" class="uri">https://www.datanovia.com/en/fr/blog/gpplot-comment-supprimer-la-legende/#ggplot-sans-legende</a></p>
+<p><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="uri">https://ggplot2.tidyverse.org/reference/geom_point.html</a></p>
+</div>
+</div>

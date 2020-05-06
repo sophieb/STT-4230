@@ -1,6 +1,6 @@
 +++
 title = "Hiver 2014"
-weight = 6
+weight = 7
 +++
 
 {{<children depth="2">}}
