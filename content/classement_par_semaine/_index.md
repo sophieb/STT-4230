@@ -7,7 +7,7 @@ weight = 9
 ## Session d'hiver 2020
 
 * Semaine 1
-    * [Présentation de R]({{< relref "introduction/presentation_r_2020.html" >}})
+    * [Présentation de R]({{< relref "introduction/presentation_r_2021.html" >}})
     * [Installation de R et RStudio]({{< relref "introduction/installation_r_2021.html" >}})
     * [Concepts de base en R]({{< relref "introduction/base_r_2020.html" >}})
 * Semaine 2

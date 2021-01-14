@@ -22,7 +22,7 @@ Le reste du matériel de cours (exercices, tutoriels, exemples supplémentaires,
 #### Ce site web comprend les pages suivantes : 
 
 * Introduction à R
-    * [Présentation de R]({{< relref "introduction/presentation_r_2020.html" >}})
+    * [Présentation de R]({{< relref "introduction/presentation_r_2021.html" >}})
     * [Installation de R et RStudio]({{< relref "introduction/installation_r_2021.html" >}})
     * [Concepts de base en R]({{< relref "introduction/base_r_2020.html" >}})
 * Manipulation de données en R
