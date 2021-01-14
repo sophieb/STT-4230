@@ -2,27 +2,26 @@
 title: "Guide d'installation ou de mise à jour de R et RStudio"
 linkTitle: "Installation de R et RStudio"
 author: "Sophie Baillargeon, Université Laval"
-date: "2020-01-11"
+date: "2021-01-13"
 weight: 2
 slug: "installation_r_rstudio"
-categories: ["cours_2020-01-14"]
-categories_weight: 2
-lastmodifierdisplayname : "Sophie Baillargeon"
+lastmodifierdisplayname: "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
 output:
-  pdf_document:
-    toc: yes
-    toc_depth: 2
-    highlight: tango
   blogdown::html_page:
     toc: true
-    toc_depth: 2
+    toc_depth: 3
+    number_sections: true
+    highlight: tango
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+    number_sections: true
     highlight: tango
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
 - \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
-- \renewcommand{\linethickness}{0.05em}
 editor_options: 
   chunk_output_type: console
 ---
@@ -37,12 +36,13 @@ Voici quelques conseils d'installation ou de mise à jour de R.
 
 ## Système d'exploitation
 
-Cette fiche explique les étapes générales d'installation de [R](https://www.r-project.org/) et [RSutdio](https://www.rstudio.com/) pour tous les systèmes d'exploitation. Cependant, des explications plus détaillées sont fournies seulement pour le système d'exploitation Windows et un peu pour les systèmes Unix / Linux. Les utilisateurs Mac OS X / OS X / macOS ou Unix / Linux intéressés à obtenir plus d'informations sont référés aux sites web suivants&nbsp;:
+Cette fiche explique les étapes générales d'installation de [R](https://www.r-project.org/) et [RSutdio](https://www.rstudio.com/) pour tous les systèmes d'exploitation&nbsp;:
 
-- https://cran.r-project.org/doc/FAQ/R-FAQ.html#How-can-R-be-installed_003f      
-(documentation officielle du *R core* concernant l'installation de R);
-- http://socserv.mcmaster.ca/jfox/Courses/R/ICPSR/R-install-instructions.html  
-(source d'information sur l'installation de R, RStudio et de tout le nécessaire à la construction de packages R par John Fox).  
+- Windows, 
+- macOS (représentant ici également ses prédécesseurs Mac OS X et OS X); 
+- Linux (ou Unix).
+
+Quelques explications plus détaillées sont parfois fournies pour un système d'exploitation spécifique (en particulier Windows). La documentation officielle du *R core* concernant l'installation de la plus récente version de R est disponible ici&nbsp;: https://cran.r-project.org/doc/manuals/r-release/R-admin.html    
 
 <!---
 Sous Windows
@@ -51,84 +51,78 @@ En démarrant des programmes (.exe) sous certaines versions de Windows, notammen
 
 ## Utilitaires pour automatiser les installations
 
-Pour les utilisateurs de Windows, le [package `installr`]( https://CRAN.R-project.org/package=installr) propose des fonctions pour installer ou mettre à jour R, RStudio ou les Rtools simplement en lançant une commande dans la console R.  https://CRAN.R-project.org/package=installr
+Pour les utilisateurs de Windows, le [package `installr`](https://CRAN.R-project.org/package=installr) propose des fonctions pour installer ou mettre à jour R, RStudio ou les Rtools simplement en lançant une commande dans la console R.  https://CRAN.R-project.org/package=installr
 
-Pour les utilisateurs de Mac OS X / OS X / macOS, le [package `updateR`](https://github.com/AndreaCirilloAC/updateR) propose l'équivalent, mais limité à l'installation de R. https://github.com/AndreaCirilloAC/updateR
+Pour les utilisateurs de macOS, le [package `updateR`](https://github.com/AndreaCirilloAC/updateR) propose l'équivalent, mais limité à l'installation de R. https://github.com/AndreaCirilloAC/updateR
 
 
 ## Nécessaire au développement de packages R {#tools}
 
-Afin de développer des packages R, quelques outils supplémentaires au logiciel R sont nécessaires, notamment un compilateur C. 
+Afin de développer des packages R, quelques outils supplémentaires au logiciel R sont nécessaires, notamment un compilateur C/C++. 
 
 - Sous Windows, tous les outils requis sont réunis dans les [Rtools](http://cran.r-project.org/bin/windows/Rtools/), qui sont gratuitement distribués sur internet. Ce document explique [comment installer les Rtools](#rtools).
 
-- Sous Mac OS X / OS X / macOS, il faut avoir les « Apple Xcode developer tools », disponible gratuitement sur l'« App Store », s'ils ne sont pas déjà installés.
+- Sous macOS, il faut avoir les «&nbsp;Xcode command line tools&nbsp;», disponibles gratuitement, s'ils ne sont pas déjà installés. Ce document explique [comment installer les Xcode command line tools](#xcode).
 
-- Sous Unix / Linux, il faut s'assurer d'avoir installé R accompagné des ses « development tools » (`r-base-dev`).
+- Sous Linux, il faut s'assurer d'avoir installé R accompagné des ses «&nbsp;development tools&nbsp;» (`r-base-dev`).
 
-Le package `pkgbuild` comporte une fonction pour tester si tout le nécessaire au développement de package est installé et fonctionne correctement.
+## LaTeX
 
-```{r eval = FALSE}
-library(pkgbuild)
-has_build_tools()
-```
+Pour compiler des documents R Markdown vers un format PDF, une installation de LaTeX est requise. De plus, une des commandes R pour le développement de packages (`R CMD check`) a besoin d'un compilateur LaTeX pour tester la création de la documentation en format PDF. Ainsi, plusieurs utilisateurs de R auront un jour également besoin de LaTeX.
 
-Si cet appel à la fonction `has_build_tools` retourne `TRUE`, alors tout est fonctionnel.
+Voici quelques suggestions de compilateurs LaTeX gratuits&nbsp;:
 
-De plus, une des commandes R pour le développement de packages, soit `R CMD check`, a besoin d'une installation de LaTeX pour tester la création de la documentation des packages en format PDF. Pour développer des packages, vous avez donc le choix entre :
+- MiKTeX&nbsp;: https://miktex.org/download
+- MacTeX (macOS seulement)&nbsp;: http://www.tug.org/mactex/
+- [TinyTeX](https://yihui.org/tinytex/), installable à partir de R grâce au package R `tinytex` (pensé spécifiquement pour les utilisateurs de R, peut-être moins intéressant pour ceux qui utilisent aussi LaTeX en dehors de R)&nbsp;: https://CRAN.R-project.org/package=tinytex  
 
-- installer LaTeX sur votre ordinateur :
-    + une version gratuite pour Windows est MiKTeX (https://miktex.org/download),
-    + une version gratuite pour Mac OS X / OS X / macOS est MacTeX (http://www.tug.org/mactex/),
-    + les systèmes Unix / Linux viennent habituellement par défaut avec une distribution de LaTeX;
-- omettre la création de la documentation PDF lors de la soumission de la commande `R CMD check` grâce à l'option `--no-manual` (plus d'informations à venir en temps opportun).
-
+Notez que les systèmes Linux viennent habituellement par défaut avec une distribution de LaTeX.
 
 
 ***
 
-# R
+# Logiciel R
 
 Si, lors de l'installation de RStudio, R est déjà présent sur l'ordinateur, son emplacement devrait être détecté automatiquement par RStudio. Il est donc préférable de débuter par l'installation de R.
 
 ## Installation
 
-Suivez d'abord ces étapes :
+Suivez d'abord ces étapes&nbsp;:
 
 - allez sur le site https://www.r-project.org/;
 - cliquez sur «&nbsp;CRAN&nbsp;» dans le menu à gauche;
 - sélectionnez le site miroir du CRAN le plus près de chez vous;
 - dans la case intitulée «&nbsp;Download and Install R&nbsp;», cliquez sur le lien correspondant à votre système d'exploitation.
 
-Sous Windows ou Mac OS X / OS X / macOS, il suffit maintenant de télécharger un installateur et de double-cliquer sur le fichier pour démarrer l'installation. Sous Unix / Linux, les instructions varient en fonction de la distribution utilisée.
+Sous Windows ou macOS, il suffit de télécharger un installateur et de double-cliquer sur le fichier pour démarrer l'installation. Sous Linux, les instructions varient en fonction de la distribution utilisée.
 
 
-### Informations plus détaillées pour les utilisateurs de Windows
+### Détails pour Windows
 
 Cliquez sur «&nbsp;base&nbsp;», puis sur «&nbsp;Download R x.y.z for Windows&nbsp;» où x.y.z est le numéro de la version la plus à jour de R. Le téléchargement du fichier «&nbsp;R-x.y.z-win.exe&nbsp;» débutera. Il s'agit d'un installateur, soit un programme permettant d'installer R. Il vous suffit ensuite de double-cliquer sur ce fichier et l'installation débutera. *Vous pouvez accepter toutes les options par défaut offertes par l'installateur.*
 
 Pour télécharger l'installateur d'une version antérieure de R, il faut cliquez sur «&nbsp;Previous releases&nbsp;», puis sur la version désirée.
 
-### Informations plus détaillées pour les utilisateurs de Linux Ubuntu
+### Détails pour Linux Ubuntu
 
-Vous pouvez procéder à l'installation de R en suivant les instructions décrites sur cette page web :
+Vous pouvez procéder à l'installation de R en suivant les instructions décrites sur cette page web&nbsp;:
 
 - http://basicgroundwork.blogspot.ca/2015/05/install-r-in-ubuntu-1404.html
 
-La première étape est d'ajouter un des miroirs du CRAN à la liste des dépôts informatiques depuis lesquels votre instance peut acquérir des logiciels. Cette liste se trouve dans le fichier `/etc/apt/sources.list`. Vous devez y ajouter le miroir `http://cran.rstudio.com/bin/linux/ubuntu` ou un autre miroir du CRAN. Pour effectuer cet ajout, le blogue cité plus haut suggère d'ouvrir le fichier avec `vi`, de l'éditer pour ajouter la ligne : `deb http://cran.rstudio.com/bin/linux/ubuntu trusty/`, puis d'enregistrer et fermer le fichier. Encore plus simplement, il est possible de réaliser cette édition en une seule commande soumise dans le terminal, la suivante :
+La première étape est d'ajouter un des miroirs du CRAN à la liste des dépôts informatiques depuis lesquels votre instance peut acquérir des logiciels. Cette liste se trouve dans le fichier `/etc/apt/sources.list`. Vous devez y ajouter le miroir `http://cran.rstudio.com/bin/linux/ubuntu` ou un autre miroir du CRAN. Pour effectuer cet ajout, le blogue cité plus haut suggère d'ouvrir le fichier avec `vi`, de l'éditer pour ajouter la ligne&nbsp;: `deb http://cran.rstudio.com/bin/linux/ubuntu trusty/`, puis d'enregistrer et fermer le fichier. Encore plus simplement, il est possible de réaliser cette édition en une seule commande soumise dans le terminal, la suivante&nbsp;:
 
 ```
 printf 'deb http://cran.rstudio.com/bin/linux/ubuntu trusty/\n'| sudo tee -a \
 /etc/apt/sources.list
 ```
 
-Il faut ensuite mettre à jour la liste des fichiers disponibles dans les dépôts énumérés dans le fichier `/etc/apt/sources.list` avec la commande suivante :
+Il faut ensuite mettre à jour la liste des fichiers disponibles dans les dépôts énumérés dans le fichier `/etc/apt/sources.list` avec la commande suivante&nbsp;:
 
 ```
 sudo apt-get update
 ```
 
-Si une erreur similaire à la suivante est générée :
+Si une erreur similaire à la suivante est générée&nbsp;:
 
 ```
 W: GPG error: http://cran.rstudio.com/bin/linux/ubuntu trusty/ Release: The following 
@@ -144,7 +138,7 @@ gpg -a --export 51716619E084DAB9| sudo apt-key add -
 sudo apt-get update
 ```
 
-Finalement, vous serez en mesure de procéder à l'installation de R avec la commande suivante :
+Finalement, vous serez en mesure de procéder à l'installation de R et de ses «&nbsp;development tools&nbsp;» avec la commande suivante&nbsp;:
 
 ```
 sudo apt-get install r-base r-base-dev
@@ -164,20 +158,20 @@ Si une version antérieure de R est déjà installée sur votre ordinateur et qu
 Cependant, sachez que plusieurs versions de R peuvent être installées simultanément sur votre ordinateur. Par défaut, chaque version de R est installée dans un sous-dossier portant le numéro de la version. Avoir plus d'une version de R est utile, par exemple, lorsqu'un de vos programmes R fonctionne seulement avec une version antérieure de R.
 
 
-### Informations plus détaillées pour les utilisateurs de Windows {#uninstall}
+### Détails pour Windows {#uninstall}
 
 Pour désinstaller un logiciel sous Windows, une façon simple de procéder est la suivante&nbsp;:
  
-- allez dans «&nbsp;Paramètres > Applications&nbsp;» (ou l'équivalent selon votre version de Windows);
+- allez dans les paramètres de Windows, puis dans «&nbsp;Applications&nbsp;» (ou l'équivalent selon votre version de Windows);
 - sélectionnez «&nbsp;R for Windows u.v.w&nbsp;» où u.v.w est le numéro de la version de R à désinstaller;
 - cliquez sur «&nbsp;Désinstaller&nbsp;».
 
-Vous pouvez aussi aller dans les fichiers d'installation de R (par défaut `"C:/Program Files/R/R-u.v.w"`) et double-cliquer sur `unins000.exe`.
+Vous pouvez aussi aller dans les fichiers d'installation de R (par défaut `"C:/Program Files/R/R-u.v.w"`) et double-cliquer sur le fichier `unins000.exe`.
 
 La désinstallation démarrera.
 
 
-## Comment savoir quand une nouvelle version de R est disponible?
+## Être informé de la disponibilité d'une nouvelle version
 
 Il y a typiquement entre 4 et 6 mises à jour de R par année. Pour être informé lorsqu'une nouvelle version est disponible, vous pouvez vous abonner à la liste courriel R-announce (https://stat.ethz.ch/mailman/listinfo/r-announce). Les abonnés reçoivent un courriel lors de la mise en ligne d'une nouvelle version de R.
 
@@ -209,12 +203,12 @@ Vous pouvez télécharger gratuitement la version la plus à jour de RStudio (RS
 
 Le fichier d'installation correspondant à votre système d'exploitation vous sera proposé. Vous pouvez aussi trouver le bon fichier dans le tableau intitulé «&nbsp;All Installers&nbsp;». 
 
-### Informations plus détaillées pour les utilisateurs de Windows
+### Détails pour Windows
 
 Le fichier téléchargé est un installateur. Il suffit de double-cliquer sur ce fichier et de répondre aux quelques questions. Encore une fois, *vous pouvez accepter toutes les options par défaut offertes par l'installateur*.
 
 
-## Modification des configurations de RStudio {#config}
+## Configurations de RStudio {#config}
 
 Une fois RStudio installé, vous désirerez peut-être modifier quelques-unes de ses configurations. Celles-ci peuvent être changées par le menu «&nbsp;Tools > Global Options...&nbsp;». Par exemple, il peut être intéressant de&nbsp;:
 
@@ -244,15 +238,34 @@ Les configurations de RStudio ne sont pas perdues lors d'une mise à jour.
 
 ## Installation
 
-Pour installer un package à partir du CRAN, il suffit de 
+### À partir du CRAN
+
+Le [CRAN](http://cran.r-project.org/mirrors.html) est le dépôt informatique de packages R géré par le *R core team*. C'est là que la majorité des packages R sont rendus disponibles publiquement.
+
+Pour installer un package à partir d'un des miroirs du CRAN, il suffit de&nbsp;: 
 
 - s'assurer d'être connecté à internet, 
 - démarrer une session R et 
-- lancer la commande suivante en R :
+- lancer la commande suivante en R&nbsp;:
 
 ```{r, eval=FALSE}
 install.packages("nomPkg")
 ```
+
+En RStudio, la commande `install.packages` peut être lancée par le bouton «&nbsp;Install&nbsp;» de la sous-fenêtre «&nbsp;Packages&nbsp;», en sélectionnant les options appropriées.
+
+### À partir d'un dépôt informatique autre que le CRAN :
+
+En plus du CRAN, des packages R sont partagés à d'autres endroits sur le web, notamment sur :
+
+- le dépôt informatique de packages en bio-informatique [Bioconductor](http://www.bioconductor.org/),
+- un service web d'hébergement et de gestion de versions tel que
+[GitHub](https://github.com/topics/r), [GitLab](https://gitlab.com/explore) ou [BitBucket](https://bitbucket.org/repo/all?name=R&language=r).
+
+Le [package `remotes`](https://remotes.r-lib.org/index.html) offre des fonctions pour télécharger et installer directement à partir de ces sites (p. ex. fonctions [`install_bioc`](https://remotes.r-lib.org/reference/install_bioc.html), [`install_github`](https://remotes.r-lib.org/reference/install_github.html), [`install_gitlab`](https://remotes.r-lib.org/reference/install_gitlab.html) et [`install_bitbucket`](https://remotes.r-lib.org/reference/install_bitbucket.html)).
+
+
+### À partir d'un fichier local
 
 Pour installer un package à partir d'un fichier local, il faut plutôt lancer la commande suivante en R&nbsp;:
 
@@ -260,9 +273,9 @@ Pour installer un package à partir d'un fichier local, il faut plutôt lancer l
 install.packages("cheminAcces/nomPkg_NoVersion.zip", repos = NULL)
 ```
 
-Dans cet exemple, l'extension du fichier doit être adaptée selon le système d'exploitation utilisé. L'extension `.zip` est celle d'un package pour Windows, `.tgz` est l'extension d'un package pour Mac OS X / OS X / macOS et `.tar.gz` est l'extension d'un package source, qui est aussi la version requise avec Unix / Linux.
+Dans cet exemple, l'extension du fichier doit être adaptée selon le système d'exploitation utilisé. L'extension `.zip` est celle d'un package pour Windows, `.tgz` est l'extension d'un package pour macOS et `.tar.gz` est l'extension d'un package source, qui est aussi la version requise avec Linux.
 
-En RStudio, la commande `install.packages` peut être lancée par le bouton «&nbsp;Install&nbsp;» de la sous-fenêtre «&nbsp;Packages&nbsp;», en sélectionnant les options appropriées.
+### Emplacement des packages installés
 
 Le répertoire dans lequel les packages R sont installés par défaut est identifié dans le premier élément du vecteur retourné par la commande R suivante&nbsp;:
 
@@ -288,12 +301,10 @@ Après une mise à jour de R, il est possible que vous n'ayez plus accès, avec 
 
 S'ils sont installés directement dans le répertoire d'installation de R, il est certain que vous n'y aurez plus accès avec la nouvelle version de R. C'est que le nom du répertoire d'installation de packages dépend alors du numéro de version de R. 
 
-Afin de ne pas forcer l'utilisateur à mettre à jour les packages qu'il utilise à chaque fois qu'il met R à jour, le comportement par défaut de R est d'installer les packages dans un répertoire local à l'utilisateur, dont le nom dépend seulement des deux premiers numéros composant le numéro de version. Par exemple, avec mon installation de R sous Windows, les packages que j'installe se retrouvent par défaut dans le répertoire `"C:/Users/Sophie/Documents/R/win-library/u.v"`. Lors d'une mise à jour mineure de R, seul le dernier numéro composant le numéro de version change. Par exemple, le 12 décembre 2019, la version 3.6.2 de R est sortie, améliorant la version 3.6.1 sortie en juillet 2019. Le répertoire d'installation de packages par défaut est donc demeuré le même entre les deux versions. Cependant, lorsqu'une mise à jour plus importante de R sortira, pour laquelle le deuxième numéro dans le numéro de version sera incrémenté, alors la mise à jour provoquera une perte d'accès aux packages installés précédemment selon le comportement par défaut de R.
-
-Vous pouvez régler ce problème en&nbsp;:
+Afin de ne pas forcer l'utilisateur à mettre à jour les packages qu'il utilise à chaque fois qu'il met R à jour, le comportement par défaut de R est d'installer les packages dans un répertoire local à l'utilisateur, dont le nom dépend seulement des deux premiers numéros composant le numéro de version. Par exemple, avec mon installation de R sous Windows, les packages que j'installe se retrouvent par défaut dans le répertoire `"C:/Users/Sophie/Documents/R/win-library/u.v"`. Lors d'une mise à jour mineure de R, seul le dernier numéro composant le numéro de version change. Par exemple, le 10 octobre 2020, la version 4.0.3 de R est sortie, améliorant la version 4.0.2 sortie en juin 2020. Le répertoire d'installation de packages par défaut est donc demeuré le même entre les deux versions. Cependant, lorsqu'une mise à jour plus importante de R sortira, pour laquelle le deuxième numéro dans le numéro de version sera incrémenté, alors la mise à jour provoquera une perte d'accès aux packages installés précédemment, selon le comportement par défaut de R. Vous pourriez alors réagir en&nbsp;:
 
 - réinstallant tous les packages dont vous avez besoin avec la nouvelle version de R, du coup les packages sont mis à jour;
-- ajouter l'ancien répertoire d'installation de packages dans le chemin de recherche de packages avec la commande suivante, en remplaçant la chaîne de caractères par le chemin d'accès approprié :
+- ajouter l'ancien répertoire d'installation de packages dans le chemin de recherche de packages avec la commande suivante, en remplaçant la chaîne de caractères par le chemin d'accès approprié&nbsp;:
 
 ```{r eval = FALSE}
 .libPaths(c(.libPaths(), "C:/Users/Sophie/Documents/R/win-library/u.v"))
@@ -303,7 +314,7 @@ Vous pouvez régler ce problème en&nbsp;:
 ***
 
 
-# Rtools (pour Windows seulement) {#rtools}
+# Rtools (Windows seulement) {#rtools}
 
 Comme mentionné dans les [notes préliminaires](#tools), le développement de packages R nécessite des outils non fournis dans l'installation de R. La version pour Windows de ces outils se trouve dans les [Rtools](http://cran.r-project.org/bin/windows/Rtools/). 
 
@@ -317,10 +328,30 @@ Vous pouvez vous rendre sur le site de téléchargement des Rtools comme suit&nb
 - dans la case intitulée «&nbsp;Download and Install R&nbsp;», cliquez sur «&nbsp;Download R for Windows&nbsp;»;
 - cliquez sur «&nbsp;Rtools&nbsp;».
 
-Ensuite, téléchargez la version la plus à jour qui est compatible avec la version de R installée sur votre ordinateur. Si votre R est à jour, il s'agit probablement de la version pour laquelle la colonne «&nbsp;Frozen?&nbsp;» indique «&nbsp;No&nbsp;».
+Ensuite, téléchargez l'installateur approprié pour la version de R installée sur votre ordinateur. Si votre installation de R est à jour, il s'agit d'un des fichiers (64-bit ou 32-bit) directement disponible sur la page atteinte en suivant les instructions précédentes.
 
-En cliquant sur le lien, le téléchargement de l'installateur débutera. Il vous suffira ensuite de double-cliquer sur le fichier téléchargé et l'installation débutera. Encore une fois, *vous pouvez accepter toutes les options par défaut offertes par l'installateur*.
+<!--
+Modifié le 2021-01-13 : les Rtools ont changé depuis la sortie de R 4.0
 
+Ensuite, téléchargez la version la plus à jour qui est compatible avec la version de R installée sur votre ordinateur. Si votre R est à jour, il s’agit probablement de la version pour laquelle la colonne « Frozen? » indique « No ».
+-->
+
+En cliquant sur le nom du fichier, le téléchargement de l'installateur débutera. Il vous suffira ensuite de double-cliquer sur le fichier téléchargé et l'installation débutera. Encore une fois, *vous pouvez accepter toutes les options par défaut offertes par l'installateur*.
+
+
+### Ajout des Rtools au PATH
+
+Après l'installation des Rtools, il reste encore un détail technique à régler. Il faut ajouter les *make utilities* de Rtools au PATH de votre ordinateur. Le PATH est une variable d'environnement du système qui indique à l'ordinateur dans quels dossiers rechercher les programmes exécutables. 
+
+La page web à partir de laquelle vous avez téléchargé l'installateur des Rtools propose, à la section intitulée «&nbsp;Putting Rtools on the PATH&nbsp;», une façon d'effectuer cet ajout. Je vous invite à lire et suivre les indications fournies à cet endroit. Je mentionne seulement ici qu'en résumé, il suffit de lancer la commande suivante dans la console R puis de redémarrer R&nbsp;: 
+
+```{r eval = FALSE}
+writeLines('PATH="${RTOOLS40_HOME}\\usr\\bin;${PATH}"', con = "~/.Renviron")
+```
+
+<!--
+
+Retiré le 2021-01-13 : les Rtools ont changé depuis la sortie de R 4.0
 
 ## Mise à jour
 
@@ -332,6 +363,25 @@ Les Rtools sont mis à jour périodiquement. Je vous conseille de vérifier si u
 - si la version sur votre ordinateur est antérieure à la version disponible sur internet, mettre les Rtools à jour.
 
 Comme pour R, il est conseillé de désinstaller les Rtools avant d'en installer une nouvelle version (des [indications pour la désinstallation de programmes sous Windows sont fournies plus haut](#uninstall)).
+-->
+
+
+# Xcode command line tools (macOS seulement) {#xcode}
+
+Comme mentionné dans les [notes préliminaires](#tools), le développement de packages R nécessite des outils non fournis dans l'installation de R. Sur macOS, les «&nbsp;Xcode command line tools&nbsp;» contiennent ces outils. Sur plusieurs versions récentes de macOS, les Xcode command line tools s'obteniennent gratuitement simplement en soumettant la commande suivante dans le Terminal (et en acceptant l'installation si une fenêtre s'ouvre pour vous le demander)&nbsp;:
+
+```
+xcode-select --install
+```
+
+Certaines versions de macOS pourraient exiger que vous vous inscriviez en tant que développeur Apple. Vous pouvez le faire gratuitement ici&nbsp;: https://developer.apple.com/programs/register/
+
+Une autre façon d'obtenir les outils nécessaires au développement de packages R sur macOS est d'installer les «&nbsp;Xcode developer tools&nbsp;» complets, disponibles gratuitement sur le «&nbsp;App Store&nbsp;»&nbsp;: https://apps.apple.com/ca/app/xcode/id497799835?mt=12
+
+Voici quelques références pour obtenir plus de détails&nbsp;:
+
+- https://osxdaily.com/2014/02/12/install-command-line-tools-mac-os-x/
+- https://r-pkgs.org/setup.html#macos
 
 
 ***
@@ -339,13 +389,15 @@ Comme pour R, il est conseillé de désinstaller les Rtools avant d'en installer
 
 # Résolution de problèmes
 
-En principe, tout devrait fonctionner correctement en suivant ces procédures d'installation. Cependant, un problème est si vite arrivé en informatique. Voici comment régler certains problèmes techniques déjà rencontrés.
+Voici comment régler certains problèmes techniques déjà rencontrés par des étudiants du cours.
 
-### RStudio ne trouve pas les Rtools alors qu'ils sont bel et bien installés sur l'ordinateur.
+<!--
+#### RStudio ne trouve pas les Rtools alors qu'ils sont bel et bien installés sur l'ordinateur. {-}
 
 Dans ce cas, une solution sous Windows est de modifier le PATH de votre ordinateur. Le PATH est une variable d'environnement du système qui indique à l'ordinateur dans quels dossiers rechercher les programmes exécutables. L'installateur de Rtools peut modifier le PATH pour vous. Vous pouvez donc désinstaller les Rtools, puis les réinstaller en sélectionnant l'option de modifier le PATH offerte par l'installateur, mais non sélectionnée par défaut, libellée «&nbsp;Add rtools to system PATH&nbsp;».
+-->
 
-### Les accents s'affichent incorrectement dans RStudio.
+**Les accents s'affichent incorrectement dans RStudio.**
 
 RStudio suppose un certain encodage lors de l'ouverture d'un fichier, par exemple d'un programme (aussi nommé script) R. Pour connaître l'encodage supposé par votre installation de RStudio, allez dans le menu «&nbsp;Tools > Global Options... > Code > Saving&nbsp;». Le champ «&nbsp;Default text encoding:&nbsp;» sert à spécifier l'encodage par défaut. Les programmes R que vous téléchargerez sur le site web du cours seront toujours en encodage UTF-8.
 
@@ -354,7 +406,8 @@ Pour corriger l'affichage des accents dans un fichier en RStudio, vous pouvez&nb
 - soit rouvrir le fichier avec le bon encodage par le menu «&nbsp;File > Reopen with Encoding...&nbsp;» (et sélectionner «&nbsp;UTF-8&nbsp;» s'il s'agit d'un de mes fichiers),
 - soit modifier la configuration de votre installation de RStudio pour utiliser par défaut l'encodage du fichier. Cette modification peut se faire par menu «&nbsp;File > Reopen with Encoding...&nbsp;» en sélectionnant l'encodage voulu, puis en cochant «&nbsp;Set as default encoding for source files&nbsp;», ou encore par le menu «&nbsp;Tools > Global Options... > Code > Saving&nbsp;», comme mentionné dans la [section concernant les modifications de configuration de RStudio](#config). 
 
-### L'explorateur de fichiers Windows n'affiche pas les extensions de certains fichiers.
+
+**L'explorateur de fichiers Windows n'affiche pas les extensions de certains fichiers.**
 
 Ce problème n'est pas en lien avec l'installation de R ou RStudio, mais on me questionne souvent à ce propos. Par défaut, Windows n'affiche pas les extensions des fichiers dont le type a été associé à un programme. Voici une façon de changer cette option avec Windows 10. 
 
