@@ -8,8 +8,11 @@ output:
   pdf_document:
     toc: yes
     toc_depth: 3
+    number_sections: true
   blogdown::html_page:
     toc: true
+    toc_depth: 3
+    number_sections: true
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
@@ -24,24 +27,25 @@ header-includes:
 
 <div id="TOC">
 <ul>
-<li><a href="#présentation-des-tâches-à-effectuer-et-du-jeu-de-données-utilisé">Présentation des tâches à effectuer et du jeu de données utilisé</a></li>
-<li><a href="#méthodes-de-base-en-r">Méthodes de base en R</a><ul>
-<li><a href="#ajout-de-variables">Ajout de variables</a></li>
-<li><a href="#sélection-dobservations">Sélection d’observations</a></li>
-<li><a href="#sélection-de-variables">Sélection de variables</a></li>
+<li><a href="#présentation-des-tâches-à-effectuer-et-du-jeu-de-données-utilisé"><span class="toc-section-number">1</span> Présentation des tâches à effectuer et du jeu de données utilisé</a></li>
+<li><a href="#méthodes-de-base-en-r"><span class="toc-section-number">2</span> Méthodes de base en R</a><ul>
+<li><a href="#ajout-de-variables"><span class="toc-section-number">2.1</span> Ajout de variables</a></li>
+<li><a href="#sélection-dobservations"><span class="toc-section-number">2.2</span> Sélection d’observations</a></li>
+<li><a href="#sélection-de-variables"><span class="toc-section-number">2.3</span> Sélection de variables</a></li>
 </ul></li>
-<li><a href="#alternative-package-dplyr">Alternative: Package <code>dplyr</code></a><ul>
-<li><a href="#fonction-mutate-ajout-de-variables">Fonction mutate : ajout de variables</a></li>
-<li><a href="#fonction-filter-sélection-dobservations">Fonction filter: sélection d’observations</a></li>
-<li><a href="#fonction-select-sélection-de-variables">Fonction select: sélection de variables</a></li>
-<li><a href="#comparaison-entre-les-méthodes-de-base-et-les-fonctions-de-dplyr">Comparaison entre les méthodes de base et les fonctions de <code>dplyr</code></a></li>
+<li><a href="#alternative-package-dplyr"><span class="toc-section-number">3</span> Alternative: Package <code>dplyr</code></a><ul>
+<li><a href="#fonction-mutate-ajout-de-variables"><span class="toc-section-number">3.1</span> Fonction <code>mutate</code> : ajout de variables</a></li>
+<li><a href="#fonction-filter-sélection-dobservations"><span class="toc-section-number">3.2</span> Fonction <code>filter</code>: sélection d’observations</a></li>
+<li><a href="#fonction-select-sélection-de-variables"><span class="toc-section-number">3.3</span> Fonction <code>select</code>: sélection de variables</a></li>
+<li><a href="#comparaison-entre-les-méthodes-de-base-et-les-fonctions-de-dplyr"><span class="toc-section-number">3.4</span> Comparaison entre les méthodes de base et les fonctions de <code>dplyr</code></a></li>
 </ul></li>
+<li><a href="#références">Références</a></li>
 </ul>
 </div>
 
 <hr />
-<div id="présentation-des-tâches-à-effectuer-et-du-jeu-de-données-utilisé" class="section level3">
-<h3>Présentation des tâches à effectuer et du jeu de données utilisé</h3>
+<div id="présentation-des-tâches-à-effectuer-et-du-jeu-de-données-utilisé" class="section level1">
+<h1><span class="header-section-number">1</span> Présentation des tâches à effectuer et du jeu de données utilisé</h1>
 <p>Cette fiche a pour but de montrer comment faire des manipulations de base sur un jeu de données en R. Lorsqu’on parle de manipulations de base, ce sont les manipulations qui sont courramment effectuées afin de bien analyser l’information d’un jeu de données comme :</p>
 <ul>
 <li><p>l’ajout de variables</p></li>
@@ -67,10 +71,10 @@ header-includes:
 <p>Ce jeu de données possède 114 observations et 42 variables. Les descriptions détaillées des différentes variables du jeu de données se trouvent sur le site: <a href="https://archive.ics.uci.edu/ml/datasets/Tennis+Major+Tournament+Match+Statistics">Tennis Major Tournament Match Statistics Data Set</a></p>
 </blockquote>
 </div>
-<div id="méthodes-de-base-en-r" class="section level2">
-<h2>Méthodes de base en R</h2>
-<div id="ajout-de-variables" class="section level3">
-<h3>Ajout de variables</h3>
+<div id="méthodes-de-base-en-r" class="section level1">
+<h1><span class="header-section-number">2</span> Méthodes de base en R</h1>
+<div id="ajout-de-variables" class="section level2">
+<h2><span class="header-section-number">2.1</span> Ajout de variables</h2>
 <p>Pour ajouter une nouvelle variable dans un <em>data.frame</em>, on peut d’abord penser à utiliser la fonction <code>cbind</code>. Elle permet de reprendre un jeu de données existant et d’y ajouter une ou plusieurs colonnes. On peut aussi simplement réutiliser la fonction <code>data.frame</code> et combiner le <em>data.frame</em> existant et la variable désirée. Par exemple, on veut créer une variable <em>Winner</em> qui contient le nom du gagnant pour chaque partie et l’ajouter au jeu de données «tennis». On ajoute alors une colonne qui contient le nom du gagnant au jeu de données «tennis». Ici, on doit d’abord réaliser une étape intermédiaire à l’aide d’un <code>ifelse</code> pour identifier correctement le gagnant à partir du résultat de la partie contenu dans la variable <em>Result</em>. Si la valeur de <em>Result</em> est 1, le joueur 1 (<em>Player1</em>) a gagné la partie. Les variables <em>Player1</em> et <em>Player2</em> sont converties en format caractère pour éviter d’obtenir des résultats inatendus, puisque ces deux variables sont des facteurs avec des niveaux différents.</p>
 <pre class="r"><code>gagnant &lt;- ifelse(tennis$Result==1,as.character(tennis$Player1),as.character(tennis$Player2))</code></pre>
 <pre class="r"><code>tennis &lt;- cbind(tennis,Winner= gagnant)</code></pre>
@@ -94,8 +98,8 @@ header-includes:
 ## 4 T.Robredo A.Bogomolov Jr.     1      1 T.Robredo
 ## 5   R.Haase       M.Youzhny     1      0 M.Youzhny</code></pre>
 </div>
-<div id="sélection-dobservations" class="section level3">
-<h3>Sélection d’observations</h3>
+<div id="sélection-dobservations" class="section level2">
+<h2><span class="header-section-number">2.2</span> Sélection d’observations</h2>
 <p>On s’intéresse souvent à la conservation des observations pour lesquelles certaines variables prennent des valeurs spécifiques. Il est possible de faire une telle sélection avec des conditions logiques en R. Dans l’exemple du tennis, on s’intéresse aux trois dernières rondes du tournoi, soit les rondes 5, 6 et 7. Cette sélection nécessite l’utilisation de la variable <em>Round</em> qui indique la ronde du tournoi. On peut d’abord extraire du <em>data.frame</em> de départ les observations qui respectent cette condition. L’opérateur <code>%in%</code> permet de vérifier si la valeur d’une variable est comprise dans un ensemble de valeurs. Autrement dit, cela est équivalent à utiliser l’opérateur <code>|</code> (ou logique) en énumérant toutes les égalités possibles désirées. Pour conserver le résultat, on va l’assigner à un nouveau <em>data.frame</em>, ici appelé tennis2.</p>
 <pre class="r"><code>tennis2 &lt;- tennis[tennis$Round==5|tennis$Round==6|tennis$Round==7,]</code></pre>
 <p>qui est équivalent à :</p>
@@ -103,8 +107,8 @@ header-includes:
 <p>Il est aussi possible d’effectuer cette opération avec la fonction <code>subset</code> qui permet de spéficier une expression de sélection pour un jeu de données.</p>
 <pre class="r"><code>tennis2 &lt;- subset(tennis, subset=Round&gt;=5 )</code></pre>
 </div>
-<div id="sélection-de-variables" class="section level3">
-<h3>Sélection de variables</h3>
+<div id="sélection-de-variables" class="section level2">
+<h2><span class="header-section-number">2.3</span> Sélection de variables</h2>
 <p>Lorsqu’on présente des données, il est préférable de n’inclure que les variables nécessaires. Pour sélectionner les variables désirées, on peut directement énumérer les numéros correspondants aux colonnes voulues. Il est aussi possible d’extraire des colonnes en les nommant dans un vecteur entre les crochets <code>[,]</code> au niveau de la dimension 2 (pour faire référence aux colonnes). Le jeu de données dit final est contenu dans tennis3 :</p>
 <pre class="r"><code>tennis3 &lt;- tennis2[,c(1:3,20:24,38:43)]</code></pre>
 <p>équivalent à :</p>
@@ -132,13 +136,13 @@ header-includes:
 </blockquote>
 </div>
 </div>
-<div id="alternative-package-dplyr" class="section level2">
-<h2>Alternative: Package <code>dplyr</code></h2>
+<div id="alternative-package-dplyr" class="section level1">
+<h1><span class="header-section-number">3</span> Alternative: Package <code>dplyr</code></h1>
 <p>Les fonctions du package <code>dplyr</code> ont été conçues pour simplifier les manipulations les plus communes que l’on doit appliquer sur un jeu de données. Il s’agit d’une suite du package <code>plyr</code> pour les <strong>data.frame</strong>, d’où le <strong>d</strong>. L’auteur est Hadley Wickham. Pour l’utiliser, il suffit de lancer les commandes suivantes:</p>
 <pre class="r"><code>install.packages(&quot;dplyr&quot;)
 library(dplyr)</code></pre>
-<div id="fonction-mutate-ajout-de-variables" class="section level3">
-<h3>Fonction mutate : ajout de variables</h3>
+<div id="fonction-mutate-ajout-de-variables" class="section level2">
+<h2><span class="header-section-number">3.1</span> Fonction <code>mutate</code> : ajout de variables</h2>
 <p>La fonction <code>mutate</code> de <code>dplyr</code> permet d’ajouter de nouvelles colonnes qui peuvent être fonction de colonnes déjà existantes. La syntaxe est <code>mutate(.data, ...)</code>.</p>
 <ul>
 <li><code>.data</code> est une table</li>
@@ -163,8 +167,8 @@ library(dplyr)</code></pre>
 <pre class="r"><code>class(tennis)==class(tennis2d)</code></pre>
 <pre><code>## [1] TRUE</code></pre>
 </div>
-<div id="fonction-filter-sélection-dobservations" class="section level3">
-<h3>Fonction filter: sélection d’observations</h3>
+<div id="fonction-filter-sélection-dobservations" class="section level2">
+<h2><span class="header-section-number">3.2</span> Fonction <code>filter</code>: sélection d’observations</h2>
 <p>La fonction <code>filter</code> du package <code>dplyr</code> permet de sélectionner des observations (lignes) d’un objet R. La synthaxe de cette fonction est <code>filter(.data, ...)</code>.</p>
 <ul>
 <li><code>.data</code> est une table</li>
@@ -174,8 +178,8 @@ library(dplyr)</code></pre>
 <pre class="r"><code>tennis3d&lt;-filter(tennis2d, Round&gt;=5)</code></pre>
 <p><strong>Attention</strong> : Il y a une fonction <code>filter</code> qui existe déjà dans le package <code>base</code>. Or, le chemin de recherche commence par les packages chargés avec <code>library</code>, donc la fonction utilisée est celle du package <code>dplyr</code>.</p>
 </div>
-<div id="fonction-select-sélection-de-variables" class="section level3">
-<h3>Fonction select: sélection de variables</h3>
+<div id="fonction-select-sélection-de-variables" class="section level2">
+<h2><span class="header-section-number">3.3</span> Fonction <code>select</code>: sélection de variables</h2>
 <p>La fonction <code>select</code> de <code>dplyr</code> permet de sélectionner les variables d’intérêt. Lorsqu’une variable n’est pas explicitement écrite, la fonction <code>select</code> ne la conserve pas. La synthaxe est <code>select(.data, ...)</code>:</p>
 <ul>
 <li><code>.data</code> est une table</li>
@@ -202,18 +206,18 @@ library(dplyr)</code></pre>
 <p>Ces trois jeux contiennent tous 14 variables et 7 observations.</p>
 </blockquote>
 </div>
-<div id="comparaison-entre-les-méthodes-de-base-et-les-fonctions-de-dplyr" class="section level3">
-<h3>Comparaison entre les méthodes de base et les fonctions de <code>dplyr</code></h3>
+<div id="comparaison-entre-les-méthodes-de-base-et-les-fonctions-de-dplyr" class="section level2">
+<h2><span class="header-section-number">3.4</span> Comparaison entre les méthodes de base et les fonctions de <code>dplyr</code></h2>
 <p>Lorsque les manipulations ne concernent que très peu de conditions ou expressions pour sélectionner les observations ou variables, les deux méthodes sont comparables. Lorsque l’on veut sélectionner des observations selon plusieurs expressions, les fonctions du package <code>dplyr</code> permettent d’alléger l’écriture. Par exemple, l’énumération des conditions de sélection d’observations avec la fonction <code>filter</code> par son utilisation des virgules est moins lourde que l’enchaînement des conditions logiques dans les opérateurs <code>[,]</code> ou dans la fonction subset.</p>
 <p>Lorsqu’on crée plus d’une variable, la fonction <code>mutate</code> nous permet d’écrire toutes les expressions les unes à la suite des autres dans un seul appel. Cette fonction permet aussi d’utiliser les variables créées en premier pour définir les dernières, contrairement à <code>$</code> et <code>cbind</code>. En effet, l’opérateur <code>$</code> nécéssite une assignation pour chacune des variables à créer et <code>cbind</code> ne permet pas d’utiliser les premières variables créées pour définir celles qui sont ultérieures.</p>
 <p>De plus, lors de la sélection des variables, les nombreuses options de la fonction <code>select</code> ne nécessitent pas de spécifier parfaitement les noms de variables à conserver comme lors de l’utilisation des crochets <code>[,]</code>. Bref, les fonctions du package <code>dplyr</code> sont plus légères à écrire et à réviser, car leurs syntaxes ressemblent à une phrase et cela peut permettre à l’utilisateur d’être plus efficace qu’en utilisant les outils du package <code>base</code>. Il faut simplement penser à l’utiliser!</p>
-<div id="bibliographie" class="section level4">
-<h4>Bibliographie</h4>
+</div>
+</div>
+<div id="références" class="section level1 unnumbered">
+<h1>Références</h1>
 <ul>
 <li>Référence pour information générale package <code>dplyr</code> (site web de l’auteur): <a href="http://hadley.nz/index.html">http://hadley.nz/index.html</a></li>
 <li>Référence fonction du package <code>dplyr</code>: <a href="https://cran.r-project.org/web/packages/dplyr/dplyr.pdf">https://cran.r-project.org/web/packages/dplyr/dplyr.pdf</a></li>
 <li>Références pour les options supplémentaires de la fonction <code>select</code>: <a href="http://genomicsclass.github.io/book/pages/dplyr_tutorial.html">http://genomicsclass.github.io/book/pages/dplyr_tutorial.html</a></li>
 </ul>
-</div>
-</div>
 </div>

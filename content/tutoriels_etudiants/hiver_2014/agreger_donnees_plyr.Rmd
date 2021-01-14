@@ -8,8 +8,11 @@ output:
   pdf_document:
     toc: yes
     toc_depth: 3
+    number_sections: true
   blogdown::html_page:
     toc: true
+    toc_depth: 3
+    number_sections: true
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
@@ -22,7 +25,7 @@ header-includes:
 
 Comparaison de la fonction `aggregate` et du package `plyr`
  
-## 1. Présentation de la tâche à effectuer et du jeu de données Iris
+# Présentation de la tâche à effectuer et du jeu de données Iris
 
 Cette fiche montre comment calculer des statistiques descriptives pour un jeu de données agrégé en `R`. Une comparaison de deux méthodes permettra de déterminer laquelle est plus simple d'utilisation pour calculer le minimum, la moyenne et le maximum d'une variable pour un regroupement d'observation d'un jeu de données. La première méthode utilise des fonctions de base dans le progiciel `R`, alors que la deuxième méthode recourt l'installation d'un package. 
 
@@ -38,7 +41,7 @@ De plus, on peut connaître sa structure interne à l'aide de la commande suivan
 ```{r}
 str(iris)
 ```
->On remarque que le jeu de données iris est un tableau de données de 150 observations avec 5 variables dont 4 qui sont numériques et une de type facteur (*Species*).
+> On remarque que le jeu de données iris est un tableau de données de 150 observations avec 5 variables dont 4 qui sont numériques et une de type facteur (*Species*).
 
 À l'aide de ce jeu de données, on pourra calculer le minimum, la moyenne et le maximum de la longueur du sépale (variable *Sepal.Length*) en fonction des différentes espèces (variable *Species*) avec la fonction de base de `R` `aggregate` et avec les fonctions `ddply` et `summarize` du package `plyr`. 
 
@@ -56,9 +59,9 @@ final
 ```
 
 
-## 2. Méthode de base en `R`: fonction `aggregate`
+# Méthode de base en `R`: fonction `aggregate`
 
-### 2.1 Explication générale de `aggregate`:
+## Explication générale de `aggregate`:
 
 Rappelons qu'on veut déterminer,  à partir d'un jeu de données, le minimum, le maximum et la moyenne de la longueur du sépale des différentes espèces d'iris. En premier lieu, on utilisera `aggregate` une fonction de base existant dans `R`. 
 
@@ -68,7 +71,7 @@ La fonction `aggregate` est utile pour calculer une statistique descriptive d'un
 
 Par exemple, pour la variable *Species* dans le jeu de données *iris*, les modalités sont *virginica*, *versicolor* et *setosa*. La fonction `aggregate`  fera une boucle itérative pour les variables entrées dans l'argument `x`  pour les différentes combinaisons de modalités afin de déterminer la statistique descriptive entrée dans l'argument `FUN`. Par exemple, on peut entrer `mean` dans l'argument `FUN` pour déterminer la moyenne des différentes espèces de fleur pour une variable quelconque entrée dans l'argument `x`.
 
-### 2.2 Utilisation de `aggregate` avec les données sur les iris de Fisher
+## Utilisation de `aggregate` avec les données sur les iris de Fisher
 
 Voici un exemple pour bien comprendre l'utilisation de la fonction `aggregate`. D'abord, on veut déterminer le minimum de la longueur du sépale selon les différentes espèces.
 
@@ -81,7 +84,7 @@ minimum <- aggregate(x = iris$Sepal.Length, by = list(iris$Species), FUN=min)
 print(minimum)
 ```
 
->On obtient donc le miminum de la longueur du sépale pour les différentes espèces. 
+> On obtient donc le miminum de la longueur du sépale pour les différentes espèces. 
 
 
 De manière plus rapide et plus simplifié, on peut utiliser une formule `y ~ x` où `y` est en fonction de `x` dans la fonction `aggregate`. 
@@ -97,7 +100,7 @@ str(minimum)
 str(moyenne)
 str(maximum)
 ```
->On obtient bien 3 jeux de données de 3 observations avec 2 variables, soit *Species* pour les espèces et *Sepal Length* pour la statistique calculée.
+> On obtient bien 3 jeux de données de 3 observations avec 2 variables, soit *Species* pour les espèces et *Sepal Length* pour la statistique calculée.
 
 On remarque que les titres des deuxièmes colonnes ne sont pas ceux désirés. On renomme les titres des colonnes à l'aide de la fonction `colnames`.
 
@@ -121,14 +124,14 @@ final
 
 Notons que la fonction `merge` s'écrit de manière à ne prendre que deux tableaux de données ou que deux objets en arguments d'où la raison de faire un `merge` dans un `merge`. En effet, l'écriture de cette fonction est `merge(x, y, .)` où x et y sont des *data frames* et que le résultat de cette fonction donne un *data frame*. 
 
->Voir l'aide de `R` pour obtenir plus d'informations à ce sujet en tapant `help(merge)` dans la console.
+> Voir l'aide de `R` pour obtenir plus d'informations à ce sujet en tapant `help(merge)` dans la console.
 
->L'utilisation de l'option `by` n'est pas nécessaire, parce que les 3 tableaux de données (minimum, moyenne et maximum) ont la même variable pour les différentes espèces avec un nom commun qui est *Species*.
+> L'utilisation de l'option `by` n'est pas nécessaire, parce que les 3 tableaux de données (minimum, moyenne et maximum) ont la même variable pour les différentes espèces avec un nom commun qui est *Species*.
 
 
-## 3 - Fonction `merge` versus package `plyr`
+# Fonction `merge` versus package `plyr`
 
-### 3.1 - Utilisation du package `plyr`
+## Utilisation du package `plyr`
 
 Une alternative à l'utilisation de la fonction `aggregate` se retrouve dans le package `plyr` de `R`. C'est Hadley Wickham qui en est l'auteur. Pour l'installer et l'utiliser, il suffit de lancer dans un éditeur de `R` les commandes suivantes :
 
@@ -140,7 +143,7 @@ library(plyr)
 library(plyr)
 ```
 
->La version du package `plyr` utilisée est la version 1.8.1 publiée le 26 février 2014. À noter que la version 2.11.0 de `R`, ou une plus récente, est nécessaire au bon fonctionnement du package `plyr`.
+> La version du package `plyr` utilisée est la version 1.8.1 publiée le 26 février 2014. À noter que la version 2.11.0 de `R`, ou une plus récente, est nécessaire au bon fonctionnement du package `plyr`.
 
 Ce package contient plusieurs fonctions très utiles pour résoudre certains problèmes de programmation. Par exemple, `plyr` offre des pistes de solutions intéressantes lorsque l'on veut appliquer des calculs ou des fonctions à des parties précises d'un jeu de données pour ensuite rassembler les résultats. Ce genre de stratégie est nommé *split-apply-combine*.
 
@@ -157,7 +160,7 @@ Aussi, le manuel de référence est disponible sur http://cran.r-project.org/web
 Pour la tâche présente, soit de calculer des statistiques descriptives de base d'un jeu de données en fonction d'un regroupement d'observations, les fonctions `ddply` et `summarize` seront utilisées en conjonction. À noter que la fonction `summarise` effectue exactement la même tâche. Ce n'est en fait qu'une utilisation britannique de ce terme.
 
 
-### 3.2 - Fonction `summarize`
+## Fonction `summarize`
 
 La fonction `summarize` est une fonction qui permet de calculer des statistiques sur l'ensemble des observations d'un jeu de données. Son écriture générale est : `summarize(.data, ...)` , où :
 
@@ -177,7 +180,7 @@ str(exemple)
 Contrairement à la fonction `aggregate`, il est donc possible, à l'aide de la fonction `summarize`, de calculer plus d'une statistique sur les données et de donner un nom significatif à chacune de ces variables. Cependant, on ne peut pas appliquer ces fonctions à plusieurs sous-parties d'un jeu de données. Pour subvenir à ce besoin, le package `plyr` permet d'utiliser en conjonction les fonctions `summarize` et `ddply`.
 
 
-### 3.3 - Conjonction de `ddply` et `summarize`
+## Conjonction de `ddply` et `summarize`
 
 L'écriture générale pour la fonction `ddply` est la suivante :
 `ddply(.data, .variables, .fun = NULL, ...)`, où :
@@ -186,7 +189,7 @@ L'écriture générale pour la fonction `ddply` est la suivante :
 - **`.variables`** est une formule ou un vecteur de caractères spécifiant les variables servant à regrouper les observations 
 - **`.fun`** est la fonction qui doit être appliquée à chacun des sous-ensembles du jeu de données
 
->L'aide de `R` peut être consultée pour obtenir plus d'informations sur l'ensemble des options de la fonction `ddply`.
+> L'aide de `R` peut être consultée pour obtenir plus d'informations sur l'ensemble des options de la fonction `ddply`.
 
 En combinant les fonctions `ddply` et `summarize`, on se retrouve à calculer des statistiques descriptives à un jeu de données en fonction d'un regroupement d'observations. Pour l'exemple des iris de Fisher, on peut facilement calculer les minimums, les moyennes et les maximums de la longueur du sépale des différentes espèces d'iris. Voici ce que l'on obtient :
 ```{r, tidy = FALSE}
@@ -198,7 +201,7 @@ print(resultat)
 ```
 
 
-## 4 - Comparaison des deux méthodes
+# Comparaison des deux méthodes
 
 En somme, pour calculer le minimum, la moyenne et le maximum de la longueur du sépale (variable *Sepal.Length*) en fonction des différentes espèces (variable *Species*), il faut effectuer plusieurs fois la fonction `aggregate` pour chacune des statistiques descriptives désirées. En comparaison, un seul appel à la fonction `ddply`, en combinaison avec la fonction `summarize`, est nécessaire. Avec `aggregate`, on doit aussi renommer chacune des colonnes de façon manuelle et par la suite combiner autant de `merge` que l'on a de statistique à calculer. Il est donc plus simple d'utiliser les fonctions `ddply` et `summarize` lorsque l'on désire obtenir beaucoup d'information sur un grand nombre de variables.
 
@@ -210,7 +213,7 @@ aggregate(Sepal.Length ~ Species, data = iris,
 Cependant, le résultat obtenu aurait tout de même demandé une mise en forme afin d’avoir l’allure souhaitée au départ.
 
 
-## Sources d'information
+# Sources d'information
 
 Nous espérons que cette introduction au package `plyr` et aux fonctions `ddply` et `summarize` vous aura été utile pour vos futures analyses.
 

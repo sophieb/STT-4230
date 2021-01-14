@@ -8,8 +8,11 @@ output:
   pdf_document:
     toc: yes
     toc_depth: 3
+    number_sections: true
   blogdown::html_page:
     toc: true
+    toc_depth: 3
+    number_sections: true
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
@@ -24,25 +27,25 @@ header-includes:
 
 <div id="TOC">
 <ul>
-<li><a href="#presentation-de-la-tache-a-effectuer-et-du-jeu-de-donnees-iris">1. Présentation de la tâche à effectuer et du jeu de données Iris</a></li>
-<li><a href="#methode-de-base-en-r-fonction-aggregate">2. Méthode de base en <code>R</code>: fonction <code>aggregate</code></a><ul>
-<li><a href="#explication-generale-de-aggregate">2.1 Explication générale de <code>aggregate</code>:</a></li>
-<li><a href="#utilisation-de-aggregate-avec-les-donnees-sur-les-iris-de-fisher">2.2 Utilisation de <code>aggregate</code> avec les données sur les iris de Fisher</a></li>
+<li><a href="#présentation-de-la-tâche-à-effectuer-et-du-jeu-de-données-iris"><span class="toc-section-number">1</span> Présentation de la tâche à effectuer et du jeu de données Iris</a></li>
+<li><a href="#méthode-de-base-en-r-fonction-aggregate"><span class="toc-section-number">2</span> Méthode de base en <code>R</code>: fonction <code>aggregate</code></a><ul>
+<li><a href="#explication-générale-de-aggregate"><span class="toc-section-number">2.1</span> Explication générale de <code>aggregate</code>:</a></li>
+<li><a href="#utilisation-de-aggregate-avec-les-données-sur-les-iris-de-fisher"><span class="toc-section-number">2.2</span> Utilisation de <code>aggregate</code> avec les données sur les iris de Fisher</a></li>
 </ul></li>
-<li><a href="#fonction-merge-versus-package-plyr">3 - Fonction <code>merge</code> versus package <code>plyr</code></a><ul>
-<li><a href="#utilisation-du-package-plyr">3.1 - Utilisation du package <code>plyr</code></a></li>
-<li><a href="#fonction-summarize">3.2 - Fonction <code>summarize</code></a></li>
-<li><a href="#conjonction-de-ddply-et-summarize">3.3 - Conjonction de <code>ddply</code> et <code>summarize</code></a></li>
+<li><a href="#fonction-merge-versus-package-plyr"><span class="toc-section-number">3</span> Fonction <code>merge</code> versus package <code>plyr</code></a><ul>
+<li><a href="#utilisation-du-package-plyr"><span class="toc-section-number">3.1</span> Utilisation du package <code>plyr</code></a></li>
+<li><a href="#fonction-summarize"><span class="toc-section-number">3.2</span> Fonction <code>summarize</code></a></li>
+<li><a href="#conjonction-de-ddply-et-summarize"><span class="toc-section-number">3.3</span> Conjonction de <code>ddply</code> et <code>summarize</code></a></li>
 </ul></li>
-<li><a href="#comparaison-des-deux-methodes">4 - Comparaison des deux méthodes</a></li>
-<li><a href="#sources-dinformation">Sources d’information</a></li>
+<li><a href="#comparaison-des-deux-méthodes"><span class="toc-section-number">4</span> Comparaison des deux méthodes</a></li>
+<li><a href="#sources-dinformation"><span class="toc-section-number">5</span> Sources d’information</a></li>
 </ul>
 </div>
 
 <hr />
 <p>Comparaison de la fonction <code>aggregate</code> et du package <code>plyr</code></p>
-<div id="presentation-de-la-tache-a-effectuer-et-du-jeu-de-donnees-iris" class="section level2">
-<h2>1. Présentation de la tâche à effectuer et du jeu de données Iris</h2>
+<div id="présentation-de-la-tâche-à-effectuer-et-du-jeu-de-données-iris" class="section level1">
+<h1><span class="header-section-number">1</span> Présentation de la tâche à effectuer et du jeu de données Iris</h1>
 <p>Cette fiche montre comment calculer des statistiques descriptives pour un jeu de données agrégé en <code>R</code>. Une comparaison de deux méthodes permettra de déterminer laquelle est plus simple d’utilisation pour calculer le minimum, la moyenne et le maximum d’une variable pour un regroupement d’observation d’un jeu de données. La première méthode utilise des fonctions de base dans le progiciel <code>R</code>, alors que la deuxième méthode recourt l’installation d’un package.</p>
 <p>Pour comparer les deux méthodes, un jeu de données très connu sur les iris de Fisher est utilisé. Ce jeu de données contient des données morphologiques sur 3 différentes espèces d’iris; <em>setosa</em>, <em>virginica</em> et <em>versicolor</em>. Pour chacune de ces espèces, on a mesuré sur un échantillon de 50 plants la longueur et la largeur du pétale et du sépale. Pour de plus amples informations concernant ce jeu de données, on peut visiter ce lien web :
 <a href="http://en.wikipedia.org/wiki/Iris_flower_data_set" class="uri">http://en.wikipedia.org/wiki/Iris_flower_data_set</a></p>
@@ -73,17 +76,17 @@ header-includes:
 ## 2 versicolor 4.9 5.936 7.0
 ## 3  virginica 4.9 6.588 7.9</code></pre>
 </div>
-<div id="methode-de-base-en-r-fonction-aggregate" class="section level2">
-<h2>2. Méthode de base en <code>R</code>: fonction <code>aggregate</code></h2>
-<div id="explication-generale-de-aggregate" class="section level3">
-<h3>2.1 Explication générale de <code>aggregate</code>:</h3>
+<div id="méthode-de-base-en-r-fonction-aggregate" class="section level1">
+<h1><span class="header-section-number">2</span> Méthode de base en <code>R</code>: fonction <code>aggregate</code></h1>
+<div id="explication-générale-de-aggregate" class="section level2">
+<h2><span class="header-section-number">2.1</span> Explication générale de <code>aggregate</code>:</h2>
 <p>Rappelons qu’on veut déterminer, à partir d’un jeu de données, le minimum, le maximum et la moyenne de la longueur du sépale des différentes espèces d’iris. En premier lieu, on utilisera <code>aggregate</code> une fonction de base existant dans <code>R</code>.</p>
 <p>Cette fonction s’écrit de façon générale : <code>aggregate(x, by, FUN, .)</code> où <code>x</code>, <code>by</code>, <code>FUN</code> sont les arguments principaux, on peut aussi ajouter des options comme <code>na.rm</code> pour enlever ou non les valeurs manquantes du calcul de la statistique descriptive.</p>
 <p>La fonction <code>aggregate</code> est utile pour calculer une statistique descriptive d’une ou plusieurs variables provenant d’un tableau de données selon des sous-ensembles d’observation. Ce sont les combinaisons de modalités des variables incluses dans l’argument <code>by</code>, sous forme de liste, qui détermine ces sous-ensembles d’observation.</p>
 <p>Par exemple, pour la variable <em>Species</em> dans le jeu de données <em>iris</em>, les modalités sont <em>virginica</em>, <em>versicolor</em> et <em>setosa</em>. La fonction <code>aggregate</code> fera une boucle itérative pour les variables entrées dans l’argument <code>x</code> pour les différentes combinaisons de modalités afin de déterminer la statistique descriptive entrée dans l’argument <code>FUN</code>. Par exemple, on peut entrer <code>mean</code> dans l’argument <code>FUN</code> pour déterminer la moyenne des différentes espèces de fleur pour une variable quelconque entrée dans l’argument <code>x</code>.</p>
 </div>
-<div id="utilisation-de-aggregate-avec-les-donnees-sur-les-iris-de-fisher" class="section level3">
-<h3>2.2 Utilisation de <code>aggregate</code> avec les données sur les iris de Fisher</h3>
+<div id="utilisation-de-aggregate-avec-les-données-sur-les-iris-de-fisher" class="section level2">
+<h2><span class="header-section-number">2.2</span> Utilisation de <code>aggregate</code> avec les données sur les iris de Fisher</h2>
 <p>Voici un exemple pour bien comprendre l’utilisation de la fonction <code>aggregate</code>. D’abord, on veut déterminer le minimum de la longueur du sépale selon les différentes espèces.</p>
 <ul>
 <li>L’argument <strong>x</strong> est la variable <em>Sepal.Length</em></li>
@@ -147,10 +150,10 @@ final</code></pre>
 </blockquote>
 </div>
 </div>
-<div id="fonction-merge-versus-package-plyr" class="section level2">
-<h2>3 - Fonction <code>merge</code> versus package <code>plyr</code></h2>
-<div id="utilisation-du-package-plyr" class="section level3">
-<h3>3.1 - Utilisation du package <code>plyr</code></h3>
+<div id="fonction-merge-versus-package-plyr" class="section level1">
+<h1><span class="header-section-number">3</span> Fonction <code>merge</code> versus package <code>plyr</code></h1>
+<div id="utilisation-du-package-plyr" class="section level2">
+<h2><span class="header-section-number">3.1</span> Utilisation du package <code>plyr</code></h2>
 <p>Une alternative à l’utilisation de la fonction <code>aggregate</code> se retrouve dans le package <code>plyr</code> de <code>R</code>. C’est Hadley Wickham qui en est l’auteur. Pour l’installer et l’utiliser, il suffit de lancer dans un éditeur de <code>R</code> les commandes suivantes :</p>
 <pre class="r"><code>install.packages(&quot;plyr&quot;)
 library(plyr)</code></pre>
@@ -164,8 +167,8 @@ library(plyr)</code></pre>
 <p>Aussi, le manuel de référence est disponible sur <a href="http://cran.r-project.org/web/packages/plyr/plyr.pdf" class="uri">http://cran.r-project.org/web/packages/plyr/plyr.pdf</a>.</p>
 <p>Pour la tâche présente, soit de calculer des statistiques descriptives de base d’un jeu de données en fonction d’un regroupement d’observations, les fonctions <code>ddply</code> et <code>summarize</code> seront utilisées en conjonction. À noter que la fonction <code>summarise</code> effectue exactement la même tâche. Ce n’est en fait qu’une utilisation britannique de ce terme.</p>
 </div>
-<div id="fonction-summarize" class="section level3">
-<h3>3.2 - Fonction <code>summarize</code></h3>
+<div id="fonction-summarize" class="section level2">
+<h2><span class="header-section-number">3.2</span> Fonction <code>summarize</code></h2>
 <p>La fonction <code>summarize</code> est une fonction qui permet de calculer des statistiques sur l’ensemble des observations d’un jeu de données. Son écriture générale est : <code>summarize(.data, ...)</code> , où :</p>
 <ul>
 <li><strong><code>.data</code></strong> est un <em>data frame</em></li>
@@ -185,8 +188,8 @@ str(exemple)</code></pre>
 </blockquote>
 <p>Contrairement à la fonction <code>aggregate</code>, il est donc possible, à l’aide de la fonction <code>summarize</code>, de calculer plus d’une statistique sur les données et de donner un nom significatif à chacune de ces variables. Cependant, on ne peut pas appliquer ces fonctions à plusieurs sous-parties d’un jeu de données. Pour subvenir à ce besoin, le package <code>plyr</code> permet d’utiliser en conjonction les fonctions <code>summarize</code> et <code>ddply</code>.</p>
 </div>
-<div id="conjonction-de-ddply-et-summarize" class="section level3">
-<h3>3.3 - Conjonction de <code>ddply</code> et <code>summarize</code></h3>
+<div id="conjonction-de-ddply-et-summarize" class="section level2">
+<h2><span class="header-section-number">3.3</span> Conjonction de <code>ddply</code> et <code>summarize</code></h2>
 <p>L’écriture générale pour la fonction <code>ddply</code> est la suivante :
 <code>ddply(.data, .variables, .fun = NULL, ...)</code>, où :</p>
 <ul>
@@ -209,16 +212,16 @@ print(resultat)</code></pre>
 ## 3  virginica 4.9 6.588 7.9</code></pre>
 </div>
 </div>
-<div id="comparaison-des-deux-methodes" class="section level2">
-<h2>4 - Comparaison des deux méthodes</h2>
+<div id="comparaison-des-deux-méthodes" class="section level1">
+<h1><span class="header-section-number">4</span> Comparaison des deux méthodes</h1>
 <p>En somme, pour calculer le minimum, la moyenne et le maximum de la longueur du sépale (variable <em>Sepal.Length</em>) en fonction des différentes espèces (variable <em>Species</em>), il faut effectuer plusieurs fois la fonction <code>aggregate</code> pour chacune des statistiques descriptives désirées. En comparaison, un seul appel à la fonction <code>ddply</code>, en combinaison avec la fonction <code>summarize</code>, est nécessaire. Avec <code>aggregate</code>, on doit aussi renommer chacune des colonnes de façon manuelle et par la suite combiner autant de <code>merge</code> que l’on a de statistique à calculer. Il est donc plus simple d’utiliser les fonctions <code>ddply</code> et <code>summarize</code> lorsque l’on désire obtenir beaucoup d’information sur un grand nombre de variables.</p>
 <p>Notons qu’il aurait été possible d’obtenir les statistiques désirées par un seul appel à la fonction <code>aggregate</code>. En effet, nous aurions pu donner en entrée à <code>aggregate</code> une fonction qui calcule toutes les statistiques désirées et les retourne dans un vecteur, comme suit :</p>
 <pre class="r"><code>aggregate(Sepal.Length ~ Species, data = iris, 
           FUN = function(x) c(min = min(x), moy = mean(x), max = max(x)))</code></pre>
 <p>Cependant, le résultat obtenu aurait tout de même demandé une mise en forme afin d’avoir l’allure souhaitée au départ.</p>
 </div>
-<div id="sources-dinformation" class="section level2">
-<h2>Sources d’information</h2>
+<div id="sources-dinformation" class="section level1">
+<h1><span class="header-section-number">5</span> Sources d’information</h1>
 <p>Nous espérons que cette introduction au package <code>plyr</code> et aux fonctions <code>ddply</code> et <code>summarize</code> vous aura été utile pour vos futures analyses.</p>
 <p>Merci de votre attention!</p>
 <p><strong>Bibliographie</strong></p>

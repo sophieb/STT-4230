@@ -8,8 +8,11 @@ output:
   pdf_document:
     toc: yes
     toc_depth: 3
+    number_sections: true
   blogdown::html_page:
     toc: true
+    toc_depth: 3
+    number_sections: true
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
@@ -17,9 +20,13 @@ header-includes:
 - \setlength{\OuterFrameSep}{6pt}
 ---
 
+```{r echo = FALSE}
+knitr::opts_chunk$set(fig.align = 'center', fig.show = 'hold')
+```
+
 ***
 
-# 1. Introduction
+# Introduction
 Les graphiques de type boxplot sont utilisés afin de représenter de façon simple un ensemble de données. Le boxplot permet de visualiser rapidement le jeu de données à travers une représentation graphique des quartiles.   
    
 Les quartiles sont au nombre de trois et divisent les échantillons en quatre groupes contenant chacun le quart des échantillons :  la médiane, qui correspond au second quartile (**Q<sub>2</sub>**), sépare le jeu de données en deux parts égales alors que le premier(**Q<sub>1</sub>**) et troisième(**Q<sub>3</sub>**) quartile redivisent en deux parts égales ces parties inférieures et supérieures du jeu de données, respectivement.    
@@ -32,7 +39,7 @@ boxplot(c(1,2,2,3,4,5,9))
 
 Dans cet exemple, **Q<sub>1</sub>** = 2, **Q<sub>2</sub>**, la médiane = 3, **Q<sub>3</sub>** = 4,5 et l'**IQR** = 4,5 - 2 = 2,5.  Les barres de part et d'autre de la boîte indiquent la plus petite donnée supérieure ou égale à **Q<sub>1</sub>** - (1,5 x IQR) = 2 - (1,5 x 2,5)  = -1, 75,  et la plus grande donnée inférieure ou égale à **Q<sub>3</sub>** + (1,5 x **IQR**) = 4,5 + (1,5 x 2,5) = 8,25; dans cet exemple, la ligne inférieure représente la donnée 1, alors que la ligne supérieure représente la donnée 5.  Les données au-delà de ces 2 lignes sont représentées par un point (ici la donnée 9).
 
-# 2. Jeu de données
+# Jeu de données
 
 À titre de démonstration, nous utiliserons le jeu de données *day.csv*  provenant de la base de données *Bike Sharing Dataset* téléchargeable sur le *UCI Machine Learning Repository* à l’adresse suivante :
 https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset.
@@ -53,7 +60,7 @@ La fonction `str(bike)` nous permet de voir que le data.frame `bike` contient 73
 
 
 
-# 3. Boxplot simple avec les fonctions de base de R
+# Boxplot simple avec les fonctions de base de R
 
 
 Dans le cadre de l'exemple, nous utiliserons un sous-ensemble du data.frame `bike`, soient les observations correspondant à l'année 2011 et aux jours de travail seulement.
@@ -73,11 +80,11 @@ La fonction de base dans R est `boxplot`.  Il faut fournir en argument  :
 - on peut également indiquer quoi faire avec les données manquantes à l'aide de `na.action`; par défaut, `na.action=NULL`, i.e que les valeurs manquantes sont ignorées.
 
 
-
 ```{r, fig.align='center'} 
-boxplot(cnt ~ mnth, data = bike2011)
+boxplot(cnt ~ mnth, data = bike2011, ann = FALSE)
 # ajout du titre et identifications des 2 axes 
-mtext("Évolution mensuelle du nombre de locations par jour en 2011 lors de jours de travail", side = 3, cex = 0.95, font = 2, line = 1.5)
+mtext("Évolution mensuelle du nombre de locations par jour en 2011 lors de jours de travail", 
+      side = 3, cex = 0.95, font = 2, line = 1.5)
 mtext("mois", side = 1, cex = 1, line=2)
 mtext("nombre de locations par jour", side = 2, cex = 1, line = 2.5)
 # Note : Ces ajouts auraient aussi pu être effectués grâce aux arguments
@@ -88,7 +95,7 @@ mtext("nombre de locations par jour", side = 2, cex = 1, line = 2.5)
 
 
 
-# 4.  Boxplot simple avec `ggplot2`
+# Boxplot simple avec `ggplot2`
 
 
 `ggplot2` est un package crée par Hadley Wickham et qui permet de créer facilement différents types de graphiques pour différents types de données numériques ou catégoriques, univariées ou multivariées (*Réf.:* *http://www.statmethods.net/advgraphs/ggplot2.html* )  
@@ -137,7 +144,7 @@ bplot +
         plot.title = element_text(face=quote(bold), vjust = 2, size = 11))
 ```
      
-# 5.  Boxplot complexe avec `ggplot2`
+# Boxplot complexe avec `ggplot2`
      
 Pour cette partie, nous utiliserons le jeu de données original, `bike`, contenant donc aussi des données pour l'année 2012 et pour les jours de congé.
     
@@ -152,7 +159,7 @@ bike$travail[bike$workingday==1] <- "oui"
 ```
 L'argument `fill` dans la fonction `aes` (qui est elle même un argument de la fonction `ggplot`) nous permet de spécifier que c'est selon la valeur retrouvée dans `bike$travail` que nous souhaitons colorer les boîtes de notre boxplot. L'argument `legend.position` sous la fonction `theme` (qui nous permettait plus haut de changer l'aspect du titre) nous permet de spécifier l'emplacement de la légende ainsi créée tandis que la fonction `labs` nous permet de spécifier le nom associé à cette légende : 
 ```{r fig.height=3, fig.align='center'} 
-ggplot(bike,aes(x = as.factor(mnth),  y=cnt, fill= bike$travail)) + 
+ggplot(bike,aes(x = as.factor(mnth),  y=cnt, fill= travail)) + 
   geom_boxplot() + 
   theme(legend.position="bottom") + 
   labs(fill = "Jour de travail")
@@ -180,7 +187,7 @@ ggplot(bike,aes(x = as.factor(mnth),  y=cnt)) +
 **Graphique complet :**
 En combinant l'usage de l'argument `fill` présenté plus haut à celui de la fonction `facet_grid` et aux fonctions permettant d'afficher le titre principal (`ggtitle`) et ceux des axes (`xlab` et `ylab`) et de les modifier (argument `plot.title` dans `theme`) nous obtenons un graphique de type boxplot complet :
 ```{r, fig.align='center'}
-ggplot(bike,aes(x = as.factor(mnth),  y=cnt, fill= bike$travail)) + 
+ggplot(bike,aes(x = as.factor(mnth),  y=cnt, fill= travail)) + 
   geom_boxplot() + 
   facet_grid(~ year) + 
   ggtitle("Évolution mensuelle du nombre de locations par jour") + 
@@ -190,7 +197,7 @@ ggplot(bike,aes(x = as.factor(mnth),  y=cnt, fill= bike$travail)) +
   labs(fill = "Jour de travail") 
 ```
 
-# Bibliographie
+# Bibliographie {-}
 
 - Définition des quartiles : Weisstein, Eric W. "Quartile." From MathWorld--A Wolfram Web Resource. http://mathworld.wolfram.com/Quartile.html   
 - Introduction à ggplot : http://blog.echen.me/2012/01/17/quick-introduction-to-ggplot2/   
@@ -199,3 +206,4 @@ http://www.cookbook-r.com/Graphs/Plotting_distributions_(ggplot2)/
 - Informations sur la légende du boxplot : http://www.sthda.com/english/wiki/ggplot2-box-plot-quick-start-guide-r-software-and-data-visualization#change-box-plot-fill-colors  
 - Informations sur les titres : http://www.cookbook-r.com/Graphs/Titles_(ggplot2)/ et  
 http://www.sthda.com/english/wiki/ggplot2-title-main-axis-and-legend-titles   
+

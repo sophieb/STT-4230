@@ -2,14 +2,18 @@
 title: "Transformer un jeu de données en forme large ou longue : base R vs le package tidyr"
 linkTitle: "tidyr - Reformater des données"
 weight: 4
+slug: "reformater_donnees_tidyr"
 author: "Hans Ivers & Mohammadsadegh Shokrizadeh"
 date: "2016-04-08"
 output:
   pdf_document:
     toc: yes
     toc_depth: 3
+    number_sections: true
   blogdown::html_page:
     toc: true
+    toc_depth: 3
+    number_sections: true
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
@@ -24,71 +28,71 @@ header-includes:
 
 <div id="TOC">
 <ul>
-<li><a href="#introduction">Introduction</a><ul>
-<li><a href="#formes-large-et-longue">Formes large et longue</a></li>
-<li><a href="#objectifs-de-ce-document">Objectifs de ce document</a></li>
+<li><a href="#introduction"><span class="toc-section-number">1</span> Introduction</a><ul>
+<li><a href="#formes-large-et-longue"><span class="toc-section-number">1.1</span> Formes large et longue</a></li>
+<li><a href="#objectifs-de-ce-document"><span class="toc-section-number">1.2</span> Objectifs de ce document</a></li>
 </ul></li>
-<li><a href="#methode-de-base-pour-changer-de-mise-en-forme">Méthode de base pour changer de mise en forme</a><ul>
-<li><a href="#illustration-de-la-base-de-donnees">Illustration de la base de données</a></li>
-<li><a href="#passage-de-la-forme-large-a-la-forme-longue">Passage de la forme large à la forme longue</a></li>
-<li><a href="#passage-de-la-forme-longue-a-la-forme-large">Passage de la forme longue à la forme large</a></li>
+<li><a href="#méthode-de-base-pour-changer-de-mise-en-forme"><span class="toc-section-number">2</span> Méthode de base pour changer de mise en forme</a><ul>
+<li><a href="#illustration-de-la-base-de-données"><span class="toc-section-number">2.1</span> Illustration de la base de données</a></li>
+<li><a href="#passage-de-la-forme-large-à-la-forme-longue"><span class="toc-section-number">2.2</span> Passage de la forme large à la forme longue</a></li>
+<li><a href="#passage-de-la-forme-longue-à-la-forme-large"><span class="toc-section-number">2.3</span> Passage de la forme longue à la forme large</a></li>
 </ul></li>
-<li><a href="#methode-alternative-a-laide-du-package-tidyr">Méthode alternative à l’aide du package <em>tidyr</em></a><ul>
-<li><a href="#passage-de-la-forme-large-a-la-forme-longue-1">Passage de la forme large à la forme longue</a></li>
-<li><a href="#passage-de-la-forme-longue-a-la-forme-large-1">Passage de la forme longue à la forme large</a></li>
+<li><a href="#méthode-alternative-à-laide-du-package-tidyr"><span class="toc-section-number">3</span> Méthode alternative à l’aide du package <em>tidyr</em></a><ul>
+<li><a href="#passage-de-la-forme-large-à-la-forme-longue-1"><span class="toc-section-number">3.1</span> Passage de la forme large à la forme longue</a></li>
+<li><a href="#passage-de-la-forme-longue-à-la-forme-large-1"><span class="toc-section-number">3.2</span> Passage de la forme longue à la forme large</a></li>
 </ul></li>
-<li><a href="#comparaison-des-deux-methodes">Comparaison des deux méthodes</a></li>
-<li><a href="#references">Références</a></li>
+<li><a href="#comparaison-des-deux-méthodes"><span class="toc-section-number">4</span> Comparaison des deux méthodes</a></li>
+<li><a href="#références">Références</a></li>
 </ul>
 </div>
 
 <hr />
 <div id="introduction" class="section level1">
-<h1>Introduction</h1>
-<div id="formes-large-et-longue" class="section level3">
-<h3>Formes large et longue</h3>
+<h1><span class="header-section-number">1</span> Introduction</h1>
+<div id="formes-large-et-longue" class="section level2">
+<h2><span class="header-section-number">1.1</span> Formes large et longue</h2>
 <p>Les bases de données peuvent représenter leur contenu d’information sous deux formats : (a) la forme <strong>large</strong>, où chaque variable est localisée dans une colonne distincte, et (b) la forme <strong>longue</strong>, également connue sous le nom de modèle <em>Entité - attribut - valeur</em>, où chaque ligne représente une combinaison de l’identifiant unique de l’observation, de l’attribut (la variable) ainsi que sa valeur (voir Figure 1).</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-1"></span>
 <img src="fig/formatlargeetlong.png" alt="Représentation des formes large et longue." width="60%" />
 <p class="caption">
-Figure 1: Représentation des formes large et longue.
+Figure 1.1: Représentation des formes large et longue.
 </p>
 </div>
 <p>La première forme est fréquemment utilisée dans les logiciels statistiques comme SAS (Delwiche &amp; Slaughter, 2012), ou dans les bases de données relationnelles, alors que la seconde forme se retrouve à la base de la représentation des données sous le formalisme NoSQL (Risch, 2013). Cette seconde forme présente de nombreux avantages, comme une flexibilité supérieure pour ajouter de nouvelles variables et une rapidité plus grande pour mettre à jour ce type de format, au détriment d’une possible perte d’information car le type de variable n’est pas nécessairement représenté dans la combinaison “attribut-valeur” (dans les cas comme le présent exemple où plusieurs variables distinctes sont transposées).</p>
 </div>
-<div id="objectifs-de-ce-document" class="section level3">
-<h3>Objectifs de ce document</h3>
+<div id="objectifs-de-ce-document" class="section level2">
+<h2><span class="header-section-number">1.2</span> Objectifs de ce document</h2>
 <p>Les objectifs de ce document d’information sont de présenter deux méthodes pour passer d’une mise en forme à une autre : (a) une méthode incluse par défaut dans R base, soit la procédure <em>reshape</em>, et (b) une méthode disponible via le package <em>tidyr</em> (Wickham, 2016) qui présente, selon notre évaluation, des avantages intéressants. Chaque méthode sera illustrée puis un comparatif de ces méthodes sera discuté.</p>
 <p>Pour illustrer ces procédures, un jeu de données est tiré d’une base incluant tous les matchs de tennis en simple masculin ayant eu lieu lors du tournoi de Wimbledon en 2013. Les données sont accessibles dans le fichier <em>Wimbledon-men-2013.csv</em>, téléchargé à l’URL suivant : <a href="https://archive.ics.uci.edu/ml/machine-learning-databases/00300/" class="uri">https://archive.ics.uci.edu/ml/machine-learning-databases/00300/</a> et la description des attributs est présentée à l’URL suivant : <a href="https://archive.ics.uci.edu/ml/datasets/Tennis+Major+Tournament+Match+Statistics" class="uri">https://archive.ics.uci.edu/ml/datasets/Tennis+Major+Tournament+Match+Statistics</a>.</p>
 <hr />
 </div>
 </div>
-<div id="methode-de-base-pour-changer-de-mise-en-forme" class="section level1">
-<h1>Méthode de base pour changer de mise en forme</h1>
-<div id="illustration-de-la-base-de-donnees" class="section level3">
-<h3>Illustration de la base de données</h3>
+<div id="méthode-de-base-pour-changer-de-mise-en-forme" class="section level1">
+<h1><span class="header-section-number">2</span> Méthode de base pour changer de mise en forme</h1>
+<div id="illustration-de-la-base-de-données" class="section level2">
+<h2><span class="header-section-number">2.1</span> Illustration de la base de données</h2>
 <p>Afin d’illustrer le passage de la forme large à la forme longue à l’aide de la méthode <em>reshape</em>, la base de données (par défaut en forme large) est d’abord chargée en mémoire et une clé primaire pour identifier chaque match de façon unique (variable <em>id</em>) est ajoutée.</p>
 <pre class="r"><code>data.raw &lt;- read.csv2(file = &quot;Wimbledon-men-2013.csv&quot;, header = TRUE, na.strings = &quot;&quot;, sep = &quot;,&quot;)
 id &lt;- as.integer(rownames(data.raw))
 data.raw &lt;- cbind(data.raw,id)</code></pre>
 <p>Voici un extrait des premières lignes de cette base, pour les variables d’intérêt (noms des deux joueurs, ronde, résultat, et les scores de chaque joueur à chacun des cinq sets possibles (noms originaux des variables : Player1, Player2, Round, Result, ST1.1 à ST5.1, et ST1.2 à ST5.2) :</p>
-<pre><code>##   id   Player1         Player2 Round Result ST1.1 ST2.1 ST3.1 ST4.1 ST5.1
-## 1  1  B.Becker        A.Murray     1      0     4     3     2    NA    NA
-## 2  2    J.Ward          Y-H.Lu     1      0     7     4     6     6    NA
-## 3  3   N.Mahut         J.Hajek     1      1     6     6     6    NA    NA
-## 4  4 T.Robredo A.Bogomolov Jr.     1      1     6     6     6    NA    NA
-## 5  5   R.Haase       M.Youzhny     1      0     4     5     5    NA    NA
-## 6  6 M.Gicquel      V.Pospisil     1      0     3     2     6    NA    NA
-##   ST1.2 ST2.2 ST3.2 ST4.2 ST5.2
-## 1     6     6     6    NA    NA
-## 2     6     6     7     7    NA
-## 3     2     4     3    NA    NA
-## 4     2     2     4    NA    NA
-## 5     6     7     7    NA    NA
-## 6     6     6     7    NA    NA</code></pre>
+<pre><code>##   id   Player1         Player2 Round Result ST1.1 ST2.1 ST3.1 ST4.1 ST5.1 ST1.2
+## 1  1  B.Becker        A.Murray     1      0     4     3     2    NA    NA     6
+## 2  2    J.Ward          Y-H.Lu     1      0     7     4     6     6    NA     6
+## 3  3   N.Mahut         J.Hajek     1      1     6     6     6    NA    NA     2
+## 4  4 T.Robredo A.Bogomolov Jr.     1      1     6     6     6    NA    NA     2
+## 5  5   R.Haase       M.Youzhny     1      0     4     5     5    NA    NA     6
+## 6  6 M.Gicquel      V.Pospisil     1      0     3     2     6    NA    NA     6
+##   ST2.2 ST3.2 ST4.2 ST5.2
+## 1     6     6    NA    NA
+## 2     6     7     7    NA
+## 3     4     3    NA    NA
+## 4     2     4    NA    NA
+## 5     7     7    NA    NA
+## 6     6     7    NA    NA</code></pre>
 </div>
-<div id="passage-de-la-forme-large-a-la-forme-longue" class="section level3">
-<h3>Passage de la forme large à la forme longue</h3>
+<div id="passage-de-la-forme-large-à-la-forme-longue" class="section level2">
+<h2><span class="header-section-number">2.2</span> Passage de la forme large à la forme longue</h2>
 <p>La procédure <em>reshape</em> permet de passer d’une forme large à une forme longue, et vice-versa. Pour cette première démonstration, nous allons d’abord passer vers la forme longue.</p>
 <p>Pour se faire, différents arguments doivent être spécifiés :</p>
 <ul>
@@ -123,17 +127,17 @@ data.raw &lt;- cbind(data.raw,id)</code></pre>
 ## 456 114 N.Djokovic    A.Murray     7      0   4   NA   NA
 ## 570 114 N.Djokovic    A.Murray     7      0   5   NA   NA</code></pre>
 </div>
-<div id="passage-de-la-forme-longue-a-la-forme-large" class="section level3">
-<h3>Passage de la forme longue à la forme large</h3>
+<div id="passage-de-la-forme-longue-à-la-forme-large" class="section level2">
+<h2><span class="header-section-number">2.3</span> Passage de la forme longue à la forme large</h2>
 <p>Une façon simple de revenir d’une forme longue à une forme large est simplement de resoumettre la commande <em>reshape (nom du dataframe en forme longue)</em>, <strong>pour autant que le dataframe a été obtenu initialement à l’aide de cette même commande</strong>, tel qu’illustré dans l’exemple suivant :</p>
 <pre class="r"><code>wide.1 &lt;- reshape(long.1)</code></pre>
 <p>Voici le résultat obtenu pour les deux derniers matchs :</p>
-<pre><code>##      id    Player1     Player2 Round Result ST1.1 ST1.2 ST2.1 ST2.2 ST3.1
-## 113 113 N.Djokovic J.Del Potro     6      1     7     5     4     6     7
-## 114 114 N.Djokovic    A.Murray     7      0     4     6     5     7     4
-##     ST3.2 ST4.1 ST4.2 ST5.1 ST5.2
-## 113     6     6     7     6     3
-## 114     6    NA    NA    NA    NA</code></pre>
+<pre><code>##      id    Player1     Player2 Round Result ST1.1 ST1.2 ST2.1 ST2.2 ST3.1 ST3.2
+## 113 113 N.Djokovic J.Del Potro     6      1     7     5     4     6     7     6
+## 114 114 N.Djokovic    A.Murray     7      0     4     6     5     7     4     6
+##     ST4.1 ST4.2 ST5.1 ST5.2
+## 113     6     7     6     3
+## 114    NA    NA    NA    NA</code></pre>
 <p>Toutefois, il est possible de noter que l’ordre des variables transposées (résultats des cinq sets pour les deux joueurs) n’est pas exactement le même que dans le fichier original. Il est ici en ordre de sets puis de joueur, alors qu’il était originalement en ordre de joueur, puis de sets.</p>
 <p>Si le fichier à transposer n’était pas déjà produit par une procédure <em>reshape</em>, il est possible d’effectuer le passage d’une forme longue vers une forme large à l’aide de quatre principaux arguments :</p>
 <ul>
@@ -147,24 +151,24 @@ data.raw &lt;- cbind(data.raw,id)</code></pre>
             timevar = &quot;set&quot;,
             direction = &quot;wide&quot;)</code></pre>
 <p>Voici le résultat obtenu pour les deux derniers matchs :</p>
-<pre><code>##      id    Player1     Player2 Round Result ST1.1 ST1.2 ST2.1 ST2.2 ST3.1
-## 113 113 N.Djokovic J.Del Potro     6      1     7     5     4     6     7
-## 114 114 N.Djokovic    A.Murray     7      0     4     6     5     7     4
-##     ST3.2 ST4.1 ST4.2 ST5.1 ST5.2
-## 113     6     6     7     6     3
-## 114     6    NA    NA    NA    NA</code></pre>
+<pre><code>##      id    Player1     Player2 Round Result ST1.1 ST1.2 ST2.1 ST2.2 ST3.1 ST3.2
+## 113 113 N.Djokovic J.Del Potro     6      1     7     5     4     6     7     6
+## 114 114 N.Djokovic    A.Murray     7      0     4     6     5     7     4     6
+##     ST4.1 ST4.2 ST5.1 ST5.2
+## 113     6     7     6     3
+## 114    NA    NA    NA    NA</code></pre>
 <p>Ici encore, bien que les données soient correctement transposées, il est possible de noter que l’ordre et le nom (sous le formalisme ST[joueur].[set]) des variables transposées n’est pas exactement le même que dans le fichier original (sous le formalisme ST[set].[joueur]). Il faudra donc une étape supplémentaire (renommer et réordonner les variables) afin de reproduire la mise en forme exacte du fichier initial. Mais dans un contexte réel d’usage de cette commande, cette étape n’est pas nécessaire car, par définition, le fichier original en format long n’existe pas, notre objectif étant plutôt de le créer.</p>
 <hr />
 </div>
 </div>
-<div id="methode-alternative-a-laide-du-package-tidyr" class="section level1">
-<h1>Méthode alternative à l’aide du package <em>tidyr</em></h1>
+<div id="méthode-alternative-à-laide-du-package-tidyr" class="section level1">
+<h1><span class="header-section-number">3</span> Méthode alternative à l’aide du package <em>tidyr</em></h1>
 <p>Le package <em>tidyr</em>, développé et maintenu par Hadley Wickham (dernière version en mars 2016), est une amélioration du package <em>reshape2</em> par le même auteur (disponible depuis 2007), lui-même développé pour améliorer les fonctionnalités de la procédure <em>reshape</em> de R Base. Cette “troisième” génération de package vise également à inclure l’usage du puissant opérateur de redirection de flux (%&gt;%), historiquement inventé pour les systèmes d’exploitation dérivés de Unix/Linux.</p>
 <p>Le package <em>tidyr</em> offre 13 fonctions de manipulation de données, mais seules deux fonctions seront traitées dans le présent document en lien avec les objectifs, soit la procédure <strong>gather()</strong>, pour passer de la forme large vers la forme longue, et la procédure <strong>spread()</strong>, afin de compléter le passage contraire.</p>
 <p>Avant d’utiliser ce package, il faut évidemment s’assurer qu’il soit bien installé et chargé dans l’environnement de travail.</p>
 <pre class="r"><code>library(tidyr)</code></pre>
-<div id="passage-de-la-forme-large-a-la-forme-longue-1" class="section level3">
-<h3>Passage de la forme large à la forme longue</h3>
+<div id="passage-de-la-forme-large-à-la-forme-longue-1" class="section level2">
+<h2><span class="header-section-number">3.1</span> Passage de la forme large à la forme longue</h2>
 <p>Notons qu’à l’instar de la procédure <em>reshape</em>, les procédures du package <em>tidyr</em> assument que chaque rangée est une observation et chaque colonne est une variable. Pour passer d’une forme large à une forme longue, la procédure <em>gather()</em> utilise les arguments suivants :</p>
 <ul>
 <li><strong>data</strong> = nom du data frame qui doit être transposé</li>
@@ -230,8 +234,8 @@ data.raw &lt;- cbind(data.raw,id)</code></pre>
 ## 569 114 N.Djokovic    A.Murray     7      0   4   NA   NA
 ## 570 114 N.Djokovic    A.Murray     7      0   5   NA   NA</code></pre>
 </div>
-<div id="passage-de-la-forme-longue-a-la-forme-large-1" class="section level3">
-<h3>Passage de la forme longue à la forme large</h3>
+<div id="passage-de-la-forme-longue-à-la-forme-large-1" class="section level2">
+<h2><span class="header-section-number">3.2</span> Passage de la forme longue à la forme large</h2>
 <p>Comme il a été illustré dans la section précédente, le package <em>tidyr</em> permet d’utiliser de façon flexible les outils de base pour effectuer toute opération nécessaire afin de réaliser une transposition vers une forme longue. Cette même approche sera retenue pour passer de la forme longue à la forme large. En clair, les mêmes opérations peuvent être utilisées pour effectuer la procédure inverse, seul l’ordre des opérations sera nécessairement à l’inverse.</p>
 <p>Rappelons que la forme longue se présente comme suit pour la base à titre d’exemple :</p>
 <pre><code>##    id  Player1  Player2 Round Result Set ST.1 ST.2
@@ -246,12 +250,12 @@ data.raw &lt;- cbind(data.raw,id)</code></pre>
 ## 9   2   J.Ward   Y-H.Lu     1      0   4    6    7
 ## 10  2   J.Ward   Y-H.Lu     1      0   5   NA   NA</code></pre>
 <p>Et l’objectif est d’obtenir une forme large similaire à :</p>
-<pre><code>##   id  Player1  Player2 Round Result ST1.1 ST2.1 ST3.1 ST4.1 ST5.1 ST1.2
-## 1  1 B.Becker A.Murray     1      0     4     3     2    NA    NA     6
-## 2  2   J.Ward   Y-H.Lu     1      0     7     4     6     6    NA     6
-##   ST2.2 ST3.2 ST4.2 ST5.2
-## 1     6     6    NA    NA
-## 2     6     7     7    NA</code></pre>
+<pre><code>##   id  Player1  Player2 Round Result ST1.1 ST2.1 ST3.1 ST4.1 ST5.1 ST1.2 ST2.2
+## 1  1 B.Becker A.Murray     1      0     4     3     2    NA    NA     6     6
+## 2  2   J.Ward   Y-H.Lu     1      0     7     4     6     6    NA     6     6
+##   ST3.2 ST4.2 ST5.2
+## 1     6    NA    NA
+## 2     7     7    NA</code></pre>
 <p>En examinant la transposition précédente, la liste suivante des opérations a été complétée afin de permettre le passage à la forme longue :</p>
 <ol style="list-style-type: decimal">
 <li>Transposer les données originales en forme large vers une forme longue (fonction gather)</li>
@@ -275,17 +279,17 @@ data.raw &lt;- cbind(data.raw,id)</code></pre>
   unite(SP,Set,Player, sep = &quot;.&quot;) %&gt;%
   spread(SP,SetRes)</code></pre>
 <p>Il est possible de constater que cet ensemble d’opérations à rebours a permis de réaliser correctement le passgage de la forme longue vers la forme large selon les spécifiations :</p>
-<pre><code>##   id  Player1  Player2 Round Result ST1.1 ST1.2 ST2.1 ST2.2 ST3.1 ST3.2
-## 1  1 B.Becker A.Murray     1      0     4     6     3     6     2     6
-## 2  2   J.Ward   Y-H.Lu     1      0     7     6     4     6     6     7
-##   ST4.1 ST4.2 ST5.1 ST5.2
-## 1    NA    NA    NA    NA
-## 2     6     7    NA    NA</code></pre>
+<pre><code>##   id  Player1  Player2 Round Result ST1.1 ST1.2 ST2.1 ST2.2 ST3.1 ST3.2 ST4.1
+## 1  1 B.Becker A.Murray     1      0     4     6     3     6     2     6    NA
+## 2  2   J.Ward   Y-H.Lu     1      0     7     6     4     6     6     7     6
+##   ST4.2 ST5.1 ST5.2
+## 1    NA    NA    NA
+## 2     7    NA    NA</code></pre>
 <hr />
 </div>
 </div>
-<div id="comparaison-des-deux-methodes" class="section level1">
-<h1>Comparaison des deux méthodes</h1>
+<div id="comparaison-des-deux-méthodes" class="section level1">
+<h1><span class="header-section-number">4</span> Comparaison des deux méthodes</h1>
 <p>Les illustrations réalisées dans les sections précédentes pour la procédure <em>reshape</em> de Base R et la combinaison des procédures <em>gather</em>, <em>spread</em>, <em>unite</em> et <em>separate</em> tirées du package <em>tidyr</em> permettent de constater plusieurs avantages de ce package. En effet, la philosophie de design derrière ce package est de rendre disponible à l’analyste une série d’outils simples, qui font une seule tâche. Toutefois, en permettant de combiner de façon flexible et originale ces différents outils, les manipulations possibles sont quasi illimitées. A l’inverse, la procédure de Base R est développée avec un nombre important d’arguments, afin de permettre certains changements de forme prévus à l’avance. L’analyste qui désire donc réaliser une certaine manipulation de données qui n’était pas prévue initialement par le concepteur de cette méthode risque d’être incapable d’atteindre son objectif.</p>
 <p>A l’instar de notre expérience, Boehmke (2015) affirme que, comparativement aux méthodes contenues dans R Base, les méthodes du package <em>tidyr</em> présentent plusieurs avantages :</p>
 <ol style="list-style-type: decimal">
@@ -298,7 +302,7 @@ data.raw &lt;- cbind(data.raw,id)</code></pre>
 <p>Bref, la découverte de ce package a été très stimulante et nous ouvre plusieurs portes vers un usage plus simple, flexible et efficace du logiciel R.</p>
 <hr />
 </div>
-<div id="references" class="section level1">
+<div id="références" class="section level1 unnumbered">
 <h1>Références</h1>
 <ul>
 <li><p>Boehmke, B. (2015). <em>Data processing with dplyr &amp; tidyr</em>. Référence en ligne : <a href="http://rpubs.com/bradleyboehmke/data_wrangling" class="uri">http://rpubs.com/bradleyboehmke/data_wrangling</a>.</p></li>

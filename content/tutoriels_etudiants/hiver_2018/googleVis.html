@@ -7,6 +7,8 @@ date: "2018-05-15"
 output:
   blogdown::html_page:
     toc: true
+    toc_depth: 3
+    number_sections: true
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
@@ -19,20 +21,16 @@ header-includes:
 
 <div id="TOC">
 <ul>
-<li><a href="#introduction">1. Introduction</a></li>
-<li><a href="#donnees-utilisees-dans-les-exemples">2. Données utilisées dans les exemples</a></li>
-<li><a href="#fonctions-graphiques">3. Fonctions graphiques</a><ul>
-<li><a href="#graphiques-de-bases">3.1. Graphiques de bases</a></li>
-<li><a href="#graphiques-intermediaires">3.2. Graphiques intermédiaires</a></li>
-<li><a href="#graphiques-avances">3.3. Graphiques avancés</a></li>
+<li><a href="#introduction"><span class="toc-section-number">1</span> Introduction</a></li>
+<li><a href="#données-utilisées-dans-les-exemples"><span class="toc-section-number">2</span> Données utilisées dans les exemples</a></li>
+<li><a href="#fonctions-graphiques"><span class="toc-section-number">3</span> Fonctions graphiques</a><ul>
+<li><a href="#graphiques-de-bases"><span class="toc-section-number">3.1</span> Graphiques de bases</a></li>
+<li><a href="#graphiques-intermédiaires"><span class="toc-section-number">3.2</span> Graphiques intermédiaires</a></li>
+<li><a href="#graphiques-avancés"><span class="toc-section-number">3.3</span> Graphiques avancés</a></li>
 </ul></li>
-<li><a href="#table-de-donnees">4. Table de données</a></li>
-<li><a href="#observations-et-conclusion">5. Observations et conclusion</a></li>
-<li><a href="#references">6. Références</a><ul>
-<li><a href="#references-sur-le-jeu-de-donnees">Références sur le jeu de données</a></li>
-<li><a href="#references-sur-lutilisation-du-package-googlevis">Références sur l’utilisation du package <code>googleVis</code></a></li>
-<li><a href="#autres-references">Autres références</a></li>
-</ul></li>
+<li><a href="#table-de-données"><span class="toc-section-number">4</span> Table de données</a></li>
+<li><a href="#observations-et-conclusion"><span class="toc-section-number">5</span> Observations et conclusion</a></li>
+<li><a href="#références">Références</a></li>
 </ul>
 </div>
 
@@ -41,16 +39,16 @@ header-includes:
 body {
 text-align: justify}
 </style>
-<div id="introduction" class="section level2">
-<h2>1. Introduction</h2>
+<div id="introduction" class="section level1">
+<h1><span class="header-section-number">1</span> Introduction</h1>
 <p>L’objectif de cette fiche est de présenter un éventail de fonctionnalités qui peuvent être exécutées à l’aide du package <code>googleVis</code>. Ce dernier sert principalement à générer divers graphiques interactifs dont la sortie est sous forme d’une page web. L’outil Google Charts API de Google permet en fait de créer un lien entre des données stockées en R et la visualisation de graphiques dans une page web.</p>
 <p>Plusieurs fonctions graphiques sont intégrées dans ce package et sont présentées sous la forme suivante dans cette fiche: graphiques de base, graphiques intermédiaires et graphiques avancés. Une dernière section est dédiée à la création de table de données interactive.</p>
 <p>Pour pouvoir utiliser le package <code>googleVis</code>, il faut tout d’abord l’installer et ensuite l’importer dans l’environnement R. C’est ce que les commandes suivantes effectuent.</p>
 <pre class="r"><code>install.packages(googleVis) #Installation
 library(googleVis) #Importation</code></pre>
 </div>
-<div id="donnees-utilisees-dans-les-exemples" class="section level2">
-<h2>2. Données utilisées dans les exemples</h2>
+<div id="données-utilisées-dans-les-exemples" class="section level1">
+<h1><span class="header-section-number">2</span> Données utilisées dans les exemples</h1>
 <p>À titre indicatif, les exemples présentés dans cette fiche utilisent les données du data frame <code>quakes</code> du package <code>datasets</code> de l’installation de base de R. Ce jeu de données porte sur la localisation de 1000 évènements sismiques dont la magnitude est plus grande que 4 dans la région de Fidji, et ce, depuis 1964.</p>
 <p>Créons d’abord l’objet <code>seismes</code> qui contiendra ces données. La fonction <code>head</code> nous permet de visualiser les 6 premières observations de ce jeu de données</p>
 <pre class="r"><code>seismes &lt;- quakes
@@ -81,15 +79,15 @@ seismes$region &lt;- factor(seismes$long&gt;= 175,labels=c(&quot;Ouest&quot;,&qu
 seismes$latlong &lt;- paste(seismes$lat,seismes$long,sep=&quot;:&quot;)</code></pre>
 <p>La première variable <code>magFactor</code> est créée à partir de la variable <code>mag</code> à l’aide de la fonction <code>floor</code> qui lui prend sa partie entière et qui crée ainsi une variable catégorique à trois modalités (magnitude = 4, 5 ou 6). La deuxième variable, créée à partir de la variable <code>long</code>, est <code>region</code>. Celle-ci est une variable catégorique à deux modalités (région = ouest ou est). La dernière variable créée <code>latlong</code> est une concaténation de la latitude et de la longitude à l’aide de la fonction <code>paste</code>.</p>
 </div>
-<div id="fonctions-graphiques" class="section level2">
-<h2>3. Fonctions graphiques</h2>
+<div id="fonctions-graphiques" class="section level1">
+<h1><span class="header-section-number">3</span> Fonctions graphiques</h1>
 <p>Dans cette section, plusieurs fonctions graphiques sont présentées à l’aide d’exemples et selon leur degré de complexité. À noter que plusieurs autres fonctions graphiques ne sont pas discutées dans cette fiche dans le but de plutôt dresser une synthèse des fonctionnalités disponibles avec <code>googleVis</code> et non pas une liste exhaustive de toutes les fonctions. Dans ce package, la syntaxe de création de graphique est fort simple et ressemble à la suivante :</p>
 <pre class="r"><code>Objet_graphique &lt;- fonctionGraphique(data=...,options=list(...))
 plot(Objet_graphique)</code></pre>
 <p>Un objet graphique est créé à l’aide d’une fonction graphique, et il est affiché avec la fonction <code>plot</code>. Il est bien de noter que les options doivent être inscrites dans une liste.</p>
-<div id="graphiques-de-bases" class="section level3">
-<h3>3.1. Graphiques de bases</h3>
-<div id="diagramme-a-bandes-bar-chart" class="section level4">
+<div id="graphiques-de-bases" class="section level2">
+<h2><span class="header-section-number">3.1</span> Graphiques de bases</h2>
+<div id="diagramme-à-bandes-bar-chart" class="section level4 unnumbered">
 <h4>Diagramme à bandes (Bar Chart)</h4>
 <p>Le diagramme à bande permet de comparer différentes modalités d’une variable catégorique. Les options de la fonction <code>gvisBarChart</code> sont relativement simples. On peut y choisir les limites et les titres des axes, les couleurs du graphique, et le titre du graphique (option <code>title=</code>). Dans cet exemple, nous avons créé un tableau de fréquence selon <code>magFactor</code> et <code>region</code>. Le package <code>googleVis</code> offre une palette de couleur de base qui peut être modifiée selon les besoins de l’utilisateur. L’option <code>colors=</code> prend en argument un nom de couleur sous forme de texte ou une couleur en format hexadécimal. Un placement du curseur sur les différentes bandes permet de voir la valeur de la variable numérique en fonction des modalités des variables catégoriques.</p>
 <pre class="r"><code>tab_freq &lt;- table(seismes$magFactor,seismes$region)
@@ -98,13 +96,13 @@ Bar &lt;- gvisBarChart(table,options=
                       list(title=&quot;Nombre de tremblements de terre par region et par magnitude&quot;,
                            colors=&quot;[&#39;#A9CCE3&#39;,&#39;blue&#39;]&quot;))
 plot(Bar)</code></pre>
-<!-- BarChart generated in R 3.6.0 by googleVis 0.6.4 package -->
-<!-- Wed May 29 13:44:26 2019 -->
+<!-- BarChart generated in R 4.0.3 by googleVis 0.6.9 package -->
+<!-- Wed Jan 13 14:20:50 2021 -->
 <!-- jsHeader -->
 <script type="text/javascript">
  
 // jsData 
-function gvisDataBarChartID382472464d6a () {
+function gvisDataBarChartID13c859e01578 () {
 var data = new google.visualization.DataTable();
 var datajson =
 [
@@ -132,15 +130,15 @@ return(data);
 }
  
 // jsDrawChart
-function drawChartBarChartID382472464d6a() {
-var data = gvisDataBarChartID382472464d6a();
+function drawChartBarChartID13c859e01578() {
+var data = gvisDataBarChartID13c859e01578();
 var options = {};
 options["allowHtml"] = true;
 options["title"] = "Nombre de tremblements de terre par region et par magnitude";
 options["colors"] = ['#A9CCE3','blue'];
 
     var chart = new google.visualization.BarChart(
-    document.getElementById('BarChartID382472464d6a')
+    document.getElementById('BarChartID13c859e01578')
     );
     chart.draw(data,options);
     
@@ -164,9 +162,9 @@ if (newPackage)
   pkgs.push(chartid);
   
 // Add the drawChart function to the global list of callbacks
-callbacks.push(drawChartBarChartID382472464d6a);
+callbacks.push(drawChartBarChartID13c859e01578);
 })();
-function displayChartBarChartID382472464d6a() {
+function displayChartBarChartID13c859e01578() {
   var pkgs = window.__gvisPackages = window.__gvisPackages || [];
   var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
   window.clearTimeout(window.__gvisLoad);
@@ -189,25 +187,25 @@ callbacks.shift()();
 // jsFooter
 </script>
 <!-- jsChart -->
-<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartBarChartID382472464d6a"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartBarChartID13c859e01578"></script>
 <!-- divChart -->
-<div id="BarChartID382472464d6a" style="width: 500; height: automatic;">
+<div id="BarChartID13c859e01578" style="width: 500; height: automatic;">
 
 </div>
 </div>
-<div id="graphique-en-pointes-de-tarte-pie-chart" class="section level4">
+<div id="graphique-en-pointes-de-tarte-pie-chart" class="section level4 unnumbered">
 <h4>Graphique en pointes de tarte (Pie Chart)</h4>
 <p>Le graphique en pointes de tarte créé avec la fonction <code>gvisPieChart</code> permet de visualiser les proportions des différentes modalités d’une variable catégorique. Comme pour le diagramme à bandes, ses options sont relativement simples. L’exemple suivant utilise un tableau de fréquences relatives de la variable <code>magFactor</code>, qu’on assigne à l’objet <code>table_tarte</code>. Un placement du curseur sur les différentes pointes de tarte permet de voir la proportion.</p>
 <pre class="r"><code>table_tarte &lt;- data.frame(prop.table(table(seismes$magFactor)))
 Pie &lt;- gvisPieChart(table_tarte,options=list(title=&quot;Proportion des différentes magnitudes&quot;))
 plot(Pie)</code></pre>
-<!-- PieChart generated in R 3.6.0 by googleVis 0.6.4 package -->
-<!-- Wed May 29 13:44:26 2019 -->
+<!-- PieChart generated in R 4.0.3 by googleVis 0.6.9 package -->
+<!-- Wed Jan 13 14:20:50 2021 -->
 <!-- jsHeader -->
 <script type="text/javascript">
  
 // jsData 
-function gvisDataPieChartID38246b4725ad () {
+function gvisDataPieChartID13c85096fc6 () {
 var data = new google.visualization.DataTable();
 var datajson =
 [
@@ -231,14 +229,14 @@ return(data);
 }
  
 // jsDrawChart
-function drawChartPieChartID38246b4725ad() {
-var data = gvisDataPieChartID38246b4725ad();
+function drawChartPieChartID13c85096fc6() {
+var data = gvisDataPieChartID13c85096fc6();
 var options = {};
 options["allowHtml"] = true;
 options["title"] = "Proportion des différentes magnitudes";
 
     var chart = new google.visualization.PieChart(
-    document.getElementById('PieChartID38246b4725ad')
+    document.getElementById('PieChartID13c85096fc6')
     );
     chart.draw(data,options);
     
@@ -262,9 +260,9 @@ if (newPackage)
   pkgs.push(chartid);
   
 // Add the drawChart function to the global list of callbacks
-callbacks.push(drawChartPieChartID38246b4725ad);
+callbacks.push(drawChartPieChartID13c85096fc6);
 })();
-function displayChartPieChartID38246b4725ad() {
+function displayChartPieChartID13c85096fc6() {
   var pkgs = window.__gvisPackages = window.__gvisPackages || [];
   var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
   window.clearTimeout(window.__gvisLoad);
@@ -287,13 +285,13 @@ callbacks.shift()();
 // jsFooter
 </script>
 <!-- jsChart -->
-<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartPieChartID38246b4725ad"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartPieChartID13c85096fc6"></script>
 <!-- divChart -->
-<div id="PieChartID38246b4725ad" style="width: 500; height: automatic;">
+<div id="PieChartID13c85096fc6" style="width: 500; height: automatic;">
 
 </div>
 </div>
-<div id="graphique-de-dispersion-scatter-chart" class="section level4">
+<div id="graphique-de-dispersion-scatter-chart" class="section level4 unnumbered">
 <h4>Graphique de dispersion (Scatter Chart)</h4>
 <p>Le graphique de dispersion créé avec la fonction <code>gvisScatterChart</code> permet de regarder le lien entre deux variables numériques. Plusieurs options sont possibles, notamment de donner un titre aux axes avec <code>vAxis=</code> et <code>hAxis=</code>, ou encore de choisir la largeur <code>width=</code> et la hauteur <code>heigth=</code> du graphique. Les options <code>lineWidth=</code> et <code>pointSize=</code> permettent de personnaliser la largeur de la ligne et la grosseur des points. Aussi, il est possible de modifier le format de la légende avec l’option <code>legend=</code>. Dans cet exemple, le lien entre le nombre de stations en fonction de la profondeur du séisme est dressé. Un placement du curseur sur les différents points permet de connaître les coordonnées en abscisse et en ordonnée.</p>
 <pre class="r"><code>seismes &lt;- seismes[order(seismes$depth),]
@@ -306,13 +304,13 @@ Scatter &lt;- gvisScatterChart(seismes[,c(&quot;depth&quot;,&quot;stations&quot;
                               hAxis=&quot;{title:&#39;depth&#39;}&quot;, 
                               width=700,height=300))
 plot(Scatter)</code></pre>
-<!-- ScatterChart generated in R 3.6.0 by googleVis 0.6.4 package -->
-<!-- Wed May 29 13:44:26 2019 -->
+<!-- ScatterChart generated in R 4.0.3 by googleVis 0.6.9 package -->
+<!-- Wed Jan 13 14:20:50 2021 -->
 <!-- jsHeader -->
 <script type="text/javascript">
  
 // jsData 
-function gvisDataScatterChartID382475e455e () {
+function gvisDataScatterChartID13c82c5326aa () {
 var data = new google.visualization.DataTable();
 var datajson =
 [
@@ -4324,8 +4322,8 @@ return(data);
 }
  
 // jsDrawChart
-function drawChartScatterChartID382475e455e() {
-var data = gvisDataScatterChartID382475e455e();
+function drawChartScatterChartID13c82c5326aa() {
+var data = gvisDataScatterChartID13c82c5326aa();
 var options = {};
 options["allowHtml"] = true;
 options["legend"] = "none";
@@ -4338,7 +4336,7 @@ options["width"] = 700;
 options["height"] = 300;
 
     var chart = new google.visualization.ScatterChart(
-    document.getElementById('ScatterChartID382475e455e')
+    document.getElementById('ScatterChartID13c82c5326aa')
     );
     chart.draw(data,options);
     
@@ -4362,9 +4360,9 @@ if (newPackage)
   pkgs.push(chartid);
   
 // Add the drawChart function to the global list of callbacks
-callbacks.push(drawChartScatterChartID382475e455e);
+callbacks.push(drawChartScatterChartID13c82c5326aa);
 })();
-function displayChartScatterChartID382475e455e() {
+function displayChartScatterChartID13c82c5326aa() {
   var pkgs = window.__gvisPackages = window.__gvisPackages || [];
   var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
   window.clearTimeout(window.__gvisLoad);
@@ -4387,13 +4385,13 @@ callbacks.shift()();
 // jsFooter
 </script>
 <!-- jsChart -->
-<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartScatterChartID382475e455e"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartScatterChartID13c82c5326aa"></script>
 <!-- divChart -->
-<div id="ScatterChartID382475e455e" style="width: 700; height: 300;">
+<div id="ScatterChartID13c82c5326aa" style="width: 700; height: 300;">
 
 </div>
 </div>
-<div id="histogramme" class="section level4">
+<div id="histogramme" class="section level4 unnumbered">
 <h4>Histogramme</h4>
 <p>L’histogramme créé avec la fonction <code>gvisHistogram</code> permet d’afficher les fréquences d’une variable numérique. Les options sont semblables aux graphiques précédents. Le paramètre <code>position</code> dans l’option <code>legend=</code> permet de choisir à quel endroit placer la légende. Dans cet exemple, le jeu de données <code>datHist</code> est créé pour différencier les trois niveaux de magnitude. La fonction graphique comprend qu’il s’agit de différents facteurs et assigne une couleur de base à chacun. Un placement du curseur sur les différentes bandes permet de voir la fréquence.</p>
 <pre class="r"><code>datHist &lt;- data.frame(mag4=seismes[seismes$magFactor==4,]$mag[1:1000],
@@ -4403,13 +4401,13 @@ callbacks.shift()();
 Hist &lt;- gvisHistogram(datHist,options=list(legend=&quot;{position:&#39;top&#39;}&quot;,
                                            title=&quot;Histogramme de la magnitude&quot;))
 plot(Hist)</code></pre>
-<!-- Histogram generated in R 3.6.0 by googleVis 0.6.4 package -->
-<!-- Wed May 29 13:44:26 2019 -->
+<!-- Histogram generated in R 4.0.3 by googleVis 0.6.9 package -->
+<!-- Wed Jan 13 14:20:50 2021 -->
 <!-- jsHeader -->
 <script type="text/javascript">
  
 // jsData 
-function gvisDataHistogramID38241ddadb () {
+function gvisDataHistogramID13c86d8e1441 () {
 var data = new google.visualization.DataTable();
 var datajson =
 [
@@ -9422,15 +9420,15 @@ return(data);
 }
  
 // jsDrawChart
-function drawChartHistogramID38241ddadb() {
-var data = gvisDataHistogramID38241ddadb();
+function drawChartHistogramID13c86d8e1441() {
+var data = gvisDataHistogramID13c86d8e1441();
 var options = {};
 options["allowHtml"] = true;
 options["legend"] = {position:'top'};
 options["title"] = "Histogramme de la magnitude";
 
     var chart = new google.visualization.Histogram(
-    document.getElementById('HistogramID38241ddadb')
+    document.getElementById('HistogramID13c86d8e1441')
     );
     chart.draw(data,options);
     
@@ -9454,9 +9452,9 @@ if (newPackage)
   pkgs.push(chartid);
   
 // Add the drawChart function to the global list of callbacks
-callbacks.push(drawChartHistogramID38241ddadb);
+callbacks.push(drawChartHistogramID13c86d8e1441);
 })();
-function displayChartHistogramID38241ddadb() {
+function displayChartHistogramID13c86d8e1441() {
   var pkgs = window.__gvisPackages = window.__gvisPackages || [];
   var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
   window.clearTimeout(window.__gvisLoad);
@@ -9479,16 +9477,16 @@ callbacks.shift()();
 // jsFooter
 </script>
 <!-- jsChart -->
-<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartHistogramID38241ddadb"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartHistogramID13c86d8e1441"></script>
 <!-- divChart -->
-<div id="HistogramID38241ddadb" style="width: 500; height: automatic;">
+<div id="HistogramID13c86d8e1441" style="width: 500; height: automatic;">
 
 </div>
 </div>
 </div>
-<div id="graphiques-intermediaires" class="section level3">
-<h3>3.2. Graphiques intermédiaires</h3>
-<div id="graphique-en-bulles-bubble-chart" class="section level4">
+<div id="graphiques-intermédiaires" class="section level2">
+<h2><span class="header-section-number">3.2</span> Graphiques intermédiaires</h2>
+<div id="graphique-en-bulles-bubble-chart" class="section level4 unnumbered">
 <h4>Graphique en bulles (Bubble Chart)</h4>
 <p>Le graphique en bulles créé avec la fonction <code>gvisBubbleChart</code> permet de dresser un lien entre plusieurs variables. Les arguments <code>xvar=</code> et <code>yvar=</code> assignent les variables souhaitées en abscisse et en ordonnée respectivement. L’étiquette de chacune des bulles est contrôlée par la variable assignée à l’argument <code>idvar=</code>. L’argument <code>colorvar=</code> utilise une variable catégorique et assigne une couleur selon chacune de ses modalités. Pour modifier la dimension de chaque bulle, il faut attribuer une variable à l’argument <code>sizevar=</code>. Dans cet exemple, on représente la latitude en fonction de la longitude selon la magnitude, le nombre de stations et la profondeur du séisme. À noter que le jeu de données en entrée de la fonction graphique ne comporte que 13 observations pour simplifier la lecture du graphique. Un placement du curseur sur les différents points permet d’obtenir les coordonnées de toutes les variables en argument.</p>
 <pre class="r"><code>Bubble &lt;- gvisBubbleChart(seismes[c(50,100,150,200,250,300,350,400,450,500,550,600,650),],   
@@ -9499,13 +9497,13 @@ callbacks.shift()();
                                        title=&quot;Graphique un bulles selon la longitude et la latitude 
                                        par la profondeur, la magnitude et le nombre de stations&quot;))
 plot(Bubble)</code></pre>
-<!-- BubbleChart generated in R 3.6.0 by googleVis 0.6.4 package -->
-<!-- Wed May 29 13:44:27 2019 -->
+<!-- BubbleChart generated in R 4.0.3 by googleVis 0.6.9 package -->
+<!-- Wed Jan 13 14:20:50 2021 -->
 <!-- jsHeader -->
 <script type="text/javascript">
  
 // jsData 
-function gvisDataBubbleChartID382440ef517a () {
+function gvisDataBubbleChartID13c879627c1e () {
 var data = new google.visualization.DataTable();
 var datajson =
 [
@@ -9611,15 +9609,15 @@ return(data);
 }
  
 // jsDrawChart
-function drawChartBubbleChartID382440ef517a() {
-var data = gvisDataBubbleChartID382440ef517a();
+function drawChartBubbleChartID13c879627c1e() {
+var data = gvisDataBubbleChartID13c879627c1e();
 var options = {};
 options["vAxis"] = {title:'latitude',ticks:[-35,-30,-25,-20,-15]};
 options["hAxis"] = {title:'longitude',ticks:[170,175,180,185,190]};
 options["title"] = "Graphique un bulles selon la longitude et la latitude \n                                       par la profondeur, la magnitude et le nombre de stations";
 
     var chart = new google.visualization.BubbleChart(
-    document.getElementById('BubbleChartID382440ef517a')
+    document.getElementById('BubbleChartID13c879627c1e')
     );
     chart.draw(data,options);
     
@@ -9643,9 +9641,9 @@ if (newPackage)
   pkgs.push(chartid);
   
 // Add the drawChart function to the global list of callbacks
-callbacks.push(drawChartBubbleChartID382440ef517a);
+callbacks.push(drawChartBubbleChartID13c879627c1e);
 })();
-function displayChartBubbleChartID382440ef517a() {
+function displayChartBubbleChartID13c879627c1e() {
   var pkgs = window.__gvisPackages = window.__gvisPackages || [];
   var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
   window.clearTimeout(window.__gvisLoad);
@@ -9668,13 +9666,13 @@ callbacks.shift()();
 // jsFooter
 </script>
 <!-- jsChart -->
-<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartBubbleChartID382440ef517a"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartBubbleChartID13c879627c1e"></script>
 <!-- divChart -->
-<div id="BubbleChartID382440ef517a" style="width: 500; height: automatic;">
+<div id="BubbleChartID13c879627c1e" style="width: 500; height: automatic;">
 
 </div>
 </div>
-<div id="diagramme-de-sankey-sankey-chart" class="section level4">
+<div id="diagramme-de-sankey-sankey-chart" class="section level4 unnumbered">
 <h4>Diagramme de Sankey (Sankey Chart)</h4>
 <p>Le diagramme de Sankey créé avec la fonction <code>gvisSankey</code> est en fait un digramme de flux. Il permet de faire un lien entre deux variables catégoriques à l’aide d’une variable de poids. L’argument <code>from=</code> permet d’attribuer la variable de gauche et <code>to=</code> assigne la variable de droite, tandis que l’argument <code>weight</code> affecte la largeur des bandes. Dans cet exemple, nous modélisons le lien entre <code>region</code> et <code>magFactor</code> par la profondeur moyenne des séismes. Ces moyennes sont calculées à l’aide de la fonction <code>aggregate</code> et stockées dans l’objet <code>dataSankey</code>. On remarque que plus la profondeur moyenne est élevée, plus la bande est large. Un placement du curseur sur les différentes bandes permet de voir la valeur numérique de la variable de poids entre les deux variables catégoriques.</p>
 <pre class="r"><code>dataSankey &lt;- aggregate(seismes$depth,by=list(seismes$region,seismes$magFactor),FUN=mean,na.rm=T)
@@ -9683,13 +9681,13 @@ colnames(dataSankey) &lt;- c(&quot;Région&quot;,&quot;Magnitude&quot;,&quot;Pro
 Sankey &lt;- gvisSankey(dataSankey,from=&quot;Région&quot;,to=&quot;Magnitude&quot;,weight=&quot;Profondeur&quot;,
                      options=list(width=400,height=300))
 plot(Sankey)</code></pre>
-<!-- Sankey generated in R 3.6.0 by googleVis 0.6.4 package -->
-<!-- Wed May 29 13:44:27 2019 -->
+<!-- Sankey generated in R 4.0.3 by googleVis 0.6.9 package -->
+<!-- Wed Jan 13 14:20:50 2021 -->
 <!-- jsHeader -->
 <script type="text/javascript">
  
 // jsData 
-function gvisDataSankeyID3824767b7865 () {
+function gvisDataSankeyID13c85091739a () {
 var data = new google.visualization.DataTable();
 var datajson =
 [
@@ -9727,14 +9725,14 @@ return(data);
 }
  
 // jsDrawChart
-function drawChartSankeyID3824767b7865() {
-var data = gvisDataSankeyID3824767b7865();
+function drawChartSankeyID13c85091739a() {
+var data = gvisDataSankeyID13c85091739a();
 var options = {};
 options["width"] = 400;
 options["height"] = 300;
 
     var chart = new google.visualization.Sankey(
-    document.getElementById('SankeyID3824767b7865')
+    document.getElementById('SankeyID13c85091739a')
     );
     chart.draw(data,options);
     
@@ -9758,9 +9756,9 @@ if (newPackage)
   pkgs.push(chartid);
   
 // Add the drawChart function to the global list of callbacks
-callbacks.push(drawChartSankeyID3824767b7865);
+callbacks.push(drawChartSankeyID13c85091739a);
 })();
-function displayChartSankeyID3824767b7865() {
+function displayChartSankeyID13c85091739a() {
   var pkgs = window.__gvisPackages = window.__gvisPackages || [];
   var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
   window.clearTimeout(window.__gvisLoad);
@@ -9783,24 +9781,24 @@ callbacks.shift()();
 // jsFooter
 </script>
 <!-- jsChart -->
-<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartSankeyID3824767b7865"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartSankeyID13c85091739a"></script>
 <!-- divChart -->
-<div id="SankeyID3824767b7865" style="width: 400; height: 300;">
+<div id="SankeyID13c85091739a" style="width: 400; height: 300;">
 
 </div>
 </div>
-<div id="juxtaposition-de-graphique" class="section level4">
+<div id="juxtaposition-de-graphique" class="section level4 unnumbered">
 <h4>Juxtaposition de graphique</h4>
 <p>La fonction <code>gvisMerge</code> permet de juxtaposer deux graphiques ensemble sur la même page web. Dans cet exemple, l’histogramme et le diagramme en pointes de tarte créés précédemment sont juxtaposés. L’argument <code>horizontal=</code> permet de décider si les graphiques seront côte à côte ou un sur l’autre.</p>
 <pre class="r"><code>Merge &lt;- gvisMerge(Hist,Pie,horizontal=FALSE)
 plot(Merge)</code></pre>
-<!-- Histogram generated in R 3.6.0 by googleVis 0.6.4 package -->
-<!-- Wed May 29 13:44:26 2019 -->
+<!-- Histogram generated in R 4.0.3 by googleVis 0.6.9 package -->
+<!-- Wed Jan 13 14:20:50 2021 -->
 <!-- jsHeader -->
 <script type="text/javascript">
  
 // jsData 
-function gvisDataHistogramID38241ddadb () {
+function gvisDataHistogramID13c86d8e1441 () {
 var data = new google.visualization.DataTable();
 var datajson =
 [
@@ -14814,7 +14812,7 @@ return(data);
 
 
 // jsData 
-function gvisDataPieChartID38246b4725ad () {
+function gvisDataPieChartID13c85096fc6 () {
 var data = new google.visualization.DataTable();
 var datajson =
 [
@@ -14838,15 +14836,15 @@ return(data);
 }
  
 // jsDrawChart
-function drawChartHistogramID38241ddadb() {
-var data = gvisDataHistogramID38241ddadb();
+function drawChartHistogramID13c86d8e1441() {
+var data = gvisDataHistogramID13c86d8e1441();
 var options = {};
 options["allowHtml"] = true;
 options["legend"] = {position:'top'};
 options["title"] = "Histogramme de la magnitude";
 
     var chart = new google.visualization.Histogram(
-    document.getElementById('HistogramID38241ddadb')
+    document.getElementById('HistogramID13c86d8e1441')
     );
     chart.draw(data,options);
     
@@ -14856,14 +14854,14 @@ options["title"] = "Histogramme de la magnitude";
 
 
 // jsDrawChart
-function drawChartPieChartID38246b4725ad() {
-var data = gvisDataPieChartID38246b4725ad();
+function drawChartPieChartID13c85096fc6() {
+var data = gvisDataPieChartID13c85096fc6();
 var options = {};
 options["allowHtml"] = true;
 options["title"] = "Proportion des différentes magnitudes";
 
     var chart = new google.visualization.PieChart(
-    document.getElementById('PieChartID38246b4725ad')
+    document.getElementById('PieChartID13c85096fc6')
     );
     chart.draw(data,options);
     
@@ -14887,9 +14885,9 @@ if (newPackage)
   pkgs.push(chartid);
   
 // Add the drawChart function to the global list of callbacks
-callbacks.push(drawChartHistogramID38241ddadb);
+callbacks.push(drawChartHistogramID13c86d8e1441);
 })();
-function displayChartHistogramID38241ddadb() {
+function displayChartHistogramID13c86d8e1441() {
   var pkgs = window.__gvisPackages = window.__gvisPackages || [];
   var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
   window.clearTimeout(window.__gvisLoad);
@@ -14926,9 +14924,9 @@ if (newPackage)
   pkgs.push(chartid);
   
 // Add the drawChart function to the global list of callbacks
-callbacks.push(drawChartPieChartID38246b4725ad);
+callbacks.push(drawChartPieChartID13c85096fc6);
 })();
-function displayChartPieChartID38246b4725ad() {
+function displayChartPieChartID13c85096fc6() {
   var pkgs = window.__gvisPackages = window.__gvisPackages || [];
   var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
   window.clearTimeout(window.__gvisLoad);
@@ -14951,14 +14949,14 @@ callbacks.shift()();
 // jsFooter
 </script>
 <!-- jsChart -->
-<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartHistogramID38241ddadb"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartHistogramID13c86d8e1441"></script>
 <!-- jsChart -->
-<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartPieChartID38246b4725ad"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartPieChartID13c85096fc6"></script>
 <table border="0">
 <tr>
 <td>
 <!-- divChart -->
-<div id="HistogramID38241ddadb" style="width: 500; height: automatic;">
+<div id="HistogramID13c86d8e1441" style="width: 500; height: automatic;">
 
 </div>
 </td>
@@ -14966,19 +14964,19 @@ callbacks.shift()();
 <tr>
 <td>
 <!-- divChart -->
-<div id="PieChartID38246b4725ad" style="width: 500; height: automatic;">
+<div id="PieChartID13c85096fc6" style="width: 500; height: automatic;">
 
 </div>
 </td>
 </tr>
 </table>
-<!-- Histogram generated in R 3.6.0 by googleVis 0.6.4 package -->
-<!-- Wed May 29 13:44:27 2019 -->
+<!-- Histogram generated in R 4.0.3 by googleVis 0.6.9 package -->
+<!-- Wed Jan 13 14:20:50 2021 -->
 <!-- jsHeader -->
 <script type="text/javascript">
  
 // jsData 
-function gvisDataHistogramID38247e981542 () {
+function gvisDataHistogramID13c873d2a2e () {
 var data = new google.visualization.DataTable();
 var datajson =
 [
@@ -19992,7 +19990,7 @@ return(data);
 
 
 // jsData 
-function gvisDataPieChartID382417f62989 () {
+function gvisDataPieChartID13c835277d79 () {
 var data = new google.visualization.DataTable();
 var datajson =
 [
@@ -20016,15 +20014,15 @@ return(data);
 }
  
 // jsDrawChart
-function drawChartHistogramID38247e981542() {
-var data = gvisDataHistogramID38247e981542();
+function drawChartHistogramID13c873d2a2e() {
+var data = gvisDataHistogramID13c873d2a2e();
 var options = {};
 options["allowHtml"] = true;
 options["legend"] = {position:'top',maxLines:2};
 options["title"] = "Histogramme de la magnitude";
 
     var chart = new google.visualization.Histogram(
-    document.getElementById('HistogramID38247e981542')
+    document.getElementById('HistogramID13c873d2a2e')
     );
     chart.draw(data,options);
     
@@ -20034,14 +20032,14 @@ options["title"] = "Histogramme de la magnitude";
 
 
 // jsDrawChart
-function drawChartPieChartID382417f62989() {
-var data = gvisDataPieChartID382417f62989();
+function drawChartPieChartID13c835277d79() {
+var data = gvisDataPieChartID13c835277d79();
 var options = {};
 options["allowHtml"] = true;
 options["title"] = "Proportion des différentes magnitudes";
 
     var chart = new google.visualization.PieChart(
-    document.getElementById('PieChartID382417f62989')
+    document.getElementById('PieChartID13c835277d79')
     );
     chart.draw(data,options);
     
@@ -20065,9 +20063,9 @@ if (newPackage)
   pkgs.push(chartid);
   
 // Add the drawChart function to the global list of callbacks
-callbacks.push(drawChartHistogramID38247e981542);
+callbacks.push(drawChartHistogramID13c873d2a2e);
 })();
-function displayChartHistogramID38247e981542() {
+function displayChartHistogramID13c873d2a2e() {
   var pkgs = window.__gvisPackages = window.__gvisPackages || [];
   var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
   window.clearTimeout(window.__gvisLoad);
@@ -20104,9 +20102,9 @@ if (newPackage)
   pkgs.push(chartid);
   
 // Add the drawChart function to the global list of callbacks
-callbacks.push(drawChartPieChartID382417f62989);
+callbacks.push(drawChartPieChartID13c835277d79);
 })();
-function displayChartPieChartID382417f62989() {
+function displayChartPieChartID13c835277d79() {
   var pkgs = window.__gvisPackages = window.__gvisPackages || [];
   var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
   window.clearTimeout(window.__gvisLoad);
@@ -20129,14 +20127,14 @@ callbacks.shift()();
 // jsFooter
 </script>
 <!-- jsChart -->
-<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartHistogramID38247e981542"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartHistogramID13c873d2a2e"></script>
 <!-- jsChart -->
-<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartPieChartID382417f62989"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartPieChartID13c835277d79"></script>
 <table border="0">
 <tr>
 <td>
 <!-- divChart -->
-<div id="HistogramID38247e981542" style="width: 500; height: automatic;">
+<div id="HistogramID13c873d2a2e" style="width: 500; height: automatic;">
 
 </div>
 </td>
@@ -20144,7 +20142,7 @@ callbacks.shift()();
 <tr>
 <td>
 <!-- divChart -->
-<div id="PieChartID382417f62989" style="width: 500; height: automatic;">
+<div id="PieChartID13c835277d79" style="width: 500; height: automatic;">
 
 </div>
 </td>
@@ -20152,22 +20150,22 @@ callbacks.shift()();
 </table>
 </div>
 </div>
-<div id="graphiques-avances" class="section level3">
-<h3>3.3. Graphiques avancés</h3>
-<div id="geo-chart" class="section level4">
+<div id="graphiques-avancés" class="section level2">
+<h2><span class="header-section-number">3.3</span> Graphiques avancés</h2>
+<div id="geo-chart" class="section level4 unnumbered">
 <h4>Geo Chart</h4>
 <p>Dans un jeu de données comme <code>quakes</code>, il peut être pertinent de regarder les données géographiquement. La fonction <code>gvisGeoChart</code> permet de visualiser les données à l’aide de cercles selon deux variables d’intensité contrôlant leur taille (<code>sizevar=</code>) et leur couleur (<code>colorvar=</code>). Dans cet exemple, on peut localiser les séismes à l’aide de la variable <code>latlong</code>. La taille des cercles représente la profondeur, tandis que le ton de la couleur représente la magnitude. Pour se concentrer sur une région du monde en particulier, il est possible de la sélectionner avec l’option <code>region=</code>. Il est possible de zoomer sur une partie de cette région en sélectionnant un amas de cercles. Chaque cercle est cliquable pour obtenir de l’information sur le séisme.</p>
 <pre class="r"><code>GeoMarker &lt;- gvisGeoChart(seismes,locationvar=&quot;latlong&quot;, 
                           sizevar=&quot;depth&quot;,
                           colorvar=&quot;mag&quot;,options=list(region=&quot;053&quot;))
 plot(GeoMarker)</code></pre>
-<!-- GeoChart generated in R 3.6.0 by googleVis 0.6.4 package -->
-<!-- Wed May 29 13:44:27 2019 -->
+<!-- GeoChart generated in R 4.0.3 by googleVis 0.6.9 package -->
+<!-- Wed Jan 13 14:20:51 2021 -->
 <!-- jsHeader -->
 <script type="text/javascript">
  
 // jsData 
-function gvisDataGeoChartID382474874707 () {
+function gvisDataGeoChartID13c877c9268a () {
 var data = new google.visualization.DataTable();
 var datajson =
 [
@@ -26181,15 +26179,15 @@ return(data);
 }
  
 // jsDrawChart
-function drawChartGeoChartID382474874707() {
-var data = gvisDataGeoChartID382474874707();
+function drawChartGeoChartID13c877c9268a() {
+var data = gvisDataGeoChartID13c877c9268a();
 var options = {};
 options["width"] = 556;
 options["height"] = 347;
 options["region"] = "053";
 
     var chart = new google.visualization.GeoChart(
-    document.getElementById('GeoChartID382474874707')
+    document.getElementById('GeoChartID13c877c9268a')
     );
     chart.draw(data,options);
     
@@ -26213,9 +26211,9 @@ if (newPackage)
   pkgs.push(chartid);
   
 // Add the drawChart function to the global list of callbacks
-callbacks.push(drawChartGeoChartID382474874707);
+callbacks.push(drawChartGeoChartID13c877c9268a);
 })();
-function displayChartGeoChartID382474874707() {
+function displayChartGeoChartID13c877c9268a() {
   var pkgs = window.__gvisPackages = window.__gvisPackages || [];
   var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
   window.clearTimeout(window.__gvisLoad);
@@ -26238,13 +26236,13 @@ callbacks.shift()();
 // jsFooter
 </script>
 <!-- jsChart -->
-<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartGeoChartID382474874707"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartGeoChartID13c877c9268a"></script>
 <!-- divChart -->
-<div id="GeoChartID382474874707" style="width: 556; height: 347;">
+<div id="GeoChartID13c877c9268a" style="width: 556; height: 347;">
 
 </div>
 </div>
-<div id="google-maps" class="section level4">
+<div id="google-maps" class="section level4 unnumbered">
 <h4>Google Maps</h4>
 <p>La fonction <code>gvisMap</code> est semblable à la fonction <code>gvisGeoChart</code>. La principale différence est que <code>gvisMap</code> permet d’afficher les données dans une carte Google Maps. Les options sont principalement en lien avec les paramètres d’utilisation de Google Maps. Dans cet exemple, les 100 premières observations du jeu de données <code>seismes</code> sont utilisées afin de ne pas engorger la visualisation. Les arguments <code>locationvar=</code> et <code>tipvar=</code> définissent les variables de localisation et de boîte de texte, respectivement. L’option <code>showTip=</code> permet d’ajouter cette boîte de texte cliquable à chacun des points, créée à partir de la nouvelle variable <code>depth_affichage</code>. Les trois dernières options permettent de contrôler différents paramètres reliés à Google Maps.</p>
 <pre class="r"><code>seismes$depth_affichage &lt;- paste(&quot;Profondeur du séisme (en km) &quot;,seismes$depth,sep=&quot; : &quot;)
@@ -26257,7 +26255,7 @@ seismesMap &lt;- gvisMap(seismes[1:100,],locationvar=&quot;latlong&quot;,tipvar=
 plot(seismesMap)</code></pre>
 <p>Note : Le graphique n’est pas affiché ici, car la publication d’une carte Google Maps sur un site web requière des autorisations particulières. Cependant, l’inclusion de carte Google Maps dans un fichier HTML local ne requière aucune autorisation.</p>
 </div>
-<div id="graphique-dintensite-gauge" class="section level4">
+<div id="graphique-dintensité-gauge" class="section level4 unnumbered">
 <h4>Graphique d’intensité (Gauge)</h4>
 <p>Le graphique d’intensité créé à partir de <code>gvisGauge</code> permet la visualisation d’une variable numérique sous forme de jauges. Dans cet exemple, les moyennes par région de la variable <code>stations</code> sont utilisées comme jeu de données d’entrée. L’argument <code>labelvar=</code> crée une jauge par modalité de la variable assignée. La position de l’aiguille est déterminée par la variable de l’argument <code>numvar=</code>. Les options mentionnées dans l’exemple contrôlent l’échelle des jauges. Ce graphique est le seul dans cette fiche qui n’est pas interactif.</p>
 <pre class="r"><code>dataGauge &lt;- aggregate(seismes$stations,by=list(seismes$region),FUN=mean)
@@ -26266,13 +26264,13 @@ Gauge &lt;- gvisGauge(dataGauge,labelvar=&quot;Group.1&quot;,numvar=&quot;x&quot
                    options=list(min=0,max=40,greenFrom=35,greenTo=40, 
                                 yellowFrom=15,yellowTo=35,redFrom=0,redTo=15))
 plot(Gauge)</code></pre>
-<!-- Gauge generated in R 3.6.0 by googleVis 0.6.4 package -->
-<!-- Wed May 29 13:44:27 2019 -->
+<!-- Gauge generated in R 4.0.3 by googleVis 0.6.9 package -->
+<!-- Wed Jan 13 14:20:51 2021 -->
 <!-- jsHeader -->
 <script type="text/javascript">
  
 // jsData 
-function gvisDataGaugeID382443c61f29 () {
+function gvisDataGaugeID13c83bec794d () {
 var data = new google.visualization.DataTable();
 var datajson =
 [
@@ -26292,8 +26290,8 @@ return(data);
 }
  
 // jsDrawChart
-function drawChartGaugeID382443c61f29() {
-var data = gvisDataGaugeID382443c61f29();
+function drawChartGaugeID13c83bec794d() {
+var data = gvisDataGaugeID13c83bec794d();
 var options = {};
 options["allowHtml"] = true;
 options["min"] = 0;
@@ -26306,7 +26304,7 @@ options["redFrom"] = 0;
 options["redTo"] = 15;
 
     var chart = new google.visualization.Gauge(
-    document.getElementById('GaugeID382443c61f29')
+    document.getElementById('GaugeID13c83bec794d')
     );
     chart.draw(data,options);
     
@@ -26330,9 +26328,9 @@ if (newPackage)
   pkgs.push(chartid);
   
 // Add the drawChart function to the global list of callbacks
-callbacks.push(drawChartGaugeID382443c61f29);
+callbacks.push(drawChartGaugeID13c83bec794d);
 })();
-function displayChartGaugeID382443c61f29() {
+function displayChartGaugeID13c83bec794d() {
   var pkgs = window.__gvisPackages = window.__gvisPackages || [];
   var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
   window.clearTimeout(window.__gvisLoad);
@@ -26355,26 +26353,26 @@ callbacks.shift()();
 // jsFooter
 </script>
 <!-- jsChart -->
-<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartGaugeID382443c61f29"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartGaugeID13c83bec794d"></script>
 <!-- divChart -->
-<div id="GaugeID382443c61f29" style="width: 500; height: automatic;">
+<div id="GaugeID13c83bec794d" style="width: 500; height: automatic;">
 
 </div>
 </div>
 </div>
 </div>
-<div id="table-de-donnees" class="section level2">
-<h2>4. Table de données</h2>
+<div id="table-de-données" class="section level1">
+<h1><span class="header-section-number">4</span> Table de données</h1>
 <p>En plus des graphiques interactifs présentés ci-haut, le package <code>googleVis</code> permet également de créer des tables de données interactives. La fonction <code>gvisTable</code> crée une table à plusieurs pages qu’on peut manuellement trier selon une variable souhaitée. L’option <code>page=</code> donne la possibilité d’avoir plusieurs pages, tandis que l’option <code>pageSize=</code> dicte le nombre d’observations qui doit être affiché par page.</p>
 <pre class="r"><code>Table &lt;- gvisTable(seismes[1:50,],options=list(page=&#39;enable&#39;,pageSize=10))
 plot(Table)</code></pre>
-<!-- Table generated in R 3.6.0 by googleVis 0.6.4 package -->
-<!-- Wed May 29 13:44:27 2019 -->
+<!-- Table generated in R 4.0.3 by googleVis 0.6.9 package -->
+<!-- Wed Jan 13 14:20:51 2021 -->
 <!-- jsHeader -->
 <script type="text/javascript">
  
 // jsData 
-function gvisDataTableID382444415cda () {
+function gvisDataTableID13c816956a06 () {
 var data = new google.visualization.DataTable();
 var datajson =
 [
@@ -26892,15 +26890,15 @@ return(data);
 }
  
 // jsDrawChart
-function drawChartTableID382444415cda() {
-var data = gvisDataTableID382444415cda();
+function drawChartTableID13c816956a06() {
+var data = gvisDataTableID13c816956a06();
 var options = {};
 options["allowHtml"] = true;
 options["page"] = "enable";
 options["pageSize"] = 10;
 
     var chart = new google.visualization.Table(
-    document.getElementById('TableID382444415cda')
+    document.getElementById('TableID13c816956a06')
     );
     chart.draw(data,options);
     
@@ -26924,9 +26922,9 @@ if (newPackage)
   pkgs.push(chartid);
   
 // Add the drawChart function to the global list of callbacks
-callbacks.push(drawChartTableID382444415cda);
+callbacks.push(drawChartTableID13c816956a06);
 })();
-function displayChartTableID382444415cda() {
+function displayChartTableID13c816956a06() {
   var pkgs = window.__gvisPackages = window.__gvisPackages || [];
   var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
   window.clearTimeout(window.__gvisLoad);
@@ -26949,28 +26947,28 @@ callbacks.shift()();
 // jsFooter
 </script>
 <!-- jsChart -->
-<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartTableID382444415cda"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartTableID13c816956a06"></script>
 <!-- divChart -->
-<div id="TableID382444415cda" style="width: 500; height: automatic;">
+<div id="TableID13c816956a06" style="width: 500; height: automatic;">
 
 </div>
 </div>
-<div id="observations-et-conclusion" class="section level2">
-<h2>5. Observations et conclusion</h2>
+<div id="observations-et-conclusion" class="section level1">
+<h1><span class="header-section-number">5</span> Observations et conclusion</h1>
 <p>Le package <code>googleVis</code> est un outil fort intéressant à capacité multiple. Divers types de graphiques interactifs afin de combler divers besoins sont disponibles dans ce package.
 L’un des points forts de ce package est évidemment l’aspect interactif qui permet à un destinataire qui n’est pas familier avec la programmation R de pouvoir analyser davantage des résultats, contrairement à un graphique ou une table de données statique. De plus, le fait que la sortie soit en HTML permet à l’utilisateur de partager facilement le contenu de ses sorties.</p>
 <p>Un autre aspect intéressant de ce package est la grande variété d’options qui existent pour chacune des fonctions graphiques, ce qui permet le rassemblement d’une grande quantité d’information dans un seul graphique. Elles sont d’ailleurs particulièrement intuitives par leurs noms facilement reconnaissables. Par ailleurs, une connaissance de base de R suffit amplement pour effectuer tous les graphiques présentés dans cette fiche.</p>
 <p>La principale difficulté du package est son intégration avec <code>R Markdown</code>. En effet, plusieurs paramètres et options ont dû être ajoutés au travers du code de la présente fiche pour la rendre lisible. C’est un aspect qui pourrait être amélioré au cours des prochaines mises à jours du package. De plus, le package ne peut être utilisé sans une connexion internet, ce qui restreint quelque peu son utilisation.</p>
 <p>Somme toute, il reste que le package est relativement simple à utiliser et offre beaucoup d’avantages par son interactivité et l’aspect visuel de ses graphiques.</p>
 </div>
-<div id="references" class="section level2">
-<h2>6. Références</h2>
-<div id="references-sur-le-jeu-de-donnees" class="section level3">
-<h3>Références sur le jeu de données</h3>
+<div id="références" class="section level1 unnumbered">
+<h1>Références</h1>
+<div id="références-sur-le-jeu-de-données" class="section level4 unnumbered">
+<h4>Références sur le jeu de données</h4>
 <p><a href="https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/quakes.html">Jeu de données <code>quakes</code></a></p>
 </div>
-<div id="references-sur-lutilisation-du-package-googlevis" class="section level3">
-<h3>Références sur l’utilisation du package <code>googleVis</code></h3>
+<div id="références-sur-lutilisation-du-package-googlevis" class="section level4 unnumbered">
+<h4>Références sur l’utilisation du package <code>googleVis</code></h4>
 <p><a href="https://cran.r-project.org/web/packages/googleVis/vignettes/googleVis.pdf">Introduction au package</a></p>
 <p><a href="https://www.rdocumentation.org/packages/googleVis/versions/0.6.0/topics/gvisBarChart">gvisBarChart</a></p>
 <p><a href="https://www.rdocumentation.org/packages/googleVis/versions/0.6.0/topics/gvisPieChart">gvisPieChart</a></p>
@@ -26984,8 +26982,8 @@ L’un des points forts de ce package est évidemment l’aspect interactif qui 
 <p><a href="https://www.rdocumentation.org/packages/googleVis/versions/0.6.0/topics/gvisGauge">gvisGauge</a></p>
 <p><a href="https://www.rdocumentation.org/packages/googleVis/versions/0.6.0/topics/gvisTable">gvisTable</a></p>
 </div>
-<div id="autres-references" class="section level3">
-<h3>Autres références</h3>
+<div id="autres-références" class="section level4 unnumbered">
+<h4>Autres références</h4>
 <p><a href="https://htmlcolorcodes.com/fr/">Choix de couleurs</a></p>
 <p><a href="https://developers.google.com/chart/interactive/docs/gallery/geochart#Continent_Hierarchy">Codes de régions</a></p>
 </div>

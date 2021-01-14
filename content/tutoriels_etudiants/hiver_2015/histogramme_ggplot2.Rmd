@@ -8,8 +8,11 @@ output:
   pdf_document:
     toc: yes
     toc_depth: 3
+    number_sections: true
   blogdown::html_page:
     toc: true
+    toc_depth: 3
+    number_sections: true
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
@@ -23,25 +26,25 @@ knitr::opts_chunk$set(fig.align='center')
 
 ***
 
-## 1.  Présentation de type de graphique
+# Présentation de type de graphique
 
-### 1.1.	 Histogramme
+## Histogramme
 
 En analyse des données, il est opportun de faire des représentations graphiques des données. Cela nous donne une idée de la forme des distributions, des statistiques de localisation (moyenne, écart-type, …), des valeurs aberrantes, etc. L’une des représentations courantes est l’histogramme.  C’est un outil d'exploration qui montre la distribution des données groupées en un ensemble de rectangles (ou intervalles). Chaque rectangle de l'histogramme représente une classe de données et sa base correspond à la longueur de l'intervalle et la surface du rectangle traduit la fréquence de la classe pour une représentation avec fréquence en ordonnée ou la proportion pour une représentation avec la probabilité en ordonnée. Le nombre de classes a un impact important sur le graphique de l’histogramme des données. Ce nombre peut se calculer selon des règles. Les plus utilisées sont: règle de Sturges, règle de Scott et règle de Freedman-Diaconis. Les logiciels statistiques utilisent par défaut la règle de Sturges. 
  
 
-### 1.2.	 Courbe de densité de Kernel
+## Courbe de densité de Kernel
 
 En statistique, l’estimation par noyau (ou encore courbe de densité de Kernel) est une méthode non paramétrique d’estimation de la densité de probabilité d’une variable aléatoire. Elle est relative à l’histogramme; elle permet de représenter un ensemble de données. En effet, la densité de Kernel offre une possibilité d'estimer la distribution sur des données. En d'autres termes, elle estime la fréquence sur ces données.  
 La courbe de densité de Kernel constitue alors la représentation en forme de ligne lisse de cette distribution estimée sur les données. La forme de la courbe dépend fortement du paramètre de lissage  (appelé en anglais bandwidth ou window width) ou encore le type du noyau. Parmi les types du noyau, nous pouvons citer entre autres le noyau Epanechnikov, le noyau Gaussien, le noyau triangulaire, le noyau rectangulaire ou uniforme, etc. La plupart des logiciels statistiques ont par défaut le noyau gaussien. C’est ce noyau que nous allons utiliser par la suite pour l’estimation de la densité.
 
 
-### 1.3.	Application aux données
+## Application aux données
 
 Notre démonstration va consister à produire d’abord un graphique simple en utilisant des fonctions graphiques de base en R accompagné d’explications, ensuite un graphique simple avec des fonctions du package ggplot2 accompagné d’explications et finalement un graphique avancé  en utilisant des fonctions du package ggplot2 accompagné d’explications. 
 
 
-### 1.4.	Présentation des données
+## Présentation des données
 
 Nous allons utiliser les données du fichier hour.csv de Bike Sharing Dataset téléchargeable sur le UCI Machine Learning Repository à l’adresse suivante : https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset. Il s’agit de données concernant des nombres de locations de vélos par heure provenant d’un système de location de vélos dans la ville de Washington D.C. aux États-Unis.
 Plus précisément, nous nous intéressons  aux données sur le nombre de locations effectuées entre 17h et 18h en 2011 et 2012. 
@@ -89,9 +92,9 @@ levels(donnees$Temperature) <- c("Dégagé", "Nuage, brume", "Pluie, neige")
 str(donnees)
 ```
 
-## 2.  Histogramme et Courbe de densité avec des fonctions R de base
+# Histogramme et Courbe de densité avec des fonctions R de base
 
-### 2.1 Histogramme avec des fonctions R de base
+## Histogramme avec des fonctions R de base
 
 La principale fonction de base permettant de construire l'histogramme d'un vecteur d'observations en R est la fonction `hist`. Elle comporte plusieurs arguments permettant d'ajouter des détails à l'histogramme ou spécifier le type de fréquences (simples ou relatives) qui seront utilisées. Parmi ceux-ci, il y a notamment les arguments: `breaks` pour le nombre de classes, `freq` pour une représentation de fréquence en ordonnée,`probability` pour une représentation de probabilité en ordonnée, `main` pour le titre,  `xlab` pour le nom de l’axe des abscisses, `ylab` pour le nom de l’axe des ordonnées, etc. 
 
@@ -119,7 +122,7 @@ hist(donnees[donnees$yr == "2011" & donnees$Temperature == "Dégagé", "cnt"],
      xlab = "nombre de locations entre 17h et 18h", ylab = "densité")
 ```
 
-### 2.2  Courbe de densité avec des fonctions R de base
+## Courbe de densité avec des fonctions R de base
 
 La fonction `density` de R de base permet de calculer la densité de Kernel pour estimer la distribution sur des données.
 
@@ -130,7 +133,7 @@ densite <- density(donnees[donnees$yr == "2011" & donnees$Temperature == "Dégag
 plot(densite)
 ```
 
-### 2.3 Surperposition de l'histogramme et la densité de kernel
+## Surperposition de l'histogramme et la densité de kernel
 
 Représentons sur le même graphique l'histogramme et la courbe de densité à l'aide de la fonction `lines`.
 
@@ -143,7 +146,7 @@ densite <- density(donnees[donnees$yr == "2011" & donnees$Temperature == "Dégag
 lines(densite)
 ```
 
-## 3.   Histogramme et courbe de densité avec le package ggplot2
+# Histogramme et courbe de densité avec le package ggplot2
 
 L'histogramme et la courbe de densité représentés précédemment peuvent facilement être reproduits en utilisant des fonctions du package ggplot2. Cette reproduction peut être scindée en deux étapes: une première étape pour dessiner l'histogramme et la seconde pour représenter la courbe de densité.
 Dans ggplot2, nous retenons deux méthodes pour représenter les graphiques notamment avec les fonctions `qplot`  et `ggplot`. Ces fonctions définissent les parcelles dédiées à la représentation graphique. La méthode avec qplot offre une rapidité de programmation et une utilisation interactive. Cependant, la fonction ggplot est plus complète en syntaxe. Elle est plus facile à utiliser pour les personnes déjà familières avec les fonctions graphiques R de base.
@@ -159,7 +162,7 @@ ggplot(donnees, aes(x = cnt)) + geom_histogram()
 
 Les deux  histogrammes précédents sont produits avec les paramètres par défaut de ggplot2. Ils permettent simplement de montrer  le résultat que donnent les fonctions `qplot` et `ggplot`. Mais, dans la suite du travail, toutes représentations graphiques seront faites avec la fonction `ggplot`.
 
-### 3.1  Histogramme avec la fonction ggplot
+## Histogramme avec la fonction ggplot
 
 La fonction `ggplot` du package ggplot2 permet de produire une zone graphique à laquelle on peut ajouter des couches graphiques. La fonction qui sert à ajouter une couche d'histogramme est la fonction  `geom_histogram`. Cette dernière comprend des arguments tels que `stat`, `fill`, `position`, `linetype`, `size`, `colour`, etc. qui permettent de définir les caractéristiques de l'histogramme et de lui ajouter des détails pour l'améliorer. 
 
@@ -188,7 +191,7 @@ zone + geom_histogram(aes(y = ..density..), colour = "black", fill = "white", bi
        x = "nombre de locations entre 17h et 18h", y = "densité")    
 ```
 
-### 3.2 Courbe de densité avec la fonction ggplot
+## Courbe de densité avec la fonction ggplot
 
 Pour compléter le graphique, nous allons ajouter la courbe de densité. Pour ce faire, utilisons la fonction `geom_density`: 
 
@@ -203,7 +206,7 @@ zone + geom_histogram(aes(y = ..density..), colour = "black", fill = "white", bi
 ```
 
 
-## 4. Graphique avancé avec ggplot2
+# Graphique avancé avec ggplot2
 
 La fonction `ggplot` permet également de produire des graphiques juxtaposés comprenant plusieurs représentations de densité de Kernel. Pour ce faire, lorsqu'on utilise la fonction ggplot,  il faut lui joindre les fonctions `geom_density` et `facet_grid`. La fonction `facet_grid` permet de juxtaposer les graphiques soit verticalement, soit horizontalement. L'argument `fill`, de la sous-fonction `aes` contenue par `geom_density`, permet de représenter plusieurs courbes sur le même graphique.
 
@@ -235,7 +238,7 @@ zone + geom_density(aes( fill = Temperature),alpha = 0.7) +
 
 
 
-## Références:
+# Références {-}
 
 - Hadley WICKHAM (2009). *ggplot2: Elegant Graphics for Data Analysis*. Éditions : Springer, New-York.
 - Hadley WICKHAM (2010). A layered grammar of graphics. *Journal of Computational and Graphical Statistics*, vol. 19, no 1, p. 3-28.   

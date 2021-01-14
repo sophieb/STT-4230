@@ -8,8 +8,11 @@ output:
   pdf_document:
     toc: yes
     toc_depth: 3
+    number_sections: true
   blogdown::html_page:
     toc: true
+    toc_depth: 3
+    number_sections: true
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
@@ -19,7 +22,7 @@ header-includes:
 
 ***
 
-## Introduction
+# Introduction
 
 La concaténation et la séparation d'observations de variables sont deux manipulations courantes dans la réorganisation des données, servant à refaçonner les jeux de données afin de mieux les exploiter.   
 La concaténation consiste à rattacher les observations de plusieurs variables, généralement des chaînes de caractères, et les regrouper en une seule variable.  
@@ -27,10 +30,10 @@ La séparation consiste par contre à "détacher" l'information contenue dans un
 Ces deux manipulations peuvent être réalisées sous R suivant différentes approches. On présentera dans cette fiche deux manières de concaténer/séparer des observations dans un jeu de données :
 
 - Fonctions de base R  
-- Package {tidyr}  
+- Package `tidyr`  
  
 
-## Description du jeu de données utilisé
+# Description du jeu de données utilisé
 
 Le jeu de données utilisé est un tableau de détails concernant 114 matchs de tennis en simple
 masculin du tournoi de Wimbledon 2013, dans lequel on trouve, entre autres, les variables suivantes :
@@ -66,9 +69,9 @@ head(cbind(tennis[c("Player1", "Player2", "Result", paste0("ST",1:5,".1"), paste
 ```
 
 
-## Concaténation/séparation avec les fonctions de base R
+# Concaténation/séparation avec les fonctions de base R
 
-### Concaténation
+## Concaténation
 
 Pour concaténer les éléments de deux vecteurs en un seul, on peut utiliser les fonctions `paste` ou `paste0`, qui sont les deux fonctions de base R les plus courantes pour cette action.  
 La fonction `paste` permet de concaténer deux vecteurs (élément par élément), en intercalant une chaîne de caractères passée en argument `sep` entre chaque deux éléments de même position.   
@@ -101,7 +104,7 @@ head(opponents)
 ```
 
 
-### Séparation
+## Séparation
 
 La fonction la plus courante pour la séparation d'un élément en plusieurs sous-éléments est la fonction `strsplit`, qui ne tient compte que des vecteurs de type caractère.  
 Cette fonction permet de séparer les éléments des chaînes de caractères d'un vecteur suivant un ou plusieurs caractères entrés en argument `split`, et retourne une liste de toutes les sous-chaînes obtenues. En voici quelques spécifications inspirées aussi de la documentation R :
@@ -168,11 +171,11 @@ head(Score_split_stringr)
 ```
 
 
-## Le package {tidyr}
+# Le package `tidyr`
 
 Le package a été créé par Hadley Wickham, la première fois en juillet 2014, et a subi plusieurs modifications depuis. La dernière version 0.4.1 de ce package est disponible sur le site https://cran.r-project.org/web/packages/tidyr/index.html
 
-### Concaténation/séparation avec {tidyr}
+## Concaténation/séparation avec `tidyr`
 
 ```{r, echo = FALSE}
 tennis = read.csv2(file = "Wimbledon-men-2013.csv", header = TRUE, sep = ",")
@@ -197,7 +200,7 @@ Pour appeler le package :
 library(tidyr)
 ```
 
-#### La fonction `unite`
+#### La fonction `unite` {-}
 
 La fonction qui nous interesse est `unite`, cette dernière permet de concaténer plusieurs colonnes d'un jeu de données en une seule colonne, ce qui s'avére très pratique en termes de lecture et d'affichage de données. 
 
@@ -238,7 +241,7 @@ Pour davantage d'informations sur l'utilisation de ces options, une documentatio
 help(select)
 ```
   
-#### La fonction `separate`
+#### La fonction `separate` {-}
 
 La fonction `separate` permet de diviser une colonne en plusieurs colonnes. Cette fonction, à l'inverse des manœuvres avec fonctions de base R, permet d'effectuer cette tâche en une seule étape sans avoir recours à un traitement préalable.
 Ainsi on s'apercoit de l'utilité de cette fonction qui nous permet de manipuler les jeux de données avec subtilité.
@@ -275,13 +278,14 @@ head(Tennis)[c("Score", paste0("ST",1:5))]
 ```
 
 
-## Comparaison des deux approches
+# Comparaison des deux approches
+
 Les fonctions de base R, dont on a présenté quelques unes dans cette fiche, sont généralement suffisantes pour réaliser des concaténations ou des séparations de données. Toutefois, les manipulations utilisant les fonctions de base R présentent des difficultés en termes d'efficience et de lisibilité du code.   
 La motivation derrière la création du package {tidyr} a été de rendre le réarrangement de données plus rapide et efficace, en particulier pour la création de nouvelles variables à partir de données concaténées ou séparées.  
 Comme on a vu dans la présente fiche, les deux fonctions `unite` et `separate` se sont montrées d'une grande utilité, puisqu'on a aboutit au résultat voulu avec un traitement moindre (pratiquement une ligne de code par manipulation). En effet on peut, en plus de la concaténation / séparation, à la fois désigner les nouvelles variables à créer, choisir de garder ou non la/les variable(s) source, de convertir ou non les données réarrangées, et déterminer quels objets remplaceront les valeurs manquantes, ce qui aurait coûté un traitement supplémentaire avec les fonctions de base R.   
 Le seul incovéniant par rapport aux fonctions de base R, qu'on reprocherait d'ailleurs à toute fonction n'appartenant pas à ce dernier, est l'indisponibilité par défaut sur R ou RStudio ; si par malheur on se retrouve quelque part sans connexion internet pour télécharger le package...   
 
-## Note concernant l'opérateur `%>%`
+# Note concernant l'opérateur `%>%`
 
 L'opérateur `%>%` passe l’objet se trouvant à gauche comme premier argument de la fonction se trouvant à droite, cet opérateur permet d'économiser du temps et de rendre le code plus lisible quand il s'agit d'imbriquer des fonctions dans d'autres.  
 Pour illustrer l'utilité de cet opérateur, on va essayer de séparer notre variable `Score`, puis d'extraire ces variables éclatées et afficher les trois premières lignes en appliquant simultanément les fonctions `separate`, `select` et `head`.  
@@ -297,7 +301,7 @@ cbind(tennis,Score) %>%
   head(3)
 ```
 
-## Références
+# Références {-}
 
 - Documentation sur les fonctions `paste` et `paste0`:
 https://stat.ethz.ch/R-manual/R-devel/library/base/html/paste.html

@@ -8,8 +8,11 @@ output:
   pdf_document:
     toc: yes
     toc_depth: 3
+    number_sections: true
   blogdown::html_page:
     toc: true
+    toc_depth: 3
+    number_sections: true
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
@@ -24,18 +27,18 @@ header-includes:
 
 <div id="TOC">
 <ul>
-<li><a href="#introduction">1. Introduction</a></li>
-<li><a href="#jeu-de-données">2. Jeu de données</a></li>
-<li><a href="#boxplot-simple-avec-les-fonctions-de-base-de-r">3. Boxplot simple avec les fonctions de base de R</a></li>
-<li><a href="#boxplot-simple-avec-ggplot2">4. Boxplot simple avec <code>ggplot2</code></a></li>
-<li><a href="#boxplot-complexe-avec-ggplot2">5. Boxplot complexe avec <code>ggplot2</code></a></li>
+<li><a href="#introduction"><span class="toc-section-number">1</span> Introduction</a></li>
+<li><a href="#jeu-de-données"><span class="toc-section-number">2</span> Jeu de données</a></li>
+<li><a href="#boxplot-simple-avec-les-fonctions-de-base-de-r"><span class="toc-section-number">3</span> Boxplot simple avec les fonctions de base de R</a></li>
+<li><a href="#boxplot-simple-avec-ggplot2"><span class="toc-section-number">4</span> Boxplot simple avec <code>ggplot2</code></a></li>
+<li><a href="#boxplot-complexe-avec-ggplot2"><span class="toc-section-number">5</span> Boxplot complexe avec <code>ggplot2</code></a></li>
 <li><a href="#bibliographie">Bibliographie</a></li>
 </ul>
 </div>
 
 <hr />
 <div id="introduction" class="section level1">
-<h1>1. Introduction</h1>
+<h1><span class="header-section-number">1</span> Introduction</h1>
 <p>Les graphiques de type boxplot sont utilisés afin de représenter de façon simple un ensemble de données. Le boxplot permet de visualiser rapidement le jeu de données à travers une représentation graphique des quartiles.</p>
 <p>Les quartiles sont au nombre de trois et divisent les échantillons en quatre groupes contenant chacun le quart des échantillons : la médiane, qui correspond au second quartile (<strong>Q<sub>2</sub></strong>), sépare le jeu de données en deux parts égales alors que le premier(<strong>Q<sub>1</sub></strong>) et troisième(<strong>Q<sub>3</sub></strong>) quartile redivisent en deux parts égales ces parties inférieures et supérieures du jeu de données, respectivement.</p>
 <p>Le graphique de type boxplot représente des données au moyen d’une boîte dont les bords horizontaux supérieurs et inférieurs correspondent respectivement au troisième et premier quartile, tandis que le second quartile est représenté d’un trait horizontal traversant la boîte. La longueur de la boîte correspond alors à l’écart interquartile (<strong>IQR</strong>, InterQuartile Range), une mesure de la dispersion représentée par la différence entre le troisième et premier quartile. Prenons un exemple simple:</p>
@@ -44,7 +47,7 @@ header-includes:
 <p>Dans cet exemple, <strong>Q<sub>1</sub></strong> = 2, <strong>Q<sub>2</sub></strong>, la médiane = 3, <strong>Q<sub>3</sub></strong> = 4,5 et l’<strong>IQR</strong> = 4,5 - 2 = 2,5. Les barres de part et d’autre de la boîte indiquent la plus petite donnée supérieure ou égale à <strong>Q<sub>1</sub></strong> - (1,5 x IQR) = 2 - (1,5 x 2,5) = -1, 75, et la plus grande donnée inférieure ou égale à <strong>Q<sub>3</sub></strong> + (1,5 x <strong>IQR</strong>) = 4,5 + (1,5 x 2,5) = 8,25; dans cet exemple, la ligne inférieure représente la donnée 1, alors que la ligne supérieure représente la donnée 5. Les données au-delà de ces 2 lignes sont représentées par un point (ici la donnée 9).</p>
 </div>
 <div id="jeu-de-données" class="section level1">
-<h1>2. Jeu de données</h1>
+<h1><span class="header-section-number">2</span> Jeu de données</h1>
 <p>À titre de démonstration, nous utiliserons le jeu de données <em>day.csv</em> provenant de la base de données <em>Bike Sharing Dataset</em> téléchargeable sur le <em>UCI Machine Learning Repository</em> à l’adresse suivante :
 <a href="https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset" class="uri">https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset</a>.</p>
 <p>Créons tout d’abord le jeu de données qui servira à la démonstration.</p>
@@ -52,7 +55,7 @@ header-includes:
 <pre class="r"><code>str(bike)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    731 obs. of  16 variables:
 ##  $ instant   : int  1 2 3 4 5 6 7 8 9 10 ...
-##  $ dteday    : Factor w/ 731 levels &quot;2011-01-01&quot;,&quot;2011-01-02&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
+##  $ dteday    : chr  &quot;2011-01-01&quot; &quot;2011-01-02&quot; &quot;2011-01-03&quot; &quot;2011-01-04&quot; ...
 ##  $ season    : int  1 1 1 1 1 1 1 1 1 1 ...
 ##  $ yr        : int  0 0 0 0 0 0 0 0 0 0 ...
 ##  $ mnth      : int  1 1 1 1 1 1 1 1 1 1 ...
@@ -70,7 +73,7 @@ header-includes:
 <p>La fonction <code>str(bike)</code> nous permet de voir que le data.frame <code>bike</code> contient 731 observations et 16 variables. Dans le cadre de notre démonstration, nous nous intéressons aux variables suivantes: i) <code>cnt</code> = nombre total de locations par jour; ii) <code>yr</code> = année, où 0 = 2011, et 1 = 2012, iii) <code>mnth</code> = mois de l’année, iv) <code>workingday</code> = variable dichotomique prenant la valeur 0 si la journée correspond à un jour férié ou de fin de semaine, ou 1 sinon.</p>
 </div>
 <div id="boxplot-simple-avec-les-fonctions-de-base-de-r" class="section level1">
-<h1>3. Boxplot simple avec les fonctions de base de R</h1>
+<h1><span class="header-section-number">3</span> Boxplot simple avec les fonctions de base de R</h1>
 <p>Dans le cadre de l’exemple, nous utiliserons un sous-ensemble du data.frame <code>bike</code>, soient les observations correspondant à l’année 2011 et aux jours de travail seulement.</p>
 <pre class="r"><code>bike2011 &lt;- bike[bike$yr == 0 &amp; bike$workingday == 1 , ]</code></pre>
 <p>La fonction de base dans R est <code>boxplot</code>. Il faut fournir en argument :</p>
@@ -80,18 +83,19 @@ header-includes:
 <li><p>un sous-ensemble du jeu de données (<code>subset=</code>), s’il y a lieu. Cet argument ne sera pas utilisé dans notre exemple, étant donné que le jeu de données <code>bike2011</code> représente déjà un sous-ensemble du jeu de données.</p></li>
 <li><p>on peut également indiquer quoi faire avec les données manquantes à l’aide de <code>na.action</code>; par défaut, <code>na.action=NULL</code>, i.e que les valeurs manquantes sont ignorées.</p></li>
 </ul>
-<pre class="r"><code>boxplot(cnt ~ mnth, data = bike2011)
+<pre class="r"><code>boxplot(cnt ~ mnth, data = bike2011, ann = FALSE)
 # ajout du titre et identifications des 2 axes 
-mtext(&quot;Évolution mensuelle du nombre de locations par jour en 2011 lors de jours de travail&quot;, side = 3, cex = 0.95, font = 2, line = 1.5)
+mtext(&quot;Évolution mensuelle du nombre de locations par jour en 2011 lors de jours de travail&quot;, 
+      side = 3, cex = 0.95, font = 2, line = 1.5)
 mtext(&quot;mois&quot;, side = 1, cex = 1, line=2)
-mtext(&quot;nombre de locations par jour&quot;, side = 2, cex = 1, line = 2.5)</code></pre>
-<p><img src="/tutoriels_etudiants/hiver_2015/boxplot_ggplot2_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code># Note : Ces ajouts auraient aussi pu être effectués grâce aux arguments
+mtext(&quot;nombre de locations par jour&quot;, side = 2, cex = 1, line = 2.5)
+# Note : Ces ajouts auraient aussi pu être effectués grâce aux arguments
 # main, xlab et ylab directement dans l&#39;appel à la fonction boxplot.</code></pre>
+<p><img src="/tutoriels_etudiants/hiver_2015/boxplot_ggplot2_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p><em>Note</em>: dans notre exemple, <code>mnth</code> est de type <em>integer</em>. Bien que la fiche d’aide de <code>boxplot</code> indique que le groupe est normalement de type <em>facteur</em>, R a tout de même produit adéquatement le graphique.</p>
 </div>
 <div id="boxplot-simple-avec-ggplot2" class="section level1">
-<h1>4. Boxplot simple avec <code>ggplot2</code></h1>
+<h1><span class="header-section-number">4</span> Boxplot simple avec <code>ggplot2</code></h1>
 <p><code>ggplot2</code> est un package crée par Hadley Wickham et qui permet de créer facilement différents types de graphiques pour différents types de données numériques ou catégoriques, univariées ou multivariées (<em>Réf.:</em> <em><a href="http://www.statmethods.net/advgraphs/ggplot2.html" class="uri">http://www.statmethods.net/advgraphs/ggplot2.html</a></em> )</p>
 <p>L’utilisation de <code>ggplot2</code> nécessite l’installation du package <code>ggplot2</code> de la façon suivante:</p>
 <pre class="r"><code>install.packages(&quot;ggplot2&quot;)</code></pre>
@@ -115,21 +119,21 @@ mtext(&quot;nombre de locations par jour&quot;, side = 2, cex = 1, line = 2.5)</
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         plot.title = element_text(face=quote(bold), vjust = 2, size = 11))</code></pre>
-<p><img src="/tutoriels_etudiants/hiver_2015/boxplot_ggplot2_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="/tutoriels_etudiants/hiver_2015/boxplot_ggplot2_files/figure-html/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="boxplot-complexe-avec-ggplot2" class="section level1">
-<h1>5. Boxplot complexe avec <code>ggplot2</code></h1>
+<h1><span class="header-section-number">5</span> Boxplot complexe avec <code>ggplot2</code></h1>
 <p>Pour cette partie, nous utiliserons le jeu de données original, <code>bike</code>, contenant donc aussi des données pour l’année 2012 et pour les jours de congé.</p>
 <p><strong>Ajouter une distinction par couleur selon des sous-groupes</strong></p>
 <p>On souhaite représenter dans des boîtes de couleurs différentes les données pour les jours de travail et celles pour les jours de fin de semaine et jours fériés. Dans le jeu de données, la colonne <code>workingday</code> contient un 1 si c’est un jour de travail et un 0 si c’est un jour de fin de semaine ou un jour férié. Ci-dessous, nous créons une nouvelle colonne nommée <code>travail</code> qui contiendra plutôt un <code>oui</code> pour les jours de travail et un <code>non</code> les autres jours.</p>
 <pre class="r"><code>bike$travail[bike$workingday==0] &lt;- &quot;non&quot;
 bike$travail[bike$workingday==1] &lt;- &quot;oui&quot;</code></pre>
 <p>L’argument <code>fill</code> dans la fonction <code>aes</code> (qui est elle même un argument de la fonction <code>ggplot</code>) nous permet de spécifier que c’est selon la valeur retrouvée dans <code>bike$travail</code> que nous souhaitons colorer les boîtes de notre boxplot. L’argument <code>legend.position</code> sous la fonction <code>theme</code> (qui nous permettait plus haut de changer l’aspect du titre) nous permet de spécifier l’emplacement de la légende ainsi créée tandis que la fonction <code>labs</code> nous permet de spécifier le nom associé à cette légende :</p>
-<pre class="r"><code>ggplot(bike,aes(x = as.factor(mnth),  y=cnt, fill= bike$travail)) + 
+<pre class="r"><code>ggplot(bike,aes(x = as.factor(mnth),  y=cnt, fill= travail)) + 
   geom_boxplot() + 
   theme(legend.position=&quot;bottom&quot;) + 
   labs(fill = &quot;Jour de travail&quot;)</code></pre>
-<p><img src="/tutoriels_etudiants/hiver_2015/boxplot_ggplot2_files/figure-html/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="/tutoriels_etudiants/hiver_2015/boxplot_ggplot2_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p><strong>Ajouter un second graphique sous un autre onglet</strong></p>
 <p>On souhaite différencier les données de 2011 et 2012 dans notre graphique. Pour ce faire, on veut diviser le graphique en deux parties pour chacune des deux années pour lesquelles nous possédons des données.</p>
 <p>Pour ce faire, nous créons une colonne <code>year</code> qui ne contiendra que l’année (et non la date complète comme dans la colonne <code>date</code>). Puisque la colonne <code>yr</code> nous indique l’âge du programme en année et que le programme a commencé en 2011, nous savons qu’une valeur de 0 pour la colonne <code>yr</code> correspond à 2011 alors qu’une valeur de 1 correspond à 2012 :</p>
@@ -139,10 +143,10 @@ bike$year[bike$yr==1] &lt;- &quot;2012&quot;</code></pre>
 <pre class="r"><code>ggplot(bike,aes(x = as.factor(mnth),  y=cnt)) + 
   geom_boxplot() + 
   facet_grid(~ year)</code></pre>
-<p><img src="/tutoriels_etudiants/hiver_2015/boxplot_ggplot2_files/figure-html/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="/tutoriels_etudiants/hiver_2015/boxplot_ggplot2_files/figure-html/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p><strong>Graphique complet :</strong>
 En combinant l’usage de l’argument <code>fill</code> présenté plus haut à celui de la fonction <code>facet_grid</code> et aux fonctions permettant d’afficher le titre principal (<code>ggtitle</code>) et ceux des axes (<code>xlab</code> et <code>ylab</code>) et de les modifier (argument <code>plot.title</code> dans <code>theme</code>) nous obtenons un graphique de type boxplot complet :</p>
-<pre class="r"><code>ggplot(bike,aes(x = as.factor(mnth),  y=cnt, fill= bike$travail)) + 
+<pre class="r"><code>ggplot(bike,aes(x = as.factor(mnth),  y=cnt, fill= travail)) + 
   geom_boxplot() + 
   facet_grid(~ year) + 
   ggtitle(&quot;Évolution mensuelle du nombre de locations par jour&quot;) + 
@@ -150,9 +154,9 @@ En combinant l’usage de l’argument <code>fill</code> présenté plus haut à
   xlab(&quot;mois&quot;) + 
   ylab(&quot;nombre de locations par jour&quot;) + 
   labs(fill = &quot;Jour de travail&quot;) </code></pre>
-<p><img src="/tutoriels_etudiants/hiver_2015/boxplot_ggplot2_files/figure-html/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="/tutoriels_etudiants/hiver_2015/boxplot_ggplot2_files/figure-html/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
-<div id="bibliographie" class="section level1">
+<div id="bibliographie" class="section level1 unnumbered">
 <h1>Bibliographie</h1>
 <ul>
 <li>Définition des quartiles : Weisstein, Eric W. “Quartile.” From MathWorld–A Wolfram Web Resource. <a href="http://mathworld.wolfram.com/Quartile.html" class="uri">http://mathworld.wolfram.com/Quartile.html</a><br />

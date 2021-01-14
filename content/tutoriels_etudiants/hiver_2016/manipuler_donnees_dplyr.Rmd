@@ -8,8 +8,11 @@ output:
   pdf_document:
     toc: yes
     toc_depth: 3
+    number_sections: true
   blogdown::html_page:
     toc: true
+    toc_depth: 3
+    number_sections: true
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
@@ -19,7 +22,7 @@ header-includes:
 
 ***
 
-### Présentation des tâches à effectuer et du jeu de données utilisé
+# Présentation des tâches à effectuer et du jeu de données utilisé
 
 Cette fiche a pour but de montrer comment faire des manipulations de base sur un jeu de données en R. Lorsqu'on parle de manipulations de base, ce sont les manipulations qui sont courramment effectuées afin de bien analyser l'information d'un jeu de données comme :
 
@@ -44,8 +47,8 @@ head(tennis, n=2)
 >  Ce jeu de données possède 114 observations et 42 variables. Les descriptions détaillées des différentes variables du jeu de données se trouvent sur le site: [Tennis Major Tournament Match Statistics Data Set ](https://archive.ics.uci.edu/ml/datasets/Tennis+Major+Tournament+Match+Statistics) 
 
 
-## Méthodes de base en R
-### Ajout de variables
+# Méthodes de base en R
+## Ajout de variables
 
 Pour ajouter une nouvelle variable dans un *data.frame*, on peut d'abord penser à utiliser la fonction `cbind`. Elle permet de reprendre un jeu de données existant et d'y ajouter une ou plusieurs colonnes. On peut aussi simplement réutiliser la fonction `data.frame` et combiner le *data.frame* existant et la variable désirée. Par exemple, on veut créer une variable *Winner* qui contient le nom du gagnant pour chaque partie et l'ajouter au jeu de données «tennis». On ajoute alors une colonne qui contient le nom du gagnant au jeu de données «tennis». Ici, on doit d'abord réaliser une étape intermédiaire à l'aide d'un `ifelse` pour identifier correctement le gagnant à partir du résultat de la partie contenu dans la variable *Result*. Si la valeur de *Result* est 1, le joueur 1 (*Player1*) a gagné la partie. Les variables *Player1* et *Player2* sont converties en format caractère pour éviter d'obtenir des résultats inatendus, puisque ces deux variables sont des facteurs avec des niveaux différents.
 
@@ -76,7 +79,7 @@ tennis$Winner <- gagnant
 head(tennis[,c(1:4,43)], n=5)
 ```
 
-### Sélection d'observations
+## Sélection d'observations
 
 On s'intéresse souvent à la conservation des observations pour lesquelles certaines variables prennent des valeurs spécifiques. Il est possible de faire une telle sélection avec des conditions logiques en R. Dans l'exemple du tennis, on s'intéresse aux trois dernières rondes du tournoi, soit les rondes 5, 6 et 7. Cette sélection nécessite l'utilisation de la variable *Round* qui indique la ronde du tournoi. On peut d'abord extraire du *data.frame* de départ les observations qui respectent cette condition. L'opérateur `%in%` permet de vérifier si la valeur d'une variable est comprise dans un ensemble de valeurs. Autrement dit, cela est équivalent à utiliser l'opérateur `|` (ou logique) en énumérant toutes les égalités possibles désirées. Pour conserver le résultat, on va l'assigner à un nouveau *data.frame*, ici appelé tennis2.
 
@@ -95,7 +98,7 @@ Il est aussi possible d'effectuer cette opération avec la fonction `subset` qui
 tennis2 <- subset(tennis, subset=Round>=5 )
 ```
 
-### Sélection de variables
+## Sélection de variables
 Lorsqu'on présente des données, il est préférable de n'inclure que les variables nécessaires. Pour sélectionner les variables désirées, on peut directement énumérer les numéros correspondants aux colonnes voulues. Il est aussi possible d'extraire des colonnes en les nommant dans un vecteur entre les crochets `[,]` au niveau de la dimension 2 (pour faire référence aux colonnes). Le jeu de données dit final est contenu dans tennis3 :
 
 ```{r results="hide"}
@@ -111,7 +114,7 @@ tennis3
 ```
 > Le jeu contient alors 14 des 42 variables et 7 des 114 observations de départ.
 
-## Alternative: Package `dplyr`
+# Alternative: Package `dplyr`
 
 Les fonctions du package `dplyr` ont été conçues pour simplifier les manipulations les plus communes que l'on doit appliquer sur un jeu de données.  Il s'agit d'une suite du package `plyr` pour les **data.frame**, d'où le **d**. L'auteur est Hadley Wickham. Pour l'utiliser, il suffit de lancer les commandes suivantes:
 
@@ -126,7 +129,7 @@ tennis <- read.table("Wimbledon-men-2013.csv",sep=",",header=T)
 #Pour avoir le data initial à nouveau
 ```
 
-### Fonction mutate : ajout de variables
+## Fonction `mutate` : ajout de variables
 
 La fonction `mutate` de `dplyr` permet d'ajouter de nouvelles colonnes qui peuvent être fonction de colonnes déjà existantes. La syntaxe est `mutate(.data, ...)`.
 
@@ -149,7 +152,7 @@ class(tennis)==class(tennis2d)
   
 
 
-### Fonction filter: sélection d'observations
+## Fonction `filter`: sélection d'observations
 
 La fonction `filter` du package `dplyr` permet de sélectionner des observations (lignes) d'un objet R. La synthaxe de cette fonction est `filter(.data, ...)`.
 
@@ -166,7 +169,7 @@ tennis3d<-filter(tennis2d, Round>=5)
 **Attention** : Il y a une fonction `filter` qui existe déjà dans le package `base`. Or, le chemin de recherche commence par les packages chargés avec `library`, donc la fonction utilisée est celle du package `dplyr`.
 
 
-### Fonction select: sélection de variables
+## Fonction `select`: sélection de variables
 
 La fonction `select` de `dplyr` permet de sélectionner les variables d'intérêt. Lorsqu'une variable n'est pas explicitement écrite, la fonction `select` ne la conserve pas. La synthaxe est `select(.data, ...)`:
 
@@ -208,7 +211,7 @@ tennis4d<-select(tennis3d, Player1, Player2, Round,ST1.1:ST5.1, ST1.2:ST5.2, Win
 
 
 
-### Comparaison entre les méthodes de base et les fonctions de `dplyr`
+## Comparaison entre les méthodes de base et les fonctions de `dplyr`
 
 Lorsque les manipulations ne concernent que très peu de conditions ou expressions pour sélectionner les observations ou variables, les deux méthodes sont comparables. Lorsque l'on veut sélectionner des observations selon plusieurs expressions, les fonctions du package `dplyr` permettent d'alléger l'écriture. Par exemple, l'énumération des conditions de sélection d'observations avec la fonction `filter` par son utilisation des virgules est moins lourde que l'enchaînement des conditions logiques dans les opérateurs `[,]` ou dans la fonction subset.
 
@@ -220,7 +223,7 @@ De plus, lors de la sélection des variables, les nombreuses options de la fonct
 
 
 
-#### Bibliographie
+# Références {-}
 
 + Référence pour information générale package `dplyr` (site web de l'auteur): [http://hadley.nz/index.html](http://hadley.nz/index.html)
 + Référence fonction du package `dplyr`: [https://cran.r-project.org/web/packages/dplyr/dplyr.pdf](https://cran.r-project.org/web/packages/dplyr/dplyr.pdf) 
