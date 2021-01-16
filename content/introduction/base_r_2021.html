@@ -1,0 +1,968 @@
+---
+title: "Concepts de base en R"
+author: "Sophie Baillargeon, Université Laval"
+date: "2021-01-15"
+weight: 3
+slug: "base_r"
+lastmodifierdisplayname: "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+    highlight: tango
+  blogdown::html_page:
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+    highlight: tango
+bibliography: ../references.bib
+csl: ../custom.csl
+link-citations: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+editor_options: 
+  chunk_output_type: console
+---
+
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #f8f8f8; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction"><span class="toc-section-number">1</span> Introduction</a>
+<ul>
+<li><a href="#r-une-puissante-calculatrice"><span class="toc-section-number">1.1</span> R = une puissante calculatrice</a></li>
+<li><a href="#résultats-en-mémoire"><span class="toc-section-number">1.2</span> Résultats en mémoire</a>
+<ul>
+<li><a href="#noms"><span class="toc-section-number">1.2.1</span> Noms acceptés</a></li>
+</ul></li>
+<li><a href="#accéder-à-un-objet-en-mémoire"><span class="toc-section-number">1.3</span> Accéder à un objet en mémoire</a>
+<ul>
+<li><a href="#objets-accessibles"><span class="toc-section-number">1.3.1</span> Objets accessibles</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#fonctions-r"><span class="toc-section-number">2</span> Fonctions R</a>
+<ul>
+<li><a href="#écriture-dun-appel-à-une-fonction"><span class="toc-section-number">2.1</span> Écriture d’un appel à une fonction</a></li>
+<li><a href="#fonctionnement-vectoriel"><span class="toc-section-number">2.2</span> Fonctionnement vectoriel</a></li>
+<li><a href="#largument-...-et-ses-deux-utilités."><span class="toc-section-number">2.3</span> L’argument <code>...</code> et ses deux utilités.</a></li>
+<li><a href="#comment-utiliser-une-fonction-dajustement-de-modèle"><span class="toc-section-number">2.4</span> Comment utiliser une fonction d’ajustement de modèle ?</a></li>
+</ul></li>
+<li><a href="#packages-r"><span class="toc-section-number">3</span> Packages R</a></li>
+<li><a href="#obtenir-de-linformation"><span class="toc-section-number">4</span> Obtenir de l’information</a></li>
+<li><a href="#graphiques-en-r"><span class="toc-section-number">5</span> Graphiques en R</a></li>
+<li><a href="#programmation-orientée-objet-en-r"><span class="toc-section-number">6</span> Programmation orientée objet en R</a></li>
+<li><a href="#sessions-r"><span class="toc-section-number">7</span> Sessions R</a>
+<ul>
+<li><a href="#paramètres-dune-session-r"><span class="toc-section-number">7.1</span> Paramètres d’une session R</a></li>
+</ul></li>
+<li><a href="#répertoire-de-travail"><span class="toc-section-number">8</span> Répertoire de travail</a></li>
+<li><a href="#programmes-r"><span class="toc-section-number">9</span> Programmes R</a>
+<ul>
+<li><a href="#règles-de-syntaxe"><span class="toc-section-number">9.1</span> Règles de syntaxe</a></li>
+<li><a href="#éditeurs-de-code-r"><span class="toc-section-number">9.2</span> Éditeurs de code R</a></li>
+</ul></li>
+<li><a href="#rstudio"><span class="toc-section-number">10</span> RStudio</a>
+<ul>
+<li><a href="#éditeur-de-code-r"><span class="toc-section-number">10.1</span> Éditeur de code R</a></li>
+<li><a href="#sous-fenêtres"><span class="toc-section-number">10.2</span> Sous-fenêtres</a></li>
+<li><a href="#fonctionnalités-diverses"><span class="toc-section-number">10.3</span> Fonctionnalités diverses</a></li>
+</ul></li>
+<li><a href="#sources-dinformations"><span class="toc-section-number">11</span> Sources d’informations</a></li>
+<li><a href="#références">Références</a></li>
+</ul>
+</div>
+
+<hr />
+<p><em>Note préliminaire : Lors de leur dernière mise à jour, ces notes ont été révisées en utilisant R 4.0.3 et RStudio 1.4.1103. Pour d’autres versions, les informations peuvent différer.</em></p>
+<hr />
+<div id="introduction" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Introduction</h1>
+<div id="r-une-puissante-calculatrice" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> R = une puissante calculatrice</h2>
+<p>R est un langage interactif. La console de R est un peu comme une calculatrice.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div>
+<pre><code>## [1] 2</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span><span class="sc">*</span><span class="dv">5</span> <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div>
+<pre><code>## [1] 11</code></pre>
+</div>
+<div id="résultats-en-mémoire" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> Résultats en mémoire</h2>
+<p style="font-size:110%">
+<strong>Comment garder une copie en mémoire d’un résultat?</strong>
+</p>
+<p>Il faut <strong>assigner</strong> le résultat à un <strong>nom</strong>, ce qui crée un objet en mémoire :</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div>
+<ul>
+<li><code>&lt;-</code> est l’<a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/assignOps.html">opérateur d’assignation</a>;</li>
+<li><code>a</code> est le nom (ou le symbole) référant à l’objet créé en mémoire;</li>
+<li><code>1 + 1</code> est l’expression générant le résultat à enregistrer, dans laquelle <code>1</code> est une valeur et <code>+</code> un <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Arithmetic.html">opérateur arithmétique</a>;</li>
+<li><code>2</code> est la valeur contenue dans l’objet créé.</li>
+</ul>
+<p>Notons que <code>=</code> est aussi un opérateur d’assignation. Cet opérateur est utilisé en R pour assigner une valeur à un argument lors de l’appel d’une fonction. Cependant, pour l’assignation d’une valeur à un nom d’objet, la pratique la plus recommandée en programmation R est d’utiliser <code>&lt;-</code> plutôt que <code>=</code>. La différence entre <code>&lt;-</code> et <code>=</code> est abordée dans les <a href="https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/#op%C3%A9rateur-dassignation">notes sur les bonnes pratiques</a>.</p>
+<div id="noms" class="section level3" number="1.2.1">
+<h3><span class="header-section-number">1.2.1</span> Noms acceptés</h3>
+<p>Un nom d’objet R doit respecter les règles suivantes <span class="citation">[<a href="#ref-make_names" role="doc-biblioref">1</a>]</span>.</p>
+<ul>
+<li><p>Le nom d’un objet peut uniquement contenir des lettres, des chiffres, des
+points ou des barres de soulignement.</p></li>
+<li><p>Il commence obligatoirement par une lettre ou un point. S’il commence
+par un point, le deuxième caractère ne doit pas être un chiffre.</p></li>
+<li><p>Il ne doit pas être un des mots suivants, qui sont réservés par R <span class="citation">[<a href="#ref-reserved" role="doc-biblioref">2</a>]</span> : <code>if</code>, <code>else</code>, <code>repeat</code>, <code>while</code>, <code>function</code>, <code>for</code>, <code>in</code>, <code>next</code>, <code>break</code>, <code>TRUE</code>, <code>FALSE</code>, <code>NULL</code>, <code>Inf</code>, <code>NaN</code>, <code>NA</code>, <code>NA_integer_</code>, <code>NA_real_</code>, <code>NA_complex_</code>, <code>NA_character_</code>, <code>...</code> et <code>..1</code>, <code>..2</code>, etc.</p></li>
+</ul>
+<p>Remarques :</p>
+<ul>
+<li><p>Les lettres accentuées sont acceptées, mais il vaut mieux les éviter, car leur transfert d’un système d’exploitation à un autre est souvent problématique.</p></li>
+<li><p>Il n’y a aucune restriction sur la longueur des noms.</p></li>
+<li><p>Si vous tentez de créer un objet portant un nom qui ne respecte pas une des règles précédentes, une erreur sera générée.</p></li>
+</ul>
+</div>
+</div>
+<div id="accéder-à-un-objet-en-mémoire" class="section level2" number="1.3">
+<h2><span class="header-section-number">1.3</span> Accéder à un objet en mémoire</h2>
+<p style="font-size:110%">
+<strong>Comment accéder à un résultat gardé en mémoire dans un objet?</strong>
+</p>
+<p>Il faut utiliser le nom référant à l’objet dans nos instructions R. Par exemple, pour afficher un objet, il suffit de taper son nom dans la console :</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>a</span></code></pre></div>
+<pre><code>## [1] 2</code></pre>
+<p>mais pas :</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;a&quot;</span></span></code></pre></div>
+<pre><code>## [1] &quot;a&quot;</code></pre>
+<p>car les guillemets servent à créer des chaînes de caractères.</p>
+<p>De plus, il faut <strong>respecter la casse</strong> car R différencie les majuscules et les minuscules. Donc <code>A</code> n’est pas le même symbole que <code>a</code> en R.</p>
+<p>Soumettre une commande R contenant uniquement le nom d’un objet est équivalent à soumettre un appel à la fonction <code>print</code> en fournissant cet objet comme premier argument. Ainsi, les commandes suivantes sont équivalentes :</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>a</span></code></pre></div>
+<pre><code>## [1] 2</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(a)</span></code></pre></div>
+<pre><code>## [1] 2</code></pre>
+<div id="objets-accessibles" class="section level3" number="1.3.1">
+<h3><span class="header-section-number">1.3.1</span> Objets accessibles</h3>
+<p style="font-size:110%">
+<strong>Est-ce le seul objet accessible?</strong>
+</p>
+<p>La commande <code>ls()</code> (équivalente à <code>objects()</code>) retourne la liste des noms des objets, dans l’<strong>environnement de travail</strong> (en anglais <em>workspace</em>), parfois appelé environnement courant ou environnement global. Il s’agit de la liste des noms des objets créés depuis le démarrage de la session R (et jamais effacés).</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span>()</span></code></pre></div>
+<pre><code>## [1] &quot;a&quot;</code></pre>
+<p>Ces noms sont ici entre guillemets, car ils sont affichés par <code>ls</code> en tant que chaînes de caractères.</p>
+<p style="font-size:110%">
+<strong>Mais est-ce vraiment le seul objet accessible?</strong>
+</p>
+<p>Non. En plus des objets que vous avez créés, vous avez accès aux objets venant avec l’installation de R. Ils sont simplement rangés ailleurs que dans l’environnement de travail. Voici la liste de tous les <em>groupes</em> d’objets auxquels vous avez accès directement.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">search</span>()</span></code></pre></div>
+<pre><code>## [1] &quot;.GlobalEnv&quot;        &quot;package:stats&quot;     &quot;package:graphics&quot;  &quot;package:grDevices&quot;
+## [5] &quot;package:utils&quot;     &quot;package:datasets&quot;  &quot;package:methods&quot;   &quot;Autoloads&quot;        
+## [9] &quot;package:base&quot;</code></pre>
+<p>Ces groupes d’objets portent le nom d’<strong>environnements</strong>. Il s’agit pour la plupart d’environnements de packages. Le premier environnement de cette liste, nommé <code>".GlobalEnv"</code>, est votre environnement de travail. La fonction <code>ls</code> affiche par défaut le contenu de cet environnement, mais elle peut afficher le contenu de n’importe quel environnement grâce à l’argument <code>name</code>.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span>(<span class="at">name =</span> <span class="st">&quot;package:stats&quot;</span>)</span></code></pre></div>
+<pre><code>##  [1] &quot;acf&quot;                  &quot;acf2AR&quot;               &quot;add.scope&quot;           
+##  [4] &quot;add1&quot;                 &quot;addmargins&quot;           &quot;aggregate&quot;           
+##  [7] &quot;aggregate.data.frame&quot; &quot;aggregate.ts&quot;         &quot;AIC&quot;                 
+## [10] &quot;alias&quot;                &quot;anova&quot;                &quot;ansari.test&quot;         
+## [13] &quot;aov&quot;                  &quot;approx&quot;               &quot;approxfun&quot;           
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 434 entries ]</code></pre>
+<p style="font-size:110%">
+<strong>Quelle est la nature de tous ces objets?</strong>
+</p>
+<p>Il s’agit principalement de fonctions et de jeux de données. Par exemple l’environnement du package <code>base</code> contient la fonction suivante :</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>casefold</span></code></pre></div>
+<pre><code>## function (x, upper = FALSE) 
+## if (upper) toupper(x) else tolower(x)
+## &lt;bytecode: 0x0000000011f2b438&gt;
+## &lt;environment: namespace:base&gt;</code></pre>
+<p>Cette fonction sert à convertir la casse de caractères alphabétiques dans une ou plusieurs chaînes de caractères, réunies dans un vecteur <span class="citation">[<a href="#ref-chartr" role="doc-biblioref">3</a>]</span>. La casse d’un caractère alphabétique, soit d’une lettre, est sa forme majuscule (capitale) ou minuscule. En anglais, les majuscules sont appelées <em>upper case characters</em> et les minuscules <em>lower case characters</em>.</p>
+<p>L’environnement du package <code>base</code> contient aussi le jeu de données suivant :</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>women</span></code></pre></div>
+<pre><code>##    height weight
+## 1      58    115
+## 2      59    117
+## 3      60    120
+## 4      61    123
+## 5      62    126
+## 6      63    129
+## 7      64    132
+## 8      65    135
+## 9      66    139
+## 10     67    142
+## 11     68    146
+## 12     69    150
+## 13     70    154
+## 14     71    159
+## 15     72    164</code></pre>
+<p>Il s’agit de valeurs moyennes de grandeur et de poids, calculées en 1975, pour des femmes américaines âgées entre 30 et 39 ans<span class="citation">[<a href="#ref-women" role="doc-biblioref">4</a>]</span>.</p>
+<p style="font-size:110%">
+<strong>Astuce :</strong>
+</p>
+<p>Utilisez la fonction <code>str</code> pour avoir un aperçu d’un objet plutôt que de l’afficher en entier.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(casefold)</span></code></pre></div>
+<pre><code>## function (x, upper = FALSE)</code></pre>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(women)</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    15 obs. of  2 variables:
+##  $ height: num  58 59 60 61 62 63 64 65 66 67 ...
+##  $ weight: num  115 117 120 123 126 129 132 135 139 142 ...</code></pre>
+<p>Ainsi, si l’objet est de grande taille, vous ne surchargerez pas la console en affichant la totalité de son contenu.</p>
+</div>
+</div>
+</div>
+<div id="fonctions-r" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Fonctions R</h1>
+<p style="font-size:110%">
+<strong>Qu’est-ce qu’une fonction R?</strong>
+</p>
+<p>Une fonction R est, comme dans tout langage informatique, un bout de code qui produit un certain résultat lorsqu’exécuté. Pour exécuter le code composant une fonction, celle-ci doit être <em>appelée</em>. Lorsqu’elle est appelée, la fonction prend des valeurs en entrée, qui sont assignées à des <em>arguments</em>. Le code de la fonction réfère à ces arguments de façon à ce que l’appel de la fonction provoque un traitement des valeurs fournies en entrée. En bout de ligne, la fonction génère un résultat, qui est la plupart du temps <em>retourné</em> dans un objet en sortie. Ce résultat peut aussi être un <a href="https://fr.wikipedia.org/wiki/Effet_de_bord_(informatique)"><em>effet de bord</em></a> tel que la production d’un graphique, l’écriture dans un fichier externe, la modification d’un paramètre de la session R, etc.</p>
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-15"></span>
+<img src="fig/Fonction.png" alt="Représentation schématique de l'exécution d'un appel à une fonction R" width="80%" />
+<p class="caption">
+Figure 2.1: Représentation schématique de l’exécution d’un appel à une fonction R
+</p>
+</div>
+<p>Un objet R de type fonction est composé des éléments suivants.</p>
+<ul>
+<li>Une liste d’arguments, avec leurs valeurs par défaut s’il y a lieu. Exemple :</li>
+</ul>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">args</span>(casefold)</span></code></pre></div>
+<pre><code>## function (x, upper = FALSE) 
+## NULL</code></pre>
+<p>La fonction <code>casefold</code> possède deux arguments : <code>x</code> et <code>upper</code>. L’argument <code>x</code> n’a pas de valeur par défaut, mais <code>upper</code> a <code>FALSE</code> comme valeur par défaut.</p>
+<ul>
+<li>Le corps de la fonction, soit le code composant la fonction. Exemple :</li>
+</ul>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">body</span>(casefold)</span></code></pre></div>
+<pre><code>## if (upper) toupper(x) else tolower(x)</code></pre>
+<p>Le corps de la fonction <code>casefold</code> est particulièrement court. Le plus souvent, le corps d’une fonction R se compose de plus d’une instruction.</p>
+<p>Pour utiliser une fonction, il faut l’appeler en fournissant, au besoin, des valeurs à ses arguments. Exemple :</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">casefold</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="st">&quot;Bonjour&quot;</span>, <span class="st">&quot;à&quot;</span>, <span class="st">&quot;tous!&quot;</span>), <span class="at">upper =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;BONJOUR&quot; &quot;À&quot;       &quot;TOUS!&quot;</code></pre>
+<p>Ici la fonction <code>c</code> est utilisée pour fournir en entrée à <code>casefold</code> trois chaînes de caractères, dans un vecteur.</p>
+<p style="font-size:110%">
+<strong>Remarque : opérateurs = fonctions</strong>
+</p>
+<p>Tous les opérateurs sont aussi des fonctions. Par exemple, l’opérateur mathématique d’addition :</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div>
+<p>est en fait un raccourci pour la fonction nommée <code>'+'</code> :</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;+&#39;</span>(<span class="dv">1</span>, <span class="dv">1</span>)</span></code></pre></div>
+<div id="écriture-dun-appel-à-une-fonction" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Écriture d’un appel à une fonction</h2>
+<p style="font-size:110%">
+<strong>Comment écrire un appel de fonction R?</strong>
+</p>
+<p>Un appel de fonction est une instruction formée des éléments suivants, en respectant cet ordre :</p>
+<ol style="list-style-type: decimal">
+<li>le nom de la fonction à appeler;</li>
+<li>une parenthèse ouvrante <code>(</code>;</li>
+<li>au besoin, des valeurs pour les arguments, spécifiées comme suit (et séparés par une virgule si plus d’une valeur d’argument est à donner en entrée) :
+<ol style="list-style-type: lower-alpha">
+<li>nom de l’argument, suivi de l’opérateur <code>=</code> (éléments non obligatoires),</li>
+<li>expression générant la valeur à assigner à l’argument (souvent simplement le nom d’un objet);</li>
+</ol></li>
+<li>une parenthèse fermante <code>)</code>.</li>
+</ol>
+<p>Dans l’exemple précédent, c’est-à-dire :</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">casefold</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="st">&quot;Bonjour&quot;</span>, <span class="st">&quot;à&quot;</span>, <span class="st">&quot;tous!&quot;</span>), <span class="at">upper =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>deux valeurs sont fournies en entrée, en spécifiant les noms des arguments auxquels les assigner. Le résultat suivant est obtenu :</p>
+<pre><code>## [1] &quot;BONJOUR&quot; &quot;À&quot;       &quot;TOUS!&quot;</code></pre>
+<p>Ici, la valeur par défaut de l’argument <code>upper</code> est <code>FALSE</code>. Pour utiliser cette valeur, il n’est pas nécessaire de fournir de valeur à l’argument dans l’appel de fonction.</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">casefold</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="st">&quot;Bonjour&quot;</span>, <span class="st">&quot;à&quot;</span>, <span class="st">&quot;tous!&quot;</span>))</span></code></pre></div>
+<pre><code>## [1] &quot;bonjour&quot; &quot;à&quot;       &quot;tous!&quot;</code></pre>
+<p>Cependant, l’argument <code>x</code> n’a pas de valeur par défaut et ne lui fournir aucune valeur génère une erreur.</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">casefold</span>()</span></code></pre></div>
+<pre><code>## Error in tolower(x): argument &quot;x&quot; is missing, with no default</code></pre>
+<p style="font-size:110%">
+<strong>Comment sont interprétées les valeurs passées en entrée sans être assignée à un argument?</strong>
+</p>
+<p>Si une valeur est passée en entrée sans être explicitement assignée à un argument, elle est par défaut assignée au premier argument non spécifié, en respectant l’ordre des arguments dans la définition de la fonction. Voici quelques exemples et les résultats obtenus.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">casefold</span>(<span class="fu">c</span>(<span class="st">&quot;Bonjour&quot;</span>, <span class="st">&quot;à&quot;</span>, <span class="st">&quot;tous!&quot;</span>))</span></code></pre></div>
+<pre><code>## [1] &quot;bonjour&quot; &quot;à&quot;       &quot;tous!&quot;</code></pre>
+<p>Ici, la valeur <code>c("Bonjour", "à", "tous!")</code> n’est pas assignée explicitement à un argument par l’utilisateur. R l’assigne donc implicitement au premier argument, soit <code>x</code>.</p>
+<p> </p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">casefold</span>(<span class="fu">c</span>(<span class="st">&quot;Bonjour&quot;</span>, <span class="st">&quot;à&quot;</span>, <span class="st">&quot;tous!&quot;</span>), <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;BONJOUR&quot; &quot;À&quot;       &quot;TOUS!&quot;</code></pre>
+<p>Ici, les deux valeurs fournies en entrée ne sont pas assignées explicitement à des arguments par l’utilisateur. Elles sont donc assignées implicitement en respectant l’ordre des arguments : la première valeur fournie, soit <code>"Bonjour", "à", "tous!"</code> est assignée au premier argument, soit <code>x</code>; la deuxième valeur fournie, soit <code>TRUE</code> est assignée au deuxième argument, soit <code>upper</code>.</p>
+<p> </p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">casefold</span>(<span class="cn">FALSE</span>, <span class="fu">c</span>(<span class="st">&quot;Bonjour&quot;</span>, <span class="st">&quot;à&quot;</span>, <span class="st">&quot;tous!&quot;</span>))</span></code></pre></div>
+<pre><code>## Warning in if (upper) toupper(x) else tolower(x): the condition has length &gt; 1 and only
+## the first element will be used</code></pre>
+<pre><code>## Error in if (upper) toupper(x) else tolower(x): argument is not interpretable as logical</code></pre>
+<p>Ici, l’ordre dans lequel les valeurs sont fournies implique que <code>FALSE</code> est assigné à <code>x</code> et <code>c("Bonjour", "à", "tous!")</code> est assigné à <code>upper</code>. Cela génère un avertissement et une erreur, car les arguments reçoivent alors des valeurs qui ne sont pas des types attendus.</p>
+<p> </p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">casefold</span>(<span class="cn">FALSE</span>, <span class="at">x =</span> <span class="fu">c</span>(<span class="st">&quot;Bonjour&quot;</span>, <span class="st">&quot;à&quot;</span>, <span class="st">&quot;tous!&quot;</span>))</span></code></pre></div>
+<pre><code>## [1] &quot;bonjour&quot; &quot;à&quot;       &quot;tous!&quot;</code></pre>
+<p>Si la valeur <code>c("Bonjour", "à", "tous!")</code> est explicitement assignée à l’argument <code>x</code>, la valeur <code>FALSE</code> est implicitement assignée à <code>upper</code>, même si elle est fournie en première position, car les assignations explicites ont préséance sur les assignations implicites.</p>
+<p style="font-size:110%">
+<strong>Astuce :</strong>
+</p>
+<p>Pour éviter les erreurs dans un appel de fonction, il vaut mieux toujours assigner les valeurs passées en entrée à des arguments. Par contre, dans la pratique, lorsque le premier argument d’une fonction R est un objet contenant des données sur lesquelles appliquer un calcul (ce qui est fréquent en R), il est habituel de ne pas le nommer. Ainsi, dans l’exemple initial, l’appel le plus usuel est le suivant :</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">casefold</span>(<span class="fu">c</span>(<span class="st">&quot;Bonjour&quot;</span>, <span class="st">&quot;à&quot;</span>, <span class="st">&quot;tous!&quot;</span>), <span class="at">upper =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+<div id="fonctionnement-vectoriel" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Fonctionnement vectoriel</h2>
+<p>Une particularité de R, qui le distingue de nombreux autres langages informatiques, est que plusieurs de ses fonctions agissent de façon vectorielle. Cela signifie qu’elles effectuent un traitement élément par élément sur le ou les objets reçus en entrée. Ainsi, l’appel précédent à la fonction <code>casefold</code>, génère l’application répétitive d’un traitement sur tous les éléments du vecteur de chaînes de caractères assigné à l’argument <code>x</code>. Dans plusieurs langages informatiques, il aurait fallu écrire une boucle pour arriver à répéter le traitement.</p>
+<p>Lors de la réalisation de calculs, ce fonctionnement vectoriel de R est très pratique. Il est simple, par exemple, d’additionner deux vecteurs numériques élément par élément,</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">2</span>, <span class="dv">6</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## [1] 7 8 4 7</code></pre>
+<p>ou encore de calculer la racine carrée tous les éléments d’un vecteur en une seule commande.</p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">2</span>, <span class="dv">6</span>))</span></code></pre></div>
+<pre><code>## [1] 1.732051 2.449490 1.414214 2.449490</code></pre>
+</div>
+<div id="largument-...-et-ses-deux-utilités." class="section level2" number="2.3">
+<h2><span class="header-section-number">2.3</span> L’argument <code>...</code> et ses deux utilités.</h2>
+<p>Certaines fonctions R possèdent un argument nommé « <code>...</code> ». C’est le cas par exemple de la fonction <code>c</code> utilisée précédemment, qui sert à combiner des valeurs dans un vecteur ou une liste <span class="citation">[<a href="#ref-c" role="doc-biblioref">5</a>]</span>.</p>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">args</span>(c)</span></code></pre></div>
+<pre><code>## function (...) 
+## NULL</code></pre>
+<p>C’est aussi le cas de la fonction <code>apply</code>, servant à appliquer un calcul sur des sous-sections d’un objet.</p>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">args</span>(apply)</span></code></pre></div>
+<pre><code>## function (X, MARGIN, FUN, ...) 
+## NULL</code></pre>
+<p>L’argument <code>...</code> n’a pas la même utilisé dans ces deux fonctions. Je vais utiliser ces deux exemples de fonction pour illustrer les deux utilités potentielles de <code>...</code>.</p>
+<p style="font-size:110%">
+<strong>Utilité 1 : recevoir un nombre indéterminé de valeurs en entrée</strong>
+</p>
+<p>La première utilité de <code>...</code> est de permettre à une fonction de recevoir en entrée un nombre indéterminé de valeurs. Si <code>...</code> est placé au tout début de la liste des arguments, il a typiquement cette utilité. C’est le cas pour la fonction <code>c</code>. Cette fonction peut combiner autant de valeurs que désiré par l’utilisateur grâce à l’argument <code>...</code>. Voici des exemples.</p>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;c&quot;</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;a&quot; &quot;c&quot;</code></pre>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="fl">4.5</span>, <span class="fl">6.8</span>, <span class="fl">2.3</span>, <span class="fl">5.1</span>, <span class="fl">0.9</span>)</span></code></pre></div>
+<pre><code>## [1] 4.5 6.8 2.3 5.1 0.9</code></pre>
+<p style="font-size:110%">
+<strong>Astuce :</strong>
+</p>
+<p>Les valeurs « attrapés » par <code>...</code> peuvent être assignées à des noms, tant que ceux-ci diffèrent des noms des autres arguments de la fonction. Dans un appel à la fonction <code>c</code>, nommer les valeurs attrapées par <code>...</code> a pour effet de nommer les éléments dans le vecteur créé. Voici un exemple.</p>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="st">&quot;Zoé&quot;</span> <span class="ot">=</span> <span class="fl">4.5</span>, <span class="st">&quot;Luc&quot;</span> <span class="ot">=</span> <span class="fl">6.8</span>, <span class="st">&quot;Ian&quot;</span> <span class="ot">=</span> <span class="fl">2.3</span>, <span class="st">&quot;Mia&quot;</span> <span class="ot">=</span> <span class="fl">5.1</span>, <span class="st">&quot;Kim&quot;</span> <span class="ot">=</span> <span class="fl">0.9</span>)</span></code></pre></div>
+<pre><code>## Zoé Luc Ian Mia Kim 
+## 4.5 6.8 2.3 5.1 0.9</code></pre>
+<p style="font-size:110%">
+<strong>Utilité 2 : passer des arguments à une autre fonction</strong>
+</p>
+<p>La deuxième utilité de l’argument <code>...</code> est de passer des arguments à une autre fonction appelée dans le corps de la première fonction. Si <code>...</code> est placé à la fin de la liste des arguments, il a typiquement cette utilité.</p>
+<p>Considérons par exemple la fonction <code>apply</code>.</p>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">args</span>(apply)</span></code></pre></div>
+<pre><code>## function (X, MARGIN, FUN, ...) 
+## NULL</code></pre>
+<p>Supposons que cette fonction soit utilisée pour calculer la moyenne des valeurs par colonne dans le jeu de données <code>women</code>.</p>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(<span class="at">X =</span> women, <span class="at">MARGIN =</span> <span class="dv">2</span>, <span class="at">FUN =</span> mean)</span></code></pre></div>
+<pre><code>##   height   weight 
+##  65.0000 136.7333</code></pre>
+<p>Cet appel à la fonction <code>apply</code> provoque des appels à la fonction fournie comme argument <code>FUN</code>, ici la fonction <code>mean</code>. Pour demander le calcul de moyennes tronquées via l’argument <code>trim</code> de la fonction <code>mean</code>, il suffit d’ajouter cet argument, et sa valeur désirée, dans l’appel à la fonction <code>apply</code>.</p>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(<span class="at">X =</span> women, <span class="at">MARGIN =</span> <span class="dv">2</span>, <span class="at">FUN =</span> mean, <span class="at">trim =</span> <span class="fl">0.3</span>)</span></code></pre></div>
+<pre><code>##   height   weight 
+##  65.0000 135.5714</code></pre>
+<p>Ici, l’argument portant un nom autre que <code>X</code>, <code>MARGIN</code> et <code>FUN</code> (les trois arguments nommés dans la liste des arguments de <code>apply</code>), soit l’argument <code>trim</code>, a été inclus automatiquement dans les sous-appels à la fonction <code>mean</code>.</p>
+<p>Il est possible de passer à la sous-fonction autant d’arguments que désiré. Pour éviter toute erreur, il vaut mieux toujours assigner des noms aux valeurs passées en argument à une sous-fonction via <code>...</code>.</p>
+</div>
+<div id="comment-utiliser-une-fonction-dajustement-de-modèle" class="section level2" number="2.4">
+<h2><span class="header-section-number">2.4</span> Comment utiliser une fonction d’ajustement de modèle ?</h2>
+<p>Étant donné que R est un langage conçu pour effectuer des calculs statistiques et créer des graphiques, il sert fréquemment à ajuster des modèles statistiques. R possède une classe d’objets particulière dédiée à la spécification de modèles : les <strong>formules</strong>. Comprendre comment utiliser une fonction d’ajustement de modèle en R revient principalement à comprendre comment correctement spécifier une formule R.</p>
+<p>Par exemple, la fonction <code>lm</code> sert à ajuster un modèle linéaire. Le premier argument de cette fonction est une formule. Voici un exemple d’ajustement d’une régression linéaire simple sur les données <code>women</code>, en utilisant le poids comme variable réponse et la grandeur comme variable explicative.</p>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> height, <span class="at">data =</span> women)</span></code></pre></div>
+<p>L’objet <code>weight ~ height</code> est une formule.</p>
+<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(weight <span class="sc">~</span> height)</span></code></pre></div>
+<pre><code>## Class &#39;formula&#39;  language weight ~ height
+##   ..- attr(*, &quot;.Environment&quot;)=&lt;environment: R_GlobalEnv&gt;</code></pre>
+<p>La partie de gauche de la formule (à gaude du <code>~</code>) contient la ou, plus rarement, les noms des variables réponse. La partie de droite contient pour sa part le ou les noms des variables explicatives. Ces noms sont accompagnés, au besoin, d’opérateurs et de fonctions pour désigner comment former les termes du modèle à partir des variables explicatives. Par exemple, voici la formule à utiliser dans l’appel à la fonction <code>lm</code> pour effectuer une régression polynomiale de degré deux avec les données <code>women</code>.</p>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>reg_poly <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> height <span class="sc">+</span> <span class="fu">I</span>(height<span class="sc">^</span><span class="dv">2</span>), <span class="at">data =</span> women)</span></code></pre></div>
+<p>L’écriture de formule sera abordées dans les <a href="https://stt4230.rbind.io/calculs/calculs_stat_math_r/#ajustement-de-mod%C3%A8les">notes sur les calculs en R</a>.</p>
+<p style="font-size:110%">
+<strong>Comment accéder aux résultats d’une fonction d’ajustement de modèle?</strong>
+</p>
+<p>Un objet obtenu en sortie d’une fonction d’ajustement de modèle contient beaucoup plus d’informations qu’il ne le laisse paraître à première vue.</p>
+<p>Par exemple, affichons dans la console l’objet <code>reg</code> créé dans le premier exemple d’ajustement de modèle.</p>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>reg </span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = weight ~ height, data = women)
+## 
+## Coefficients:
+## (Intercept)       height  
+##      -87.52         3.45</code></pre>
+<p>Seul un court extrait des résultats contenus dans <code>reg</code> est imprimé. Un résumé plus complet des résultats est obtenu avec la fonction <code>summary</code>.</p>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(reg)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = weight ~ height, data = women)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.7333 -1.1333 -0.3833  0.7417  3.1167 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -87.51667    5.93694  -14.74 1.71e-09 ***
+## height        3.45000    0.09114   37.85 1.09e-14 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.525 on 13 degrees of freedom
+## Multiple R-squared:  0.991,  Adjusted R-squared:  0.9903 
+## F-statistic:  1433 on 1 and 13 DF,  p-value: 1.091e-14</code></pre>
+<p>Cependant, en réalité, l’objet <code>reg</code> contient plus d’éléments que ce que le laisse croire les sorties précédentes.</p>
+<p>L’objet <code>reg</code> est une liste de sous-objets contenant les résultats de l’ajustement du modèle :</p>
+<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(reg, <span class="at">max.level =</span> <span class="dv">1</span>, <span class="at">give.attr =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<pre><code>## List of 12
+##  $ coefficients : Named num [1:2] -87.52 3.45
+##  $ residuals    : Named num [1:15] 2.4167 0.9667 0.5167 0.0667 -0.3833 ...
+##  $ effects      : Named num [1:15] -529.566 57.73 -0.058 -0.486 -0.914 ...
+##  $ rank         : int 2
+##  $ fitted.values: Named num [1:15] 113 116 119 123 126 ...
+##  $ assign       : int [1:2] 0 1
+##  $ qr           :List of 5
+##  $ df.residual  : int 13
+##  $ xlevels      : Named list()
+##  $ call         : language lm(formula = weight ~ height, data = women)
+##  $ terms        :Classes &#39;terms&#39;, &#39;formula&#39;  language weight ~ height
+##  $ model        :&#39;data.frame&#39;:   15 obs. of  2 variables:</code></pre>
+<p>Un élément de la liste <code>reg</code> peut être extrait avec l’opérateur <code>$</code> comme suit :</p>
+<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a>reg<span class="sc">$</span>coefficients</span></code></pre></div>
+<pre><code>## (Intercept)      height 
+##   -87.51667     3.45000</code></pre>
+<p>Cependant, il existe des fonctions servant spécifiquement à extraire des éléments d’une sortie de modèle. Par exemple, la fonction <code>coefficients</code> extrait les coefficients du modèle :</p>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coefficients</span>(reg)</span></code></pre></div>
+<pre><code>## (Intercept)      height 
+##   -87.51667     3.45000</code></pre>
+<p>La fonction <code>summary</code>, en plus d’afficher un résumé des résultats tel que vu précédemment, retourne en sortie une liste contenant quelques résultats complémentaires à ceux retournés par la fonction d’ajustement du modèle :</p>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>regSummary <span class="ot">&lt;-</span> <span class="fu">summary</span>(reg)</span>
+<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(regSummary, <span class="at">max.level =</span> <span class="dv">1</span>, <span class="at">give.attr =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<pre><code>## List of 11
+##  $ call         : language lm(formula = weight ~ height, data = women)
+##  $ terms        :Classes &#39;terms&#39;, &#39;formula&#39;  language weight ~ height
+##  $ residuals    : Named num [1:15] 2.4167 0.9667 0.5167 0.0667 -0.3833 ...
+##  $ coefficients : num [1:2, 1:4] -87.5167 3.45 5.9369 0.0911 -14.741 ...
+##  $ aliased      : Named logi [1:2] FALSE FALSE
+##  $ sigma        : num 1.53
+##  $ df           : int [1:3] 2 13 2
+##  $ r.squared    : num 0.991
+##  $ adj.r.squared: num 0.99
+##  $ fstatistic   : Named num [1:3] 1433 1 13
+##  $ cov.unscaled : num [1:2, 1:2] 15.15595 -0.23214 -0.23214 0.00357</code></pre>
+</div>
+</div>
+<div id="packages-r" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Packages R</h1>
+<p style="font-size:110%">
+<strong>Qu’est-ce qu’un package R?</strong>
+</p>
+<p>Un package R est un <strong>regroupement de fonctions et/ou de données documentées</strong>. En fait, lors de l’ouverture d’une session R, en supposant que l’environnement de travail est vide, tous les objets accessibles proviennent d’un package.</p>
+<p>L’installation de base de R est composée d’un certain nombre de packages R. Beaucoup de packages supplémentaires sont aussi disponibles sur le web. Les packages sont la façon formelle de partager publiquement des fonctions R.</p>
+<p>La majorité des développeurs de packages R les rendent disponibles sur le <strong>CRAN</strong> (<em>Comprehensive R Archive Network</em>) : <a href="http://www.r-project.org/" class="uri">http://www.r-project.org/</a> &gt; « CRAN » dans le menu de gauche.</p>
+<p>Le site web <strong>Bioconductor</strong> (<a href="http://www.bioconductor.org/" class="uri">http://www.bioconductor.org/</a>) propose aussi beaucoup de packages R spécifiques au domaine de la bio-informatique.</p>
+<p>Finalement, certains développeurs distribuent leurs packages R sur un service web d’hébergement et de gestion de versions tel que <strong>GitHub</strong> (<a href="https://github.com/search?utf8=%E2%9C%93&amp;q=language%3AR&amp;type=Repositories&amp;ref=advsearch&amp;l=R&amp;l=">https://github.com/</a>).</p>
+<p style="font-size:110%">
+<strong>Comment utiliser un package?</strong>
+</p>
+<p>Pour utiliser un package R, il faut premièrement qu’il soit installé. Installer R provoque l’installation de certains packages. Les packages supplémentaires doivent être installés séparément. La <a href="https://stt4230.rbind.io/introduction/installation_r_rstudio/">fiche sur l’installation de R</a> explique comment procéder à ces installations.</p>
+<p>Ensuite, pour utiliser un package, une pratique courante est de charger celui-ci dans une session R, ce qui donne directement accès à toutes les fonctions publiques qu’il contient. Le démarrage d’une session R provoque automatiquement le chargement de certains packages. Par défaut, les packages suivants sont chargés automatiquement : <code>base</code>, <code>methods</code>, <code>datasets</code>, <code>utils</code>, <code>grDevices</code>, <code>graphics</code>, <code>stats</code>. Pour charger d’autres packages, il faut utiliser la fonction <code>library</code>, comme dans cet exemple :</p>
+<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
+<p>Pour accéder à une fonction publique d’un package chargé, il suffit de l’appeler par son nom. Par exemple, nous pouvons maintenant extraire des lignes d’un jeu de données avec la fonction <code>slice</code> du package <code>dplyr</code> comme suit.</p>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="fu">slice</span>(women, <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">5</span>))</span></code></pre></div>
+<pre><code>##   height weight
+## 1     58    115
+## 2     61    123
+## 3     62    126</code></pre>
+<p>Il est aussi possible d’accéder à une fonction d’un package non chargé, <strong>mais installé</strong>, grâce à l’opérateur <code>::</code> précédé du nom du package. Ainsi, même si la commande <code>library(dplyr)</code> n’avait pas été exécutée, la commande suivante fonctionnerait, à la condition que <code>dplyr</code> soit installé.</p>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>dplyr<span class="sc">::</span><span class="fu">slice</span>(women, <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">5</span>))</span></code></pre></div>
+<pre><code>##   height weight
+## 1     58    115
+## 2     61    123
+## 3     62    126</code></pre>
+<!--
+Info sur les packages chargés par défaut trouvée dans le fichier
+"C:\Program Files\R\R-4.0.3\library\base\R\Rprofile"
+-->
+</div>
+<div id="obtenir-de-linformation" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Obtenir de l’information</h1>
+<p style="font-size:110%">
+<strong>Comment obtenir de l’information sur une fonction?</strong>
+</p>
+<p>Avant d’utiliser une fonction pour la première fois, il est utile de savoir :</p>
+<ul>
+<li>ce que la fonction fait;</li>
+<li>les utilités de ses arguments et les formats d’objets acceptés comme valeur en argument;</li>
+<li>le format du résultat en sortie et/ou l’effet de bord produit.</li>
+</ul>
+<p>Toutes les fonctions ont une fiche d’aide, toujours structurée de la même façon, procurant ces informations. En R, la fonction <code>help</code> (ou l’opérateur <code>?</code>) permet d’accéder à cette fiche d’aide, comme dans cet exemple :</p>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="fu">help</span>(lm)</span>
+<span id="cb93-2"><a href="#cb93-2" aria-hidden="true" tabindex="-1"></a><span class="co"># ou</span></span>
+<span id="cb93-3"><a href="#cb93-3" aria-hidden="true" tabindex="-1"></a>?lm</span></code></pre></div>
+<p>Notons que pour ouvrir la fiche d’aide d’un opérateur, il faut encadrer son nom de guillemets simples ou doubles dans l’appel à la fonction <code>help</code>, par exemple :</p>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="fu">help</span>(<span class="st">&#39;+&#39;</span>)</span></code></pre></div>
+<p>La majorité des fiches d’aide de fonctions R comportent des exemples d’utilisation de la fonction à la fin. Ces exemples sont souvent très utiles pour comprendre comment utiliser la fonction.</p>
+<p>Aussi, le CRAN comporte une page web pour chaque package R qu’il héberge (par exemple <a href="https://CRAN.R-project.org/package=dplyr" class="uri">https://CRAN.R-project.org/package=dplyr</a>). Celle-ci contient la version PDF des fiches d’aide de toutes les fonctions publiques du package. Ce document se nomme <em>Reference manual</em> (par exemple <a href="https://cran.r-project.org/web/packages/dplyr/dplyr.pdf" class="uri">https://cran.r-project.org/web/packages/dplyr/dplyr.pdf</a>). Dans certains cas, la page web d’un package sur le CRAN comporte un lien vers un site web documentant davantage le package dans le champ nommé <em>URL</em> (par exemple <a href="https://dplyr.tidyverse.org/" class="uri">https://dplyr.tidyverse.org/</a>). Elle comporte aussi parfois des guides d’utilisation du package, appelés <em>vignettes</em>, créés par les développeurs du package (par exemple <a href="https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html" class="uri">https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html</a>).</p>
+<p>Les vignettes d’un package sont aussi consultables hors-ligne, à partir de R. Dans le bas d’une fiche d’aide R, il y a toujours un lien vers l’index du package contenant la fonction documentée dans la fiche. Dans la première partie de cet index, il y a un lien vers les vignettes du package (nommé <em>User guides, package vignettes and other documentation</em>), si celui-ci en possède.</p>
+<p>Il n’y a pas que le <em>R Core Team</em> et les autres développeurs de packages R qui fournissent de l’information sur des fonctions R. La communauté R étant très active, il est fréquent de trouver sur le web de l’information à propos d’une fonction R provenant d’utilisateurs de la fonction. Par exemple, lançons la recherche « <code>R function lm</code> » dans un moteur de recherche web tel que <strong>Google</strong>. Les résultats contiennent des versions en ligne de la fiche d’aide de la fonction ainsi que des pages web très pertinentes pour apprendre à utiliser la fonction, créées par des utilisateurs.</p>
+<p style="font-size:110%">
+<strong>Comment dénicher une fonction pour réaliser une certaine tâche?</strong>
+</p>
+<p>Il est relativement facile d’obtenir de l’information lorsque nous connaissons le nom de la fonction à utiliser. Par contre, il est parfois moins facile de trouver le nom de la fonction qui répond à notre besoin.</p>
+<p>Afin de trouver une fonction R qui effectue une certaine tâche, le premier endroit pour chercher est encore un moteur de recherche web. En entrant dans la barre de recherche « <code>R function</code> », suivi d’une courte description en anglais de la tâche à effectuer, il est fort probable que des résultats pertinents soient retournés. Le web contient vraiment beaucoup d’informations sur la programmation en R, principalement en anglais. Des pages sur des sites sociaux de questions/réponses tels que <strong>StackOverflow</strong> (<a href="http://stackoverflow.com/questions/tagged/r" class="uri">http://stackoverflow.com/questions/tagged/r</a>) ou <strong>CrossValidated</strong> (<a href="http://stats.stackexchange.com/questions/tagged/r" class="uri">http://stats.stackexchange.com/questions/tagged/r</a>) sont souvent suggérés.</p>
+<p>Il existe aussi des outils de recherche spécifiques à R. Tout d’abord, la fonction R <code>help.start</code>, appelée sans lui fournir d’arguments en entrées, ouvre une table des matières contenant des liens vers la documentation R. Toute cette information est aussi accessible en ligne sur le site web <a href="http://stat.ethz.ch/R-manual/R-patched/doc/html/" class="uri">http://stat.ethz.ch/R-manual/R-patched/doc/html/</a>.</p>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a><span class="fu">help.start</span>()</span></code></pre></div>
+<p>Aussi, la fonction R <code>help.search</code> permet de rechercher la présence de chaînes de caractères dans les fiches d’aide R, par exemple :</p>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="fu">help.search</span>(<span class="st">&quot;regression&quot;</span>)</span></code></pre></div>
+<p>Cependant, les fonctions <code>help</code>, <code>help.start</code> et <code>help.search</code> donnent uniquement accès à la documentation des packages R installés dans le chemin de recherche de la session R à partir de laquelle elles sont appelées. Pour faire une recherche dans les fiches d’aide de tous les packages R sur le CRAN, Bioconductor ou Github, le site web suivant est un bon outil.</p>
+<p><a href="http://www.rdocumentation.org/" class="uri">http://www.rdocumentation.org/</a></p>
+<p>Le site web <a href="http://rseek.org/" class="uri">http://rseek.org/</a> permet d’élargir la recherche à :</p>
+<ul>
+<li>toute la documentation distribuée par l’équipe de R, incluant les manuels du <em>R Core Team</em> (<a href="http://cran.r-project.org/manuals.html" class="uri">http://cran.r-project.org/manuals.html</a>);</li>
+<li>les messages publiés sur les listes courriel de R (<a href="http://www.r-project.org/mail.html" class="uri">http://www.r-project.org/mail.html</a>), dont le R-help où les abonnés peuvent poser des questions concernant R;</li>
+<li>le R Journal (<a href="http://journal.r-project.org/" class="uri">http://journal.r-project.org/</a>);</li>
+<li>des blogues et autres sites web consacrés à R, dont R-bloggers (<a href="http://www.r-bloggers.com/" class="uri">http://www.r-bloggers.com/</a>) et Quick-R (<a href="http://www.statmethods.net/" class="uri">http://www.statmethods.net/</a>);</li>
+<li>le support et d’autres ressources offertes par RStudio (<a href="https://support.rstudio.com" class="uri">https://support.rstudio.com</a>);</li>
+<li>etc.</li>
+</ul>
+<p>Il existe en fait plusieurs outils de recherche de documentation R.</p>
+</div>
+<div id="graphiques-en-r" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Graphiques en R</h1>
+<p style="font-size:110%">
+<strong>Comment produire un graphique en R?</strong>
+</p>
+<p>La fonction graphique de base en R est <code>plot</code>.</p>
+<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="at">x =</span> women<span class="sc">$</span>height, <span class="at">y =</span> women<span class="sc">$</span>weight)</span></code></pre></div>
+<p><img src="/introduction/base_r_2021_files/figure-html/unnamed-chunk-55-1.png" width="480" style="display: block; margin: auto;" /></p>
+<p>Pour deux vecteurs de données <code>x</code> et <code>y</code> fournis en entrée, elle génère un diagramme de dispersion.</p>
+<p>Elle accepte plusieurs autres types d’objets comme premier argument. Par exemple, si elle reçoit en entrée un objet créé par la fonction <code>lm</code>, elle génère quelques graphiques de résidus (non affichés ici).</p>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(reg)</span></code></pre></div>
+<p>La fonction <code>plot</code> n’est que la pointe de l’iceberg de toutes les possibilités graphiques de R. <a href="https://stt4230.rbind.io/communication_resultats/graphiques_r/">Un cours sera consacré à ce sujet</a>.</p>
+</div>
+<div id="programmation-orientée-objet-en-r" class="section level1" number="6">
+<h1><span class="header-section-number">6</span> Programmation orientée objet en R</h1>
+<p style="font-size:110%">
+<strong>Est-ce que de la programmation orientée objet est possible en R?</strong>
+</p>
+<p>La fonction <code>plot</code>, mentionnée ci-dessus, a un comportement qui s’adapte à la classe de l’objet assigné à son premier argument. Il s’agit d’une fonction générique <em>polymorphe</em> propre à un langage orienté objet. Ainsi, la programmation orientée objet est possible en R. Il y a même plus d’un système R de programmation orientée objet. La fonction <code>plot</code> du package <code>graphics</code> est une fonction générique issue du système orienté objet S3, le plus simple et encore le plus courant en R.</p>
+<p>Jetons un coup d’oeil au corps de la fonction <code>plot</code>.</p>
+<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a>plot</span></code></pre></div>
+<pre><code>## function (x, y, ...) 
+## UseMethod(&quot;plot&quot;)
+## &lt;bytecode: 0x0000000011f7a608&gt;
+## &lt;environment: namespace:base&gt;</code></pre>
+<p>La fonction <code>plot</code> possède seulement trois arguments : <code>x</code>, <code>y</code> et <code>...</code>. Aussi, le corps de la fonction est un peu particulier. Il est très court. Il contient uniquement un appel à la fonction <code>UseMethod</code>. Cette caractéristique indique que <code>plot</code> est une fonction générique de type S3.</p>
+<p>À travers l’appel à la fonction <code>UseMethod</code>, la fonction <code>plot</code> appelle une sous-fonction (appelée <em>méthode</em>), choisie selon la classe de l’objet fourni en entrée comme valeur pour le premier argument (ici <code>x</code>). Pour énumérer toutes les « versions » d’une fonction générique auxquelles notre installation de R nous donne accès, il faut appeler la fonction <code>methods</code> comme suit.</p>
+<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a><span class="fu">methods</span>(plot)</span></code></pre></div>
+<pre><code>##  [1] plot.acf*           plot.data.frame*    plot.decomposed.ts* plot.default       
+##  [5] plot.dendrogram*    plot.density*       plot.ecdf           plot.factor*       
+##  [9] plot.formula*       plot.function       plot.hclust*        plot.histogram*    
+## [13] plot.HoltWinters*   plot.isoreg*        plot.lm*            plot.medpolish*    
+## [17] plot.mlm*           plot.ppr*           plot.prcomp*        plot.princomp*     
+## [21] plot.profile.nls*   plot.R6*            plot.raster*        plot.spec*         
+## [25] plot.stepfun        plot.stl*           plot.table*         plot.ts            
+## [29] plot.tskernel*      plot.TukeyHSD*     
+## see &#39;?methods&#39; for accessing help and source code</code></pre>
+<p>Les caractères se trouvant après le point dans le nom d’une méthode S3 représentent une classe d’objets. Par exemple, <code>lm</code> est la classe des objets retournés par la fonction du même nom. C’est la méthode <code>plot.lm</code> qui est appelée lorsque <code>plot</code> reçoit en entrée un objet de classe <code>lm</code>.</p>
+<p>Les méthodes sont souvent documentées, au même titre que les fonctions. Par exemple, la fiche d’aide ouverte par <code>help(plot.lm)</code> fourni de l’information à propos du comportement de la fonction <code>plot</code> avec un objet de classe <code>lm</code>,</p>
+<p>La programmation orientée objet est un sujet technique plutôt avancé. <a href="https://stt4230.rbind.io/programmation/oop_r/">Nous reviendrons sur ce concept vers la fin de la session</a>.</p>
+</div>
+<div id="sessions-r" class="section level1" number="7">
+<h1><span class="header-section-number">7</span> Sessions R</h1>
+<p>R est souvent utilisé de façon interactive dans une session R pour analyser des données. Lors d’une session R, l’utilisateur soumet des commandes dans la console.</p>
+<p style="font-size:110%">
+<strong>Comment conserver une trace des commandes soumises au cours d’une session R?</strong>
+</p>
+<p>Il est possible de sauver l’<strong>historique des commandes</strong> soumises au cours d’une session R avec la fonction <code>savehistory</code>. Le fichier ainsi créé (d’extension <code>.Rhistory</code> par défaut) contient une énumération de toutes les commandes soumises dans la console depuis l’ouverture de R.</p>
+<p>Il est aussi possible de sauver l’<strong>environnement de travail</strong> avec la fonction <code>save.image</code>. Le fichier ainsi créé (d’extension <code>.RData</code> par défaut) contient tout le contenu de l’environnement de travail, soit tous les objets créés depuis l’ouverture de R (et jamais effacés).</p>
+<p style="font-size:110%">
+<strong>Astuce :</strong>
+</p>
+<p>En fait, la console R garde toujours une trace en mémoire des commandes que vous avez soumises (comme le Terminal Linux). Vous pouvez parcourir cet historique, dans la console, avec les touches « flèche vers le haut » et « flèche vers le bas » de votre clavier. Ainsi, pour soumettre de nouveau une commande, vous pouvez éviter de la retaper en y accédant à l’aide de la touche « flèche vers le haut ».</p>
+<p style="font-size:110%">
+<strong>Comment terminer une session R?</strong>
+</p>
+<p>La commande <code>q()</code> provoque la fin de la session R, tout comme la fermeture de la fenêtre de la console R. R demande alors si une <strong>image de la session</strong> doit être sauvegardée. Si la réponse fournie à cette question est oui, R sauvegarde l’historique des commandes dans un fichier nommé « <code>.Rhistory</code> » et le contenu de l’environnement de travail dans un fichier nommé « <code>.RData</code> ».</p>
+<p style="font-size:110%">
+<strong>Comment charger un fichier d’extension <code>.RData</code>?</strong>
+</p>
+<p>Les objets sauvegardés dans un fichier d’extension <code>.RData</code> deviennent accessibles en R après que le fichier soit chargé avec la fonction <code>load</code>.</p>
+<p style="font-size:110%">
+<strong>Attention :</strong>
+</p>
+<p>Si à l’ouverture d’une nouvelle session R le répertoire de travail (voir ci-dessous) contient un fichier <code>.RData</code>, les objets contenus dans ce fichier sont automatiquement chargés en R. Dans ce cas, l’environnement de travail n’est pas vide en début de session.</p>
+<p style="font-size:110%">
+<strong>Astuce :</strong>
+</p>
+<p>Je recommande de ne jamais accepter l’enregistrement d’une image de la session à la fermeture d’une session R, afin que le répertoire de travail par défaut ne contienne pas de fichier d’extension <code>.RData</code> et que toute nouvelle session R démarre avec un environnement de travail vide. Partir d’un environnement de travail vide aide à garder le contrôle sur son contenu et ainsi à éviter des erreurs de manipulation de mauvaises données.</p>
+<div id="paramètres-dune-session-r" class="section level2" number="7.1">
+<h2><span class="header-section-number">7.1</span> Paramètres d’une session R</h2>
+<p style="font-size:110%">
+<strong>Comment connaître et modifier les paramètres d’une session R?</strong>
+</p>
+<p>Une session R comporte un certain nombre de paramètres nommés options. La fonction R <code>options</code> permet de connaître les paramètres d’une session en cours, ainsi que de les modifier. Il faut d’abord aller voir la fiche d’aide de la fonction (ouverte par la commande <code>help(options)</code> <span class="citation">[<a href="#ref-options" role="doc-biblioref">6</a>]</span>), pour obtenir de l’information sur ces paramètres.</p>
+<p>Par exemple, la façon dont les nombres sont affichés dans la console est notamment contrôlée par les options <code>digits</code> et <code>scipen</code>. Ces options prennent par défaut les valeurs suivantes.</p>
+<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Afin de garder une copie des valeurs par défaut avant de les modifier</span></span>
+<span id="cb103-2"><a href="#cb103-2" aria-hidden="true" tabindex="-1"></a>optionsDefaut <span class="ot">&lt;-</span> <span class="fu">options</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a>optionsDefaut<span class="sc">$</span>digits</span></code></pre></div>
+<pre><code>## [1] 7</code></pre>
+<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a>optionsDefaut<span class="sc">$</span>scipen</span></code></pre></div>
+<pre><code>## [1] 0</code></pre>
+<p>L’option <code>digits</code> représente le nombre maximal de chiffres affichés, par exemple :</p>
+<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a><span class="fl">1.23456789</span></span></code></pre></div>
+<pre><code>## [1] 1.234568</code></pre>
+<p>Le nombre est arrondi pour respecter ce nombre maximal de chiffres. Cette option peut être modifiée comme suit.</p>
+<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb110-1"><a href="#cb110-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">digits =</span> <span class="dv">4</span>)</span>
+<span id="cb110-2"><a href="#cb110-2" aria-hidden="true" tabindex="-1"></a><span class="fl">1.23456789</span></span></code></pre></div>
+<pre><code>## [1] 1.235</code></pre>
+<p>Pour toute nouvelle session R démarrée, la valeur par défaut de <code>digits</code> retombe à 7 (sauf si ce paramètre est modifié dans le fichier de configuration de R). Si nous avons préalablement enregistré les valeurs par défaut des options, il est facile de redonner à <code>digits</code> sa valeur par défaut comme suit.</p>
+<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">digits =</span> optionsDefaut<span class="sc">$</span>digits)</span></code></pre></div>
+<p>L’option <code>scipen</code> contrôle pour sa part l’affichage en format scientifique. R affiche les très grands nombres dans ce format. Par exemple, par défaut</p>
+<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a><span class="dv">100000</span></span></code></pre></div>
+<pre><code>## [1] 1e+05</code></pre>
+<p>est affiché en format scientifique, mais pas</p>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1" aria-hidden="true" tabindex="-1"></a><span class="dv">10000</span></span></code></pre></div>
+<pre><code>## [1] 10000</code></pre>
+<p>En modifiant la valeur de <code>scipen</code> comme suit</p>
+<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="sc">-</span><span class="dv">1</span>)</span></code></pre></div>
+<p>10000 sera lui aussi affiché en format scientifique.</p>
+<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb118-1"><a href="#cb118-1" aria-hidden="true" tabindex="-1"></a><span class="dv">10000</span></span></code></pre></div>
+<pre><code>## [1] 1e+04</code></pre>
+</div>
+</div>
+<div id="répertoire-de-travail" class="section level1" number="8">
+<h1><span class="header-section-number">8</span> Répertoire de travail</h1>
+<p style="font-size:110%">
+<strong>Qu’est-ce que le répertoire de travail?</strong>
+</p>
+<p>R a parfois besoin de lire ou d’écrire dans des fichiers externes. Il le fait par exemple :</p>
+<ul>
+<li>lors de l’importation de données provenant d’un fichier externe (lecture dans un fichier, par exemple avec la fonction <code>load</code>);</li>
+<li>lors de l’enregistrement de l’historique des commandes ou de l’environnement de travail (écriture dans un fichier).</li>
+</ul>
+<p>R se définit un emplacement par défaut pour ces fichiers. Cet emplacement se nomme <strong>répertoire de travail</strong> (en anglais <em>working directory</em>), parfois appelé répertoire courant. Lorsqu’aucun emplacement n’est spécifié lors d’une communication entre R et un fichier externe, R considérera par défaut que le fichier se situe dans le répertoire de travail.</p>
+<p style="font-size:110%">
+<strong>Comment contrôler le répertoire de travail?</strong>
+</p>
+<p>La commande suivante permet de connaître le répertoire de travail :</p>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getwd</span>()</span></code></pre></div>
+<p>La suivante permet de le modifier :</p>
+<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setwd</span>(<span class="st">&quot;cheminAccesRepertoire&quot;</span>)</span></code></pre></div>
+<p>où <code>"cheminAccesRepertoire"</code> est le chemin d’accès d’un répertoire sur votre ordinateur, par exemple <code>"C:/MesDocuments"</code> ou autre.</p>
+<p style="font-size:110%">
+<strong>Attention :</strong>
+</p>
+<p>En R, les chemins d’accès contenant le caractère <code>\</code> ne sont pas acceptés. Ce n’est pas très pratique pour ceux qui travaillent sous Windows, car un chemin d’accès copié à partir d’un explorateur de fichiers Windows contient ce caractère. Il faut toujours remplacer, dans un chemin d’accès fourni à R, les <code>\</code> par <code>/</code> ou <code>\\</code> (ex.: <code>"C:\MesDocuments"</code> devient <code>"C:/MesDocuments"</code> ou <code>"C:\\MesDocuments"</code>).</p>
+</div>
+<div id="programmes-r" class="section level1" number="9">
+<h1><span class="header-section-number">9</span> Programmes R</h1>
+<p style="font-size:110%">
+<strong>Pourquoi créer des programmes R plutôt que de travailler directement dans la console?</strong>
+</p>
+<p>Retrouver des commandes spécifiques dans un ancien historique peut être difficile. Une meilleure méthode de travail que de travailler directement dans la console R consiste à rédiger des <em>programmes R</em>, aussi appelés <em>scripts R</em>. Les programmes facilitent la réutilisation du code. Ils sont composés d’une série d’instructions.</p>
+<p>Faire rouler un ancien programme recrée tous les objets produits par les instructions dans le programme (ce qui remplace une image de session). Si le code de création de certains objets est long à exécuter, ces objets peuvent être enregistrés dans un fichier externe lors de leur création d’origine. Ensuite, pour utiliser ces objets, il suffit de les charger dans une session R (au lieu de faire rouler de nouveau le code pour les créer). Nous verrons comment faire ça lors d’<a href="https://stt4230.rbind.io/manipulation_donnees/lecture_ecriture_r/">un prochain cours</a>.</p>
+<div id="règles-de-syntaxe" class="section level2" number="9.1">
+<h2><span class="header-section-number">9.1</span> Règles de syntaxe</h2>
+<p style="font-size:110%">
+<strong>Quelles sont les règles de syntaxe du langage R?</strong>
+</p>
+<p>Lors de l’écriture d’un programme R, il y a quelques règles de syntaxe à respecter. En plus des <a href="#noms">règles concernant les choix de noms d’objets</a> énumérées précédemment, voici les règles syntaxiques de base du langage R <span class="citation">[<a href="#ref-rintro" role="doc-biblioref">7</a>]</span>.</p>
+<ul>
+<li>R fait toujours la distinction entre les majuscules et les minuscules (il respecte la casse des caractères, comme il a déjà été mentionné).</li>
+<li>Dans un nombre réel, la décimale est représentée par un point et non par une virgule.</li>
+<li>Chaque commande doit se terminer par un retour de chariot ou un point-virgule (moins usuel).</li>
+<li>Une commande peut s’étaler sur plusieurs lignes.</li>
+<li>Il est possible de mettre plusieurs commandes sur une même ligne, à condition
+de séparer les commandes par des points-virgules.</li>
+<li>Les différents éléments d’une commande peuvent ou non être séparés par
+un ou plusieurs espaces. C’est uniquement une question de style.</li>
+<li>Le symbole <code>#</code> sert à insérer des commentaires dans un programme R. Sur une ligne, tout ce qui se trouve après un <code>#</code> est ignoré par R lors de l’exécution d’un programme.</li>
+</ul>
+<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb122-1"><a href="#cb122-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemple de ligne en commentaire, donc non exécutée</span></span>
+<span id="cb122-2"><a href="#cb122-2" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span>  <span class="co"># exemple de commentaire suivant une instruction</span></span></code></pre></div>
+</div>
+<div id="éditeurs-de-code-r" class="section level2" number="9.2">
+<h2><span class="header-section-number">9.2</span> Éditeurs de code R</h2>
+<p style="font-size:110%">
+<strong>Quel outil utiliser pour éditer un programme R?</strong>
+</p>
+<p>Un programme R s’édite dans une fenêtre séparée de la console. Le GUI de la version Windows de R possède un éditeur de code R minimaliste, qui s’ouvre par le menu « Fichier &gt; Nouveau script ». Par convention, l’<strong>extension <code>.R</code> ou <code>.r</code></strong> est donnée à un programme R. À partir de cet éditeur, le raccourci clavier <strong>Ctrl-R</strong> permet de soumettre dans la console des lignes de code de l’éditeur.</p>
+<p>Il existe cependant des outils bien plus performants que cet éditeur pour programmer en R. Plusieurs éditeurs de code R ou environnements intégrés de développement R (en anglais IDE pour Integrated Development Environment) sont offerts, notamment :</p>
+<ul>
+<li>RStudio (<a href="http://www.rstudio.com/" class="uri">http://www.rstudio.com/</a>),</li>
+<li>des extensions R pour Visual Studio Code (par exemple <a href="https://marketplace.visualstudio.com/items?itemName=Ikuyadeu.r" class="uri">https://marketplace.visualstudio.com/items?itemName=Ikuyadeu.r</a>)</li>
+<li>Emacs avec ESS (<a href="http://ess.r-project.org/" class="uri">http://ess.r-project.org/</a>),</li>
+<li>Eclipse avec StatET (<a href="https://eclipse.org/statet" class="uri">https://eclipse.org/statet</a>),</li>
+<li>Tinn-R (<a href="http://sourceforge.net/projects/tinn-r/" class="uri">http://sourceforge.net/projects/tinn-r/</a>),</li>
+<li>etc.</li>
+</ul>
+</div>
+</div>
+<div id="rstudio" class="section level1" number="10">
+<h1><span class="header-section-number">10</span> RStudio</h1>
+<p>RStudio est probablement le plus populaire de ces outils. Il s’agit d’un IDE déjà très complet et qui continue d’être activement développé. Une version gratuite du logiciel est offerte (<a href="https://www.rstudio.com/products/rstudio/download/" class="uri">https://www.rstudio.com/products/rstudio/download/</a>, version « Desktop, Open Source License »). Nous utiliserons RStudio dans ce cours.</p>
+<p>RStudio facilite le travail en R, par exemple grâce aux caractéristiques suivantes.</p>
+<div id="éditeur-de-code-r" class="section level2" number="10.1">
+<h2><span class="header-section-number">10.1</span> Éditeur de code R</h2>
+<p>L’éditeur de code R de RStudio est pourvu de plusieurs fonctionnalités, notamment :</p>
+<ul>
+<li><strong>coloration syntaxique</strong>;</li>
+<li><strong>complètement automatique</strong> (en anglais <em>autocompletion</em>);</li>
+<li><strong>fermeture automatique</strong> de parenthèses, crochets, accolades (potentiellement colorés selon leur niveau) et guillemets;</li>
+<li>création possible de <strong>sections</strong> (commentaires terminant par quatre tirets ou plus) et accès à un <strong><em>outline</em> permettant de se déplacer facilement entre les sections</strong>;</li>
+<li><strong>pliage de code</strong>;</li>
+<li><strong>configurable</strong> (beaucoup d’options dans le menu « Tools &gt; Global Options… &gt; Code »).</li>
+</ul>
+<p>La <a href="https://stt4230.rbind.io/introduction/installation_r_rstudio/#config">fiche sur l’installation de R</a> mentionne quelques configurations de RStudio qui pourraient vous intéresser.</p>
+<p style="font-size:110%">
+<strong>Détails concernant le complètement automatique (<em>autocompletion</em>) :</strong>
+</p>
+<p>RStudio peut compléter nos commandes pour nous. En cours de saisie d’une commande dans la console ou dans un script R, RStudio ouvre une petite fenêtre contenant des suggestions de suite à notre commande. Si cette fenêtre ne s’ouvre pas d’elle-même, la touche « Tab » devrait permettre de l’ouvrir. RStudio propose des suggestions de suite pour :</p>
+<ul>
+<li>les noms d’objets se trouvant dans un des environnements dans le chemin de recherche,</li>
+<li>les noms des éléments d’une liste ou les noms de colonnes d’un data frame après l’opérateur $,</li>
+<li>les arguments à ajouter à un appel de fonction,</li>
+<li>etc.</li>
+</ul>
+<p>Si vous n’aimez pas ce comportement, vous pouvez le configurer par le menu « Tools &gt; Global Options… &gt; Code &gt; Completion ».</p>
+<p style="font-size:110%">
+<strong>Détails concernant la fermeture automatique de parenthèses, guillemets et crochets :</strong>
+</p>
+<p>RStudio offre aussi de fermer les parenthèses, guillemets et crochets automatiquement. Ainsi, si nous ouvrons une parenthèse dans un programme ou dans la console, une parenthèse fermante est automatiquement ajoutée à la ligne de commande.</p>
+<p>Si vous n’aimez pas cette fonctionnalité, vous pouvez l’enlever par le menu « Tools &gt; Global Options… &gt; Code &gt; Editing », en décochant l’option « Insert matching parens/quotes ».</p>
+</div>
+<div id="sous-fenêtres" class="section level2" number="10.2">
+<h2><span class="header-section-number">10.2</span> Sous-fenêtres</h2>
+<p>La fenêtre principale de RStudio est divisée en sous-fenêtres, comprenant chacune potentiellement un choix de sous-fenêtres en onglets. La configuration par défaut propose les 4 sous-fenêtres suivantes :</p>
+<ul>
+<li>en haut à gauche : l’<strong>éditeur R</strong> (possibilité d’avoir plusieurs programmes ouverts, accessibles via des onglets);</li>
+<li>en bas à gauche : la <strong>console R</strong> (aussi une fenêtre <em>Terminal</em> et autres);</li>
+<li>en haut à droite : la visualisation du contenu des <strong>environnements</strong> chargés (aussi de l’historique des commandes et autres);</li>
+<li>en bas à droite : la visualisation de, notamment,
+<ul>
+<li>l’arborescence de <strong>fichiers</strong> (<em>Files</em>) sur votre ordinateur,</li>
+<li>les <strong>graphiques</strong> produits (<em>Plots</em>),</li>
+<li>les <strong>packages</strong> installés ,</li>
+<li>les fiches d’<strong>aide</strong> (<em>Help</em>).</li>
+</ul></li>
+</ul>
+</div>
+<div id="fonctionnalités-diverses" class="section level2" number="10.3">
+<h2><span class="header-section-number">10.3</span> Fonctionnalités diverses</h2>
+<p>Plusieurs autres fonctionnalités de RStudio permettent de travailler de façon plus productive, par exemples les suivantes :</p>
+<ul>
+<li>Possibilité de lancer certaines commandes à partir de menus, notamment :
+<ul>
+<li>des appels aux fonctions courantes telles que :
+<ul>
+<li><code>help</code> : en utilisant la barre de recherche de la sous-fenêtre <em>Help</em>,</li>
+<li><code>install.packages</code> : en utilisant le bouton <em>Install</em> de la sous-fenêtre <em>Packages</em>,</li>
+<li><code>setwd</code>: par le menu <em>Session</em> &gt; <em>Set Working Directory</em>;</li>
+</ul></li>
+<li>des commandes de construction de package par le menu <em>Build</em>;</li>
+</ul></li>
+<li>Nombreux raccourcis clavier (<a href="https://support.rstudio.com/hc/en-us/articles/200711853-Keyboard-Shortcuts" class="uri">https://support.rstudio.com/hc/en-us/articles/200711853-Keyboard-Shortcuts</a>), notamment :
+<ul>
+<li>les raccourcis usuels tels que :
+<ul>
+<li><strong>Ctrl-C</strong> / <strong>Ctrl-V</strong> pour effectuer un copier / coller,</li>
+<li><strong>Ctrl-Z</strong> pour annuler la dernière action,</li>
+<li><strong>Ctrl-S</strong> pour enregistrer le document courant,</li>
+<li>etc.;</li>
+</ul></li>
+<li><strong>Ctrl-Enter</strong> pour soumettre (dans la console) la ligne du programme source où le curseur se situe ou la sélection (dans l’éditeur);</li>
+<li><strong>Tab</strong> ou <strong>Ctrl+Space</strong> pour tenter un complètement automatique.</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="sources-dinformations" class="section level1" number="11">
+<h1><span class="header-section-number">11</span> Sources d’informations</h1>
+<p>Voici des sources d’informations sur l’utilisation de R et la programmation R. Cette liste n’est pas exhaustive. Les sources d’informations R sont très nombreuses!</p>
+<p><strong>Documentation de R</strong> : fiches d’aide des fonctions et manuels du R core team :</p>
+<ul>
+<li>accessible à partir de la console au cours d’une session R grâce aux fonctions <code>help.start</code>, <code>help</code> et <code>help.search</code>;</li>
+<li>accessible en ligne :
+<ul>
+<li><a href="http://stat.ethz.ch/R-manual/R-patched/doc/html/" class="uri">http://stat.ethz.ch/R-manual/R-patched/doc/html/</a></li>
+<li><a href="https://cran.r-project.org/manuals.html" class="uri">https://cran.r-project.org/manuals.html</a></li>
+<li><a href="http://www.r-project.org/" class="uri">http://www.r-project.org/</a> &gt; « Documentation » dans le menu de gauche.</li>
+</ul></li>
+</ul>
+<p><strong>Documentation de packages R</strong> qui ne se retrouvent pas dans l’installation de base :</p>
+<ul>
+<li>accessible à partir de la console au cours d’une session R lorsque les packages sont installés dans le chemin de recherche de la session grâce aux fonctions <code>help.start</code>, <code>help</code> et <code>help.search</code>;</li>
+<li>accessible en ligne :
+<ul>
+<li><a href="https://cran.r-project.org/web/packages/" class="uri">https://cran.r-project.org/web/packages/</a></li>
+<li><a href="http://bioconductor.org/packages" class="uri">http://bioconductor.org/packages</a></li>
+</ul></li>
+</ul>
+<p><strong>Outils de recherche dans la documentation de R et des packages sur le CRAN</strong> :</p>
+<ul>
+<li><a href="http://www.rdocumentation.org/" class="uri">http://www.rdocumentation.org/</a></li>
+<li><a href="http://rseek.org/" class="uri">http://rseek.org/</a></li>
+<li><a href="https://r-pkg.org/" class="uri">https://r-pkg.org/</a></li>
+<li><a href="https://rdrr.io/" class="uri">https://rdrr.io/</a></li>
+<li>package <code>pkgsearch</code>, pour effectuer des recherches dans la documentation des packages sur le CRAN à partir de la console R : <a href="https://r-hub.github.io/pkgsearch/index.html" class="uri">https://r-hub.github.io/pkgsearch/index.html</a></li>
+</ul>
+<p><strong>Documentation relative à RStudio</strong> :</p>
+<ul>
+<li><a href="https://rstudio.com/" class="uri">https://rstudio.com/</a></li>
+<li>support utilisateurs : <a href="https://support.rstudio.com/hc/en-us" class="uri">https://support.rstudio.com/hc/en-us</a></li>
+<li>feuille de triche : <a href="https://github.com/rstudio/cheatsheets/blob/master/rstudio-ide.pdf" class="uri">https://github.com/rstudio/cheatsheets/blob/master/rstudio-ide.pdf</a></li>
+</ul>
+<p><strong>Sites web à propos de R</strong> :</p>
+<ul>
+<li><a href="http://larmarange.github.io/analyse-R/" class="uri">http://larmarange.github.io/analyse-R/</a></li>
+<li><a href="http://www.statmethods.net/" class="uri">http://www.statmethods.net/</a></li>
+<li><a href="http://www.cookbook-r.com/" class="uri">http://www.cookbook-r.com/</a></li>
+<li><a href="http://www.r-graph-gallery.com/" class="uri">http://www.r-graph-gallery.com/</a></li>
+</ul>
+<p><strong>Exercices ou formations R</strong> :</p>
+<ul>
+<li><a href="http://r-exercises.com/" class="uri">http://r-exercises.com/</a></li>
+<li><a href="http://swirlstats.com" class="uri">http://swirlstats.com</a></li>
+<li><a href="http://swcarpentry.github.io/r-novice-inflammation/" class="uri">http://swcarpentry.github.io/r-novice-inflammation/</a></li>
+<li><a href="http://swcarpentry.github.io/r-novice-gapminder/" class="uri">http://swcarpentry.github.io/r-novice-gapminder/</a></li>
+<li><a href="https://www.udemy.com/course/r-basics/" class="uri">https://www.udemy.com/course/r-basics/</a></li>
+</ul>
+<p><strong>Outils sociaux de questions/réponses</strong> :</p>
+<ul>
+<li>StackOverflow (<a href="http://stackoverflow.com/questions/tagged/r" class="uri">http://stackoverflow.com/questions/tagged/r</a>),</li>
+<li>CrossValidated (<a href="http://stats.stackexchange.com/questions/tagged/r" class="uri">http://stats.stackexchange.com/questions/tagged/r</a>)</li>
+<li>la liste courriel R-help (<a href="https://stat.ethz.ch/mailman/listinfo/r-help" class="uri">https://stat.ethz.ch/mailman/listinfo/r-help</a>)</li>
+</ul>
+<p><strong>Outils pour suivre la communauté R</strong> :</p>
+<ul>
+<li><a href="http://www.r-bloggers.com/" class="uri">http://www.r-bloggers.com/</a></li>
+<li><a href="https://rweekly.org/" class="uri">https://rweekly.org/</a></li>
+<li>hashtag #rstats sur Twitter : <a href="https://twitter.com/hashtag/rstats" class="uri">https://twitter.com/hashtag/rstats</a></li>
+<li>le groupe « The R Project for Statistical Computing » sur LinkedIn : <a href="https://www.linkedin.com/groups/77616" class="uri">https://www.linkedin.com/groups/77616</a></li>
+</ul>
+<p><strong>Livres</strong></p>
+<p>Livres que j’utilise le plus :</p>
+<ul>
+<li>Matloff, N. (2011). <em>The art of R programming: A tour of statistical software design</em>. No Starch Press.</li>
+<li>Wickham, H. (2019). <em>Advanced R</em>. 2e édition. Chapman and Hall/CRC. URL <a href="https://adv-r.hadley.nz/" class="uri">https://adv-r.hadley.nz/</a>
+<ul>
+<li>Solutionnaire des exercices dans ce livre : <a href="https://advanced-r-solutions.rbind.io/" class="uri">https://advanced-r-solutions.rbind.io/</a></li>
+</ul></li>
+<li>Wickham, H. (2015). <em>R packages</em>. O’Reilly Media, Inc. URL de la 2e édition en développement (avec Bryan J.) <a href="http://r-pkgs.had.co.nz/" class="uri">http://r-pkgs.had.co.nz/</a></li>
+<li>Grolemund, G. et Wickham, H. (2016). <em>R for Data Science</em>. O’Reilly Media, Inc. URL <a href="http://r4ds.had.co.nz/" class="uri">http://r4ds.had.co.nz/</a></li>
+</ul>
+<p>Autres livres :</p>
+<ul>
+<li>Adler, J. (2010). <em>R in a nutshell: A desktop quick reference</em>. 2e édition. O’Reilly Media, Inc.</li>
+<li>Braun, W. J. et Murdoch, D. (2007). <em>A first Course in Statistical Programming with R</em>. Cambridge University Press.</li>
+<li>Chambers, J. M. (2016). <em>Extending R</em>. Chapman and Hall/CRC.</li>
+<li>Chambers, J. M. (2008). <em>Software for Data Analysis: Programming with R</em>. Springer.</li>
+<li>Cotton, R. (2013). <em>Learning R: A Step-by-Step Function Guide to Data Analysis</em>. O’Reilly Media.</li>
+<li>Davies, T. M. (2016). <em>The Book of R: A First Course in Programming and Statistics</em>. No Starch Press.</li>
+<li>Gillespie, C. et Lovelace, R. (2016). <em>Efficient R Programming: A Practical Guide to Smarter Programming</em>. O’Reilly Media, Inc. URL <a href="https://csgillespie.github.io/efficientR/" class="uri">https://csgillespie.github.io/efficientR/</a></li>
+<li>Gentleman, R. (2009). <em>R Programming for Bioinformatics</em>. Chapman and Hall/CRC.</li>
+<li>Grolemund, G. (2014). <em>Hands-on programming with R</em>. O’Reilly Media, Inc. URL <a href="https://rstudio-education.github.io/hopr/" class="uri">https://rstudio-education.github.io/hopr/</a></li>
+<li>Kabacoff, R. (2015). <em>R in action</em>. 2e édition. Manning Publications.</li>
+<li>Muenchen, R. A. (2011). <em>R for SAS and SPSS Users</em>. 2e édition. Springer.</li>
+<li>Teetor, P. (2011). <em>R Cookbook</em>. O’Reilly Media.</li>
+<li>Zumel, N. et Mount, J. (2014). <em>Practical Data Science with R</em>. Manning Publications Co. </li>
+<li>Zuur, A. F., Ieno, E. N. et Meesters, E. H.W.G. (2009). <em>A Beginner’s Guide to R</em>. Springer.</li>
+</ul>
+<p><strong>Notes de cours</strong></p>
+<p>Référence officielle pour les notes de ce cours :</p>
+<ul>
+<li>Baillargeon, S. (2020). <em>R pour scientifique : notes de cours, STT-4230/STT-6230</em>. Université Laval, Département de mathématiques et de statistique. URL <a href="https://stt4230.rbind.io/" class="uri">https://stt4230.rbind.io/</a></li>
+</ul>
+<p>Notes d’autres cours à propos de R</p>
+<ul>
+<li>Introduction à R et à la programmation informatique (en français) : Goulet, V. (2020). <em>Programmer avec R</em>. Université Laval, École d’actuariat. URL <a href="https://vigou3.gitlab.io/programmer-avec-r/" class="uri">https://vigou3.gitlab.io/programmer-avec-r/</a></li>
+<li>Manny Gimond (2020). <em>Exploratory Data Analysis in R</em>. Colby College. URL <a href="https://mgimond.github.io/ES218/" class="uri">https://mgimond.github.io/ES218/</a></li>
+<li>Bryan, J. (2020). <em>Data wrangling, exploration, and analysis with R</em>. University of British Columbia et RStudio. URL <a href="https://stat545.com/" class="uri">https://stat545.com/</a></li>
+</ul>
+<p>Encore plus : <a href="https://www.bigbookofr.com" class="uri">https://www.bigbookofr.com</a></p>
+</div>
+<div id="références" class="section level1 unnumbered">
+<h1>Références</h1>
+<p style="font-size:110%">
+<strong>Références citées dans le texte :</strong>
+</p>
+<div id="refs" class="references csl-bib-body">
+<div id="ref-make_names" class="csl-entry">
+<div class="csl-right-inline">[1] R Core Team. <em><span class="nocase">Fiche d’aide intitulée « <span>M</span>ake <span>S</span>yntactically <span>V</span>alid <span>N</span>ames »</span></em>. <span>R</span> base package version 4.0.3. URL <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/make.names.html">https://stat.ethz.ch/R-manual/R-patched/library/base/html/make.names.html</a></div>
+</div>
+<div id="ref-reserved" class="csl-entry">
+<div class="csl-right-inline">[2] R Core Team. <em><span class="nocase">Fiche d’aide intitulée « Reserved Words in R »</span></em>. <span>R</span> base package version 4.0.3. URL <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Reserved.html">https://stat.ethz.ch/R-manual/R-patched/library/base/html/Reserved.html</a></div>
+</div>
+<div id="ref-chartr" class="csl-entry">
+<div class="csl-right-inline">[3] R Core Team. <em><span class="nocase">Fiche d’aide intitulée « Character Translation and Casefolding »</span></em>. <span>R</span> base package version 4.0.3. URL <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/chartr.html">https://stat.ethz.ch/R-manual/R-patched/library/base/html/chartr.html</a></div>
+</div>
+<div id="ref-women" class="csl-entry">
+<div class="csl-right-inline">[4] R Core Team. <em><span class="nocase">Fiche d’aide intitulée « Average Heights and Weights for American Women »</span></em>. <span>R</span> datasets package version 4.0.3. URL <a href="https://stat.ethz.ch/R-manual/R-patched/library/datasets/html/women.html">https://stat.ethz.ch/R-manual/R-patched/library/datasets/html/women.html</a></div>
+</div>
+<div id="ref-c" class="csl-entry">
+<div class="csl-right-inline">[5] R Core Team. <em><span class="nocase">Fiche d’aide intitulée « Combine Values into a Vector or List »</span></em>. <span>R</span> base package version 4.0.3. URL <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/c.html">https://stat.ethz.ch/R-manual/R-patched/library/base/html/c.html</a></div>
+</div>
+<div id="ref-options" class="csl-entry">
+<div class="csl-right-inline">[6] R Core Team. <em><span class="nocase">Fiche d’aide intitulée « Options Settings »</span></em>. <span>R</span> base package version 4.0.3. URL <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/options.html">https://stat.ethz.ch/R-manual/R-patched/library/base/html/options.html</a></div>
+</div>
+<div id="ref-rintro" class="csl-entry">
+<div class="csl-right-inline">[7] R Core Team. (2020). <em><span class="nocase">An Introduction to R</span></em>. <span>R</span> version 4.0.3. URL <a href="https://cran.r-project.org/doc/manuals/r-release/R-intro.html">https://cran.r-project.org/doc/manuals/r-release/R-intro.html</a></div>
+</div>
+</div>
+<p style="font-size:110%">
+<strong>Référence supplémentaire :</strong>
+</p>
+<p>Référence officielle pour le logiciel R et sa documentation (retournée par la commande <code>citation()</code>) :</p>
+<p>R Core Team (2020). <em>R: A language and environment for statistical computing</em>. R Foundation for Statistical Computing, Vienna, Austria. URL <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a></p>
+</div>
