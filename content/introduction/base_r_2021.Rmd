@@ -1,7 +1,7 @@
 ---
 title: "Concepts de base en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2021-01-15"
+date: "2021-01-17"
 weight: 3
 slug: "base_r"
 lastmodifierdisplayname: "Sophie Baillargeon"
@@ -39,7 +39,7 @@ editor_options:
 
 # Introduction
 
-## R = une puissante calculatrice
+## Console R
 
 R est un langage interactif. La console de R est un peu comme une calculatrice.
 
@@ -48,6 +48,16 @@ R est un langage interactif. La console de R est un peu comme une calculatrice.
 2*5 + 1
 ```
 
+Dans les blocs de code précédents, l'invite de commande (en anglais *prompt*) de la console R n'est pas affichée. Elle ne sera jamais affichée dans ces notes, pour alléger la présentation. Par défaut dans la console R, l'invite de commande est le symbole `> `. Lorsque la dernière ligne de la console R débute par ce symbole, R est prêt à recevoir une commande. Le symbole `+ ` indique quant à lui que la dernière commande soumise dans la console est incomplète, comme dans cet exemple.
+
+```{r prompt = TRUE}
+1 + 3 -
+  2
+```
+
+Ici, il manque un terme dans l'opération sur la première ligne puisque l'opérateur de soustraction `-` n'est pas suivi d'une valeur. Les commandes incomplètes sont souvent dues à des parenthèses ou des guillemets non fermés.
+
+Dans ces notes, les blocs débutant par le symbole `##` seront toujours des sorties produites par R.
 
 
 ## Résultats en mémoire
@@ -68,7 +78,7 @@ a <- 1 + 1
 - `1 + 1` est l'expression générant le résultat à enregistrer, dans laquelle `1` est une valeur et `+` un [opérateur arithmétique](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Arithmetic.html);
 - `2` est la valeur contenue dans l'objet créé.
 
-Notons que `=` est aussi un opérateur d'assignation. Cet opérateur est utilisé en R pour assigner une valeur à un argument lors de l'appel d'une fonction. Cependant, pour l'assignation d'une valeur à un nom d'objet, la pratique la plus recommandée en programmation R est d'utiliser `<-` plutôt que `=`. La différence entre `<-` et `=` est abordée dans les [notes sur les bonnes pratiques](https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/#op%C3%A9rateur-dassignation).
+Notons que `=` est aussi un opérateur d'assignation. Cet opérateur est utilisé en R pour assigner une valeur à un argument lors de l'appel d'une fonction. Cependant, pour l'assignation d'une valeur à un nom d'objet, la pratique la plus recommandée en programmation R est d'utiliser `<-` plutôt que `=`. La différence entre `<-` et `=` sera abordée plus tard, dans les [notes sur les bonnes pratiques](https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/#op%C3%A9rateur-dassignation).
 
 
 ```{r, eval = FALSE, echo = FALSE}
@@ -123,6 +133,12 @@ mais pas&nbsp;:
 car les guillemets servent à créer des chaînes de caractères.
 
 De plus, il faut **respecter la casse** car R différencie les majuscules et les minuscules. Donc `A` n'est pas le même symbole que `a` en R.
+
+
+\vspace{6pt}
+<p style="font-size:110%">
+**Remarque&nbsp;:**
+</p>
 
 Soumettre une commande R contenant uniquement le nom d'un objet est équivalent à soumettre un appel à la fonction `print` en fournissant cet objet comme premier argument. Ainsi, les commandes suivantes sont équivalentes&nbsp;:
 
@@ -180,17 +196,16 @@ options(max.print = op.default$max.print)
 </p>
 
 Il s'agit principalement de fonctions et de jeux de données. Par exemple l'environnement du package `base` contient la fonction suivante&nbsp;:
-
 ```{r}
 casefold
 ```
-Cette fonction sert à convertir la casse de caractères alphabétiques dans une ou plusieurs chaînes de caractères, réunies dans un vecteur [@chartr]. La casse d'un caractère alphabétique, soit d'une lettre, est sa forme majuscule (capitale) ou minuscule. En anglais, les majuscules sont appelées *upper case characters* et les minuscules *lower case characters*.
+La [fonction `casefold`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/chartr.html) sert à convertir la casse de caractères alphabétiques dans une ou plusieurs chaînes de caractères, réunies dans un vecteur. Elle permet donc de convertir des lettres majuscules (en anglais *upper case characters*) en lettres minuscules (en anglais *lower case characters*) et vice versa.
 
 L'environnement du package `base` contient aussi le jeu de données suivant&nbsp;:
 ```{r}
 women
 ```
-Il s'agit de valeurs moyennes de grandeur et de poids, calculées en 1975, pour des femmes américaines âgées entre 30 et 39 ans[@women].  
+L'[objet `women`](https://stat.ethz.ch/R-manual/R-patched/library/datasets/html/women.html) contient des valeurs moyennes de grandeur et de poids, calculées en 1975, pour des femmes américaines âgées entre 30 et 39 ans.  
 
 
 \vspace{6pt}
@@ -214,7 +229,7 @@ Ainsi, si l'objet est de grande taille, vous ne surchargerez pas la console en a
 **Qu'est-ce qu'une fonction R?**
 </p>
 
-Une fonction R est, comme dans tout langage informatique, un bout de code qui produit un certain résultat lorsqu'exécuté. Pour exécuter le code composant une fonction, celle-ci doit être *appelée*. Lorsqu'elle est appelée, la fonction prend des valeurs en entrée, qui sont assignées à des *arguments*. Le code de la fonction réfère à ces arguments de façon à ce que l'appel de la fonction provoque un traitement des valeurs fournies en entrée. En bout de ligne, la fonction génère un résultat, qui est la plupart du temps *retourné* dans un objet en sortie. Ce résultat peut aussi être un [*effet de bord*](https://fr.wikipedia.org/wiki/Effet_de_bord_(informatique)) tel que la production d'un graphique, l'écriture dans un fichier externe, la modification d'un paramètre de la session R, etc.
+Une fonction R est, comme dans tout langage informatique, un bout de code qui produit un certain résultat lorsqu'exécuté. Pour exécuter le code composant une fonction, celle-ci doit être *appelée*. Lorsqu'elle est appelée, la fonction prend des valeurs en entrée, qui sont assignées à des *arguments*. Le code de la fonction réfère à ces arguments de façon à ce que l'appel de la fonction provoque un traitement des valeurs fournies en entrée. En fin de compte, la fonction génère un résultat, qui est la plupart du temps *retourné* dans un objet en sortie. Ce résultat peut aussi être un [*effet de bord*](https://fr.wikipedia.org/wiki/Effet_de_bord_(informatique)) tel que la production d'un graphique, l'écriture dans un fichier externe, la modification d'un paramètre de la session R, etc.
 
 
 ```{r echo = FALSE, out.width = "80%", fig.pos = 'h', fig.align = 'center', fig.cap = "Représentation schématique de l'exécution d'un appel à une fonction R"}
@@ -302,7 +317,7 @@ casefold()
 
 \vspace{6pt}
 <p style="font-size:110%">
-**Comment sont interprétées les valeurs passées en entrée sans être assignée à un argument?**
+**Comment sont interprétées les valeurs passées en entrée sans être assignées à un argument?**
 </p>
 
 Si une valeur est passée en entrée sans être explicitement assignée à un argument, elle est par défaut assignée au premier argument non spécifié, en respectant l'ordre des arguments dans la définition de la fonction. Voici quelques exemples et les résultats obtenus.
@@ -334,8 +349,8 @@ casefold(FALSE, x = c("Bonjour", "à", "tous!"))
 
 Si la valeur `c("Bonjour", "à", "tous!")` est explicitement assignée à l'argument `x`, la valeur `FALSE` est implicitement assignée à `upper`, même si elle est fournie en première position, car les assignations explicites ont préséance sur les assignations implicites.
 
+&nbsp;
 
-\vspace{6pt}
 <p style="font-size:110%">
 **Astuce&nbsp;:**
 </p>
@@ -364,13 +379,13 @@ sqrt(c(3, 6, 2, 6))
 
 ## L'argument `...` et ses deux utilités.
 
-Certaines fonctions R possèdent un argument nommé  «&nbsp;`...`&nbsp;». C'est le cas par exemple de la fonction `c` utilisée précédemment, qui sert à combiner des valeurs dans un vecteur ou une liste [@c].
+Certaines fonctions R possèdent un argument nommé  «&nbsp;`...`&nbsp;». C'est le cas par exemple de la [fonction `c`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/c.html) utilisée précédemment, qui sert à combiner des valeurs dans un vecteur ou une liste.
 
 ```{r}
 args(c)
 ```
 
-C'est aussi le cas de la fonction `apply`, servant à appliquer un calcul sur des sous-sections d'un objet.
+C'est aussi le cas de la [fonction `apply`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/apply.html), servant à appliquer un calcul sur des sous-sections d'un objet.
 
 ```{r}
 args(apply)
@@ -449,13 +464,13 @@ L'objet `weight ~ height` est une formule.
 str(weight ~ height)
 ```
 
-La partie de gauche de la formule (à gaude du `~`) contient la ou, plus rarement, les noms des variables réponse. La partie de droite contient pour sa part le ou les noms des variables explicatives. Ces noms sont accompagnés, au besoin, d'opérateurs et de fonctions pour désigner comment former les termes du modèle à partir des variables explicatives. Par exemple, voici la formule à utiliser dans l'appel à la fonction `lm` pour effectuer une régression polynomiale de degré deux avec les données `women`.
+La partie de gauche de la formule (à gauche du `~`) contient le ou, plus rarement, les noms des variables réponse. La partie de droite contient pour sa part le ou les noms des variables explicatives. Ces noms sont accompagnés, au besoin, d'opérateurs et de fonctions pour désigner comment former les termes du modèle à partir des variables explicatives. Par exemple, voici la formule à utiliser dans l'appel à la fonction `lm` pour effectuer une régression polynomiale de degré deux avec les données `women`.
 
 ```{r}
 reg_poly <- lm(weight ~ height + I(height^2), data = women)
 ```
 
-L'écriture de formule sera abordées dans les [notes sur les calculs en R](https://stt4230.rbind.io/calculs/calculs_stat_math_r/#ajustement-de-mod%C3%A8les). 
+L'écriture de formule sera abordée dans les [notes sur les calculs en R](https://stt4230.rbind.io/calculs/calculs_stat_math_r/#ajustement-de-mod%C3%A8les). 
 
 \vspace{6pt}
 <p style="font-size:110%">
@@ -726,7 +741,7 @@ Je recommande de ne jamais accepter l'enregistrement d'une image de la session �
 **Comment connaître et modifier les paramètres d'une session R?**
 </p>
 
-Une session R comporte un certain nombre de paramètres nommés options. La fonction R `options` permet de connaître les paramètres d'une session en cours, ainsi que de les modifier. Il faut d'abord aller voir la fiche d'aide de la fonction (ouverte par la commande `help(options)` [@options]), pour obtenir de l'information sur ces paramètres.
+Une session R comporte un certain nombre de paramètres nommés options. La fonction R `options` permet de connaître les paramètres d'une session en cours, ainsi que de les modifier. Il faut d'abord aller voir la fiche d'aide de la fonction (ouverte par la [commande `help(options)`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/options.html)), pour obtenir de l'information sur ces paramètres.
 
 Par exemple, la façon dont les nombres sont affichés dans la console est notamment contrôlée par les options `digits` et `scipen`. Ces options prennent par défaut les valeurs suivantes.
 
@@ -739,6 +754,11 @@ optionsDefaut <- options()
 optionsDefaut$digits
 optionsDefaut$scipen
 ```
+
+\vspace{6pt}
+<p style="font-size:110%">
+**Option `digits`&nbsp;: contrôle du nombre maximal de chiffres affichés**
+</p>
 
 L’option `digits` représente le nombre maximal de chiffres affichés, par exemple&nbsp;:
 ```{r}
@@ -753,6 +773,11 @@ Pour toute nouvelle session R démarrée, la valeur par défaut de `digits` reto
 ```{r}
 options(digits = optionsDefaut$digits)
 ```
+
+\vspace{6pt}
+<p style="font-size:110%">
+**Option `digits`&nbsp;: contrôle de l'affichage en format scientifique**
+</p>
 
 L’option `scipen` contrôle pour sa part l'affichage en format scientifique. R affiche les très grands nombres dans ce format. Par exemple, par défaut
 ```{r}
@@ -820,7 +845,7 @@ En R, les chemins d'accès contenant le caractère `\` ne sont pas acceptés. Ce
 
 Retrouver des commandes spécifiques dans un ancien historique peut être difficile. Une meilleure méthode de travail que de travailler directement dans la console R consiste à rédiger des *programmes R*, aussi appelés *scripts R*. Les programmes facilitent la réutilisation du code. Ils sont composés d'une série d'instructions.
 
-Faire rouler un ancien programme recrée tous les objets produits par les instructions dans le programme (ce qui remplace une image de session). Si le code de création de certains objets est long à exécuter, ces objets peuvent être enregistrés dans un fichier externe lors de leur création d'origine. Ensuite, pour utiliser ces objets, il suffit de les charger dans une session R (au lieu de faire rouler de nouveau le code pour les créer). Nous verrons comment faire ça lors d'[un prochain cours](https://stt4230.rbind.io/manipulation_donnees/lecture_ecriture_r/).
+Faire rouler un ancien programme recrée tous les objets produits par les instructions dans le programme (ce qui remplace une image de session). Si le code de création de certains objets est long à exécuter, ces objets peuvent être enregistrés dans un fichier externe lors de leur création d'origine. Ensuite, pour utiliser ces objets, il suffit de les charger dans une session R (au lieu de faire rouler de nouveau le code pour les créer). Nous verrons comment faire ça dans les [notes traitant de lecture et d'écriture dans des fichiers à partir de R](https://stt4230.rbind.io/manipulation_donnees/lecture_ecriture_r/).
 
 
 ## Règles de syntaxe
@@ -831,7 +856,7 @@ Faire rouler un ancien programme recrée tous les objets produits par les instru
 
 Lors de l'écriture d'un programme R, il y a quelques règles de syntaxe à respecter. En plus des [règles concernant les choix de noms d'objets](#noms) énumérées précédemment, voici les règles syntaxiques de base du langage R [@rintro].
 
-- R fait toujours la distinction entre les majuscules et les minuscules (il respecte la casse des caractères, comme il a déjà été mentionné).
+- R respecte la casse des caractères (il fait toujours la distinction entre les majuscules et les minuscules, comme il a déjà été mentionné).
 - Dans un nombre réel, la décimale est représentée par un point et non par une virgule.
 - Chaque commande doit se terminer par un retour de chariot ou un point-virgule (moins usuel).
 - Une commande peut s'étaler sur plusieurs lignes.
@@ -925,7 +950,7 @@ La fenêtre principale de RStudio est divisée en sous-fenêtres, comprenant cha
 
 ## Fonctionnalités diverses
 
-Plusieurs autres fonctionnalités de RStudio permettent de travailler de façon plus productive, par exemples les suivantes&nbsp;:
+Plusieurs autres fonctionnalités de RStudio permettent de travailler de façon plus productive, par exemple les suivantes&nbsp;:
 
 - Possibilité de lancer certaines commandes à partir de menus, notamment&nbsp;:
     + des appels aux fonctions courantes telles que&nbsp;:
@@ -1060,11 +1085,16 @@ Encore plus : https://www.bigbookofr.com
 
 # Références {-}
 
+**Remarque** : Le texte de ces notes contient aussi quelques hyperliens vers des pages web permettant au lecteur de facilement obtenir plus d'information. Tout texte en bleu (en dehors de blocs de code) est un hyperlien.
+
+
+\vspace{6pt}
 <p style="font-size:110%">
 **Références citées dans le texte&nbsp;:**
 </p>
 
 <div id="refs"></div> 
+
 
 \vspace{6pt}
 <p style="font-size:110%">
