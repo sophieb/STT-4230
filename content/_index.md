@@ -26,7 +26,7 @@ Le reste du matériel de cours (exercices, tutoriels, exemples supplémentaires,
     * [Installation de R et RStudio]({{< relref "introduction/installation_r_2021.html" >}})
     * [Concepts de base en R]({{< relref "introduction/base_r_2021.html" >}})
 * Manipulation de données en R
-    * [Structures de données en R]({{< relref "manipulation_donnees/structures_donnees_r_2020.html" >}})
+    * [Structures de données en R]({{< relref "manipulation_donnees/structures_donnees_r_2021.html" >}})
     * [Lecture et écriture dans des fichiers externes à partir de R]({{< relref "manipulation_donnees/lecture_ecriture_r_2020.html" >}})
     * [Prétraitement de données en R]({{< relref "manipulation_donnees/pretraitement_donnees_r_2020.html" >}})
 * Calculs en R

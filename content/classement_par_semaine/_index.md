@@ -11,7 +11,7 @@ weight = 9
     * [Installation de R et RStudio]({{< relref "introduction/installation_r_2021.html" >}})
 * Semaine 2
     * [Concepts de base en R]({{< relref "introduction/base_r_2021.html" >}})
-    * [Structures de données en R]({{< relref "manipulation_donnees/structures_donnees_r_2020.html" >}})
+    * [Structures de données en R]({{< relref "manipulation_donnees/structures_donnees_r_2021.html" >}})
     * [Lecture et écriture dans des fichiers externes à partir de R]({{< relref "manipulation_donnees/lecture_ecriture_r_2020.html" >}})
 * Semaine 3
     * [Calculs mathématiques en R]
