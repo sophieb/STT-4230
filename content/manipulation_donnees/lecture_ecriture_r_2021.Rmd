@@ -2,37 +2,46 @@
 title: "Lecture et écriture dans des fichiers externes à partir de R"
 linkTitle: "Lecture/écriture dans fichiers en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2020-01-13"
+date: "2021-01-18"
 weight: 2
 slug: "lecture_ecriture_r"
-categories: ["cours_2020-01-21"]
-categories_weight: 2
-lastmodifierdisplayname : "Sophie Baillargeon"
+lastmodifierdisplayname: "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
 output:
   pdf_document: 
     highlight: tango
     toc: yes
     toc_depth: 3
+    number_sections: yes
   blogdown::html_page:
     highlight: tango
     toc: yes
     toc_depth: 3
+    number_sections: yes
 header-includes:
 - \usepackage{float}
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
 - \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
-- \renewcommand{\linethickness}{0.05em}
 editor_options: 
   chunk_output_type: console
 ---
+
+```{r, setup, include = FALSE}
+knitr::opts_knit$set(root.dir = "./files")
+knitr::opts_chunk$set(R.options = list(width = 85))
+```
+
+
+***
+
+*Note préliminaire : Lors de leur dernière mise à jour, ces notes ont été révisées en utilisant R version 4.0.3, le package `readr` version 1.4.0, le package `data.table` version 1.13.6, le package `jsonlite` version 1.7.2,  le package `readxl` version 1.3.1,  le package `rvest` version 0.3.6 et  le package `openxlsx` version 4.2.3. Pour d'autres versions, les informations peuvent différer.*
 
 ***
 
 Maintenant que les objets R pouvant servir de structure de données ont été vus, voyons comment lire et écrire dans des fichiers externes à partir de R. Dans un cadre d'analyse de données, lire et écrire dans des fichiers permet d'importer et d'exporter des données. Nous traiterons ici seulement du cas pour lequel l'importation ou l'exportation consiste à lire ou écrire dans un fichier externe de format texte, JSON, EXCEL, HTML ou dans un format propre à R.
 
-Pour apprendre comment lire ou écrire des données stockées dans une base de données, le lecteur est référé à la documentation d'un package permettant de communiquer avec la base de données qu'il utilise. La page web suivante répertorie plusieurs de ces packages : https://CRAN.R-project.org/view=Databases.
+Pour apprendre comment lire ou écrire des données stockées dans une base de données, le lecteur est référé à la documentation d'un package permettant de communiquer avec la base de données qu'il utilise. La page web suivante répertorie plusieurs de ces packages&nbsp;: https://CRAN.R-project.org/view=Databases.
 
 
 # Répertoire de travail
@@ -41,44 +50,44 @@ Avant toute chose, revenons sur le répertoire de travail (ou répertoire couran
 
 Dans toute commande R effectuant une lecture ou de l'écriture dans un fichier, il faut identifier le fichier. Il peut être identifié en utilisant son chemin d'accès complet, ou encore en utilisant un chemin d'accès relatif à un emplacement courant. Peu importe l'option choisie, le chemin doit se terminer par le nom complet du fichier, incluant son extension.
 
-Par exemple, supposons que le fichier `dataEx.txt` se trouve dans le répertoire `C:\coursR` de l'ordinateur d'un utilisateur de R sous Windows. Le chemin d'accès complet de ce fichier est `C:\coursR\dataEx.txt`. Le chemin d'accès du fichier relatif au répertoire `C:\coursR` est pour sa part simplement le nom du fichier, soit `dataEx.txt`.
+Par exemple, supposons que le fichier `data_ex.txt` se trouve dans le répertoire `C:\coursR` de l'ordinateur d'un utilisateur de R sous Windows. Le chemin d'accès complet de ce fichier est `C:\coursR\data_ex.txt`. Le chemin d'accès du fichier relatif au répertoire `C:\coursR` est pour sa part simplement le nom du fichier, soit `data_ex.txt`.
 
-**Remarque importante** : Bien que le caractère utilisé pour séparer les composantes dans un chemin d'accès sous Windows soit `\`, ce caractère est réservé en R pour les «&nbsp;séquences d'échappement&nbsp;». Il s'agit de séquences ayant une signification particulière dans une chaîne de caractères (par exemple `"\t"` représente une tabulation, `"\n"` représente un retour de chariot, etc.). Dans un chemin d'accès en R, il faut plutôt séparer les composantes par le caractère `/`, ou encore par `\\`.
+**Remarque importante**&nbsp;: Bien que le caractère utilisé pour séparer les composantes dans un chemin d'accès sous Windows soit `\`, ce caractère est réservé en R pour les «&nbsp;séquences d'échappement&nbsp;». Il s'agit de séquences ayant une signification particulière dans une chaîne de caractères (par exemple `"\t"` représente une tabulation, `"\n"` représente un retour de chariot, etc.). Dans un chemin d'accès en R, il faut plutôt séparer les composantes par le caractère `/`, ou encore par `\\`.
 
 Lorsqu'un fichier est identifié par un chemin relatif dans une instruction, R doit faire une supposition quant au répertoire à partir duquel chercher le fichier. C'est justement l'utilité du répertoire de travail. Il s'agit de l'emplacement de base, celui à partir duquel débuter un chemin d'accès à un fichier lorsque le début du chemin n'est pas spécifié par l'utilisateur. 
 
-Pour connaître le répertoire de travail d'une session R, il suffit de soumettre la commande suivante :
+Pour connaître le répertoire de travail d'une session R, il suffit de soumettre la commande suivante&nbsp;:
 
 ```{r eval = FALSE}
 getwd()
 ```
 
-Pour accéder au fichier `dataEx.txt` en utilisant seulement son nom, il faut d'abord s'assurer que le répertoire de travail de la session R correspond au répertoire contenant le fichier. La fonction `setwd` permet de modifier le répertoire de travail. Par exemple, la commande suivante change le répertoire de travail pour `C:\coursR`.
+Pour accéder au fichier `data_ex.txt` en utilisant seulement son nom, il faut d'abord s'assurer que le répertoire de travail de la session R correspond au répertoire contenant le fichier. La fonction `setwd` permet de modifier le répertoire de travail. Par exemple, la commande suivante change le répertoire de travail pour `C:\coursR`.
 
 ```{r eval = FALSE}
 setwd("C:/coursR")
 ```
 
-Dans une commande R, un chemin d'accès doit toujours être présenté sous forme de chaîne de caractères, donc ête encadré de guillemets.
+Dans une commande R, un chemin d'accès doit toujours être présenté sous forme de chaîne de caractères, donc être encadré de guillemets.
 
-Si le répertoire de travail avait été fixé à  `"C:"`, le chemin d'accès relatif du fichier aurait été `"/coursR/dataEx.txt"` (le `"/"` au début du chemin indique que `coursR` est un répertoire et non un fichier).
+Si le répertoire de travail avait été fixé à  `"C:"`, le chemin d'accès relatif du fichier aurait été `"/coursR/data_ex.txt"` (le `"/"` au début du chemin indique que `coursR` est un répertoire et non un fichier).
 
 
-## Accéder au système de fichiers de notre ordinateur à partir de R
+## Accéder au système de fichiers
 
-Ainsi, R a accès au système de fichiers de l'ordinateur à partir duquel la session a été démarrée. Par défaut, l'accès se fait à partir du répertoire de travail. Directement dans la console R, il est possible de voir le contenu du répertoire de travail, créer des fichiers et des répertoires, effacer des fichiers, etc. Par exemple, la fonction `dir` permet d'afficher le contenu d'un répertoire (par défaut le répertoire de travail). Pour plus d'information à ce propos, la fiche d'aide nommée `files` (ouverte avec la commande [`help(files)`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/files.html)) est un bon point de départ.
+R a donc accès au système de fichiers de l'ordinateur à partir duquel la session a été démarrée. Par défaut, l'accès se fait à partir du répertoire de travail. Directement dans la console R, il est possible de voir le contenu du répertoire de travail, créer des fichiers et des répertoires, effacer des fichiers, etc. Par exemple, la fonction `dir` permet d'afficher le contenu d'un répertoire (par défaut le répertoire de travail). Pour plus d'information à ce propos, la fiche d'aide nommée `files` (ouverte avec la commande [`help(files)`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/files.html)) est un bon point de départ.
 
 ```{r, eval = FALSE}
 dir()
 ```
 
 ```{r, echo = FALSE}
-c("dataEx.csv", "dataEx.json", "dataEx.txt", "dataEx.xlsx")
+c("data_ex.csv", "data_ex.json", "data_ex.txt", "data_ex.xlsx")
 ```
 
-Note : Tous les fichiers de la liste ci-dessus sont disponibles dans le fichier `lecture_ecriture_r_2020.zip` afin de vous permettre de reproduire les exemples de ces notes de cours.
+Note&nbsp;: Tous les fichiers de la liste ci-dessus sont disponibles dans le fichier `lecture_ecriture_r_2020.zip` afin de vous permettre de reproduire les exemples de ces notes de cours.
 
-Un bon truc pour trouver facilement le nom complet d'un fichier, qui respecte la syntaxe de R, est d'utiliser la commande suivante :
+Un bon truc pour trouver facilement le nom complet d'un fichier, qui respecte la syntaxe de R, est d'utiliser la commande suivante&nbsp;:
 
 ```{r, eval = FALSE}
 file.choose()
@@ -91,7 +100,7 @@ Cette commande ouvre une fenêtre pour naviguer dans le système de fichiers et 
 
 Il est souvent judicieux de rassembler sous un même répertoire un programme R et tous les fichiers qu'il utilise. Les fichiers de données peuvent même être placés dans un sous-répertoire, surtout s'ils sont nombreux. 
 
-RStudio offre l'option de transformer un répertoire qui rassemble un ou des programmes R et leurs fichiers associés en « projet ». Des explications à propos de l'utilisation de projets RStudio se trouvent sur la page web suivante : https://support.rstudio.com/hc/en-us/articles/200526207-Using-Projects.
+RStudio offre l'option de transformer un répertoire qui rassemble un ou des programmes R et leurs fichiers associés en «&nbsp;projet&nbsp;». Des explications à propos de l'utilisation de projets RStudio se trouvent sur la page web suivante&nbsp;: https://support.rstudio.com/hc/en-us/articles/200526207-Using-Projects.
 
 Les projets RStudio facilitent la gestion du répertoire de travail. En ouvrant un projet RStudio, une nouvelle session R est démarrée ayant pour répertoire de travail le répertoire de base du projet.
 
@@ -102,29 +111,29 @@ Les projets RStudio facilitent la gestion du répertoire de travail. En ouvrant 
 
 # Lecture de fichiers 
 
-Une analyse de données en R débute typiquement par l'importation de données. Les données à importer en R peuvent provenir de toutes sortes de sources. Elles peuvent se trouver dans des fichiers sous un certain format, dans des bases de données, ou provenir directement du web. En outre, il existe plusieurs formats de fichiers pour stocker des données : texte (dont CSV), JSON, EXCEL, formats propres à un logiciel statistique particulier, etc. Nous aborderons ici uniquement les formats texte, CSV, JSON, EXCEL, ainsi que les formats propres à R (vus plus loin). La lecture de table HTML sur le web sera aussi introduite. Pour en savoir plus sur les autres possibilités, des références sont fournies en fin de document.
+Une analyse de données en R débute typiquement par l'importation de données. Les données à importer en R peuvent provenir de toutes sortes de sources. Elles peuvent se trouver dans des fichiers sous un certain format, dans des bases de données, ou provenir directement du web. En outre, il existe plusieurs formats de fichiers pour stocker des données&nbsp;: texte (dont CSV), JSON, EXCEL, formats propres à un logiciel statistique particulier, etc. Nous aborderons ici uniquement les formats texte, CSV, JSON, EXCEL, ainsi que les formats propres à R (vus plus loin). La lecture de table HTML sur le web sera aussi introduite. Pour en savoir plus sur les autres possibilités, des références sont fournies en fin de document.
 
 Les fonctions de base en R pour lire dans des fichiers externes sont `scan` et `readLines`. Nous ne verrons pas comment utiliser ces fonctions, car il existe des fonctions mieux adapter à la lecture de fichiers contenant des données à analyser.
 
 Les données du data frame suivant seront utilisées dans les exemples. Il s'agit de données créées dans les notes sur les [structures de données en R](https://stt4230.rbind.io/manipulation_donnees/structures_r/), dans lesquelles deux valeurs ont été remplacées par des valeurs manquantes. Ces données se rapportent à une expérience fictive de lancers de dés.
 
 ```{r}
-de1 <- c(2, 3, 4, 1, 2, 3, 5, 6, 5, 4)
-de2 <- c(1, 4, 2, 3, 5, 4, 6, 2, 5, 3)
+de_1 <- c(2, 3, 4, 1, 2, 3, 5, 6, 5, 4)
+de_2 <- c(1, 4, 2, 3, 5, 4, 6, 2, 5, 3)
 lanceur <- rep(c("Luc", "Kim"), each = 5)
-dataEx <- data.frame(de1, de2, lanceur)
+data_ex <- data.frame(de1 = de_1, de2 = de_2, lanceur = lanceur)
 # Introduction de valeurs manquantes
-dataEx$de2[7] <- NA
-dataEx$lanceur[3] <- NA
+data_ex$de2[7] <- NA
+data_ex$lanceur[3] <- NA
 # Affichage du date frame
-dataEx
+data_ex
 ```
 
-Avant de lire en R un fichier de données, il est utile de d'abord le visualiser afin de connaître la façon dont les données sont formatées. Cependant, il est important de ne pas modifier le fichier en le visulisant. Pour être absolument certain(e) de ne pas modifier le fichier par inadvertance, une bonne pratique est de faire une copie du fichier et de visualiser cette copie plutôt que le fichier lu en R.
+Avant de lire en R un fichier de données, il est utile de d'abord le visualiser afin de connaître la façon dont les données sont formatées. Cependant, il est important de ne pas modifier le fichier en le visualisant. Pour être absolument certain(e) de ne pas modifier le fichier par inadvertance, une bonne pratique est de faire une copie du fichier et de visualiser cette copie plutôt que le fichier lu en R.
 
-## Importation de données à partir d'un fichier texte
+## Fichier texte
 
-La lecture de données dans un fichier texte se fait principalement avec la fonction R `read.table`. Par exemple, allons lire les données contenues dans le fichier `dataEx.txt`, qui a l'allure suivante.
+La lecture de données dans un fichier texte se fait principalement avec la fonction R `read.table`. Par exemple, allons lire les données contenues dans le fichier `data_ex.txt`, qui a l'allure suivante.
 
 ```
 de1	de2	lanceur
@@ -143,7 +152,7 @@ de1	de2	lanceur
 Remarquons que les valeurs manquantes dans ce fichier sont représentées par des points. Importons ces données avec `read.table`.
 
 ```{r importTexte}
-dataEx_txt <- read.table("C:/coursR/dataEx.txt")
+data_ex_txt <- read.table("C:/coursR/data_ex.txt")
 ```
 
 Le seul argument obligatoire dans la fonction `read.table` est le chemin d'accès au fichier à lire. Ici, il n'aurait pas été nécessaire de spécifier le chemin d'accès complet du fichier puisque ce fichier se trouve dans le répertoire de travail de la session R. Dans tous les exemples suivants, seul le nom du fichier sera fourni. 
@@ -151,8 +160,8 @@ Le seul argument obligatoire dans la fonction `read.table` est le chemin d'accè
 Les autres arguments de la fonction `read.table` doivent être adaptés selon le formatage du fichier à lire (voir la [fiche d'aide de la fonction `read.table`](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html)). Dans l'exemple ci-dessus, est-ce que toutes les valeurs par défaut des arguments convenaient vraiment? Jetons un coup d'oeil à l'objet obtenu.
 
 ```{r}
-dataEx_txt
-str(dataEx_txt)
+data_ex_txt
+str(data_ex_txt)
 ```
 
 Il s'agit d'un data frame. La fonction `read.table` retourne toujours un objet de ce type. 
@@ -160,41 +169,25 @@ Il s'agit d'un data frame. La fonction `read.table` retourne toujours un objet d
 Nous pouvons tout de suite remarquer un problème avec ce data frame. Le nom des variables a été interprété comme une observation. Il faudrait utiliser l'argument `header` pour indiquer que la première ligne du fichier contient les noms des variables. 
 
 ```{r}
-dataEx_txt <- read.table("dataEx.txt", header = TRUE)
-str(dataEx_txt)
+data_ex_txt <- read.table("data_ex.txt", header = TRUE)
+str(data_ex_txt)
 ```
 
 La première variable, `de1`, a été correctement lu, mais il y a un problème avec la deuxième variable, `de2`. Elle est un facteur. Nous souhaitons considérer cette variable numérique et non catégorique (il s'agit du résultat d'un lancer de dé). Afin de pouvoir faire des calculs numériques sur cette variable, elle doit être stockée dans un vecteur (= colonne du data frame) de valeurs numériques. R a cru que les valeurs dans cette colonne étaient de type caractère à cause de la valeur manquante représentée par un point. L'argument `na.strings` de `read.table` indique à R les chaînes de caractères à interpréter comme des valeurs manquantes. Par défaut, `na.strings` prend la valeur `"NA"`. Il faut donc changer la valeur de cet argument comme suit.
 
 ```{r}
-dataEx_txt <- read.table("dataEx.txt", header = TRUE, na.strings = ".")
-str(dataEx_txt)
+data_ex_txt <- read.table("data_ex.txt", header = TRUE, na.strings = ".")
+str(data_ex_txt)
 ```
 
-Nous avons réglé le problème de lecture de la deuxième colonne. Attardons-nous maintenant à la dernière colonne. Elle est enregistrée dans un facteur à 2 niveaux. C'est potentiellement ce que nous voulons. Par défaut, `read.table` transforme toutes les colonnes contenant des valeurs caractères en facteur (comme le fait la fonction `data.frame`). Pour obtenir plutôt un vecteur de chaînes de caractères, il faut modifier la valeur de l'argument `stringsAsFactors` comme suit.
+Nous avons réglé le problème de lecture de la deuxième colonne. Attardons-nous maintenant à la dernière colonne. Elle est enregistrée dans un vecteur de chaînes de caractères. Si nous avions préféré que `read.table` transforme les colonnes contenant des valeurs caractères en facteur, il aurait fallu assigner la valeur `TRUE` à l'argument `stringsAsFactors`. Avant sa version 4.0.0, R avait ce comportement par défaut. Le nouveau comportement par défaut est cependant bien ce que nous désirons ici.
 
-```{r}
-dataEx_txt <- read.table("dataEx.txt", header = TRUE, na.strings = ".", 
-                         stringsAsFactors = FALSE)
-str(dataEx_txt)
-
-```
-
-Nous aurions aussi pu utiliser l'argument `colClasses` pour spécifier le type de données dans chacune des colonnes.
-
-```{r}
-dataEx_txt <- read.table("dataEx.txt", header = TRUE, na.strings = ".",
-                         colClasses = c("numeric", "numeric", "character"))
-str(dataEx_txt)
-
-```
-
-Nous avons illustré ici quatre arguments de la fonction `read.table`. Elle en possède plusieurs autres, à adapter selon le fichier à lire. 
-
-### Résumé des arguments les plus utiles de la fonction `read.table`
+Nous avons illustré ici deux arguments de la fonction `read.table`. Elle en possède plusieurs autres, à adapter selon le fichier à lire. 
 
 
-Chaque argument de la fonction `read.table` est en lien avec une question que l'utilisateur doit se poser lors de la lecture d'un fichier de données.
+### Arguments de la fonction `read.table`
+
+Voici un résumé des arguments les plus utiles de la fonction `read.table`. Chaque argument est en lien avec une question que l'utilisateur doit se poser lors de la lecture d'un fichier de données.
 
 - Est-ce que les noms des variables sont sur la première ligne ?
     + Si oui, utiliser `header = TRUE`, sinon `header = FALSE`. 
@@ -202,7 +195,7 @@ Chaque argument de la fonction `read.table` est en lien avec une question que l'
     
 - Quel caractère sépare les valeurs ?
     + Fournir ce caractère comme valeur à l'argument `sep`. 
-    + Par défaut `sep = ""`, ce qui signifie que le séparateur est un « blanc », soit un espace ou plus, une tabulation, une fin de ligne ou un retour de chariot.
+    + Par défaut `sep = ""`, ce qui signifie que le séparateur est un «&nbsp;blanc&nbsp;», soit un espace ou plus, une tabulation, une fin de ligne ou un retour de chariot.
     
 - Quel est le symbole décimal ?
     + Fournir ce symbole sous forme de chaîne de caractères à l'argument `dec`. 
@@ -234,7 +227,7 @@ Chaque argument de la fonction `read.table` est en lien avec une question que l'
 
 -	Est-ce que les colonnes contenant des chaînes de caractères doivent être converties en facteurs ?
     + Si oui, utiliser `stringsAsFactors = TRUE`, sinon `stringsAsFactors = FALSE`.
-    + Par défaut `stringsAsFactors = TRUE`.
+    + Par défaut `stringsAsFactors = FALSE`.
     
 -	Est-ce que les données dans les différentes colonnes sont toutes du bon type ?
     + Si ce n'est pas le cas, les types désirés peuvent être spécifiés avec l'argument `colClasses`.
@@ -242,11 +235,10 @@ Chaque argument de la fonction `read.table` est en lien avec une question que l'
 
 Tous les détails ainsi que la description des autres arguments de la fonction `read.table` sont dans la [fiche d'aide de la fonction `read.table`](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html). 
 
-\newpage
 
-### Importation de données en format CSV
+### Format CSV
 
-Le format CSV est un format texte de données assez usuel. CSV signifie Comma Separated Values. En fait, dans un fichier CSV, les valeurs sont séparées par des virgules ou des points-virgules. Deux séparateurs consécutifs signifient qu'une valeur est manquante. Le fichier `dataEx.csv` est un exemple de fichier sous ce format. Il a l'allure suivante.
+Le format CSV est un format texte de données assez usuel. CSV signifie *Comma Separated Values*. En fait, dans un fichier CSV, les valeurs sont séparées par des virgules ou des points-virgules. Deux séparateurs consécutifs signifient qu'une valeur est manquante. Le fichier `data_ex.csv` est un exemple de fichier sous ce format. Il a l'allure suivante.
 
 ```
 "de1";"de2";"lanceur"
@@ -262,24 +254,24 @@ Le format CSV est un format texte de données assez usuel. CSV signifie Comma Se
 4;3;"Kim"
 ```
 
-La fonction `read.csv2` est tout indiquée pour importer ce fichier puisque la valeur par défaut de son argument `sep` est `";"`. Cette fonction appelle en fait la fonction `read.table`, mais avec des valeurs par défaut différentes pour les arguments. Ce type de fonction est appelé fonction enveloppe (en anglais *wrapper*). La fonction `read.table` possède 4 fonctions enveloppe : `read.csv`, `read.csv2`, `read.delim` et `read.delim2`.
+La fonction `read.csv2` est tout indiquée pour importer ce fichier puisque la valeur par défaut de son argument `sep` est `";"`. Cette fonction appelle en fait la fonction `read.table`, mais avec des valeurs par défaut différentes pour les arguments. Ce type de fonction est appelé fonction enveloppe (en anglais *wrapper*). La fonction `read.table` possède 4 fonctions enveloppe&nbsp;: `read.csv`, `read.csv2`, `read.delim` et `read.delim2`.
 
-Les arguments de la fonction `read.csv2` ont-ils toutes les bonnes valeurs par défaut pour importer le fichier `dataEx.csv`?
+Les arguments de la fonction `read.csv2` ont-ils toutes les bonnes valeurs par défaut pour importer le fichier `data_ex.csv`?
 
 ```{r}
-dataEx_csv <- read.csv2("dataEx.csv")
-str(dataEx_csv)
+data_ex_csv <- read.csv2("data_ex.csv")
+str(data_ex_csv)
 ```
 
 Ici, la première ligne a correctement été interprétée comme le nom des variables, parce que l'argument `header` de `read.csv2` prend par défaut la valeur `TRUE`. Aussi, la valeur manquante a été bien interprétée pour la variable numérique, mais pas pour la variable catégorique. Utilisons donc l'argument `na.strings` comme suit pour faire correctement l'importation.
 
 ```{r}
-dataEx_csv <- read.csv2("dataEx.csv", na.strings = "")
-str(dataEx_csv)
+data_ex_csv <- read.csv2("data_ex.csv", na.strings = "")
+str(data_ex_csv)
 ```
 
 
-### Lecture de fichiers textes volumineux
+### Fichier texte volumineux
 
 La fonction `read.table` (et ses fonctions enveloppe) arrive en principe à lire n'importe quel fichier texte de données. Elle peut cependant être lente pour lire des fichiers volumineux. Dans ce cas, il est plus pratique de se tourner vers une alternative plus rapide.
 
@@ -287,45 +279,37 @@ La fonction `read.table` (et ses fonctions enveloppe) arrive en principe à lire
 
 \mbox{}
 
-Le package [`readr`](https://CRAN.R-project.org/package=readr) du [`tidyverse`](https://www.tidyverse.org/) offre différentes fonctions pour lire des fichiers textes, selon leur format. Par exemple, il offre la fonction [`read_csv2`](https://readr.tidyverse.org/reference/read_delim.html), similaire à la fonction `read.csv2` du R de base. Voici un exemple d'utilisation de cette fonction.
+Le package [`readr`](https://readr.tidyverse.org/) du [`tidyverse`](https://www.tidyverse.org/) offre différentes fonctions pour lire des fichiers textes, selon leur format. Par exemple, il offre la fonction [`read_csv2`](https://readr.tidyverse.org/reference/read_delim.html), similaire à la fonction `read.csv2` du R de base. Voici un exemple d'utilisation de cette fonction.
 
 ```{r message = FALSE}
 library(readr)
-dataEx_csv_readr <- read_csv2("dataEx.csv")
-str(dataEx_csv_readr)
+data_ex_csv_readr <- read_csv2("data_ex.csv")
+str(data_ex_csv_readr)
 ```
 
-L'objet retourné par les fonctions de `readr` est un [tibble](https://stt4230.rbind.io/manipulation_donnees/structures_r/#le-tibble). Remarquons que la fonction `read_csv2` a, par défaut, correctement inteprété les valeurs manquantes et elle n'a pas stocké les données de type caractère dans un facteur.
+L'objet retourné par les fonctions de `readr` est un [tibble](https://stt4230.rbind.io/manipulation_donnees/structures_r/#tibbles). Remarquons que la fonction `read_csv2` a, par défaut, correctement interprété les valeurs manquantes et elle n'a pas stocké les données de type caractère dans un facteur.
 
-Plus d'informations sur l'importation de données avec `readr` sont présentées :
-
-- dans documentation du package : https://readr.tidyverse.org/
-- dans le chapitre 11 du livre Grolemund, G. et Wickham, H. (2016). R for Data Science. O'Reilly Media, Inc. : https://r4ds.had.co.nz/data-import.html
 
 
 #### Package `data.table`
 
 \mbox{}
 
-Bien que les fonctions du package `readr` tendent à être plus rapides que la fonction `read.table` selon différentes sources, par exemple https://csgillespie.github.io/efficientR/5-3-importing-data.html#fast-data-reading, une autre fonction est capable d'être encore plus rapide : la fonction [`fread`](https://rdatatable.gitlab.io/data.table/reference/fread.html) du package [`data.table`](https://CRAN.R-project.org/package=data.table). Voici un exemple d'utilisation de cette fonction.
+Bien que les fonctions du package `readr` tendent à être plus rapides que la fonction `read.table`, une autre fonction est capable d'être encore plus rapide&nbsp;: la fonction [`fread`](https://rdatatable.gitlab.io/data.table/reference/fread.html) du package [`data.table`](https://rdatatable.gitlab.io/data.table/). Voici un exemple d'utilisation de cette fonction.
 
 ```{r}
 library(data.table)
-dataEx_csv_fread <- fread("dataEx.csv", na.strings = "")
-str(dataEx_csv_fread)
+data_ex_csv_fread <- fread("data_ex.csv", na.strings = "")
+str(data_ex_csv_fread)
 ```
 
-L'objet retourné par la fonction `fread` est un [data table](https://stt4230.rbind.io/manipulation_donnees/structures_r/#le-data-table). Tout comme la fonction `read.table`, la fonction `fread` possède un argument nommé `na.strings`, que nous avons du spécifier afin que la valeur manquante pour la variable catégorique soit vien interprétée. Le comportement par défaut de `fread` avec des données de types caractères n'est cependant pas le même que celui de la fonction `read.table`. Il stocke ces données dans un vecteur, comme le fait les fonctions de `readr`.
-
-La documentation du package `data.table` se trouve sur la page web suivante :  
-https://rdatatable.gitlab.io/data.table/
+L'objet retourné par la fonction `fread` est un [data table](https://stt4230.rbind.io/manipulation_donnees/structures_r/#data-tables). Tout comme la fonction `read.table`, la fonction `fread` possède un argument nommé `na.strings`, que nous avons du spécifier afin que la valeur manquante pour la variable catégorique soit bien interprétée. Le comportement par défaut de `fread` avec des données de types caractères n'est cependant pas le même que celui de la fonction `read.table`. Il stocke ces données dans un vecteur, comme le fait les fonctions de `readr`.
 
 
-## Importation de données en format JSON
+## Format JSON
 
 Ce ne sont pas toutes les données qui conviennent au format «&nbsp;tableau de données&nbsp;» avec des observations en lignes et des variables en colonnes. Le format JSON n'est pas contraint à des données de ce type. Un fichier JSON est en fait un fichier texte, contenant des paires attributs - valeurs. Par exemple, les données utilisées dans les exemples précédents ont l'allure suivante en format JSON.
 
-\newpage
 
 ```
 [
@@ -382,7 +366,6 @@ Ce ne sont pas toutes les données qui conviennent au format «&nbsp;tableau de 
 ]
 ```
 
-\newpage
 
 Le fichier comporte un élément pour chacune des 10 observations. Pour chaque observation, la valeur prise pour chacune des variables est spécifiée. Ce format est plus souple qu'un tableau de données, car la valeur d'une variable pour une observation pourrait être de n'importe quelle dimension, plutôt que d'être une seule donnée. Remarquons que dans le format JSON, une donnée manquante est représentée par `null` plutôt que `NA`.
 
@@ -390,54 +373,57 @@ Aucune fonction de l'installation de base de R ne permet de lire ce format de fi
 
 ```{r}
 library(jsonlite)
-dataEx_json <- fromJSON("dataEx.json")
-str(dataEx_json)
+data_ex_json <- fromJSON("data_ex.json")
+str(data_ex_json)
 ```
 
-La fonction `fromJSON` a converti le contenu du fichier `dataEx.json` en data frame. 
+La fonction `fromJSON` a converti le contenu du fichier `data_ex.json` en data frame. 
 
 
-## Importation de données à partir d'un fichier EXCEL
+## Fichier EXCEL
 
-Afin de lire en R des données provenant d'un fichier EXCEL, une première option est d’enregistrer le fichier dans un format texte, puis de l'importer en R avec les moyens vus précédemment. Cette procédure n'est cependant pas automatique. Il existe quelques packages R offrant des fonctions pour lire directement dans un fichier EXCEL. Un de ces packages est [`readxl`](https://readxl.tidyverse.org). Supposons que nous voulons importer en R le fichier EXCEL `dataEx.xlsx` ayant l'allure suivante.
+Afin de lire en R des données provenant d'un fichier EXCEL, une première option est d’enregistrer le fichier dans un format texte, puis de l'importer en R avec les moyens vus précédemment. Cette procédure n'est cependant pas automatique. Il existe quelques packages R offrant des fonctions pour lire directement dans un fichier EXCEL. Un de ces packages est [`readxl`](https://readxl.tidyverse.org). Supposons que nous voulons importer en R le fichier EXCEL `data_ex.xlsx` ayant l'allure suivante.
 
-```{r echo = FALSE, out.width = "50%", fig.align = 'center', fig.pos='H'}
-knitr::include_graphics("fig/dataEx_xlsx.png")
+```{r echo = FALSE, out.width = "50%", fig.align = 'center', fig.pos='H', eval=knitr::is_html_output()}
+knitr::include_graphics("../fig/data_ex_xlsx.png")
 ```
+```{r echo = FALSE, eval=knitr::is_latex_output()}
+knitr::asis_output("\\begin{center}\\includegraphics[width=0.5\\linewidth]{fig/data_ex_xlsx.png}\\end{center}")
+```
+
 
 Nous pourrions procéder comme suit.
 
 ```{r importEXCEL}
 library(readxl)
-dataEx_xlsx <- read_excel("dataEx.xlsx")
-str(dataEx_xlsx)
+data_ex_xlsx <- read_excel("data_ex.xlsx")
+str(data_ex_xlsx)
 ```
 
-\newpage
 
 Remarquons que la colonne contenant des valeurs caractères n'a pas été transformée en un facteur comme le fait `read.table` par défaut.
 
 <!---
 Retiré, car je crois qu'il est maintenant possible de faire avec readxl et openxlsx ce qu'on peut faire avec XLConnect, avec l'avantage de ne pas dépendre de Java
 
-Le [package `XLConnect`](https://CRAN.R-project.org/package=XLConnect) offre aussi des fonctions pour lire des fichiers EXCEL. Il est plus puissant que `readxl`. Il permet de lire dans des cases précises d'un fichier EXCEL, ainsi que d'écrire dans un fichier EXCEL. Cependant, ce package dépend d'un autre logiciel : Java. Il faut donc avoir une installation du logiciel Java sur son ordinateur pour utiliser ce package. Il faut en outre avoir la version de Java avec un nombre de bits correspondant au nombre de bits de la version de R utilisée. Afin d'optimiser la mémoire accessible au cours d'une session R, je conseille d'utiliser R 64-bits à ceux qui travaillent sous un système d'exploitation 64-bits. Par contre, il est courant d'avoir seulement la version 32-bits de Java sur son ordinateur, même si le système d'exploitation de celui-ci fonctionne en 64-bits. C'est dû au fait que le logiciel Java est utilisé principalement par les navigateurs web, qui fonctionnent souvent en 32-bits, même sous un système d'exploitation 64-bits. Pour installer la version 64-bits de Java en plus de la version 32-bits, il faut télécharger un installateur pour cette version de Java sur la page web suivante :  
+Le [package `XLConnect`](https://CRAN.R-project.org/package=XLConnect) offre aussi des fonctions pour lire des fichiers EXCEL. Il est plus puissant que `readxl`. Il permet de lire dans des cases précises d'un fichier EXCEL, ainsi que d'écrire dans un fichier EXCEL. Cependant, ce package dépend d'un autre logiciel&nbsp;: Java. Il faut donc avoir une installation du logiciel Java sur son ordinateur pour utiliser ce package. Il faut en outre avoir la version de Java avec un nombre de bits correspondant au nombre de bits de la version de R utilisée. Afin d'optimiser la mémoire accessible au cours d'une session R, je conseille d'utiliser R 64-bits à ceux qui travaillent sous un système d'exploitation 64-bits. Par contre, il est courant d'avoir seulement la version 32-bits de Java sur son ordinateur, même si le système d'exploitation de celui-ci fonctionne en 64-bits. C'est dû au fait que le logiciel Java est utilisé principalement par les navigateurs web, qui fonctionnent souvent en 32-bits, même sous un système d'exploitation 64-bits. Pour installer la version 64-bits de Java en plus de la version 32-bits, il faut télécharger un installateur pour cette version de Java sur la page web suivante&nbsp;:  
 https://www.java.com/fr/download/manual.jsp
 --->
 
-Un des grands avantages de `readxl` comparativement à d'autres packages offrant des fonctions pour lire des fichiers EXCEL est qu'il ne dépend pas d'un autre logiciel. Plusieurs de ces packages requière une installation du logiciel Java.
+Un des grands avantages de `readxl` comparativement à d'autres packages offrant des fonctions pour lire des fichiers EXCEL est qu'il ne dépend pas d'un autre logiciel. Plusieurs de ces packages requièrent une installation du logiciel Java.
 
 
-## Importation de données publiées sur internet
+## Données publiées sur internet
 
 Le web est rempli de données de toutes sortes. Pour lire des données stockées dans un fichier téléchargeable sur une page web, il suffit de d'abord télécharger le fichier, puis de le lire avec un des moyens présentés précédemment. Il est aussi possible de donner comme argument `file` à une fonction de la famille `read.table` directement une URL (adresse web). 
 
 La plupart des données disponibles sur le web ne sont cependant pas distribuées dans un fichier. Souvent, elles sont simplement présentées sous forme de tableaux dans des tables HTML. Une façon d'importer en R les données d'une table HTML serait de copier/coller le contenu de la table dans un fichier (texte ou autre), puis d'importer ce fichier en R. Si la table HTML en question provient d'une page sur un Wiki, tel que Wikipédia, le site web https://wikitable2csv.ggor.de/ facilite même cette tâche en créant des fichiers au format CSV contenant les données dans les tables HTML.
 
-Ces façons de procéder ne sont cependant pas automatiques. Certains packages R permettent d'éviter les étapes intermédiaires manuelles et permettent de lire directement dans une table HTML. Il est ainsi facile d'accéder à un très grand nombre de données en R. C'est une forme de ce qui est appelé en anglais le « *web harvesting* » ou « *web scraping* ».
+Ces façons de procéder ne sont cependant pas automatiques. Certains packages R permettent d'éviter les étapes intermédiaires manuelles et permettent de lire directement dans une table HTML. Il est ainsi facile d'accéder à un très grand nombre de données en R. C'est une forme de ce qui est appelé en anglais le «&nbsp;*web harvesting*&nbsp;» ou «&nbsp;*web scraping*&nbsp;».
 
-Voici un exemple de lecture de données directement à partir d'une table HTML avec le [package `rvest`](https://github.com/hadley/rvest).
+Voici un exemple de lecture de données directement à partir d'une table HTML avec le [package `rvest`](https://rvest.tidyverse.org/).
 
-```{r HTML, warning = FALSE, message = FALSE, eval = FALSE}
+```{r HTML, message = FALSE}
 library(rvest)
 url <- "https://en.wikipedia.org/wiki/List_of_highest-grossing_films"
 page <- read_html(url)
@@ -446,16 +432,17 @@ boxoffice <- tables[[1]]
 str(boxoffice)
 ```
 
-```{r echo = FALSE}
+```{r include = FALSE, eval = FALSE}
+# À utiliser seulement s'il y a un problème avec le code ci-dessus
 boxoffice <- readRDS("C:/coursR/boxoffice_20200113.rds")
 str(boxoffice)
 ```
 
 La fonction `read_html` lit tout le code HTML d'une page web. Cette lecture fonctionnera évidemment à la condition d'être connecté à internet. La fonction `html_table` en extrait les tables et les converties en data frames. Pour finir, il ne reste plus qu'à extraire la table voulue parmi toutes les tables lues.
 
-Le data frame obtenu dans le code précédent, nommé `boxoffice`, contient les recettes des films ayant générés le plus de revenus dans les cinémas américains, telles que présentées sur la page web https://en.wikipedia.org/wiki/List_of_highest-grossing_films le 13 janvier 2020.
+Le data frame obtenu dans le code précédent, nommé `boxoffice`, contient les recettes des films ayant générés le plus de revenus dans les cinémas américains, telles que présentées sur la page web https://en.wikipedia.org/wiki/List_of_highest-grossing_films le 18 janvier 2021.
 
-Mentionnons finalement qu'il existe de plus en plus de packages R pour aller chercher rapidement, à partir de R, des données ouvertes publiées sur des sites web. Par exemple, le [package `gtrendsR`](https://github.com/PMassicotte/gtrendsR) permet d'importer en R des données provenant de [Google trends](https://trends.google.ca). Ce genre de possibilité ne sera pas illustrée ici, mais la page web suivante énumère des packages utiles pour aller chercher des données sur divers sites web :  
+Mentionnons finalement qu'il existe de plus en plus de packages R pour aller chercher rapidement, à partir de R, des données ouvertes publiées sur des sites web. Par exemple, le [package `gtrendsR`](https://github.com/PMassicotte/gtrendsR) permet d'importer en R des données provenant de [Google trends](https://trends.google.ca). Ce genre de possibilité ne sera pas illustrée ici, mais la page web suivante énumère des packages utiles pour aller chercher des données sur divers sites web&nbsp;:  
 https://cran.r-project.org/web/views/WebTechnologies.html.
 
 ## Vérification de l'importation
@@ -467,12 +454,12 @@ Voici une liste de vérifications qu'il est toujours bon d'effectuer après une 
 -	Est-ce que le nombre de variables (colonnes) dans le data frame est le même que le nombre de variables dans le fichier ?
 -	Est-ce que le nombre d'observations (lignes) dans le data frame est le même que le nombre d'observations dans le fichier ?
 -	Est-ce que, pour chacune des variables du jeu de données, le type de données dans le data frame correspond au type de données dans le fichier ?
--	Si les jeu de données n'est pas de très petite taille, il est impossible de vérifier une à une toutes les observations. Cependant, pour une observation (ligne) sélectionnée au hasard (ou plus d'une si vous désirez être encore plus rigoureux), est-ce que les valeurs de cette observation dans le data frame sont identiques aux valeurs de cette observation dans le fichier ?
+-	Si le jeu de données n'est pas de très petite taille, il est impossible de vérifier une à une toutes les observations. Cependant, pour une observation (ligne) sélectionnée au hasard (ou plus d'une si vous désirez être encore plus rigoureux), est-ce que les valeurs de cette observation dans le data frame sont identiques aux valeurs de cette observation dans le fichier ?
 -	Est-ce que les données manquantes sont bien représentées dans data frame par la constante `NA`, et ce, dans les colonnes de tout type ?
 
 Si vous répondez oui à toutes ces questions, votre importation de données a de bonnes chances d'avoir été effectuée correctement.
 
-
+***
 
 # Écriture dans des fichiers 
 
@@ -481,22 +468,15 @@ En cours d'analyse, il n'est pas rare d'obtenir des résultats dont il est préf
 Exporter les données stockées dans un objet R peut aussi être utile simplement pour aider à les visualiser. Il est vrai que R offre la possibilité de voir le contenu de matrices ou de data frames dans un chiffrier ressemblant à une feuille EXCEL. Ce chiffrier peut être ouvert en appelant la [fonction `View`](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/View.html) ou en cliquant sur un objet dans la sous-fenêtre *Environment* de RStudio. Cependant, pour certaines structures de données non représentables sous forme de tableau, exporter les données dans un fichier externe demeure la meilleure option pour les visualiser.
 
 
-Pour les exemples à venir, reprenons le data frame `dataEx`, auquel une colonne est ajoutée contenant la somme des 2 dés.
-
-```{r}
-dataExS <- cbind(dataEx, Somme = dataEx$de1 + dataEx$de2)
-dataExS
-```
-
-Nommons ce nouveau jeu de données `dataExS` et voyons comment exporter son contenu.
+Pour les exemples à venir, reprenons le data frame `data_ex` et voyons comment exporter son contenu.
 
 
-## Exportation de données dans un fichier texte
+## Fichier texte
 
-Le format de fichier le plus universel pour exporter des données est le format texte. Un grand nombre de logiciels peuvent lire ce format. Les fonctions de base en R pour écrire dans un fichier texte sont `write` et `write.table`. Nous verrons ici seulement comment utiliser `write.table`, qui est plus adaptée à l'exportation de jeux de données. Par exemple, exportons le contenu du data frame `dataExS` dans le fichier texte `dataExS.txt`
+Le format de fichier le plus universel pour exporter des données est le format texte. Un grand nombre de logiciels peuvent lire ce format. Les fonctions de base en R pour écrire dans un fichier texte sont `write` et `write.table`. Nous verrons ici seulement comment utiliser `write.table`, qui est plus adaptée à l'exportation de jeux de données. Par exemple, exportons le contenu du data frame `data_ex` dans le fichier texte `data_ex.txt`
 
 ```{r exportTexte}
-write.table(dataExS, file = "dataExS.txt")
+write.table(data_ex, file = "data_ex.txt")
 ```
 
 Il faut spécifier à la fonction l'objet dans lequel se trouvent les données à exporter (typiquement une matrice ou un data frame), ainsi que le fichier dans lequel écrire les données. 
@@ -505,26 +485,26 @@ Tout comme son équivalent pour lire des données `read.table`, la fonction `wri
 Il existe aussi deux fonctions enveloppe à la fonction `write.table` pour les formats CSV, nommées `write.csv` et `write.csv2`.
 
 
-## Exportation de données dans un fichier JSON
+## Fichier JSON
 
 Pour exporter les données dans un data frame en format JSON avec le package `jsonlite`, il faut d'abord transformer les données au format JSON avec la fonction `toJSON`. Ensuite, l'objet obtenu doit être écrit dans un fichier externe avec la fonction `write` du R de base.
 
 ```{r}
-dataExS_json <- toJSON(dataExS, pretty = TRUE)
-write(dataExS_json, "dataExS.json")
+data_ex_json <- toJSON(data_ex, pretty = TRUE)
+write(data_ex_json, "data_ex.json")
 ```
 
-## Exportation de données dans un fichier EXCEL
+## Fichier EXCEL
 
-Le [package `openxlsx`](https://CRAN.R-project.org/package=openxlsx) offre des fonctions pour exporter des données stockées dans un objet R dans un fichier EXCEL. Par exemple, le contenu du data frame `dataExS` peut être écrit dans un fichier EXCEL comme suit.
+Le [package `openxlsx`](https://ycphs.github.io/openxlsx/index.html) offre des fonctions pour exporter des données stockées dans un objet R dans un fichier EXCEL. Par exemple, le contenu du data frame `data_ex` peut être écrit dans un fichier EXCEL comme suit.
 
 ```{r, message = FALSE}
 library(openxlsx)
-write.xlsx(dataExS, file = "dataExS.xlsx")
+write.xlsx(data_ex, file = "data_ex.xlsx")
 ```
 
 
-## Enregistrement d'objet(s) R dans un fichier externe
+## Enregistrement d'objets R dans un fichier externe
 
 R propose aussi ses formats de fichiers pour enregistrer des objets entiers, en conservant à la fois les données contenues dans les objets et les structures des objets.
 
@@ -536,20 +516,20 @@ Une image de session est l'ensemble des objets dans l'environnement de travail d
 save.image(file = "image.RData")
 ```
 
-La fonction `save` permet pour sa part d'enregistrer un ou des objets en particulier, par exemple :
+La fonction `save` permet pour sa part d'enregistrer un ou des objets en particulier, par exemple&nbsp;:
 
 ```{r}
-save(dataExS, de1, file = "deuxObj.rda")
-save(dataExS, file = "dataExS.rda")
+save(data_ex, de_1, file = "deux_obj.rda")
+save(data_ex, file = "data_ex.rda")
 ```
 
 R offre aussi un format binaire alternatif pour enregistrer un seul objet, sans inclure le nom de l'objet dans le fichier (contrairement aux fonctions précédentes). Il s'agit du format .rds, obtenu avec la fonction `saveRDS`.
 
 ```{r}
-saveRDS(dataExS, file = "dataExS.rds")
+saveRDS(data_ex, file = "data_ex.rds")
 ```
 
-L'utilisateur peut en réalité donner les extensions de son choix aux fichiers. Il est cependant recommandé d'utiliser les extensions suivantes :
+L'utilisateur peut en réalité donner les extensions de son choix aux fichiers. Il est cependant recommandé d'utiliser les extensions suivantes&nbsp;:
 
 - .RData ou .rda pour un objet créé avec les fonctions `save.image` ou `save`, 
 - .rds pour un fichier créé avec la fonction `saveRDS`.
@@ -567,72 +547,71 @@ Il est aussi possible d'enregistrer des objets R sous un format texte avec `dump
 Finalement, il est possible d'envoyer les résultats de nos commandes dans un fichier texte externe plutôt que dans la console grâce aux fonctions `capture.output` et `sink`.
 
 ```{r saveOutput}
-capture.output(summary(dataExS), file = "dataExS_summary.out")
+capture.output(summary(data_ex), file = "data_ex_summary.out")
 ```
 
 ```{r eval = FALSE}
-sink("dataExS.out")
-dataExS
-colMeans(dataExS[, 1:2], na.rm = TRUE)
+sink("data_ex.out")
+data_ex
+colMeans(data_ex[, 1:2], na.rm = TRUE)
 sink()
 ```
 
+***
 
-
-
-# Chargement d’objet(s) R provenant d’un fichier externe 
+# Chargement d’objets R provenant d’un fichier externe 
 
 **Formats binaires**
 
 Pour charger en R des objets R stockés dans un fichier au format .RData, .rda ou .rds, il faut utiliser la fonction
 
-- `load` : pour les fichiers produits avec la fonction `save` ou `save.image` (format .RData ou .rda, peut contenir plus d'un objet, les noms des objets sont inclus dans le fichier);
-- `readRDS` : pour les fichiers produits avec la fonction `saveRDS` (format .rds, ne peut contenir qu'un seul objet, le nom de l'objet n'est pas inclus dans le fichier); la fonction `readRDS` doit être utilisée avec une assignation pour stocker le résultat de l'importation dans un objet.
+- `load`&nbsp;: pour les fichiers produits avec la fonction `save` ou `save.image` (format .RData ou .rda, peut contenir plus d'un objet, les noms des objets sont inclus dans le fichier);
+- `readRDS`&nbsp;: pour les fichiers produits avec la fonction `saveRDS` (format .rds, ne peut contenir qu'un seul objet, le nom de l'objet n'est pas inclus dans le fichier); la fonction `readRDS` doit être utilisée avec une assignation pour stocker le résultat de l'importation dans un objet.
 
 Voici deux exemples d'appel de ces fonctions.
 
 ```{r readObjects}
-load("deuxObj.rda")
+load("deux_obj.rda")
 ```
 
 ```{r}
-dataEx_copie <- readRDS("dataExS.rds")
+data_ex_copie <- readRDS("data_ex.rds")
 ```
 
 La fonction `load` ajoute des objets dans l'environnement de travail. Si des objets portant les mêmes noms que ceux à importer sont déjà présents dans l'environnement de travail, ils sont remplacés sans même qu'un avertissement ne soit émis. Avec cette fonction, il y a donc un risque d'écraser sans s'en rendre compte des objets présents dans notre environnement de travail.
 
-**Rappel** : Si le répertoire de travail par défaut de R contient un fichier nommé `.RData`, les objets dans ce fichier seront automatiquement chargés en R lors d'une ouverture de session. *Pour empêcher ce chargement automatique, il faut effacer ce fichier `.RData` .*
+**Rappel**&nbsp;: Si le répertoire de travail par défaut de R contient un fichier nommé `.RData`, les objets dans ce fichier seront automatiquement chargés en R lors d'une ouverture de session. *Pour empêcher ce chargement automatique, il faut effacer ce fichier `.RData` .*
 
 
 ***
 
 # Résumé
 
-#### Répertoire de travail et écriture de chemins d'accès à des fichiers
-
-\mbox{}
+<p style="font-size:110%">
+**Répertoire de travail et écriture de chemins d'accès à des fichiers**
+</p>
 
 Répertoire de travail = emplacement par défaut dans le système de fichier de notre ordinateur utilisé dans la session R (emplacement supposé par R lorsque cette information n’est pas spécifiée)
 
-- `getwd` : affiche le chemin d'accès au répertoire de travail,
-- `setwd` : permet de changer de répertoire de travail.
+- `getwd`&nbsp;: affiche le chemin d'accès au répertoire de travail,
+- `setwd`&nbsp;: permet de changer de répertoire de travail.
 
-Règles à respecter dans l'écriture de chemins d'accès à des fichiers :
+Règles à respecter dans l'écriture de chemins d'accès à des fichiers&nbsp;:
 
-- **pas de `\`** : seuls `/` et `\\` sont acceptés pour séparer les éléments d'un chemin d'accès;
+- **pas de `\`**&nbsp;: seuls `/` et `\\` sont acceptés pour séparer les éléments d'un chemin d'accès;
 - toujours inclure l'**extension** du fichier;
 - encadrer le chemin de **guillemets**.
 
-Exemple :
+Exemple&nbsp;:
 ```{r eval = FALSE}
-"C:/coursR/dataEx.txt"
+"C:/coursR/data_ex.txt"
 ```
 
 
-
-#### Lecture (importation) de données
-
-\mbox{}
+\vspace{6pt}
+<p style="font-size:110%">
+**Lecture (importation) dans des fichiers**
+</p>
 
 Format à lire  Fonctions de lecture
 -------------  ----------------------
@@ -664,18 +643,19 @@ table HTML & \texttt{read\_html} + \texttt{html\_table} (package
 
 Des fonctions R existent pour importer des données sous plusieurs autres formats (voir références dans les notes). $\rightarrow$ non couvert dans le cours
 
-**À garder en tête** : Il est conseillé de toujours vérifier que les données importées sont les bonnes et sous le bon format. Si ce n’est pas le cas, la commande d’importation de données doit être corrigée.
+**À garder en tête**&nbsp;: Il est conseillé de toujours vérifier que les données importées sont les bonnes et sous le bon format. Si ce n’est pas le cas, la commande d’importation de données doit être corrigée.
 
 
-#### Écriture (exportation) dans des fichiers
-
-\mbox{}
+\vspace{6pt}
+<p style="font-size:110%">
+**Écriture (exportation) dans des fichiers**
+</p>
 
 Élément(s) à exporter   | Fonction d'écriture                          
 --------------------- | ----------------------------------------------------
-données et (optionnel)  | format texte (recommandé) : `write.table` (`.csv`, `.csv2`)                   
-métadonnées             | format JSON : `toJSON` (package `jsonlite`) + `write`
-&nbsp;                  | format EXCEL : `write.xlsx` (package `openxlsx`)
+données et (optionnel)  | format texte (recommandé)&nbsp;: `write.table` (`.csv`, `.csv2`)                   
+métadonnées             | format JSON&nbsp;: `toJSON` (package `jsonlite`) + `write`
+&nbsp;                  | format EXCEL&nbsp;: `write.xlsx` (package `openxlsx`)
 &nbsp; | &nbsp;
 + structure complète    | `save.image`, `save` (objet(s) + leur(s) nom(s)) 
 (objet R intact)        | `saveRDS` (un seul objet, sans son nom)
@@ -696,19 +676,19 @@ Fonction d'écriture\strut
 \begin{minipage}[t]{0.31\columnwidth}\raggedright
 données et (optionnel)\strut
 \end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright
-- format texte (recommandé) : \texttt{write.table} (\texttt{.csv},
+- format texte (recommandé)&nbsp;: \texttt{write.table} (\texttt{.csv},
 \texttt{.csv2})\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.31\columnwidth}\raggedright
 métadonnées\strut
 \end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright
-- format JSON : \texttt{toJSON} (package \texttt{jsonlite}) +
+- format JSON&nbsp;: \texttt{toJSON} (package \texttt{jsonlite}) +
 \texttt{write}\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.31\columnwidth}\raggedright
 ~\strut
 \end{minipage} & \begin{minipage}[t]{0.63\columnwidth}\raggedright
-- format EXCEL : \texttt{write.xlsx} (package \texttt{openxlsx})\strut
+- format EXCEL&nbsp;: \texttt{write.xlsx} (package \texttt{openxlsx})\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.31\columnwidth}\raggedright
 ---------------------------\strut
@@ -744,51 +724,70 @@ sorties R\strut
 \end{longtable}
 -->
 
-\newpage
 
-#### Chargement d’objet(s) R provenant d'un fichier externe
+\vspace{6pt}
+<p style="font-size:110%">
+**Chargement d’objets R provenant d'un fichier externe**
+</p>
 
-\mbox{}
+Fonction pour charger en R des objets stockés dans un fichier externe&nbsp;:
 
-Fonction pour charger en R des objets stockés dans un fichier externe :
-
-- fichier créé avec `save.image` ou `save` (typiquement extension .RData ou .rda) : `load`;
-- fichier créé avec `saveRDS` : `readRDS`, accompagnée d'une assignation à un nom pour enregistrer l'objet dans l'environnement de travail.
+- fichier créé avec `save.image` ou `save` (typiquement extension .RData ou .rda)&nbsp;: `load`;
+- fichier créé avec `saveRDS`&nbsp;: `readRDS`, accompagnée d'une assignation à un nom pour enregistrer l'objet dans l'environnement de travail.
 
 ***
 
-# Références 
+# Références {-}
 
-Documentation officielle de R :  
+Documentation officielle de R&nbsp;:  
 
-- http://cran.r-project.org/doc/manuals/r-release/R-data.html
+- R Core Team (2020). *R Data Import/Export*. R version 4.0.3. URL http://cran.r-project.org/doc/manuals/r-release/R-data.html
 
-Bonnes sources d'information sur le web :
+Documentation des packages utilisés&nbsp;:
+
+- package `readr`&nbsp;:
+    + page web du package sur le CRAN&nbsp;: https://CRAN.R-project.org/package=readr
+    + documentation du package&nbsp;: https://readr.tidyverse.org/
+    + chapitre 11 du livre&nbsp;: Grolemund, G. et Wickham, H. (2016). *R for Data Science*. O'Reilly Media, Inc.&nbsp;: https://r4ds.had.co.nz/data-import.html
+- package `data.table`&nbsp;:
+    + page web du package sur le CRAN&nbsp;: https://CRAN.R-project.org/package=data.table
+    + documentation du package&nbsp;: https://rdatatable.gitlab.io/data.table/
+- package `jsonlite`&nbsp;:
+    + page web du package sur le CRAN&nbsp;: https://CRAN.R-project.org/package=jsonlite
+- package `readxl`&nbsp;:
+    + page web du package sur le CRAN&nbsp;: https://CRAN.R-project.org/package=readxl 
+    + documentation du package&nbsp;: https://readxl.tidyverse.org/
+- package `rvest`&nbsp;:
+    + page web du package sur le CRAN&nbsp;: https://CRAN.R-project.org/package=rvest 
+    + documentation du package&nbsp;: https://rvest.tidyverse.org/
+- package `openxlsx`&nbsp;:
+    + page web du package sur le CRAN&nbsp;: https://CRAN.R-project.org/package=openxlsx
+    + documentation du package&nbsp;: https://ycphs.github.io/openxlsx/index.html
+
+Autres bonnes sources d'information sur le web&nbsp;:
 
 - https://www.datacamp.com/community/tutorials/r-data-import-tutorial
 - https://en.wikibooks.org/wiki/R_Programming/Importing_and_exporting_data
+- https://themockup.blog/posts/2020-12-13-extracting-json-from-websites-and-public-apis-with-r/
 
-Livre dédié à la manipulation de données en R :
+\vspace{6pt}
+<p style="font-size:110%">
+**Pour aller plus loin en importation et exportation de données**
+</p>
 
-- Spector, P. (2008). Data Manipulation with R. Springer, New York.
-
-
-#### Pour aller plus loin en importation et exportation de données
-
-- packages utiles pour aller chercher des données ouvertes publiées sur le web :
+- packages utiles pour aller chercher des données ouvertes publiées sur le web&nbsp;:
     + https://CRAN.R-project.org/view=WebTechnologies
     
-- package `foreign`, `Hmisc` ou `haven` pour des jeux de données dans un format propre à un autre logiciel statistique (ex. formats SAS, SPSS, etc.) et autres formats : 
+- package `foreign`, `Hmisc` ou `haven` pour des jeux de données dans un format propre à un autre logiciel statistique (ex. formats SAS, SPSS, etc.) et autres formats&nbsp;: 
     + http://www.statmethods.net/input/importingdata.html
     + http://www.statmethods.net/input/exportingdata.html 
     + https://CRAN.R-project.org/package=haven
     
-- communication avec des bases de données :
+- communication avec des bases de données&nbsp;:
     + https://CRAN.R-project.org/view=Databases
     + https://db.rstudio.com/
     + https://datacarpentry.org/R-ecology-lesson/05-r-and-databases.html
     
-- utilisation de connexions pour accéder à des fichiers :  
-    + Chapitre 10 de Matloff, N. (2011). The Art of R Programming : A Tour of Statistical Software Design. No Starch Press.
-
+- utilisation de connexions pour accéder à des fichiers&nbsp;:  
+    + Chapitre 10 de Matloff, N. (2011). *The Art of R Programming&nbsp;: A Tour of Statistical Software Design*. No Starch Press.
 
