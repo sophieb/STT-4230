@@ -1,0 +1,1161 @@
+---
+title: "Calculs mathématiques en R"
+author: "Sophie Baillargeon, Université Laval"
+date: "2021-01-22"
+weight: 1
+slug: "calculs_math_r"
+lastmodifierdisplayname: "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document: 
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+    highlight: tango
+  blogdown::html_page:
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+    highlight: tango
+header-includes:
+- \usepackage{ragged2e}
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+editor_options: 
+  chunk_output_type: console
+---
+
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #f8f8f8; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<div id="TOC">
+<ul>
+<li><a href="#fonctionnement-vectoriel-et-règle-de-recyclage"><span class="toc-section-number">1</span> Fonctionnement vectoriel et règle de recyclage</a></li>
+<li><a href="#fonctions-et-opérateurs-mathématiques-de-base"><span class="toc-section-number">2</span> Fonctions et opérateurs mathématiques de base</a>
+<ul>
+<li><a href="#opérateurs-mathématiques"><span class="toc-section-number">2.1</span> Opérateurs mathématiques</a>
+<ul>
+<li><a href="#opérateurs-arithmétiques"><span class="toc-section-number">2.1.1</span> Opérateurs arithmétiques</a></li>
+<li><a href="#opérateurs-de-comparaison"><span class="toc-section-number">2.1.2</span> Opérateurs de comparaison</a></li>
+<li><a href="#opérateurs-et-fonction-logiques-vectoriels"><span class="toc-section-number">2.1.3</span> Opérateurs et fonction logiques vectoriels</a></li>
+<li><a href="#préséance-des-opérateurs"><span class="toc-section-number">2.1.4</span> Préséance des opérateurs</a></li>
+</ul></li>
+<li><a href="#fonctions-mathématiques-opérant-de-façon-vectorielle"><span class="toc-section-number">2.2</span> Fonctions mathématiques opérant de façon vectorielle</a></li>
+<li><a href="#fonctions-mathématiques-combinant-des-éléments"><span class="toc-section-number">2.3</span> Fonctions mathématiques combinant des éléments</a></li>
+<li><a href="#opérations-sur-des-ensembles"><span class="toc-section-number">2.4</span> Opérations sur des ensembles</a></li>
+<li><a href="#calcul-de-distances"><span class="toc-section-number">2.5</span> Calcul de distances</a></li>
+<li><a href="#constantes-mathématiques"><span class="toc-section-number">2.6</span> Constantes mathématiques</a></li>
+</ul></li>
+<li><a href="#conditions-logiques"><span class="toc-section-number">3</span> Conditions logiques</a>
+<ul>
+<li><a href="#conditions-logiques-vectorielles"><span class="toc-section-number">3.1</span> Conditions logiques vectorielles</a>
+<ul>
+<li><a href="#extraction-déléments-selon-une-condition-logique"><span class="toc-section-number">3.1.1</span> Extraction d’éléments selon une condition logique</a></li>
+<li><a href="#opérateur-in-de-comparaison-à-plusieurs-valeurs"><span class="toc-section-number">3.1.2</span> Opérateur <code>%in%</code> de comparaison à plusieurs valeurs</a></li>
+<li><a href="#fonctions-de-comparaison-pour-constantes-spéciales"><span class="toc-section-number">3.1.3</span> Fonctions de comparaison pour constantes spéciales</a></li>
+</ul></li>
+<li><a href="#conditions-logiques-de-longueur-1"><span class="toc-section-number">3.2</span> Conditions logiques de longueur 1</a>
+<ul>
+<li><a href="#opérateurs-et-fonctions-logiques-non-vectoriels"><span class="toc-section-number">3.2.1</span> Opérateurs et fonctions logiques non vectoriels</a></li>
+<li><a href="#fonctions-all-et-any"><span class="toc-section-number">3.2.2</span> Fonctions <code>all</code> et <code>any</code></a></li>
+<li><a href="#fonctions-de-vérification-de-type"><span class="toc-section-number">3.2.3</span> Fonctions de vérification de type</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#calculs-plus-avancés"><span class="toc-section-number">4</span> Calculs plus avancés</a>
+<ul>
+<li><a href="#algèbre-linéaire"><span class="toc-section-number">4.1</span> Algèbre linéaire</a>
+<ul>
+<li><a href="#opérateur"><span class="toc-section-number">4.1.1</span> Opérateur <code>%*%</code></a></li>
+<li><a href="#fonction-solve"><span class="toc-section-number">4.1.2</span> Fonction <code>solve</code></a></li>
+<li><a href="#fonction-crossprod"><span class="toc-section-number">4.1.3</span> Fonction <code>crossprod</code></a></li>
+<li><a href="#produits-dyadique-et-de-kronecker"><span class="toc-section-number">4.1.4</span> Produits dyadique et de Kronecker</a></li>
+<li><a href="#fonction-diag"><span class="toc-section-number">4.1.5</span> Fonction <code>diag</code></a></li>
+</ul></li>
+<li><a href="#calcul-différentiel-et-intégral"><span class="toc-section-number">4.2</span> Calcul différentiel et intégral</a>
+<ul>
+<li><a href="#dérivation-symbolique-d-deriv-et-deriv3"><span class="toc-section-number">4.2.1</span> Dérivation symbolique : <code>D</code>, <code>deriv</code> et <code>deriv3</code></a></li>
+<li><a href="#dérivation-numérique-numericderiv"><span class="toc-section-number">4.2.2</span> Dérivation numérique : <code>numericDeriv</code></a></li>
+<li><a href="#intégration-numérique-integrate"><span class="toc-section-number">4.2.3</span> Intégration numérique : <code>integrate</code></a></li>
+</ul></li>
+<li><a href="#optimisation-numérique"><span class="toc-section-number">4.3</span> Optimisation numérique</a></li>
+</ul></li>
+<li><a href="#résumé"><span class="toc-section-number">5</span> Résumé</a></li>
+<li><a href="#références"><span class="toc-section-number">6</span> Références</a></li>
+</ul>
+</div>
+
+<hr />
+<p><em>Note préliminaire : Lors de leur dernière mise à jour, ces notes ont été révisées en utilisant R version 4.0.3.</em></p>
+<hr />
+<p>Dans un contexte d’analyse de données, il est courant de devoir effectuer un calcul mathématique simple, par exemple pour transformer une variable ou tester si des observations rencontrent une certaine condition. Il est donc essentiel pour tout utilisateur de R de connaître les opérateurs et fonctions mathématiques de base, qui sont présentées ici.</p>
+<p>De plus, il n’est pas rare qu’un programmeur R cherchant à implémenter une méthode de calcul doivent utiliser de l’algèbre linéaire, du calcul différentiel et intégral ou encore de l’optimisation numérique. Ces possibilités de calculs mathématiques plus avancés en R sont aussi abordées ici <em>(mais ces sujets ne seront pas évalués dans le cadre du cours STT-4230 / STT-6230 R pour scientifique)</em>.</p>
+<hr />
+<div id="fonctionnement-vectoriel-et-règle-de-recyclage" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Fonctionnement vectoriel et règle de recyclage</h1>
+<p>Tous les opérateurs et plusieurs des fonctions qui sont présentés dans cette fiche agissent de façon vectorielle. Ils effectuent un traitement élément par élément sur le ou les objets reçus en entrée.</p>
+<p>Par exemple, si les deux matrices suivantes sont additionnées avec l’opérateur <code>+</code>,</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span> , <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">3</span>)</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    1    3    5
+## [2,]    2    4    6</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">matrix</span>(<span class="dv">6</span><span class="sc">:</span><span class="dv">1</span> , <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">3</span>)</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    6    4    2
+## [2,]    5    3    1</code></pre>
+<p>l’élément en position (i,j) dans la première matrice sera additionné à l’élément à la même position dans la deuxième matrice, et ce, pour toutes les positions. Le résultat de cette addition terme à terme est donc le suivant :</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span> , <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">3</span>) <span class="sc">+</span> <span class="fu">matrix</span>(<span class="dv">6</span><span class="sc">:</span><span class="dv">1</span> , <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">3</span>)</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    7    7    7
+## [2,]    7    7    7</code></pre>
+<p style="font-size:110%">
+<strong>Règle de recyclage</strong>
+</p>
+<p>Si les deux objets intervenant dans l’opération ne sont pas de mêmes dimensions, la <strong>règle de recyclage</strong> s’applique. Cette règle avait déjà été mentionnée dans les notes sur les <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#remplacement">structures de données en R</a>. Étant donné son importance, revoyons-là plus en profondeur ici.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">6</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">3</span>, <span class="dv">1</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>x <span class="sc">+</span> y</span></code></pre></div>
+<pre><code>## [1]  7 11  8  7</code></pre>
+<p>L’instruction précédente effectue 4 additions, une pour chacun des 4 éléments du plus long des deux vecteurs dans l’opération, soit ici le deuxième. Le premier vecteur est plutôt de longueur 2. R répète donc ses éléments pour créer un vecteur aussi long que le deuxième</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rep</span>(x, <span class="at">times =</span> <span class="fu">length</span>(y)<span class="sc">/</span><span class="fu">length</span>(x))</span></code></pre></div>
+<pre><code>## [1] 5 6 5 6</code></pre>
+<p>et effectue en réalité l’opération suivante :</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">5</span>, <span class="dv">6</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">3</span>, <span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## [1]  7 11  8  7</code></pre>
+<p>Cette règle de recyclage est exploitée, souvent sans que l’utilisateur en soit pleinement conscient, lorsque l’un des deux vecteurs impliqués dans une opération est de longueur 1. Par exemple, la commande suivante impliquant un exposant,</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>y <span class="sc">^</span> <span class="dv">2</span></span></code></pre></div>
+<pre><code>## [1]  4 25  9  1</code></pre>
+<p>est en fait traduite par R en la commande suivante :</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>y <span class="sc">^</span> <span class="fu">rep</span>(<span class="dv">2</span>, <span class="at">times =</span> <span class="fu">length</span>(y))</span></code></pre></div>
+<pre><code>## [1]  4 25  9  1</code></pre>
+<p style="font-size:110%">
+<strong>Règle de recyclage avec des objets à plus d’une dimension</strong>
+</p>
+<p>La règle de recyclage s’applique aussi dans des opérations faisant intervenir des objets à plus d’une dimension. Par exemple, pour additionner le même vecteur, disons</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">1</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>y</span></code></pre></div>
+<pre><code>## [1] 3 2 1</code></pre>
+<p>à chacune des colonnes d’une matrice, disons</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span> , <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">4</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>mat</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]    1    4    7   10
+## [2,]    2    5    8   11
+## [3,]    3    6    9   12</code></pre>
+<p>il suffit de lancer la commande suivante</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>mat <span class="sc">+</span> y</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]    4    7   10   13
+## [2,]    4    7   10   13
+## [3,]    4    7   10   13</code></pre>
+<p>au lieu de la suivante, qui retourne exactement le même résultat.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>mat <span class="sc">+</span> <span class="fu">matrix</span>(<span class="fu">rep</span>(y, <span class="at">times =</span> <span class="fu">length</span>(mat)<span class="sc">/</span><span class="fu">length</span>(y)), <span class="at">nrow =</span> <span class="fu">nrow</span>(mat), <span class="at">ncol =</span> <span class="fu">ncol</span>(mat))</span></code></pre></div>
+<p>Dans cette dernière commande, les deux arguments fournis à l’opérateur <code>+</code> sont réellement de mêmes dimensions, car la deuxième matrice est la suivante</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">matrix</span>(<span class="fu">rep</span>(y, <span class="fu">length</span>(mat)<span class="sc">/</span><span class="fu">length</span>(y)), <span class="at">nrow =</span> <span class="fu">nrow</span>(mat), <span class="at">ncol =</span> <span class="fu">ncol</span>(mat))</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]    3    3    3    3
+## [2,]    2    2    2    2
+## [3,]    1    1    1    1</code></pre>
+<p>Une règle de recyclage utilisée pour former une matrice de dimension appropriée va donc remplir la matrice une colonne à la fois, comme le fait la fonction <code>matrix</code> par défaut.</p>
+<p style="font-size:110%">
+<strong>Règle de recyclage lorsque la longueur de l’objet le plus long n’est pas multiple de la longueur de l’objet le plus court</strong>
+</p>
+<p>Lorsque la longueur de l’objet le plus long n’est pas multiple de la longueur de l’objet le plus court, la règle de recyclage fonctionne quand même. R recycle l’objet le plus court assez de fois pour arriver à un objet de longueur égale ou supérieure à l’objet le plus long. Ensuite, si l’objet recyclé est plus long que l’autre objet, il est tronqué de façon à ce que les deux objets aient la même longueur.</p>
+<p>Prenons par exemple les deux vecteurs suivants :</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>x</span></code></pre></div>
+<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10 11 12</code></pre>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="dv">5</span><span class="sc">:</span><span class="dv">1</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>y</span></code></pre></div>
+<pre><code>## [1] 5 4 3 2 1</code></pre>
+<p>Supposons que la commande suivante soit soumise en R.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>x <span class="sc">+</span> y</span></code></pre></div>
+<p>L’objet de gauche dans l’addition est de longueur 12 et l’objet de droite de longueur 5. L’objet de droite sera donc recyclé 3 fois,</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>y_recycle <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">5</span><span class="sc">:</span><span class="dv">1</span>, <span class="at">times =</span> <span class="fu">ceiling</span>(<span class="fu">length</span>(x)<span class="sc">/</span><span class="fu">length</span>(y)))</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>y_recycle</span></code></pre></div>
+<pre><code>##  [1] 5 4 3 2 1 5 4 3 2 1 5 4 3 2 1</code></pre>
+<p>puis sa longueur sera réduite à la longueur de l’objet de gauche.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(y_recycle) <span class="ot">&lt;-</span> <span class="fu">length</span>(x)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>y_recycle</span></code></pre></div>
+<pre><code>##  [1] 5 4 3 2 1 5 4 3 2 1 5 4</code></pre>
+<p>Ensuite l’addition terme à terme sera effectuée.</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>x <span class="sc">+</span> y_recycle</span></code></pre></div>
+<pre><code>##  [1]  6  6  6  6  6 11 11 11 11 11 16 16</code></pre>
+<p>Cependant, R émettra un avertissement pour nous informer qu’il a dû faire cet ajustement de longueur.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>x <span class="sc">+</span> y</span></code></pre></div>
+<pre><code>## Warning in x + y: longer object length is not a multiple of shorter object
+## length</code></pre>
+<pre><code>##  [1]  6  6  6  6  6 11 11 11 11 11 16 16</code></pre>
+<hr />
+</div>
+<div id="fonctions-et-opérateurs-mathématiques-de-base" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Fonctions et opérateurs mathématiques de base</h1>
+<div id="opérateurs-mathématiques" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Opérateurs mathématiques</h2>
+<div id="opérateurs-arithmétiques" class="section level3" number="2.1.1">
+<h3><span class="header-section-number">2.1.1</span> Opérateurs arithmétiques</h3>
+<p>Voici une liste d’<a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Arithmetic.html">opérateurs arithmétiques disponibles en R</a> :</p>
+<ul>
+<li><code>+</code> : addition,</li>
+<li><code>-</code> : soustraction,</li>
+<li><code>*</code> : multiplication,</li>
+<li><code>/</code> : division,</li>
+<li><code>^</code> : puissance,</li>
+<li><code>%/%</code> : division entière,</li>
+<li><code>%%</code> : modulo = reste de la division entière.</li>
+</ul>
+<p>Les premiers opérateurs sont usuels et ne requièrent aucune explication. Expliquons cependant brièvement les deux derniers opérateurs de cette liste.</p>
+<div id="division-entière-et-modulo" class="section level4" number="2.1.1.1">
+<h4><span class="header-section-number">2.1.1.1</span> Division entière et modulo</h4>
+<p></p>
+<p>L’opérateur <code>%/%</code> réalise une <a href="https://fr.wikipedia.org/wiki/Division_euclidienne">division entière</a>. Pour illustrer ce type de division, prenons l’exemple suivant.</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="dv">5</span> <span class="sc">/</span> <span class="dv">2</span></span></code></pre></div>
+<pre><code>## [1] 2.5</code></pre>
+<p>L’opérateur de division ordinaire <code>/</code> retourne un nombre réel. L’opérateur <code>%/%</code> retourne la partie entière du résultat obtenu avec <code>/</code>. La partie décimale est tronquée.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="dv">5</span> <span class="sc">%/%</span> <span class="dv">2</span></span></code></pre></div>
+<pre><code>## [1] 2</code></pre>
+<p>L’opérateur <a href="https://fr.wikipedia.org/wiki/Modulo_(op%C3%A9ration)">modulo</a> <code>%%</code> retourne le reste de la division entière. Dans l’exemple traité ici, ce reste vaut 1 car 5 - 2*2 = 1.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="dv">5</span> <span class="sc">%%</span> <span class="dv">2</span></span></code></pre></div>
+<pre><code>## [1] 1</code></pre>
+<p><strong>Astuces</strong> :</p>
+<ul>
+<li>Cet opérateur est pratique pour tester si des nombres sont pairs ou impairs. Les nombres pairs sont des multiples de 2. Alors <code>x %% 2</code> retourne 0 pour les nombres pairs et 1 pour les nombres impairs.</li>
+<li>L’opérateur modulo peut aussi servir à tester si un nombre stocké sous le type <code>double</code> est en réalité un entier au sens mathématique. S’il s’agit d’un entier, <code>x %% 1</code> retournera 0.</li>
+</ul>
+</div>
+</div>
+<div id="opérateurs-de-comparaison" class="section level3" number="2.1.2">
+<h3><span class="header-section-number">2.1.2</span> Opérateurs de comparaison</h3>
+<p>Les <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Comparison.html">opérateurs de comparaison</a> permettent de comparer des valeurs. Ils retournent <code>TRUE</code> ou <code>FALSE</code>. Il s’agit des opérateurs suivants :</p>
+<ul>
+<li><code>==</code> : égalité,</li>
+<li><code>!=</code> : non-égalité,</li>
+<li><code>&gt;</code> : plus grand,</li>
+<li><code>&gt;=</code> : plus grand ou égal,</li>
+<li><code>&lt;</code> : plus petit,</li>
+<li><code>&lt;=</code> : plus petit ou égal.</li>
+</ul>
+<p>Supposons <code>x</code> et <code>y</code> les deux vecteurs numériques suivants.</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">7</span>, <span class="dv">3</span>)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">4</span>)</span></code></pre></div>
+<p>Comparons ces vecteurs à l’aide d’un opérateur de comparaison. Est-ce que les valeurs contenues dans <code>x</code> sont supérieures aux valeurs contenues dans <code>y</code> ?</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>x <span class="sc">&gt;</span> y</span></code></pre></div>
+<pre><code>## [1] FALSE FALSE  TRUE FALSE</code></pre>
+<p>L’opérateur fonctionne de façon vectorielle, donc une comparaison est effectuée pour toutes les paires d’éléments à la même position dans les vecteurs <code>x</code> et <code>y</code>. Les valeurs dans le résultat retourné sont de type logique.</p>
+<p>Les valeurs dans un vecteur peuvent aussi être comparées à une seule valeur, auquel cas la règle de recyclage s’applique.</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>x <span class="sc">!=</span> <span class="dv">5</span></span></code></pre></div>
+<pre><code>## [1]  TRUE FALSE  TRUE  TRUE</code></pre>
+<div id="comparaison-de-valeurs-non-numériques" class="section level4" number="2.1.2.1">
+<h4><span class="header-section-number">2.1.2.1</span> Comparaison de valeurs non numériques</h4>
+<p></p>
+<p>Les opérateurs de comparaison ne fonctionnent pas seulement avec des valeurs numériques. Ils peuvent aussi être utilisés pour comparer des valeurs logiques ou caractères. Dans ce cas, il faut savoir que R considère que <code>FALSE</code> est inférieure à <code>TRUE</code>.</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="cn">FALSE</span> <span class="sc">&lt;</span> <span class="cn">TRUE</span> </span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p>Quant aux caractères, les opérateurs de comparaison utilisent l’ordre de classement des caractères pour déterminer, entre deux valeurs, celle qui est inférieure. Cet ordre dépend des paramètres régionaux de la session R. D’une langue à l’autre, cet ordre peut varier.</p>
+<p>Pour connaître l’ordre utilisé dans une session R, les instructions suivantes sont utiles :</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>caracteres_speciaux <span class="ot">&lt;-</span> </span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">&quot;!&quot;</span>, <span class="st">&quot;</span><span class="sc">\&quot;</span><span class="st">&quot;</span>, <span class="st">&quot;#&quot;</span>, <span class="st">&quot;$&quot;</span>, <span class="st">&quot;%&quot;</span>, <span class="st">&quot;&amp;&quot;</span>, <span class="st">&quot;&#39;&quot;</span>, <span class="st">&quot;(&quot;</span>, <span class="st">&quot;)&quot;</span>, <span class="st">&quot;*&quot;</span>, <span class="st">&quot;+&quot;</span>, <span class="st">&quot;,&quot;</span>, <span class="st">&quot;-&quot;</span>, <span class="st">&quot;.&quot;</span>, <span class="st">&quot;/&quot;</span>, <span class="st">&quot;:&quot;</span>, <span class="st">&quot;;&quot;</span>, </span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;&lt;&quot;</span>, <span class="st">&quot;=&quot;</span>,<span class="st">&quot;&gt;&quot;</span>, <span class="st">&quot;?&quot;</span>, <span class="st">&quot;@&quot;</span>, <span class="st">&quot;[&quot;</span>, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">&quot;</span>, <span class="st">&quot;]&quot;</span>, <span class="st">&quot;^&quot;</span>, <span class="st">&quot;_&quot;</span>, <span class="st">&quot;{&quot;</span>, <span class="st">&quot;|&quot;</span>, <span class="st">&quot;}&quot;</span>, <span class="st">&quot;~&quot;</span>)</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>lettres_accentuees <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;à&quot;</span>, <span class="st">&quot;â&quot;</span>, <span class="st">&quot;é&quot;</span>, <span class="st">&quot;è&quot;</span>, <span class="st">&quot;ê&quot;</span>, <span class="st">&quot;ë&quot;</span>, <span class="st">&quot;ï&quot;</span>, <span class="st">&quot;î&quot;</span>, <span class="st">&quot;ô&quot;</span>, <span class="st">&quot;ù&quot;</span>, <span class="st">&quot;ü&quot;</span>, <span class="st">&quot;û&quot;</span>, <span class="st">&quot;ç&quot;</span>)</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>catacteres_ordonnes <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">c</span>(caracteres_speciaux, <span class="dv">0</span><span class="sc">:</span><span class="dv">9</span>, letters, LETTERS, </span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>                              lettres_accentuees, <span class="fu">toupper</span>(lettres_accentuees))) </span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(catacteres_ordonnes, <span class="at">collapse =</span> <span class="st">&quot;&quot;</span>)</span></code></pre></div>
+<p>J’ai obtenu le résultat suivant, qui sera peut-être différent sur votre ordinateur si vous n’avez pas les mêmes paramètres régionaux que moi.</p>
+<pre><code>&quot;&#39;-!\&quot;#$%&amp;()*,./:;?@[\\]^_{|}~+&lt;=&gt;0123456789aAàÀâÂbBcCçÇdDeEéÉèÈêÊëËfFgGhHiIîÎïÏjJkKlLmM
+nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
+<p>Ainsi, dans ma session R :</p>
+<ul>
+<li>les caractères spéciaux sont inférieurs aux chiffres et aux lettres,</li>
+<li>les chiffres sont inférieurs aux lettres,</li>
+<li>les lettres sont classées en ordre alphabétique et
+<ul>
+<li>les lettres minuscules sont inférieures aux lettres majuscules,</li>
+<li>les lettres non accentuées sont inférieures aux lettres accentuées.</li>
+</ul></li>
+</ul>
+<p>Pour des chaînes à plus d’un caractère, la comparaison s’effectue caractère par caractère (premiers caractères comparés entre eux, puis deuxièmes en cas d’égalité, puis troisièmes en cas d’égalités aux deux premières positions, etc.).</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;arborescence&quot;</span> <span class="sc">&lt;</span> <span class="st">&quot;arbre&quot;</span> </span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p>Aussi, l’absence de caractères vaut moins que la présence.</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;a&quot;</span> <span class="sc">&lt;</span> <span class="st">&quot;aa&quot;</span></span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p><strong>Remarque</strong> : Afin de correctement ordonner des nombres, il faut s’assurer de les stocker sous un format numérique. S’ils sont stockés sous forme de chaînes de caractères, les résultats obtenus ne seront pas toujours ceux attendus, comme dans cet exemple pour lequel 2 est dit non inférieur à 10 lorsque les nombres sont fournis à l’opérateur de comparaison sous forme de chaînes de caractères.</p>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span> <span class="sc">&lt;</span> <span class="dv">10</span></span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;2&quot;</span> <span class="sc">&lt;</span> <span class="st">&quot;10&quot;</span></span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+</div>
+</div>
+<div id="opérateurs-et-fonction-logiques-vectoriels" class="section level3" number="2.1.3">
+<h3><span class="header-section-number">2.1.3</span> Opérateurs et fonction logiques vectoriels</h3>
+<p>Un <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Logic.html">opérateur ou une fonction logique</a> vectoriel prend en entrée un ou deux vecteurs de logiques et retourne un autre vecteur de valeurs logiques. Le R de base comporte les opérateurs et la fonction logiques vectoriels suivants :</p>
+<ul>
+<li><code>!</code> : négation,</li>
+<li><code>&amp;</code> : et,</li>
+<li><code>|</code> : ou,</li>
+<li><code>xor</code> : ou exclusif.</li>
+</ul>
+<div id="opérateur-de-négation" class="section level4" number="2.1.3.1">
+<h4><span class="header-section-number">2.1.3.1</span> Opérateur de négation <code>!</code></h4>
+<p></p>
+<p>L’opérateur <code>!</code> n’a qu’un seul argument, alors que les autres opérateurs logiques en ont deux. Il effectue une négation, donc transforme les <code>TRUE</code> en <code>FALSE</code> et les <code>FALSE</code> en <code>TRUE</code>.</p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="sc">!</span><span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>)</span></code></pre></div>
+<pre><code>## [1] FALSE  TRUE</code></pre>
+</div>
+<div id="opérateurs-et-fonction-xor" class="section level4" number="2.1.3.2">
+<h4><span class="header-section-number">2.1.3.2</span> Opérateurs <code>&amp;</code> et <code>|</code>, fonction <code>xor</code></h4>
+<p></p>
+<p>Les opérateurs <code>&amp;</code> et <code>|</code>, ainsi que la fonction <code>xor</code>, appliquent de façon vectorielle les <a href="https://fr.wikipedia.org/wiki/Table_de_v%C3%A9rit%C3%A9">tables de vérité</a> des fonctions mathématiques logiques « et », « ou » et « ou exclusif » respectivement.</p>
+<p><strong>Rappel</strong> : table de vérité de <a href="https://fr.wikipedia.org/wiki/Conjonction_logique">« et »</a>, <a href="https://fr.wikipedia.org/wiki/Disjonction_logique">« ou »</a> et <a href="https://fr.wikipedia.org/wiki/Fonction_OU_exclusif">« ou exclusif »</a></p>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="cn">FALSE</span>, <span class="cn">TRUE</span>), <span class="at">each =</span> <span class="dv">2</span>)</span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="cn">FALSE</span>, <span class="cn">TRUE</span>), <span class="at">times =</span> <span class="dv">2</span>)</span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(p, q, <span class="st">&quot;p et q&quot;</span> <span class="ot">=</span> p <span class="sc">&amp;</span> q, <span class="st">&quot;p ou q&quot;</span> <span class="ot">=</span> p <span class="sc">|</span> q, <span class="st">&quot;p xor q&quot;</span> <span class="ot">=</span> <span class="fu">xor</span>(p, q))</span></code></pre></div>
+<pre><code>##          p     q p et q p ou q p xor q
+## [1,] FALSE FALSE  FALSE  FALSE   FALSE
+## [2,] FALSE  TRUE  FALSE   TRUE    TRUE
+## [3,]  TRUE FALSE  FALSE   TRUE    TRUE
+## [4,]  TRUE  TRUE   TRUE   TRUE   FALSE</code></pre>
+<p>Ainsi,</p>
+<ul>
+<li>l’expression <code>p &amp; q</code> retournera un vecteur contenant des <code>TRUE</code> aux positions pour lesquelles la valeur en <code>p</code> et la valeur en <code>q</code> sont toutes les deux <code>TRUE</code> et contenant des <code>FALSE</code> partout ailleurs;</li>
+<li>l’expression <code>p | q</code> retournera un vecteur contenant des <code>FALSE</code> aux positions pour lesquelles la valeur en <code>p</code> et la valeur en <code>q</code> sont toutes les deux <code>FALSE</code> et contenant des <code>TRUE</code> partout ailleurs;</li>
+<li>l’expression <code>xor(p, q)</code> retournera un vecteur contenant des <code>TRUE</code> aux positions pour lesquelles la valeur en <code>p</code> ou la valeur en <code>q</code> est <code>TRUE</code>, mais pas les deux, et contenant des <code>FALSE</code> partout ailleurs.</li>
+</ul>
+</div>
+</div>
+<div id="préséance-des-opérateurs" class="section level3" number="2.1.4">
+<h3><span class="header-section-number">2.1.4</span> Préséance des opérateurs</h3>
+<p>Dans une expression R contenant plusieurs opérateurs, mathématiques ou non, ceux-ci sont évalués dans un certain ordre, selon leur priorité d’opération. La <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Syntax.html">fiche d’aide nommée <code>Syntax</code> (ouverte par la commande <code>help(Syntax)</code>)</a> détaille l’ordre de préséance des différents opérateurs.</p>
+<p>Pour les calculs mathématiques, les priorités d’opération usuelles sont respectées. Par exemple, dans l’expression <code>2 + 3 * 4</code>, la multiplication est effectuée avant l’addition.</p>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span> <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> <span class="dv">4</span></span></code></pre></div>
+<pre><code>## [1] 14</code></pre>
+<p>Pour forcer l’évaluation d’un opérateur avant un autre de priorité plus élevée, il faut utiliser des parenthèses, comme dans cet exemple.</p>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>(<span class="dv">2</span> <span class="sc">+</span> <span class="dv">3</span>) <span class="sc">*</span> <span class="dv">4</span></span></code></pre></div>
+<pre><code>## [1] 20</code></pre>
+</div>
+</div>
+<div id="fonctions-mathématiques-opérant-de-façon-vectorielle" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Fonctions mathématiques opérant de façon vectorielle</h2>
+<p>R offre aussi plusieurs fonctions de calculs mathématiques, travaillant de façon vectorielle, dont les suivantes :</p>
+<ul>
+<li>racine carrée et fonctions relatives au signe : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/MathFun.html"><code>sqrt</code>, <code>abs</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/sign.html"><code>sign</code></a>;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Log.html">exponentielles et logarithmes</a> : <code>exp</code>, <code>log</code> (= logarithme naturel), <code>log10</code>, <code>log2</code>;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Trig.html">fonctions trigonométriques</a> : <code>sin</code>, <code>cos</code>, <code>tan</code>, <code>acos</code>, <code>asin</code>, <code>atan</code>, <code>atan2</code>;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Round.html">fonctions d’arrondissement</a> : <code>ceiling</code>, <code>floor</code>, <code>round</code>, <code>trunc</code>, <code>signif</code>;</li>
+<li>fonctions reliées aux fonctions mathématiques <a href="https://fr.wikipedia.org/wiki/Fonction_b%C3%AAta">bêta</a> et <a href="https://fr.wikipedia.org/wiki/Fonction_gamma">gamma</a>: <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Special.html"><code>beta</code>, <code>gamma</code>, <code>factorial</code>, <code>choose</code></a>, etc.</li>
+</ul>
+<p>Ces fonctions font un calcul distinct pour tous les éléments de l’objet fourni en entrée et retournent un résultat de même dimension que l’objet en entrée. Voici quelques exemples.</p>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Vecteur de données numériques pour les exemples</span></span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="sc">-</span><span class="fl">1.25</span>, <span class="at">to =</span> <span class="fl">1.5</span>, <span class="at">by =</span> <span class="fl">0.25</span>)</span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>x</span></code></pre></div>
+<pre><code>##  [1] -1.25 -1.00 -0.75 -0.50 -0.25  0.00  0.25  0.50  0.75  1.00  1.25  1.50</code></pre>
+<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Arrondissement régulier au dixième près</span></span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(x, <span class="at">digits =</span> <span class="dv">1</span>)</span></code></pre></div>
+<pre><code>##  [1] -1.2 -1.0 -0.8 -0.5 -0.2  0.0  0.2  0.5  0.8  1.0  1.2  1.5</code></pre>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Arrondissement à l&#39;entier supérieur</span></span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ceiling</span>(x)</span></code></pre></div>
+<pre><code>##  [1] -1 -1  0  0  0  0  1  1  1  1  2  2</code></pre>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Arrondissement à la partie entière</span></span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a><span class="fu">trunc</span>(x)</span></code></pre></div>
+<pre><code>##  [1] -1 -1  0  0  0  0  0  0  0  1  1  1</code></pre>
+<p>Ces fonctions arrivent aussi à effectuer des calculs par élément dans un objet atomique de dimension supérieure à un ou dans un data frame.</p>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Matrice de données numériques pour les exemples</span></span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>x_mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(x, <span class="at">nrow =</span> <span class="dv">2</span>)</span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>x_mat</span></code></pre></div>
+<pre><code>##       [,1]  [,2]  [,3] [,4] [,5] [,6]
+## [1,] -1.25 -0.75 -0.25 0.25 0.75 1.25
+## [2,] -1.00 -0.50  0.00 0.50 1.00 1.50</code></pre>
+<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extraction du signe</span></span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sign</span>(x_mat)</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4] [,5] [,6]
+## [1,]   -1   -1   -1    1    1    1
+## [2,]   -1   -1    0    1    1    1</code></pre>
+</div>
+<div id="fonctions-mathématiques-combinant-des-éléments" class="section level2" number="2.3">
+<h2><span class="header-section-number">2.3</span> Fonctions mathématiques combinant des éléments</h2>
+<p>Certaines fonctions mathématiques en R effectuent des calculs faisant intervenir plus d’un élément de l’objet donné en entrée, plutôt que d’effectuer un calcul distinct pour chacun des éléments. C’est le cas des fonctions suivantes :</p>
+<ul>
+<li>somme ou produit de tous les éléments (retourne une seule valeur) : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/sum.html"><code>sum</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/prod.html"><code>prod</code></a>;</li>
+<li>somme ou produit cumulatif des éléments (retourne un vecteur de même longueur que le vecteur en entrée) : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/cumsum.html"><code>cummsum</code>, <code>cumprod</code></a>;</li>
+<li>différences entre des éléments : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/diff.html"><code>diff</code></a>.</li>
+</ul>
+<p>Voici quelques exemples.</p>
+<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Matrice de données numériques pour les exemples</span></span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">9</span>, <span class="dv">8</span>), <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">4</span>)</span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a>mat</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]    2    4    4    2
+## [2,]    5    6    3    9
+## [3,]    3    5    1    8</code></pre>
+<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Produit de tous les éléments</span></span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a><span class="fu">prod</span>(mat)</span></code></pre></div>
+<pre><code>## [1] 6220800</code></pre>
+<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Somme cumulative des éléments (ici 2, 2+5, 2+5+3, 2+5+3+4, ...)</span></span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cumsum</span>(mat)</span></code></pre></div>
+<pre><code>##  [1]  2  7 10 14 20 25 29 32 33 35 44 52</code></pre>
+<p style="font-size:110%">
+<strong>Fonction <code>diff</code></strong>
+</p>
+<p>Pour une matrice ou un data frame, <code>diff</code> calcule les différences terme à terme des éléments composant les lignes. Par défaut, la fonction calcule pour chaque ligne, à l’exception de la première, la différence entre la ligne et la ligne au-dessous.</p>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="fu">diff</span>(mat)</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]    3    2   -1    7
+## [2,]   -2   -1   -2   -1</code></pre>
+<p>La commande suivante retourne donc le même résultat que la précédente.</p>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>mat[<span class="sc">-</span><span class="dv">1</span>, ] <span class="sc">-</span> mat[<span class="sc">-</span><span class="fu">nrow</span>(mat), ]</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]    3    2   -1    7
+## [2,]   -2   -1   -2   -1</code></pre>
+<p>Pour un vecteur, la fonction <code>diff</code> retourne les différences entre un élément (sauf le premier) et l’élément précédent.</p>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="fu">diff</span>(<span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">3</span>, <span class="dv">4</span>))</span></code></pre></div>
+<pre><code>## [1]  3 -2  1</code></pre>
+<p>La fonction <code>diff</code> peut calculer des différences entre les éléments séparés par plus d’une position grâce à l’argument <code>lag</code>, comme dans cet exemple.</p>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a><span class="fu">diff</span>(<span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">3</span>, <span class="dv">4</span>), <span class="at">lag =</span> <span class="dv">2</span>)</span></code></pre></div>
+<pre><code>## [1]  1 -1</code></pre>
+<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a><span class="co"># soustractions effectuées&amp;nbsp;: 3-2 et 4-5</span></span></code></pre></div>
+</div>
+<div id="opérations-sur-des-ensembles" class="section level2" number="2.4">
+<h2><span class="header-section-number">2.4</span> Opérations sur des ensembles</h2>
+<p>Les <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/sets.html">fonctions R</a> d’<a href="https://fr.wikipedia.org/wiki/Alg%C3%A8bre_des_parties_d%27un_ensemble">opérations sur des ensembles</a> sont les suivantes :</p>
+<ul>
+<li><code>union</code> : union,</li>
+<li><code>intersect</code> : intersection,</li>
+<li><code>setdiff</code> : différence,</li>
+<li><code>setequal</code> : test d’égalité,</li>
+<li><code>is.element</code> : test d’inclusion.</li>
+</ul>
+<p>Voici quelques exemples utilisant les deux ensembles suivants, stockés sous forme de vecteur :</p>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;m&quot;</span>, <span class="st">&quot;s&quot;</span>, <span class="st">&quot;e&quot;</span>, <span class="st">&quot;f&quot;</span>, <span class="st">&quot;m&quot;</span>)</span>
+<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;m&quot;</span>, <span class="st">&quot;e&quot;</span>, <span class="st">&quot;h&quot;</span>, <span class="st">&quot;i&quot;</span>)</span></code></pre></div>
+<p>Union de tous les éléments des ensembles <code>A</code> et <code>B</code>, en retirant les doublons :</p>
+<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a><span class="fu">union</span>(A, B)</span></code></pre></div>
+<pre><code>## [1] &quot;m&quot; &quot;s&quot; &quot;e&quot; &quot;f&quot; &quot;h&quot; &quot;i&quot;</code></pre>
+<p>Identification des éléments communs entre <code>A</code> et <code>B</code>, en retirant les doublons :</p>
+<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a><span class="fu">intersect</span>(A, B)</span></code></pre></div>
+<pre><code>## [1] &quot;m&quot; &quot;e&quot;</code></pre>
+<p>Identification des éléments de <code>A</code> ne se retrouvant pas dans <code>B</code>, en retirant les doublons :</p>
+<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(A, B)</span></code></pre></div>
+<pre><code>## [1] &quot;s&quot; &quot;f&quot;</code></pre>
+<p>Test sur l’égalité entre les ensembles <code>A</code> et <code>B</code> :</p>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setequal</span>(A, B)</span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<p>Test sur la présence de <code>"d"</code> et <code>"e"</code> dans l’ensemble <code>A</code> :</p>
+<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.element</span>(<span class="at">el =</span> <span class="fu">c</span>(<span class="st">&quot;d&quot;</span>, <span class="st">&quot;e&quot;</span>), <span class="at">set =</span> A)</span></code></pre></div>
+<pre><code>## [1] FALSE  TRUE</code></pre>
+</div>
+<div id="calcul-de-distances" class="section level2" number="2.5">
+<h2><span class="header-section-number">2.5</span> Calcul de distances</h2>
+<p style="font-size:110%">
+<strong>Distance entre des variables numériques</strong>
+</p>
+<p>Pour calculer des distances entre des observations numériques, la package <code>stats</code> offre la fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/dist.html"><code>dist</code></a>. Voici un exemple d’utilisation de cette fonction traitant les <a href="https://fr.wikipedia.org/wiki/Iris_de_Fisher">célèbres données iris</a>, incluses dans l’installation de base de R dans le data frame nommé <a href="https://stat.ethz.ch/R-manual/R-patched/library/datasets/html/iris.html"><code>iris</code></a> (du package <code>datasets</code>). Prenons uniquement les 5 premières observations du jeu de données et conservons uniquement les variables numériques.</p>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a>iris_ech_num <span class="ot">&lt;-</span> iris[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="fu">c</span>(<span class="st">&quot;Sepal.Length&quot;</span>, <span class="st">&quot;Sepal.Width&quot;</span>, <span class="st">&quot;Petal.Length&quot;</span>, <span class="st">&quot;Petal.Width&quot;</span>)]</span>
+<span id="cb109-2"><a href="#cb109-2" aria-hidden="true" tabindex="-1"></a>iris_ech_num</span></code></pre></div>
+<pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width
+## 1          5.1         3.5          1.4         0.2
+## 2          4.9         3.0          1.4         0.2
+## 3          4.7         3.2          1.3         0.2
+## 4          4.6         3.1          1.5         0.2
+## 5          5.0         3.6          1.4         0.2</code></pre>
+<p>Calculons les distances euclidiennes entre toutes les paires d’observations dans ce jeu de données, basées sur les 4 variables numériques.</p>
+<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist</span>(<span class="at">x =</span> iris_ech_num, <span class="at">method =</span> <span class="st">&quot;euclidean&quot;</span>, <span class="at">diag =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>##           1         2         3         4         5
+## 1 0.0000000                                        
+## 2 0.5385165 0.0000000                              
+## 3 0.5099020 0.3000000 0.0000000                    
+## 4 0.6480741 0.3316625 0.2449490 0.0000000          
+## 5 0.1414214 0.6082763 0.5099020 0.6480741 0.0000000</code></pre>
+<p>La distance euclidienne est un cas particulier de la <a href="https://fr.wikipedia.org/wiki/Distance_(math%C3%A9matiques)#Exemples_de_distances_classiques">distance de Minkowski</a>, avec un paramètre <span class="math inline">\(p = 2\)</span>.</p>
+<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist</span>(<span class="at">x =</span> iris_ech_num, <span class="at">method =</span> <span class="st">&quot;minkowski&quot;</span>, <span class="at">p =</span> <span class="dv">2</span>, <span class="at">diag =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>##           1         2         3         4         5
+## 1 0.0000000                                        
+## 2 0.5385165 0.0000000                              
+## 3 0.5099020 0.3000000 0.0000000                    
+## 4 0.6480741 0.3316625 0.2449490 0.0000000          
+## 5 0.1414214 0.6082763 0.5099020 0.6480741 0.0000000</code></pre>
+<p>La fonction <code>dist</code> propose quelques autres distances pour variables numériques (voir la <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/dist.html">fiche d’aide de la fonction</a> pour la liste complète). Le package <code>stats</code> offre aussi la fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mahalanobis.html"><code>mahalanobis</code></a> pour calculer des <a href="https://fr.wikipedia.org/wiki/Distance_de_Mahalanobis">distances de Mahalanobis</a>.</p>
+<p style="font-size:110%">
+<strong>Distance entre des chaînes de caractères</strong>
+</p>
+<p>Pour faire le tour des fonctions de mesure de distances incluses dans l’installation R de base, mentionnons aussi la fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/utils/html/adist.html"><code>adist</code></a> du package <code>utils</code> qui calcule la <a href="https://fr.wikipedia.org/wiki/Distance_de_Levenshtein">distance de Levenshtein</a> entre des chaînes de caractères, par exemple :</p>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1" aria-hidden="true" tabindex="-1"></a><span class="fu">adist</span>(<span class="at">x =</span> <span class="st">&quot;Allo&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Hello&quot;</span>)</span></code></pre></div>
+<pre><code>##      [,1]
+## [1,]    2</code></pre>
+<p>La distance de Levenshtein, aussi appelée distance minimale d’édition, compte le nombre minimal d’insertions, de retraits et de substitutions à effectuer pour transformer la première chaîne de caractères en la deuxième. Il est possible d’associer un coût différent à chacune de ces opérations. Par défaut, elles ont toutes un coût de 1. La distance de Levenshtein entre <code>"Allo"</code> et <code>"Hello"</code> vaut 2 parce que pour transformer <code>"Allo"</code> en <code>"Hello"</code> il faut au minimum faire les deux opérations suivantes :</p>
+<ul>
+<li>ajouter une lettre (par exemple un <code>H</code> au début);</li>
+<li>transformer une lettre (par exemple transformer le <code>"A"</code> en <code>"e"</code>).</li>
+</ul>
+</div>
+<div id="constantes-mathématiques" class="section level2" number="2.6">
+<h2><span class="header-section-number">2.6</span> Constantes mathématiques</h2>
+<p>En R, le nombre <span class="math inline">\(\pi\)</span> est représenté par la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Constants.html">constante <code>pi</code></a>.</p>
+<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" aria-hidden="true" tabindex="-1"></a>pi</span></code></pre></div>
+<pre><code>## [1] 3.141593</code></pre>
+<p><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/is.finite.html"><code>Inf</code></a> est la constante R pour l’infini <span class="math inline">\(\infty\)</span>.</p>
+<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span><span class="dv">5</span> <span class="sc">/</span> <span class="dv">0</span></span></code></pre></div>
+<pre><code>## [1] -Inf</code></pre>
+<p><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/is.finite.html"><code>NaN</code></a> est une constante signifiant <em>Not A Number</em>. Cette constante est retournée par R lorsqu’un utilisateur lui demande d’effectuer une opération mathématique impossible, par exemple :</p>
+<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(<span class="sc">-</span><span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## Warning in log(-1): NaNs produced</code></pre>
+<pre><code>## [1] NaN</code></pre>
+<p><strong>Rappel</strong> : Attention à ne pas confondre la constante <code>NaN</code> avec la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/NA.html">constante <code>NA</code></a> qui signifie plutôt <em>Not Available</em> et qui sert à représenter les données manquantes.</p>
+<hr />
+</div>
+</div>
+<div id="conditions-logiques" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Conditions logiques</h1>
+<p>Une condition logique est simplement une expression R qui retourne une ou des valeurs logiques (<code>TRUE</code> ou <code>FALSE</code>). Ce type d’expression a différentes utilités, par exemple :</p>
+<ul>
+<li>explorer des données : répondre à des questions du genre combien d’observations respectent une certaine condition;</li>
+<li>filtrer des données : extraire les observations respectant une certaine condition;</li>
+<li>définir une condition dans une structure de contrôle conditionnelle <code>if ... else</code>;</li>
+<li>etc.</li>
+</ul>
+<div id="conditions-logiques-vectorielles" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Conditions logiques vectorielles</h2>
+<p>Les deux premières utilités potentielles des conditions logiques énumérées ci-dessus requièrent la création d’un vecteur de valeurs logiques de la même longueur que l’objet R sur lequel la condition est testée. Nous avons vu au début de cette fiche des outils pour écrire de telles conditions logiques :</p>
+<ul>
+<li>les <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Comparison.html">opérateurs de comparaison</a> : <code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code> et <code>&lt;=</code>;</li>
+<li>les <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Logic.html">opérateurs et fonctions logiques vectoriels</a> : <code>!</code> (négation), <code>&amp;</code> (et), <code>|</code> (ou) et <code>xor</code> (ou exclusif).</li>
+</ul>
+<p>Voici des exemples d’écriture de conditions logiques utilisant le vecteur suivant, que nous avons déjà manipulé dans des <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#fonction-c">notes précédentes</a>.</p>
+<div class="sourceCode" id="cb124"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb124-1"><a href="#cb124-1" aria-hidden="true" tabindex="-1"></a>de <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">5</span>, <span class="dv">4</span>)</span></code></pre></div>
+<p>Supposons que nous voulions connaître le nombre d’éléments dans ce vecteur numérique dont la valeur est supérieure à 3. La condition logique suivante nous permet d’identifier ces valeurs.</p>
+<div class="sourceCode" id="cb125"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb125-1"><a href="#cb125-1" aria-hidden="true" tabindex="-1"></a>condition <span class="ot">&lt;-</span> de <span class="sc">&gt;</span> <span class="dv">3</span></span>
+<span id="cb125-2"><a href="#cb125-2" aria-hidden="true" tabindex="-1"></a>condition</span></code></pre></div>
+<pre><code>##  [1] FALSE FALSE  TRUE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE</code></pre>
+<p>Compter le nombre de valeurs supérieures à 3 dans <code>de</code> revient à compter le nombre de <code>TRUE</code> dans le vecteur précédent. Ce calcul se réalise facilement avec la fonction <code>sum</code> comme suit.</p>
+<div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(condition)</span></code></pre></div>
+<pre><code>## [1] 5</code></pre>
+<p>Même si une somme est une opération mathématique sur des valeurs numériques, la commande précédente ne retourne par d’erreur, car R réalise d’abord une <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#conversions">conversion implicite de type de données</a> pour transformer les valeurs logiques en nombres (<code>TRUE</code> devient 1 et <code>FALSE</code> devient 0), puis effectue la somme.</p>
+<div id="extraction-déléments-selon-une-condition-logique" class="section level3" number="3.1.1">
+<h3><span class="header-section-number">3.1.1</span> Extraction d’éléments selon une condition logique</h3>
+<p>Le vecteur <code>condition</code> serait aussi utile pour extraire les éléments de <code>de</code> ayant une valeur supérieure à 3. Nous savons que l’<a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#extraction">opérateur d’indiçage <code>[</code> et la fonction d’extraction <code>subset</code></a> acceptent en entrée un vecteur logique. Nous pouvons donc extraire les éléments respectant la condition comme suit.</p>
+<div class="sourceCode" id="cb129"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb129-1"><a href="#cb129-1" aria-hidden="true" tabindex="-1"></a>de[condition]</span></code></pre></div>
+<pre><code>## [1] 4 5 6 5 4</code></pre>
+<div id="fonction-which" class="section level4" number="3.1.1.1">
+<h4><span class="header-section-number">3.1.1.1</span> Fonction <code>which</code></h4>
+<p></p>
+<p>La <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/which.html">fonction <code>which</code></a> permet de connaître les positions des <code>TRUE</code> dans le vecteur, comme l’illustre cet exemple :</p>
+<div class="sourceCode" id="cb131"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb131-1"><a href="#cb131-1" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span>(condition)</span></code></pre></div>
+<pre><code>## [1]  3  7  8  9 10</code></pre>
+<p>L’utilisation de <code>which</code> n’est cependant pas nécessaire lors de l’extraction d’éléments à partir d’un vecteur logique. Par exemple, les commandes <code>de[which(condition)]</code> et <code>de[condition]</code> produisent le même résultat, mais la commande sans appel à la fonction <code>which</code> a l’avantage d’être plus succincte.</p>
+</div>
+<div id="conditions-combinant-des-vecteurs-logiques" class="section level4" number="3.1.1.2">
+<h4><span class="header-section-number">3.1.1.2</span> Conditions combinant des vecteurs logiques</h4>
+<p></p>
+<p>La condition précédente était plutôt simple. Une condition plus complexe requiert souvent de combiner des vecteurs logiques à l’aide d’un opérateur logique. Par exemple, l’instruction suivante identifie les éléments du vecteur <code>de</code> dont la valeur se situe dans l’intervalle <span class="math inline">\([3, 5]\)</span>.</p>
+<div class="sourceCode" id="cb133"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb133-1"><a href="#cb133-1" aria-hidden="true" tabindex="-1"></a>de <span class="sc">&gt;=</span> <span class="dv">3</span> <span class="sc">&amp;</span> de <span class="sc">&lt;=</span> <span class="dv">5</span></span></code></pre></div>
+<pre><code>##  [1] FALSE  TRUE  TRUE FALSE FALSE  TRUE  TRUE FALSE  TRUE  TRUE</code></pre>
+<p>L’instruction suivante identifie pour sa part les éléments du vecteur <code>de</code> égaux à 1, 4 ou 6.</p>
+<div class="sourceCode" id="cb135"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1" aria-hidden="true" tabindex="-1"></a>de <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> de <span class="sc">==</span> <span class="dv">4</span> <span class="sc">|</span> de <span class="sc">==</span> <span class="dv">6</span></span></code></pre></div>
+<pre><code>##  [1] FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE FALSE  TRUE</code></pre>
+<p>Pour identifier les éléments du vecteur <code>de</code> non-égaux à 1, 4 ou 6, nous pourrions inverser le vecteur logique précédent avec l’opérateur de négation comme suit.</p>
+<div class="sourceCode" id="cb137"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1" aria-hidden="true" tabindex="-1"></a><span class="sc">!</span>(de <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> de <span class="sc">==</span> <span class="dv">4</span> <span class="sc">|</span> de <span class="sc">==</span> <span class="dv">6</span>)</span></code></pre></div>
+<pre><code>##  [1]  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE FALSE</code></pre>
+<p>Rappelons qu’en logique mathématique, la <a href="https://fr.wikipedia.org/wiki/Table_de_v%C3%A9rit%C3%A9#NON-OU_logique">négation d’une disjonction est équivalente à la conjonction de négations</a>. L’instruction suivante retourne donc le même résultat que la précédente.</p>
+<div class="sourceCode" id="cb139"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1" aria-hidden="true" tabindex="-1"></a>de <span class="sc">!=</span> <span class="dv">1</span> <span class="sc">&amp;</span> de <span class="sc">!=</span> <span class="dv">4</span> <span class="sc">&amp;</span> de <span class="sc">!=</span> <span class="dv">6</span></span></code></pre></div>
+<pre><code>##  [1]  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE FALSE</code></pre>
+</div>
+</div>
+<div id="opérateur-in-de-comparaison-à-plusieurs-valeurs" class="section level3" number="3.1.2">
+<h3><span class="header-section-number">3.1.2</span> Opérateur <code>%in%</code> de comparaison à plusieurs valeurs</h3>
+<p>Pour effectuer une comparaison à un ensemble de valeur, telle que le fait l’instruction <code>de == 1 | de == 4 | de == 6</code>, R offre un opérateur raccourcissant la syntaxe : l’<a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/match.html">opérateur <code>%in%</code></a>. Cet opérateur compare les éléments d’un vecteur (placé avant l’opérateur) aux éléments d’un ensemble présenté sous la forme d’un vecteur (placé après). Il retourne <code>TRUE</code> pour un élément égal à n’importe lequel des éléments de l’ensemble, <code>FALSE</code> sinon. L’instruction <code>de == 1 | de == 4 | de == 6</code> est donc équivalent à la suivante.</p>
+<div class="sourceCode" id="cb141"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1" aria-hidden="true" tabindex="-1"></a>de <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">6</span>)</span></code></pre></div>
+<pre><code>##  [1] FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE FALSE  TRUE</code></pre>
+<p>Combiné à un opérateur de négation <code>!</code>, l’opérateur <code>%in%</code> permet de facilement tester si les valeurs dans un vecteur sont différentes des valeurs d’un ensemble, comme dans cet exemple.</p>
+<div class="sourceCode" id="cb143"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1" aria-hidden="true" tabindex="-1"></a><span class="sc">!</span> de <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">6</span>)</span></code></pre></div>
+<pre><code>##  [1]  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE FALSE</code></pre>
+</div>
+<div id="fonctions-de-comparaison-pour-constantes-spéciales" class="section level3" number="3.1.3">
+<h3><span class="header-section-number">3.1.3</span> Fonctions de comparaison pour constantes spéciales</h3>
+<p>Notons que tester si un ou des éléments sont égaux à <code>NA</code>, <code>NaN</code>, <code>Inf</code> ou <code>-Inf</code>, ne se fait pas directement avec l’opérateur <code>==</code> comme suit.</p>
+<div class="sourceCode" id="cb145"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="cn">NA</span>, <span class="dv">4</span>, <span class="dv">5</span>) <span class="sc">==</span> <span class="cn">NA</span></span></code></pre></div>
+<pre><code>## [1] NA NA NA NA NA</code></pre>
+<p>Il faut plutôt utiliser la fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/NA.html"><code>is.na</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/is.finite.html"><code>is.nan</code> ou <code>is.infinite</code></a>.</p>
+<div class="sourceCode" id="cb147"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb147-1"><a href="#cb147-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.na</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="cn">NA</span>, <span class="dv">4</span>, <span class="dv">5</span>))</span></code></pre></div>
+<pre><code>## [1] FALSE FALSE  TRUE FALSE FALSE</code></pre>
+<p>La fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/is.finite.html"><code>is.finite</code></a> retourne pour sa part <code>TRUE</code> pour les éléments non égaux à <code>NA</code>, <code>NaN</code>, <code>Inf</code> ou <code>-Inf</code>.</p>
+<div class="sourceCode" id="cb149"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb149-1"><a href="#cb149-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.finite</span>(<span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NaN</span>, <span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>, <span class="fl">4.5</span>, <span class="dv">3</span>))</span></code></pre></div>
+<pre><code>## [1] FALSE FALSE FALSE FALSE  TRUE  TRUE</code></pre>
+</div>
+</div>
+<div id="conditions-logiques-de-longueur-1" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> Conditions logiques de longueur 1</h2>
+<p>Lors de l’écriture d’une condition logique, il faut parfois s’assurer de retourner un vecteur logique de longueur 1. C’est le cas lors de l’écriture d’une condition logique dans une structure de contrôle conditionnelle <code>if ... else</code> (que nous verrons plus loin). La condition dans un <code>if</code> doit être obligatoirement de longueur 1.</p>
+<div id="opérateurs-et-fonctions-logiques-non-vectoriels" class="section level3" number="3.2.1">
+<h3><span class="header-section-number">3.2.1</span> Opérateurs et fonctions logiques non vectoriels</h3>
+<p>Les <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Logic.html">opérateurs et fonctions logiques</a> suivants garantissent que le résultat retourné est de longueur 1.</p>
+<ul>
+<li><code>&amp;&amp;</code> : et,</li>
+<li><code>||</code> : ou,</li>
+<li><code>isTRUE</code> et <code>isFALSE</code>.</li>
+</ul>
+<p>Les opérateurs <code>&amp;&amp;</code> et <code>||</code> appliquent les mêmes tables de vérité que les opérateurs <code>&amp;</code> et <code>|</code>, mais ils ne travaillent pas de façon vectorielle. Si, par inadvertance, <code>&amp;&amp;</code> ou <code>||</code> reçoit en entrée des vecteurs de longueurs supérieures à 1, il effectue une opération seulement sur les premiers éléments de ces vecteurs, comme dans cet exemple.</p>
+<div class="sourceCode" id="cb151"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1" aria-hidden="true" tabindex="-1"></a>de <span class="sc">==</span> <span class="dv">1</span> <span class="sc">||</span> de <span class="sc">==</span> <span class="dv">4</span> <span class="sc">||</span> de <span class="sc">==</span> <span class="dv">6</span></span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<p>Les fonctions <code>isTRUE</code> et <code>isFALSE</code>, pour leur part, sont des fonctions raccourcies permettant d’effectuer les tests suivants.</p>
+<div class="sourceCode" id="cb153"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb153-1"><a href="#cb153-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.logical</span>(x) <span class="sc">&amp;&amp;</span> <span class="fu">length</span>(x) <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(x) <span class="sc">&amp;&amp;</span> x   <span class="co"># isTRUE</span></span>
+<span id="cb153-2"><a href="#cb153-2" aria-hidden="true" tabindex="-1"></a><span class="fu">is.logical</span>(x) <span class="sc">&amp;&amp;</span> <span class="fu">length</span>(x) <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(x) <span class="sc">&amp;&amp;</span> <span class="sc">!</span>x  <span class="co"># isFALSE</span></span></code></pre></div>
+<p>Elles permettent donc de s’assurer qu’une condition possède toutes les caractéristiques requises pour être fournie à un <code>if</code> (contenir des données logiques, être de longueur 1 et ne pas prendre la valeur <code>NA</code>).</p>
+</div>
+<div id="fonctions-all-et-any" class="section level3" number="3.2.2">
+<h3><span class="header-section-number">3.2.2</span> Fonctions <code>all</code> et <code>any</code></h3>
+<p>Les fonctions <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/all.html"><code>all</code></a> et <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/any.html"><code>any</code></a> font partie des fonctions R retournant toujours une seule valeur logique. La fonction <code>all</code> indique si tous les éléments d’un vecteur logique sont <code>TRUE</code>. Par exemple, pour tester si toutes les valeurs dans le vecteur <code>de</code> sont entières au sens mathématique, nous pourrions utiliser la commande suivante.</p>
+<div class="sourceCode" id="cb154"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb154-1"><a href="#cb154-1" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(de <span class="sc">%%</span> <span class="dv">1</span> <span class="sc">==</span> <span class="dv">0</span>)</span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p>La fonction <code>any</code> indique pour sa part si au moins un élément d’un vecteur logique est <code>TRUE</code>. Nous pourrions par exemple vérifier si le vecteur <code>de</code> comporte des valeurs négatives comme suit.</p>
+<div class="sourceCode" id="cb156"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb156-1"><a href="#cb156-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(de <span class="sc">&lt;</span> <span class="dv">0</span>)</span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+</div>
+<div id="fonctions-de-vérification-de-type" class="section level3" number="3.2.3">
+<h3><span class="header-section-number">3.2.3</span> Fonctions de vérification de type</h3>
+<p>Finalement, les fonctions <code>is.numeric</code>, <code>is.character</code>, <code>is.logical</code>, <code>is.vector</code>, <code>is.matrix</code>, <code>is.data.frame</code>, <code>is.factor</code>, <code>is.null</code>, <code>is.function</code>, etc., testent une condition et retournent toujours un logique de longueur unitaire. Par exemple, testons si le vecteur <code>de</code> contient bien des données numériques.</p>
+<div class="sourceCode" id="cb158"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb158-1"><a href="#cb158-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.numeric</span>(de)</span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<hr />
+</div>
+</div>
+</div>
+<div id="calculs-plus-avancés" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Calculs plus avancés</h1>
+<p><em>Voici des informations concernant trois sujets mathématiques plus poussés. Cette matière ne sera pas évaluée dans le cadre du cours, car certains étudiants n’ont pas les connaissances préalables pour facilement la comprendre. Il est cependant fort probable que certaines des informations ci-dessous seront utiles aux étudiants gradués en statistique. L’implémentation de méthodes statistiques fait souvent intervenir ces types de calculs.</em></p>
+<div id="algèbre-linéaire" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Algèbre linéaire</h2>
+<p>Il existe plusieurs fonctions en R pour faire de l’algèbre linéaire.</p>
+<ul>
+<li>multiplication matricielle : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/matmult.html"><code>%*%</code></a>;</li>
+<li>transposition : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/t.html"><code>t</code></a>;</li>
+<li>inverse : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/solve.html"><code>solve</code></a> (en fait <code>solve</code> résout <code>A %*% x = B</code>, mais par défaut <code>B</code> est la matrice identité);</li>
+<li>produit vectoriel (en anglais <em>cross product</em>) de matrices : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/crossprod.html"><code>crossprod</code></a>;</li>
+<li>produit dyadique généralisé (en anglais <em>outer product</em>) : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/outer.html"><code>outer</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/outer.html"><code>%o%</code></a>;</li>
+<li>produit de Kronecker généralisé : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/kronecker.html"><code>kronecker</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/kronecker.html"><code>%x%</code></a>;</li>
+<li>matrices diagonales : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/diag.html"><code>diag</code></a>;</li>
+<li>déterminant : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/det.html"><code>det</code></a>;</li>
+<li>valeurs et vecteur propres : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/eigen.html"><code>eigen</code></a>;</li>
+<li>décompositions : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/svd.html"><code>svd</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/qr.html"><code>qr</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/chol.html"><code>chol</code></a>.</li>
+</ul>
+<p>Faisons quelques exemples pour illustrer certaines de ces fonctions.</p>
+<div id="opérateur" class="section level3" number="4.1.1">
+<h3><span class="header-section-number">4.1.1</span> Opérateur <code>%*%</code></h3>
+<p>L’opérateur usuel de multiplication effectue une multiplication terme à terme entre deux matrices.</p>
+<div class="sourceCode" id="cb160"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb160-1"><a href="#cb160-1" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb160-2"><a href="#cb160-2" aria-hidden="true" tabindex="-1"></a>A</span></code></pre></div>
+<pre><code>##      [,1] [,2]
+## [1,]    1    4
+## [2,]    2    5
+## [3,]    3    6</code></pre>
+<div class="sourceCode" id="cb162"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb162-1"><a href="#cb162-1" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">6</span><span class="sc">:</span><span class="dv">1</span>, <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb162-2"><a href="#cb162-2" aria-hidden="true" tabindex="-1"></a>B</span></code></pre></div>
+<pre><code>##      [,1] [,2]
+## [1,]    6    3
+## [2,]    5    2
+## [3,]    4    1</code></pre>
+<div class="sourceCode" id="cb164"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb164-1"><a href="#cb164-1" aria-hidden="true" tabindex="-1"></a>A<span class="sc">*</span>B</span></code></pre></div>
+<pre><code>##      [,1] [,2]
+## [1,]    6   12
+## [2,]   10   10
+## [3,]   12    6</code></pre>
+<p>Pour effectuer une <a href="https://fr.wikipedia.org/wiki/Produit_matriciel">multiplication matricielle</a>, il faut utiliser l’opérateur <code>%*%</code>. Les dimensions des matrices doivent évidemment concorder.</p>
+<div class="sourceCode" id="cb166"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb166-1"><a href="#cb166-1" aria-hidden="true" tabindex="-1"></a>A <span class="sc">%*%</span> B</span></code></pre></div>
+<pre><code>## Error in A %*% B: non-conformable arguments</code></pre>
+<div class="sourceCode" id="cb168"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb168-1"><a href="#cb168-1" aria-hidden="true" tabindex="-1"></a>C <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">7</span>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb168-2"><a href="#cb168-2" aria-hidden="true" tabindex="-1"></a>C</span></code></pre></div>
+<pre><code>##      [,1] [,2]
+## [1,]    5    3
+## [2,]    2    7</code></pre>
+<div class="sourceCode" id="cb170"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb170-1"><a href="#cb170-1" aria-hidden="true" tabindex="-1"></a>A <span class="sc">%*%</span> C</span></code></pre></div>
+<pre><code>##      [,1] [,2]
+## [1,]   13   31
+## [2,]   20   41
+## [3,]   27   51</code></pre>
+</div>
+<div id="fonction-solve" class="section level3" number="4.1.2">
+<h3><span class="header-section-number">4.1.2</span> Fonction <code>solve</code></h3>
+<p>L’<a href="https://fr.wikipedia.org/wiki/Matrice_inversible">inverse d’une matrice</a> s’obtient avec la fonction <code>solve</code>.</p>
+<div class="sourceCode" id="cb172"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb172-1"><a href="#cb172-1" aria-hidden="true" tabindex="-1"></a><span class="fu">solve</span>(C)</span></code></pre></div>
+<pre><code>##             [,1]       [,2]
+## [1,]  0.24137931 -0.1034483
+## [2,] -0.06896552  0.1724138</code></pre>
+</div>
+<div id="fonction-crossprod" class="section level3" number="4.1.3">
+<h3><span class="header-section-number">4.1.3</span> Fonction <code>crossprod</code></h3>
+<p>La fonction <code>crossprod</code> sert à calculer <span class="math inline">\(A^T B\)</span> ou <span class="math inline">\(A^T A\)</span>.</p>
+<div class="sourceCode" id="cb174"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb174-1"><a href="#cb174-1" aria-hidden="true" tabindex="-1"></a><span class="fu">crossprod</span>(A, B)</span></code></pre></div>
+<pre><code>##      [,1] [,2]
+## [1,]   28   10
+## [2,]   73   28</code></pre>
+<div class="sourceCode" id="cb176"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb176-1"><a href="#cb176-1" aria-hidden="true" tabindex="-1"></a><span class="co"># équivalent à</span></span>
+<span id="cb176-2"><a href="#cb176-2" aria-hidden="true" tabindex="-1"></a><span class="fu">t</span>(A) <span class="sc">%*%</span> B</span></code></pre></div>
+<pre><code>##      [,1] [,2]
+## [1,]   28   10
+## [2,]   73   28</code></pre>
+</div>
+<div id="produits-dyadique-et-de-kronecker" class="section level3" number="4.1.4">
+<h3><span class="header-section-number">4.1.4</span> Produits dyadique et de Kronecker</h3>
+<p>Parfois, nous avons besoin d’effectuer une opération en prenant toutes les paires de termes possibles entre deux vecteurs ou matrices. C’est ce que font les <a href="https://fr.wikipedia.org/wiki/Produit_dyadique">produits dyadique</a> (<em>outer product</em>) (opérateur <code>%o%</code>) et de <a href="https://fr.wikipedia.org/wiki/Produit_de_Kronecker">Kronecker</a> (opérateur <code>%x%</code>). Cependant, ils n’assemblent pas les résultats de la même façon. Voici des exemples avec des vecteurs.</p>
+<div class="sourceCode" id="cb178"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb178-1"><a href="#cb178-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">:</span><span class="dv">3</span> <span class="sc">%o%</span> <span class="dv">4</span><span class="sc">:</span><span class="dv">5</span></span></code></pre></div>
+<pre><code>##      [,1] [,2]
+## [1,]    4    5
+## [2,]    8   10
+## [3,]   12   15</code></pre>
+<div class="sourceCode" id="cb180"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb180-1"><a href="#cb180-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">:</span><span class="dv">3</span> <span class="sc">%x%</span> <span class="dv">4</span><span class="sc">:</span><span class="dv">5</span></span></code></pre></div>
+<pre><code>## [1]  4  5  8 10 12 15</code></pre>
+<p>Les deux commandes ont permis le calcul des mêmes 6 produits (<span class="math inline">\(1 \times 4 = 4\)</span>, <span class="math inline">\(2 \times 4 = 8\)</span>, <span class="math inline">\(3 \times 4 = 12\)</span>, <span class="math inline">\(1 \times 5 = 5\)</span>, <span class="math inline">\(2 \times 5 = 10\)</span> et <span class="math inline">\(3 \times 5 = 15\)</span>). Cependant, l’opérateur <code>%o%</code> a rassemblé les produits dans une matrice de dimension 3 par 2, et l’opérateur <code>%x%</code> dans un vecteur de longueur <span class="math inline">\(3 \times 2 = 6\)</span>.</p>
+<p>Avec deux matrices en entrée, le résultat de <code>A %o% B</code> est un array à 4 dimensions dont les tailles sont, dans l’ordre, <code>nrow(A)</code>, <code>ncol(A)</code>, <code>nrow(B)</code> et <code>ncol(B)</code>. Le résultat de <code>A %x% B</code> est pour sa part une matrice à 2 dimensions comprenant <code>nrow(A)*nrow(B)</code> lignes et <code>ncol(A)*ncol(B)</code> colonnes.</p>
+<p>Voici des exemples.</p>
+<div class="sourceCode" id="cb182"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb182-1"><a href="#cb182-1" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">12</span><span class="sc">:</span><span class="dv">1</span>, <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">4</span>)</span>
+<span id="cb182-2"><a href="#cb182-2" aria-hidden="true" tabindex="-1"></a>A</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]   12    9    6    3
+## [2,]   11    8    5    2
+## [3,]   10    7    4    1</code></pre>
+<div class="sourceCode" id="cb184"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb184-1"><a href="#cb184-1" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">1</span>)</span>
+<span id="cb184-2"><a href="#cb184-2" aria-hidden="true" tabindex="-1"></a>B</span></code></pre></div>
+<pre><code>##      [,1]
+## [1,]    1
+## [2,]    2</code></pre>
+<div class="sourceCode" id="cb186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb186-1"><a href="#cb186-1" aria-hidden="true" tabindex="-1"></a>A <span class="sc">%o%</span> B</span></code></pre></div>
+<pre><code>## , , 1, 1
+## 
+##      [,1] [,2] [,3] [,4]
+## [1,]   12    9    6    3
+## [2,]   11    8    5    2
+## [3,]   10    7    4    1
+## 
+## , , 2, 1
+## 
+##      [,1] [,2] [,3] [,4]
+## [1,]   24   18   12    6
+## [2,]   22   16   10    4
+## [3,]   20   14    8    2</code></pre>
+<div class="sourceCode" id="cb188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb188-1"><a href="#cb188-1" aria-hidden="true" tabindex="-1"></a>A <span class="sc">%x%</span> B</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]   12    9    6    3
+## [2,]   24   18   12    6
+## [3,]   11    8    5    2
+## [4,]   22   16   10    4
+## [5,]   10    7    4    1
+## [6,]   20   14    8    2</code></pre>
+<p>Les deux opérations se généralisent à l’emploi d’un autre opérateur que le produit, grâce aux fonctions <code>outer</code> et <code>kronecker</code>.</p>
+<div class="sourceCode" id="cb190"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb190-1"><a href="#cb190-1" aria-hidden="true" tabindex="-1"></a><span class="fu">outer</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">4</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">FUN =</span> <span class="st">&#39;+&#39;</span>)</span></code></pre></div>
+<pre><code>##      [,1] [,2]
+## [1,]    5    6
+## [2,]    6    7
+## [3,]    7    8</code></pre>
+<div class="sourceCode" id="cb192"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb192-1"><a href="#cb192-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kronecker</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">4</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">FUN =</span> <span class="st">&#39;+&#39;</span>)</span></code></pre></div>
+<pre><code>## [1] 5 6 6 7 7 8</code></pre>
+</div>
+<div id="fonction-diag" class="section level3" number="4.1.5">
+<h3><span class="header-section-number">4.1.5</span> Fonction <code>diag</code></h3>
+<p>Finalement, la fonction <code>diag</code> a plusieurs utilités. Selon le type de l’objet qu’elle reçoit comme premier argument, elle permet de :</p>
+<ul>
+<li>matrice en entrée : extraire la diagonale de la matrice reçue;</li>
+</ul>
+<div class="sourceCode" id="cb194"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb194-1"><a href="#cb194-1" aria-hidden="true" tabindex="-1"></a>C</span></code></pre></div>
+<pre><code>##      [,1] [,2]
+## [1,]    5    3
+## [2,]    2    7</code></pre>
+<div class="sourceCode" id="cb196"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb196-1"><a href="#cb196-1" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(C)</span></code></pre></div>
+<pre><code>## [1] 5 7</code></pre>
+<ul>
+<li>vecteur en entrée : créer une matrice diagonale à partir du vecteur reçu, qui doit continir les éléments à mettre sur la diagonale;</li>
+</ul>
+<div class="sourceCode" id="cb198"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb198-1"><a href="#cb198-1" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    1    0    0
+## [2,]    0    2    0
+## [3,]    0    0    3</code></pre>
+<ul>
+<li>un seul nombre en entrée : créer une matrice identité dont la taille commune des dimensions est déterminée par le nombre fourni.</li>
+</ul>
+<div class="sourceCode" id="cb200"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb200-1"><a href="#cb200-1" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(<span class="dv">3</span>)</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    1    0    0
+## [2,]    0    1    0
+## [3,]    0    0    1</code></pre>
+</div>
+</div>
+<div id="calcul-différentiel-et-intégral" class="section level2" number="4.2">
+<h2><span class="header-section-number">4.2</span> Calcul différentiel et intégral</h2>
+<p><em>(Ce qui est offert en R dans ce domaine n’est pas très performant ni facile d’utilisation.)</em></p>
+<div id="dérivation-symbolique-d-deriv-et-deriv3" class="section level3" number="4.2.1">
+<h3><span class="header-section-number">4.2.1</span> Dérivation symbolique : <code>D</code>, <code>deriv</code> et <code>deriv3</code></h3>
+<p>Tout comme les logiciels Maple ou Mathematica, R peut faire du calcul symbolique de dérivées. Cependant, il est loin d’être le meilleur outil pour ces tâches. Pour illustrer les capacités (limitées) de R dans ce domaine, tentons d’abord de calculer la dérivée suivante :</p>
+<p><span class="math inline">\(\frac{d}{dx}( log(x) + sin(x) ).\)</span></p>
+<div class="sourceCode" id="cb202"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb202-1"><a href="#cb202-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">deriv</span>(<span class="at">expr =</span> <span class="sc">~</span> <span class="fu">log</span>(x) <span class="sc">+</span> <span class="fu">sin</span>(x), <span class="at">namevec =</span> <span class="st">&quot;x&quot;</span>)</span>
+<span id="cb202-2"><a href="#cb202-2" aria-hidden="true" tabindex="-1"></a>df</span></code></pre></div>
+<pre><code>## expression({
+##     .value &lt;- log(x) + sin(x)
+##     .grad &lt;- array(0, c(length(.value), 1L), list(NULL, c(&quot;x&quot;)))
+##     .grad[, &quot;x&quot;] &lt;- 1/x + cos(x)
+##     attr(.value, &quot;gradient&quot;) &lt;- .grad
+##     .value
+## })</code></pre>
+<p>L’objet <code>df</code> est particulier. Il s’agit d’une expression. La ligne <code>.grad[, "x"] &lt;- 1/x + cos(x)</code> permet de constater que R a bien trouvé que la dérivée symbolique de <span class="math inline">\(log(x) + sin(x)\)</span> est <span class="math inline">\(1/x + cos(x)\)</span>. Nous pouvons maintenant utiliser <code>df</code> pour calculer cette dérivée en certains points. Étant donné que nous avons nommé <code>x</code> la variable dans la fonction à dériver, il faut d’abord créer un objet nommé <code>x</code> contenant les valeurs en lesquelles nous souhaitons calculer la dérivée.</p>
+<div class="sourceCode" id="cb204"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb204-1"><a href="#cb204-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">5</span></span></code></pre></div>
+<p>Ensuite, nous soumettons la commande suivante pour obtenir le résultat recherché.</p>
+<div class="sourceCode" id="cb205"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb205-1"><a href="#cb205-1" aria-hidden="true" tabindex="-1"></a><span class="fu">eval</span>(df)</span></code></pre></div>
+<pre><code>## [1] 1.6024446 1.2397323 0.6294919 0.6505136
+## attr(,&quot;gradient&quot;)
+##                x
+## [1,]  0.08385316
+## [2,] -0.65665916
+## [3,] -0.40364362
+## [4,]  0.48366219</code></pre>
+<p>Cette sortie contient les valeurs de la fonction d’origine aux points d’intérêt,</p>
+<div class="sourceCode" id="cb207"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb207-1"><a href="#cb207-1" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(x) <span class="sc">+</span> <span class="fu">sin</span>(x)</span></code></pre></div>
+<pre><code>## [1] 1.6024446 1.2397323 0.6294919 0.6505136</code></pre>
+<p>suivies des valeurs de la dérivée de la fonction en ces points.</p>
+<div class="sourceCode" id="cb209"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb209-1"><a href="#cb209-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">/</span>x <span class="sc">+</span> <span class="fu">cos</span>(x)</span></code></pre></div>
+<pre><code>## [1]  0.08385316 -0.65665916 -0.40364362  0.48366219</code></pre>
+<p>Ainsi, R peut faire du calcul symbolique de dérivée, mais il n’offre pas une façon très conviviale de le faire. Plus d’information peut être trouvée dans la <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/deriv.html">fiche d’aide des fonctions <code>D</code>, <code>deriv</code> et <code>deriv3</code></a>. Le R de base n’offre pas de fonctions pour le calcul symbolique d’intégrales. Cependant, le package <code>Ryacas</code> en offre : <a href="https://CRAN.R-project.org/package=Ryacas" class="uri">https://CRAN.R-project.org/package=Ryacas</a></p>
+</div>
+<div id="dérivation-numérique-numericderiv" class="section level3" number="4.2.2">
+<h3><span class="header-section-number">4.2.2</span> Dérivation numérique : <code>numericDeriv</code></h3>
+<p>Le <a href="https://en.wikipedia.org/wiki/Numerical_differentiation">calcul de dérivées numériques</a> est un peu plus simple. Par exemple, dérivons la fonction de répartition d’une loi normale standard en quelques points avec la fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/numericDeriv.html"><code>numericDeriv</code></a>.</p>
+<div class="sourceCode" id="cb211"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb211-1"><a href="#cb211-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Points en lesquels nous allons dériver</span></span>
+<span id="cb211-2"><a href="#cb211-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">as.double</span>(<span class="sc">-</span><span class="dv">3</span><span class="sc">:</span><span class="dv">3</span>)</span>
+<span id="cb211-3"><a href="#cb211-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Valeur de la fonction en ces points</span></span>
+<span id="cb211-4"><a href="#cb211-4" aria-hidden="true" tabindex="-1"></a><span class="fu">pnorm</span>(x)</span></code></pre></div>
+<pre><code>## [1] 0.001349898 0.022750132 0.158655254 0.500000000 0.841344746 0.977249868 0.998650102</code></pre>
+<div class="sourceCode" id="cb213"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb213-1"><a href="#cb213-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcul de la dérivée en ces points</span></span>
+<span id="cb213-2"><a href="#cb213-2" aria-hidden="true" tabindex="-1"></a><span class="fu">numericDeriv</span>(<span class="at">expr =</span> <span class="fu">quote</span>(<span class="fu">pnorm</span>(x)), <span class="at">theta =</span> <span class="st">&quot;x&quot;</span>)</span></code></pre></div>
+<pre><code>## [1] 0.001349898 0.022750132 0.158655254 0.500000000 0.841344746 0.977249868 0.998650102
+## attr(,&quot;gradient&quot;)
+##             [,1]       [,2]      [,3]      [,4]      [,5]       [,6]        [,7]
+## [1,] 0.004431849 0.00000000 0.0000000 0.0000000 0.0000000 0.00000000 0.000000000
+## [2,] 0.000000000 0.05399097 0.0000000 0.0000000 0.0000000 0.00000000 0.000000000
+## [3,] 0.000000000 0.00000000 0.2419707 0.0000000 0.0000000 0.00000000 0.000000000
+## [4,] 0.000000000 0.00000000 0.0000000 0.3989423 0.0000000 0.00000000 0.000000000
+## [5,] 0.000000000 0.00000000 0.0000000 0.0000000 0.2419707 0.00000000 0.000000000
+## [6,] 0.000000000 0.00000000 0.0000000 0.0000000 0.0000000 0.05399096 0.000000000
+## [7,] 0.000000000 0.00000000 0.0000000 0.0000000 0.0000000 0.00000000 0.004431849</code></pre>
+<p>Nous arrivons au bon résultat, soit la fonction de densité de loi normale standard aux mêmes points.</p>
+<div class="sourceCode" id="cb215"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb215-1"><a href="#cb215-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dnorm</span>(x)</span></code></pre></div>
+<pre><code>## [1] 0.004431848 0.053990967 0.241970725 0.398942280 0.241970725 0.053990967 0.004431848</code></pre>
+<p>L’appel de la fonction <code>numericDeriv</code> n’est pas standard. Il fait intervenir une expression R à créer avec la fonction <code>quote</code>.</p>
+<p>Nous pourrions aussi programmer à la main une version simpliste de la dérivation numérique comme suit :</p>
+<div class="sourceCode" id="cb217"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb217-1"><a href="#cb217-1" aria-hidden="true" tabindex="-1"></a>delta <span class="ot">&lt;-</span> .<span class="dv">000001</span></span>
+<span id="cb217-2"><a href="#cb217-2" aria-hidden="true" tabindex="-1"></a>(<span class="fu">pnorm</span>(x <span class="sc">+</span> delta) <span class="sc">-</span> <span class="fu">pnorm</span>(x <span class="sc">-</span> delta)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> delta)</span></code></pre></div>
+<pre><code>## [1] 0.004431848 0.053990967 0.241970724 0.398942280 0.241970725 0.053990967 0.004431848</code></pre>
+</div>
+<div id="intégration-numérique-integrate" class="section level3" number="4.2.3">
+<h3><span class="header-section-number">4.2.3</span> Intégration numérique : <code>integrate</code></h3>
+<p>Effectuons maintenant l’opération inverse : intégrons la fonction de densité de la loi normale standard avec la fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/integrate.html"><code>integrate</code></a>.</p>
+<div class="sourceCode" id="cb219"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb219-1"><a href="#cb219-1" aria-hidden="true" tabindex="-1"></a><span class="fu">integrate</span>(<span class="at">f =</span> dnorm, <span class="at">lower =</span> <span class="sc">-</span><span class="cn">Inf</span>, <span class="at">upper =</span> <span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## 0.8413448 with absolute error &lt; 1.5e-05</code></pre>
+<p>Nous arrivons au bon résultat, soit la fonction de répartition de loi normale standard au point 1</p>
+<div class="sourceCode" id="cb221"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb221-1"><a href="#cb221-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pnorm</span>(<span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## [1] 0.8413447</code></pre>
+<p>Remarque : La fonction <code>integrate</code> ne travaille pas de façon vectorielle. Elle ne peut pas calculer des intégrales numériques pour plusieurs intervalles en un seul appel de la fonction.</p>
+</div>
+</div>
+<div id="optimisation-numérique" class="section level2" number="4.3">
+<h2><span class="header-section-number">4.3</span> Optimisation numérique</h2>
+<p>En mathématiques, l’optimisation consiste à trouver en quel(s) point(s) une fonction mathématique atteint sa valeur maximale ou minimale. En statistique, ce problème est souvent abordé en ces termes : trouver les valeurs des paramètres pour lesquels une fonction atteint son maximum ou son minimum.</p>
+<p>Parfois, il est possible de trouver une solution algébrique à ce problème à l’aide du calcul différentiel et intégral. Par contre, il arrive qu’il soit trop difficile, voire impossible, de dériver la fonction en question. L’optimisation numérique est une bonne solution dans un tel cas.</p>
+<p>Fonctions R utiles en optimisation numérique :</p>
+<ul>
+<li>pour optimiser une fonction à une variable : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/optimize.html"><code>optimize</code></a>,</li>
+<li>pour optimiser une fonction avec un nombre de variables quelconque : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/nlm.html"><code>nlm</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/optim.html"><code>optim</code></a>,</li>
+<li>optimisation sous contrainte : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/constrOptim.html"><code>constrOptim</code></a>.</li>
+</ul>
+<p>Exemple d’optimisation d’une fonction à une variable en R : trouvons en quel point la fonction de densité de la loi normale atteint son maximum. La théorie nous dit que ce maximum est atteint en la valeur de l’espérance de la loi. Voyons si l’optimisation numérique saura retourner le bon résultat.</p>
+<div class="sourceCode" id="cb223"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb223-1"><a href="#cb223-1" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(</span>
+<span id="cb223-2"><a href="#cb223-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> <span class="fu">dnorm</span>(x, <span class="at">mean =</span> <span class="dv">3</span>), <span class="at">from =</span> <span class="sc">-</span><span class="dv">3</span>, <span class="at">to =</span> <span class="dv">10</span>, </span>
+<span id="cb223-3"><a href="#cb223-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Maximum de la densité normale&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;densité N(3,1)&quot;</span></span>
+<span id="cb223-4"><a href="#cb223-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb223-5"><a href="#cb223-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">3</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>)</span></code></pre></div>
+<p><img src="/calculs/calculs_math_r_2021_files/figure-html/unnamed-chunk-92-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb224"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb224-1"><a href="#cb224-1" aria-hidden="true" tabindex="-1"></a><span class="fu">optimize</span>(<span class="at">f =</span> dnorm, <span class="at">interval =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">10</span>), <span class="at">mean =</span> <span class="dv">3</span>, <span class="at">maximum =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## $maximum
+## [1] 3
+## 
+## $objective
+## [1] 0.3989423</code></pre>
+<p>Oui, pour une loi normale d’espérance 3 et de variance 1, nous arrivons bien numériquement au résultat que le maximum de la densité est atteint en la valeur 3. La fonction <code>optimize</code> nous dit aussi que ce maximum vaut :</p>
+<div class="sourceCode" id="cb226"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb226-1"><a href="#cb226-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dnorm</span>(<span class="dv">3</span>, <span class="at">mean =</span> <span class="dv">3</span>)</span></code></pre></div>
+<pre><code>## [1] 0.3989423</code></pre>
+<p>Les fonctions <code>nlm</code>, <code>optim</code> et <code>constrOptim</code> utilisent des <strong>algorithmes itératifs</strong>. Elles ont besoin de valeurs initiales pour les paramètres (argument <code>par</code> à fournir obligatoirement). À chaque itération de l’algorithme, elles modifient ces valeurs en tentant de se diriger vers l’optimum de la fonction. Elles peuvent :</p>
+<ul>
+<li>ne pas converger,</li>
+<li>converger au mauvais endroit (optimum local plutôt que global).</li>
+</ul>
+<p>Il faut être prudent lors de leur utilisation. Par exemple, <code>optim</code> est <strong>sensible au choix de plusieurs arguments</strong>, notamment :</p>
+<ul>
+<li>l’algorithme employé,</li>
+<li>les valeurs initiales données aux paramètres.</li>
+</ul>
+<p>Ces fonctions sont tout de même très utiles pour effectuer une optimisation lorsque celle-ci est difficile ou impossible à réaliser algébriquement.</p>
+<p>Voici un exemple d’optimisation d’une fonction à plusieurs variables. La fonction <code>lm</code> minimise le critère des moindres carrés, en implémentant des formules algébriques. Les estimations des paramètres du modèle linéaire que <code>lm</code> retourne sont les points en lesquelles la fonction des moindres carrés est minimisée. Tentons de minimiser cette fonction de façon numérique. Pour ce faire, nous avons d’abord besoin d’une fonction qui calcule le critère des moindres carrés et qui prend comme premier argument les paramètres du modèle. Nous n’avons pas encore vu dans le cours comment créer des fonctions, mais je me permets tout de même ici d’en créer une, pour illustrer l’optimisation numérique. La syntaxe pour créer des fonctions R sera vue au prochain cours.</p>
+<p>Le <a href="https://en.wikipedia.org/wiki/Least_squares">critère des moindres carrés</a> est calculé en sommant les différences au carré entre les valeurs observées d’une variable et les valeurs prédites par le modèle. Pour un modèle de régression linéaire, la fonction suivante calcule de façon matricielle la valeur du critère.</p>
+<div class="sourceCode" id="cb228"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb228-1"><a href="#cb228-1" aria-hidden="true" tabindex="-1"></a>moindresCarres <span class="ot">&lt;-</span> <span class="cf">function</span>(beta, y, X) {</span>
+<span id="cb228-2"><a href="#cb228-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.vector</span>(<span class="fu">crossprod</span>(y <span class="sc">-</span> X <span class="sc">%*%</span> <span class="fu">matrix</span>(beta, <span class="at">ncol =</span> <span class="dv">1</span>)))</span>
+<span id="cb228-3"><a href="#cb228-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Le vecteur <code>y</code> doit contenir les valeurs observées de la variable réponse et la matrice <code>X</code> est la <a href="https://en.wikipedia.org/wiki/Design_matrix">matrice de design du modèle</a>. Cette dernière contient les observations des variables explicatives pour les termes présents dans le modèle. Le vecteur <code>y</code> et la matrice <code>X</code> sont des composantes du modèle supposées connues ici. C’est le vecteur de paramètre <code>beta</code> que nous cherchons à estimer. Nous allons utiliser les données du jeu de données <code>cars</code> dans cet exemple.</p>
+<p>Voyons d’abord le résultat obtenu avec la fonction <code>lm</code> pour un modèle quadratique.</p>
+<div class="sourceCode" id="cb229"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb229-1"><a href="#cb229-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(dist <span class="sc">~</span> speed <span class="sc">+</span> <span class="fu">I</span>(speed<span class="sc">^</span><span class="dv">2</span>), <span class="at">data =</span> cars)</span>
+<span id="cb229-2"><a href="#cb229-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coefficients</span>(reg)</span></code></pre></div>
+<pre><code>## (Intercept)       speed  I(speed^2) 
+##   2.4701378   0.9132876   0.0999593</code></pre>
+<p>Pour retrouver ce résultat par optimisation numérique, il faut d’abord construire le vecteur <code>y</code> et la matrice <code>X</code> comme suit.</p>
+<div class="sourceCode" id="cb231"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb231-1"><a href="#cb231-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> cars<span class="sc">$</span>dist</span>
+<span id="cb231-2"><a href="#cb231-2" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">intercept =</span> <span class="dv">1</span>, cars<span class="sc">$</span>speed, cars<span class="sc">$</span>speed<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
+<p>La fonction <code>lm</code> arrive à la valeur minimale des moindres carrés suivante</p>
+<div class="sourceCode" id="cb232"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb232-1"><a href="#cb232-1" aria-hidden="true" tabindex="-1"></a><span class="fu">moindresCarres</span>(<span class="at">beta =</span> <span class="fu">coefficients</span>(reg), <span class="at">y =</span> y, <span class="at">X =</span> X)</span></code></pre></div>
+<pre><code>## [1] 10824.72</code></pre>
+<p>pour les valeurs de paramètres <span class="math inline">\(\beta\)</span> = (2.4701378, 0.9132876, 0.0999593). Quel résultat est obtenu avec <code>optim</code>?</p>
+<div class="sourceCode" id="cb234"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb234-1"><a href="#cb234-1" aria-hidden="true" tabindex="-1"></a>op1 <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">3</span>), <span class="at">fn =</span> moindresCarres, <span class="at">y =</span> y, <span class="at">X =</span> X)</span>
+<span id="cb234-2"><a href="#cb234-2" aria-hidden="true" tabindex="-1"></a>op1</span></code></pre></div>
+<pre><code>## $par
+## [1] 7.2212674 0.2859028 0.1191485
+## 
+## $value
+## [1] 10848.71
+## 
+## $counts
+## function gradient 
+##      144       NA 
+## 
+## $convergence
+## [1] 0
+## 
+## $message
+## NULL</code></pre>
+<p>L’algorithme a convergé (car il retourne une valeur de 0 pour l’élément <code>convergence</code> dans la sortie), mais il n’arrive pas au bon résultat.</p>
+<p>Solution potentielle : changer d’algorithme d’optimisation.</p>
+<div class="sourceCode" id="cb236"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb236-1"><a href="#cb236-1" aria-hidden="true" tabindex="-1"></a>op2 <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">3</span>), <span class="at">fn =</span> moindresCarres, <span class="at">y =</span> y, <span class="at">X =</span> X, <span class="at">method =</span> <span class="st">&quot;BFGS&quot;</span>)</span>
+<span id="cb236-2"><a href="#cb236-2" aria-hidden="true" tabindex="-1"></a>op2</span></code></pre></div>
+<pre><code>## $par
+## [1] 2.47011519 0.91329056 0.09995889
+## 
+## $value
+## [1] 10824.72
+## 
+## $counts
+## function gradient 
+##       43        6 
+## 
+## $convergence
+## [1] 0
+## 
+## $message
+## NULL</code></pre>
+<p>Autre solution potentielle : changer les bornes initiales.</p>
+<div class="sourceCode" id="cb238"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb238-1"><a href="#cb238-1" aria-hidden="true" tabindex="-1"></a>op3 <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="fl">2.5</span>,<span class="dv">1</span>,<span class="fl">0.1</span>), <span class="at">fn =</span> moindresCarres, <span class="at">y =</span> y, <span class="at">X =</span> X)</span>
+<span id="cb238-2"><a href="#cb238-2" aria-hidden="true" tabindex="-1"></a>op3</span></code></pre></div>
+<pre><code>## $par
+## [1] 2.46514183 0.91414522 0.09993205
+## 
+## $value
+## [1] 10824.72
+## 
+## $counts
+## function gradient 
+##      150       NA 
+## 
+## $convergence
+## [1] 0
+## 
+## $message
+## NULL</code></pre>
+<p>Ici, même en partant de valeurs initiales très proches des paramètres optimaux, l’algorithme d’optimisation utilisé par défaut avec <code>optim</code> n’arrive pas tout à fait à trouver l’optimum global de la fonction. Seule la solution de changer l’algorithme d’optimisation nous permet d’arriver approximativement au même résultat que celui trouvé algébriquement par <code>lm</code>.</p>
+<div class="sourceCode" id="cb240"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb240-1"><a href="#cb240-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coefficients</span>(reg)</span></code></pre></div>
+<pre><code>## (Intercept)       speed  I(speed^2) 
+##   2.4701378   0.9132876   0.0999593</code></pre>
+<div class="sourceCode" id="cb242"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb242-1"><a href="#cb242-1" aria-hidden="true" tabindex="-1"></a>op2<span class="sc">$</span>par</span></code></pre></div>
+<pre><code>## [1] 2.47011519 0.91329056 0.09995889</code></pre>
+<p>Cet exemple illustre comment la fonction <code>optim</code> s’emploie. Il faut d’abord lui donner en entrée des valeurs initiales pour les paramètres de la fonction à optimiser (argument <code>par</code>). Ensuite, il faut lui fournir la fonction R qui implémente la fonction mathématique à optimiser (argument <code>fn</code>). Cette fonction doit retourner une seule valeur, numérique. De plus, son premier argument doit obligatoirement être le vecteur des paramètres que nous cherchons à estimer par l’optimisation effectuée. Après les arguments <code>par</code> et <code>fn</code>, il faut fournir, au besoin, des arguments à passer à la fonction donnée en entrée via l’argument <code>fn</code> (les arguments <code>y</code> et <code>X</code> dans l’exemple). Finalement, nous pouvons configurer le fonctionnement de la fonction <code>optim</code> en modifiant les valeurs des arguments <code>method</code>, <code>lower</code>, <code>upper</code>, <code>control</code>, ou <code>hessian</code>.</p>
+<hr />
+</div>
+</div>
+<div id="résumé" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Résumé</h1>
+<ul>
+<li>Fonctionnement vectoriel et règle de recyclage : calculs élément par élément pour un objet, ou encore terme à terme entre des objets;</li>
+</ul>
+<p style="font-size:110%">
+<strong>Fonctions et opérateurs mathématiques de base en R</strong>
+</p>
+<table>
+<colgroup>
+<col width="21%" />
+<col width="32%" />
+<col width="18%" />
+<col width="27%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Calcul</th>
+<th>opère de façon vectorielle</th>
+<th>combine, retourne une valeur</th>
+<th>combine, retourne un vecteur</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Arithmetic.html">arithmétique</a></td>
+<td><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>^</code>, <code>%%</code>, <code>%/%</code></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/sum.html"><code>sum</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/prod.html"><code>prod</code></a></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/cumsum.html"><code>cumsum</code>, <code>cumprod</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/diff.html"><code>diff</code></a></td>
+</tr>
+<tr class="even">
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Comparison.html">comparaison</a></td>
+<td><code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Logic.html">logique</a></td>
+<td><code>!</code>, <code>&amp;</code>, <code>|</code>, <code>xor</code></td>
+<td><code>&amp;&amp;</code>, <code>||</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Fonctions mathématiques opérant de façon vectorielle :
+<ul>
+<li>racine carrée et fonctions relatives au signe : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/MathFun.html"><code>sqrt</code>, <code>abs</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/sign.html"><code>sign</code></a>;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Log.html">exponentielles et logarithmes</a> : <code>exp</code>, <code>log</code> (= logarithme naturel), <code>log10</code>, <code>log2</code>;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Trig.html">fonctions trigonométriques</a> : <code>sin</code>, <code>cos</code>, <code>tan</code>, <code>acos</code>, <code>asin</code>, <code>atan</code>, <code>atan2</code>;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Round.html">fonctions d’arrondissement</a> : <code>ceiling</code>, <code>floor</code>, <code>round</code>, <code>trunc</code>, <code>signif</code>;</li>
+<li>fonctions reliées aux fonctions mathématiques bêta et gamma : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Special.html"><code>beta</code>, <code>gamma</code>, <code>factorial</code>, <code>choose</code></a>, etc.</li>
+</ul></li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/sets.html">Opérations sur des ensembles</a> : <code>union</code>, <code>intersect</code>, <code>setdiff</code>, <code>setequal</code>, <code>is.element</code>;</li>
+<li>Calcul de distances : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/dist.html"><code>dist</code></a> (distance euclidienne et autres distances), <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mahalanobis.html"><code>mahalanobis</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/utils/html/adist.html"><code>adist</code></a> (distance de Levenshtein entre des chaînes de caractères);</li>
+<li>constantes mathématiques : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Constants.html"><code>pi</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/is.finite.html"><code>Inf</code>, <code>NaN</code></a>.</li>
+</ul>
+<p style="font-size:110%">
+<strong>Conditions logiques</strong>
+</p>
+<p>Fonctions opérant de façon vectorielle :</p>
+<ul>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Comparison.html">Opérateurs de comparaison</a> : <code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&gt;=</code> , <code>&lt;</code>, <code>&lt;=</code>.</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Logic.html">Opérateurs et fonction logiques</a> : <code>!</code> (négation), <code>&amp;</code> (et), <code>|</code> (ou), <code>xor</code> (ou exclusif).</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/which.html">Fonction <code>which</code></a>;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/match.html">Opérateur de comparaison à un ensemble de valeurs</a> : <code>%in%</code>.</li>
+<li>Fonctions de comparaison pour caractères spéciaux :
+<a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/NA.html"><code>is.na</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/is.finite.html"><code>is.nan</code>, <code>is.infinite</code></a>.</li>
+</ul>
+<p>Fonctions retournant toujours un logique de longueur 1 :</p>
+<ul>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Logic.html">Opérateurs logiques non vectoriels</a> : <code>&amp;&amp;</code> (et), <code>||</code> (ou), <code>isTRUE</code>, <code>isFALSE</code>.</li>
+<li>Fonctions qui condensent un vecteur logique en une seule valeur logique : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/all.html"><code>all</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/any.html"><code>any</code></a>.</li>
+<li>Fonctions de vérification de type :<br />
+<code>is.</code>(<code>numeric</code>/<code>character</code>/<code>logical</code>/<code>vector</code>/<code>matrix</code>/<code>array</code>/<code>list</code>/<code>data.frame</code>/<code>factor</code>/<code>null</code>/…)<br />
+(il en existe beaucoup!).</li>
+</ul>
+<p><em>(non évalué à partir d’ici)</em></p>
+<p style="font-size:110%">
+<strong>Algèbre linéaire</strong>
+</p>
+<ul>
+<li>multiplication matricielle : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/matmult.html"><code>%*%</code></a>;</li>
+<li>transposition : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/t.html"><code>t</code></a>;</li>
+<li>inverse : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/solve.html"><code>solve</code></a> (en fait <code>solve</code> résout <code>A %*% x = B</code>, mais par défaut <code>B</code> est la matrice identité);</li>
+<li>produit vectoriel (en anglais <em>cross product</em>) de matrices : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/crossprod.html"><code>crossprod</code></a>;</li>
+<li>produit dyadique généralisé (en anglais <em>outer product</em>) : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/outer.html"><code>outer</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/outer.html"><code>%o%</code></a>;</li>
+<li>produit de Kronecker généralisé : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/kronecker.html"><code>kronecker</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/kronecker.html"><code>%x%</code></a>;</li>
+<li>matrices diagonales : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/diag.html"><code>diag</code></a>;</li>
+<li>déterminant : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/det.html"><code>det</code></a>;</li>
+<li>valeurs et vecteur propres : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/eigen.html"><code>eigen</code></a>;</li>
+<li>décompositions : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/svd.html"><code>svd</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/qr.html"><code>qr</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/chol.html"><code>chol</code></a>.</li>
+</ul>
+<p style="font-size:110%">
+<strong>Calcul différentiel et intégral</strong>
+</p>
+<ul>
+<li>Calculs symboliques : dérivation avec <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/deriv.html"><code>D</code>, <code>deriv</code> et <code>deriv3</code></a>.</li>
+<li>Calculs numériques :
+<ul>
+<li>dérivation avec <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/numericDeriv.html"><code>numericDeriv</code></a>;</li>
+<li>intégration avec <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/integrate.html"><code>integrate</code></a>.</li>
+</ul></li>
+</ul>
+<p style="font-size:110%">
+<strong>Optimisation numérique</strong>
+</p>
+<p><strong>Définition générale</strong> : Trouver en quel(s) point(s) une fonction mathématique atteint sa valeur maximale ou minimale.</p>
+<p><strong>Application usuelle en statistique</strong> : Trouver les valeurs des paramètres pour lesquels une fonction (ex. log-vraisemblance ou somme des erreurs au carré) atteint son maximum ou son minimum.</p>
+<ul>
+<li>pour optimiser une fonction à une variable : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/optimize.html"><code>optimize</code></a>,</li>
+<li>pour optimiser une fonction avec un nombre de variables quelconque : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/nlm.html"><code>nlm</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/optim.html"><code>optim</code></a>,</li>
+<li>optimisation sous contrainte : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/constrOptim.html"><code>constrOptim</code></a>.</li>
+</ul>
+<p>Ces fonctions prennent en entrée une fonction R</p>
+<ul>
+<li>dont le premier argument est le vecteur des paramètres et</li>
+<li>dont la sortie est une seule valeur numérique, soit la valeur prise par la fonction mathématique à optimiser lorsque les paramètres prennent les valeurs fournies en entrée.</li>
+</ul>
+<hr />
+</div>
+<div id="références" class="section level1" number="6">
+<h1><span class="header-section-number">6</span> Références</h1>
+<p>Les informations présentées dans ces notes proviennent des fiches d’aide du logiciel R :</p>
+<p>R Core Team (2020). <em>R: A language and environment for statistical computing</em>. R Foundation for Statistical Computing, Vienna, Austria. URL <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a></p>
+</div>

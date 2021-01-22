@@ -1,0 +1,1149 @@
+---
+title: "Calculs mathématiques en R"
+author: "Sophie Baillargeon, Université Laval"
+date: "2021-01-22"
+weight: 1
+slug: "calculs_math_r"
+lastmodifierdisplayname: "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document: 
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+    highlight: tango
+  blogdown::html_page:
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+    highlight: tango
+header-includes:
+- \usepackage{ragged2e}
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+editor_options: 
+  chunk_output_type: console
+---
+
+***
+
+*Note préliminaire&nbsp;: Lors de leur dernière mise à jour, ces notes ont été révisées en utilisant R version 4.0.3.*
+
+***
+
+Dans un contexte d'analyse de données, il est courant de devoir effectuer un calcul mathématique simple, par exemple pour transformer une variable ou tester si des observations rencontrent une certaine condition. Il est donc essentiel pour tout utilisateur de R de connaître les opérateurs et fonctions mathématiques de base, qui sont présentées ici. 
+
+De plus, il n'est pas rare qu'un programmeur R cherchant à implémenter une méthode de calcul doivent utiliser de l'algèbre linéaire, du calcul différentiel et intégral ou encore de l'optimisation numérique. Ces possibilités de calculs mathématiques plus avancés en R sont aussi abordées ici *(mais ces sujets ne seront pas évalués dans le cadre du cours STT-4230 / STT-6230 R pour scientifique)*. 
+
+***
+
+# Fonctionnement vectoriel et règle de recyclage
+
+Tous les opérateurs et plusieurs des fonctions qui sont présentés dans cette fiche agissent de façon vectorielle. Ils effectuent un traitement élément par élément sur le ou les objets reçus en entrée.
+
+Par exemple, si les deux matrices suivantes sont additionnées avec l'opérateur `+`,
+
+```{r}
+matrix(1:6 , nrow = 2, ncol = 3)
+matrix(6:1 , nrow = 2, ncol = 3)
+```
+
+l'élément en position (i,j) dans la première matrice sera additionné à l'élément à la même position dans la deuxième matrice, et ce, pour toutes les positions. Le résultat de cette addition terme à terme est donc le suivant&nbsp;:
+
+```{r}
+matrix(1:6 , nrow = 2, ncol = 3) + matrix(6:1 , nrow = 2, ncol = 3)
+```
+
+\vspace{6pt}
+<p style="font-size:110%">
+**Règle de recyclage**
+</p>
+
+Si les deux objets intervenant dans l'opération ne sont pas de mêmes dimensions, la **règle de recyclage** s'applique. Cette règle avait déjà été mentionnée dans les notes sur les [structures de données en R](https://stt4230.rbind.io/manipulation_donnees/structures_r/#remplacement). Étant donné son importance, revoyons-là plus en profondeur ici.
+
+```{r}
+x <- c(5, 6)
+y <- c(2, 5, 3, 1)
+x + y
+```
+
+L'instruction précédente effectue 4 additions, une pour chacun des 4 éléments du plus long des deux vecteurs dans l'opération, soit ici le deuxième. Le premier vecteur est plutôt de longueur 2. R répète donc ses éléments pour créer un vecteur aussi long que le deuxième
+
+```{r}
+rep(x, times = length(y)/length(x))
+```
+
+et effectue en réalité l'opération suivante&nbsp;:
+
+```{r}
+c(5, 6, 5, 6) + c(2, 5, 3, 1)
+```
+
+Cette règle de recyclage est exploitée, souvent sans que l'utilisateur en soit pleinement conscient,  lorsque l'un des deux vecteurs impliqués dans une opération est de longueur 1. Par exemple, la commande suivante impliquant un exposant,
+```{r}
+y ^ 2
+```
+est en fait traduite par R en la commande suivante&nbsp;:
+```{r}
+y ^ rep(2, times = length(y))
+```
+
+
+\vspace{6pt}
+<p style="font-size:110%">
+**Règle de recyclage avec des objets à plus d'une dimension**
+</p>
+
+La règle de recyclage s'applique aussi dans des opérations faisant intervenir des objets à plus d'une dimension. Par exemple, pour additionner le même vecteur, disons
+```{r}
+y <- 3:1
+y
+```
+à chacune des colonnes d'une matrice, disons
+```{r}
+mat <- matrix(1:12 , nrow = 3, ncol = 4)
+mat
+```
+il suffit de lancer la commande suivante 
+```{r}
+mat + y
+```
+au lieu de la suivante, qui retourne exactement le même résultat.
+```{r eval = FALSE}
+mat + matrix(rep(y, times = length(mat)/length(y)), nrow = nrow(mat), ncol = ncol(mat))
+```
+Dans cette dernière commande, les deux arguments fournis à l'opérateur `+` sont réellement de mêmes dimensions, car la deuxième matrice est la suivante
+```{r}
+matrix(rep(y, length(mat)/length(y)), nrow = nrow(mat), ncol = ncol(mat))
+```
+Une règle de recyclage utilisée pour former une matrice de dimension appropriée va donc remplir la matrice une colonne à la fois, comme le fait la fonction `matrix` par défaut.
+
+
+\vspace{6pt}
+<p style="font-size:110%">
+**Règle de recyclage lorsque la longueur de l'objet le plus long n'est pas multiple de la longueur de l'objet le plus court**
+</p>
+
+Lorsque la longueur de l'objet le plus long n'est pas multiple de la longueur de l'objet le plus court, la règle de recyclage fonctionne quand même. R recycle l'objet le plus court assez de fois pour arriver à un objet de longueur égale ou supérieure à l'objet le plus long. Ensuite, si l'objet recyclé est plus long que l'autre objet, il est tronqué de façon à ce que les deux objets aient la même longueur.
+
+Prenons par exemple les deux vecteurs suivants&nbsp;:
+
+```{r}
+x <- 1:12
+x
+y <- 5:1
+y
+```
+
+Supposons que la commande suivante soit soumise en R.
+
+```{r eval = FALSE}
+x + y
+```
+
+L'objet de gauche dans l'addition est de longueur 12 et l'objet de droite de longueur 5. L'objet de droite sera donc recyclé 3 fois,
+
+```{r}
+y_recycle <- rep(5:1, times = ceiling(length(x)/length(y)))
+y_recycle
+```
+
+puis sa longueur sera réduite à la longueur de l'objet de gauche.
+
+```{r}
+length(y_recycle) <- length(x)
+y_recycle
+```
+
+Ensuite l'addition terme à terme sera effectuée.
+
+```{r}
+x + y_recycle
+```
+
+Cependant, R émettra un avertissement pour nous informer qu'il a dû faire cet ajustement de longueur.
+
+```{r eval = TRUE}
+x + y
+```
+
+***
+
+# Fonctions et opérateurs mathématiques de base
+
+## Opérateurs mathématiques
+
+### Opérateurs arithmétiques
+
+Voici une liste d'[opérateurs arithmétiques disponibles en R](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Arithmetic.html)&nbsp;:
+
+- `+`&nbsp;: addition, 
+- `-`&nbsp;: soustraction, 
+- `*`&nbsp;: multiplication, 
+- `/`&nbsp;: division,
+- `^`&nbsp;: puissance, 
+- `%/%`&nbsp;: division entière,
+- `%%`&nbsp;: modulo = reste de la division entière.
+
+Les premiers opérateurs sont usuels et ne requièrent aucune explication. Expliquons cependant brièvement les deux derniers opérateurs de cette liste.
+
+#### Division entière et modulo
+
+\mbox{}
+
+L'opérateur `%/%` réalise une [division entière](https://fr.wikipedia.org/wiki/Division_euclidienne). Pour illustrer ce type de division, prenons l'exemple suivant.
+```{r}
+5 / 2
+```
+L'opérateur de division ordinaire `/` retourne un nombre réel. L'opérateur `%/%` retourne la partie entière du résultat obtenu avec `/`. La partie décimale est tronquée. 
+```{r}
+5 %/% 2
+```
+L'opérateur [modulo](https://fr.wikipedia.org/wiki/Modulo_(op%C3%A9ration)) `%%` retourne le reste de la division entière. Dans l'exemple traité ici, ce reste vaut 1 car 5 - 2*2 = 1.
+```{r}
+5 %% 2
+```
+
+**Astuces**&nbsp;:
+
+- Cet opérateur est pratique pour tester si des nombres sont pairs ou impairs. Les nombres pairs sont des multiples de 2. Alors `x %% 2` retourne 0 pour les nombres pairs et 1 pour les nombres impairs.
+- L'opérateur modulo peut aussi servir à tester si un nombre stocké sous le type `double` est en réalité un entier au sens mathématique. S'il s'agit d'un entier, `x %% 1` retournera 0.  
+
+
+### Opérateurs de comparaison
+
+Les [opérateurs de comparaison](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Comparison.html) permettent de comparer des valeurs. Ils retournent `TRUE` ou `FALSE`. Il s'agit des opérateurs suivants&nbsp;:
+ 
+- `==`&nbsp;: égalité,
+- `!=`&nbsp;: non-égalité,
+- `>`&nbsp;: plus grand,
+- `>=`&nbsp;: plus grand ou égal, 
+- `<`&nbsp;: plus petit, 
+- `<=`&nbsp;: plus petit ou égal.
+
+
+
+Supposons `x` et `y` les deux vecteurs numériques suivants.
+
+```{r}
+x <- c(2, 5, 7, 3)
+y <- c(3, 5, 6, 4)
+```
+
+Comparons ces vecteurs à l'aide d'un opérateur de comparaison. Est-ce que les valeurs contenues dans `x` sont supérieures aux valeurs contenues dans `y` ?
+
+```{r}
+x > y
+```
+
+L'opérateur fonctionne de façon vectorielle, donc une comparaison est effectuée pour toutes les paires d'éléments à la même position dans les vecteurs `x` et `y`. Les valeurs dans le résultat retourné sont de type logique.
+
+Les valeurs dans un vecteur peuvent aussi être comparées à une seule valeur, auquel cas la règle de recyclage s'applique.
+
+```{r}
+x != 5
+```
+
+#### Comparaison de valeurs non numériques
+
+\mbox{}
+
+Les opérateurs de comparaison ne fonctionnent pas seulement avec des valeurs numériques. Ils peuvent aussi être utilisés pour comparer des valeurs logiques ou caractères. Dans ce cas, il faut savoir que R considère que `FALSE` est inférieure à `TRUE`. 
+
+```{r}
+FALSE < TRUE 
+```
+
+Quant aux caractères, les opérateurs de comparaison utilisent l'ordre de classement des caractères pour déterminer, entre deux valeurs, celle qui est inférieure. Cet ordre dépend des paramètres régionaux de la session R. D'une langue à l'autre, cet ordre peut varier.
+
+Pour connaître l'ordre utilisé dans une session R, les instructions suivantes sont utiles&nbsp;:
+
+```{r eval = FALSE}
+caracteres_speciaux <- 
+  c("!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/", ":", ";", 
+    "<", "=",">", "?", "@", "[", "\\", "]", "^", "_", "{", "|", "}", "~")
+lettres_accentuees <- c("à", "â", "é", "è", "ê", "ë", "ï", "î", "ô", "ù", "ü", "û", "ç")
+catacteres_ordonnes <- sort(c(caracteres_speciaux, 0:9, letters, LETTERS, 
+                              lettres_accentuees, toupper(lettres_accentuees))) 
+paste(catacteres_ordonnes, collapse = "")
+```
+
+J'ai obtenu le résultat suivant, qui sera peut-être différent sur votre ordinateur si vous n'avez pas les mêmes paramètres régionaux que moi.
+
+```
+"'-!\"#$%&()*,./:;?@[\\]^_{|}~+<=>0123456789aAàÀâÂbBcCçÇdDeEéÉèÈêÊëËfFgGhHiIîÎïÏjJkKlLmM
+nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ"
+```
+
+Ainsi, dans ma session R&nbsp;:
+
+- les caractères spéciaux sont inférieurs aux chiffres et aux lettres, 
+- les chiffres sont inférieurs aux lettres,
+- les lettres sont classées en ordre alphabétique et
+    + les lettres minuscules sont inférieures aux lettres majuscules,
+    + les lettres non accentuées sont inférieures aux lettres accentuées.
+
+Pour des chaînes à plus d'un caractère, la comparaison s'effectue caractère par caractère (premiers caractères comparés entre eux, puis deuxièmes en cas d’égalité, puis troisièmes en cas d'égalités aux deux premières positions, etc.). 
+
+```{r}
+"arborescence" < "arbre" 
+```
+
+Aussi, l’absence de caractères vaut moins que la présence.
+
+```{r}
+"a" < "aa"
+```
+
+**Remarque**&nbsp;: Afin de correctement ordonner des nombres, il faut s'assurer de les stocker sous un format numérique. S'ils sont stockés sous forme de chaînes de caractères, les résultats obtenus ne seront pas toujours ceux attendus, comme dans cet exemple pour lequel 2 est dit non inférieur à 10 lorsque les nombres sont fournis à l'opérateur de comparaison sous forme de chaînes de caractères.
+
+```{r}
+2 < 10
+"2" < "10"
+```
+
+
+### Opérateurs et fonction logiques vectoriels
+
+Un [opérateur ou une fonction logique](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Logic.html) vectoriel prend en entrée un ou deux vecteurs de logiques et retourne un autre vecteur de valeurs logiques. Le R de base comporte les opérateurs et la fonction logiques vectoriels suivants&nbsp;:
+
+- `!`&nbsp;: négation, 
+- `&`&nbsp;: et,
+- `|`&nbsp;: ou,
+- `xor`&nbsp;: ou exclusif.
+
+#### Opérateur de négation `!`
+
+\mbox{}
+
+L'opérateur `!` n'a qu'un seul argument, alors que les autres opérateurs logiques en ont deux. Il effectue une négation, donc transforme les `TRUE` en `FALSE` et les `FALSE` en `TRUE`.
+```{r}
+!c(TRUE, FALSE)
+```
+
+
+#### Opérateurs `&` et `|`, fonction `xor`
+
+\mbox{}
+
+Les opérateurs `&` et `|`, ainsi que la fonction `xor`, appliquent de façon vectorielle les [tables de vérité](https://fr.wikipedia.org/wiki/Table_de_v%C3%A9rit%C3%A9) des fonctions mathématiques logiques «&nbsp;et&nbsp;», «&nbsp;ou&nbsp;» et «&nbsp;ou exclusif&nbsp;» respectivement. 
+
+**Rappel**&nbsp;: table de vérité de [«&nbsp;et&nbsp;»](https://fr.wikipedia.org/wiki/Conjonction_logique), [«&nbsp;ou&nbsp;»](https://fr.wikipedia.org/wiki/Disjonction_logique) et [«&nbsp;ou exclusif&nbsp;»](https://fr.wikipedia.org/wiki/Fonction_OU_exclusif)
+
+```{r}
+p <- rep(c(FALSE, TRUE), each = 2)
+q <- rep(c(FALSE, TRUE), times = 2)
+cbind(p, q, "p et q" = p & q, "p ou q" = p | q, "p xor q" = xor(p, q))
+```
+
+Ainsi, 
+
+- l'expression `p & q` retournera un vecteur contenant des `TRUE` aux positions pour lesquelles la valeur en `p` et la valeur en `q` sont toutes les deux `TRUE` et contenant des `FALSE` partout ailleurs;
+- l'expression `p | q` retournera un vecteur contenant des `FALSE` aux positions pour lesquelles la valeur en `p` et la valeur en `q` sont toutes les deux `FALSE` et contenant des `TRUE` partout ailleurs;
+- l'expression `xor(p, q)` retournera un vecteur contenant des `TRUE` aux positions pour lesquelles la valeur en `p` ou la valeur en `q` est `TRUE`, mais pas les deux, et contenant des `FALSE` partout ailleurs.
+
+
+### Préséance des opérateurs
+
+Dans une expression R contenant plusieurs opérateurs, mathématiques ou non, ceux-ci sont évalués dans un certain ordre, selon leur priorité d'opération. La [fiche d'aide nommée `Syntax` (ouverte par la commande `help(Syntax)`)](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Syntax.html) détaille l'ordre de préséance des différents opérateurs.
+
+Pour les calculs mathématiques, les priorités d'opération usuelles sont respectées. Par exemple, dans l'expression `2 + 3 * 4`, la multiplication est effectuée avant l'addition.
+
+```{r}
+2 + 3 * 4
+```
+
+Pour forcer l'évaluation d'un opérateur avant un autre de priorité plus élevée, il faut utiliser des parenthèses, comme dans cet exemple.
+
+```{r}
+(2 + 3) * 4
+```
+
+
+
+## Fonctions mathématiques opérant de façon vectorielle
+
+R offre aussi plusieurs fonctions de calculs mathématiques, travaillant de façon vectorielle, dont les suivantes&nbsp;:
+
+- racine carrée et fonctions relatives au signe&nbsp;: [`sqrt`, `abs`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/MathFun.html), [`sign`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/sign.html);
+- [exponentielles et logarithmes](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Log.html)&nbsp;: `exp`, `log` (= logarithme naturel), `log10`, `log2`;
+- [fonctions trigonométriques](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Trig.html)&nbsp;: `sin`, `cos`, `tan`, `acos`, `asin`, `atan`, `atan2`;
+- [fonctions d'arrondissement](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Round.html)&nbsp;: `ceiling`, `floor`, `round`, `trunc`, `signif`;
+- fonctions reliées aux fonctions mathématiques [bêta](https://fr.wikipedia.org/wiki/Fonction_b%C3%AAta) et [gamma](https://fr.wikipedia.org/wiki/Fonction_gamma): [`beta`, `gamma`, `factorial`, `choose`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Special.html), etc.
+
+Ces fonctions font un calcul distinct pour tous les éléments de l'objet fourni en entrée et retournent un résultat de même dimension que l'objet en entrée. Voici quelques exemples.
+
+```{r}
+# Vecteur de données numériques pour les exemples
+x <- seq(from = -1.25, to = 1.5, by = 0.25)
+x
+# Arrondissement régulier au dixième près
+round(x, digits = 1)
+# Arrondissement à l'entier supérieur
+ceiling(x)
+# Arrondissement à la partie entière
+trunc(x)
+```
+
+Ces fonctions arrivent aussi à effectuer des calculs par élément dans un objet atomique de dimension supérieure à un ou dans un data frame.
+
+```{r}
+# Matrice de données numériques pour les exemples
+x_mat <- matrix(x, nrow = 2)
+x_mat
+# Extraction du signe
+sign(x_mat)
+```
+
+
+## Fonctions mathématiques combinant des éléments
+
+Certaines fonctions mathématiques en R effectuent des calculs faisant intervenir plus d'un élément de l'objet donné en entrée, plutôt que d'effectuer un calcul distinct pour chacun des éléments. C'est le cas des fonctions suivantes&nbsp;:
+
+- somme ou produit de tous les éléments (retourne une seule valeur)&nbsp;: [`sum`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/sum.html), [`prod`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/prod.html);
+- somme ou produit cumulatif des éléments (retourne un vecteur de même longueur que le vecteur en entrée)&nbsp;: [`cummsum`, `cumprod`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/cumsum.html);
+- différences entre des éléments&nbsp;: [`diff`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/diff.html).
+
+Voici quelques exemples.
+```{r}
+# Matrice de données numériques pour les exemples
+mat <- matrix(c(2, 5, 3, 4, 6, 5, 4, 3, 1, 2, 9, 8), nrow = 3, ncol = 4)
+mat
+# Produit de tous les éléments
+prod(mat)
+# Somme cumulative des éléments (ici 2, 2+5, 2+5+3, 2+5+3+4, ...)
+cumsum(mat)
+```
+
+\vspace{6pt}
+<p style="font-size:110%">
+**Fonction `diff`**
+</p>
+
+Pour une matrice ou un data frame, `diff` calcule les différences terme à terme des éléments composant les lignes. Par défaut, la fonction calcule pour chaque ligne, à l'exception de la première, la différence entre la ligne et la ligne au-dessous.
+
+```{r diff}
+diff(mat)
+```
+La commande suivante retourne donc le même résultat que la précédente. 
+```{r}
+mat[-1, ] - mat[-nrow(mat), ]
+```
+Pour un vecteur, la fonction `diff` retourne les différences entre un élément (sauf le premier) et l'élément précédent. 
+```{r}
+diff(c(2, 5, 3, 4))
+```
+La fonction `diff` peut calculer des différences entre les éléments séparés par plus d'une position grâce à l'argument `lag`, comme dans cet exemple. 
+```{r}
+diff(c(2, 5, 3, 4), lag = 2)
+# soustractions effectuées&nbsp;: 3-2 et 4-5
+```
+
+
+## Opérations sur des ensembles
+
+Les [fonctions R](https://stat.ethz.ch/R-manual/R-patched/library/base/html/sets.html) d'[opérations sur des ensembles](https://fr.wikipedia.org/wiki/Alg%C3%A8bre_des_parties_d%27un_ensemble) sont les suivantes&nbsp;: 
+
+- `union`&nbsp;: union, 
+- `intersect`&nbsp;: intersection, 
+- `setdiff`&nbsp;: différence, 
+- `setequal`&nbsp;: test d'égalité, 
+- `is.element`&nbsp;: test d'inclusion.
+
+Voici quelques exemples utilisant les deux ensembles suivants, stockés sous forme de vecteur&nbsp;:
+
+```{r}
+A <- c("m", "s", "e", "f", "m")
+B <- c("m", "e", "h", "i")
+```
+
+Union de tous les éléments des ensembles `A` et `B`, en retirant les doublons&nbsp;:
+
+```{r}
+union(A, B)
+```
+
+Identification des éléments communs entre `A` et `B`, en retirant les doublons&nbsp;:
+
+```{r}
+intersect(A, B)
+```
+
+Identification des éléments de `A` ne se retrouvant pas dans `B`, en retirant les doublons&nbsp;:
+
+```{r}
+setdiff(A, B)
+```
+
+Test sur l'égalité entre les ensembles `A` et `B`&nbsp;:
+
+```{r}
+setequal(A, B)
+```
+
+Test sur la présence de `"d"` et `"e"` dans l'ensemble `A`&nbsp;:
+
+```{r}
+is.element(el = c("d", "e"), set = A)
+```
+
+
+## Calcul de distances
+
+
+<p style="font-size:110%">
+**Distance entre des variables numériques**
+</p>
+
+Pour calculer des distances entre des observations numériques, la package `stats` offre la fonction [`dist`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/dist.html). Voici un exemple d'utilisation de cette fonction traitant les [célèbres données iris](https://fr.wikipedia.org/wiki/Iris_de_Fisher), incluses dans l'installation de base de R dans le data frame nommé [`iris`](https://stat.ethz.ch/R-manual/R-patched/library/datasets/html/iris.html) (du package `datasets`). Prenons uniquement les 5 premières observations du jeu de données et conservons uniquement les variables numériques.
+
+```{r}
+iris_ech_num <- iris[1:5, c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")]
+iris_ech_num
+```
+
+Calculons les distances euclidiennes entre toutes les paires d'observations dans ce jeu de données, basées sur les 4 variables numériques.
+
+```{r}
+dist(x = iris_ech_num, method = "euclidean", diag = TRUE)
+```
+
+La distance euclidienne est un cas particulier de la [distance de Minkowski](https://fr.wikipedia.org/wiki/Distance_(math%C3%A9matiques)#Exemples_de_distances_classiques), avec un paramètre $p = 2$. 
+
+
+```{r}
+dist(x = iris_ech_num, method = "minkowski", p = 2, diag = TRUE)
+```
+
+La fonction `dist` propose quelques autres distances pour variables numériques (voir la [fiche d'aide de la fonction](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/dist.html) pour la liste complète). Le package `stats` offre aussi la fonction [`mahalanobis`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mahalanobis.html) pour calculer des [distances de Mahalanobis](https://fr.wikipedia.org/wiki/Distance_de_Mahalanobis). 
+
+\vspace{6pt}
+<p style="font-size:110%">
+**Distance entre des chaînes de caractères**
+</p>
+
+Pour faire le tour des fonctions de mesure de distances incluses dans l'installation R de base, mentionnons aussi la fonction [`adist`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/adist.html) du package `utils` qui calcule la [distance de Levenshtein](https://fr.wikipedia.org/wiki/Distance_de_Levenshtein) entre des chaînes de caractères, par exemple&nbsp;:
+
+```{r}
+adist(x = "Allo", y = "Hello")
+```
+
+La distance de Levenshtein, aussi appelée distance minimale d'édition, compte le nombre minimal d'insertions, de retraits et de substitutions à effectuer pour transformer la première chaîne de caractères en la deuxième. Il est possible d'associer un coût différent à chacune de ces opérations. Par défaut, elles ont toutes un coût de 1. La distance de Levenshtein entre `"Allo"` et `"Hello"` vaut 2 parce que pour transformer `"Allo"` en `"Hello"` il faut au minimum faire les deux opérations suivantes&nbsp;:
+
+- ajouter une lettre (par exemple un `H` au début);
+- transformer une lettre (par exemple transformer le `"A"` en `"e"`).
+
+
+## Constantes mathématiques
+
+En R, le nombre $\pi$ est représenté par la [constante `pi`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Constants.html).
+```{r}
+pi
+```
+
+[`Inf`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/is.finite.html) est la constante R pour l'infini $\infty$.
+```{r}
+-5 / 0
+```
+
+[`NaN`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/is.finite.html) est une constante signifiant *Not A Number*. Cette constante est retournée par R lorsqu'un utilisateur lui demande d'effectuer une opération mathématique impossible, par exemple&nbsp;:
+```{r}
+log(-1)
+```
+
+**Rappel**&nbsp;: Attention à ne pas confondre la constante `NaN` avec la [constante `NA`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/NA.html) qui signifie plutôt *Not Available* et qui sert à représenter les données manquantes.
+
+
+***
+
+# Conditions logiques
+
+Une condition logique est simplement une expression R qui retourne une ou des valeurs logiques (`TRUE` ou `FALSE`). Ce type d'expression a différentes utilités, par exemple&nbsp;:
+
+- explorer des données&nbsp;: répondre à des questions du genre combien d'observations respectent une certaine condition;
+- filtrer des données&nbsp;: extraire les observations respectant une certaine condition;
+- définir une condition dans une structure de contrôle conditionnelle `if ... else`;
+- etc.
+
+## Conditions logiques vectorielles
+
+Les deux premières utilités potentielles des conditions logiques énumérées ci-dessus requièrent la création d'un vecteur de valeurs logiques de la même longueur que l'objet R sur lequel la condition est testée. Nous avons vu au début de cette fiche des outils pour écrire de telles conditions logiques&nbsp;:
+
+- les [opérateurs de comparaison](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Comparison.html)&nbsp;: `==`, `!=`, `>`, `>=`, `<` et `<=`;
+- les [opérateurs et fonctions logiques vectoriels](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Logic.html)&nbsp;: `!` (négation), `&` (et), `|` (ou) et `xor` (ou exclusif). 
+
+Voici des exemples d'écriture de conditions logiques utilisant le vecteur suivant, que nous avons déjà manipulé dans des [notes précédentes](https://stt4230.rbind.io/manipulation_donnees/structures_r/#fonction-c).
+
+```{r}
+de <- c(2, 3, 4, 1, 2, 3, 5, 6, 5, 4)
+```
+
+Supposons que nous voulions connaître le nombre d'éléments dans ce vecteur numérique dont la valeur est supérieure à 3. La condition logique suivante nous permet d'identifier ces valeurs.
+
+```{r}
+condition <- de > 3
+condition
+```
+
+Compter le nombre de valeurs supérieures à 3 dans `de` revient à compter le nombre de `TRUE` dans le vecteur précédent. Ce calcul se réalise facilement avec la fonction `sum` comme suit.
+
+```{r}
+sum(condition)
+```
+
+Même si une somme est une opération mathématique sur des valeurs numériques, la commande précédente ne retourne par d'erreur, car R réalise d'abord une [conversion implicite de type de données](https://stt4230.rbind.io/manipulation_donnees/structures_r/#conversions) pour transformer les valeurs logiques en nombres (`TRUE` devient 1 et `FALSE` devient 0), puis effectue la somme.
+
+### Extraction d'éléments selon une condition logique
+
+Le vecteur `condition` serait aussi utile pour extraire les éléments de `de` ayant une valeur supérieure à 3. Nous savons que l'[opérateur d'indiçage `[` et la fonction d'extraction `subset`](https://stt4230.rbind.io/manipulation_donnees/structures_r/#extraction) acceptent en entrée un vecteur logique. Nous pouvons donc extraire les éléments respectant la condition comme suit.
+
+```{r}
+de[condition]
+```
+
+
+#### Fonction `which`
+
+\mbox{}
+
+La [fonction `which`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/which.html) permet de connaître les positions des `TRUE` dans le vecteur, comme l'illustre cet exemple&nbsp;:
+
+```{r}
+which(condition)
+```
+
+L'utilisation de `which` n'est cependant pas nécessaire lors de l'extraction d'éléments à partir d'un vecteur logique. Par exemple, les commandes `de[which(condition)]` et `de[condition]` produisent le même résultat, mais la commande sans appel à la fonction `which` a l'avantage d'être plus succincte.
+
+
+#### Conditions combinant des vecteurs logiques
+
+\mbox{}
+
+La condition précédente était plutôt simple. Une condition plus complexe requiert souvent de combiner des vecteurs logiques à l'aide d'un opérateur logique. Par exemple, l'instruction suivante identifie les éléments du vecteur `de` dont la valeur se situe dans l'intervalle $[3, 5]$.
+
+```{r}
+de >= 3 & de <= 5
+```
+
+L'instruction suivante identifie pour sa part les éléments du vecteur `de` égaux à 1, 4 ou 6. 
+
+```{r}
+de == 1 | de == 4 | de == 6
+```
+
+Pour identifier les éléments du vecteur `de` non-égaux à 1, 4 ou 6, nous pourrions inverser le vecteur logique précédent avec l'opérateur de négation comme suit.
+
+```{r}
+!(de == 1 | de == 4 | de == 6)
+```
+
+Rappelons qu'en logique mathématique, la [négation d'une disjonction est équivalente à la conjonction de négations](https://fr.wikipedia.org/wiki/Table_de_v%C3%A9rit%C3%A9#NON-OU_logique). L'instruction suivante retourne donc le même résultat que la précédente.
+
+```{r}
+de != 1 & de != 4 & de != 6
+```
+
+
+### Opérateur `%in%` de comparaison à plusieurs valeurs
+
+Pour effectuer une comparaison à un ensemble de valeur, telle que le fait l'instruction `de == 1 | de == 4 | de == 6`, R offre un opérateur raccourcissant la syntaxe&nbsp;: l'[opérateur `%in%`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/match.html). Cet opérateur compare les éléments d'un vecteur (placé avant l'opérateur) aux éléments d'un ensemble présenté sous la forme d'un vecteur (placé après). Il retourne `TRUE` pour un élément égal à n'importe lequel des éléments de l'ensemble, `FALSE` sinon. L'instruction `de == 1 | de == 4 | de == 6` est donc équivalent à la suivante.
+
+```{r}
+de %in% c(1, 4, 6)
+```
+
+Combiné à un opérateur de négation `!`, l'opérateur `%in%` permet de facilement tester si les valeurs dans un vecteur sont différentes des valeurs d'un ensemble, comme dans cet exemple.
+
+```{r}
+! de %in% c(1, 4, 6)
+```
+
+
+### Fonctions de comparaison pour constantes spéciales
+
+Notons que tester si un ou des éléments sont égaux à `NA`, `NaN`, `Inf` ou `-Inf`, ne se fait pas directement avec l'opérateur `==` comme suit.
+
+```{r}
+c(1, 2, NA, 4, 5) == NA
+```
+
+Il faut plutôt utiliser la fonction [`is.na`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/NA.html), [`is.nan` ou `is.infinite`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/is.finite.html).
+
+```{r}
+is.na(c(1, 2, NA, 4, 5))
+```
+
+
+La fonction [`is.finite`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/is.finite.html) retourne pour sa part `TRUE` pour les éléments non égaux à `NA`, `NaN`, `Inf` ou `-Inf`.
+
+```{r}
+is.finite(c(NA, NaN, Inf, -Inf, 4.5, 3))
+```
+
+
+## Conditions logiques de longueur 1
+
+Lors de l'écriture d'une condition logique, il faut parfois s'assurer de retourner un vecteur logique de longueur 1. C'est le cas lors de l'écriture d'une condition logique dans une structure de contrôle conditionnelle `if ... else` (que nous verrons plus loin). La condition dans un `if` doit être obligatoirement de longueur 1.
+
+
+### Opérateurs et fonctions logiques non vectoriels
+
+Les [opérateurs et fonctions logiques](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Logic.html) suivants garantissent que le résultat retourné est de longueur 1.
+ 
+- `&&`&nbsp;: et,
+- `||`&nbsp;: ou,
+- `isTRUE` et `isFALSE`.
+
+Les opérateurs `&&` et `||` appliquent les mêmes tables de vérité que les opérateurs `&` et `|`, mais ils ne travaillent pas de façon vectorielle. Si, par inadvertance, `&&` ou `||` reçoit en entrée des vecteurs de longueurs supérieures à 1, il effectue une opération seulement sur les premiers éléments de ces vecteurs, comme dans cet exemple.
+
+```{r}
+de == 1 || de == 4 || de == 6
+```
+
+Les fonctions `isTRUE` et `isFALSE`, pour leur part, sont des fonctions raccourcies permettant d'effectuer les tests suivants.
+
+```{r eval = FALSE}
+is.logical(x) && length(x) == 1 && !is.na(x) && x   # isTRUE
+is.logical(x) && length(x) == 1 && !is.na(x) && !x  # isFALSE
+```
+
+Elles permettent donc de s'assurer qu'une condition possède toutes les caractéristiques requises pour être fournie à un `if` (contenir des données logiques, être de longueur 1 et ne pas prendre la valeur `NA`).
+
+
+### Fonctions `all` et `any`
+
+Les fonctions [`all`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/all.html) et [`any`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/any.html) font partie des fonctions R retournant toujours une seule valeur logique. La fonction `all` indique si tous les éléments d'un vecteur logique sont `TRUE`. Par exemple, pour tester si toutes les valeurs dans le vecteur `de` sont entières au sens mathématique, nous pourrions utiliser la commande suivante.
+```{r}
+all(de %% 1 == 0)
+```
+
+La fonction `any` indique pour sa part si au moins un élément d'un vecteur logique est `TRUE`. Nous pourrions par exemple vérifier si le vecteur `de` comporte des valeurs négatives comme suit.
+```{r}
+any(de < 0)
+```
+
+### Fonctions de vérification de type
+
+Finalement, les fonctions `is.numeric`, `is.character`, `is.logical`, `is.vector`, `is.matrix`, `is.data.frame`, `is.factor`, `is.null`, `is.function`, etc., testent une condition et retournent toujours un logique de longueur unitaire. Par exemple, testons si le vecteur `de` contient bien des données numériques.
+
+```{r}
+is.numeric(de)
+```
+
+
+***
+
+# Calculs plus avancés
+
+*Voici des informations concernant trois sujets mathématiques plus poussés. Cette matière ne sera pas évaluée dans le cadre du cours, car certains étudiants n'ont pas les connaissances préalables pour facilement la comprendre. Il est cependant fort probable que certaines des informations ci-dessous seront utiles aux étudiants gradués en statistique. L'implémentation de méthodes statistiques fait souvent intervenir ces types de calculs.*
+
+## Algèbre linéaire
+
+Il existe plusieurs fonctions en R pour faire de l'algèbre linéaire.
+
+- multiplication matricielle&nbsp;: [`%*%`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/matmult.html);
+- transposition&nbsp;: [`t`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/t.html);
+- inverse&nbsp;: [`solve`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/solve.html) (en fait `solve` résout `A %*% x = B`, mais par défaut `B` est la matrice identité);
+- produit vectoriel (en anglais *cross product*) de matrices&nbsp;: [`crossprod`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/crossprod.html);
+- produit dyadique généralisé (en anglais *outer product*)&nbsp;: [`outer`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/outer.html), [`%o%`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/outer.html);
+- produit de Kronecker généralisé&nbsp;: [`kronecker`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/kronecker.html), [`%x%`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/kronecker.html);
+- matrices diagonales&nbsp;: [`diag`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/diag.html);
+- déterminant&nbsp;: [`det`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/det.html);
+- valeurs et vecteur propres&nbsp;: [`eigen`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/eigen.html);
+- décompositions&nbsp;: [`svd`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/svd.html), [`qr`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/qr.html), [`chol`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/chol.html).
+
+Faisons quelques exemples pour illustrer certaines de ces fonctions. 
+
+
+### Opérateur `%*%`
+
+L'opérateur usuel de multiplication effectue une multiplication terme à terme entre deux matrices.
+```{r}
+A <- matrix(1:6, nrow = 3, ncol = 2)
+A
+B <- matrix(6:1, nrow = 3, ncol = 2)
+B
+A*B
+```
+Pour effectuer une [multiplication matricielle](https://fr.wikipedia.org/wiki/Produit_matriciel), il faut utiliser l'opérateur `%*%`. Les dimensions des matrices doivent évidemment concorder.
+```{r, error = TRUE}
+A %*% B
+C <- matrix(c(5, 2, 3, 7), nrow = 2, ncol = 2)
+C
+A %*% C
+```
+
+
+### Fonction `solve`
+
+L'[inverse d'une matrice](https://fr.wikipedia.org/wiki/Matrice_inversible) s'obtient avec la fonction `solve`.
+```{r}
+solve(C)
+```
+
+
+### Fonction `crossprod`
+
+La fonction `crossprod` sert à calculer $A^T B$ ou $A^T A$.
+```{r}
+crossprod(A, B)
+# équivalent à
+t(A) %*% B
+```
+
+### Produits dyadique et de Kronecker
+
+Parfois, nous avons besoin d'effectuer une opération en prenant toutes les paires de termes possibles entre deux vecteurs ou matrices. C'est ce que font les [produits dyadique](https://fr.wikipedia.org/wiki/Produit_dyadique) (*outer product*) (opérateur `%o%`) et de [Kronecker](https://fr.wikipedia.org/wiki/Produit_de_Kronecker) (opérateur `%x%`). Cependant, ils n'assemblent pas les résultats de la même façon. Voici des exemples avec des vecteurs.
+```{r}
+1:3 %o% 4:5
+1:3 %x% 4:5
+```
+Les deux commandes ont permis le calcul des mêmes 6 produits ($1 \times 4 = 4$, $2 \times 4 = 8$, $3 \times 4 = 12$, $1 \times 5 = 5$, $2 \times 5 = 10$ et $3 \times 5 = 15$). Cependant, l'opérateur `%o%` a rassemblé les produits dans une matrice de dimension 3 par 2, et l'opérateur `%x%` dans un vecteur de longueur $3 \times 2 = 6$. 
+
+Avec deux matrices en entrée, le résultat de `A %o% B` est un array à 4 dimensions dont les tailles sont, dans l'ordre, `nrow(A)`, `ncol(A)`, `nrow(B)` et `ncol(B)`. Le résultat de `A %x% B` est pour sa part une matrice à 2 dimensions comprenant `nrow(A)*nrow(B)` lignes et `ncol(A)*ncol(B)` colonnes. 
+
+
+Voici des exemples.
+```{r}
+A <- matrix(12:1, nrow = 3, ncol = 4)
+A
+B <- matrix(c(1,2), nrow = 2, ncol = 1)
+B
+A %o% B
+A %x% B
+```
+
+Les deux opérations se généralisent à l'emploi d'un autre opérateur que le produit, grâce aux fonctions `outer` et `kronecker`.
+
+```{r}
+outer(1:3, 4:5, FUN = '+')
+kronecker(1:3, 4:5, FUN = '+')
+```
+
+
+### Fonction `diag`
+
+Finalement, la fonction `diag` a plusieurs utilités. Selon le type de l'objet qu'elle reçoit comme premier argument, elle permet de&nbsp;:
+
+- matrice en entrée&nbsp;: extraire la diagonale de la matrice reçue;
+```{r}
+C
+diag(C)
+```
+- vecteur en entrée&nbsp;: créer une matrice diagonale à partir du vecteur reçu, qui doit continir les éléments à mettre sur la diagonale;
+```{r}
+diag(1:3)
+```
+- un seul nombre en entrée&nbsp;: créer une matrice identité dont la taille commune des dimensions est déterminée par le nombre fourni.
+```{r}
+diag(3)
+```
+
+
+## Calcul différentiel et intégral
+
+*(Ce qui est offert en R dans ce domaine n’est pas très performant ni facile d'utilisation.)*
+
+
+### Dérivation symbolique&nbsp;: `D`, `deriv` et `deriv3`
+
+Tout comme les logiciels Maple ou Mathematica, R peut faire du calcul symbolique de dérivées. Cependant, il est loin d'être le meilleur outil pour ces tâches. Pour illustrer les capacités (limitées) de R dans ce domaine, tentons d'abord de calculer la dérivée suivante&nbsp;:
+
+\Large
+\centering
+
+$\frac{d}{dx}( log(x) + sin(x) ).$
+
+\justify
+\normalsize
+
+```{r}
+df <- deriv(expr = ~ log(x) + sin(x), namevec = "x")
+df
+```
+L'objet `df` est particulier. Il s'agit d'une expression. La ligne `.grad[, "x"] <- 1/x + cos(x)` permet de constater que R a bien trouvé que la dérivée symbolique de $log(x) + sin(x)$ est $1/x + cos(x)$. Nous pouvons maintenant utiliser `df` pour calculer cette dérivée en certains points. Étant donné que nous avons nommé `x` la variable dans la fonction à dériver, il faut d'abord créer un objet nommé `x` contenant les valeurs en lesquelles nous souhaitons calculer la dérivée.
+```{r}
+x <- 2:5
+```
+Ensuite, nous soumettons la commande suivante pour obtenir le résultat recherché.
+```{r}
+eval(df)
+```
+Cette sortie contient les valeurs de la fonction d'origine aux points d'intérêt,
+```{r}
+log(x) + sin(x)
+```
+suivies des valeurs de la dérivée de la fonction en ces points.
+```{r}
+1/x + cos(x)
+```
+
+Ainsi, R peut faire du calcul symbolique de dérivée, mais il n'offre pas une façon très conviviale de le faire. Plus d'information peut être trouvée dans la [fiche d'aide des fonctions `D`, `deriv` et `deriv3`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/deriv.html). Le R de base n'offre pas de fonctions pour le calcul symbolique d'intégrales. Cependant, le package `Ryacas` en offre&nbsp;: https://CRAN.R-project.org/package=Ryacas
+
+
+### Dérivation numérique&nbsp;: `numericDeriv`
+
+Le [calcul de dérivées numériques](https://en.wikipedia.org/wiki/Numerical_differentiation) est un peu plus simple. Par exemple, dérivons la fonction de répartition d'une loi normale standard en quelques points avec la fonction [`numericDeriv`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/numericDeriv.html).
+
+```{r, R.options= list(width = 100)}
+# Points en lesquels nous allons dériver
+x <- as.double(-3:3)
+# Valeur de la fonction en ces points
+pnorm(x)
+# Calcul de la dérivée en ces points
+numericDeriv(expr = quote(pnorm(x)), theta = "x")
+```
+
+Nous arrivons au bon résultat, soit la fonction de densité de loi normale standard aux mêmes points.
+```{r, R.options= list(width = 100)}
+dnorm(x)
+```
+
+L'appel de la fonction `numericDeriv` n'est pas standard. Il fait intervenir une expression R à créer avec la fonction `quote`. 
+
+Nous pourrions aussi programmer à la main une version simpliste de la dérivation numérique comme suit&nbsp;:
+```{r , R.options= list(width = 100)}
+delta <- .000001
+(pnorm(x + delta) - pnorm(x - delta)) / (2 * delta)
+```
+
+
+### Intégration numérique&nbsp;: `integrate`
+
+Effectuons maintenant l'opération inverse&nbsp;: intégrons la fonction de densité de la loi normale standard avec la fonction [`integrate`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/integrate.html).
+
+```{r}
+integrate(f = dnorm, lower = -Inf, upper = 1)
+```
+
+Nous arrivons au bon résultat, soit la fonction de répartition de loi normale standard au point 1
+```{r}
+pnorm(1)
+```
+
+Remarque&nbsp;: La fonction `integrate` ne travaille pas de façon vectorielle. Elle ne peut pas calculer des intégrales numériques pour plusieurs intervalles en un seul appel de la fonction.
+
+
+
+## Optimisation numérique
+
+En mathématiques, l'optimisation consiste à trouver en quel(s) point(s) une fonction mathématique atteint sa valeur maximale ou minimale. En statistique, ce problème est souvent abordé en ces termes&nbsp;: trouver les valeurs des paramètres pour lesquels une fonction atteint son maximum ou son minimum.
+
+Parfois, il est possible de trouver une solution algébrique à ce problème à l'aide du calcul différentiel et intégral. Par contre, il arrive qu'il soit trop difficile, voire impossible, de dériver la fonction en question. L'optimisation numérique est une bonne solution dans un tel cas.
+
+Fonctions R utiles en optimisation numérique&nbsp;:
+
+- pour optimiser une fonction à une variable&nbsp;: [`optimize`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/optimize.html),
+- pour optimiser une fonction avec un nombre de variables quelconque&nbsp;: [`nlm`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/nlm.html), [`optim`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/optim.html),
+- optimisation sous contrainte&nbsp;: [`constrOptim`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/constrOptim.html).
+
+
+Exemple d'optimisation d'une fonction à une variable en R&nbsp;: trouvons en quel point la fonction de densité de la loi normale atteint son maximum. La théorie nous dit que ce maximum est atteint en la valeur de l'espérance de la loi. Voyons si l'optimisation numérique saura retourner le bon résultat.
+
+```{r, out.width = "70%", fig.align= "center" }
+curve(
+  expr = dnorm(x, mean = 3), from = -3, to = 10, 
+  main = "Maximum de la densité normale", ylab = "densité N(3,1)"
+)
+abline(v = 3, lty = 2, col = "blue")
+```
+
+```{r}
+optimize(f = dnorm, interval = c(-3, 10), mean = 3, maximum = TRUE)
+```
+
+Oui, pour une loi normale d'espérance 3 et de variance 1, nous arrivons bien numériquement au résultat que le maximum de la densité est atteint en la valeur 3. La fonction `optimize` nous dit aussi que ce maximum vaut&nbsp;:
+```{r}
+dnorm(3, mean = 3)
+```
+
+
+Les fonctions `nlm`, `optim` et `constrOptim` utilisent des **algorithmes itératifs**. Elles ont besoin de valeurs initiales pour les paramètres (argument `par` à fournir obligatoirement). À chaque itération de l'algorithme, elles modifient ces valeurs en tentant de se diriger vers l'optimum de la fonction. Elles peuvent&nbsp;:
+
+- ne pas converger,
+- converger au mauvais endroit (optimum local plutôt que global).
+
+Il faut être prudent lors de leur utilisation. Par exemple, `optim` est **sensible au choix de plusieurs arguments**, notamment&nbsp;:
+
+- l'algorithme employé,
+- les valeurs initiales données aux paramètres.
+
+Ces fonctions sont tout de même très utiles pour effectuer une optimisation lorsque celle-ci est difficile ou impossible à réaliser algébriquement. 
+
+Voici un exemple d'optimisation d'une fonction à plusieurs variables. La fonction `lm` minimise le critère des moindres carrés, en implémentant des formules algébriques. Les estimations des paramètres du modèle linéaire que `lm` retourne sont les points en lesquelles la fonction des moindres carrés est minimisée. Tentons de minimiser cette fonction de façon numérique. Pour ce faire, nous avons d'abord besoin d'une fonction qui calcule le critère des moindres carrés et qui prend comme premier argument les paramètres du modèle. Nous n'avons pas encore vu dans le cours comment créer des fonctions, mais je me permets tout de même ici d'en créer une, pour illustrer l'optimisation numérique. La syntaxe pour créer des fonctions R sera vue au prochain cours.
+
+Le [critère des moindres carrés](https://en.wikipedia.org/wiki/Least_squares) est calculé en sommant les différences au carré entre les valeurs observées d'une variable et les valeurs prédites par le modèle. Pour un modèle de régression linéaire, la fonction suivante calcule de façon matricielle la valeur du critère.
+
+```{r}
+moindresCarres <- function(beta, y, X) {
+  as.vector(crossprod(y - X %*% matrix(beta, ncol = 1)))
+}
+```
+
+Le vecteur `y` doit contenir les valeurs observées de la variable réponse et la matrice `X` est la [matrice de design du modèle](https://en.wikipedia.org/wiki/Design_matrix). Cette dernière contient les observations des variables explicatives pour les termes présents dans le modèle. Le vecteur `y` et la matrice `X` sont des composantes du modèle supposées connues ici. C'est le vecteur de paramètre `beta` que nous cherchons à estimer. Nous allons utiliser les données du jeu de données `cars` dans cet exemple.
+
+Voyons d'abord le résultat obtenu avec la fonction `lm` pour un modèle quadratique.
+
+```{r}
+reg <- lm(dist ~ speed + I(speed^2), data = cars)
+coefficients(reg)
+```
+
+Pour retrouver ce résultat par optimisation numérique, il faut d'abord construire le vecteur `y` et la matrice `X` comme suit.
+
+```{r}
+y <- cars$dist
+X <- cbind(intercept = 1, cars$speed, cars$speed^2)
+```
+
+La fonction `lm` arrive à la valeur minimale des moindres carrés suivante
+
+```{r}
+moindresCarres(beta = coefficients(reg), y = y, X = X)
+```
+
+pour les valeurs de paramètres $\beta$ = (`r coefficients(reg)`). Quel résultat est obtenu avec `optim`?
+
+```{r}
+op1 <- optim(par = c(3,3,3), fn = moindresCarres, y = y, X = X)
+op1
+```
+
+L'algorithme a convergé (car il retourne une valeur de 0 pour l'élément `convergence` dans la sortie), mais il n'arrive pas au bon résultat. 
+
+Solution potentielle&nbsp;: changer d'algorithme d'optimisation.
+
+```{r}
+op2 <- optim(par = c(3,3,3), fn = moindresCarres, y = y, X = X, method = "BFGS")
+op2
+```
+
+Autre solution potentielle&nbsp;: changer les bornes initiales.
+
+```{r}
+op3 <- optim(par = c(2.5,1,0.1), fn = moindresCarres, y = y, X = X)
+op3
+```
+
+Ici, même en partant de valeurs initiales très proches des paramètres optimaux, l'algorithme d'optimisation utilisé par défaut avec `optim` n'arrive pas tout à fait à trouver l'optimum global de la fonction. Seule la solution de changer l'algorithme d'optimisation nous permet d'arriver approximativement au même résultat que celui trouvé algébriquement par `lm`.
+
+```{r}
+coefficients(reg)
+op2$par
+```
+
+Cet exemple illustre comment la fonction `optim` s'emploie. Il faut d'abord lui donner en entrée des valeurs initiales pour les paramètres de la fonction à optimiser (argument `par`). Ensuite, il faut lui fournir la fonction R qui implémente la fonction mathématique à optimiser (argument `fn`). Cette fonction doit retourner une seule valeur, numérique. De plus, son premier argument doit obligatoirement être le vecteur des paramètres que nous cherchons à estimer par l'optimisation effectuée. Après les arguments `par` et `fn`, il faut fournir, au besoin, des arguments à passer à la fonction donnée en entrée via l'argument `fn` (les arguments `y` et `X` dans l'exemple). Finalement, nous pouvons configurer le fonctionnement de la fonction `optim` en modifiant les valeurs des arguments `method`, `lower`, `upper`, `control`, ou `hessian`.
+
+
+***
+
+
+# Résumé
+
+- Fonctionnement vectoriel et règle de recyclage&nbsp;: calculs élément par élément pour un objet, ou encore terme à terme entre des objets;
+
+<p style="font-size:110%">
+**Fonctions et opérateurs mathématiques de base en R**
+</p>
+
+
+Calcul | opère de façon vectorielle | combine, retourne une valeur | combine, retourne un vecteur|
+------------|------------------|----------|---------------|
+[arithmétique](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Arithmetic.html) | `+`, `-`, `*`, `/`, `^`, `%%`, `%/%` | [`sum`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/sum.html), [`prod`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/prod.html) | [`cumsum`, `cumprod`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/cumsum.html), [`diff`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/diff.html) |
+[comparaison](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Comparison.html) | `==`, `!=`, `>`, `>=`, `<`, `<=` | | |
+[logique](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Logic.html) | `!`, `&`, `|`, `xor` | `&&`, `||` | |
+
+- Fonctions mathématiques opérant de façon vectorielle&nbsp;:
+    + racine carrée et fonctions relatives au signe&nbsp;: [`sqrt`, `abs`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/MathFun.html), [`sign`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/sign.html);
+    + [exponentielles et logarithmes](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Log.html)&nbsp;: `exp`, `log` (= logarithme naturel), `log10`, `log2`;
+    + [fonctions trigonométriques](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Trig.html)&nbsp;: `sin`, `cos`, `tan`, `acos`, `asin`, `atan`, `atan2`;
+    + [fonctions d'arrondissement](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Round.html)&nbsp;: `ceiling`, `floor`, `round`, `trunc`, `signif`;
+    + fonctions reliées aux fonctions mathématiques bêta et gamma&nbsp;: [`beta`, `gamma`, `factorial`, `choose`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Special.html), etc.
+- [Opérations sur des ensembles](https://stat.ethz.ch/R-manual/R-patched/library/base/html/sets.html)&nbsp;: `union`, `intersect`, `setdiff`, `setequal`, `is.element`;
+- Calcul de distances&nbsp;: [`dist`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/dist.html) (distance euclidienne et autres distances), [`mahalanobis`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mahalanobis.html), [`adist`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/adist.html) (distance de Levenshtein entre des chaînes de caractères);
+- constantes mathématiques&nbsp;: [`pi`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Constants.html), [`Inf`, `NaN`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/is.finite.html).
+
+
+\vspace{6pt}
+<p style="font-size:110%">
+**Conditions logiques**
+</p>
+
+Fonctions opérant de façon vectorielle&nbsp;:
+
+- [Opérateurs de comparaison](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Comparison.html)&nbsp;: `==`, `!=`, `>`, `>=` , `<`, `<=`.
+- [Opérateurs et fonction logiques](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Logic.html)&nbsp;: `!` (négation), `&` (et), `|` (ou), `xor` (ou exclusif).
+- [Fonction `which`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/which.html);
+- [Opérateur de comparaison à un ensemble de valeurs](https://stat.ethz.ch/R-manual/R-patched/library/base/html/match.html)&nbsp;: `%in%`.
+- Fonctions de comparaison pour caractères spéciaux&nbsp;:
+	[`is.na`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/NA.html), [`is.nan`, `is.infinite`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/is.finite.html).
+
+Fonctions retournant toujours un logique de longueur 1&nbsp;:
+
+- [Opérateurs logiques non vectoriels](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Logic.html)&nbsp;: `&&` (et), `||` (ou), `isTRUE`, `isFALSE`.
+- Fonctions qui condensent un vecteur logique en une seule valeur logique&nbsp;: [`all`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/all.html), [`any`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/any.html).
+- Fonctions de vérification de type&nbsp;:  
+`is.`(`numeric`/`character`/`logical`/`vector`/`matrix`/`array`/`list`/`data.frame`/`factor`/`null`/...)  
+(il en existe beaucoup!).
+
+
+*(non évalué à partir d'ici)*
+
+\vspace{6pt}
+<p style="font-size:110%">
+**Algèbre linéaire**
+</p>
+
+- multiplication matricielle&nbsp;: [`%*%`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/matmult.html);
+- transposition&nbsp;: [`t`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/t.html);
+- inverse&nbsp;: [`solve`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/solve.html) (en fait `solve` résout `A %*% x = B`, mais par défaut `B` est la matrice identité);
+- produit vectoriel (en anglais *cross product*) de matrices&nbsp;: [`crossprod`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/crossprod.html);
+- produit dyadique généralisé (en anglais *outer product*)&nbsp;: [`outer`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/outer.html), [`%o%`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/outer.html);
+- produit de Kronecker généralisé&nbsp;: [`kronecker`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/kronecker.html), [`%x%`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/kronecker.html);
+- matrices diagonales&nbsp;: [`diag`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/diag.html);
+- déterminant&nbsp;: [`det`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/det.html);
+- valeurs et vecteur propres&nbsp;: [`eigen`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/eigen.html);
+- décompositions&nbsp;: [`svd`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/svd.html), [`qr`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/qr.html), [`chol`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/chol.html).
+
+
+\vspace{6pt}
+<p style="font-size:110%">
+**Calcul différentiel et intégral**
+</p>
+
+- Calculs symboliques&nbsp;: dérivation avec [`D`, `deriv` et `deriv3`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/deriv.html).
+- Calculs numériques&nbsp;:
+     + dérivation avec [`numericDeriv`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/numericDeriv.html);
+     + intégration avec [`integrate`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/integrate.html).
+
+
+\vspace{6pt}
+<p style="font-size:110%">
+**Optimisation numérique**
+</p>
+
+**Définition générale**&nbsp;: Trouver en quel(s) point(s) une fonction mathématique atteint sa valeur maximale ou minimale.
+
+**Application usuelle en statistique**&nbsp;: Trouver les valeurs des paramètres pour lesquels une fonction (ex. log-vraisemblance ou somme des erreurs au carré) atteint son maximum ou son minimum.
+
+- pour optimiser une fonction à une variable&nbsp;: [`optimize`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/optimize.html),
+- pour optimiser une fonction avec un nombre de variables quelconque&nbsp;: [`nlm`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/nlm.html), [`optim`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/optim.html),
+- optimisation sous contrainte&nbsp;: [`constrOptim`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/constrOptim.html).
+
+Ces fonctions prennent en entrée une fonction R 
+
+- dont le premier argument est le vecteur des paramètres et 
+- dont la sortie est une seule valeur numérique, soit la valeur prise par la fonction mathématique à optimiser lorsque les paramètres prennent les valeurs fournies en entrée.
+
+
+
+***
+
+# Références
+
+Les informations présentées dans ces notes proviennent des fiches d'aide du logiciel R :
+
+R Core Team (2020). *R: A language and environment for statistical computing*. R Foundation for Statistical Computing, Vienna, Austria. URL https://www.R-project.org/
+
+
