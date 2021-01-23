@@ -1,0 +1,1477 @@
+---
+title: "Calculs statistiques en R"
+author: "Sophie Baillargeon, Université Laval"
+date: "2021-01-22"
+weight: 2
+slug: "calculs_stat_r"
+lastmodifierdisplayname: "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 
+    number_sections: yes
+    highlight: tango
+  blogdown::html_page:
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+    highlight: tango
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+editor_options: 
+  chunk_output_type: console
+---
+
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #f8f8f8; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<div id="TOC">
+<ul>
+<li><a href="#statistiques-descriptives"><span class="toc-section-number">1</span> Statistiques descriptives</a>
+<ul>
+<li><a href="#fonctions-retournant-une-seule-statistique"><span class="toc-section-number">1.1</span> Fonctions retournant une seule statistique</a>
+<ul>
+<li><a href="#traitement-des-données-manquantes-et-argument-na.rm"><span class="toc-section-number">1.1.1</span> Traitement des données manquantes et argument <code>na.rm</code></a></li>
+</ul></li>
+<li><a href="#fonctions-pouvant-retourner-plusieurs-statistiques"><span class="toc-section-number">1.2</span> Fonctions pouvant retourner plusieurs statistiques</a></li>
+<li><a href="#fonctions-retournant-un-vecteur-de-statistiques"><span class="toc-section-number">1.3</span> Fonctions retournant un vecteur de statistiques</a></li>
+<li><a href="#calcul-de-fréquences"><span class="toc-section-number">1.4</span> Calcul de fréquences</a></li>
+<li><a href="#énumération-de-combinaisons"><span class="toc-section-number">1.5</span> Énumération de combinaisons</a></li>
+</ul></li>
+<li><a href="#distributions-de-probabilité"><span class="toc-section-number">2</span> Distributions de probabilité</a>
+<ul>
+<li><a href="#fonction-de-densité"><span class="toc-section-number">2.1</span> Fonction de densité</a></li>
+<li><a href="#fonction-de-répartition"><span class="toc-section-number">2.2</span> Fonction de répartition</a></li>
+<li><a href="#fonction-quantile"><span class="toc-section-number">2.3</span> Fonction quantile</a></li>
+</ul></li>
+<li><a href="#génération-de-nombres-pseudo-aléatoires"><span class="toc-section-number">3</span> Génération de nombres pseudo-aléatoires</a>
+<ul>
+<li><a href="#fonction-sample"><span class="toc-section-number">3.1</span> Fonction <code>sample</code></a></li>
+<li><a href="#germe-de-la-génération-pseudo-aléatoire"><span class="toc-section-number">3.2</span> Germe de la génération pseudo-aléatoire</a></li>
+</ul></li>
+<li><a href="#tests-statistiques"><span class="toc-section-number">4</span> Tests statistiques</a></li>
+<li><a href="#ajustement-de-modèles"><span class="toc-section-number">5</span> Ajustement de modèles</a>
+<ul>
+<li><a href="#formules"><span class="toc-section-number">5.1</span> Formules</a>
+<ul>
+<li><a href="#exemples"><span class="toc-section-number">5.1.1</span> Exemples</a></li>
+<li><a href="#arguments-accompagnant-les-formules"><span class="toc-section-number">5.1.2</span> Arguments accompagnant les formules</a></li>
+</ul></li>
+<li><a href="#manipulation-de-la-sortie"><span class="toc-section-number">5.2</span> Manipulation de la sortie</a>
+<ul>
+<li><a href="#fonctions-génériques-dextraction-dinformation"><span class="toc-section-number">5.2.1</span> Fonctions génériques d’extraction d’information</a></li>
+<li><a href="#résultats-additionnels-fournis-par-summary"><span class="toc-section-number">5.2.2</span> Résultats additionnels fournis par <code>summary</code></a></li>
+<li><a href="#mise-en-forme-avec-le-package-broom"><span class="toc-section-number">5.2.3</span> Mise en forme avec le package <code>broom</code></a></li>
+</ul></li>
+</ul></li>
+<li><a href="#résumé"><span class="toc-section-number">6</span> Résumé</a></li>
+<li><a href="#références">Références</a></li>
+</ul>
+</div>
+
+<hr />
+<p><em>Note préliminaire : Lors de leur dernière mise à jour, ces notes ont été révisées en utilisant R version 4.0.3 et le package <code>broom</code> version 0.7.3. Pour d’autres versions, les informations peuvent différer.</em></p>
+<hr />
+<p>R est un environnement spécialisé dans les calculs statistiques. Voyons comment réaliser de tels calculs en R, qu’il s’agisse de production de statistiques descriptives, de manipulation des distributions de probabilité, de génération des nombres pseudo-aléatoires, de réalisation de tests ou d’ajustement de modèles.</p>
+<hr />
+<div id="statistiques-descriptives" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Statistiques descriptives</h1>
+<div id="fonctions-retournant-une-seule-statistique" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> Fonctions retournant une seule statistique</h2>
+<p>Certaines fonctions de calcul de statistiques descriptives retournent en sortie une seule valeur. C’est le cas des fonctions suivantes :</p>
+<ul>
+<li><a href="https://fr.wikipedia.org/wiki/Indicateur_de_position">mesures de position</a> : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Extremes.html"><code>min</code>, <code>max</code></a>;</li>
+<li><a href="https://fr.wikipedia.org/wiki/Indicateur_de_tendance_centrale">mesures de tendance centrale</a> : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/mean.html"><code>mean</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/median.html"><code>median</code></a>;</li>
+<li><a href="https://fr.wikipedia.org/wiki/Indicateur_de_dispersion">mesure de dispersion</a> : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/sd.html"><code>sd</code></a> (écart-type).</li>
+</ul>
+<p>Utilisons le <a href="https://stat.ethz.ch/R-manual/R-patched/library/datasets/html/cars.html">jeu de données <code>cars</code></a> du package <code>datasets</code> pour présenter quelques exemples. Ce jeu de données contient 50 observations de 2 variables numériques.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cars)</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    50 obs. of  2 variables:
+##  $ speed: num  4 4 7 7 8 9 10 10 10 11 ...
+##  $ dist : num  2 10 4 22 16 10 18 26 34 17 ...</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Moyenne des observations de la variable dist</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(cars<span class="sc">$</span>dist)</span></code></pre></div>
+<pre><code>## [1] 42.98</code></pre>
+<p>Si l’objet en entrée a plus d’une dimension, la sortie est tout de même de longueur 1. Donc tous les éléments contenus dans l’objet sont mis en commun pour faire le calcul.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(cars)</span></code></pre></div>
+<pre><code>## [1] 120</code></pre>
+<p style="font-size:110%">
+<strong>Fonctions <code>which.max</code> et <code>which.min</code></strong>
+</p>
+<p>Les fonctions <code>min</code> et <code>max</code> retournent respectivement la valeur la plus petite et la valeur la plus grande parmi les éléments d’un objet. Les fonctions <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/which.min.html"><code>which.max</code> et <code>which.min</code></a> retournent pour leur part la position dans l’objet du <strong>premier</strong> maximum ou minimum.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">which.min</span>(cars<span class="sc">$</span>speed)</span></code></pre></div>
+<pre><code>## [1] 1</code></pre>
+<p>Dans l’exemple précédent, il y a en fait deux observations qui prennent la valeur minimum de <code>min(cars$speed)</code>. La commande suivante permet de trouver la position de toutes les observations prenant la valeur minimale.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span>(cars<span class="sc">$</span>speed <span class="sc">==</span> <span class="fu">min</span>(cars<span class="sc">$</span>speed))</span></code></pre></div>
+<pre><code>## [1] 1 2</code></pre>
+<div id="traitement-des-données-manquantes-et-argument-na.rm" class="section level3" number="1.1.1">
+<h3><span class="header-section-number">1.1.1</span> Traitement des données manquantes et argument <code>na.rm</code></h3>
+<p>Les fonctions <code>min</code>, <code>max</code>, <code>mean</code>, <code>median</code> et <code>sd</code>, ainsi que quelques autres fonctions vues dans ces notes, ont un argument en commun nommé <code>na.rm</code>. Cet argument sert à indiquer à la fonction comment agir en présence de données manquantes (<code>NA</code>). Par défaut, <code>na.rm</code> prend la valeur <code>FALSE</code> pour ces fonctions. Cette valeur signifie que les données manquantes ne doivent pas être retirées avant d’effectuer le calcul. Cependant, en présence de données manquantes, ces fonctions ne sont pas en mesure de calculer des statistiques. Par exemple, supposons que nous voulions calculer la médiane des données dans le vecteur suivant.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">6</span>, <span class="cn">NA</span>, <span class="dv">8</span>, <span class="dv">11</span>, <span class="dv">15</span>, <span class="dv">23</span>)</span></code></pre></div>
+<p>Si nous ne retirons pas la donnée manquante, nous obtenons le résultat suivant.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">median</span>(x)</span></code></pre></div>
+<pre><code>## [1] NA</code></pre>
+<p>Ce résultat s’explique par le fait que la valeur de la médiane dépend de toutes les observations, incluant l’observation manquante, qui est inconnue. La valeur de la médiane est donc elle aussi inconnue. Pour calculer plutôt la médiane des observations non manquantes, il faut donner la valeur <code>TRUE</code> à l’argument <code>na.rm</code> comme suit.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">median</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## [1] 9.5</code></pre>
+<p>Notons que la <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/na.fail.html">fonction <code>na.omit</code></a> permet de retirer les observations manquantes d’un objet R. Si l’objet est un vecteur, les éléments contenant <code>NA</code> sont retirés.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">na.omit</span>(x)</span></code></pre></div>
+<pre><code>## [1]  3  6  8 11 15 23
+## attr(,&quot;na.action&quot;)
+## [1] 3
+## attr(,&quot;class&quot;)
+## [1] &quot;omit&quot;</code></pre>
+<p>La fonction <code>na.omit</code> ajoute deux attributs à l’objet, dont un pour identifier les observations retirées.</p>
+<p>Remarquons que les deux commandes suivantes retournent le même résultat.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">median</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## [1] 9.5</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">median</span>(<span class="fu">na.omit</span>(x))</span></code></pre></div>
+<pre><code>## [1] 9.5</code></pre>
+<p>Si la fonction <code>na.omit</code> reçoit en entrée une matrice ou un data frame, elle retire toutes les lignes contenant au moins un <code>NA</code>, comme dans cet exemple :</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>ex_jeu <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(x, <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="cn">NA</span>, <span class="dv">8</span>, <span class="dv">9</span>, <span class="dv">6</span>, <span class="cn">NA</span>, <span class="dv">2</span>)); </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>ex_jeu</span></code></pre></div>
+<pre><code>##    x  y
+## 1  3  2
+## 2  6 NA
+## 3 NA  8
+## 4  8  9
+## 5 11  6
+## 6 15 NA
+## 7 23  2</code></pre>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">na.omit</span>(ex_jeu)</span></code></pre></div>
+<pre><code>##    x y
+## 1  3 2
+## 4  8 9
+## 5 11 6
+## 7 23 2</code></pre>
+</div>
+</div>
+<div id="fonctions-pouvant-retourner-plusieurs-statistiques" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> Fonctions pouvant retourner plusieurs statistiques</h2>
+<p>D’autres fonctions peuvent retourner plus d’une statistique, notamment les fonctions suivantes :</p>
+<ul>
+<li>mesures de position : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/range.html"><code>range</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/quantile.html"><code>quantile</code></a>;</li>
+<li>résumé comprenant plusieurs mesures : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/summary.html"><code>summary</code></a>;</li>
+<li>variances, covariances et corrélations : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/cor.html"><code>var</code>, <code>cov</code>, <code>cor</code></a>.</li>
+</ul>
+<p style="font-size:110%">
+<strong>Fonctions <code>range</code> et <code>quantile</code></strong>
+</p>
+<p>La <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/range.html">fonction <code>range</code></a> retourne à la fois le minimum est le maximum, comme dans cet exemple :</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">range</span>(cars<span class="sc">$</span>speed)</span></code></pre></div>
+<pre><code>## [1]  4 25</code></pre>
+<p>Une façon simple d’obtenir l’étendue d’observations à partir de la sortie de la fonction <code>range</code> est de procéder comme suit :</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">diff</span>(<span class="fu">range</span>(cars<span class="sc">$</span>speed))</span></code></pre></div>
+<pre><code>## [1] 21</code></pre>
+<p>La <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/quantile.html">fonction <code>quantile</code></a> calcule des quantiles empiriques. Par défaut, elle retourne le minimum, le maximum et les quartiles, comme dans cet exemple :</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(cars<span class="sc">$</span>speed)</span></code></pre></div>
+<pre><code>##   0%  25%  50%  75% 100% 
+##    4   12   15   19   25</code></pre>
+<p>L’argument <code>probs</code> permet de demander n’importe quels quantiles. Dans l’exemple suivant, les premiers et neuvièmes déciles sont demandés.</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(cars<span class="sc">$</span>speed, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.9</span>))</span></code></pre></div>
+<pre><code>##  10%  90% 
+##  8.9 23.1</code></pre>
+<p><strong>Remarque</strong> : Il existe plusieurs façons de calculer des quantiles. La fonction <code>quantile</code> implémente 9 algorithmes de calcul de quantiles (voir <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html"><code>help(quantile)</code></a>).</p>
+<p style="font-size:110%">
+<strong>Fonction <code>summary</code></strong>
+</p>
+<p>La <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/summary.html">fonction <code>summary</code></a> retourne les statistiques suivantes selon l’entrée qu’elle reçoit :</p>
+<ul>
+<li>vecteur numérique : minimum, premier quartile, médiane, moyenne, troisième quartile, maximum;</li>
+<li>facteur : fréquences des modalités (comme la fonction <code>table</code> vue plus loin);</li>
+<li>matrice ou data frame : la fonction <code>summary</code> est appliquée séparément à chacune des colonnes.</li>
+</ul>
+<p>Utilisons le <a href="https://stat.ethz.ch/R-manual/R-patched/library/datasets/html/Puromycin.html">jeu de données <code>Puromycin</code></a> du package <code>datasets</code> pour présenter quelques exemples d’utilisation de la fonction <code>summary</code>. Ce jeu de données contient 23 observations de 3 variables, dont deux numériques et une catégorique, stockée sous forme de facteur.</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(Puromycin)</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    23 obs. of  3 variables:
+##  $ conc : num  0.02 0.02 0.06 0.06 0.11 0.11 0.22 0.22 0.56 0.56 ...
+##  $ rate : num  76 47 97 107 123 139 159 152 191 201 ...
+##  $ state: Factor w/ 2 levels &quot;treated&quot;,&quot;untreated&quot;: 1 1 1 1 1 1 1 1 1 1 ...
+##  - attr(*, &quot;reference&quot;)= chr &quot;A1.3, p. 269&quot;</code></pre>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Vecteur numérique en entrée&amp;nbsp;:</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(Puromycin<span class="sc">$</span>rate)</span></code></pre></div>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    47.0    91.5   124.0   126.8   158.5   207.0</code></pre>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Facteur en entrée&amp;nbsp;:</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(Puromycin<span class="sc">$</span>state)</span></code></pre></div>
+<pre><code>##   treated untreated 
+##        12        11</code></pre>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data frame entier en entrée&amp;nbsp;:</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(Puromycin)</span></code></pre></div>
+<pre><code>##       conc             rate             state   
+##  Min.   :0.0200   Min.   : 47.0   treated  :12  
+##  1st Qu.:0.0600   1st Qu.: 91.5   untreated:11  
+##  Median :0.1100   Median :124.0                 
+##  Mean   :0.3122   Mean   :126.8                 
+##  3rd Qu.:0.5600   3rd Qu.:158.5                 
+##  Max.   :1.1000   Max.   :207.0</code></pre>
+<p style="font-size:110%">
+<strong>Fonctions <code>var</code>, <code>cov</code> et <code>cor</code></strong>
+</p>
+<p>La <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/cor.html">fonction <code>var</code></a> peut prendre en entrée un vecteur ou un objet à deux dimensions. Si elle reçoit en entrée un vecteur, elle calcule la variance empirique de toutes les valeurs, comme dans cet exemple :</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(cars<span class="sc">$</span>speed)</span></code></pre></div>
+<pre><code>## [1] 27.95918</code></pre>
+<p>Cependant, si elle reçoit en entrée une matrice ou un data frame de valeurs numériques, elle considère que chaque colonne contient les observations d’une variable aléatoire. Elle va calculer une <a href="https://fr.wikipedia.org/wiki/Covariance">matrice de variances-covariances</a>, comme dans cet exemple :</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(cars)</span></code></pre></div>
+<pre><code>##           speed     dist
+## speed  27.95918 109.9469
+## dist  109.94694 664.0608</code></pre>
+<p>La <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/cor.html">fonction <code>cov</code></a> fait exactement le même calcul par défaut.</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cov</span>(cars)</span></code></pre></div>
+<pre><code>##           speed     dist
+## speed  27.95918 109.9469
+## dist  109.94694 664.0608</code></pre>
+<p>Elle peut cependant calculer des covariances de Kendall ou de Spearman (toutes deux des statistiques non paramétriques basées sur les rangs des observations) au lieu de la covariance classique de Pearson. La <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/cor.html">fonction <code>cor</code></a> calcule des corrélations plutôt que des covariances. Elle aussi peut utiliser les définitions de <a href="https://fr.wikipedia.org/wiki/Corr%C3%A9lation_(statistiques)">Pearson</a> (par défaut), <a href="https://fr.wikipedia.org/wiki/Tau_de_Kendall">Kendall</a> et <a href="https://fr.wikipedia.org/wiki/Corr%C3%A9lation_de_Spearman">Spearman</a>. Voici un exemple de calcul de matrice de corrélations de Spearman.</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(cars, <span class="at">method =</span> <span class="st">&quot;spearman&quot;</span>)</span></code></pre></div>
+<pre><code>##           speed      dist
+## speed 1.0000000 0.8303568
+## dist  0.8303568 1.0000000</code></pre>
+</div>
+<div id="fonctions-retournant-un-vecteur-de-statistiques" class="section level2" number="1.3">
+<h2><span class="header-section-number">1.3</span> Fonctions retournant un vecteur de statistiques</h2>
+<p>Certaines fonctions, telles que les suivantes, retournent autant de statistiques qu’il y a d’éléments dans l’objet donné en entrée.</p>
+<ul>
+<li>mesures de position : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/cumsum.html"><code>cummin</code>, <code>cummax</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Extremes.html"><code>pmin</code>, <code>pmax</code></a>;</li>
+<li>rangs : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/rank.html"><code>rank</code></a>.</li>
+</ul>
+<p style="font-size:110%">
+<strong>Fonctions <code>cummin</code> et <code>cummax</code></strong>
+</p>
+<p>Les <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/cumsum.html">fonctions <code>cummin</code> et <code>cummax</code></a> calculent les minimums et les maximums cumulatifs. Comme nous pouvons le constater dans l’exemple suivant, la valeur en position <code>i</code> du vecteur retourné par une de ces deux fonctions est la valeur minimale ou maximale dans le sous-vecteur <code>x[1:i]</code>.</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cummin</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">4</span>, <span class="sc">-</span><span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">7</span>, <span class="sc">-</span><span class="dv">6</span>, <span class="dv">0</span>))</span></code></pre></div>
+<pre><code>## [1] -2 -2 -3 -3 -3 -6 -6</code></pre>
+<p style="font-size:110%">
+<strong>Fonctions <code>pmin</code> et <code>pmax</code></strong>
+</p>
+<p>Les <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Extremes.html">fonctions <code>pmin</code> et <code>pmax</code></a> calculent le minimum et le maximum par position, entre autant de vecteurs que désiré, comme dans l’exemple suivant.</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pmax</span>(</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">4</span>, <span class="sc">-</span><span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">7</span>, <span class="sc">-</span><span class="dv">6</span>, <span class="dv">0</span>), </span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>( <span class="dv">1</span>, <span class="dv">2</span>,  <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>,  <span class="dv">6</span>, <span class="dv">7</span>),</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>( <span class="dv">5</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>,  <span class="dv">3</span>, <span class="dv">3</span>)</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## [1] 5 4 3 4 7 6 7</code></pre>
+<p>Ces fonctions sont utiles pour remplacer des valeurs par un seuil. Par exemple, l’instruction suivante permet de remplacer par zéro toute valeur négative contenue dans le vecteur en entrée.</p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pmax</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">4</span>, <span class="sc">-</span><span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">7</span>, <span class="sc">-</span><span class="dv">6</span>, <span class="dv">0</span>), <span class="dv">0</span>)</span></code></pre></div>
+<pre><code>## [1] 0 4 0 4 7 0 0</code></pre>
+<p style="font-size:110%">
+<strong>Fonction <code>rank</code></strong>
+</p>
+<p>Certains tests statistiques non paramétriques utilisent des statistiques basées sur les rangs des observations. Voici un exemple d’obtention de ces rangs avec la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/rank.html">fonction <code>rank</code></a>.</p>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rank</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">4</span>, <span class="sc">-</span><span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">7</span>, <span class="sc">-</span><span class="dv">6</span>, <span class="dv">0</span>))</span></code></pre></div>
+<pre><code>## [1] 3.0 5.5 2.0 5.5 7.0 1.0 4.0</code></pre>
+<p>Par défaut, en cas d’égalité, le rang moyen est utilisé. Pour changer cette option, il faut modifier la valeur de l’argument <code>ties.method</code>. Dans l’exemple suivant, le rang minimum est retourné en cas d’égalité.</p>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rank</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">4</span>, <span class="sc">-</span><span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">7</span>, <span class="sc">-</span><span class="dv">6</span>, <span class="dv">0</span>), <span class="at">ties.method =</span> <span class="st">&quot;min&quot;</span>)</span></code></pre></div>
+<pre><code>## [1] 3 5 2 5 7 1 4</code></pre>
+</div>
+<div id="calcul-de-fréquences" class="section level2" number="1.4">
+<h2><span class="header-section-number">1.4</span> Calcul de fréquences</h2>
+<p>Les fonctions <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/table.html"><code>table</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/xtabs.html"><code>xtabs</code></a> et <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/ftable.html"><code>ftable</code></a> permettent de calculer des fréquences.</p>
+<p>Voici un petit jeu de données pour illustrer l’utilisation de ces fonctions. Il contient des observations concernant 7 individus fictifs : la couleur de leurs yeux, la couleur de leurs cheveux et leur genre.</p>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>sondage <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">yeux    =</span> <span class="fu">c</span>(<span class="st">&quot;brun&quot;</span>,    <span class="st">&quot;brun&quot;</span>,     <span class="st">&quot;bleu&quot;</span>,    <span class="st">&quot;brun&quot;</span>,    <span class="st">&quot;vert&quot;</span>,     <span class="st">&quot;brun&quot;</span>,    <span class="st">&quot;bleu&quot;</span>    ),</span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">cheveux =</span> <span class="fu">c</span>(<span class="st">&quot;brun&quot;</span>,    <span class="st">&quot;noir&quot;</span>,     <span class="st">&quot;blond&quot;</span>,   <span class="st">&quot;brun&quot;</span>,    <span class="st">&quot;brun&quot;</span>,     <span class="st">&quot;blond&quot;</span>,   <span class="st">&quot;brun&quot;</span>    ),</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">genre   =</span> <span class="fu">c</span>(<span class="st">&quot;féminin&quot;</span>, <span class="st">&quot;masculin&quot;</span>, <span class="st">&quot;féminin&quot;</span>, <span class="st">&quot;féminin&quot;</span>, <span class="st">&quot;masculin&quot;</span>, <span class="st">&quot;féminin&quot;</span>, <span class="st">&quot;masculin&quot;</span>)</span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>sondage</span></code></pre></div>
+<pre><code>##   yeux cheveux    genre
+## 1 brun    brun  féminin
+## 2 brun    noir masculin
+## 3 bleu   blond  féminin
+## 4 brun    brun  féminin
+## 5 vert    brun masculin
+## 6 brun   blond  féminin
+## 7 bleu    brun masculin</code></pre>
+<p style="font-size:110%">
+<strong>Fonctions <code>table</code></strong>
+</p>
+<p>La <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/table.html">fonction <code>table</code></a> permet de compter le nombre d’occurrences de chacune des modalités d’une variable catégorique dans des données. Demandons, par exemple, à <code>table</code> de compter le nombre d’individus dans les données <code>sondage</code> classés dans chacune des catégories de couleurs de cheveux.</p>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(sondage<span class="sc">$</span>cheveux)</span></code></pre></div>
+<pre><code>## 
+## blond  brun  noir 
+##     2     4     1</code></pre>
+<p>La fonction <code>table</code> produit un tableau de fréquences à une variable si elle reçoit les observations d’une seule variable. Elle peut aussi produire des tableaux de fréquences croisées à deux variables ou plus.</p>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemple de tableau de fréquences à deux variables (avec variables nommées)</span></span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="at">yeux =</span> sondage<span class="sc">$</span>yeux, <span class="at">cheveux =</span> sondage<span class="sc">$</span>cheveux)</span></code></pre></div>
+<pre><code>##       cheveux
+## yeux   blond brun noir
+##   bleu     1    1    0
+##   brun     1    2    1
+##   vert     0    1    0</code></pre>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemple de tableau de fréquences à trois variables (data frame en entrée à table)</span></span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>t3 <span class="ot">&lt;-</span> <span class="fu">table</span>(sondage)</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>t3</span></code></pre></div>
+<pre><code>## , , genre = féminin
+## 
+##       cheveux
+## yeux   blond brun noir
+##   bleu     1    0    0
+##   brun     1    2    0
+##   vert     0    0    0
+## 
+## , , genre = masculin
+## 
+##       cheveux
+## yeux   blond brun noir
+##   bleu     0    1    0
+##   brun     0    0    1
+##   vert     0    1    0</code></pre>
+<p style="font-size:110%">
+<strong>Fonctions <code>ftable</code></strong>
+</p>
+<p>La <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/ftable.html">fonction <code>ftable</code></a> retourne un tableau de fréquences sous la forme d’une table « plate » (en anglais <em>flat</em>, d’où le <code>f</code> dans le nom de la fonction) dans le cas d’un croisement de 3 variables ou plus, plutôt que sous la forme d’un array comme le fait la fonction <code>table</code>. Elle accepte les mêmes types d’entrées que <code>table</code> (série d’objets atomiques à une dimension ou objet récursif dont les éléments sont interprétables en facteurs) et peut aussi recevoir une sortie de la fonction <code>table</code>, comme dans l’exemple suivant.</p>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ftable</span>(t3)</span></code></pre></div>
+<pre><code>##              genre féminin masculin
+## yeux cheveux                       
+## bleu blond               1        0
+##      brun                0        1
+##      noir                0        0
+## brun blond               1        0
+##      brun                2        0
+##      noir                0        1
+## vert blond               0        0
+##      brun                0        1
+##      noir                0        0</code></pre>
+<p style="font-size:110%">
+<strong>Fonctions <code>xtabs</code></strong>
+</p>
+<p>La <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/xtabs.html">fonction <code>xtabs</code></a> fait le même calcul que les fonctions précédentes, mais elle prend en entrée une formule. Le tableau de fréquences à deux variables créé précédemment peut être réobtenu de la façon suivante avec <code>xtabs</code>.</p>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">xtabs</span>(<span class="sc">~</span> yeux <span class="sc">+</span> cheveux, <span class="at">data =</span> sondage)</span></code></pre></div>
+<pre><code>##       cheveux
+## yeux   blond brun noir
+##   bleu     1    1    0
+##   brun     1    2    1
+##   vert     0    1    0</code></pre>
+<p>La fonction <code>xtabs</code> est utile lorsque les données que nous avons en main contiennent déjà des fréquences, car il est possible d’inclure une variable réponse contenant des dénombrements dans la formule que nous lui fournissons en entrée. Par exemple, <code>xtabs</code> permet de facilement retrouver le tableau de fréquences marginales croisées entre les variables <code>yeux</code> et <code>cheveux</code> à partir du tableau de fréquences à trois variables produit précédemment mis sous forme de data frame, qui a l’allure suivante.</p>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>t3_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(t3)</span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>t3_df</span></code></pre></div>
+<pre><code>##    yeux cheveux    genre Freq
+## 1  bleu   blond  féminin    1
+## 2  brun   blond  féminin    1
+## 3  vert   blond  féminin    0
+## 4  bleu    brun  féminin    0
+## 5  brun    brun  féminin    2
+## 6  vert    brun  féminin    0
+## 7  bleu    noir  féminin    0
+## 8  brun    noir  féminin    0
+## 9  vert    noir  féminin    0
+## 10 bleu   blond masculin    0
+## 11 brun   blond masculin    0
+## 12 vert   blond masculin    0
+## 13 bleu    brun masculin    1
+## 14 brun    brun masculin    0
+## 15 vert    brun masculin    1
+## 16 bleu    noir masculin    0
+## 17 brun    noir masculin    1
+## 18 vert    noir masculin    0</code></pre>
+<p>Il suffit de procéder comme suit :</p>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> <span class="fu">xtabs</span>(Freq <span class="sc">~</span> yeux <span class="sc">+</span> cheveux, <span class="at">data =</span> t3_df)</span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>t2</span></code></pre></div>
+<pre><code>##       cheveux
+## yeux   blond brun noir
+##   bleu     1    1    0
+##   brun     1    2    1
+##   vert     0    1    0</code></pre>
+<p style="font-size:110%">
+<strong>Autres fonctions relatives au calcul de fréquences</strong>
+</p>
+<p>Les fonctions <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/marginSums.html"><code>marginSums</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/addmargins.html"><code>addmargins</code></a> et <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/proportions.html"><code>proportions</code></a> permettent de calculer des fréquences marginales ou relatives à partir d’un tableau de fréquences. Voici quelques exemples d’utilisation de ces fonctions exploitant le tableau de fréquences à deux variables produit ci-dessus.</p>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fréquences marginales en colonnes&amp;nbsp;:</span></span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a><span class="fu">marginSums</span>(t2, <span class="at">margin =</span> <span class="dv">2</span>)</span></code></pre></div>
+<pre><code>## cheveux
+## blond  brun  noir 
+##     2     4     1</code></pre>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fréquences marginales ajoutées au tableau&amp;nbsp;:</span></span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a><span class="fu">addmargins</span>(t2)</span></code></pre></div>
+<pre><code>##       cheveux
+## yeux   blond brun noir Sum
+##   bleu     1    1    0   2
+##   brun     1    2    1   4
+##   vert     0    1    0   1
+##   Sum      2    4    1   7</code></pre>
+<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fréquences relatives croisées&amp;nbsp;:</span></span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a><span class="fu">proportions</span>(t2)</span></code></pre></div>
+<pre><code>##       cheveux
+## yeux       blond      brun      noir
+##   bleu 0.1428571 0.1428571 0.0000000
+##   brun 0.1428571 0.2857143 0.1428571
+##   vert 0.0000000 0.1428571 0.0000000</code></pre>
+<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fréquences relatives conditionnelles à la variable yeux&amp;nbsp;:</span></span>
+<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a><span class="fu">proportions</span>(t2, <span class="at">margin =</span> <span class="dv">1</span>)</span></code></pre></div>
+<pre><code>##       cheveux
+## yeux   blond brun noir
+##   bleu  0.50 0.50 0.00
+##   brun  0.25 0.50 0.25
+##   vert  0.00 1.00 0.00</code></pre>
+<p style="font-size:110%">
+<strong>Transformation du format d’un objet de classe <code>"table"</code></strong>
+</p>
+<p>Les fonctions <code>table</code> et <code>xtabs</code> attribuent à l’objet qu’ils retournent en sortie la classe <code>"table"</code>, comme nous pouvons le constater en observant l’objet <code>t2</code>.</p>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="fu">attributes</span>(t2)</span></code></pre></div>
+<pre><code>## $dim
+## [1] 3 3
+## 
+## $dimnames
+## $dimnames$yeux
+## [1] &quot;bleu&quot; &quot;brun&quot; &quot;vert&quot;
+## 
+## $dimnames$cheveux
+## [1] &quot;blond&quot; &quot;brun&quot;  &quot;noir&quot; 
+## 
+## 
+## $class
+## [1] &quot;xtabs&quot; &quot;table&quot;
+## 
+## $call
+## xtabs(formula = Freq ~ yeux + cheveux, data = t3_df)</code></pre>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(t2)</span></code></pre></div>
+<pre><code>##  &#39;xtabs&#39; int [1:3, 1:3] 1 1 0 1 2 1 0 1 0
+##  - attr(*, &quot;dimnames&quot;)=List of 2
+##   ..$ yeux   : chr [1:3] &quot;bleu&quot; &quot;brun&quot; &quot;vert&quot;
+##   ..$ cheveux: chr [1:3] &quot;blond&quot; &quot;brun&quot; &quot;noir&quot;
+##  - attr(*, &quot;call&quot;)= language xtabs(formula = Freq ~ yeux + cheveux, data = t3_df)</code></pre>
+<p>Il est parfois utile de transformer un objet de classe <code>"table"</code> en un array (matrice si la table croise deux variables) ou un data frame. Pour la transformation en array, il suffit de retirer l’attribut <code>class</code> avec la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/class.html">fonction <code>unclass</code></a>, comme dans cet exemple :</p>
+<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(<span class="fu">unclass</span>(t2))</span></code></pre></div>
+<pre><code>##  int [1:3, 1:3] 1 1 0 1 2 1 0 1 0
+##  - attr(*, &quot;dimnames&quot;)=List of 2
+##   ..$ yeux   : chr [1:3] &quot;bleu&quot; &quot;brun&quot; &quot;vert&quot;
+##   ..$ cheveux: chr [1:3] &quot;blond&quot; &quot;brun&quot; &quot;noir&quot;
+##  - attr(*, &quot;call&quot;)= language xtabs(formula = Freq ~ yeux + cheveux, data = t3_df)</code></pre>
+<p>Comme nous avons pu le constater dans un exemple précédent, la transformation en data frame crée pour sa part un jeu de données contenant une ligne par combinaison distincte des niveaux des facteurs croisés dans la table. Le data frame obtenu comporte une colonne par facteur, ainsi qu’une colonne nommée <code>Freq</code> contenant les fréquences dans la table. En voici un exemple :</p>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(<span class="fu">as.data.frame</span>(t2))</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    9 obs. of  3 variables:
+##  $ yeux   : Factor w/ 3 levels &quot;bleu&quot;,&quot;brun&quot;,..: 1 2 3 1 2 3 1 2 3
+##  $ cheveux: Factor w/ 3 levels &quot;blond&quot;,&quot;brun&quot;,..: 1 1 1 2 2 2 3 3 3
+##  $ Freq   : int  1 1 0 1 2 1 0 1 0</code></pre>
+</div>
+<div id="énumération-de-combinaisons" class="section level2" number="1.5">
+<h2><span class="header-section-number">1.5</span> Énumération de combinaisons</h2>
+<p>Un fonction utile pour énumérer toutes les combinaisons des niveaux d’un facteur est <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/expand.grid.html"><code>expand.grid</code></a>. Par exemple, retrouvons avec cette fonction toutes les combinaisons présentes dans le data frame <code>t3_df</code> créé précédemment.</p>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a><span class="fu">expand.grid</span>(</span>
+<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">yeux =</span> <span class="fu">c</span>(<span class="st">&quot;bleu&quot;</span>, <span class="st">&quot;brun&quot;</span>, <span class="st">&quot;vert&quot;</span>),</span>
+<span id="cb92-3"><a href="#cb92-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">cheveux =</span> <span class="fu">c</span>(<span class="st">&quot;blond&quot;</span>, <span class="st">&quot;brun&quot;</span>, <span class="st">&quot;noir&quot;</span>),</span>
+<span id="cb92-4"><a href="#cb92-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">genre =</span> <span class="fu">c</span>(<span class="st">&quot;féminin&quot;</span>, <span class="st">&quot;masculin&quot;</span>)</span>
+<span id="cb92-5"><a href="#cb92-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>##    yeux cheveux    genre
+## 1  bleu   blond  féminin
+## 2  brun   blond  féminin
+## 3  vert   blond  féminin
+## 4  bleu    brun  féminin
+## 5  brun    brun  féminin
+## 6  vert    brun  féminin
+## 7  bleu    noir  féminin
+## 8  brun    noir  féminin
+## 9  vert    noir  féminin
+## 10 bleu   blond masculin
+## 11 brun   blond masculin
+## 12 vert   blond masculin
+## 13 bleu    brun masculin
+## 14 brun    brun masculin
+## 15 vert    brun masculin
+## 16 bleu    noir masculin
+## 17 brun    noir masculin
+## 18 vert    noir masculin</code></pre>
+<p>Il faut fournir en entrée à <code>expand.grid</code> les valeurs à combiner. Si les vecteurs ou facteurs contenant ces valeurs sont fournis avec des noms, comme dans l’exemple précédent (via les assignations), les colonnes du data frame retourné en sortie par <code>expand.grid</code> porteront ces noms.</p>
+<p>Une autre fonction R permet d’énumérer des combinaisons possibles : la <a href="https://stat.ethz.ch/R-manual/R-patched/library/utils/html/combn.html">fonction <code>combn</code></a>. Il s’agit de combinaisons au sens mathématique cette fois, donc « de dispositions non ordonnées d’un certain nombre d’éléments d’un ensemble » (définition tirée du <a href="https://www.alloprof.qc.ca/fr/eleves/bv/mathematiques/les-permutations-les-arrangements-et-les-combinai-m1346">site web alloprof</a>). Par exemple, voici toutes les combinaisons possibles de 3 éléments parmi l’ensemble <code>c("Ève", "Jean", "Mia", "Paul")</code>, trouvées par la fonction <code>combn</code>.</p>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="fu">combn</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="st">&quot;Ève&quot;</span>, <span class="st">&quot;Jean&quot;</span>, <span class="st">&quot;Mia&quot;</span>, <span class="st">&quot;Paul&quot;</span>), <span class="at">m =</span> <span class="dv">3</span>)</span></code></pre></div>
+<pre><code>##      [,1]   [,2]   [,3]   [,4]  
+## [1,] &quot;Ève&quot;  &quot;Ève&quot;  &quot;Ève&quot;  &quot;Jean&quot;
+## [2,] &quot;Jean&quot; &quot;Jean&quot; &quot;Mia&quot;  &quot;Mia&quot; 
+## [3,] &quot;Mia&quot;  &quot;Paul&quot; &quot;Paul&quot; &quot;Paul&quot;</code></pre>
+<p>Contrairement à <code>expand.grid</code> qui présente les combinaisons possibles ligne par ligne, chaque colonne de la sortie produite par <code>combn</code> représente une combinaison possible.</p>
+<p>Notons finalement que la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Special.html">fonction <code>choose</code></a> mentionnée précédemment permet de compter le nombre de combinaisons possibles de <code>k</code> éléments d’un ensemble de taille <code>n</code>. Elle calcule donc le <a href="https://fr.wikipedia.org/wiki/Coefficient_binomial">coefficient binomial</a> <span class="math inline">\({n\choose k}\)</span>.</p>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Nombre de combinaisons possibles dans l&#39;exemple précédent&amp;nbsp;:</span></span>
+<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a><span class="fu">choose</span>(<span class="at">n =</span> <span class="dv">4</span>, <span class="at">k =</span> <span class="dv">3</span>)</span></code></pre></div>
+<pre><code>## [1] 4</code></pre>
+<hr />
+</div>
+</div>
+<div id="distributions-de-probabilité" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Distributions de probabilité</h1>
+<p>Le package <code>stats</code> de l’installation de base de R comprend, pour plusieurs distributions de probabilité, des fonctions de calcul de :</p>
+<ul>
+<li>la fonction de densité (forme <code>d*</code> où <code>*</code> change selon la distribution),</li>
+<li>la fonction de répartition (forme <code>p*</code>) et</li>
+<li>la fonction quantile (forme <code>q*</code>).</li>
+</ul>
+<p>La <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/Distributions.html">fiche d’aide ouverte par la commande <code>help(Distributions)</code></a> énumère toutes les distributions de probabilité offertes dans le package <code>stats</code>. Il existe aussi des fonctions relatives à d’autres distributions de probabilité dans des packages sur le CRAN (voir <a href="https://CRAN.R-project.org/view=Distributions" class="uri">https://CRAN.R-project.org/view=Distributions</a> pour découvrir ce qui est offert).</p>
+<p>Ces fonctions sont utiles notamment pour calculer des valeurs critiques ou des seuils observés de tests d’hypothèses. Un exemple est présenté plus loin.</p>
+<div id="fonction-de-densité" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Fonction de densité</h2>
+<p>Les fonctions R implémentant des <a href="https://fr.wikipedia.org/wiki/Densit%C3%A9_de_probabilit%C3%A9">fonctions de densité</a> ont un nom qui débute par le lettre <code>d</code> pour <em>density</em>. Leur premier argument est toujours un vecteur de valeurs en lesquelles calculer la fonction de densité. Les arguments suivants servent à spécifier les valeurs des paramètres de la distribution.</p>
+<p>Dans le cas d’une variable aléatoire discrète, la fonction de densité est plus justement appelée <a href="https://fr.wikipedia.org/wiki/Fonction_de_masse_(probabilit%C3%A9s)">fonction de masse</a>. Il s’agit alors d’une probabilité, pour une variable aléatoire suivant une certaine distribution, de prendre une certaine valeur.</p>
+<p style="font-size:110%">
+<strong>Exemple : distribution binomiale</strong>
+</p>
+<p>Soit <span class="math inline">\(X\)</span> une variable aléatoire représentant le nombre de 6 obtenus lors de 5 lancés d’un dé. Cette variable aléatoire suit une <a href="https://fr.wikipedia.org/wiki/Loi_binomiale">distribution binomiale</a> de paramètres <span class="math inline">\(n = 5\)</span> et <span class="math inline">\(p = 1/6\)</span>, donc <span class="math inline">\(X \sim Bin(n = 5, p = 1/6)\)</span>.</p>
+<p>Calculons <span class="math inline">\(P(X = 2)\)</span>, soit la probabilité que la variable aléatoire <span class="math inline">\(X\)</span> prenne la valeur 2.</p>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dbinom</span>(<span class="at">x =</span> <span class="dv">2</span>, <span class="at">size =</span> <span class="dv">5</span>, <span class="at">prob =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">6</span>)</span></code></pre></div>
+<pre><code>## [1] 0.160751</code></pre>
+<p>La fonction <code>dbinom</code> implémente donc la fonction de masse d’une distribution binomiale. Les arguments <code>size</code> et <code>prob</code> sont les paramètres <span class="math inline">\(n\)</span> et <span class="math inline">\(p\)</span> de la distribution, selon la notation utilisée ci-dessus.</p>
+<p>Les fonctions de la famille <code>d*</code> peuvent calculer plusieurs valeurs de densité par un seul appel de la fonction, car celles-ci acceptent des valeurs d’arguments de longueur supérieure à 1. Ces fonctions travaillent donc de façon vectorielle, comme presque toutes les fonctions de calcul en R.</p>
+<p>Voici un exemple de code R permettant de représenter graphiquement la densité <span class="math inline">\(Bin(n = 5, p = 1/6)\)</span> complète, en mettant en évidence la valeur calculée ci-dessus, soit <span class="math inline">\(P(X = 2)\)</span>. <em>(Nous verrons dans les <a href="https://stt4230.rbind.io/communication_resultats/graphiques_r/">notes sur les graphiques</a> comment produire ce genre de figure et les suivants.)</em></p>
+<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(</span>
+<span id="cb100-2"><a href="#cb100-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="fu">dbinom</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">size =</span> <span class="dv">5</span>, <span class="at">prob =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">6</span>), </span>
+<span id="cb100-3"><a href="#cb100-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">names.arg =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">5</span>,</span>
+<span id="cb100-4"><a href="#cb100-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Densité Binomiale(5,1/6)&quot;</span>,</span>
+<span id="cb100-5"><a href="#cb100-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;x&quot;</span>,</span>
+<span id="cb100-6"><a href="#cb100-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">&quot;dbinom(x, size = 5, prob = 1/6)&quot;</span></span>
+<span id="cb100-7"><a href="#cb100-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb100-8"><a href="#cb100-8" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(</span>
+<span id="cb100-9"><a href="#cb100-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="fu">dbinom</span>(<span class="dv">2</span>, <span class="at">size =</span> <span class="dv">5</span>, <span class="at">prob =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">6</span>), <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>),</span>
+<span id="cb100-10"><a href="#cb100-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>,</span>
+<span id="cb100-11"><a href="#cb100-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">add =</span> <span class="cn">TRUE</span></span>
+<span id="cb100-12"><a href="#cb100-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p><img src="/calculs/calculs_stat_r_2021_files/figure-html/unnamed-chunk-36-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<p style="font-size:110%">
+<strong>Exemple : distribution normale standard</strong>
+</p>
+<p>Supposons maintenant que <span class="math inline">\(X\)</span> est une variable aléatoire continue de <a href="https://fr.wikipedia.org/wiki/Loi_normale">distribution normale</a> standard, donc <span class="math inline">\(X \sim N(\mu = 0, \sigma^2 = 1)\)</span>. La valeur de la fonction de densité pour cette distribution en la valeur <span class="math inline">\(x = 1\)</span>, souvent notée <span class="math inline">\(f_X(1)\)</span>, vaut :</p>
+<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dnorm</span>(<span class="at">x =</span> <span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## [1] 0.2419707</code></pre>
+<p>Voici une représentation graphique de la densité complète dans laquelle la valeur calculée ci-dessus est mise en évidence.</p>
+<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="at">expr =</span> dnorm, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>), <span class="at">main =</span> <span class="st">&quot;Densité N(0,1)&quot;</span>)</span>
+<span id="cb103-2"><a href="#cb103-2" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(</span>
+<span id="cb103-3"><a href="#cb103-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x0 =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">4</span>, <span class="dv">1</span>), <span class="at">y0 =</span> <span class="fu">dnorm</span>(<span class="dv">1</span>), <span class="at">x1 =</span> <span class="dv">1</span>, <span class="at">y1 =</span> <span class="fu">c</span>(<span class="fu">dnorm</span>(<span class="dv">1</span>), <span class="sc">-</span><span class="dv">1</span>), </span>
+<span id="cb103-4"><a href="#cb103-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span></span>
+<span id="cb103-5"><a href="#cb103-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p><img src="/calculs/calculs_stat_r_2021_files/figure-html/unnamed-chunk-38-1.png" width="50%" style="display: block; margin: auto;" /></p>
+<p>Ici, nous n’avons pas eu besoin de fournir des valeurs aux arguments de la fonction <code>dnorm</code> relatifs aux paramètres de la distribution, parce que nous avons utilisés leurs valeurs par défaut. Ces paramètres, pour la densité <span class="math inline">\(N(\mu, \sigma^2)\)</span>, sont représentés par les arguments <code>mean</code> = <span class="math inline">\(\mu\)</span> et <code>sd</code> = <span class="math inline">\(\sigma\)</span> (remarquez que l’argument de la fonction R représente l’écart-type, pas la variance).</p>
+<p>Tout comme le premier argument, nommé <span class="math inline">\(x\)</span>, les arguments des fonctions de la famille <code>d*</code> représentant des paramètres de la distribution acceptent aussi en entrée plus d’une valeur. Voici un exemple, qui permet de calculer la densité en <span class="math inline">\(x = 1\)</span> pour <span class="math inline">\(X \sim N(\mu = -2, \sigma^2 = 1)\)</span>, <span class="math inline">\(X \sim N(\mu = 0, \sigma^2 = 2.25)\)</span> et <span class="math inline">\(X \sim N(\mu = 1, \sigma^2 = 4)\)</span> en un seul appel à la fonction <code>dnorm</code>.</p>
+<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dnorm</span>(<span class="at">x =</span> <span class="dv">1</span>, <span class="at">mean =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">1</span>), <span class="at">sd =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] 0.004431848 0.212965337 0.199471140</code></pre>
+</div>
+<div id="fonction-de-répartition" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Fonction de répartition</h2>
+<p>La <a href="https://fr.wikipedia.org/wiki/Fonction_de_r%C3%A9partition">fonction de répartition</a> d’une variable aléatoire <span class="math inline">\(X\)</span> est définie par <span class="math inline">\(F_X(x) = P(X \le x)\)</span>. Il s’agit donc toujours d’une probabilité, d’où le <code>p</code> au début des noms des fonctions R implémentant des fonctions de répartition.</p>
+<p style="font-size:110%">
+<strong>Exemple : distribution normale standard</strong>
+</p>
+<p>Prenons encore comme exemple la distribution normale standard. Nous avons donc <span class="math inline">\(X \sim N(0, 1)\)</span>. Calculons la valeur de la fonction de répartition de cette variable aléatoire en <span class="math inline">\(x = 1\)</span>.</p>
+<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pnorm</span>(<span class="at">q =</span> <span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## [1] 0.8413447</code></pre>
+<p>Il s’agit de la valeur de la probabilité <span class="math inline">\(P(X \le 1)\)</span>.</p>
+<p>Le premier argument des fonctions de la famille <code>p*</code> ne se nomme pas <code>x</code>, il se nomme plutôt <code>q</code>. Cette lettre réfère au mot quantile et souligne le lien entre les fonctions de répartition et les fonctions quantiles. Les arguments suivants des fonctions de la famille <code>p*</code> permettent de spécifier les valeurs des paramètres de la distribution, comme pour les fonctions de la famille <code>p*</code>.</p>
+<p>Voici une illustration graphique du lien entre la fonction de densité et la fonction de répartition en utilisant la distribution normale standard. La valeur de la fonction de répartition en un point quelconque <span class="math inline">\(x\)</span> (dans le graphique <span class="math inline">\(x = 1\)</span>) est égale à l’aire sous la courbe de densité entre <span class="math inline">\(-\infty\)</span> et <span class="math inline">\(x\)</span>.</p>
+<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a>par.default <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb108-2"><a href="#cb108-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb108-3"><a href="#cb108-3" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="at">expr =</span> dnorm, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>), <span class="at">main =</span> <span class="st">&quot;Densité N(0,1)&quot;</span>)</span>
+<span id="cb108-4"><a href="#cb108-4" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="sc">-</span><span class="dv">3</span>, <span class="at">to =</span> <span class="dv">1</span>, <span class="at">length =</span> <span class="dv">100</span>)</span>
+<span id="cb108-5"><a href="#cb108-5" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(<span class="at">x =</span> <span class="fu">c</span>(x, <span class="dv">1</span>, <span class="sc">-</span><span class="dv">3</span>), <span class="at">y =</span> <span class="fu">c</span>(<span class="fu">dnorm</span>(x), <span class="dv">0</span>, <span class="dv">0</span>), <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>)</span>
+<span id="cb108-6"><a href="#cb108-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb108-7"><a href="#cb108-7" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(</span>
+<span id="cb108-8"><a href="#cb108-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> pnorm, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>), </span>
+<span id="cb108-9"><a href="#cb108-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Fonction de répartition N(0,1)&quot;</span>, <span class="at">xname =</span> <span class="st">&quot;q&quot;</span></span>
+<span id="cb108-10"><a href="#cb108-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb108-11"><a href="#cb108-11" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(</span>
+<span id="cb108-12"><a href="#cb108-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">x0 =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">4</span>, <span class="dv">1</span>), <span class="at">y0 =</span> <span class="fu">pnorm</span>(<span class="dv">1</span>), <span class="at">x1 =</span> <span class="dv">1</span>, <span class="at">y1 =</span> <span class="fu">c</span>(<span class="fu">pnorm</span>(<span class="dv">1</span>), <span class="sc">-</span><span class="dv">1</span>), </span>
+<span id="cb108-13"><a href="#cb108-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span></span>
+<span id="cb108-14"><a href="#cb108-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb108-15"><a href="#cb108-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb108-16"><a href="#cb108-16" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(par.default)</span></code></pre></div>
+<p><img src="/calculs/calculs_stat_r_2021_files/figure-html/unnamed-chunk-41-1.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="fonction-quantile" class="section level2" number="2.3">
+<h2><span class="header-section-number">2.3</span> Fonction quantile</h2>
+<p>La <a href="https://fr.wikipedia.org/wiki/Fonction_quantile">fonction quantile</a> est l’inverse généralisé de la fonction de répartition. Les fonctions R implémentant des fonctions quantile ont un nom qui débute par le lettre <code>q</code> pour <em>quantile</em>.</p>
+<p style="font-size:110%">
+<strong>Exemple : distribution normale standard</strong>
+</p>
+<p>Pour clore l’exemple de la distribution normale standard, voyons de quoi à l’air la fonction quantile de cette distribution.</p>
+<p>Premièrement, calculons la valeur de la fonction quantile en un point, disons en <span class="math inline">\(p = 0.8413447\)</span>.</p>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qnorm</span>(<span class="at">p =</span> <span class="fl">0.8413447</span>)</span></code></pre></div>
+<pre><code>## [1] 0.9999998</code></pre>
+<p>Il s’agit de la valeur <span class="math inline">\(x\)</span> pour laquelle <span class="math inline">\(P(X \le x) = 0.8413447\)</span>, où <span class="math inline">\(X \sim N(0, 1)\)</span>.</p>
+<p>Le premier argument d’une fonction de la famille <code>q*</code> se nomme <code>p</code>. Cette notation peut nous aider à nous rappeler que cet argument représente une probabilité et accepte donc seulement des valeurs entre 0 et 1. Encore une fois, les arguments suivants des fonctions de la famille <code>q*</code> permettent de spécifier les valeurs des paramètres de la distribution.</p>
+<p>Le graphique suivant illustre le lien entre la fonction de répartition et la fonction quantile. Le graphique de la fonction quantile est simplement obtenu en inversant les axes du graphique de la fonction de répartition.</p>
+<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1" aria-hidden="true" tabindex="-1"></a>par.default <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), <span class="at">pty =</span> <span class="st">&quot;s&quot;</span>)</span>
+<span id="cb111-2"><a href="#cb111-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb111-3"><a href="#cb111-3" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(</span>
+<span id="cb111-4"><a href="#cb111-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> pnorm, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>), <span class="at">n =</span> <span class="dv">1000</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">asp =</span> <span class="dv">6</span>,</span>
+<span id="cb111-5"><a href="#cb111-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Fonction de répartition N(0,1)&quot;</span>, <span class="at">xname =</span> <span class="st">&quot;q&quot;</span></span>
+<span id="cb111-6"><a href="#cb111-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb111-7"><a href="#cb111-7" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(</span>
+<span id="cb111-8"><a href="#cb111-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">x0 =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">4</span>, <span class="dv">1</span>), <span class="at">y0 =</span> <span class="fu">pnorm</span>(<span class="dv">1</span>),  <span class="at">x1 =</span> <span class="dv">1</span>, <span class="at">y1 =</span> <span class="fu">c</span>(<span class="fu">pnorm</span>(<span class="dv">1</span>), <span class="sc">-</span><span class="dv">1</span>), </span>
+<span id="cb111-9"><a href="#cb111-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span></span>
+<span id="cb111-10"><a href="#cb111-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb111-11"><a href="#cb111-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb111-12"><a href="#cb111-12" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(</span>
+<span id="cb111-13"><a href="#cb111-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> qnorm, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">n =</span> <span class="dv">1000</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>), <span class="at">asp =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">6</span>, </span>
+<span id="cb111-14"><a href="#cb111-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Fonction quantile  N(0,1)&quot;</span>, <span class="at">xname =</span> <span class="st">&quot;p&quot;</span></span>
+<span id="cb111-15"><a href="#cb111-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb111-16"><a href="#cb111-16" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(</span>
+<span id="cb111-17"><a href="#cb111-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">x0 =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.2</span>, <span class="fu">pnorm</span>(<span class="dv">1</span>)), <span class="at">y0 =</span> <span class="fu">qnorm</span>(<span class="fu">pnorm</span>(<span class="dv">1</span>)), </span>
+<span id="cb111-18"><a href="#cb111-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">x1 =</span> <span class="fu">pnorm</span>(<span class="dv">1</span>), <span class="at">y1 =</span> <span class="fu">c</span>(<span class="fu">qnorm</span>(<span class="fu">pnorm</span>(<span class="dv">1</span>)), <span class="sc">-</span><span class="dv">4</span>), </span>
+<span id="cb111-19"><a href="#cb111-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span></span>
+<span id="cb111-20"><a href="#cb111-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb111-21"><a href="#cb111-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb111-22"><a href="#cb111-22" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(par.default)</span></code></pre></div>
+<p><img src="/calculs/calculs_stat_r_2021_files/figure-html/unnamed-chunk-43-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="génération-de-nombres-pseudo-aléatoires" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Génération de nombres pseudo-aléatoires</h1>
+<p>En R, les fonctions <code>r*</code> permettent de générer pseudo-aléatoirement des observations selon une certaine distribution désignée par <code>*</code>. La lettre <code>r</code> au début de leur nom signifie <em>random</em>.</p>
+<p>Par exemple, voici la représentation graphique de 3 échantillons générés aléatoirement selon 3 distributions différentes : des distributions normale, uniforme continue et khi-deux. Pour chaque échantillon, nous traçons l’histogramme des observations simulées pour représenter leur densité empirique. Nous superposons à cet histogramme la courbe de densité de la distribution théorique à partir de laquelle les observations ont été générées.</p>
+<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a>par.default <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
+<span id="cb112-2"><a href="#cb112-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb112-3"><a href="#cb112-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Densité normale d&#39;espérance 5 et de variance 4</span></span>
+<span id="cb112-4"><a href="#cb112-4" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">5</span>, <span class="at">sd =</span> <span class="dv">2</span>)</span>
+<span id="cb112-5"><a href="#cb112-5" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="at">x =</span> x1, <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">ylab =</span> <span class="st">&quot;Proportion&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Densité empirique de x1&quot;</span>)</span>
+<span id="cb112-6"><a href="#cb112-6" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="at">expr =</span> <span class="fu">dnorm</span>(x, <span class="at">mean =</span> <span class="dv">5</span>, <span class="at">sd =</span> <span class="dv">2</span>), <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>)</span>
+<span id="cb112-7"><a href="#cb112-7" aria-hidden="true" tabindex="-1"></a><span class="fu">title</span>(<span class="at">main =</span> <span class="st">&quot;courbe bleue = densité visée N(5,4)&quot;</span>, <span class="at">line =</span> <span class="fl">0.5</span>)</span>
+<span id="cb112-8"><a href="#cb112-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb112-9"><a href="#cb112-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Densité uniforme continue entre 2 et 8</span></span>
+<span id="cb112-10"><a href="#cb112-10" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1000</span>, <span class="at">min =</span> <span class="dv">2</span>, <span class="at">max =</span> <span class="dv">8</span>)</span>
+<span id="cb112-11"><a href="#cb112-11" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="at">x =</span> x2, <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">ylab =</span> <span class="st">&quot;Proportion&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Densité empirique de x2&quot;</span>)</span>
+<span id="cb112-12"><a href="#cb112-12" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="at">expr =</span> <span class="fu">dunif</span>(x, <span class="at">min =</span> <span class="dv">2</span>, <span class="at">max =</span> <span class="dv">8</span>), <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>)</span>
+<span id="cb112-13"><a href="#cb112-13" aria-hidden="true" tabindex="-1"></a><span class="fu">title</span>(<span class="at">main =</span> <span class="st">&quot;courbe bleue = densité visée U(2,8)&quot;</span>, <span class="at">line =</span> <span class="fl">0.5</span>)</span>
+<span id="cb112-14"><a href="#cb112-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb112-15"><a href="#cb112-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Densité chi-carré à 4 degrés de liberté</span></span>
+<span id="cb112-16"><a href="#cb112-16" aria-hidden="true" tabindex="-1"></a>x3 <span class="ot">&lt;-</span> <span class="fu">rchisq</span>(<span class="dv">1000</span>, <span class="at">df =</span> <span class="dv">4</span>)</span>
+<span id="cb112-17"><a href="#cb112-17" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="at">x =</span> x3, <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">ylab =</span> <span class="st">&quot;Proportion&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Densité empirique de x3&quot;</span>)</span>
+<span id="cb112-18"><a href="#cb112-18" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="at">expr =</span> <span class="fu">dchisq</span>(x, <span class="at">df =</span> <span class="dv">4</span>), <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>)</span>
+<span id="cb112-19"><a href="#cb112-19" aria-hidden="true" tabindex="-1"></a><span class="fu">title</span>(<span class="at">main =</span> <span class="fu">expression</span>(<span class="fu">paste</span>(<span class="st">&quot;courbe bleue = densité visée &quot;</span>, chi[<span class="dv">4</span>]<span class="sc">^</span><span class="dv">2</span>)), <span class="at">line =</span> <span class="fl">0.5</span>)</span>
+<span id="cb112-20"><a href="#cb112-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb112-21"><a href="#cb112-21" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(par.default)</span></code></pre></div>
+<p><img src="/calculs/calculs_stat_r_2021_files/figure-html/unnamed-chunk-45-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>Comme nous pouvons le constater sur ces graphiques, la distribution empirique des observations générées avec ces fonctions se rapproche vraiment de la distribution théorique demandée. En générant un nombre encore plus grand d’observations (ici nous en avons généré 1000 pour chaque distribution), la densité empirique se rapprocherait encore plus de la densité théorique.</p>
+<div id="fonction-sample" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Fonction <code>sample</code></h2>
+<p>La fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/sample.html"><code>sample</code></a> permet de tirer un échantillon aléatoire parmi un ensemble d’éléments fourni à son argument <code>x</code> sous forme de vecteur.</p>
+<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="st">&quot;Luc&quot;</span>, <span class="st">&quot;Kim&quot;</span>, <span class="st">&quot;Paul&quot;</span>, <span class="st">&quot;Ève&quot;</span>))</span></code></pre></div>
+<pre><code>## [1] &quot;Kim&quot;  &quot;Paul&quot; &quot;Ève&quot;  &quot;Luc&quot;</code></pre>
+<p>Ce vecteur peut contenir des données de n’importe quel type.</p>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>)</span></code></pre></div>
+<pre><code>## [1] 4 3 5 6 1 2</code></pre>
+<p>Par défaut, <code>sample</code> effectue un tirage sans remise et sélectionne autant d’éléments que l’ensemble de départ en contient. La fonction effectue donc une permutation aléatoire des éléments de l’ensemble de départ. L’argument <code>size</code> permet cependant de contrôler la taille de l’échantillon tiré.</p>
+<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">size =</span> <span class="dv">5</span>)</span></code></pre></div>
+<pre><code>## [1] 3 4 2 5 6</code></pre>
+<p>L’argument <code>replace</code> permet quant à lui de spécifier si le tirage doit être effectué avec (<code>replace = TRUE</code>) ou sans remise (<code>replace = FALSE</code>, valeur par défaut).</p>
+<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">size =</span> <span class="dv">10</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>##  [1] 5 5 5 6 2 5 6 3 5 1</code></pre>
+<p>Il est aussi possible d’attribuer des probabilité de sélection à chacun des éléments grâce à l’argument <code>prob</code>. Par défaut, tous les éléments ont une probabilité égale d’être tiré.</p>
+<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">size =</span> <span class="dv">20</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>, <span class="at">prob =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">10</span>, <span class="at">times =</span> <span class="dv">5</span>)))</span></code></pre></div>
+<pre><code>##  [1] 1 3 3 4 4 1 4 1 5 3 1 1 1 5 1 1 1 2 1 1</code></pre>
+<p>La fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/sample.html"><code>sample.int</code></a> est très similaire à la fonction <code>sample</code>, mais elle prend comme premier argument un seul entier, <code>n</code>, et tire aléatoirement <code>size</code> entiers entre 1 et <code>n</code>.</p>
+<div class="sourceCode" id="cb123"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb123-1"><a href="#cb123-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample.int</span>(<span class="at">n =</span> <span class="dv">6</span>, <span class="at">size =</span> <span class="dv">4</span>)</span></code></pre></div>
+<pre><code>## [1] 4 5 3 6</code></pre>
+<p>Si nous souhaitons sélectionner aléatoirement des observations (lignes) dans un jeu de données, il est d’usage de sélectionner d’abord des entiers compris entre 1 et le nombre total d’observations, puis d’extraire du jeu de donnée les observations sur les lignes portant les numéros sélectionnés. Voici un exemple, utilisant <a href="https://fr.wikipedia.org/wiki/Iris_de_Fisher">célèbres données iris</a>, incluses dans l’installation de base de R dans le data frame nommé <a href="https://stat.ethz.ch/R-manual/R-patched/library/datasets/html/iris.html"><code>iris</code></a> (du package <code>datasets</code>).</p>
+<div class="sourceCode" id="cb125"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb125-1"><a href="#cb125-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(iris)</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    150 obs. of  5 variables:
+##  $ Sepal.Length: num  5.1 4.9 4.7 4.6 5 5.4 4.6 5 4.4 4.9 ...
+##  $ Sepal.Width : num  3.5 3 3.2 3.1 3.6 3.9 3.4 3.4 2.9 3.1 ...
+##  $ Petal.Length: num  1.4 1.4 1.3 1.5 1.4 1.7 1.4 1.5 1.4 1.5 ...
+##  $ Petal.Width : num  0.2 0.2 0.2 0.2 0.2 0.4 0.3 0.2 0.2 0.1 ...
+##  $ Species     : Factor w/ 3 levels &quot;setosa&quot;,&quot;versicolor&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...</code></pre>
+<div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a>index_ech <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(<span class="at">n =</span> <span class="fu">nrow</span>(iris), <span class="at">size =</span> <span class="dv">5</span>, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb127-2"><a href="#cb127-2" aria-hidden="true" tabindex="-1"></a>index_ech</span></code></pre></div>
+<pre><code>## [1]  43  69  30 127  83</code></pre>
+<div class="sourceCode" id="cb129"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb129-1"><a href="#cb129-1" aria-hidden="true" tabindex="-1"></a>iris_ech <span class="ot">&lt;-</span> iris[index_ech, ]</span>
+<span id="cb129-2"><a href="#cb129-2" aria-hidden="true" tabindex="-1"></a>iris_ech</span></code></pre></div>
+<pre><code>##     Sepal.Length Sepal.Width Petal.Length Petal.Width    Species
+## 43           4.4         3.2          1.3         0.2     setosa
+## 69           6.2         2.2          4.5         1.5 versicolor
+## 30           4.7         3.2          1.6         0.2     setosa
+## 127          6.2         2.8          4.8         1.8  virginica
+## 83           5.8         2.7          3.9         1.2 versicolor</code></pre>
+</div>
+<div id="germe-de-la-génération-pseudo-aléatoire" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> Germe de la génération pseudo-aléatoire</h2>
+<p>Les nombres générés avec les fonctions <code>r*</code> et les échantillons tirés avec <code>sample</code> sont qualifiés de pseudo-aléatoires, car ils proviennent d’un algorithme déterministe qui tente de reproduire le hasard. Un tel algorithme est nommé en anglais <em>random number generator</em> (RNG) ou <em>pseudo-random number generator</em>. La fiche d’aide ouverte par la commande <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Random.html"><code>help(Random)</code></a> contient de l’information sur la génération de nombres pseudo-aléatoires en R.</p>
+<p>Plusieurs RNG sont implémentés en R. Celui utilisé par défaut, nommé Mersenne Twister, a été choisi parce qu’il est réputé être bon. Sans entrer dans les détails du fonctionnement des RNG implémentés dans le package <code>base</code> de R, il faut savoir qu’ils travaillent tous à partir d’une séquence de nombres appelée <em>germe</em> (en anglais <em>seed</em>). En contrôlant ce germe, il est possible de générer de nouveau, autant de fois que désiré, les mêmes valeurs.</p>
+<p>Par défaut, R contrôle le germe des RNG de façon automatique. Chaque fois qu’une commande faisant intervenir un RNG est évaluée, R crée un nouveau germe à partir, notamment, de l’heure à laquelle la commande est soumise. Ainsi, deux générations pseudo-aléatoires consécutives ne produisent en général pas le même résultat.</p>
+<div class="sourceCode" id="cb131"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb131-1"><a href="#cb131-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> letters, <span class="at">size =</span> <span class="dv">5</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;z&quot; &quot;q&quot; &quot;p&quot; &quot;o&quot; &quot;i&quot;</code></pre>
+<div class="sourceCode" id="cb133"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb133-1"><a href="#cb133-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> letters, <span class="at">size =</span> <span class="dv">5</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;g&quot; &quot;k&quot; &quot;j&quot; &quot;b&quot; &quot;h&quot;</code></pre>
+<p>En tout temps, il est possible de connaître le germe du RNG en R. Il est stocké dans un objet nommé <code>.Random.seed</code>. Cet objet est un vecteur numérique de longueur 626 pour le RNG Mersenne Twister. Voyons de quoi ont l’air les premiers éléments de ce vecteur à différents moments.</p>
+<div class="sourceCode" id="cb135"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(.Random.seed)</span></code></pre></div>
+<pre><code>##  int [1:626] 10403 81 1047847371 -1797991383 485769848 -268963930 615098817 117300385..</code></pre>
+<div class="sourceCode" id="cb137"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> letters, <span class="at">size =</span> <span class="dv">5</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;n&quot; &quot;g&quot; &quot;q&quot; &quot;h&quot; &quot;f&quot;</code></pre>
+<div class="sourceCode" id="cb139"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(.Random.seed)</span></code></pre></div>
+<pre><code>##  int [1:626] 10403 90 1047847371 -1797991383 485769848 -268963930 615098817 117300385..</code></pre>
+<div class="sourceCode" id="cb141"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> letters, <span class="at">size =</span> <span class="dv">5</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;a&quot; &quot;r&quot; &quot;q&quot; &quot;b&quot; &quot;e&quot;</code></pre>
+<div class="sourceCode" id="cb143"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(.Random.seed)</span></code></pre></div>
+<pre><code>##  int [1:626] 10403 98 1047847371 -1797991383 485769848 -268963930 615098817 117300385..</code></pre>
+<p>Nous constatons qu’au moins un élément de ce vecteur (le deuxième élément) change à chaque fois que nous appelons la fonction <code>sample</code>. La fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Random.html"><code>set.seed</code></a> permet de fixer le germe du RNG à partir d’une seule valeur entière. Par exemple, la commande suivante :</p>
+<div class="sourceCode" id="cb145"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">753</span>)</span></code></pre></div>
+<p>spécifie le germe suivant :</p>
+<div class="sourceCode" id="cb146"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb146-1"><a href="#cb146-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(.Random.seed)</span></code></pre></div>
+<pre><code>##  int [1:626] 10403 624 302719261 615841082 -1828406925 -1314498536 214287161 14262109..</code></pre>
+<p>En soumettant de nouveau le même appel à la fonction <code>sample</code>, nous obtenons l’échantillon suivant.</p>
+<div class="sourceCode" id="cb148"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb148-1"><a href="#cb148-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> letters, <span class="at">size =</span> <span class="dv">5</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;v&quot; &quot;r&quot; &quot;g&quot; &quot;i&quot; &quot;t&quot;</code></pre>
+<p>La soumission de cette commande a eu pour effet de modifier le germe.</p>
+<div class="sourceCode" id="cb150"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb150-1"><a href="#cb150-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(.Random.seed)</span></code></pre></div>
+<pre><code>##  int [1:626] 10403 6 47777699 -819670847 -326033232 523235278 1163109177 1104276299 1..</code></pre>
+<p>Donc si nous resoumettons la commande <code>sample</code>, nous n’obtiendrons sûrement pas le même résultat.</p>
+<div class="sourceCode" id="cb152"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb152-1"><a href="#cb152-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> letters, <span class="at">size =</span> <span class="dv">5</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;l&quot; &quot;q&quot; &quot;f&quot; &quot;e&quot; &quot;k&quot;</code></pre>
+<p>Par contre, si nous fixons de nouveau le germe à partir de l’entier 753 avec <code>set.seed</code>, nous arrivons à obtenir de nouveau l’avant-dernier échantillon généré.</p>
+<div class="sourceCode" id="cb154"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb154-1"><a href="#cb154-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">753</span>)</span>
+<span id="cb154-2"><a href="#cb154-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> letters, <span class="at">size =</span> <span class="dv">5</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;v&quot; &quot;r&quot; &quot;g&quot; &quot;i&quot; &quot;t&quot;</code></pre>
+<p>À n’importe quel moment, dans n’importe qu’elle session R, nous obtienons l’échantillon {v, r, g, i, t} si nous soumettons la commande <code>set.seed(753)</code> avant la commande <code>sample(letters, size = 5)</code>.</p>
+<p>L’utilité de fixer le germe d’une génération pseudo-aléatoire est de rendre son résultat reproduisible.</p>
+<hr />
+</div>
+</div>
+<div id="tests-statistiques" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Tests statistiques</h1>
+<p>Il existe des fonctions R pour faire des tests statistiques de base. En voici quelques-unes :</p>
+<ul>
+<li>tests sur une ou des moyennes : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/t.test.html"><code>t.test</code></a>;</li>
+<li>tests sur une ou des proportions : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/prop.test.html"><code>prop.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/binom.test.html"><code>binom.test</code></a>;</li>
+<li>tests de comparaison de variances : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/var.test.html"><code>var.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/bartlett.test.html"><code>bartlett.test</code></a>;</li>
+<li>tests sur une corrélation : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/cor.test.html"><code>cor.test</code></a>;</li>
+<li>tests pour une distribution : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/shapiro.test.html"><code>shapiro.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/ks.test.html"><code>ks.test</code></a>;</li>
+<li>tests non paramétriques : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/wilcox.test.html"><code>wilcox.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/kruskal.test.html"><code>kruskal.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/friedman.test.html"><code>friedman.test</code></a>;</li>
+<li>tests sur des fréquences : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/table.html">méthode <code>summary</code> pour un objet de classe <code>table</code></a> (produit par la fonction <code>table</code> ou <code>xtabs</code>), <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/chisq.test.html"><code>chisq.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/fisher.test.html"><code>fisher.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mantelhaen.test.html"><code>mantelhaen.test</code></a>.</li>
+</ul>
+<p>Utilisons encore une fois les données <code>iris</code> pour construire un exemple de test de comparaison de moyennes. Nous allons comparer les largeurs moyennes des sépales des espèces versicolor et virginica.</p>
+<p style="font-size:110%">
+<strong>Exemple : test t bilatéral de comparaison de moyennes, avec variances inégales</strong>
+</p>
+<div class="sourceCode" id="cb156"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb156-1"><a href="#cb156-1" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(</span>
+<span id="cb156-2"><a href="#cb156-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> Sepal.Width <span class="sc">~</span> Species,</span>
+<span id="cb156-3"><a href="#cb156-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> iris,</span>
+<span id="cb156-4"><a href="#cb156-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">subset =</span> Species <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;versicolor&quot;</span>, <span class="st">&quot;virginica&quot;</span>)</span>
+<span id="cb156-5"><a href="#cb156-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  Sepal.Width by Species
+## t = -3.2058, df = 97.927, p-value = 0.001819
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -0.33028364 -0.07771636
+## sample estimates:
+## mean in group versicolor  mean in group virginica 
+##                    2.770                    2.974</code></pre>
+<p>Lorsque nous connaissons la valeur d’une statistique de test ainsi que sa loi sous l’hypothèse nulle, il est possible de calculer en R le seuil observé du test avec la bonne fonction <code>p*</code>. Par exemple, dans le test t ci-dessus, nous pouvons retrouver la valeur du seuil observé ainsi :</p>
+<div class="sourceCode" id="cb158"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb158-1"><a href="#cb158-1" aria-hidden="true" tabindex="-1"></a><span class="co"># multiplication par 2, car le test est bilatéral et la loi t est symétrique</span></span>
+<span id="cb158-2"><a href="#cb158-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pt</span>(<span class="at">q =</span> <span class="sc">-</span><span class="fl">3.2058</span>, <span class="at">df =</span> <span class="fl">97.927</span>)<span class="sc">*</span><span class="dv">2</span> </span></code></pre></div>
+<pre><code>## [1] 0.001819258</code></pre>
+<p style="font-size:110%">
+<strong>Exemple : test non paramétrique équivalent</strong>
+</p>
+<div class="sourceCode" id="cb160"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb160-1"><a href="#cb160-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wilcox.test</span>(</span>
+<span id="cb160-2"><a href="#cb160-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> Sepal.Width <span class="sc">~</span> Species,</span>
+<span id="cb160-3"><a href="#cb160-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> iris, </span>
+<span id="cb160-4"><a href="#cb160-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">subset =</span> Species <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;versicolor&quot;</span>, <span class="st">&quot;virginica&quot;</span>), </span>
+<span id="cb160-5"><a href="#cb160-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">exact =</span> <span class="cn">FALSE</span></span>
+<span id="cb160-6"><a href="#cb160-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  Sepal.Width by Species
+## W = 841, p-value = 0.004572
+## alternative hypothesis: true location shift is not equal to 0</code></pre>
+<hr />
+</div>
+<div id="ajustement-de-modèles" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Ajustement de modèles</h1>
+<p>Il existe plusieurs fonctions en R pour ajuster des modèles. Les modèles les plus usuels sont :</p>
+<ul>
+<li>modèles linéaires, dont la régression : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/lm.html"><code>lm</code></a> pour <em>linear model</em>;</li>
+<li>modèle d’analyse de la variance : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/lm.html"><code>lm</code></a> ou <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/aov.html"><code>aov</code></a>;</li>
+<li>modèles linéaires généralisés : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/glm.html"><code>glm</code></a>;</li>
+<li>modèles linéaires mixtes (peuvent contenir des effets aléatoires) : <code>lmer</code> du package <a href="https://CRAN.R-project.org/package=lme4"><code>lme4</code></a> ou <code>lme</code> du package <a href="https://CRAN.R-project.org/package=nlme"><code>nlme</code></a>;</li>
+<li>modèles non linéaires : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/nls.html"><code>nls</code></a>.</li>
+</ul>
+<p>À titre d’exemples, ajustons deux modèles sur les données iris.</p>
+<p style="font-size:110%">
+<strong>Exemple : régression linéaire simple entre la largeur et la longueur des sépales</strong>
+</p>
+<div class="sourceCode" id="cb162"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb162-1"><a href="#cb162-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula =</span> Sepal.Width <span class="sc">~</span> Sepal.Length, <span class="at">data =</span> iris)</span>
+<span id="cb162-2"><a href="#cb162-2" aria-hidden="true" tabindex="-1"></a>reg</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = Sepal.Width ~ Sepal.Length, data = iris)
+## 
+## Coefficients:
+##  (Intercept)  Sepal.Length  
+##      3.41895      -0.06188</code></pre>
+<p style="font-size:110%">
+<strong>Exemple : ANOVA pour comparer les largeurs de sépales moyennes entre toutes les espèces</strong>
+</p>
+<div class="sourceCode" id="cb164"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb164-1"><a href="#cb164-1" aria-hidden="true" tabindex="-1"></a>ANOVA <span class="ot">&lt;-</span> <span class="fu">aov</span>(<span class="at">formula =</span> Sepal.Width <span class="sc">~</span> Species, <span class="at">data =</span> iris)</span>
+<span id="cb164-2"><a href="#cb164-2" aria-hidden="true" tabindex="-1"></a>ANOVA</span></code></pre></div>
+<pre><code>## Call:
+##    aov(formula = Sepal.Width ~ Species, data = iris)
+## 
+## Terms:
+##                  Species Residuals
+## Sum of Squares  11.34493  16.96200
+## Deg. of Freedom        2       147
+## 
+## Residual standard error: 0.3396877
+## Estimated effects may be unbalanced</code></pre>
+<div id="formules" class="section level2" number="5.1">
+<h2><span class="header-section-number">5.1</span> Formules</h2>
+<p>Ces fonctions d’ajustement de modèles prennent obligatoirement en entrée une formule R assignée à l’<a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/formula.html">argument <code>formula</code></a>, tout comme la fonction <code>xtabs</code>. D’autres fonctions acceptent aussi en entrée une formule, sans que ce type d’argument soit obligatoire. C’est le cas des fonctions <code>aggregate</code>, <code>ftable</code>, plusieurs des fonctions effectuant un test (p. ex. <code>t.test</code>, <code>wilcox.test</code>) et certaines fonctions graphiques (p. ex. <code>plot</code>, <code>boxplot</code>).</p>
+<p>Les fonctions prenant une formule en entrée ont toujours un argument <code>data</code> pour spécifier d’où tirer les variables incluses dans la formule.</p>
+<p>Une formule s’écrit sous la forme <code>y ~ x1 + x2</code> où <code>y</code> représente la variable réponse (ou à expliquer, ou dépendante, ou endogène) et <code>x1</code> et <code>x2</code> des variables explicatives (ou indépendantes, ou exogènes). Dans la partie de droite, les opérateurs suivants peuvent apparaître :</p>
+<ul>
+<li>« <code>+</code> » : pour ajouter des termes;</li>
+<li>« <code>-</code> » : pour soustraire des termes;</li>
+<li>« <code>0</code> » : ou <code>1</code> pour représenter l’ordonnée à l’origine (par défaut tout modèle linéaire comporte une ordonnée à l’origine, pour la retirer il faut ajouter <code>- 1</code> ou <code>+ 0</code> à la partie de droite de la formule);</li>
+<li>« <code>.</code> » : pour représenter toutes les variables dans le jeu de données fournit en argument <code>data</code>, autres que la variable mise à la gauche du <code>~</code> (note : le point signifie autre chose dans la fonction <code>update</code>).</li>
+</ul>
+<p>Opérateurs propres aux facteurs :</p>
+<ul>
+<li>« <code>:</code> » : pour les termes d’interaction entre facteurs;</li>
+<li>« <code>*</code> » : pour le croisement de facteurs (<code>x1*x2</code> est équivalent à <code>x1 + x2 + x1:x2</code>);</li>
+<li>« <code>^</code> » : pour le croisement de facteurs jusqu’à un certain niveau d’interaction (par exemple <code>(x1 + x2 + x3)^2</code> va inclure tous les termes de croisement des facteurs jusqu’aux interactions doubles <code>x1 + x2 + x3 + x1:x2 + x1:x3 + x2:x3</code>, mais pas l’interaction triple <code>x1:x2:x3</code>);</li>
+<li>« <code>%in%</code> » : pour les facteurs emboîtés (dans <code>x2 %in% x1</code>, <code>x2</code> est emboîté dans <code>x1</code>).</li>
+</ul>
+<p>Autre opérateur :</p>
+<ul>
+<li>« <code>|</code> » : (p. ex. <code>y ~ x1 | x2</code>) n’a pas toujours exactement la même signification selon la fonction, il représente parfois :
+<ul>
+<li>un conditionnement par rapport à une variable (p. ex. fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/graphics/html/coplot.html"><code>coplot</code></a>),</li>
+<li>la structure d’effets aléatoires (p. ex. fonctions <code>lmer</code> du package <a href="https://CRAN.R-project.org/package=lme4"><code>lme4</code></a> ou <code>lme</code> du package <a href="https://CRAN.R-project.org/package=nlme"><code>nlme</code></a>).</li>
+</ul></li>
+</ul>
+<p>Les formules peuvent inclurent des appels à des fonctions pour transformer les variables. Par exemple, pour ajuster un modèle sur la racine carrée de la variable réponse, nous pouvons écrire <code>sqrt(y) ~ x1 + x2</code>. Certaines transformations pourraient faire intervenir un ou des opérateurs ayant une signification modifiée dans une formule. Par exemple, imaginons que nous voulons ajuster un modèle avec une seule variable explicative créée en additionnant les valeurs des variables <code>x1</code> et <code>x2</code>. La formule <code>y ~ x1 + x2</code> n’ajuste pas ce modèle puisque, dans une formule, l’opérateur <code>+</code> signifie « ajouter des termes » et non plus « additionner des valeurs ». Alors est-il possible d’ajuster le modèle souhaité (<em>sans ajouter une nouvelle variable dans les données</em>)?</p>
+<p>Oui, c’est possible grâce à la fonction <code>I</code>. Il faut encadrer l’opération arithmétique à effectuer dans la formule d’un appel à la fonction <code>I</code>. Par exemple, <code>y ~ I(x1 + x2)</code> ajuste un modèle à une seule variable explicative formée de la somme des valeurs de <code>x1</code> et <code>x2</code>. Ainsi, <code>I()</code> permet d’utiliser la signification usuelle des opérateurs et non celle spécifique aux formules.</p>
+<div id="exemples" class="section level3" number="5.1.1">
+<h3><span class="header-section-number">5.1.1</span> Exemples</h3>
+<p>Voici quelques exemples, dans lesquels nous omettrons de nommer le premier argument, soit <code>formula</code>, pour alléger la présentation et parce qu’il est usuel de ne pas nommer ce premier argument.</p>
+<div id="retrait-de-lordonnée-à-lorigine" class="section level4" number="5.1.1.1">
+<h4><span class="header-section-number">5.1.1.1</span> Retrait de l’ordonnée à l’origine</h4>
+<p></p>
+<div class="sourceCode" id="cb166"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb166-1"><a href="#cb166-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(Sepal.Width <span class="sc">~</span> Sepal.Length <span class="sc">-</span> <span class="dv">1</span>, <span class="at">data =</span> iris)</span>
+<span id="cb166-2"><a href="#cb166-2" aria-hidden="true" tabindex="-1"></a><span class="co"># ou encore&amp;nbsp;:</span></span>
+<span id="cb166-3"><a href="#cb166-3" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(Sepal.Width <span class="sc">~</span> Sepal.Length <span class="sc">+</span> <span class="dv">0</span>, <span class="at">data =</span> iris)</span></code></pre></div>
+<div class="sourceCode" id="cb167"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb167-1"><a href="#cb167-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">summary</span>(reg))</span></code></pre></div>
+<pre><code>##               Estimate  Std. Error  t value      Pr(&gt;|t|)
+## Sepal.Length 0.5117739 0.008939966 57.24562 2.422615e-103</code></pre>
+</div>
+<div id="régression-log-log" class="section level4" number="5.1.1.2">
+<h4><span class="header-section-number">5.1.1.2</span> Régression log-log</h4>
+<p></p>
+<div class="sourceCode" id="cb169"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb169-1"><a href="#cb169-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(Sepal.Width) <span class="sc">~</span> <span class="fu">log</span>(Sepal.Length), <span class="at">data =</span> iris)</span></code></pre></div>
+<div class="sourceCode" id="cb170"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb170-1"><a href="#cb170-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">summary</span>(reg))</span></code></pre></div>
+<pre><code>##                     Estimate Std. Error   t value     Pr(&gt;|t|)
+## (Intercept)        1.3057236 0.14573780  8.959402 1.293792e-15
+## log(Sepal.Length) -0.1129573 0.08275742 -1.364920 1.743495e-01</code></pre>
+</div>
+<div id="régression-polynomiale" class="section level4" number="5.1.1.3">
+<h4><span class="header-section-number">5.1.1.3</span> Régression polynomiale</h4>
+<p></p>
+<div class="sourceCode" id="cb172"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb172-1"><a href="#cb172-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(Sepal.Width <span class="sc">~</span> Sepal.Length <span class="sc">+</span> Sepal.Length<span class="sc">^</span><span class="dv">2</span>, <span class="at">data =</span> iris)</span></code></pre></div>
+<div class="sourceCode" id="cb173"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb173-1"><a href="#cb173-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">summary</span>(reg))</span></code></pre></div>
+<pre><code>##                Estimate Std. Error   t value     Pr(&gt;|t|)
+## (Intercept)   3.4189468 0.25356227 13.483658 1.552431e-27
+## Sepal.Length -0.0618848 0.04296699 -1.440287 1.518983e-01</code></pre>
+<p>Non, ça n’a pas fonctionné. Dans une formule, l’opérateur <code>^</code> ne signifie pas exposant. Pour demander à R d’utiliser la signification usuelle de l’opérateur, et non celle spécifique aux formules, il faut encadrer le terme contenant l’opérateur de <code>I()</code> comme suit :</p>
+<div class="sourceCode" id="cb175"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb175-1"><a href="#cb175-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(Sepal.Width <span class="sc">~</span> Sepal.Length <span class="sc">+</span> <span class="fu">I</span>(Sepal.Length<span class="sc">^</span><span class="dv">2</span>), <span class="at">data =</span> iris)</span></code></pre></div>
+<div class="sourceCode" id="cb176"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb176-1"><a href="#cb176-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">summary</span>(reg))</span></code></pre></div>
+<pre><code>##                      Estimate Std. Error   t value     Pr(&gt;|t|)
+## (Intercept)        6.41583572 1.58499197  4.047866 8.327686e-05
+## Sepal.Length      -1.08556027 0.53624556 -2.024372 4.474291e-02
+## I(Sepal.Length^2)  0.08570656 0.04475502  1.915016 5.743267e-02</code></pre>
+<p> </p>
+<p><strong>Création de variables catégoriques pour les exemples à venir</strong> <em>(nous verrons dans les <a href="https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/">notes sur le prétraitement de données comment utiliser la fonction <code>cut</code></a>)</em> :</p>
+<div class="sourceCode" id="cb178"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb178-1"><a href="#cb178-1" aria-hidden="true" tabindex="-1"></a>iris<span class="sc">$</span>Sepal.Length_catego <span class="ot">&lt;-</span> <span class="fu">cut</span>(</span>
+<span id="cb178-2"><a href="#cb178-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> iris<span class="sc">$</span>Sepal.Length, </span>
+<span id="cb178-3"><a href="#cb178-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="fu">quantile</span>(iris<span class="sc">$</span>Sepal.Length, <span class="at">probs =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>)), <span class="cn">Inf</span>),</span>
+<span id="cb178-4"><a href="#cb178-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">right =</span> <span class="cn">FALSE</span></span>
+<span id="cb178-5"><a href="#cb178-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb178-6"><a href="#cb178-6" aria-hidden="true" tabindex="-1"></a>iris<span class="sc">$</span>Petal.Width_catego <span class="ot">&lt;-</span> <span class="fu">cut</span>(</span>
+<span id="cb178-7"><a href="#cb178-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> iris<span class="sc">$</span>Petal.Width, </span>
+<span id="cb178-8"><a href="#cb178-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="fu">quantile</span>(iris<span class="sc">$</span>Petal.Width, <span class="at">probs =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>)), <span class="cn">Inf</span>), </span>
+<span id="cb178-9"><a href="#cb178-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">right =</span> <span class="cn">FALSE</span></span>
+<span id="cb178-10"><a href="#cb178-10" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+</div>
+<div id="anova-à-3-facteurs-modèle-complet" class="section level4" number="5.1.1.4">
+<h4><span class="header-section-number">5.1.1.4</span> Anova à 3 facteurs, modèle complet</h4>
+<p></p>
+<div class="sourceCode" id="cb179"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb179-1"><a href="#cb179-1" aria-hidden="true" tabindex="-1"></a>ANOVA <span class="ot">&lt;-</span> <span class="fu">aov</span>(Sepal.Width <span class="sc">~</span> Species<span class="sc">*</span>Sepal.Length_catego<span class="sc">*</span>Petal.Width_catego, <span class="at">data =</span> iris)</span>
+<span id="cb179-2"><a href="#cb179-2" aria-hidden="true" tabindex="-1"></a><span class="co"># ou encore</span></span>
+<span id="cb179-3"><a href="#cb179-3" aria-hidden="true" tabindex="-1"></a>ANOVA <span class="ot">&lt;-</span> <span class="fu">aov</span>(</span>
+<span id="cb179-4"><a href="#cb179-4" aria-hidden="true" tabindex="-1"></a>  Sepal.Width <span class="sc">~</span> (Species <span class="sc">+</span> Sepal.Length_catego <span class="sc">+</span> Petal.Width_catego)<span class="sc">^</span><span class="dv">3</span>,</span>
+<span id="cb179-5"><a href="#cb179-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> iris</span>
+<span id="cb179-6"><a href="#cb179-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb180"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb180-1"><a href="#cb180-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ANOVA)</span></code></pre></div>
+<pre><code>##                                                 Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## Species                                          2 11.345   5.672  64.620  &lt; 2e-16 ***
+## Sepal.Length_catego                              2  3.843   1.922  21.891 5.53e-09 ***
+## Petal.Width_catego                               1  0.872   0.872   9.934  0.00199 ** 
+## Species:Sepal.Length_catego                      3  0.077   0.026   0.291  0.83194    
+## Species:Petal.Width_catego                       1  0.006   0.006   0.073  0.78754    
+## Sepal.Length_catego:Petal.Width_catego           1  0.047   0.047   0.540  0.46357    
+## Species:Sepal.Length_catego:Petal.Width_catego   1  0.002   0.002   0.026  0.87212    
+## Residuals                                      138 12.114   0.088                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+</div>
+<div id="anova-à-3-facteurs-modèle-complet-sans-linteraction-triple" class="section level4" number="5.1.1.5">
+<h4><span class="header-section-number">5.1.1.5</span> Anova à 3 facteurs, modèle complet sans l’interaction triple</h4>
+<p></p>
+<div class="sourceCode" id="cb182"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb182-1"><a href="#cb182-1" aria-hidden="true" tabindex="-1"></a>ANOVA <span class="ot">&lt;-</span> <span class="fu">aov</span>(</span>
+<span id="cb182-2"><a href="#cb182-2" aria-hidden="true" tabindex="-1"></a>  Sepal.Width <span class="sc">~</span> Species<span class="sc">*</span>Sepal.Length_catego<span class="sc">*</span>Petal.Width_catego <span class="sc">-</span> </span>
+<span id="cb182-3"><a href="#cb182-3" aria-hidden="true" tabindex="-1"></a>                Species<span class="sc">:</span>Sepal.Length_catego<span class="sc">:</span>Petal.Width_catego, </span>
+<span id="cb182-4"><a href="#cb182-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> iris</span>
+<span id="cb182-5"><a href="#cb182-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb182-6"><a href="#cb182-6" aria-hidden="true" tabindex="-1"></a><span class="co"># ou encore</span></span>
+<span id="cb182-7"><a href="#cb182-7" aria-hidden="true" tabindex="-1"></a>ANOVA <span class="ot">&lt;-</span> <span class="fu">aov</span>(</span>
+<span id="cb182-8"><a href="#cb182-8" aria-hidden="true" tabindex="-1"></a>  Sepal.Width <span class="sc">~</span> (Species <span class="sc">+</span> Sepal.Length_catego <span class="sc">+</span> Petal.Width_catego)<span class="sc">^</span><span class="dv">2</span>, </span>
+<span id="cb182-9"><a href="#cb182-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> iris</span>
+<span id="cb182-10"><a href="#cb182-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb183"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb183-1"><a href="#cb183-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ANOVA)</span></code></pre></div>
+<pre><code>##                                         Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## Species                                  2 11.345   5.672  65.076  &lt; 2e-16 ***
+## Sepal.Length_catego                      2  3.843   1.922  22.046 4.83e-09 ***
+## Petal.Width_catego                       1  0.872   0.872  10.004  0.00192 ** 
+## Species:Sepal.Length_catego              3  0.077   0.026   0.293  0.83046    
+## Species:Petal.Width_catego               1  0.006   0.006   0.073  0.78681    
+## Sepal.Length_catego:Petal.Width_catego   1  0.047   0.047   0.544  0.46199    
+## Residuals                              139 12.116   0.087                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+</div>
+</div>
+<div id="arguments-accompagnant-les-formules" class="section level3" number="5.1.2">
+<h3><span class="header-section-number">5.1.2</span> Arguments accompagnant les formules</h3>
+<p>Pour les fonctions prenant une formule comme premier argument, cet argument est souvent le seul argument obligatoire.</p>
+<div class="sourceCode" id="cb185"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb185-1"><a href="#cb185-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(iris<span class="sc">$</span>Sepal.Width <span class="sc">~</span> iris<span class="sc">$</span>Sepal.Length)</span>
+<span id="cb185-2"><a href="#cb185-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">summary</span>(reg))</span></code></pre></div>
+<pre><code>##                     Estimate Std. Error   t value     Pr(&gt;|t|)
+## (Intercept)        3.4189468 0.25356227 13.483658 1.552431e-27
+## iris$Sepal.Length -0.0618848 0.04296699 -1.440287 1.518983e-01</code></pre>
+<p>Cependant, un argument <code>formula</code> est toujours accompagné d’un argument <code>data</code>. Typiquement, l’utilisateur fournit à <code>data</code> un data frame contenant en colonnes les variables à inclure dans la formule. Utiliser l’argument <code>data</code> permet d’alléger la formule. Les noms de variables dans la formule sont d’abord recherchés parmi les noms des éléments de <code>data</code>.</p>
+<div class="sourceCode" id="cb187"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb187-1"><a href="#cb187-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(Sepal.Width <span class="sc">~</span> Sepal.Length, <span class="at">data =</span> iris)  <span class="co"># (plus de iris$ dans la formule)</span></span>
+<span id="cb187-2"><a href="#cb187-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">summary</span>(reg))</span></code></pre></div>
+<pre><code>##                Estimate Std. Error   t value     Pr(&gt;|t|)
+## (Intercept)   3.4189468 0.25356227 13.483658 1.552431e-27
+## Sepal.Length -0.0618848 0.04296699 -1.440287 1.518983e-01</code></pre>
+<p> </p>
+<p>En plus de l’argument <code>data</code>, les fonctions prenant une formule en entrée ont la plupart du temps les arguments :</p>
+<ul>
+<li><code>subset</code> pour spécifier un sous-ensemble de données à utiliser (par défaut toutes les observations de <code>data</code> sont utilisées) et</li>
+<li><code>na.action</code> pour spécifier quoi faire avec les valeurs manquantes (voir <a href="http://stat.ethz.ch/R-manual/R-patched/library/stats/html/na.fail.html"><code>help(na.fail)</code></a>).</li>
+</ul>
+<div id="ajustement-dun-modèle-sur-un-sous-ensemble-des-données" class="section level4" number="5.1.2.1">
+<h4><span class="header-section-number">5.1.2.1</span> Ajustement d’un modèle sur un sous-ensemble des données</h4>
+<p></p>
+<p>Un argument <code>subset</code> se spécifie comme l’argument <code>subset</code> de la fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/subset.html"><code>subset</code></a>. Sa valeur doit être un vecteur logique dont la longueur est égale au nombre d’observations dans le jeu de données fourni à l’argument <code>data</code>. Voici un exemple.</p>
+<div class="sourceCode" id="cb189"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb189-1"><a href="#cb189-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(Sepal.Width <span class="sc">~</span> Sepal.Length, <span class="at">data =</span> iris, <span class="at">subset =</span> Species <span class="sc">==</span> <span class="st">&quot;setosa&quot;</span>)</span>
+<span id="cb189-2"><a href="#cb189-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">summary</span>(reg))</span></code></pre></div>
+<pre><code>##                Estimate Std. Error   t value     Pr(&gt;|t|)
+## (Intercept)  -0.5694327  0.5217119 -1.091470 2.805148e-01
+## Sepal.Length  0.7985283  0.1039651  7.680738 6.709843e-10</code></pre>
+</div>
+<div id="modification-du-traitement-des-valeurs-manquantes" class="section level4" number="5.1.2.2">
+<h4><span class="header-section-number">5.1.2.2</span> Modification du traitement des valeurs manquantes</h4>
+<p></p>
+<div class="sourceCode" id="cb191"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb191-1"><a href="#cb191-1" aria-hidden="true" tabindex="-1"></a>iris_2 <span class="ot">&lt;-</span> iris</span>
+<span id="cb191-2"><a href="#cb191-2" aria-hidden="true" tabindex="-1"></a>iris_2<span class="sc">$</span>Sepal.Length[<span class="dv">6</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span> <span class="co"># pour insérer une donnée manquante (pas de NA dans iris)</span></span></code></pre></div>
+<p>La valeur fournie à l’argument <code>na.action</code> est le nom d’une fonction qui traite les données manquantes dans un jeu de données. Le comportement par défaut de l’argument <code>na.action</code> est régi par l’<a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/options.html">option de session</a> du même nom.</p>
+<div class="sourceCode" id="cb192"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb192-1"><a href="#cb192-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getOption</span>(<span class="st">&quot;na.action&quot;</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;na.omit&quot;</code></pre>
+<p>Dans mon cas, <code>na.action</code> prend donc par défaut la valeur <code>na.omit</code>, ce qui a pour conséquence que les observations avec au moins une valeur de variable manquante sont omises (ligne complète non considérée).</p>
+<p>Nous pourrions fournir à l’argument une autre des fonctions listées dans la fiche d’aide <a href="http://stat.ethz.ch/R-manual/R-patched/library/stats/html/na.fail.html"><code>help(na.fail)</code></a>. Par exemple, l’ajustement du modèle n’est pas effectué lorsque les données comportent des données manquantes si la valeur <code>na.fail</code> est fournie à <code>na.action</code>.</p>
+<div class="sourceCode" id="cb194"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb194-1"><a href="#cb194-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(Sepal.Width <span class="sc">~</span> Sepal.Length, <span class="at">data =</span> iris_2, <span class="at">na.action =</span> na.fail)</span></code></pre></div>
+<pre><code>## Error in na.fail.default(list(Sepal.Width = c(3.5, 3, 3.2, 3.1, 3.6, 3.9, &amp;nbsp;: 
+##   missing values in object</code></pre>
+</div>
+</div>
+</div>
+<div id="manipulation-de-la-sortie" class="section level2" number="5.2">
+<h2><span class="header-section-number">5.2</span> Manipulation de la sortie</h2>
+<p>Lorsque nous affichons dans la console un objet produit en sortie d’une fonction d’ajustement de modèle, la sortie obtenue est brève.</p>
+<div class="sourceCode" id="cb196"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb196-1"><a href="#cb196-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(Sepal.Width <span class="sc">~</span> Sepal.Length, <span class="at">data =</span> iris)</span>
+<span id="cb196-2"><a href="#cb196-2" aria-hidden="true" tabindex="-1"></a>reg</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = Sepal.Width ~ Sepal.Length, data = iris)
+## 
+## Coefficients:
+##  (Intercept)  Sepal.Length  
+##      3.41895      -0.06188</code></pre>
+<p>En réalité, cet objet est une liste contenant plusieurs éléments.</p>
+<div class="sourceCode" id="cb198"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb198-1"><a href="#cb198-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(reg, <span class="at">list.len =</span> <span class="dv">5</span>)</span></code></pre></div>
+<pre><code>## List of 12
+##  $ coefficients : Named num [1:2] 3.4189 -0.0619
+##   ..- attr(*, &quot;names&quot;)= chr [1:2] &quot;(Intercept)&quot; &quot;Sepal.Length&quot;
+##  $ residuals    : Named num [1:150] 0.3967 -0.1157 0.0719 -0.0343 0.4905 ...
+##   ..- attr(*, &quot;names&quot;)= chr [1:150] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; ...
+##  $ effects      : Named num [1:150] -37.4445 -0.6255 0.0564 -0.0485 0.471 ...
+##   ..- attr(*, &quot;names&quot;)= chr [1:150] &quot;(Intercept)&quot; &quot;Sepal.Length&quot; &quot;&quot; &quot;&quot; ...
+##  $ rank         : int 2
+##  $ fitted.values: Named num [1:150] 3.1 3.12 3.13 3.13 3.11 ...
+##   ..- attr(*, &quot;names&quot;)= chr [1:150] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; ...
+##   [list output truncated]
+##  - attr(*, &quot;class&quot;)= chr &quot;lm&quot;</code></pre>
+<p>L’objet obtenu de la fonction d’ajustement de modèle ne s’affiche pas comme une liste parce qu’un attribut classe lui est attribué et que la fonction polymorphe <code>print</code> possède une définition spécifique aux objets de cette classe.</p>
+<div class="sourceCode" id="cb200"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb200-1"><a href="#cb200-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(reg)</span></code></pre></div>
+<pre><code>## [1] &quot;lm&quot;</code></pre>
+<div class="sourceCode" id="cb202"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb202-1"><a href="#cb202-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(reg)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = Sepal.Width ~ Sepal.Length, data = iris)
+## 
+## Coefficients:
+##  (Intercept)  Sepal.Length  
+##      3.41895      -0.06188</code></pre>
+<p>C’est une caractéristique orientée objet du langage R. Dans la terminologie de R, une fonction polymorphe est appelée <em>fonction générique</em> et les différentes définitions de cette fonction sont appelées <em>méthodes</em>. Les fonctions génériques, telles que les fonctions <code>print</code> et <code>plot</code>, ont un comportement qui varie en fonction de la classe du premier argument qui leur est fourni en entrée.</p>
+<p>Rappelons que taper le nom d’un objet dans la console est en fait un raccourci pour soumettre la fonction <code>print</code> avec l’objet à afficher en argument.</p>
+<p>Si nous retirons l’attribut classe de l’objet, nous retombons sur un affichage usuel pour un objet de type liste.</p>
+<div class="sourceCode" id="cb204"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb204-1"><a href="#cb204-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(reg) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb204-2"><a href="#cb204-2" aria-hidden="true" tabindex="-1"></a>reg <span class="co"># résultat non affiché, car trop long</span></span></code></pre></div>
+<p>L’attribut classe peut même contenir plus d’une classe.</p>
+<div class="sourceCode" id="cb205"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb205-1"><a href="#cb205-1" aria-hidden="true" tabindex="-1"></a>ANOVA <span class="ot">&lt;-</span> <span class="fu">aov</span>(Sepal.Width <span class="sc">~</span> Species, <span class="at">data =</span> iris)</span>
+<span id="cb205-2"><a href="#cb205-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(ANOVA)</span></code></pre></div>
+<pre><code>## [1] &quot;aov&quot; &quot;lm&quot;</code></pre>
+<p>Souvent, le nom de la classe d’un objet est le nom de la fonction qui a produit cet objet. Les objets retournés par la fonction <code>aov</code> ont deux classes, car en réalité la fonction <code>aov</code> appelle la fonction <code>lm</code>.</p>
+<div id="fonctions-génériques-dextraction-dinformation" class="section level3" number="5.2.1">
+<h3><span class="header-section-number">5.2.1</span> Fonctions génériques d’extraction d’information</h3>
+<p>Voici la liste des fonctions génériques les plus couramment utilisées pour tirer de l’information d’un objet produit par une fonction d’ajustement de modèle :</p>
+<ul>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/summary.html"><code>summary</code></a> : pour afficher un résumé des informations plus long que ce qui est affiché avec <code>print</code> et pour produire des résultats supplémentaires;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/coef.html"><code>coef</code></a> (ou son alias <code>coefficients</code>) et <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/confint.html"><code>confint</code></a> : pour afficher les coefficients et pour produire des intervalles de confiance pour les coefficients d’un modèle;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/residuals.html"><code>residuals</code></a> et <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/fitted.values.html"><code>fitted</code></a> : pour extraire les résidus et les valeurs prédites;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/predict.html"><code>predict</code></a> : pour effectuer des prédictions pour de nouvelles observations;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/anova.html"><code>anova</code></a> : pour calculer la table d’analyse de la variance (ANOVA) du modèle;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/model.tables.html"><code>model.tables</code></a> et <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/TukeyHSD.html"><code>TukeyHSD</code></a> (pour la classe <code>aov</code>) : pour calculer les moyennes par niveaux de facteurs et pour faire des comparaisons multiples de Tukey sur ces moyennes;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/deviance.html"><code>deviance</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/logLik.html"><code>logLik</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/AIC.html"><code>AIC</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/AIC.html"><code>BIC</code></a> : pour extraire la déviance, la log-vraisemblance maximisée, le AIC et le BIC.</li>
+</ul>
+<p>L’utilisation de ces fonctions est la façon usuelle en R d’extraire des résultats relatifs à un modèle. Par exemple, pour extraire les coefficients d’un modèle, nous pouvons utiliser :</p>
+<div class="sourceCode" id="cb207"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb207-1"><a href="#cb207-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(Sepal.Width <span class="sc">~</span> Sepal.Length, <span class="at">data =</span> iris)</span>
+<span id="cb207-2"><a href="#cb207-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(reg)</span></code></pre></div>
+<pre><code>##  (Intercept) Sepal.Length 
+##    3.4189468   -0.0618848</code></pre>
+<p>Notons cependant qu’il est aussi possible d’extraire cette information en accédant directement aux éléments de <code>reg</code>, qui est une liste.</p>
+<div class="sourceCode" id="cb209"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb209-1"><a href="#cb209-1" aria-hidden="true" tabindex="-1"></a>reg<span class="sc">$</span>coefficients</span></code></pre></div>
+<pre><code>##  (Intercept) Sepal.Length 
+##    3.4189468   -0.0618848</code></pre>
+<p> </p>
+<p>Voici quelques exemples d’utilisation des fonctions d’extraction d’information  :</p>
+<div class="sourceCode" id="cb211"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb211-1"><a href="#cb211-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(Sepal.Width <span class="sc">~</span> Sepal.Length <span class="sc">+</span> Petal.Width, <span class="at">data =</span> iris)</span>
+<span id="cb211-2"><a href="#cb211-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(reg)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = Sepal.Width ~ Sepal.Length + Petal.Width, data = iris)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.99563 -0.24690 -0.00503  0.23354  1.01131 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   1.92632    0.32094   6.002 1.45e-08 ***
+## Sepal.Length  0.28929    0.06605   4.380 2.24e-05 ***
+## Petal.Width  -0.46641    0.07175  -6.501 1.17e-09 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.3841 on 147 degrees of freedom
+## Multiple R-squared:  0.234,  Adjusted R-squared:  0.2236 
+## F-statistic: 22.46 on 2 and 147 DF,  p-value: 3.091e-09</code></pre>
+<div class="sourceCode" id="cb213"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb213-1"><a href="#cb213-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(reg)</span></code></pre></div>
+<pre><code>##                   2.5 %     97.5 %
+## (Intercept)   1.2920761  2.5605655
+## Sepal.Length  0.1587655  0.4198079
+## Petal.Width  -0.6082076 -0.3246210</code></pre>
+<div class="sourceCode" id="cb215"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb215-1"><a href="#cb215-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(<span class="fu">residuals</span>(reg))</span></code></pre></div>
+<pre><code>##  Named num [1:150] 0.1916 -0.25054 0.00731 -0.06376 0.32053 ...
+##  - attr(*, &quot;names&quot;)= chr [1:150] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; ...</code></pre>
+<div class="sourceCode" id="cb217"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb217-1"><a href="#cb217-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(</span>
+<span id="cb217-2"><a href="#cb217-2" aria-hidden="true" tabindex="-1"></a>  reg, </span>
+<span id="cb217-3"><a href="#cb217-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">newdata =</span> <span class="fu">data.frame</span>(</span>
+<span id="cb217-4"><a href="#cb217-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sepal.Length =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">6</span>),</span>
+<span id="cb217-5"><a href="#cb217-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Petal.Width =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb217-6"><a href="#cb217-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb217-7"><a href="#cb217-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>##        1        2 
+## 2.906340 2.729213</code></pre>
+<div class="sourceCode" id="cb219"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb219-1"><a href="#cb219-1" aria-hidden="true" tabindex="-1"></a>ANOVA <span class="ot">&lt;-</span> <span class="fu">aov</span>(Sepal.Width <span class="sc">~</span> Species <span class="sc">+</span> Sepal.Length_catego, <span class="at">data =</span> iris)</span>
+<span id="cb219-2"><a href="#cb219-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ANOVA)</span></code></pre></div>
+<pre><code>##                      Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## Species               2 11.345   5.672   62.70  &lt; 2e-16 ***
+## Sepal.Length_catego   2  3.843   1.922   21.24 8.13e-09 ***
+## Residuals           145 13.119   0.090                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<div class="sourceCode" id="cb221"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb221-1"><a href="#cb221-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(ANOVA)</span></code></pre></div>
+<pre><code>## Analysis of Variance Table
+## 
+## Response: Sepal.Width
+##                      Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## Species               2 11.3449  5.6725  62.697 &lt; 2.2e-16 ***
+## Sepal.Length_catego   2  3.8433  1.9216  21.240 8.129e-09 ***
+## Residuals           145 13.1187  0.0905                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<div class="sourceCode" id="cb223"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb223-1"><a href="#cb223-1" aria-hidden="true" tabindex="-1"></a><span class="fu">model.tables</span>(ANOVA, <span class="at">type =</span> <span class="st">&quot;means&quot;</span>)</span></code></pre></div>
+<pre><code>## Tables of means
+## Grand mean
+##          
+## 3.057333 
+## 
+##  Species 
+##     setosa versicolor virginica
+##      3.428       2.77     2.974
+## rep 50.000      50.00    50.000
+## 
+##  Sepal.Length_catego 
+##     [-Inf,5.4) [5.4,6.3) [6.3, Inf)
+##          2.919     3.081      3.157
+## rep     46.000    53.000     51.000</code></pre>
+<div class="sourceCode" id="cb225"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb225-1"><a href="#cb225-1" aria-hidden="true" tabindex="-1"></a><span class="fu">TukeyHSD</span>(ANOVA)</span></code></pre></div>
+<pre><code>##   Tukey multiple comparisons of means
+##     95% family-wise confidence level
+## 
+## Fit: aov(formula = Sepal.Width ~ Species + Sepal.Length_catego, data = iris)
+## 
+## $Species
+##                        diff         lwr        upr     p adj
+## versicolor-setosa    -0.658 -0.80045516 -0.5155448 0.0000000
+## virginica-setosa     -0.454 -0.59645516 -0.3115448 0.0000000
+## virginica-versicolor  0.204  0.06154484  0.3464552 0.0025694
+## 
+## $Sepal.Length_catego
+##                             diff         lwr       upr     p adj
+## [5.4,6.3)-[-Inf,5.4)  0.16172436  0.01819230 0.3052564 0.0229762
+## [6.3, Inf)-[-Inf,5.4) 0.23756010  0.09272626 0.3823939 0.0004549
+## [6.3, Inf)-[5.4,6.3)  0.07583574 -0.06387887 0.2155503 0.4057167</code></pre>
+</div>
+<div id="résultats-additionnels-fournis-par-summary" class="section level3" number="5.2.2">
+<h3><span class="header-section-number">5.2.2</span> Résultats additionnels fournis par <code>summary</code></h3>
+<p>La fonction générique <code>summary</code> ne fait pas que produire un affichage du modèle ajusté plus complet que la fonction générique <code>print</code>. Elle produit des résultats supplémentaires concernant le modèle. Par exemple, pour un modèle produit avec <code>lm</code>, comparons ce que produit directement la fonction <code>lm</code> et ce que produit la fonction générique <code>summary</code> pour un objet retourné par <code>lm</code>.</p>
+<div class="sourceCode" id="cb227"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb227-1"><a href="#cb227-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(Sepal.Width <span class="sc">~</span> Sepal.Length, <span class="at">data =</span> iris)</span>
+<span id="cb227-2"><a href="#cb227-2" aria-hidden="true" tabindex="-1"></a>reg_summary <span class="ot">&lt;-</span> <span class="fu">summary</span>(reg)</span>
+<span id="cb227-3"><a href="#cb227-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">names</span>(reg))</span></code></pre></div>
+<pre><code>##  [1] &quot;assign&quot;        &quot;call&quot;          &quot;coefficients&quot;  &quot;df.residual&quot;  
+##  [5] &quot;effects&quot;       &quot;fitted.values&quot; &quot;model&quot;         &quot;qr&quot;           
+##  [9] &quot;rank&quot;          &quot;residuals&quot;     &quot;terms&quot;         &quot;xlevels&quot;</code></pre>
+<div class="sourceCode" id="cb229"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb229-1"><a href="#cb229-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">names</span>(reg_summary))</span></code></pre></div>
+<pre><code>##  [1] &quot;adj.r.squared&quot; &quot;aliased&quot;       &quot;call&quot;          &quot;coefficients&quot; 
+##  [5] &quot;cov.unscaled&quot;  &quot;df&quot;            &quot;fstatistic&quot;    &quot;r.squared&quot;    
+##  [9] &quot;residuals&quot;     &quot;sigma&quot;         &quot;terms&quot;</code></pre>
+<p>Seulement 4 éléments de la liste <code>reg</code> portent des noms aussi présents dans la liste <code>reg_summary</code>. Et des éléments de même nom dans les deux listes ne contiennent pas toujours la même chose.</p>
+<div class="sourceCode" id="cb231"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb231-1"><a href="#cb231-1" aria-hidden="true" tabindex="-1"></a>reg<span class="sc">$</span>coefficients</span></code></pre></div>
+<pre><code>##  (Intercept) Sepal.Length 
+##    3.4189468   -0.0618848</code></pre>
+<div class="sourceCode" id="cb233"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb233-1"><a href="#cb233-1" aria-hidden="true" tabindex="-1"></a>reg_summary<span class="sc">$</span>coefficients</span></code></pre></div>
+<pre><code>##                Estimate Std. Error   t value     Pr(&gt;|t|)
+## (Intercept)   3.4189468 0.25356227 13.483658 1.552431e-27
+## Sepal.Length -0.0618848 0.04296699 -1.440287 1.518983e-01</code></pre>
+<p>Les éléments produits par <code>summary</code> tendent à contenir plus de détails que les éléments obtenus directement de <code>lm</code>.</p>
+<p>La fonction <code>summary</code> réalise donc des calculs supplémentaires relatifs au modèle. Par exemple, pour un modèle ajusté avec <code>lm</code>, elle réalise les tests sur les termes du modèle et calcule le coefficient de détermination (R<sup>2</sup>), soit une mesure souvent utilisée pour évaluer la qualité de la prédiction du modèle.</p>
+<div class="sourceCode" id="cb235"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb235-1"><a href="#cb235-1" aria-hidden="true" tabindex="-1"></a>reg_summary<span class="sc">$</span>r.squared</span></code></pre></div>
+<pre><code>## [1] 0.01382265</code></pre>
+<p>Pour un modèle d’analyse de la variance ajusté avec <code>aov</code>, la fonction <code>summary</code> produit la table d’ANOVA complète, tout comme la fonction <code>anova</code> le fait.</p>
+<div class="sourceCode" id="cb237"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb237-1"><a href="#cb237-1" aria-hidden="true" tabindex="-1"></a>ANOVA <span class="ot">&lt;-</span> <span class="fu">aov</span>(Sepal.Width <span class="sc">~</span> Species <span class="sc">+</span> Sepal.Length_catego, <span class="at">data =</span> iris)</span>
+<span id="cb237-2"><a href="#cb237-2" aria-hidden="true" tabindex="-1"></a>ANOVA_summary <span class="ot">&lt;-</span> <span class="fu">summary</span>(ANOVA)</span>
+<span id="cb237-3"><a href="#cb237-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(ANOVA_summary)</span></code></pre></div>
+<pre><code>## List of 1
+##  $ :Classes &#39;anova&#39; and &#39;data.frame&#39;:    3 obs. of  5 variables:
+##   ..$ Df     : num [1:3] 2 2 145
+##   ..$ Sum Sq : num [1:3] 11.34 3.84 13.12
+##   ..$ Mean Sq: num [1:3] 5.6725 1.9216 0.0905
+##   ..$ F value: num [1:3] 62.7 21.2 NA
+##   ..$ Pr(&gt;F) : num [1:3] 2.40e-20 8.13e-09 NA
+##  - attr(*, &quot;class&quot;)= chr [1:2] &quot;summary.aov&quot; &quot;listof&quot;</code></pre>
+</div>
+<div id="mise-en-forme-avec-le-package-broom" class="section level3" number="5.2.3">
+<h3><span class="header-section-number">5.2.3</span> Mise en forme avec le package <code>broom</code></h3>
+<p>Le <a href="https://broom.tidymodels.org/">package <code>broom</code></a> offre des fonctions pour faciliter la manipulation de sorties d’une fonction d’ajustement de modèle. Les trois principales fonctions de ce package sont les suivantes :</p>
+<ul>
+<li><code>tidy</code> : produit un résumé des principaux résultats statistiques d’un modèle, dans le cas d’un modèle linéaire il s’agit d’une table des tests sur les coefficients du modèle;</li>
+<li><code>augment</code> : ajoute aux données sur lesquelles le modèle a été ajusté des informations tirées du modèle, comme des résidus et des valeurs prédites;</li>
+<li><code>glance</code> : réunit dans un seul data frame à une ligne plusieurs statistiques globales au modèle, comme des statistiques d’ajustement du modèle.</li>
+</ul>
+<p>Voici quelques exemples :</p>
+<div class="sourceCode" id="cb239"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb239-1"><a href="#cb239-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(Sepal.Width <span class="sc">~</span> Sepal.Length, <span class="at">data =</span> iris)</span></code></pre></div>
+<div class="sourceCode" id="cb240"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb240-1"><a href="#cb240-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
+<span id="cb240-2"><a href="#cb240-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(reg) <span class="co"># très similaire à coef(summary(reg)) pour une sortie de lm</span></span></code></pre></div>
+<pre><code>## # A tibble: 2 x 5
+##   term         estimate std.error statistic  p.value
+##   &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)    3.42      0.254      13.5  1.55e-27
+## 2 Sepal.Length  -0.0619    0.0430     -1.44 1.52e- 1</code></pre>
+<div class="sourceCode" id="cb242"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb242-1"><a href="#cb242-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">augment</span>(reg))</span></code></pre></div>
+<pre><code>## # A tibble: 6 x 8
+##   Sepal.Width Sepal.Length .fitted  .resid .std.resid    .hat .sigma   .cooksd
+##         &lt;dbl&gt;        &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;
+## 1         3.5          5.1    3.10  0.397      0.919  0.0121   0.435 0.00516  
+## 2         3            4.9    3.12 -0.116     -0.269  0.0154   0.436 0.000563 
+## 3         3.2          4.7    3.13  0.0719     0.167  0.0195   0.436 0.000277 
+## 4         3.1          4.6    3.13 -0.0343    -0.0798 0.0218   0.436 0.0000709
+## 5         3.6          5      3.11  0.490      1.14   0.0136   0.434 0.00893  
+## 6         3.9          5.4    3.08  0.815      1.89   0.00859  0.431 0.0154</code></pre>
+<div class="sourceCode" id="cb244"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb244-1"><a href="#cb244-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glance</span>(reg)</span></code></pre></div>
+<pre><code>## # A tibble: 1 x 12
+##   r.squared adj.r.squared sigma statistic p.value    df logLik   AIC   BIC deviance df.residual
+##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;       &lt;int&gt;
+## 1    0.0138       0.00716 0.434      2.07   0.152     1  -86.7  179.  188.     27.9         148
+## # ... with 1 more variable: nobs &lt;int&gt;</code></pre>
+<p>Plus d’informations peuvent être trouvées dans la documentation du package : <a href="https://broom.tidymodels.org/" class="uri">https://broom.tidymodels.org/</a></p>
+<hr />
+</div>
+</div>
+</div>
+<div id="résumé" class="section level1" number="6">
+<h1><span class="header-section-number">6</span> Résumé</h1>
+<p style="font-size:110%">
+<strong>Statistiques descriptives</strong>
+</p>
+<table>
+<colgroup>
+<col width="21%" />
+<col width="13%" />
+<col width="25%" />
+<col width="21%" />
+<col width="19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Calcul</th>
+<th>opère de façon vectorielle</th>
+<th>combine, retourne une valeur</th>
+<th>combine, retourne valeur(s)</th>
+<th>combine, retourne un vecteur</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>mesure de position</td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Extremes.html"><code>pmin</code>, <code>pmax</code></a></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Extremes.html"><code>min</code>, <code>max</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/which.min.html"><code>which.min</code>, <code>which.max</code></a></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/range.html"><code>range</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/quantile.html"><code>quantile</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/summary.html"><code>summary</code></a></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/cumsum.html"><code>cummin</code>, <code>cummax</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/rank.html"><code>rank</code></a></td>
+</tr>
+<tr class="even">
+<td>tendance centrale</td>
+<td></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/mean.html"><code>mean</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/median.html"><code>median</code></a></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/summary.html"><code>summary</code></a></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>dispersion</td>
+<td></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/sd.html"><code>sd</code></a></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/cor.html"><code>var</code>, <code>cov</code>, <code>cor</code></a></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>fréquences</td>
+<td></td>
+<td></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/table.html"><code>table</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/ftable.html"><code>ftable</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/xtabs.html"><code>xtabs</code></a>, <a href="(https://stat.ethz.ch/R-manual/R-patched/library/base/html/summary.html)"><code>summary</code></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Traitement des données manquantes :
+<ul>
+<li>argument <code>na.rm</code> ,</li>
+<li>fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/na.fail.html"><code>na.omit</code></a>;</li>
+</ul></li>
+<li>calcul de fréquences marginales ou relatives à partir d’un tableau de fréquences :<br />
+<a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/marginSums.html"><code>marginSums</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/addmargins.html"><code>addmargins</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/proportions.html"><code>proportions</code></a>.</li>
+<li>énumération de combinaisons : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/expand.grid.html"><code>expand.grid</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/utils/html/combn.html"><code>combn</code></a>.</li>
+</ul>
+<p style="font-size:110%">
+<strong>Distributions de probabilité et génération de nombres aléatoires</strong>
+</p>
+<table>
+<thead>
+<tr class="header">
+<th>Famille de fonction</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>d*</code></td>
+<td><strong>fonction de densité</strong> de la distribution <code>*</code></td>
+</tr>
+<tr class="even">
+<td><code>p*</code></td>
+<td><strong>fonction de répartition</strong> de la distribution <code>*</code></td>
+</tr>
+<tr class="odd">
+<td><code>q*</code></td>
+<td><strong>fonction quantile</strong> de la distribution <code>*</code></td>
+</tr>
+<tr class="even">
+<td><code>r*</code></td>
+<td>génération pseudo-aléatoirement d’observations selon la distribution <code>*</code></td>
+</tr>
+</tbody>
+</table>
+<p>Liste de toutes les distributions <code>*</code> offertes en R de base : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/Distributions.html"><code>help(Distributions)</code></a></p>
+<ul>
+<li>fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/sample.html"><code>sample</code></a> (ou <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/sample.html"><code>sample.int</code></a>) : tirage aléatoire d’échantillons</li>
+<li>fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Random.html"><code>set.seed</code></a> : pour fixer le germe du tirage pseudo-aléatoire</li>
+</ul>
+<p style="font-size:110%">
+<strong>Tests statistiques</strong>
+</p>
+<p>Quelques fonctions R pour faire des tests statistiques de base :</p>
+<ul>
+<li>tests sur une ou des moyennes : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/t.test.html"><code>t.test</code></a>;</li>
+<li>tests sur une ou des proportions : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/prop.test.html"><code>prop.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/binom.test.html"><code>binom.test</code></a>;</li>
+<li>tests de comparaison de variances : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/var.test.html"><code>var.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/bartlett.test.html"><code>bartlett.test</code></a>;</li>
+<li>tests sur une corrélation : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/cor.test.html"><code>cor.test</code></a>;</li>
+<li>tests pour une distribution : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/shapiro.test.html"><code>shapiro.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/ks.test.html"><code>ks.test</code></a>;</li>
+<li>tests non paramétriques : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/wilcox.test.html"><code>wilcox.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/kruskal.test.html"><code>kruskal.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/friedman.test.html"><code>friedman.test</code></a>;</li>
+<li>tests sur des fréquences : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/table.html">méthode <code>summary</code> pour un objet de classe <code>table</code></a> (produit par la fonction <code>table</code> ou <code>xtabs</code>), <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/chisq.test.html"><code>chisq.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/fisher.test.html"><code>fisher.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mantelhaen.test.html"><code>mantelhaen.test</code></a>.</li>
+</ul>
+<p style="font-size:110%">
+<strong>Ajustement de modèles</strong>
+</p>
+<p>Quelques fonctions R pour ajuster des modèles :</p>
+<ul>
+<li>modèles linéaires, dont la régression : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/lm.html"><code>lm</code></a>;</li>
+<li>modèle d’analyse de la variance : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/lm.html"><code>lm</code></a> ou <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/aov.html"><code>aov</code></a>;</li>
+<li>modèles linéaires généralisés : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/glm.html"><code>glm</code></a>;</li>
+<li>modèles linéaires mixtes (peuvent contenir des effets aléatoires) : <code>lmer</code> du package <a href="https://CRAN.R-project.org/package=lme4"><code>lme4</code></a> ou <code>lme</code> du package <a href="https://CRAN.R-project.org/package=nlme"><code>nlme</code></a>;</li>
+<li>modèles non linéaires : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/nls.html"><code>nls</code></a>.</li>
+</ul>
+<p style="font-size:110%">
+<strong>Formules R</strong>
+</p>
+<p><strong>Écriture générale</strong> : <code>y ~ x1 + x2</code><br />
+où <code>y</code> = variable réponse, <code>x1</code> et <code>x2</code> = variables explicatives.</p>
+<p><strong>Opérateurs acceptés</strong> et leur signification :</p>
+<ul>
+<li><code>+</code> pour ajouter des termes;</li>
+<li><code>-</code> pour soustraire des termes;</li>
+<li><code>- 1</code> ou <code>+ 0</code> pour retirer l’ordonnée à l’origine;</li>
+<li><code>.</code> pour représenter toutes les variables dans le jeu de données, autres que la variable mise à la gauche du <code>~</code> ;</li>
+<li><code>:</code> pour les termes d’interaction entre facteurs;</li>
+<li><code>*</code> pour le croisement de facteurs;</li>
+<li><code>^</code> croisement de facteurs jusqu’à un certain niveau d’interaction;</li>
+<li><code>%in%</code> pour les facteurs emboîtés;</li>
+<li><code>|</code> pour un conditionnement ou spécifier des effets aléatoires</li>
+</ul>
+<p><code>I()</code> pour utiliser la signification usuelle des opérateurs et non celle spécifique aux formules.</p>
+<p style="font-size:110%">
+<strong>Sortie d’une fonction d’ajustement de modèle</strong>
+</p>
+<p>Affichage (<code>print</code>) vs liste contenant les objets retournés</p>
+<p>La liste retournée a une ou des classes <span class="math inline">\(\rightarrow\)</span> programmation orientée objet</p>
+<p>Fonctions pour tirer de l’information d’un objet produit par une fonction d’ajustement de modèle :</p>
+<ul>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/summary.html"><code>summary</code></a> : plus de résultats relatifs au modèle + affichage d’un résumé des informations;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/coef.html"><code>coef</code></a> (ou son alias <code>coefficients</code>) et <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/confint.html"><code>confint</code></a> : coefficients et leurs intervalles de confiance;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/residuals.html"><code>residuals</code></a> et <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/fitted.values.html"><code>fitted</code></a> : résidus et valeurs prédites;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/predict.html"><code>predict</code></a> : prédiction pour une nouvelle observation;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/anova.html"><code>anova</code></a> : table d’analyse de la variance du modèle;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/model.tables.html"><code>model.tables</code></a> et <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/TukeyHSD.html"><code>TukeyHSD</code></a> (pour la classe <code>aov</code>) : moyennes par niveaux de facteurs et comparaisons multiples de Tukey;</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/deviance.html"><code>deviance</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/logLik.html"><code>logLik</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/AIC.html"><code>AIC</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/AIC.html"><code>BIC</code></a> : déviance, log-vraisemblance maximisée, AIC et BIC.</li>
+</ul>
+<hr />
+</div>
+<div id="références" class="section level1 unnumbered">
+<h1>Références</h1>
+<p>Les informations présentées dans ces notes proviennent des fiches d’aide du logiciel R :</p>
+<p>R Core Team (2020). <em>R: A language and environment for statistical computing</em>. R Foundation for Statistical Computing, Vienna, Austria. URL <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a></p>
+<p>Le manuel suivant de R contient aussi plusieurs informations concernant les calculs statistiques en R :</p>
+<p>R Core Team (2020). <em>An Introduction to R</em>. R version 4.0.3. URL <a href="https://cran.r-project.org/doc/manuals/r-release/R-intro.html" class="uri">https://cran.r-project.org/doc/manuals/r-release/R-intro.html</a></p>
+<p>Documentation du package utilisé :</p>
+<ul>
+<li>package <code>broom</code> :
+<ul>
+<li>page web du package sur le CRAN : <a href="https://CRAN.R-project.org/package=broom" class="uri">https://CRAN.R-project.org/package=broom</a></li>
+<li>documentation du package : <a href="https://broom.tidymodels.org/" class="uri">https://broom.tidymodels.org/</a></li>
+</ul></li>
+</ul>
+<p>Une très grande quantité de méthodes statistiques sont implémentées en R. Voici quelques bonnes références sur le sujet.</p>
+<ul>
+<li>Livres :
+<ul>
+<li>Hothorn, T. et Everitt, B.S. (2014). <em>A handbook of statistical analyses using R</em>, third edition. CRC Press.</li>
+<li>Millot, G. (2018). <em>Comprendre et réaliser les tests statistiques à l’aide de R: manuel de biostatistique</em>, 4<sup>e</sup> édition. De Boeck Supérieur.</li>
+</ul></li>
+<li>Sites web contenant plusieurs exemples d’analyses statistiques en R :
+<ul>
+<li><a href="https://stats.idre.ucla.edu/other/dae/" class="uri">https://stats.idre.ucla.edu/other/dae/</a> (contient aussi les mêmes exemples avec d’autres logiciels statistiques)</li>
+<li><a href="https://www.statmethods.net/about/sitemap.html" class="uri">https://www.statmethods.net/about/sitemap.html</a></li>
+</ul></li>
+<li>Ressources pour dénicher des packages R implémentant des méthodes statistiques particulières :
+<ul>
+<li>Task views de R : <a href="http://cran.r-project.org/web/views/" class="uri">http://cran.r-project.org/web/views/</a></li>
+<li>Dépôt informatique de packages R en bio-informatique : <a href="http://www.bioconductor.org/" class="uri">http://www.bioconductor.org/</a></li>
+</ul></li>
+</ul>
+<p>Pour aller plus loin :</p>
+<ul>
+<li>Braun, W. J. et Murdoch, D. (2007). <em>A first Course in Statistical Programming with R</em>. Cambridge University Press.</li>
+</ul>
+</div>

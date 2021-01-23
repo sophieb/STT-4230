@@ -30,8 +30,8 @@ Le reste du matériel de cours (exercices, tutoriels, exemples supplémentaires,
     * [Lecture et écriture dans des fichiers externes à partir de R]({{< relref "manipulation_donnees/lecture_ecriture_r_2021.html" >}})
     * [Prétraitement de données en R]({{< relref "manipulation_donnees/pretraitement_donnees_r_2020.html" >}})
 * Calculs en R
-    * [Calculs de base en R]({{< relref "calculs/calculs_base_r_2020.html" >}})
-    * [Calculs statistiques et mathématiques plus avancés en R]({{< relref "calculs/calculs_stat_math_r_2020.html" >}})
+    * [Calculs mathématiques en R]({{< relref "calculs/calculs_math_r_2021.html" >}})
+    * [Calculs statistiques en R]({{< relref "calculs/calculs_stat_r_2021.html" >}})
 * Communication de résultats en R
     * [Graphiques en R]({{< relref "communication_resultats/graphiques_r_2020.html" >}})
     * [Rédaction de documents en R Markdown]({{< relref "communication_resultats/redaction_r_markdown_2020.html" >}})

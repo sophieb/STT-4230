@@ -14,8 +14,8 @@ weight = 9
     * [Structures de données en R]({{< relref "manipulation_donnees/structures_donnees_r_2021.html" >}})
     * [Lecture et écriture dans des fichiers externes à partir de R]({{< relref "manipulation_donnees/lecture_ecriture_r_2021.html" >}})
 * Semaine 3
-    * [Calculs mathématiques en R]
-    * [Calculs statistiques en R]
+    * [Calculs mathématiques en R]({{< relref "calculs/calculs_math_r_2021.html" >}})
+    * [Calculs statistiques en R]({{< relref "calculs/calculs_stat_r_2021.html" >}})
 * Semaine 4
     * [Prétraitement de données en R]
     * [Rédaction de documents en R Markdown]
