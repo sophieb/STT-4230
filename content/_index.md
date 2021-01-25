@@ -32,6 +32,7 @@ Le reste du matériel de cours (exercices, tutoriels, exemples supplémentaires,
 * Calculs en R
     * [Calculs mathématiques en R]({{< relref "calculs/calculs_math_r_2021.html" >}})
     * [Calculs statistiques en R]({{< relref "calculs/calculs_stat_r_2021.html" >}})
+    * [Calculs par sections d'un objet R]({{< relref "calculs/calculs_apply_r_2021.html" >}})
 * Communication de résultats en R
     * [Graphiques en R]({{< relref "communication_resultats/graphiques_r_2020.html" >}})
     * [Rédaction de documents en R Markdown]({{< relref "communication_resultats/redaction_r_markdown_2020.html" >}})

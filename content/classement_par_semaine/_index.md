@@ -16,6 +16,7 @@ weight = 9
 * Semaine 3
     * [Calculs mathématiques en R]({{< relref "calculs/calculs_math_r_2021.html" >}})
     * [Calculs statistiques en R]({{< relref "calculs/calculs_stat_r_2021.html" >}})
+    * [Calculs par sections d'un objet R]({{< relref "calculs/calculs_apply_r_2021.html" >}})
 * Semaine 4
     * [Prétraitement de données en R]
     * [Rédaction de documents en R Markdown]

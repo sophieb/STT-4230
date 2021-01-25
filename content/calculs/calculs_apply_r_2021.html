@@ -1,0 +1,680 @@
+---
+title: "Calculs par sections d'un objet R"
+author: "Sophie Baillargeon, Université Laval"
+date: "2021-01-25"
+weight: 3
+slug: "calculs_apply_r"
+lastmodifierdisplayname: "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document: 
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+    highlight: tango
+  blogdown::html_page:
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+    highlight: tango
+header-includes:
+- \usepackage{float}
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+editor_options: 
+  chunk_output_type: console
+---
+
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #f8f8f8; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<div id="TOC">
+<ul>
+<li><a href="#fonctions-de-la-famille-des-apply"><span class="toc-section-number">1</span> Fonctions de la famille des <code>apply</code></a>
+<ul>
+<li><a href="#fonction-apply"><span class="toc-section-number">1.1</span> Fonction <code>apply</code></a>
+<ul>
+<li><a href="#fonctions-raccourcies"><span class="toc-section-number">1.1.1</span> Fonctions raccourcies</a></li>
+</ul></li>
+<li><a href="#fonctions-lapply-sapply-et-mapply"><span class="toc-section-number">1.2</span> Fonctions <code>lapply</code>, <code>sapply</code> et <code>mapply</code></a></li>
+<li><a href="#fonctions-tapply-by-et-aggregate"><span class="toc-section-number">1.3</span> Fonctions <code>tapply</code>, <code>by</code> et <code>aggregate</code></a></li>
+<li><a href="#choix-de-la-fonction-de-la-famille-des-apply-à-utiliser"><span class="toc-section-number">1.4</span> Choix de la fonction de la famille des <code>apply</code> à utiliser</a></li>
+</ul></li>
+<li><a href="#solutions-de-rechange-pour-calculs-par-niveaux-de-facteurs"><span class="toc-section-number">2</span> Solutions de rechange pour calculs par niveaux de facteurs</a>
+<ul>
+<li><a href="#package-dplyr"><span class="toc-section-number">2.1</span> Package <code>dplyr</code></a></li>
+<li><a href="#package-data.table"><span class="toc-section-number">2.2</span> Package <code>data.table</code></a></li>
+</ul></li>
+<li><a href="#résumé"><span class="toc-section-number">3</span> Résumé</a></li>
+<li><a href="#références">Références</a></li>
+</ul>
+</div>
+
+<hr />
+<p><em>Note préliminaire : Lors de leur dernière mise à jour, ces notes ont été révisées en utilisant R version 4.0.3, le package <code>dplyr</code> version 1.0.3 et le package <code>data.table</code> version 1.13.6. Pour d’autres versions, les informations peuvent différer.</em></p>
+<hr />
+<p>Dans le cadre d’une analyse exploratoire de données, certains calculs doivent être répétés sur différentes parties d’un jeu de données, par exemple diverses variables ou des sous-groupes d’observations. Le R de base propose plusieurs fonctions pour arriver à réaliser de tels calculs répétitifs sans écrire de boucle : les fonctions de la famille des <code>apply</code>. Ces fonctions sont présentées ici. Deux solutions de rechange pour le cas particulier du calcul de statistiques selon les niveaux de facteurs sont également présentées.</p>
+<hr />
+<div id="fonctions-de-la-famille-des-apply" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Fonctions de la famille des <code>apply</code></h1>
+<p>R propose plusieurs fonctions, dites « de la famille des <code>apply</code> », qui ont pour but d’appliquer itérativement une autre fonction sur des sections d’un objet. Les grandes étapes d’un traitement effectué par une de ces fonctions sont les suivantes :</p>
+<ul>
+<li>séparer un objet en sous-objets;</li>
+<li>répéter la même action pour tous les sous-objets : appeler une fonction en lui donnant comme premier argument le sous-objet;</li>
+<li>combiner les résultats obtenus.</li>
+</ul>
+<p>Ces fonctions cachent en fait des boucles. Les fonctions de la famille des <code>apply</code> sont utiles pour :</p>
+<ul>
+<li>obtenir des statistiques marginales à partir d’une matrice ou d’un array,</li>
+<li>appliquer le même traitement à tous les éléments d’une liste,</li>
+<li>calculer des statistiques descriptives selon les niveaux de facteurs,</li>
+<li>effectuer des calculs en parallèle (nous y reviendrons plus tard),</li>
+<li>etc.</li>
+</ul>
+<p>Nous verrons ici les fonctions : <code>apply</code>, <code>lapply</code>, <code>sapply</code>, <code>mapply</code>, <code>tapply</code>, <code>by</code> et <code>aggregate</code>.</p>
+<div id="fonction-apply" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> Fonction <code>apply</code></h2>
+<p>Si elle reçoit comme premier argument une matrice, la fonction <code>apply</code> appelle en boucle une fonction en lui donnant en entrée l’une après l’autre chacune des lignes ou des colonnes d’une matrice. Voici un exemple.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">4</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mat[<span class="dv">2</span>,<span class="dv">3</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>mat</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]
+## [1,]    1    2    3    4
+## [2,]    5    6   NA    8
+## [3,]    9   10   11   12</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcul sur chaque ligne&amp;nbsp;:</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(mat, <span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> mean)</span></code></pre></div>
+<pre><code>## [1]  2.5   NA 10.5</code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcul sur chaque colonne&amp;nbsp;:</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(mat, <span class="at">MARGIN =</span> <span class="dv">2</span>, <span class="at">FUN =</span> mean)</span></code></pre></div>
+<pre><code>## [1]  5  6 NA  8</code></pre>
+<p>Pour ajouter un argument à envoyer à la fonction <code>FUN</code>, il suffit de l’ajouter à la liste des arguments fournis, préférablement en le nommant. C’est l’argument <code>...</code> qui permet ce transfert d’arguments entre une fonction principale et une fonction présente dans le corps de la fonction principale.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(mat, <span class="at">MARGIN =</span> <span class="dv">2</span>, <span class="at">FUN =</span> mean, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## [1] 5 6 7 8</code></pre>
+<p>La fonction retourne une liste si <code>FUN</code> retourne plus d’une valeur.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(mat, <span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> summary)</span></code></pre></div>
+<pre><code>## [[1]]
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    1.00    1.75    2.50    2.50    3.25    4.00 
+## 
+## [[2]]
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&#39;s 
+##   5.000   5.500   6.000   6.333   7.000   8.000       1 
+## 
+## [[3]]
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    9.00    9.75   10.50   10.50   11.25   12.00</code></pre>
+<p>De façon plus générale, la fonction <code>apply</code> peut itérer sur des sous-objets créés à partir d’un array à plus de deux dimensions.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>arr <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, <span class="at">dim =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>))</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>arr</span></code></pre></div>
+<pre><code>## , , 1
+## 
+##      [,1] [,2] [,3]
+## [1,]    1    3    5
+## [2,]    2    4    6
+## 
+## , , 2
+## 
+##      [,1] [,2] [,3]
+## [1,]    7    9   11
+## [2,]    8   10   12</code></pre>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(arr, <span class="at">MARGIN =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">FUN =</span> sum)</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    8   12   16
+## [2,]   10   14   18</code></pre>
+<p>Si elle reçoit en entrée un data frame, elle le transformera en matrice avant d’effectuer les calculs.</p>
+<div id="fonctions-raccourcies" class="section level3" number="1.1.1">
+<h3><span class="header-section-number">1.1.1</span> Fonctions raccourcies</h3>
+<p>Pour le calcul de sommes et de moyennes par lignes ou colonnes d’une matrice, il existe des fonctions raccourcies à la fonction <code>apply</code> : <code>rowSums</code>, <code>colSums</code>, <code>rowMeans</code>, <code>colMeans</code>. Par exemple :</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colMeans</span>(mat, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## [1] 5 6 7 8</code></pre>
+<p>est équivalent à <code>apply(mat,  MARGIN = 2, FUN = mean, na.rm = TRUE)</code> et</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rowSums</span>(mat, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## [1] 10 19 42</code></pre>
+<p>est équivalent à <code>apply(mat,  MARGIN = 1, FUN = sum, na.rm = TRUE)</code>.</p>
+<p>Ces fonctions spécialisées ont été optimisées en termes de temps d’exécution.</p>
+</div>
+</div>
+<div id="fonctions-lapply-sapply-et-mapply" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> Fonctions <code>lapply</code>, <code>sapply</code> et <code>mapply</code></h2>
+<p>Les fonctions <code>lapply</code>, <code>sapply</code> et <code>mapply</code> prennent en entrée un vecteur ou une liste (qui peut aussi être un data frame) et appliquent une fonction sur chaque élément de cet objet. Voici une liste qui sera utilisée pour illustrer l’emploi de ces fonctions. Cette liste contient les mots formant trois courtes phrases (ponctuation omise).</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>phrases <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">phrase1 =</span> <span class="fu">c</span>(<span class="st">&quot;regarde&quot;</span>, <span class="st">&quot;la&quot;</span>, <span class="st">&quot;belle&quot;</span>, <span class="st">&quot;neige&quot;</span>),</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">phrase2 =</span> <span class="fu">c</span>(<span class="st">&quot;allons&quot;</span>, <span class="st">&quot;skier&quot;</span>),</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">phrase3 =</span> <span class="fu">c</span>(<span class="st">&quot;non&quot;</span>, <span class="st">&quot;il&quot;</span>, <span class="st">&quot;fait&quot;</span>, <span class="st">&quot;trop&quot;</span>, <span class="st">&quot;froid&quot;</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p style="font-size:110%">
+<strong>Fonction <code>sapply</code></strong>
+</p>
+<p>Supposons que nous voulons isoler le dernier mot de chaque phrase dans la liste <code>phrases</code>. L’action que nous souhaitons réaliser revient à extraire le dernier élément d’un vecteur. Elle doit être réalisée pour tous les vecteurs qui sont des éléments de la liste <code>phrases</code>. Nous pourrions réaliser cette tâche avec la commande suivante.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>derniers_mots <span class="ot">&lt;-</span> <span class="fu">sapply</span>(phrases, <span class="at">FUN =</span> tail, <span class="at">n =</span> <span class="dv">1</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>derniers_mots</span></code></pre></div>
+<pre><code>## phrase1 phrase2 phrase3 
+## &quot;neige&quot; &quot;skier&quot; &quot;froid&quot;</code></pre>
+<p>Décortiquons maintenant cette commande. L’instruction <code>sapply(phrases, FUN = tail, n = 1)</code> permet d’appliquer la fonction <code>tail</code> à chaque élément de la liste <code>phrases</code>. Ces éléments sont tous des vecteurs. L’argument <code>n = 1</code> est passé à la fonction <code>tail</code>. Ainsi, seul le dernier élément de chaque vecteur est extrait. C’est comme si nous avions soumis la commande</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span>(phrases[[i]], <span class="at">n =</span> <span class="dv">1</span>)</span></code></pre></div>
+<p>séparément pour tous les éléments, donc pour <code>i</code> = 1, 2 et 3, puis que nous avions rassemblé les résultats.</p>
+<p style="font-size:110%">
+<strong>Utilisation d’un opérateur comme valeur de l’argument <code>FUN</code></strong>
+</p>
+<p>Si nous cherchions plutôt à isoler le deuxième mot de chaque phrase dans la liste <code>phrases</code>, nous pourrions réaliser cette extraction avec la commande suivante.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(phrases, <span class="at">FUN =</span> <span class="st">&#39;[&#39;</span>, <span class="dv">2</span>)</span></code></pre></div>
+<pre><code>## phrase1 phrase2 phrase3 
+##    &quot;la&quot; &quot;skier&quot;    &quot;il&quot;</code></pre>
+<p>Dans cet exemple, la fonction à appliquer est en fait l’opérateur d’extraction du crochet simple. Rappelons que les opérateurs sont en fait des fonctions. Donc, pour un vecteur quelconque, disons</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> phrases[[<span class="dv">1</span>]]</span></code></pre></div>
+<p>les commandes suivantes sont équivalentes.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>x[<span class="dv">2</span>]</span></code></pre></div>
+<pre><code>## [1] &quot;la&quot;</code></pre>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;[&#39;</span>(x, <span class="dv">2</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;la&quot;</code></pre>
+<p>Ainsi, l’objet duquel nous voulons extraire est le premier argument à fournir à l’opérateur <code>[</code>. L’identifiant de l’élément à extraire (ici un entier représentant une position) est le deuxième argument à fournir à l’opérateur <code>[</code>. Si l’objet avait plus d’une dimension, il suffirait d’ajouter des arguments.</p>
+<p>Lorsque l’argument <code>FUN</code> d’une fonction de la famille des <code>apply</code> est un opérateur, il faut toujours l’encadrer de guillemets (simples ou doubles).</p>
+<p style="font-size:110%">
+<strong>Fonction <code>lapply</code></strong>
+</p>
+<p>La fonction <code>lapply</code> fait exactement le même calcul que la fonction <code>sapply</code>, mais retourne le résultat sous la forme d’une liste plutôt que sous une forme simplifiée. Voici un appel à <code>lapply</code> équivalent à l’appel à <code>sapply</code> qui a permis de créer <code>derniers_mots</code>. Les valeurs en sortie n’ont pas changé, mais elles sont stockées dans une liste plutôt que dans un vecteur.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(phrases, <span class="at">FUN =</span> tail, <span class="at">n =</span> <span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## $phrase1
+## [1] &quot;neige&quot;
+## 
+## $phrase2
+## [1] &quot;skier&quot;
+## 
+## $phrase3
+## [1] &quot;froid&quot;</code></pre>
+<p style="font-size:110%">
+<strong>Fonction <code>mapply</code></strong>
+</p>
+<p>Il aurait aussi été possible de solutionner le problème de l’extraction des derniers mots des phrases en utilisant la fonction <code>mapply</code>. La différence entre cette fonction et les fonctions <code>sapply</code> et <code>lapply</code> est qu’elle peut fournir à la fonction <code>FUN</code> plusieurs (ou de multiples, d’où le <code>m</code> dans <code>mapply</code>) arguments qui sont des vecteurs ou des listes.</p>
+<p>Par exemple, nous pourrions extraire les derniers mots en appliquant l’opérateur <code>[</code> à chaque élément de la liste <code>phrases</code>, mais en spécifiant comme argument pour l’opérateur d’extraction la position du dernier élément. Cette position diffère un peu d’un élément à l’autre. Elle est égale à la longueur de l’élément.</p>
+<p>Nous pourrions donc, dans un premier temps, calculer la longueur de chaque élément de <code>phrases</code> comme suit :</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>longueurs_phrases <span class="ot">&lt;-</span> <span class="fu">sapply</span>(phrases, length)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>longueurs_phrases</span></code></pre></div>
+<pre><code>## phrase1 phrase2 phrase3 
+##       4       2       5</code></pre>
+<p>Ayant en main un vecteur contenant les longueurs, nous pouvons utiliser <code>mapply</code> pour extraire les derniers éléments des vecteurs dans <code>phrases</code> par la commande suivante :</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mapply</span>(<span class="at">FUN =</span> <span class="st">&quot;[&quot;</span>, phrases, longueurs_phrases)</span></code></pre></div>
+<pre><code>## phrase1 phrase2 phrase3 
+## &quot;neige&quot; &quot;skier&quot; &quot;froid&quot;</code></pre>
+<p>La boucle cachée derrière cet appel à la fonction <code>mapply</code> est la suivante : pour <code>i</code> allant de 1 à 3, soit le nombre total d’éléments dans la liste <code>phrases</code>, l’extraction suivante est effectuée.</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;[&quot;</span>(phrases[[i]], longueurs_phrases[[i]])</span></code></pre></div>
+<p>Voici un autre exemple d’utilisation de la fonction <code>mapply</code>. Supposons que nous possédons trois listes contenant des vecteurs numériques, dont la longueur est la même selon la position, telles que les listes suivantes.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>liste1 <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>))</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>liste2 <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">3</span>), <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">2</span>))</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>liste3 <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">9</span>, <span class="dv">8</span>, <span class="dv">6</span>), <span class="fu">c</span>(<span class="dv">7</span>, <span class="dv">5</span>, <span class="dv">0</span>))</span></code></pre></div>
+<p>Nous pourrions utiliser <code>mapply</code> pour former des matrices en concaténant en lignes tous les vecteurs à la même position dans les listes, comme suit :</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mapply</span>(<span class="at">FUN =</span> rbind, liste1, liste2, liste3)</span></code></pre></div>
+<pre><code>## [[1]]
+##      [,1] [,2] [,3] [,4] [,5]
+## [1,]    1    2    3    4    5
+## [2,]    3    5    4    2    3
+## [3,]    0    3    9    8    6
+## 
+## [[2]]
+##      [,1] [,2] [,3]
+## [1,]    1    2    3
+## [2,]    3    4    2
+## [3,]    7    5    0</code></pre>
+<p>La fonction <code>mapply</code> est capable d’itérer sur les éléments d’un nombre indéterminé de vecteurs ou de listes.</p>
+</div>
+<div id="fonctions-tapply-by-et-aggregate" class="section level2" number="1.3">
+<h2><span class="header-section-number">1.3</span> Fonctions <code>tapply</code>, <code>by</code> et <code>aggregate</code></h2>
+<p>Ces fonctions appliquent elles aussi la même fonction à plusieurs sous-objets. Ce qui les distingue des autres fonctions de la famille des <code>apply</code> est la formation des sous-objets, qui se réalise cette fois selon les niveaux de facteurs.</p>
+<p>Nous allons reprendre le jeu de données <code>Puromycin</code> pour illustrer l’utilisation de ces fonctions.</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(Puromycin)</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    23 obs. of  3 variables:
+##  $ conc : num  0.02 0.02 0.06 0.06 0.11 0.11 0.22 0.22 0.56 0.56 ...
+##  $ rate : num  76 47 97 107 123 139 159 152 191 201 ...
+##  $ state: Factor w/ 2 levels &quot;treated&quot;,&quot;untreated&quot;: 1 1 1 1 1 1 1 1 1 1 ...
+##  - attr(*, &quot;reference&quot;)= chr &quot;A1.3, p. 269&quot;</code></pre>
+<p style="font-size:110%">
+<strong>Fonction <code>tapply</code></strong>
+</p>
+<p>Nous pourrions par exemple calculer la moyenne de la variable <code>rate</code> selon les niveaux du facteur <code>state</code> comme suit.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tapply</span>(Puromycin<span class="sc">$</span>rate, <span class="at">INDEX =</span> Puromycin<span class="sc">$</span>state, <span class="at">FUN =</span> mean)</span></code></pre></div>
+<pre><code>##   treated untreated 
+##  141.5833  110.7273</code></pre>
+<p>L’argument <code>INDEX</code> pourrait être une liste de plusieurs facteurs.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tapply</span>(Puromycin<span class="sc">$</span>rate, <span class="at">INDEX =</span> Puromycin[, <span class="fu">c</span>(<span class="st">&quot;conc&quot;</span>, <span class="st">&quot;state&quot;</span>)], <span class="at">FUN =</span> mean)</span></code></pre></div>
+<pre><code>##       state
+## conc   treated untreated
+##   0.02    61.5      59.0
+##   0.06   102.0      85.0
+##   0.11   131.0     106.5
+##   0.22   155.5     127.5
+##   0.56   196.0     151.0
+##   1.1    203.5     160.0</code></pre>
+<p>Dans l’exemple ci-dessous, nous avons fourni à <code>INDEX</code> un data frame, mais rappelons-nous que les data frames sont des cas particulier de listes. De plus, un élément de ce data frame n’est pas un facteur. Il s’agit de la variable <code>conc</code>. Cela n’a pas posé problème parce que <code>lapply</code> est arrivé à transformer l’élément en facteur.</p>
+<p style="font-size:110%">
+<strong>Fonction <code>by</code></strong>
+</p>
+<p>La fonction <code>by</code> prend comme objet en entrée un data frame et permet d’effectuer un calcul sur des sous-objets qui sont aussi des data frames. Par exemple, nous pourrions calculer la matrice de corrélations entre les observations des variables <code>conc</code> et <code>rate</code> selon les niveaux du facteur <code>state</code> comme suit.</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">by</span>(Puromycin[, <span class="fu">c</span>(<span class="st">&quot;conc&quot;</span>, <span class="st">&quot;rate&quot;</span>)], <span class="at">INDICES =</span> Puromycin<span class="sc">$</span>state, <span class="at">FUN =</span> cor)</span></code></pre></div>
+<pre><code>## Puromycin$state: treated
+##           conc      rate
+## conc 1.0000000 0.8310362
+## rate 0.8310362 1.0000000
+## ------------------------------------------------------------ 
+## Puromycin$state: untreated
+##           conc      rate
+## conc 1.0000000 0.8207311
+## rate 0.8207311 1.0000000</code></pre>
+<p style="font-size:110%">
+<strong>Fonction <code>aggregate</code></strong>
+</p>
+<p>Finalement, la fonction <code>aggregate</code> prend aussi en entrée un data frame, mais elle applique la fonction séparément pour chaque colonne du data frame.</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aggregate</span>(Puromycin[, <span class="fu">c</span>(<span class="st">&quot;conc&quot;</span>, <span class="st">&quot;rate&quot;</span>)], <span class="at">by =</span> <span class="fu">list</span>(<span class="at">state =</span> Puromycin<span class="sc">$</span>state), <span class="at">FUN =</span> mean)</span></code></pre></div>
+<pre><code>##       state      conc     rate
+## 1   treated 0.3450000 141.5833
+## 2 untreated 0.2763636 110.7273</code></pre>
+<p>L’argument <code>by</code> doit obligatoirement être une liste. Nommer les éléments de la liste aide à clarifier la sortie.</p>
+<p>La fonction <code>aggregate</code> accepte aussi des formules en entrée, comme dans les exemples ci-dessous.</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemple avec deux variables réponses et une variable explicative (de groupement)</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="fu">aggregate</span>(<span class="fu">cbind</span>(conc, rate) <span class="sc">~</span> state, <span class="at">data =</span> Puromycin, <span class="at">FUN =</span> mean)</span></code></pre></div>
+<pre><code>##       state      conc     rate
+## 1   treated 0.3450000 141.5833
+## 2 untreated 0.2763636 110.7273</code></pre>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemple avec une variable réponse et deux variables explicatives (de groupement)</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="fu">aggregate</span>(rate <span class="sc">~</span> conc <span class="sc">+</span> state, <span class="at">data =</span> Puromycin, <span class="at">FUN =</span> median)</span></code></pre></div>
+<pre><code>##    conc     state  rate
+## 1  0.02   treated  61.5
+## 2  0.06   treated 102.0
+## 3  0.11   treated 131.0
+## 4  0.22   treated 155.5
+## 5  0.56   treated 196.0
+## 6  1.10   treated 203.5
+## 7  0.02 untreated  59.0
+## 8  0.06 untreated  85.0
+## 9  0.11 untreated 106.5
+## 10 0.22 untreated 127.5
+## 11 0.56 untreated 151.0
+## 12 1.10 untreated 160.0</code></pre>
+</div>
+<div id="choix-de-la-fonction-de-la-famille-des-apply-à-utiliser" class="section level2" number="1.4">
+<h2><span class="header-section-number">1.4</span> Choix de la fonction de la famille des <code>apply</code> à utiliser</h2>
+<p>Les fonctions de la famille des <code>apply</code> servent à appliquer un même calcul sur différentes parties (sous-objets) d’une structure de données R (objet principal).</p>
+<p>La structure de données peut être brisée en sous-objets de différentes façons. Par exemple, s’il s’agit d’une matrice, elle peut être séparée en lignes ou en colonnes. S’il s’agit d’une liste, elle peut être séparée en éléments. Il est aussi possible de briser un vecteur ou un data frame en blocs d’observations référant à différents niveaux de facteurs. Dans ces notes, les fonctions de la famille des <code>apply</code> ont été séparées en 3 catégories selon la façon de former les sous-objets.</p>
+<p>Le format de la sortie retournée varie aussi d’une fonction à l’autre.</p>
+<p>Quand vient le temps de choisir une fonction de la famille des <code>apply</code> à utiliser, il faut donc se demander :</p>
+<ul>
+<li>Quel est le type de l’objet sur lequel appliquer les calculs?</li>
+<li>Comment les sous-objets doivent-ils être formés?</li>
+<li>Quel format de sortie est le plus approprié?</li>
+</ul>
+<p>Le tableau suivant permet de facilement comparer les fonctions de la famille des <code>apply</code> présentées en fournissant les réponses aux questions précédentes.</p>
+<table>
+<colgroup>
+<col width="12%" />
+<col width="31%" />
+<col width="33%" />
+<col width="22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Fonction</th>
+<th>Objet typique en entrée</th>
+<th>Formation des sous-objets</th>
+<th>Format de la sortie</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>apply</code></td>
+<td>array (matrice)</td>
+<td>selon une ou des dimensions</td>
+<td>vecteur, array, liste</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr class="odd">
+<td><code>lapply</code></td>
+<td>vecteur, liste (data frame)</td>
+<td>éléments de l’objet en entrée</td>
+<td>liste</td>
+</tr>
+<tr class="even">
+<td><code>sapply</code></td>
+<td>vecteur, liste (data frame)</td>
+<td>éléments de l’objet en entrée</td>
+<td>simplifié par défaut</td>
+</tr>
+<tr class="odd">
+<td><code>mapply</code></td>
+<td>vecteurs, listes (data frames)</td>
+<td>éléments des objets en entrée</td>
+<td>simplifié par défaut</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr class="odd">
+<td><code>tapply</code></td>
+<td>vecteur</td>
+<td>selon les niveaux de facteurs</td>
+<td>array ou liste</td>
+</tr>
+<tr class="even">
+<td><code>by</code></td>
+<td>data frame</td>
+<td>selon les niveaux de facteurs</td>
+<td>array ou liste</td>
+</tr>
+<tr class="odd">
+<td><code>aggregate</code></td>
+<td>data frame</td>
+<td>selon les niveaux de facteurs et par colonne du data frame</td>
+<td>data frame</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="solutions-de-rechange-pour-calculs-par-niveaux-de-facteurs" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Solutions de rechange pour calculs par niveaux de facteurs</h1>
+<p>Quelques packages R offrent d’autres fonctions permettant de réaliser des calculs par niveaux de facteurs. L’utilisation de deux de ces packages, souvent mentionnés par la communauté R, est illustrée brièvement ici en reproduisant les deux exemples précédents.</p>
+<div id="package-dplyr" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Package <code>dplyr</code></h2>
+<p>L’utilisation conjointe des fonctions <a href="https://dplyr.tidyverse.org/reference/group_by.html"><code>group_by</code></a> et <a href="https://dplyr.tidyverse.org/reference/summarise.html"><code>summarize</code></a> du package <a href="https://CRAN.R-project.org/package=dplyr"><code>dplyr</code></a> du <a href="https://www.tidyverse.org/"><code>tidyverse</code></a> permet d’agréger, en utilisant des statistiques de notre choix, les observations de variables selon les niveaux de facteurs.</p>
+<p>Reproduisons avec <code>dplyr</code> les deux derniers exemples présentés pour la fonction <code>aggregate</code>.</p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemple avec deux variables réponses et une variable explicative (de groupement)</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summarize</span>(<span class="fu">group_by</span>(Puromycin, state), <span class="at">conc =</span> <span class="fu">mean</span>(conc), <span class="at">rate =</span> <span class="fu">mean</span>(rate))</span></code></pre></div>
+<pre><code>## # A tibble: 2 x 3
+##   state      conc  rate
+## * &lt;fct&gt;     &lt;dbl&gt; &lt;dbl&gt;
+## 1 treated   0.345  142.
+## 2 untreated 0.276  111.</code></pre>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemple avec une variable réponse et deux variables explicatives (de groupement)</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summarize</span>(<span class="fu">group_by</span>(Puromycin, conc, state), <span class="at">rate =</span> <span class="fu">median</span>(rate))</span></code></pre></div>
+<pre><code>## `summarise()` has grouped output by &#39;conc&#39;. You can override using the `.groups` argument.</code></pre>
+<pre><code>## # A tibble: 12 x 3
+## # Groups:   conc [6]
+##     conc state      rate
+##    &lt;dbl&gt; &lt;fct&gt;     &lt;dbl&gt;
+##  1  0.02 treated    61.5
+##  2  0.02 untreated  59  
+##  3  0.06 treated   102  
+##  4  0.06 untreated  85  
+##  5  0.11 treated   131  
+##  6  0.11 untreated 106. 
+##  7  0.22 treated   156. 
+##  8  0.22 untreated 128. 
+##  9  0.56 treated   196  
+## 10  0.56 untreated 151  
+## 11  1.1  treated   204. 
+## 12  1.1  untreated 160</code></pre>
+<p>Les statistiques obtenues n’ont pas changé, mais elles sont retournées dans un <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#tibbles">tibble</a> au lieu d’un data frame.</p>
+<p>Il faut fournir comme premier argument à la fonction <code>summarize</code> le jeu de données sur lequel effectuer les calculs. De plus, pour réaliser des calculs selon les niveaux d’un facteur, le jeu de données doit être préalablement brisé en sous-groupes avec la fonction <code>group_by</code>. Par exemple, l’expression <code>group_by(Puromycin, conc, state)</code> permet d’indiquer que les observations du jeu de données <code>Puromycin</code> (argument 1 de <code>group_by</code> = jeu de données) doivent être groupées selon les niveaux des variables <code>conc</code> et <code>state</code> (arguments suivants de <code>group_by</code> = noms des colonnes du jeu de données contenant les facteurs selon lesquels créer les groupes). L’appel à la fonction <code>group_by</code> est donc assigné au premier argument de <code>summarize</code>. Les arguments suivants de <code>summarize</code> servent à définir les statistiques à calculer. Autant de statistiques que désiré peuvent être demandées. Les statistiques sont définies par des appels à des fonctions R de calcul statistique, en fournissant comme premier argument à la fonction le nom d’une variable dans le jeu de données (p. ex. <code>mean(conc)</code>). Si cette expression est précédée d’un opérateur <code>=</code> et d’un nom, celui-ci apparaîtra dans la sortie produite.</p>
+<p>Il aurait été possible de passer d’autres arguments dans les appels aux fonctions de calcul statistique. Par exemple, reprenons le premier exemple ci-dessus et demandons le calcul de moyennes tronquées.</p>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summarize</span>(</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Puromycin, state), </span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">conc =</span> <span class="fu">mean</span>(conc, <span class="at">trim =</span> <span class="fl">0.1</span>), </span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">rate =</span> <span class="fu">mean</span>(rate, <span class="at">trim =</span> <span class="fl">0.1</span>),</span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_obs =</span> <span class="fu">n</span>()</span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## # A tibble: 2 x 4
+##   state      conc  rate n_obs
+## * &lt;fct&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
+## 1 treated   0.302  144.    12
+## 2 untreated 0.213  112.    11</code></pre>
+<p>Ici, le calcul du nombre d’observations par sous-groupe a aussi été demandé avec la fonction <code>n</code> du package <code>dplyr</code>. Cette fonction n’a besoin d’aucun argument.</p>
+<p>Notons que les fonctions de <code>dplyr</code> sont souvent utilisées avec l’opérateur <code>%&gt;%</code>, nommé « <em>forward-pipe operator</em> ». En utilisant cet opérateur, la dernière instruction aurait l’allure suivante.</p>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>Puromycin <span class="sc">%&gt;%</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(state) <span class="sc">%&gt;%</span></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">conc =</span> <span class="fu">mean</span>(conc, <span class="at">trim =</span> <span class="fl">0.1</span>), </span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">rate =</span> <span class="fu">mean</span>(rate, <span class="at">trim =</span> <span class="fl">0.1</span>),</span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_obs =</span> <span class="fu">n</span>()</span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<pre><code>## # A tibble: 2 x 4
+##   state      conc  rate n_obs
+## * &lt;fct&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
+## 1 treated   0.302  144.    12
+## 2 untreated 0.213  112.    11</code></pre>
+<p>L’utilisation de l’opérateur <code>%&gt;%</code> sera expliquée plus tard, dans les <a href="https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/#op%C3%A9rateur-pipe">notes sur les bonnes pratiques</a>. Bien que son utilisation avec les fonctions du <code>tidyverse</code> soit très populaire, elle n’est pas obligatoire.</p>
+<p>Pour obtenir plus d’informations sur les calculs par niveaux de facteurs avec le package <code>dplyr</code> :</p>
+<ul>
+<li><a href="https://dplyr.tidyverse.org/articles/grouping.html#summarise-" class="uri">https://dplyr.tidyverse.org/articles/grouping.html#summarise-</a></li>
+<li><a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2016/agreger_donnees_dplyr/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2016/agreger_donnees_dplyr/</a></li>
+</ul>
+</div>
+<div id="package-data.table" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Package <code>data.table</code></h2>
+<p>Il est aussi possible de réaliser ces agrégations grâce à l’argument <code>by</code> de l’opérateur <code>[</code> du package <a href="https://rdatatable.gitlab.io/data.table/"><code>data.table</code></a>. Ce package offre l’avantage de pouvoir effectuer ces opérations rapidement sur de grands jeux de données.</p>
+<p>Reproduisons encore une fois les deux derniers exemples présentés pour la fonction <code>aggregate</code>.</p>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>Puromycin_dt <span class="ot">&lt;-</span> <span class="fu">data.table</span>(Puromycin)</span></code></pre></div>
+<p>Tout d’abord, le jeu de données doit être transformé en data table.</p>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemple avec deux variables réponses et une variable explicative (de groupement)</span></span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>Puromycin_dt[, j <span class="ot">=</span> .(<span class="at">conc =</span> <span class="fu">mean</span>(conc), <span class="at">rate =</span> <span class="fu">mean</span>(rate)), by <span class="ot">=</span> state]</span></code></pre></div>
+<pre><code>##        state      conc     rate
+## 1:   treated 0.3450000 141.5833
+## 2: untreated 0.2763636 110.7273</code></pre>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemple avec une variable réponse et deux variables explicatives (de groupement)</span></span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>Puromycin_dt[, j <span class="ot">=</span> .(<span class="at">rate =</span> <span class="fu">median</span>(rate)), by <span class="ot">=</span> .(conc, state)]</span></code></pre></div>
+<pre><code>##     conc     state  rate
+##  1: 0.02   treated  61.5
+##  2: 0.06   treated 102.0
+##  3: 0.11   treated 131.0
+##  4: 0.22   treated 155.5
+##  5: 0.56   treated 196.0
+##  6: 1.10   treated 203.5
+##  7: 0.02 untreated  59.0
+##  8: 0.06 untreated  85.0
+##  9: 0.11 untreated 106.5
+## 10: 0.22 untreated 127.5
+## 11: 0.56 untreated 151.0
+## 12: 1.10 untreated 160.0</code></pre>
+<p>Ensuite, la clé est de spécifier adéquatement les arguments <code>j</code> et <code>by</code> de l’opérateur <code>[</code> pour le data table. Cet opérateur avait été présenté dans les <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#data-tables">notes sur les structures de données en R</a>.</p>
+<p>Pour obtenir plus d’informations sur les calculs par niveaux de facteurs avec le package <code>data.table</code> :</p>
+<ul>
+<li><a href="https://rdatatable.gitlab.io/data.table/articles/datatable-intro.html#aggregations" class="uri">https://rdatatable.gitlab.io/data.table/articles/datatable-intro.html#aggregations</a></li>
+<li><a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2017/data.table/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2017/data.table/</a></li>
+</ul>
+<hr />
+</div>
+</div>
+<div id="résumé" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Résumé</h1>
+<p style="font-size:110%">
+<strong>Fonctions de la famille des <code>apply</code></strong>
+</p>
+<p>Principe de base derrière ces fonctions (qui cachent des boucles) :</p>
+<ul>
+<li>séparer un objet en sous-objets;</li>
+<li>appeler une fonction en lui donnant comme premier argument tous les sous-objets, un à la fois;</li>
+<li>combiner les résultats obtenus.</li>
+</ul>
+<p>Résumé du fonctionnement des fonctions présentées :</p>
+<table>
+<colgroup>
+<col width="12%" />
+<col width="31%" />
+<col width="33%" />
+<col width="22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Fonction</th>
+<th>Objet typique en entrée</th>
+<th>Formation des sous-objets</th>
+<th>Format de la sortie</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>apply</code></td>
+<td>array (matrice)</td>
+<td>selon une ou des dimensions</td>
+<td>vecteur, array, liste</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr class="odd">
+<td><code>lapply</code></td>
+<td>vecteur, liste (data frame)</td>
+<td>éléments de l’objet en entrée</td>
+<td>liste</td>
+</tr>
+<tr class="even">
+<td><code>sapply</code></td>
+<td>vecteur, liste (data frame)</td>
+<td>éléments de l’objet en entrée</td>
+<td>simplifié par défaut</td>
+</tr>
+<tr class="odd">
+<td><code>mapply</code></td>
+<td>vecteurs, listes (data frames)</td>
+<td>éléments des objets en entrée</td>
+<td>simplifié par défaut</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr class="odd">
+<td><code>tapply</code></td>
+<td>vecteur</td>
+<td>selon les niveaux de facteurs</td>
+<td>array ou liste</td>
+</tr>
+<tr class="even">
+<td><code>by</code></td>
+<td>data frame</td>
+<td>selon les niveaux de facteurs</td>
+<td>array ou liste</td>
+</tr>
+<tr class="odd">
+<td><code>aggregate</code></td>
+<td>data frame</td>
+<td>selon les niveaux de facteurs et par colonne du data frame</td>
+<td>data frame</td>
+</tr>
+</tbody>
+</table>
+<p>Description des arguments à donner en entrée à ces fonctions :</p>
+<ul>
+<li><p>1<sup>e</sup> argument (sauf pour <code>mapply</code>) : objet à séparer et sur lequel appliquer la fonction;</p></li>
+<li><p>argument suivant : information pour spécifier comment séparer l’objet en sous-objets (sauf pour les fonctions prenant en entrée une liste, soit pour <code>lapply</code>, <code>sapply</code> et <code>mapply</code>, car dans ce cas les sous-objets sont les éléments de la liste);</p></li>
+<li><p>argument suivant (celui nommé <code>FUN</code>) : la fonction à appliquer (les sous-objets lui seront fournis comme premier argument);</p></li>
+<li><p><code>...</code> : il est possible de passer des arguments supplémentaires à la fonction à appliquer (<code>FUN</code>) simplement en les donnant en argument à la fonction de la famille des <code>apply</code> grâce aux <code>...</code> (il s’agit de la deuxième utilité de l’argument <code>...</code> mentionnée dans les notes sur les <a href="https://stt4230.rbind.io/introduction/base_r/#largument-...-et-ses-deux-utilites.">concepts de base en R</a>).</p></li>
+</ul>
+<p>Note : La fonction <code>aggregate</code> accepte aussi une formule en entrée.</p>
+<p style="font-size:110%">
+<strong>Autres fonctions pour réaliser des calculs par niveaux de facteurs</strong>
+</p>
+<p>Solutions de rechange à <code>tapply</code>, <code>by</code> et <code>aggregate</code> :</p>
+<ul>
+<li>fonctions <a href="https://dplyr.tidyverse.org/reference/group_by.html"><code>group_by</code></a> et <a href="https://dplyr.tidyverse.org/reference/summarise.html"><code>summarize</code></a> du package <a href="https://CRAN.R-project.org/package=dplyr"><code>dplyr</code></a> utilisées conjointement;</li>
+<li>opérateur <code>[</code> du package <a href="https://rdatatable.gitlab.io/data.table/"><code>data.table</code></a> utilisé en exploitant son argument <code>by</code>.</li>
+</ul>
+<hr />
+</div>
+<div id="références" class="section level1 unnumbered">
+<h1>Références</h1>
+<p>R Core Team (2020). <em>R: A language and environment for statistical computing</em>. R Foundation for Statistical Computing, Vienna, Austria. URL <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a></p>
+<p>Ressource web pour mieux comprendre les fonctions de la famille des <code>apply</code> :</p>
+<ul>
+<li><a href="https://www.datacamp.com/community/tutorials/r-tutorial-apply-family" class="uri">https://www.datacamp.com/community/tutorials/r-tutorial-apply-family</a></li>
+</ul>
+<p>Documentation des package mentionnés apportant des solutions de rechange pour des calculs par niveaux de facteurs :</p>
+<ul>
+<li>package <code>dplyr</code> :
+<ul>
+<li>page web du package sur le CRAN : <a href="https://CRAN.R-project.org/package=dplyr" class="uri">https://CRAN.R-project.org/package=dplyr</a></li>
+<li>documentation du package : <a href="https://dplyr.tidyverse.org/" class="uri">https://dplyr.tidyverse.org/</a></li>
+<li>informations sur les calculs par niveaux de facteurs :
+<ul>
+<li><a href="https://dplyr.tidyverse.org/articles/grouping.html#summarise-" class="uri">https://dplyr.tidyverse.org/articles/grouping.html#summarise-</a></li>
+<li><a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2016/agreger_donnees_dplyr/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2016/agreger_donnees_dplyr/</a></li>
+</ul></li>
+</ul></li>
+<li>package <code>data.table</code> :
+<ul>
+<li>page web du package sur le CRAN : <a href="https://CRAN.R-project.org/package=data.table" class="uri">https://CRAN.R-project.org/package=data.table</a></li>
+<li>documentation du package : <a href="https://rdatatable.gitlab.io/data.table/" class="uri">https://rdatatable.gitlab.io/data.table/</a></li>
+<li>informations sur les calculs par niveaux de facteurs :
+<ul>
+<li><a href="https://rdatatable.gitlab.io/data.table/articles/datatable-intro.html#aggregations" class="uri">https://rdatatable.gitlab.io/data.table/articles/datatable-intro.html#aggregations</a></li>
+<li><a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2017/data.table/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2017/data.table/</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
