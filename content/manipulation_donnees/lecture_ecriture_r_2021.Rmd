@@ -168,40 +168,16 @@ Il s'agit d'un data frame. La fonction `read.table` retourne toujours un objet d
 
 Nous pouvons tout de suite remarquer un problème avec ce data frame. Le nom des variables a été interprété comme une observation. Il faudrait utiliser l'argument `header` pour indiquer que la première ligne du fichier contient les noms des variables. 
 
-```{r import_texte_2, eval = FALSE}
+```{r import_texte_2}
 data_ex_txt <- read.table("data_ex.txt", header = TRUE)
 str(data_ex_txt)
-```
-```{r, echo = FALSE}
-# Je ne sais pas pourquoi ça n'affiche pas la même sortie que dans la console.
-# Je fais donc la correction manuellement.
-data_ex_txt_2 <- data.frame(de1 = de_1, de2 = de_2, lanceur = lanceur)
-# de1 int au lieu de num
-data_ex_txt_2$de1 <- as.integer(data_ex_txt_2$de1)
-# Introduction de valeurs manquantes
-data_ex_txt_2$de2[7] <- "."
-data_ex_txt_2$lanceur[3] <- "."
-# Affichage de la structure du date frame
-str(data_ex_txt_2)
-# Vérification dans la console
-# identical(data_ex_txt, data_ex_txt_2)
 ```
 
 La première variable, `de1`, a été correctement lu, mais il y a un problème avec la deuxième variable, `de2`. Elle contient des données de type caractères, alors qu'il s'agit d'une variable numérique (le résultat d'un lancer de dé). Afin de pouvoir faire des calculs numériques sur cette variable, elle doit être stockée dans un vecteur (= colonne du data frame) de valeurs numériques. R a cru que les valeurs dans cette colonne étaient de type caractère à cause de la valeur manquante représentée par un point. L'argument `na.strings` de `read.table` indique à R les chaînes de caractères à interpréter comme des valeurs manquantes. Par défaut, `na.strings` prend la valeur `"NA"`. Il faut donc changer la valeur de cet argument comme suit.
 
-```{r import_texte_3, eval = FALSE}
+```{r import_texte_3}
 data_ex_txt <- read.table("data_ex.txt", header = TRUE, na.strings = ".")
 str(data_ex_txt)
-```
-```{r, echo = FALSE}
-data_ex_txt_3 <- data_ex
-# de1 et d2 int au lieu de num
-data_ex_txt_3$de1 <- as.integer(data_ex_txt_3$de1)
-data_ex_txt_3$de2 <- as.integer(data_ex_txt_3$de2)
-# Affichage de la structure du date frame
-str(data_ex_txt_3)
-# Vérification dans la console
-# identical(data_ex_txt, data_ex_txt_3)
 ```
 
 Nous avons réglé le problème de lecture de la deuxième colonne. Attardons-nous maintenant à la dernière colonne. Elle est enregistrée dans un vecteur de chaînes de caractères. Si nous avions préféré que `read.table` transforme les colonnes contenant des valeurs caractères en facteur, il aurait fallu assigner la valeur `TRUE` à l'argument `stringsAsFactors`. Avant sa version 4.0.0, R avait ce comportement par défaut. Le nouveau comportement par défaut est cependant bien ce que nous désirons ici.
@@ -496,7 +472,7 @@ Pour les exemples à venir, reprenons le data frame `data_ex` et voyons comment 
 
 Le format de fichier le plus universel pour exporter des données est le format texte. Un grand nombre de logiciels peuvent lire ce format. Les fonctions de base en R pour écrire dans un fichier texte sont `write` et `write.table`. Nous verrons ici seulement comment utiliser `write.table`, qui est plus adaptée à l'exportation de jeux de données. Par exemple, exportons le contenu du data frame `data_ex` dans le fichier texte `data_ex.txt`
 
-```{r exportTexte}
+```{r exportTexte, eval = FALSE}
 write.table(data_ex, file = "data_ex.txt")
 ```
 
@@ -510,7 +486,7 @@ Il existe aussi deux fonctions enveloppe à la fonction `write.table` pour les f
 
 Pour exporter les données dans un data frame en format JSON avec le package `jsonlite`, il faut d'abord transformer les données au format JSON avec la fonction `toJSON`. Ensuite, l'objet obtenu doit être écrit dans un fichier externe avec la fonction `write` du R de base.
 
-```{r}
+```{r eval = FALSE}
 data_ex_json <- toJSON(data_ex, pretty = TRUE)
 write(data_ex_json, "data_ex.json")
 ```
@@ -519,7 +495,7 @@ write(data_ex_json, "data_ex.json")
 
 Le [package `openxlsx`](https://ycphs.github.io/openxlsx/index.html) offre des fonctions pour exporter des données stockées dans un objet R dans un fichier EXCEL. Par exemple, le contenu du data frame `data_ex` peut être écrit dans un fichier EXCEL comme suit.
 
-```{r, message = FALSE}
+```{r, eval = FALSE}
 library(openxlsx)
 write.xlsx(data_ex, file = "data_ex.xlsx")
 ```
@@ -533,20 +509,20 @@ R propose aussi ses formats de fichiers pour enregistrer des objets entiers, en 
 
 Une image de session est l'ensemble des objets dans l'environnement de travail d'une session R. Lors de la fermeture de R, il nous est proposé par défaut d'enregistrer cette image. La fonction `save.image` peut aussi être utilisée en tout temps pour enregistrer cette image.
 
-```{r saveObjects}
+```{r saveObjects, eval = FALSE}
 save.image(file = "image.RData")
 ```
 
 La fonction `save` permet pour sa part d'enregistrer un ou des objets en particulier, par exemple&nbsp;:
 
-```{r}
+```{r eval = FALSE}
 save(data_ex, de_1, file = "deux_obj.rda")
 save(data_ex, file = "data_ex.rda")
 ```
 
 R offre aussi un format binaire alternatif pour enregistrer un seul objet, sans inclure le nom de l'objet dans le fichier (contrairement aux fonctions précédentes). Il s'agit du format .rds, obtenu avec la fonction `saveRDS`.
 
-```{r}
+```{r eval = FALSE}
 saveRDS(data_ex, file = "data_ex.rds")
 ```
 
@@ -567,7 +543,7 @@ Il est aussi possible d'enregistrer des objets R sous un format texte avec `dump
 
 Finalement, il est possible d'envoyer les résultats de nos commandes dans un fichier texte externe plutôt que dans la console grâce aux fonctions `capture.output` et `sink`.
 
-```{r saveOutput}
+```{r saveOutput, eval = FALSE}
 capture.output(summary(data_ex), file = "data_ex_summary.out")
 ```
 
@@ -591,11 +567,11 @@ Pour charger en R des objets R stockés dans un fichier au format .RData, .rda o
 
 Voici deux exemples d'appel de ces fonctions.
 
-```{r readObjects}
+```{r readObjects, eval = FALSE}
 load("deux_obj.rda")
 ```
 
-```{r}
+```{r eval = FALSE}
 data_ex_copie <- readRDS("data_ex.rds")
 ```
 
