@@ -2,7 +2,7 @@
 title: "Lecture et écriture dans des fichiers externes à partir de R"
 linkTitle: "Lecture/écriture dans fichiers en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2021-01-18"
+date: "2021-01-25"
 weight: 2
 slug: "lecture_ecriture_r"
 lastmodifierdisplayname: "Sophie Baillargeon"
@@ -151,7 +151,7 @@ de1	de2	lanceur
 
 Remarquons que les valeurs manquantes dans ce fichier sont représentées par des points. Importons ces données avec `read.table`.
 
-```{r importTexte}
+```{r import_texte_1}
 data_ex_txt <- read.table("C:/coursR/data_ex.txt")
 ```
 
@@ -159,7 +159,7 @@ Le seul argument obligatoire dans la fonction `read.table` est le chemin d'accè
 
 Les autres arguments de la fonction `read.table` doivent être adaptés selon le formatage du fichier à lire (voir la [fiche d'aide de la fonction `read.table`](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html)). Dans l'exemple ci-dessus, est-ce que toutes les valeurs par défaut des arguments convenaient vraiment? Jetons un coup d'oeil à l'objet obtenu.
 
-```{r}
+```{r explo_import_texte_1}
 data_ex_txt
 str(data_ex_txt)
 ```
@@ -168,16 +168,40 @@ Il s'agit d'un data frame. La fonction `read.table` retourne toujours un objet d
 
 Nous pouvons tout de suite remarquer un problème avec ce data frame. Le nom des variables a été interprété comme une observation. Il faudrait utiliser l'argument `header` pour indiquer que la première ligne du fichier contient les noms des variables. 
 
-```{r}
+```{r import_texte_2, eval = FALSE}
 data_ex_txt <- read.table("data_ex.txt", header = TRUE)
 str(data_ex_txt)
 ```
+```{r, echo = FALSE}
+# Je ne sais pas pourquoi ça n'affiche pas la même sortie que dans la console.
+# Je fais donc la correction manuellement.
+data_ex_txt_2 <- data.frame(de1 = de_1, de2 = de_2, lanceur = lanceur)
+# de1 int au lieu de num
+data_ex_txt_2$de1 <- as.integer(data_ex_txt_2$de1)
+# Introduction de valeurs manquantes
+data_ex_txt_2$de2[7] <- "."
+data_ex_txt_2$lanceur[3] <- "."
+# Affichage de la structure du date frame
+str(data_ex_txt_2)
+# Vérification dans la console
+# identical(data_ex_txt, data_ex_txt_2)
+```
 
-La première variable, `de1`, a été correctement lu, mais il y a un problème avec la deuxième variable, `de2`. Elle est un facteur. Nous souhaitons considérer cette variable numérique et non catégorique (il s'agit du résultat d'un lancer de dé). Afin de pouvoir faire des calculs numériques sur cette variable, elle doit être stockée dans un vecteur (= colonne du data frame) de valeurs numériques. R a cru que les valeurs dans cette colonne étaient de type caractère à cause de la valeur manquante représentée par un point. L'argument `na.strings` de `read.table` indique à R les chaînes de caractères à interpréter comme des valeurs manquantes. Par défaut, `na.strings` prend la valeur `"NA"`. Il faut donc changer la valeur de cet argument comme suit.
+La première variable, `de1`, a été correctement lu, mais il y a un problème avec la deuxième variable, `de2`. Elle contient des données de type caractères, alors qu'il s'agit d'une variable numérique (le résultat d'un lancer de dé). Afin de pouvoir faire des calculs numériques sur cette variable, elle doit être stockée dans un vecteur (= colonne du data frame) de valeurs numériques. R a cru que les valeurs dans cette colonne étaient de type caractère à cause de la valeur manquante représentée par un point. L'argument `na.strings` de `read.table` indique à R les chaînes de caractères à interpréter comme des valeurs manquantes. Par défaut, `na.strings` prend la valeur `"NA"`. Il faut donc changer la valeur de cet argument comme suit.
 
-```{r}
+```{r import_texte_3, eval = FALSE}
 data_ex_txt <- read.table("data_ex.txt", header = TRUE, na.strings = ".")
 str(data_ex_txt)
+```
+```{r, echo = FALSE}
+data_ex_txt_3 <- data_ex
+# de1 et d2 int au lieu de num
+data_ex_txt_3$de1 <- as.integer(data_ex_txt_3$de1)
+data_ex_txt_3$de2 <- as.integer(data_ex_txt_3$de2)
+# Affichage de la structure du date frame
+str(data_ex_txt_3)
+# Vérification dans la console
+# identical(data_ex_txt, data_ex_txt_3)
 ```
 
 Nous avons réglé le problème de lecture de la deuxième colonne. Attardons-nous maintenant à la dernière colonne. Elle est enregistrée dans un vecteur de chaînes de caractères. Si nous avions préféré que `read.table` transforme les colonnes contenant des valeurs caractères en facteur, il aurait fallu assigner la valeur `TRUE` à l'argument `stringsAsFactors`. Avant sa version 4.0.0, R avait ce comportement par défaut. Le nouveau comportement par défaut est cependant bien ce que nous désirons ici.
@@ -287,7 +311,7 @@ data_ex_csv_readr <- read_csv2("data_ex.csv")
 str(data_ex_csv_readr)
 ```
 
-L'objet retourné par les fonctions de `readr` est un [tibble](https://stt4230.rbind.io/manipulation_donnees/structures_r/#tibbles). Remarquons que la fonction `read_csv2` a, par défaut, correctement interprété les valeurs manquantes et elle n'a pas stocké les données de type caractère dans un facteur.
+L'objet retourné par les fonctions de `readr` est un [tibble](https://stt4230.rbind.io/manipulation_donnees/structures_r/#tibbles). Remarquons que la fonction `read_csv2` a, par défaut, correctement interprété les valeurs manquantes et elle n'a pas stocké les données de type caractère dans un facteur. Des attributs ont été ajoutés au tibble pour spécifier les types des colonnes.
 
 
 
@@ -297,13 +321,13 @@ L'objet retourné par les fonctions de `readr` est un [tibble](https://stt4230.r
 
 Bien que les fonctions du package `readr` tendent à être plus rapides que la fonction `read.table`, une autre fonction est capable d'être encore plus rapide&nbsp;: la fonction [`fread`](https://rdatatable.gitlab.io/data.table/reference/fread.html) du package [`data.table`](https://rdatatable.gitlab.io/data.table/). Voici un exemple d'utilisation de cette fonction.
 
-```{r}
+```{r message = FALSE}
 library(data.table)
 data_ex_csv_fread <- fread("data_ex.csv", na.strings = "")
 str(data_ex_csv_fread)
 ```
 
-L'objet retourné par la fonction `fread` est un [data table](https://stt4230.rbind.io/manipulation_donnees/structures_r/#data-tables). Tout comme la fonction `read.table`, la fonction `fread` possède un argument nommé `na.strings`, que nous avons du spécifier afin que la valeur manquante pour la variable catégorique soit bien interprétée. Le comportement par défaut de `fread` avec des données de types caractères n'est cependant pas le même que celui de la fonction `read.table`. Il stocke ces données dans un vecteur, comme le fait les fonctions de `readr`.
+L'objet retourné par la fonction `fread` est un [data table](https://stt4230.rbind.io/manipulation_donnees/structures_r/#data-tables). Tout comme la fonction `read.table`, la fonction `fread` possède un argument nommé `na.strings`, que nous avons du spécifier afin que la valeur manquante pour la variable catégorique soit bien interprétée. La fonction `fread` a, comme `read.table` et `read_csv2`, stocké par défaut dans un vecteur les données de types caractères.
 
 
 ## Format JSON
@@ -399,9 +423,6 @@ library(readxl)
 data_ex_xlsx <- read_excel("data_ex.xlsx")
 str(data_ex_xlsx)
 ```
-
-
-Remarquons que la colonne contenant des valeurs caractères n'a pas été transformée en un facteur comme le fait `read.table` par défaut.
 
 <!---
 Retiré, car je crois qu'il est maintenant possible de faire avec readxl et openxlsx ce qu'on peut faire avec XLConnect, avec l'avantage de ne pas dépendre de Java
