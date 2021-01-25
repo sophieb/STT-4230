@@ -1,7 +1,7 @@
 ---
 title: "Calculs statistiques en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2021-01-22"
+date: "2021-01-25"
 weight: 2
 slug: "calculs_stat_r"
 lastmodifierdisplayname: "Sophie Baillargeon"
@@ -33,11 +33,22 @@ editor_options:
 
 ***
 
-R est un environnement spécialisé dans les calculs statistiques. Voyons comment réaliser de tels calculs en R, qu'il s'agisse de production de statistiques descriptives, de manipulation des distributions de probabilité, de génération des nombres pseudo-aléatoires, de réalisation de tests ou d'ajustement de modèles.
+R est un environnement spécialisé dans les calculs statistiques. Voyons comment réaliser de tels calculs en R, qu'il s'agisse de production de statistiques descriptives, de manipulation des distributions de probabilité, de génération de nombres pseudo-aléatoires, de réalisation de tests ou d'ajustement de modèles.
 
 ***
 
 # Statistiques descriptives
+
+Les fonctions permettant de calculer des statistiques descriptives en R sont très nombreuses. Les principales sont présentées ici, mais il en existe d'autres. Le tableau suivant classe les fonctions mentionnées ci-dessous selon le type de mesure calculée (mesure de position, de tendance centrale, de dispersion ou de fréquences) et selon le type de fonctionnement de la fonction (calcul vectoriel, données combinées en une ou plusieurs valeurs).
+
+Calcul | opère de façon vectorielle | combine, retourne une valeur | combine, retourne valeur(s) | combine, retourne un vecteur|
+-----------|-------|-------------|-----------|----------|
+mesure de position | [`pmin`, `pmax`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Extremes.html) | [`min`, `max`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Extremes.html), [`which.min`, `which.max`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/which.min.html) | [`range`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/range.html), [`quantile`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/quantile.html), [`summary`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/summary.html) | [`cummin`, `cummax`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/cumsum.html), [`rank`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/rank.html) 
+tendance centrale | | [`mean`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/mean.html), [`median`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/median.html) | [`summary`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/summary.html) | |
+dispersion | | [`sd`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/sd.html), [`IQR`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/IQR.html), [`mad`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mad.html) | [`var`, `cov`, `cor`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/cor.html) | |
+fréquences | | | [`table`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/table.html), [`ftable`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/ftable.html), [`xtabs`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/xtabs.html), [`summary`]((https://stat.ethz.ch/R-manual/R-patched/library/base/html/summary.html)) | |
+
+
 
 ## Fonctions retournant une seule statistique
 
@@ -45,7 +56,7 @@ Certaines fonctions de calcul de statistiques descriptives retournent en sortie 
 
 - [mesures de position](https://fr.wikipedia.org/wiki/Indicateur_de_position)&nbsp;: [`min`, `max`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Extremes.html);
 - [mesures de tendance centrale](https://fr.wikipedia.org/wiki/Indicateur_de_tendance_centrale)&nbsp;: [`mean`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/mean.html), [`median`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/median.html);
-- [mesure de dispersion](https://fr.wikipedia.org/wiki/Indicateur_de_dispersion)&nbsp;: [`sd`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/sd.html) (écart-type).
+- [mesure de dispersion](https://fr.wikipedia.org/wiki/Indicateur_de_dispersion)&nbsp;: [`sd`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/sd.html) ([écart-type](https://fr.wikipedia.org/wiki/%C3%89cart_type)), [`IQR`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/IQR.html) ([écart interquartile](https://fr.wikipedia.org/wiki/%C3%89cart_interquartile)), [`mad`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mad.html) ([écart absolu médian](https://en.wikipedia.org/wiki/Median_absolute_deviation)).
 
 Utilisons le [jeu de données `cars`](https://stat.ethz.ch/R-manual/R-patched/library/datasets/html/cars.html) du package `datasets` pour présenter quelques exemples. Ce jeu de données contient 50 observations de 2 variables numériques.
 
@@ -454,7 +465,7 @@ La fonction `dbinom` implémente donc la fonction de masse d'une distribution bi
 
 Les fonctions de la famille `d*` peuvent calculer plusieurs valeurs de densité par un seul appel de la fonction, car celles-ci acceptent des valeurs d'arguments de longueur supérieure à 1. Ces fonctions travaillent donc de façon vectorielle, comme presque toutes les fonctions de calcul en R.
 
-Voici un exemple de code R permettant de représenter graphiquement la densité $Bin(n = 5, p = 1/6)$ complète, en mettant en évidence la valeur calculée ci-dessus, soit $P(X = 2)$. *(Nous verrons dans les [notes sur les graphiques](https://stt4230.rbind.io/communication_resultats/graphiques_r/) comment produire ce genre de figure et les suivants.)*
+Voici un exemple de code R permettant de représenter graphiquement la densité $Bin(n = 5, p = 1/6)$ complète, en mettant en évidence la valeur calculée ci-dessus, soit $P(X = 2)$. *(Nous verrons dans les [notes sur les graphiques](https://stt4230.rbind.io/communication_resultats/graphiques_r/) comment produire ce genre de figure et les suivantes.)*
 
 ```{r out.width = "70%"}
 barplot(
@@ -789,9 +800,9 @@ set.seed(753)
 sample(x = letters, size = 5)
 ```
 
-À n'importe quel moment, dans n'importe qu'elle session R, nous obtienons l'échantillon {`r set.seed(753); sample(letters, size = 5)`} si nous soumettons la commande `set.seed(753)` avant la commande `sample(letters, size = 5)`.
+À n'importe quel moment, dans n'importe qu'elle session R, nous obtenons l'échantillon {`r set.seed(753); sample(letters, size = 5)`} si nous soumettons la commande `set.seed(753)` avant la commande `sample(letters, size = 5)`.
 
-L'utilité de fixer le germe d'une génération pseudo-aléatoire est de rendre son résultat reproduisible. 
+L'utilité de fixer le germe d'une génération pseudo-aléatoire est de rendre son résultat reproductible. 
 
 ***
 
@@ -807,7 +818,7 @@ Il existe des fonctions R pour faire des tests statistiques de base. En voici qu
 - tests non paramétriques&nbsp;: [`wilcox.test`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/wilcox.test.html), [`kruskal.test`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/kruskal.test.html), [`friedman.test`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/friedman.test.html);
 - tests sur des fréquences&nbsp;: [méthode `summary` pour un objet de classe `table`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/table.html) (produit par la fonction `table` ou `xtabs`), [`chisq.test`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/chisq.test.html), [`fisher.test`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/fisher.test.html), [`mantelhaen.test`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mantelhaen.test.html).
 
-Utilisons encore une fois les données `iris` pour construire un exemple de test de comparaison de moyennes. Nous allons comparer les largeurs moyennes des sépales des espèces versicolor et virginica.
+Utilisons encore une fois les données `iris` pour construire un exemple de test de comparaison de moyennes. Nous allons comparer les largeurs moyennes des sépales des espèces *versicolor* et *virginica*.
 
 
 \vspace{6pt}
@@ -1089,7 +1100,7 @@ L'objet obtenu de la fonction d'ajustement de modèle ne s'affiche pas comme une
 class(reg)
 print(reg)
 ```
-C'est une caractéristique orientée objet du langage R. Dans la terminologie de R, une fonction polymorphe est appelée *fonction générique* et les différentes définitions de cette fonction sont appelées *méthodes*. Les fonctions génériques, telles que les fonctions `print` et `plot`, ont un comportement qui varie en fonction de la classe du premier argument qui leur est fourni en entrée.
+C'est une caractéristique orientée objet du langage R. Dans la terminologie de R, une fonction polymorphe est appelée *fonction générique* et les différentes définitions de cette fonction sont appelées *méthodes*. Les fonctions génériques, telles que les fonctions `print`, `plot` et `summary`, ont un comportement qui varie en fonction de la classe du premier argument qui leur est fourni en entrée.
 
 Rappelons que taper le nom d'un objet dans la console est en fait un raccourci pour soumettre la fonction `print` avec l'objet à afficher en argument.
 
@@ -1225,7 +1236,7 @@ Calcul | opère de façon vectorielle | combine, retourne une valeur | combine, 
 -----------|-------|-------------|-----------|----------|
 mesure de position | [`pmin`, `pmax`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Extremes.html) | [`min`, `max`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/Extremes.html), [`which.min`, `which.max`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/which.min.html) | [`range`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/range.html), [`quantile`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/quantile.html), [`summary`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/summary.html) | [`cummin`, `cummax`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/cumsum.html), [`rank`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/rank.html) 
 tendance centrale | | [`mean`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/mean.html), [`median`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/median.html) | [`summary`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/summary.html) | |
-dispersion | | [`sd`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/sd.html) | [`var`, `cov`, `cor`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/cor.html) | |
+dispersion | | [`sd`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/sd.html), [`IQR`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/IQR.html), [`mad`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mad.html) | [`var`, `cov`, `cor`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/cor.html) | |
 fréquences | | | [`table`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/table.html), [`ftable`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/ftable.html), [`xtabs`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/xtabs.html), [`summary`]((https://stat.ethz.ch/R-manual/R-patched/library/base/html/summary.html)) | |
 
 - Traitement des données manquantes&nbsp;:
@@ -1322,7 +1333,7 @@ Fonctions pour tirer de l'information d'un objet produit par une fonction d'ajus
 - [`coef`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/coef.html) (ou son alias `coefficients`) et [`confint`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/confint.html)&nbsp;: coefficients et leurs intervalles de confiance; 
 - [`residuals`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/residuals.html) et [`fitted`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/fitted.values.html)&nbsp;: résidus et valeurs prédites;
 - [`predict`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/predict.html)&nbsp;: prédiction pour une nouvelle observation;
-- [`anova`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/anova.html)&nbsp;: table d’analyse de la variance du modèle;
+- [`anova`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/anova.html)&nbsp;: table d'analyse de la variance du modèle;
 - [`model.tables`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/model.tables.html) et [`TukeyHSD`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/TukeyHSD.html) (pour la classe `aov`)&nbsp;: moyennes par niveaux de facteurs et comparaisons multiples de Tukey; 
 - [`deviance`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/deviance.html), [`logLik`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/logLik.html), [`AIC`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/AIC.html), [`BIC`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/AIC.html)&nbsp;: déviance, log-vraisemblance maximisée, AIC et BIC.
 
@@ -1340,7 +1351,7 @@ Le manuel suivant de R contient aussi plusieurs informations concernant les calc
 
 R Core Team (2020). *An Introduction to R*. R version 4.0.3. URL https://cran.r-project.org/doc/manuals/r-release/R-intro.html
 
-Documentation du package utilisé&nbsp;:
+Documentation du package mentionné qui ne vient pas avec l'installation de base de R&nbsp;:
 
 - package `broom`&nbsp;:
     + page web du package sur le CRAN&nbsp;: https://CRAN.R-project.org/package=broom

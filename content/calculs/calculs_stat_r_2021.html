@@ -1,15 +1,15 @@
 ---
 title: "Calculs statistiques en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2021-01-22"
+date: "2021-01-25"
 weight: 2
 slug: "calculs_stat_r"
 lastmodifierdisplayname: "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
 output:
-  pdf_document:
+  pdf_document: 
     toc: yes
-    toc_depth: 
+    toc_depth: 3
     number_sections: yes
     highlight: tango
   blogdown::html_page:
@@ -137,17 +137,66 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <hr />
 <p><em>Note préliminaire : Lors de leur dernière mise à jour, ces notes ont été révisées en utilisant R version 4.0.3 et le package <code>broom</code> version 0.7.3. Pour d’autres versions, les informations peuvent différer.</em></p>
 <hr />
-<p>R est un environnement spécialisé dans les calculs statistiques. Voyons comment réaliser de tels calculs en R, qu’il s’agisse de production de statistiques descriptives, de manipulation des distributions de probabilité, de génération des nombres pseudo-aléatoires, de réalisation de tests ou d’ajustement de modèles.</p>
+<p>R est un environnement spécialisé dans les calculs statistiques. Voyons comment réaliser de tels calculs en R, qu’il s’agisse de production de statistiques descriptives, de manipulation des distributions de probabilité, de génération de nombres pseudo-aléatoires, de réalisation de tests ou d’ajustement de modèles.</p>
 <hr />
 <div id="statistiques-descriptives" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Statistiques descriptives</h1>
+<p>Les fonctions permettant de calculer des statistiques descriptives en R sont très nombreuses. Les principales sont présentées ici, mais il en existe d’autres. Le tableau suivant classe les fonctions mentionnées ci-dessous selon le type de mesure calculée (mesure de position, de tendance centrale, de dispersion ou de fréquences) et selon le type de fonctionnement de la fonction (calcul vectoriel, données combinées en une ou plusieurs valeurs).</p>
+<table>
+<colgroup>
+<col width="21%" />
+<col width="13%" />
+<col width="25%" />
+<col width="21%" />
+<col width="19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Calcul</th>
+<th>opère de façon vectorielle</th>
+<th>combine, retourne une valeur</th>
+<th>combine, retourne valeur(s)</th>
+<th>combine, retourne un vecteur</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>mesure de position</td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Extremes.html"><code>pmin</code>, <code>pmax</code></a></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Extremes.html"><code>min</code>, <code>max</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/which.min.html"><code>which.min</code>, <code>which.max</code></a></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/range.html"><code>range</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/quantile.html"><code>quantile</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/summary.html"><code>summary</code></a></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/cumsum.html"><code>cummin</code>, <code>cummax</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/rank.html"><code>rank</code></a></td>
+</tr>
+<tr class="even">
+<td>tendance centrale</td>
+<td></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/mean.html"><code>mean</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/median.html"><code>median</code></a></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/summary.html"><code>summary</code></a></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>dispersion</td>
+<td></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/sd.html"><code>sd</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/IQR.html"><code>IQR</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mad.html"><code>mad</code></a></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/cor.html"><code>var</code>, <code>cov</code>, <code>cor</code></a></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>fréquences</td>
+<td></td>
+<td></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/table.html"><code>table</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/ftable.html"><code>ftable</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/xtabs.html"><code>xtabs</code></a>, <a href="(https://stat.ethz.ch/R-manual/R-patched/library/base/html/summary.html)"><code>summary</code></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <div id="fonctions-retournant-une-seule-statistique" class="section level2" number="1.1">
 <h2><span class="header-section-number">1.1</span> Fonctions retournant une seule statistique</h2>
 <p>Certaines fonctions de calcul de statistiques descriptives retournent en sortie une seule valeur. C’est le cas des fonctions suivantes :</p>
 <ul>
 <li><a href="https://fr.wikipedia.org/wiki/Indicateur_de_position">mesures de position</a> : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Extremes.html"><code>min</code>, <code>max</code></a>;</li>
 <li><a href="https://fr.wikipedia.org/wiki/Indicateur_de_tendance_centrale">mesures de tendance centrale</a> : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/mean.html"><code>mean</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/median.html"><code>median</code></a>;</li>
-<li><a href="https://fr.wikipedia.org/wiki/Indicateur_de_dispersion">mesure de dispersion</a> : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/sd.html"><code>sd</code></a> (écart-type).</li>
+<li><a href="https://fr.wikipedia.org/wiki/Indicateur_de_dispersion">mesure de dispersion</a> : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/sd.html"><code>sd</code></a> (<a href="https://fr.wikipedia.org/wiki/%C3%89cart_type">écart-type</a>), <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/IQR.html"><code>IQR</code></a> (<a href="https://fr.wikipedia.org/wiki/%C3%89cart_interquartile">écart interquartile</a>), <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mad.html"><code>mad</code></a> (<a href="https://en.wikipedia.org/wiki/Median_absolute_deviation">écart absolu médian</a>).</li>
 </ul>
 <p>Utilisons le <a href="https://stat.ethz.ch/R-manual/R-patched/library/datasets/html/cars.html">jeu de données <code>cars</code></a> du package <code>datasets</code> pour présenter quelques exemples. Ce jeu de données contient 50 observations de 2 variables numériques.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cars)</span></code></pre></div>
@@ -573,7 +622,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <pre><code>## [1] 0.160751</code></pre>
 <p>La fonction <code>dbinom</code> implémente donc la fonction de masse d’une distribution binomiale. Les arguments <code>size</code> et <code>prob</code> sont les paramètres <span class="math inline">\(n\)</span> et <span class="math inline">\(p\)</span> de la distribution, selon la notation utilisée ci-dessus.</p>
 <p>Les fonctions de la famille <code>d*</code> peuvent calculer plusieurs valeurs de densité par un seul appel de la fonction, car celles-ci acceptent des valeurs d’arguments de longueur supérieure à 1. Ces fonctions travaillent donc de façon vectorielle, comme presque toutes les fonctions de calcul en R.</p>
-<p>Voici un exemple de code R permettant de représenter graphiquement la densité <span class="math inline">\(Bin(n = 5, p = 1/6)\)</span> complète, en mettant en évidence la valeur calculée ci-dessus, soit <span class="math inline">\(P(X = 2)\)</span>. <em>(Nous verrons dans les <a href="https://stt4230.rbind.io/communication_resultats/graphiques_r/">notes sur les graphiques</a> comment produire ce genre de figure et les suivants.)</em></p>
+<p>Voici un exemple de code R permettant de représenter graphiquement la densité <span class="math inline">\(Bin(n = 5, p = 1/6)\)</span> complète, en mettant en évidence la valeur calculée ci-dessus, soit <span class="math inline">\(P(X = 2)\)</span>. <em>(Nous verrons dans les <a href="https://stt4230.rbind.io/communication_resultats/graphiques_r/">notes sur les graphiques</a> comment produire ce genre de figure et les suivantes.)</em></p>
 <div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(</span>
 <span id="cb100-2"><a href="#cb100-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="fu">dbinom</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">size =</span> <span class="dv">5</span>, <span class="at">prob =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">6</span>), </span>
 <span id="cb100-3"><a href="#cb100-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">names.arg =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">5</span>,</span>
@@ -705,22 +754,22 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">3.1</span> Fonction <code>sample</code></h2>
 <p>La fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/sample.html"><code>sample</code></a> permet de tirer un échantillon aléatoire parmi un ensemble d’éléments fourni à son argument <code>x</code> sous forme de vecteur.</p>
 <div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="st">&quot;Luc&quot;</span>, <span class="st">&quot;Kim&quot;</span>, <span class="st">&quot;Paul&quot;</span>, <span class="st">&quot;Ève&quot;</span>))</span></code></pre></div>
-<pre><code>## [1] &quot;Kim&quot;  &quot;Paul&quot; &quot;Ève&quot;  &quot;Luc&quot;</code></pre>
+<pre><code>## [1] &quot;Paul&quot; &quot;Ève&quot;  &quot;Kim&quot;  &quot;Luc&quot;</code></pre>
 <p>Ce vecteur peut contenir des données de n’importe quel type.</p>
 <div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>)</span></code></pre></div>
-<pre><code>## [1] 4 3 5 6 1 2</code></pre>
+<pre><code>## [1] 5 1 3 4 6 2</code></pre>
 <p>Par défaut, <code>sample</code> effectue un tirage sans remise et sélectionne autant d’éléments que l’ensemble de départ en contient. La fonction effectue donc une permutation aléatoire des éléments de l’ensemble de départ. L’argument <code>size</code> permet cependant de contrôler la taille de l’échantillon tiré.</p>
 <div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">size =</span> <span class="dv">5</span>)</span></code></pre></div>
-<pre><code>## [1] 3 4 2 5 6</code></pre>
+<pre><code>## [1] 5 3 2 1 6</code></pre>
 <p>L’argument <code>replace</code> permet quant à lui de spécifier si le tirage doit être effectué avec (<code>replace = TRUE</code>) ou sans remise (<code>replace = FALSE</code>, valeur par défaut).</p>
 <div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">size =</span> <span class="dv">10</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
-<pre><code>##  [1] 5 5 5 6 2 5 6 3 5 1</code></pre>
+<pre><code>##  [1] 1 6 6 4 3 3 4 4 1 5</code></pre>
 <p>Il est aussi possible d’attribuer des probabilité de sélection à chacun des éléments grâce à l’argument <code>prob</code>. Par défaut, tous les éléments ont une probabilité égale d’être tiré.</p>
 <div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">size =</span> <span class="dv">20</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>, <span class="at">prob =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>, <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">10</span>, <span class="at">times =</span> <span class="dv">5</span>)))</span></code></pre></div>
-<pre><code>##  [1] 1 3 3 4 4 1 4 1 5 3 1 1 1 5 1 1 1 2 1 1</code></pre>
+<pre><code>##  [1] 1 4 1 4 1 5 2 1 6 4 2 5 1 5 1 1 1 5 4 6</code></pre>
 <p>La fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/sample.html"><code>sample.int</code></a> est très similaire à la fonction <code>sample</code>, mais elle prend comme premier argument un seul entier, <code>n</code>, et tire aléatoirement <code>size</code> entiers entre 1 et <code>n</code>.</p>
 <div class="sourceCode" id="cb123"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb123-1"><a href="#cb123-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample.int</span>(<span class="at">n =</span> <span class="dv">6</span>, <span class="at">size =</span> <span class="dv">4</span>)</span></code></pre></div>
-<pre><code>## [1] 4 5 3 6</code></pre>
+<pre><code>## [1] 3 2 6 1</code></pre>
 <p>Si nous souhaitons sélectionner aléatoirement des observations (lignes) dans un jeu de données, il est d’usage de sélectionner d’abord des entiers compris entre 1 et le nombre total d’observations, puis d’extraire du jeu de donnée les observations sur les lignes portant les numéros sélectionnés. Voici un exemple, utilisant <a href="https://fr.wikipedia.org/wiki/Iris_de_Fisher">célèbres données iris</a>, incluses dans l’installation de base de R dans le data frame nommé <a href="https://stat.ethz.ch/R-manual/R-patched/library/datasets/html/iris.html"><code>iris</code></a> (du package <code>datasets</code>).</p>
 <div class="sourceCode" id="cb125"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb125-1"><a href="#cb125-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(iris)</span></code></pre></div>
 <pre><code>## &#39;data.frame&#39;:    150 obs. of  5 variables:
@@ -731,15 +780,15 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ##  $ Species     : Factor w/ 3 levels &quot;setosa&quot;,&quot;versicolor&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...</code></pre>
 <div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a>index_ech <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(<span class="at">n =</span> <span class="fu">nrow</span>(iris), <span class="at">size =</span> <span class="dv">5</span>, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb127-2"><a href="#cb127-2" aria-hidden="true" tabindex="-1"></a>index_ech</span></code></pre></div>
-<pre><code>## [1]  43  69  30 127  83</code></pre>
+<pre><code>## [1]   6  31 145 138  87</code></pre>
 <div class="sourceCode" id="cb129"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb129-1"><a href="#cb129-1" aria-hidden="true" tabindex="-1"></a>iris_ech <span class="ot">&lt;-</span> iris[index_ech, ]</span>
 <span id="cb129-2"><a href="#cb129-2" aria-hidden="true" tabindex="-1"></a>iris_ech</span></code></pre></div>
 <pre><code>##     Sepal.Length Sepal.Width Petal.Length Petal.Width    Species
-## 43           4.4         3.2          1.3         0.2     setosa
-## 69           6.2         2.2          4.5         1.5 versicolor
-## 30           4.7         3.2          1.6         0.2     setosa
-## 127          6.2         2.8          4.8         1.8  virginica
-## 83           5.8         2.7          3.9         1.2 versicolor</code></pre>
+## 6            5.4         3.9          1.7         0.4     setosa
+## 31           4.8         3.1          1.6         0.2     setosa
+## 145          6.7         3.3          5.7         2.5  virginica
+## 138          6.4         3.1          5.5         1.8  virginica
+## 87           6.7         3.1          4.7         1.5 versicolor</code></pre>
 </div>
 <div id="germe-de-la-génération-pseudo-aléatoire" class="section level2" number="3.2">
 <h2><span class="header-section-number">3.2</span> Germe de la génération pseudo-aléatoire</h2>
@@ -747,20 +796,20 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <p>Plusieurs RNG sont implémentés en R. Celui utilisé par défaut, nommé Mersenne Twister, a été choisi parce qu’il est réputé être bon. Sans entrer dans les détails du fonctionnement des RNG implémentés dans le package <code>base</code> de R, il faut savoir qu’ils travaillent tous à partir d’une séquence de nombres appelée <em>germe</em> (en anglais <em>seed</em>). En contrôlant ce germe, il est possible de générer de nouveau, autant de fois que désiré, les mêmes valeurs.</p>
 <p>Par défaut, R contrôle le germe des RNG de façon automatique. Chaque fois qu’une commande faisant intervenir un RNG est évaluée, R crée un nouveau germe à partir, notamment, de l’heure à laquelle la commande est soumise. Ainsi, deux générations pseudo-aléatoires consécutives ne produisent en général pas le même résultat.</p>
 <div class="sourceCode" id="cb131"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb131-1"><a href="#cb131-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> letters, <span class="at">size =</span> <span class="dv">5</span>)</span></code></pre></div>
-<pre><code>## [1] &quot;z&quot; &quot;q&quot; &quot;p&quot; &quot;o&quot; &quot;i&quot;</code></pre>
+<pre><code>## [1] &quot;a&quot; &quot;r&quot; &quot;b&quot; &quot;s&quot; &quot;w&quot;</code></pre>
 <div class="sourceCode" id="cb133"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb133-1"><a href="#cb133-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> letters, <span class="at">size =</span> <span class="dv">5</span>)</span></code></pre></div>
-<pre><code>## [1] &quot;g&quot; &quot;k&quot; &quot;j&quot; &quot;b&quot; &quot;h&quot;</code></pre>
+<pre><code>## [1] &quot;t&quot; &quot;s&quot; &quot;u&quot; &quot;h&quot; &quot;q&quot;</code></pre>
 <p>En tout temps, il est possible de connaître le germe du RNG en R. Il est stocké dans un objet nommé <code>.Random.seed</code>. Cet objet est un vecteur numérique de longueur 626 pour le RNG Mersenne Twister. Voyons de quoi ont l’air les premiers éléments de ce vecteur à différents moments.</p>
 <div class="sourceCode" id="cb135"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(.Random.seed)</span></code></pre></div>
-<pre><code>##  int [1:626] 10403 81 1047847371 -1797991383 485769848 -268963930 615098817 117300385..</code></pre>
+<pre><code>##  int [1:626] 10403 73 1271394959 1694477206 788346688 -344319485 319012897 1312008976..</code></pre>
 <div class="sourceCode" id="cb137"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> letters, <span class="at">size =</span> <span class="dv">5</span>)</span></code></pre></div>
-<pre><code>## [1] &quot;n&quot; &quot;g&quot; &quot;q&quot; &quot;h&quot; &quot;f&quot;</code></pre>
+<pre><code>## [1] &quot;s&quot; &quot;m&quot; &quot;f&quot; &quot;k&quot; &quot;z&quot;</code></pre>
 <div class="sourceCode" id="cb139"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(.Random.seed)</span></code></pre></div>
-<pre><code>##  int [1:626] 10403 90 1047847371 -1797991383 485769848 -268963930 615098817 117300385..</code></pre>
+<pre><code>##  int [1:626] 10403 79 1271394959 1694477206 788346688 -344319485 319012897 1312008976..</code></pre>
 <div class="sourceCode" id="cb141"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> letters, <span class="at">size =</span> <span class="dv">5</span>)</span></code></pre></div>
-<pre><code>## [1] &quot;a&quot; &quot;r&quot; &quot;q&quot; &quot;b&quot; &quot;e&quot;</code></pre>
+<pre><code>## [1] &quot;n&quot; &quot;j&quot; &quot;a&quot; &quot;b&quot; &quot;x&quot;</code></pre>
 <div class="sourceCode" id="cb143"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(.Random.seed)</span></code></pre></div>
-<pre><code>##  int [1:626] 10403 98 1047847371 -1797991383 485769848 -268963930 615098817 117300385..</code></pre>
+<pre><code>##  int [1:626] 10403 84 1271394959 1694477206 788346688 -344319485 319012897 1312008976..</code></pre>
 <p>Nous constatons qu’au moins un élément de ce vecteur (le deuxième élément) change à chaque fois que nous appelons la fonction <code>sample</code>. La fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Random.html"><code>set.seed</code></a> permet de fixer le germe du RNG à partir d’une seule valeur entière. Par exemple, la commande suivante :</p>
 <div class="sourceCode" id="cb145"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">753</span>)</span></code></pre></div>
 <p>spécifie le germe suivant :</p>
@@ -779,8 +828,8 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode" id="cb154"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb154-1"><a href="#cb154-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">753</span>)</span>
 <span id="cb154-2"><a href="#cb154-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> letters, <span class="at">size =</span> <span class="dv">5</span>)</span></code></pre></div>
 <pre><code>## [1] &quot;v&quot; &quot;r&quot; &quot;g&quot; &quot;i&quot; &quot;t&quot;</code></pre>
-<p>À n’importe quel moment, dans n’importe qu’elle session R, nous obtienons l’échantillon {v, r, g, i, t} si nous soumettons la commande <code>set.seed(753)</code> avant la commande <code>sample(letters, size = 5)</code>.</p>
-<p>L’utilité de fixer le germe d’une génération pseudo-aléatoire est de rendre son résultat reproduisible.</p>
+<p>À n’importe quel moment, dans n’importe qu’elle session R, nous obtenons l’échantillon {v, r, g, i, t} si nous soumettons la commande <code>set.seed(753)</code> avant la commande <code>sample(letters, size = 5)</code>.</p>
+<p>L’utilité de fixer le germe d’une génération pseudo-aléatoire est de rendre son résultat reproductible.</p>
 <hr />
 </div>
 </div>
@@ -796,7 +845,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <li>tests non paramétriques : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/wilcox.test.html"><code>wilcox.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/kruskal.test.html"><code>kruskal.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/friedman.test.html"><code>friedman.test</code></a>;</li>
 <li>tests sur des fréquences : <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/table.html">méthode <code>summary</code> pour un objet de classe <code>table</code></a> (produit par la fonction <code>table</code> ou <code>xtabs</code>), <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/chisq.test.html"><code>chisq.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/fisher.test.html"><code>fisher.test</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mantelhaen.test.html"><code>mantelhaen.test</code></a>.</li>
 </ul>
-<p>Utilisons encore une fois les données <code>iris</code> pour construire un exemple de test de comparaison de moyennes. Nous allons comparer les largeurs moyennes des sépales des espèces versicolor et virginica.</p>
+<p>Utilisons encore une fois les données <code>iris</code> pour construire un exemple de test de comparaison de moyennes. Nous allons comparer les largeurs moyennes des sépales des espèces <em>versicolor</em> et <em>virginica</em>.</p>
 <p style="font-size:110%">
 <strong>Exemple : test t bilatéral de comparaison de moyennes, avec variances inégales</strong>
 </p>
@@ -1084,7 +1133,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ## Coefficients:
 ##  (Intercept)  Sepal.Length  
 ##      3.41895      -0.06188</code></pre>
-<p>C’est une caractéristique orientée objet du langage R. Dans la terminologie de R, une fonction polymorphe est appelée <em>fonction générique</em> et les différentes définitions de cette fonction sont appelées <em>méthodes</em>. Les fonctions génériques, telles que les fonctions <code>print</code> et <code>plot</code>, ont un comportement qui varie en fonction de la classe du premier argument qui leur est fourni en entrée.</p>
+<p>C’est une caractéristique orientée objet du langage R. Dans la terminologie de R, une fonction polymorphe est appelée <em>fonction générique</em> et les différentes définitions de cette fonction sont appelées <em>méthodes</em>. Les fonctions génériques, telles que les fonctions <code>print</code>, <code>plot</code> et <code>summary</code>, ont un comportement qui varie en fonction de la classe du premier argument qui leur est fourni en entrée.</p>
 <p>Rappelons que taper le nom d’un objet dans la console est en fait un raccourci pour soumettre la fonction <code>print</code> avec l’objet à afficher en argument.</p>
 <p>Si nous retirons l’attribut classe de l’objet, nous retombons sur un affichage usuel pour un objet de type liste.</p>
 <div class="sourceCode" id="cb204"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb204-1"><a href="#cb204-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(reg) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
@@ -1322,7 +1371,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <tr class="odd">
 <td>dispersion</td>
 <td></td>
-<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/sd.html"><code>sd</code></a></td>
+<td><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/sd.html"><code>sd</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/IQR.html"><code>IQR</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/mad.html"><code>mad</code></a></td>
 <td><a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/cor.html"><code>var</code>, <code>cov</code>, <code>cor</code></a></td>
 <td></td>
 </tr>
@@ -1444,7 +1493,7 @@ où <code>y</code> = variable réponse, <code>x1</code> et <code>x2</code> = var
 <p>R Core Team (2020). <em>R: A language and environment for statistical computing</em>. R Foundation for Statistical Computing, Vienna, Austria. URL <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a></p>
 <p>Le manuel suivant de R contient aussi plusieurs informations concernant les calculs statistiques en R :</p>
 <p>R Core Team (2020). <em>An Introduction to R</em>. R version 4.0.3. URL <a href="https://cran.r-project.org/doc/manuals/r-release/R-intro.html" class="uri">https://cran.r-project.org/doc/manuals/r-release/R-intro.html</a></p>
-<p>Documentation du package utilisé :</p>
+<p>Documentation du package mentionné qui ne vient pas avec l’installation de base de R :</p>
 <ul>
 <li>package <code>broom</code> :
 <ul>
