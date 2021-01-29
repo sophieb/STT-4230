@@ -18,7 +18,7 @@ weight = 9
     * [Calculs statistiques en R]({{< relref "calculs/calculs_stat_r_2021.html" >}})
     * [Calculs par sections d'un objet R]({{< relref "calculs/calculs_apply_r_2021.html" >}})
 * Semaine 4
-    * [Prétraitement de données en R]
+    * [Prétraitement de données en R]({{< relref "manipulation_donnees/pretraitement_donnees_r_2021.html" >}})
     * [Bonnes pratiques en R]({{< relref "amelioration_code/bonnes_pratiques_r_2021.html" >}})
 * Semaine 6
     * [Graphiques en R]

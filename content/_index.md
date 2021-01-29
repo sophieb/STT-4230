@@ -28,7 +28,7 @@ Le reste du matériel de cours (exercices, tutoriels, exemples supplémentaires,
 * Manipulation de données en R
     * [Structures de données en R]({{< relref "manipulation_donnees/structures_donnees_r_2021.html" >}})
     * [Lecture et écriture dans des fichiers externes à partir de R]({{< relref "manipulation_donnees/lecture_ecriture_r_2021.html" >}})
-    * [Prétraitement de données en R]({{< relref "manipulation_donnees/pretraitement_donnees_r_2020.html" >}})
+    * [Prétraitement de données en R]({{< relref "manipulation_donnees/pretraitement_donnees_r_2021.html" >}})
 * Calculs en R
     * [Calculs mathématiques en R]({{< relref "calculs/calculs_math_r_2021.html" >}})
     * [Calculs statistiques en R]({{< relref "calculs/calculs_stat_r_2021.html" >}})
