@@ -46,7 +46,7 @@ Le reste du matériel de cours (exercices, tutoriels, exemples supplémentaires,
     * [Utilisation de packages R]({{< relref "packages/utilisation_packages_r_2020.html" >}})
     * [Développement de packages R]({{< relref "packages/developpement_packages_r_2020.html" >}})
 * Amélioration de code R
-    * [Bonnes pratiques en R]({{< relref "amelioration_code/bonnes_pratiques_r_2020.html" >}})
+    * [Bonnes pratiques en R]({{< relref "amelioration_code/bonnes_pratiques_r_2021.html" >}})
     * [Optimisation de temps d'exécution en R]({{< relref "amelioration_code/optim_temps_r_2020.html" >}})
     * [Métaprogrammation en R]({{< relref "amelioration_code/metaprogrammation_r_2020.html" >}})
 * [Tutoriels d'étudiants]({{< relref "tutoriels_etudiants" >}})

@@ -19,7 +19,7 @@ weight = 9
     * [Calculs par sections d'un objet R]({{< relref "calculs/calculs_apply_r_2021.html" >}})
 * Semaine 4
     * [Prétraitement de données en R]
-    * [Rédaction de documents en R Markdown]
+    * [Bonnes pratiques en R]({{< relref "amelioration_code/bonnes_pratiques_r_2021.html" >}})
 * Semaine 6
     * [Graphiques en R]
 * Semaine 9
@@ -27,8 +27,8 @@ weight = 9
     * [Évaluation d'expressions et environnements en R]
     * [Fonctions en R]
 * Semaine 11
+    * [Rédaction de documents en R Markdown]
     * [Programmation orientée objet en R]
-    * [Bonnes pratiques en R]
     * [Tests et exceptions en R]
 * Semaine 12
     * [Utilisation de packages R]
