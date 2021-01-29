@@ -1,7 +1,7 @@
 ---
 title: "Concepts de base en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2021-01-17"
+date: "2021-01-29"
 weight: 3
 slug: "base_r"
 lastmodifierdisplayname: "Sophie Baillargeon"
@@ -120,7 +120,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <li><a href="#programmation-orientée-objet-en-r"><span class="toc-section-number">6</span> Programmation orientée objet en R</a></li>
 <li><a href="#sessions-r"><span class="toc-section-number">7</span> Sessions R</a>
 <ul>
-<li><a href="#paramètres-dune-session-r"><span class="toc-section-number">7.1</span> Paramètres d’une session R</a></li>
+<li><a href="#options-de-r"><span class="toc-section-number">7.1</span> Options de R</a></li>
 </ul></li>
 <li><a href="#répertoire-de-travail"><span class="toc-section-number">8</span> Répertoire de travail</a></li>
 <li><a href="#programmes-r"><span class="toc-section-number">9</span> Programmes R</a>
@@ -243,7 +243,7 @@ par un point, le deuxième caractère ne doit pas être un chiffre.</p></li>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>casefold</span></code></pre></div>
 <pre><code>## function (x, upper = FALSE) 
 ## if (upper) toupper(x) else tolower(x)
-## &lt;bytecode: 0x000000001218ec60&gt;
+## &lt;bytecode: 0x00000000163548e0&gt;
 ## &lt;environment: namespace:base&gt;</code></pre>
 <p>La <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/chartr.html">fonction <code>casefold</code></a> sert à convertir la casse de caractères alphabétiques dans une ou plusieurs chaînes de caractères, réunies dans un vecteur. Elle permet donc de convertir des lettres majuscules (en anglais <em>upper case characters</em>) en lettres minuscules (en anglais <em>lower case characters</em>) et vice versa.</p>
 <p>L’environnement du package <code>base</code> contient aussi le jeu de données suivant :</p>
@@ -436,7 +436,7 @@ Figure 2.1: Représentation schématique de l’exécution d’un appel à une f
 ##   ..- attr(*, &quot;.Environment&quot;)=&lt;environment: R_GlobalEnv&gt;</code></pre>
 <p>La partie de gauche de la formule (à gauche du <code>~</code>) contient le ou, plus rarement, les noms des variables réponse. La partie de droite contient pour sa part le ou les noms des variables explicatives. Ces noms sont accompagnés, au besoin, d’opérateurs et de fonctions pour désigner comment former les termes du modèle à partir des variables explicatives. Par exemple, voici la formule à utiliser dans l’appel à la fonction <code>lm</code> pour effectuer une régression polynomiale de degré deux avec les données <code>women</code>.</p>
 <div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>reg_poly <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> height <span class="sc">+</span> <span class="fu">I</span>(height<span class="sc">^</span><span class="dv">2</span>), <span class="at">data =</span> women)</span></code></pre></div>
-<p>L’écriture de formule sera abordée dans les <a href="https://stt4230.rbind.io/calculs/calculs_stat_math_r/#ajustement-de-mod%C3%A8les">notes sur les calculs en R</a>.</p>
+<p>L’écriture de formule sera abordée dans les <a href="https://stt4230.rbind.io/calculs/calculs_stat_r/#formules">notes sur les calculs en R</a>.</p>
 <p style="font-size:110%">
 <strong>Comment accéder aux résultats d’une fonction d’ajustement de modèle?</strong>
 </p>
@@ -610,7 +610,7 @@ Info sur les packages chargés par défaut trouvée dans le fichier
 <div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a>plot</span></code></pre></div>
 <pre><code>## function (x, y, ...) 
 ## UseMethod(&quot;plot&quot;)
-## &lt;bytecode: 0x0000000011f41320&gt;
+## &lt;bytecode: 0x000000001e5ba468&gt;
 ## &lt;environment: namespace:base&gt;</code></pre>
 <p>La fonction <code>plot</code> possède seulement trois arguments : <code>x</code>, <code>y</code> et <code>...</code>. Aussi, le corps de la fonction est un peu particulier. Il est très court. Il contient uniquement un appel à la fonction <code>UseMethod</code>. Cette caractéristique indique que <code>plot</code> est une fonction générique de type S3.</p>
 <p>À travers l’appel à la fonction <code>UseMethod</code>, la fonction <code>plot</code> appelle une sous-fonction (appelée <em>méthode</em>), choisie selon la classe de l’objet fourni en entrée comme valeur pour le premier argument (ici <code>x</code>). Pour énumérer toutes les « versions » d’une fonction générique auxquelles notre installation de R nous donne accès, il faut appeler la fonction <code>methods</code> comme suit.</p>
@@ -656,18 +656,18 @@ Info sur les packages chargés par défaut trouvée dans le fichier
 <strong>Astuce :</strong>
 </p>
 <p>Je recommande de ne jamais accepter l’enregistrement d’une image de la session à la fermeture d’une session R, afin que le répertoire de travail par défaut ne contienne pas de fichier d’extension <code>.RData</code> et que toute nouvelle session R démarre avec un environnement de travail vide. Partir d’un environnement de travail vide aide à garder le contrôle sur son contenu et ainsi à éviter des erreurs de manipulation de mauvaises données.</p>
-<div id="paramètres-dune-session-r" class="section level2" number="7.1">
-<h2><span class="header-section-number">7.1</span> Paramètres d’une session R</h2>
+<div id="options-de-r" class="section level2" number="7.1">
+<h2><span class="header-section-number">7.1</span> Options de R</h2>
 <p style="font-size:110%">
-<strong>Comment connaître et modifier les paramètres d’une session R?</strong>
+<strong>Comment connaître et modifier les options de R?</strong>
 </p>
-<p>Une session R comporte un certain nombre de paramètres nommés options. La fonction R <code>options</code> permet de connaître les paramètres d’une session en cours, ainsi que de les modifier. Il faut d’abord aller voir la fiche d’aide de la fonction (ouverte par la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/options.html">commande <code>help(options)</code></a>), pour obtenir de l’information sur ces paramètres.</p>
+<p>Une session R (tout comme un processus R) comporte un certain nombre de paramètres nommés options. La fonction <code>options</code> permet de connaître les valeurs prises par les options, ainsi que de les modifier. Il faut d’abord aller voir la fiche d’aide de la fonction (ouverte par la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/options.html">commande <code>help(options)</code></a>), pour obtenir de l’information sur ces options.</p>
 <p>Par exemple, la façon dont les nombres sont affichés dans la console est notamment contrôlée par les options <code>digits</code> et <code>scipen</code>. Ces options prennent par défaut les valeurs suivantes.</p>
 <div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Afin de garder une copie des valeurs par défaut avant de les modifier</span></span>
-<span id="cb105-2"><a href="#cb105-2" aria-hidden="true" tabindex="-1"></a>optionsDefaut <span class="ot">&lt;-</span> <span class="fu">options</span>()</span></code></pre></div>
-<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a>optionsDefaut<span class="sc">$</span>digits</span></code></pre></div>
+<span id="cb105-2"><a href="#cb105-2" aria-hidden="true" tabindex="-1"></a>options.default <span class="ot">&lt;-</span> <span class="fu">options</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a>options.default<span class="sc">$</span>digits</span></code></pre></div>
 <pre><code>## [1] 7</code></pre>
-<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a>optionsDefaut<span class="sc">$</span>scipen</span></code></pre></div>
+<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a>options.default<span class="sc">$</span>scipen</span></code></pre></div>
 <pre><code>## [1] 0</code></pre>
 <p style="font-size:110%">
 <strong>Option <code>digits</code> : contrôle du nombre maximal de chiffres affichés</strong>
@@ -679,22 +679,23 @@ Info sur les packages chargés par défaut trouvée dans le fichier
 <div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">digits =</span> <span class="dv">4</span>)</span>
 <span id="cb112-2"><a href="#cb112-2" aria-hidden="true" tabindex="-1"></a><span class="fl">1.23456789</span></span></code></pre></div>
 <pre><code>## [1] 1.235</code></pre>
-<p>Pour toute nouvelle session R démarrée, la valeur par défaut de <code>digits</code> retombe à 7 (sauf si ce paramètre est modifié dans le fichier de configuration de R). Si nous avons préalablement enregistré les valeurs par défaut des options, il est facile de redonner à <code>digits</code> sa valeur par défaut comme suit.</p>
-<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb114-1"><a href="#cb114-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">digits =</span> optionsDefaut<span class="sc">$</span>digits)</span></code></pre></div>
 <p style="font-size:110%">
-<strong>Option <code>digits</code> : contrôle de l’affichage en format scientifique</strong>
+<strong>Option <code>scipen</code> : contrôle de l’affichage en format scientifique</strong>
 </p>
 <p>L’option <code>scipen</code> contrôle pour sa part l’affichage en format scientifique. R affiche les très grands nombres dans ce format. Par exemple, par défaut</p>
-<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1" aria-hidden="true" tabindex="-1"></a><span class="dv">100000</span></span></code></pre></div>
+<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb114-1"><a href="#cb114-1" aria-hidden="true" tabindex="-1"></a><span class="dv">100000</span></span></code></pre></div>
 <pre><code>## [1] 1e+05</code></pre>
 <p>est affiché en format scientifique, mais pas</p>
-<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" aria-hidden="true" tabindex="-1"></a><span class="dv">10000</span></span></code></pre></div>
+<div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb116-1"><a href="#cb116-1" aria-hidden="true" tabindex="-1"></a><span class="dv">10000</span></span></code></pre></div>
 <pre><code>## [1] 10000</code></pre>
 <p>En modifiant la valeur de <code>scipen</code> comme suit</p>
-<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="sc">-</span><span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb118-1"><a href="#cb118-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="sc">-</span><span class="dv">1</span>)</span></code></pre></div>
 <p>10000 sera lui aussi affiché en format scientifique.</p>
-<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1" aria-hidden="true" tabindex="-1"></a><span class="dv">10000</span></span></code></pre></div>
+<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1" aria-hidden="true" tabindex="-1"></a><span class="dv">10000</span></span></code></pre></div>
 <pre><code>## [1] 1e+04</code></pre>
+<p><em>Remarque</em> : Si nous avons préalablement enregistré les valeurs par défaut des options (dans notre cas, nous les avons dans <code>options.default</code>), il est facile de redonner d’une coup leurs valeurs par défaut à toutes les options lorsque nous le souhaitons, par la commande suivante.</p>
+<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(options.default)</span></code></pre></div>
+<p>Notons également que toute modification aux options est perdue à la fermeture de session. En effet, toute nouvelle session R démarre avec des options prennant leurs valeurs par défaut.</p>
 </div>
 </div>
 <div id="répertoire-de-travail" class="section level1" number="8">

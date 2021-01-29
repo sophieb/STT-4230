@@ -1,7 +1,7 @@
 ---
 title: "Concepts de base en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2021-01-17"
+date: "2021-01-29"
 weight: 3
 slug: "base_r"
 lastmodifierdisplayname: "Sophie Baillargeon"
@@ -29,7 +29,6 @@ editor_options:
 ---
 
 `r knitr::opts_chunk$set(R.options = list(width = 90))`
-
 
 ***
 
@@ -470,7 +469,7 @@ La partie de gauche de la formule (à gauche du `~`) contient le ou, plus rareme
 reg_poly <- lm(weight ~ height + I(height^2), data = women)
 ```
 
-L'écriture de formule sera abordée dans les [notes sur les calculs en R](https://stt4230.rbind.io/calculs/calculs_stat_math_r/#ajustement-de-mod%C3%A8les). 
+L'écriture de formule sera abordée dans les [notes sur les calculs en R](https://stt4230.rbind.io/calculs/calculs_stat_r/#formules). 
 
 \vspace{6pt}
 <p style="font-size:110%">
@@ -735,24 +734,24 @@ Si à l'ouverture d'une nouvelle session R le répertoire de travail (voir ci-de
 Je recommande de ne jamais accepter l'enregistrement d'une image de la session à la fermeture d'une session R, afin que le répertoire de travail par défaut ne contienne pas de fichier d'extension `.RData` et que toute nouvelle session R démarre avec un environnement de travail vide. Partir d'un environnement de travail vide aide à garder le contrôle sur son contenu et ainsi à éviter des erreurs de manipulation de mauvaises données.
 
 
-## Paramètres d'une session R
+## Options de R
 
 <p style="font-size:110%">
-**Comment connaître et modifier les paramètres d'une session R?**
+**Comment connaître et modifier les options de R?**
 </p>
 
-Une session R comporte un certain nombre de paramètres nommés options. La fonction R `options` permet de connaître les paramètres d'une session en cours, ainsi que de les modifier. Il faut d'abord aller voir la fiche d'aide de la fonction (ouverte par la [commande `help(options)`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/options.html)), pour obtenir de l'information sur ces paramètres.
+Une session R (tout comme un processus R) comporte un certain nombre de paramètres nommés options. La fonction `options` permet de connaître les valeurs prises par les options, ainsi que de les modifier. Il faut d'abord aller voir la fiche d'aide de la fonction (ouverte par la [commande `help(options)`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/options.html)), pour obtenir de l'information sur ces options.
 
 Par exemple, la façon dont les nombres sont affichés dans la console est notamment contrôlée par les options `digits` et `scipen`. Ces options prennent par défaut les valeurs suivantes.
 
 ```{r}
 # Afin de garder une copie des valeurs par défaut avant de les modifier
-optionsDefaut <- options()
+options.default <- options()
 ```
 
 ```{r options}
-optionsDefaut$digits
-optionsDefaut$scipen
+options.default$digits
+options.default$scipen
 ```
 
 \vspace{6pt}
@@ -769,14 +768,11 @@ Le nombre est arrondi pour respecter ce nombre maximal de chiffres. Cette option
 options(digits = 4)
 1.23456789
 ```
-Pour toute nouvelle session R démarrée, la valeur par défaut de `digits` retombe à `r optionsDefaut$digits` (sauf si ce paramètre est modifié dans le fichier de configuration de R). Si nous avons préalablement enregistré les valeurs par défaut des options, il est facile de redonner à `digits` sa valeur par défaut comme suit.
-```{r}
-options(digits = optionsDefaut$digits)
-```
+
 
 \vspace{6pt}
 <p style="font-size:110%">
-**Option `digits`&nbsp;: contrôle de l'affichage en format scientifique**
+**Option `scipen`&nbsp;: contrôle de l'affichage en format scientifique**
 </p>
 
 L’option `scipen` contrôle pour sa part l'affichage en format scientifique. R affiche les très grands nombres dans ce format. Par exemple, par défaut
@@ -795,6 +791,13 @@ options(scipen = -1)
 ```{r}
 10000
 ```
+
+
+*Remarque* : Si nous avons préalablement enregistré les valeurs par défaut des options (dans notre cas, nous les avons dans `options.default`), il est facile de redonner d'une coup leurs valeurs par défaut à toutes les options lorsque nous le souhaitons, par la commande suivante.
+```{r}
+options(options.default)
+```
+Notons également que toute modification aux options est perdue à la fermeture de session. En effet, toute nouvelle session R démarre avec des options prennant leurs valeurs par défaut.
 
 
 # Répertoire de travail
