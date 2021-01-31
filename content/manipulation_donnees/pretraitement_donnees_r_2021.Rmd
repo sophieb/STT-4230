@@ -1,27 +1,26 @@
 ---
 title: "Prétraitement de données en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2020-01-27"
+date: "2021-01-31"
 weight: 3
 slug: "pretraitement_donnees_r"
-categories: ["cours_2020-02-04"]
-categories_weight: 1
-lastmodifierdisplayname : "Sophie Baillargeon"
+lastmodifierdisplayname: "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
 output:
   pdf_document:
     toc: yes
     toc_depth: 3
+    number_sections: yes
     highlight: tango
   blogdown::html_page:
     toc: yes
     toc_depth: 3
+    number_sections: yes
     highlight: tango
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
 - \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
-- \renewcommand{\linethickness}{0.05em}
 - \usepackage{ragged2e}
 editor_options: 
   chunk_output_type: console
@@ -29,7 +28,11 @@ editor_options:
 
 ***
 
-Maintenant que nous savons comment créer un objet contenant les données que nous voulons analyser, il nous reste un volet à couvrir dans la manipulation de données en R : le prétraitement des données. Ce prétraitement est défini ici comme étant toutes les étapes nécessaires pour rendre des données prêtes à être fournies en entrée à une certaine fonction, par exemple une fonction pour produire un graphique ou ajuster un modèle. Un jeu de données brut doit, dans la grande majorité des cas, être adapté afin d'être analysable. Préparer des données peut impliquer :
+*Note préliminaire\ : Lors de leur dernière mise à jour, ces notes ont été révisées en utilisant R version 4.0.3, le package `dplyr` version 1.0.3, le package `tidyr` version 1.1.2, le package `data.table` version 1.13.6, le package `stringr` version 1.4.0 et le package `lubridate` version 1.7.9.2. Pour d'autres versions, les informations peuvent différer.*
+
+***
+
+Maintenant que nous savons comment créer un objet contenant les données que nous voulons analyser, il nous reste un volet à couvrir dans la manipulation de données en R\ : le prétraitement des données. Ce prétraitement est défini ici comme étant toutes les étapes nécessaires pour rendre des données prêtes à être fournies en entrée à une certaine fonction, par exemple une fonction pour produire un graphique ou ajuster un modèle. Un jeu de données brut doit, dans la grande majorité des cas, être adapté afin d'être analysable. Préparer des données peut impliquer\ :
 
 - nettoyer les données (repérer et corriger des erreurs);
 - modifier les observations d'une variable;
@@ -39,7 +42,7 @@ Maintenant que nous savons comment créer un objet contenant les données que no
 - modifier la mise en forme d'un jeu de données;
 - etc.
 
-Voici comment réaliser certains de ces prétraitements en R. La façon de procéder avec les packages chargés par défaut lors de l'ouverture d'une session R (principalement les packages `base` et `stats`) est présentée en détails. Des façons de réaliser certaines tâches avec des packages du [`tidyverse`](https://www.tidyverse.org/) (principalement les packages [`dplyr`](https://dplyr.tidyverse.org/) et [`tidyr`](https://tidyr.tidyverse.org/)), ainsi qu'avec le package [`data.table`](	http://r-datatable.com), sont également mentionnées, sans être approfondies. Chargeons donc ces packages.
+Voici comment réaliser certains de ces prétraitements en R. La façon de procéder avec les packages chargés par défaut lors de l'ouverture d'une session R (principalement les packages `base` et `stats`) est présentée en détail. Des façons de réaliser certaines tâches avec des packages du [`tidyverse`](https://www.tidyverse.org/) (principalement les packages [`dplyr`](https://dplyr.tidyverse.org/) et [`tidyr`](https://tidyr.tidyverse.org/)), ainsi qu'avec le package [`data.table`](	http://r-datatable.com), sont également mentionnées, sans être approfondies. Chargeons donc ces packages.
 
 ```{r message = FALSE}
 library(dplyr)
@@ -49,12 +52,14 @@ library(data.table)
 
 De façon générale, les packages du `tidyverse` présentent l'avantage d'être cohérents entre eux et abondamment documentés sur le web (en partie en raison de leur popularité). Pour sa part, la grande force du package `data.table` est sa capacité à effectuer rapidement des traitements, même sur des jeux de données de grande taille. Les packages du `tidyverse` tendent aussi à être un peu plus rapide que le R de base, mais pas aussi rapide que le package `data.table`. Malgré des différences en ce qui concerne les temps d'exécution, les trois options présentées ici (R de base versus `tidyverse` versus `data.table`) produisent des résultats équivalents. Ainsi, dans un cas de manipulation de données dont la taille n'est pas trop grande, le choix entre ces outils est uniquement une question de goût.
 
+Ces notes se terminent en présentant trois différentes avenues pour comparer des objets R. Lors de la réalisation de prétraitement de données, il est fréquemment de vouloir comparer des structures de données, dans leur entièreté ou en partie, afin de s'assurer d'avoir correctement effectué les manipulations requises.
+
 
 ***
 
 # Transformations de variables
 
-Un grand nombre de transformations de variables usuelles peuvent être facilement réalisées en R, par exemple les transformations suivantes :
+Un grand nombre de transformations de variables usuelles peuvent être facilement réalisées en R, par exemple les transformations suivantes\ :
 
 - conversion de format de données,
 - modification de chaînes de caractères (p. ex. remplacement ou retrait des caractères, modification de la casse (majuscule ou minuscule))
@@ -73,97 +78,92 @@ Supposons ici que nous travaillons avec un jeu de données stocké dans un data 
 str(cars)
 ```
 
-Il s'agit d'un petit jeu de données à 50 observations prises sur des voitures et 2 variables :
+Il s'agit d'un petit jeu de données à 50 observations prises sur des voitures et 2 variables\ :
 
-- `speed` : la vitesse de déplacement des voitures tout juste avant de freiner, mesurée en miles par heure;
-- `dist` : la distance parcourue par ces voitures entre le moment d'un freinage et l'atteinte d'une immobilisation complète, mesurée en pieds.
-
-Nous allons travailler sur une copie de ce jeu de données afin de ne pas modifier le jeu de données original.
-
-```{r}
-cars2 <- cars
-```
+- `speed`\ : la vitesse de déplacement des voitures tout juste avant de freiner, mesurée en miles par heure;
+- `dist`\ : la distance parcourue par ces voitures entre le moment d'un freinage et l'atteinte d'une immobilisation complète, mesurée en pieds.
 
 
-## Modification ou ajout d'une variable dans un data frame
+
+## Modification ou ajout de variables
 
 ### Opérateurs d'indiçage et fonction `transform`
 
 Pour remplacer une variable dans un data frame par une transformation de celle-ci, il suffit d'assigner le nouveau vecteur ou facteur contenant les observations de la variable transformée à la colonne contenant la variable à modifier.
 
-Par exemple, dans le jeu de données `cars2`, la distance est exprimée en pieds. Supposons que nous voulons transformer l'échelle de mesure de cette variable pour des mètres. Cette transformation est effectuée par une simple opération mathématique : la multiplication par un facteur de conversion. Ce facteur de conversion est ici 0.3048, car un pied est l'équivalent de 0.3048 mètre.
+Par exemple, dans le jeu de données `cars`, la distance est exprimée en pieds. Supposons que nous voulons transformer l'échelle de mesure de cette variable pour des mètres. Cette transformation est effectuée par une simple opération mathématique\ : la multiplication par un facteur de conversion. Ce facteur de conversion est ici 0.3048, car un pied est l'équivalent de 0.3048 mètre.
 
 ```{r eval = FALSE}
-cars2$dist * 0.3048
+cars$dist * 0.3048
 ```
 
 Pour modifier la variable sans en créer une nouvelle, il suffit d'assigner le vecteur contenant les données pour la variable transformée à la colonne qui contenait la variable d'origine.
 
 ```{r}
-cars2$dist <- cars2$dist * 0.3048
+cars$dist <- cars$dist * 0.3048
 ```
 
-Nous savons que l'instruction `cars2$dist`, servant à identifier la colonne à modifier, aurait pu être écrite de bien d'autres façons, notamment : 
+Nous savons que l'instruction `cars$dist`, servant à identifier la colonne à modifier, aurait pu être écrite de bien d'autres façons, notamment\ : 
 
-- `cars2[["dist"]]`
-- `cars2[, "dist"]`
-- `cars2[, 2]`
+- `cars[["dist"]]`
+- `cars[, "dist"]`
+- `cars[, 2]`
 - etc. 
 
-Je considère cependant que l'opérateur `$` procure la syntaxe la plus simple pour un remplacement de variable dans un data frame. Le jeu de données `cars2` a été modifié comme suit.
+Je considère cependant que l'opérateur `$` procure la syntaxe la plus simple pour un remplacement de variable dans un data frame. Le jeu de données `cars` a été modifié comme suit.
 
 ```{r}
-str(cars2)
+str(cars)
 ```
 
 
 La [fonction `transform`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/transform.html) offre une autre façon d'écrire ce genre d'assignation. La commande suivante produit le même résultat que la dernière assignation.
 
 ```{r}
-cars2 <- transform(cars2, dist = dist * 0.3048)
+cars <- transform(cars, dist = dist * 0.3048)
 ```
 
 Il faut donner comme premier argument à la fonction `transform` le data frame dans lequel nous souhaitons effectuer une transformation de variable. Les arguments suivants sont des assignations de nouvelles valeurs. Dans ces assignations, il est possible de référer aux colonnes du data frame fourni comme premier argument par leur nom sans les précéder de `nom_du_data_frame$` et sans les encadrer de guillemets, comme avec la [fonction `subset`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/subset.html), vue dans le [cours sur les structures de données en R](https://stt4230.rbind.io/manipulation_donnees/structures_r/#fonctions-dextraction).
 
-Plutôt que d'écraser une colonne d'un data frame en la remplaçant par un autre objet, comme nous venons de le faire, il sera souvent préférable d'ajouter les nouvelles variables créées tout en conservant les anciennes. Dans ce cas, il suffit de concaténer les nouvelles variables au data frame avec la [fonction `cbind`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/cbind.html) ou [`data.frame`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/data.frame.html), ou d'assigner les nouvelles variables à des colonnes portant des noms qui ne sont pas initialement présents dans le data frame. Par exemple, pour ajouter une variable contenant la distance exprimée en mètres au data frame `cars2`, nous pourrions procéder comme suit.
+Plutôt que d'écraser une colonne d'un data frame en la remplaçant par un autre objet, comme nous venons de le faire, il sera souvent préférable d'ajouter les nouvelles variables créées tout en conservant les anciennes. Dans ce cas, il suffit de concaténer les nouvelles variables au data frame avec la [fonction `cbind`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/cbind.html) ou [`data.frame`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/data.frame.html), ou d'assigner les nouvelles variables à des colonnes portant des noms qui ne sont pas initialement présents dans le data frame. Par exemple, pour ajouter une variable contenant la distance exprimée en mètres au data frame `cars`, nous pourrions procéder comme suit.
 
 ```{r}
-cars2 <- cars  # pour repartir avec la version originale du jeu de données
-cars2$dist_m <- cars2$dist * 0.3048
-head(cars2)
+cars <- datasets::cars  # pour repartir avec la version originale du jeu de données
+cars$dist_m <- cars$dist * 0.3048
+head(cars)
 ```
 
-Étant donné que le jeu de données `cars2` ne contenait pas à l'origine de colonne nommée `dist_m`, une nouvelle colonne portant ce nom a été créée et ajoutée après les colonnes déjà présentes dans le data frame. La même tâche aurait pu être effectuée en utilisant en appelant la fonction `cbind` ou `data.frame` comme suit.
+Étant donné que le jeu de données `cars` ne contenait pas à l'origine de colonne nommée `dist_m`, une nouvelle colonne portant ce nom a été créée et ajoutée après les colonnes déjà présentes dans le data frame. La même tâche aurait pu être effectuée en utilisant en appelant la fonction `cbind` ou `data.frame` comme suit.
 
-```{r}
-cars2 <- data.frame(cars2, dist_m = cars2$dist * 0.3048)
+```{r eval = FALSE}
+cars <- data.frame(cars, dist_m = cars$dist * 0.3048)
 ```
 
 La fonction `transform` permet aussi d'ajouter de nouvelles variables par une assignation à un nouveau nom de colonne.
 
-**Remarque** : Il y a souvent plusieurs façons de réaliser une même tâche en R. Personnellement, je tends à adopter la façon qui présente le meilleur compromis entre un code le plus facile à comprendre possible et un code le plus court possible. Ici, l'assignation à un nouveau nom de colonne avec l'opérateur `$` me semble la meilleure option.
+**Remarque**\ : Il y a souvent plusieurs façons de réaliser une même tâche en R. Personnellement, je tends à adopter la façon qui présente le meilleur compromis entre un code le plus facile à comprendre possible et un code le plus court possible. Ici, l'assignation à un nouveau nom de colonne avec l'opérateur `$` me semble la meilleure option.
 
 
 ### Fonction `mutate` du package `dplyr`
 
 Pour les adeptes du `tidyverse`, le package `dplyr` propose, entre autres, la fonction [`mutate`](https://dplyr.tidyverse.org/reference/mutate.html) pour modifier ou créer de nouvelles variables. L'opération précédente aurait pu être effectuée comme suit avec cette fonction, dont l'utilisation ressemble à celle de la fonction `transform`.
 
-```{r}
-cars2 <- mutate(cars2, dist_m = dist * 0.3048)
+```{r eval = FALSE}
+cars <- mutate(cars, dist_m = dist * 0.3048)
 ```
 
 
 ### Opérateur `:=` du package `data.table`
 
-Si le data frame contenant les données à manipuler est d'abord transformé en data table, déjà mentionné dans les notes sur les [structures de données](https://stt4230.rbind.io/manipulation_donnees/structures_r/#le-data-table), l'[opérateur d'assignation `:=`](https://rdatatable.gitlab.io/data.table/articles/datatable-reference-semantics.html#addupdatedelete-columns-by-reference) offert par le package `data.table` peut ensuite être utilisé pour ajouter, modifier ou même effacer des variables dans les données. Cet opérateur s'utilise en conjonction avec l'opérateur, `[` comme dans l'exemple suivant. 
+Si le data frame contenant les données à manipuler est d'abord transformé en data table, déjà mentionné dans les notes sur les [structures de données](https://stt4230.rbind.io/manipulation_donnees/structures_r/#data-tables), l'[opérateur d'assignation `:=`](https://rdatatable.gitlab.io/data.table/articles/datatable-reference-semantics.html#addupdatedelete-columns-by-reference) offert par le package `data.table` peut ensuite être utilisé pour ajouter, modifier ou même effacer des variables dans les données. Cet opérateur s'utilise en conjonction avec l'opérateur, `[` comme dans l'exemple suivant. 
 
 ```{r}
-cars_dt <- as.data.table(cars)
+cars_dt <- as.data.table(datasets::cars)
 cars_dt[, dist_m := dist * 0.3048]
 str(cars_dt)
 ```
 
-Avec `:=`, aucune copie de l'objet n'est effectuée pour ensuite être réassignée. L'objet est modifié par référence (donc « sur place »), ce qui n'est pas le cas pour toutes les autres façons de faire présentées précédemment. La modification d'objets par référence est une des techniques utilisées par le package `data.table` pour optimiser ses temps de traitement.
+Avec `:=`, aucune copie de l'objet n'est effectuée pour ensuite être réassignée. L'objet est modifié par référence (donc «\ sur place\ »), ce qui n'est pas le cas pour toutes les autres façons de faire présentées précédemment. La modification d'objets par référence est une des techniques utilisées par le package `data.table` pour optimiser ses temps de traitement.
 
 
 ## Variable conditionnelle à une autre avec la fonction `ifelse`
@@ -178,11 +178,11 @@ ifelse(
 )
 ```
 
-Par exemple, supposons que nous souhaitons créer une nouvelle variable dans le jeu de données `cars2` contenant la vitesse en km/heure plutôt qu'en miles/heure, mais dans laquelle les valeurs de distance en miles à l'heure inférieures à 10 sont ramenées à des valeurs manquantes. Nous pourrions créer cette variable comme suit (1.60934 est le facteur de conversion entre un mile à l'heure et un kilomètre à l'heure). 
+Par exemple, supposons que nous souhaitons créer une nouvelle variable dans le jeu de données `cars` contenant la vitesse en km/heure plutôt qu'en miles/heure, mais dans laquelle les valeurs de distance en miles à l'heure inférieures à 10 sont ramenées à des valeurs manquantes. Nous pourrions créer cette variable comme suit (1.60934 est le facteur de conversion entre un mile à l'heure et un kilomètre à l'heure). 
 
 ```{r}
-cars2$speed_km <- ifelse(test = cars$speed < 10, yes = NA, no = cars$speed * 1.60934)
-head(cars2, n = 10)
+cars$speed_km <- ifelse(test = cars$speed < 10, yes = NA, no = cars$speed * 1.60934)
+head(cars, n = 10)
 ```
 
 Dans cet exemple, la valeur fournie au deuxième argument (`yes`) n'est pas un vecteur de même longueur que les valeurs fournies aux arguments `test` et `no`. R applique donc la règle de recyclage pour transformer `NA`, qui est en fait un vecteur de longueur 1, en un vecteur contenant `length(cars$speed)=` `r nrow(cars)` valeurs `NA`.
@@ -190,22 +190,22 @@ Dans cet exemple, la valeur fournie au deuxième argument (`yes`) n'est pas un v
 Il est même possible d'imbriquer plusieurs appels à la fonction `ifelse`, comme dans cet exemple.
 
 ```{r}
-cars2$speed_catego <- ifelse(
-  test = cars2$speed < 10, 
+cars$speed_cat <- ifelse(
+  test = cars$speed < 10, 
   yes = "moins de 10",
   no = ifelse(
-    test = cars2$speed >= 20, 
+    test = cars$speed >= 20, 
     yes = "20 ou plus", 
     no = "entre 10 et 20"
   )
 )
-str(cars2)
+str(cars)
 ```
 
 Voici un extrait du jeu de données pour mieux comprendre de quoi a l'air la nouvelle variable créée.
 
 ```{r}
-cars2[c(5:7,38:40), c("speed", "speed_catego")]
+cars[c(5:7,38:40), c("speed", "speed_cat")]
 ```
 
 Nous avons catégorisé la variable `speed` en 3 catégories. Il existe cependant de meilleures façons de faire ce genre de tâche, présentées dans la sous-section suivante.
@@ -215,53 +215,77 @@ Notons, avant de clore cette sous-section, que le package `dplyr` offre une fonc
 
 ## Catégorisation d'une variable numérique
 
-Parfois, nous avons besoin de rendre catégorique une variable numérique. Les agences de statistiques officielles, par exemple Statistique Canada, font souvent de telles catégorisations avant de rendre des données publiques afin qu'il ne soit plus possible d'identifier les individus auquels réfèrent les données. Il s'agit d'une technique courante d'anonymisation de données qui contribue à permettre l'accès à des données tout en respectant des règlements concernant la confidentialité des données.
+Parfois, nous avons besoin de rendre catégorique une variable numérique. Les agences de statistiques officielles, par exemple Statistique Canada, font souvent de telles catégorisations avant de rendre des données publiques afin qu'il ne soit plus possible d'identifier les individus auxquels réfèrent les données. Il s'agit d'une technique courante d'anonymisation de données qui contribue à permettre l'accès à des données tout en respectant des règlements concernant la confidentialité des données.
 
 
-### Fonction `cut` :  
+### Fonction `cut`\ :  
 
 La principale fonction pour catégoriser une variable numérique en R est la [fonction `cut`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/cut.html). En voici un exemple d'utilisation.
 ```{r cut}
-cars2$speed_catego2 <- cut(cars$speed, breaks = c(-Inf, 10, 20, Inf), right = FALSE)
+cars$speed_cat_2 <- cut(cars$speed, breaks = c(-Inf, 10, 20, Inf), right = FALSE)
+str(cars)
 ```
+L'argument `right` sert à préciser si les limites de droite des intervalles de catégorisation sont incluses dans ceux-ci ou non. Ici, la valeur `FALSE` fournie à cet argument a pour conséquence que les intervalles sont ouverts à droite\ : $[-\infty, 10), [10, 20), [20, \infty)$.
+
+La nouvelle variable obtenue est un facteur, avec des libellés de niveaux différents de ceux de la variable `speed_cat`. 
+```{r}
+cars[c(5:7,38:40), c("speed", "speed_cat", "speed_cat_2")]
+```
+Nous pouvons contrôler ces libellés avec l'argument `labels` de la fonction `cut`, comme dans cet exemple.
+```{r}
+cars$speed_cat_3 <- cut(
+  cars$speed, 
+  breaks = c(-Inf, 10, 20, Inf), 
+  labels = c("faible", "moyenne", "grande"),
+  right = FALSE
+)
+cars[c(5:7,38:40), c("speed", "speed_cat", "speed_cat_2", "speed_cat_3")]
+```
+
+
+### Fonction `case_when` du package `dplyr`
+
+L'équivalent de la fonction `cut` dans l'univers du `tidyverse` est la [fonction `case_when` du package `dplyr`](https://dplyr.tidyverse.org/reference/case_when.html). À titre d'exemple, le dernier appel à `cut` est reproduit comme suit avec `case_when`.
 
 ```{r}
-str(cars2)
+cars$speed_cat_4 <- case_when(
+  cars$speed < 10 ~ "faible",
+  cars$speed >= 10 & cars$speed < 20 ~ "moyenne",
+  cars$speed >= 20 ~ "grande"
+)
+str(cars)
 ```
 
-La nouvelle variable obtenue est un facteur, avec des niveaux aux libellés différents de ceux de la variable `speed_catego`. 
-```{r}
-cars2[c(5:7,38:40), c("speed", "speed_catego" , "speed_catego2")]
-```
-Nous aurions pu contrôler ces libellés avec l'argument `labels` de la fonction `cut`.
+Contrairement à la fonction `cut`, `case_when` retourne un vecteur plutôt qu'un facteur. 
 
 
-### Fonction `ave` :  
+
+### Fonction `ave`\ :  
 
 Si nous souhaitions remplacer les identifiants des nouvelles catégories par une statistique calculée sur les valeurs observées dans chaque catégorie, nous utiliserions la [fonction `ave`](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/ave.html), comme dans cet exemple.
 
 ```{r ave}
-cars2$speed_catego3 <- ave(cars2$speed, cars2$speed_catego, FUN = mean)
+cars$speed_ave <- ave(cars$speed, cars$speed_cat, FUN = mean)
 ```
 
 ```{r}
-cars2[c(5:7,38:40),c("speed", "speed_catego", "speed_catego2", "speed_catego3")]
+cars[c(5:7,38:40),c("speed", "speed_cat", "speed_cat_2", "speed_ave")]
 ```
 
-Pour une observation, la valeur de la nouvelle variable `speed_catego3` est la moyenne de toutes les vitesses observées dans la même catégorie que celle de l'observation en question.
+Pour une observation, la valeur de la nouvelle variable `speed_ave` est la moyenne de toutes les vitesses observées dans la même catégorie que celle de l'observation en question.
 
 
-#### Comparaison entre la fonction `ave` et les fonctions `tapply`, `by` et `aggregate` :
+#### Comparaison entre la fonction `ave` et les fonctions `tapply`, `by` et `aggregate`\ :
 
 \mbox{}
 
 La fonction `ave` calcule une statistique selon des combinaisons de niveaux de facteurs, tout comme les fonctions `tapply`, `by` et `aggregate`. Cependant, elle retourne un objet de même dimension que le premier argument qu'elle reçoit en entrée plutôt que de retourner une valeur par combinaison distincte de niveaux de facteurs. Par exemple, voici l'appel à la fonction `aggregate` correspondant à l'appel à la fonction `ave` précédent.
 
 ```{r}
-aggregate(x = cars2$speed, by = list(catego = cars2$speed_catego), FUN = mean)
+aggregate(x = cars$speed, by = list(catego = cars$speed_cat), FUN = mean)
 ```
 
-Ici, le résultat produit possède seulement 3 lignes, pour les trois catégories distinctes. La sortie de l'appel à la fonction `ave` précédent était plutôt de longueur 50, soit la longueur de `cars2$speed`.
+Ici, le résultat produit possède seulement 3 lignes, pour les trois catégories distinctes. La sortie de l'appel à la fonction `ave` précédent était plutôt de longueur 50, soit la longueur de `cars$speed`.
 
 
 ## Normalisation de valeurs numériques
@@ -272,7 +296,14 @@ La normalisation permet de ramener les mesures de différentes variables sur une
 
 La [fonction `scale`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/scale.html) permet de normaliser par colonne les valeurs numériques dans une matrice ou un data frame.
 
-Par exemple, revenons au jeu de données `cars` d'origine. Les valeurs pour les deux variables dans le jeu de données `cars` ne sont pas sur la même échelle. En effet, leurs moyennes et écarts-types empiriques ne sont pas similaires. Utilisons la fonction `apply`, vue dans le cours sur les [calculs de base en R](https://stt4230.rbind.io/calculs/calculs_base_r/#fonction-apply), pour calculer ces statistiques par variable (= par colonne). 
+Par exemple, revenons au jeu de données `cars` d'origine.
+
+```{r}
+cars <- datasets::cars
+str(cars)
+```
+
+Les valeurs pour les deux variables dans le jeu de données `cars` ne sont pas sur la même échelle. En effet, leurs moyennes et écarts-types empiriques ne sont pas similaires. Utilisons la fonction `apply`, vue dans les notes sur les [calculs par sections d'un objet R](https://stt4230.rbind.io/calculs/calculs_apply_r/#fonction-apply), pour calculer ces statistiques par variable (= par colonne). 
 
 ```{r}
 # moyennes par variable
@@ -284,7 +315,7 @@ apply(cars, MARGIN = 2, FUN = mean)
 apply(cars, MARGIN = 2, FUN = sd)
 ```
 
-Une normalisation couramment employée consiste à soustraire de valeurs leur moyenne, puis à diviser ces différences par l'écart-type des valeurs d'origine. Cette normalisation est parfois appelée standardisation. Les valeurs sont centrées et réduites. En notation statistique, la formule pour obtenir cette normalisation est la suivante :
+Une normalisation couramment employée consiste à soustraire de valeurs leur moyenne, puis à diviser ces différences par l'écart-type des valeurs d'origine. Cette normalisation est parfois appelée standardisation. Les valeurs sont centrées et réduites. En notation statistique, la formule pour obtenir cette normalisation est la suivante\ :
 
 \Large
 \centering
@@ -307,7 +338,7 @@ Les valeurs dans chacune des colonnes de `cars_standard` ont une moyenne de 0 et
 round(apply(cars_standard, MARGIN = 2, FUN = mean), digits = 5)
 ```
 
-\newpage
+
 
 ```{r}
 # écarts-types par variable
@@ -316,7 +347,7 @@ apply(cars_standard, MARGIN = 2, FUN = sd)
 
 Les arguments `center` et `scale` de la fonction `scale` permettent de contrôler, respectivement, les valeurs soustraites par colonnes et les valeurs par lesquelles les colonnes sont divisées. Il est possible, par exemple, de centrer sans réduire avec `center = TRUE` et `scale = FALSE`.
 
-Un autre exemple de normalisation possible avec `scale` est de ramener les mesures de toutes les variables entre 0 et 1. En notation statistique, la formule pour obtenir cette normalisation est la suivante :
+Un autre exemple de normalisation possible avec `scale` est de ramener les mesures de toutes les variables entre 0 et 1. En notation statistique, la formule pour obtenir cette normalisation est la suivante\ :
 
 \Large
 \centering
@@ -336,7 +367,7 @@ summary(cars_01norm)
 ```
 
 
-**Note** : La [fonction `sweep`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/sweep.html) permet aussi de faire simultanément une transformation pour chacune des colonnes d'une matrice. Elle généralise en fait `scale` en permettant d'effectuer la transformation sur n'importe laquelle des dimensions d'un array. Cette fonction ne sera cependant pas approfondie ici.   
+**Note**\ : La [fonction `sweep`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/sweep.html) permet aussi de faire simultanément une transformation pour chacune des colonnes d'une matrice. Elle généralise en fait `scale` en permettant d'effectuer la transformation sur n'importe laquelle des dimensions d'un array. Cette fonction ne sera cependant pas approfondie ici.   
 
 
 ## Manipulation de chaînes de caractères
@@ -360,7 +391,7 @@ str(chaine)
 length(chaine)
 ```
 
-\newpage
+
 
 ```{r}
 chaine[1]
@@ -370,38 +401,38 @@ Cette section présente quelques fonctions R de base pour manipuler des vecteurs
 
 Ces fonctions seront illustrées en utilisant un data frame nommé `boxoffice` créé le 25 janvier 2019 en important le contenu de la page web http://pro.boxoffice.com/numbers/all_time. Cette page web n'existe plus aujourd'hui, car le site web Boxoffice Pro a subi une refonte. Utilisons tout de même ces données, même si elles ne sont plus à jour, puisque leur format est parfait pour illustrer la manipulation de chaînes de caractères et de dates en R.
 
-Une copie des données se trouve dans le haut de [la page web des notes que vous êtes en train de lire](https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/). Le fichier contenant les données est en format `.rds`, il se nomme `boxoffice_20190125.rds`. Il se trouve dans le fichier compressé `pretraitement_donnees_r_2021.zip`. Après avoir téléchargé ce fichier sur votre ordinateur, et après l'avoir décompressé pour en extraire `boxoffice_20190125.rds`, vous pouvez charger les données en R avec le code suivant (en spécifiant le bon chemin d'accès) :
+Une copie des données se trouve dans le haut de [la page web des notes que vous êtes en train de lire](https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/). Le fichier contenant les données est en format `.rds`, il se nomme `boxoffice_20190125.rds`. Il se trouve dans le fichier compressé `pretraitement_donnees_r_2021.zip`. Après avoir téléchargé ce fichier sur votre ordinateur, et après l'avoir décompressé pour en extraire `boxoffice_20190125.rds`, vous pouvez charger les données en R avec le code suivant (en spécifiant le bon chemin d'accès)\ :
 
 ```{r}
 boxoffice <- readRDS("C:/coursR/boxoffice_20190125.rds")
 ```
 
-Le data frame `boxoffice` utilisé ici ressemble à celui créé dans les notes sur la [lecture et l'écriture dans des fichiers externes à partir de R](https://stt4230.rbind.io/manipulation_donnees/lecture_ecriture_r/#importation-de-donn%C3%A9es-publi%C3%A9es-sur-internet), mais il contient des données moins récentes et présentées sous un format un peu différent.
+Le data frame `boxoffice` utilisé ici ressemble à celui créé dans les [notes sur la lecture et l'écriture dans des fichiers externes à partir de R](https://stt4230.rbind.io/manipulation_donnees/lecture_ecriture_r/#donn%C3%A9es-publi%C3%A9es-sur-internet), mais il contient des données moins récentes et présentées sous un format un peu différent.
 
 ```{r}
 head(boxoffice, n = 3)
 ```
 
-Les noms des colonnes du data frame ne sont pas informatifs. Renommons les colonnes du data frame en reprennant les noms de colonnes qui apparaissaient dans la page web d'où ses données proviennent (en remplaçant les espaces par des tirets bas et en omettant les parenthèses).
+Les noms des colonnes du data frame ne sont pas informatifs. Renommons les colonnes du data frame en reprenant les noms de colonnes qui apparaissaient dans la page web d'où ses données proviennent (en remplaçant les espaces par des tirets bas et en omettant les parenthèses).
 
 ```{r}
 colnames(boxoffice) <- c("Ranking", "Movie_Distributor", "Release_Date", "Gross")
 ```
 
-Il s'agit de données concernant les recettes (`Gross`) des films ayant générés le plus de revenus dans les cinémas américains.
+Il s'agit de données concernant les recettes (`Gross`) des films ayant généré le plus de revenus dans les cinémas américains.
 
-### Fonction `paste` :
+### Fonction `paste`\ :
 
-La [fonction `paste`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/paste.html) sert à concaténer des éléments de vecteurs. Elle retourne toujours un résultat sous le format caractère. Elle n'est pas illustrée ici, car elle a été présentée dans les notes sur les [structures de données en R](https://stt4230.rbind.io/manipulation_donnees/structures_r/#les-fonctions-paste-et-paste0).
+La [fonction `paste`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/paste.html) sert à concaténer des éléments de vecteurs. Elle retourne toujours un résultat sous le format caractère. Elle n'est pas illustrée ici, car elle a été présentée dans les [notes sur les structures de données en R](https://stt4230.rbind.io/manipulation_donnees/structures_r/#fonctions-paste-et-paste0).
 
-Notons que la fonction `paste0` est en quelque sorte une version de la fonction `paste` avec l'argument `sep = ""` (aucun caractère comme séparation entre les chaînes de caractères à concaténer).
+Rappelons que la fonction `paste0` est en quelque sorte une version de la fonction `paste` avec l'argument `sep = ""` (aucun caractère comme séparation entre les chaînes de caractères à concaténer).
 
 
-### Fonction `nchar` :
+### Fonction `nchar`\ :
 
-La [fonction `nchar`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/nchar.html) permet de compter le nombre de caractères dans des chaînes de caractères. Elle a aussi été illustrée dans les notes sur les [structures de données en R](https://stt4230.rbind.io/manipulation_donnees/structures_r/#les-vecteurs-de-cha%C3%AEnes-de-caract%C3%A8res).  
+La [fonction `nchar`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/nchar.html) permet de compter le nombre de caractères dans des chaînes de caractères. Elle a aussi été illustrée dans les [notes sur les structures de données en R](https://stt4230.rbind.io/manipulation_donnees/structures_r/#vecteurs-de-cha%C3%AEnes-de-caract%C3%A8res).  
 
-### Fonctions `toupper`, `tolower` et `casefold` :
+### Fonctions `toupper`, `tolower` et `casefold`\ :
 
 Les [fonctions `toupper` et `tolower`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/chartr.html) transforment tous les caractères alphabétiques en majuscules et en minuscules respectivement.
 
@@ -412,7 +443,7 @@ toupper(extrait)
 tolower(extrait)
 ```
 
-La [fonction `casefold`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/chartr.html), utilisée comme exemple de fonction dans les notes sur les [concepts de base en R](https://stt4230.rbind.io/introduction/base_r/#quest-ce-quune-fonction-r), permet de faire les deux transformations de casse, soit transformer tous les caractères alphabétiques en majuscules (avec l'argument `upper = TRUE`) ou transformer tous les caractères alphabétiques en minuscules (avec l'argument `upper = FALSE`).
+La [fonction `casefold`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/chartr.html), utilisée comme exemple de fonction dans les [notes sur les concepts de base en R](https://stt4230.rbind.io/introduction/base_r/#fonctions-r), permet de faire les deux transformations de casse, soit transformer tous les caractères alphabétiques en majuscules (avec l'argument `upper = TRUE`) ou transformer tous les caractères alphabétiques en minuscules (avec l'argument `upper = FALSE`).
 
 ```{r, R.options = list(width = 90)}
 casefold(extrait, upper = TRUE)
@@ -420,29 +451,29 @@ casefold(extrait, upper = FALSE)
 ```
 
 
-### Fonction `strsplit` :
+### Fonction `strsplit`\ :
 
-La [fonction `strsplit`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/strsplit.html) sépare des chaînes de caractères en sous-chaînes de caractères en coupant lors de la rencontre d'une certaine série de caractères. Tentons d'utiliser cette fonction pour séparer le nom du film du nom du distributeur, qui se retrouvent tous deux dans la colonne `Movie_Distributor` du data frame `boxoffice`. Demandons à `strsplit` de briser le contenu de cette colonne en deux parties : ce qui se trouve avant la parenthèse ouvrante et ce qui se trouve après. Étant donné que le nom du distributeur est toujours placé à la fin de la chaîne de caractères, entre parenthèses, nous réussirons ainsi à isoler les deux éléments. 
+La [fonction `strsplit`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/strsplit.html) sépare des chaînes de caractères en sous-chaînes de caractères en coupant lors de la rencontre d'une certaine série de caractères. Tentons d'utiliser cette fonction pour séparer le nom du film du nom du distributeur, qui se retrouvent tous deux dans la colonne `Movie_Distributor` du data frame `boxoffice`. Demandons à `strsplit` de briser le contenu de cette colonne en deux parties\ : ce qui se trouve avant la parenthèse ouvrante et ce qui se trouve après. Étant donné que le nom du distributeur est toujours placé à la fin de la chaîne de caractères, entre parenthèses, nous réussirons ainsi à isoler les deux éléments. 
 
 
 ```{r strsplit}
-resSplit <- strsplit(x = boxoffice$Movie_Distributor, split = "(", fixed = TRUE)
-head(resSplit, n = 2)
+res_split <- strsplit(x = boxoffice$Movie_Distributor, split = "(", fixed = TRUE)
+head(res_split, n = 2)
 ```
 
 Par défaut, la fonction considère que la valeur donnée a l'argument `split` est une [expression régulière](https://fr.wikipedia.org/wiki/Expression_r%C3%A9guli%C3%A8re). Les expressions régulières ne seront pas vues ici (mais des références pour en apprendre davantage à ce sujet sont fournies dans les références). Elles constituent un moyen puissant pour effectuer des recherches dans des chaînes de caractères. L'argument `fixed = TRUE` demande à `strsplit` de ne pas considérer l'argument `split` comme une expression régulière, mais bien de traiter la chaîne de caractères telle qu'elle a été fournie.
 
-Le résultat de la fonction `strsplit` est toujours une liste de la même longueur que le vecteur assigné à l'argument `x`. Chaque élément de la liste est un vecteur comprenant les sous-chaînes de caractères obtenues de la séparation. Ici, ces vecteurs ont le plus souvent une longueur de 2. Par exemple pour le premier film du jeu de données, `r boxoffice$Movie_Distributor[1]`, on obtient le vecteur `[`r paste0("\"", resSplit[[1]], "\"")`]`. Par contre, certains titres de film comprennent un élément entre parenthèses de plus, par exemple `"`r boxoffice$Movie_Distributor[which(sapply(resSplit, length) == 3)[1]]`"`. Pour eux, la longueur du vecteur est 3. 
+Le résultat de la fonction `strsplit` est toujours une liste de la même longueur que le vecteur assigné à l'argument `x`. Chaque élément de la liste est un vecteur comprenant les sous-chaînes de caractères obtenues de la séparation. Ici, ces vecteurs ont le plus souvent une longueur de 2. Par exemple pour le premier film du jeu de données, `r boxoffice$Movie_Distributor[1]`, on obtient le vecteur `[`r paste0("\"", res_split[[1]], "\"")`]`. Par contre, certains titres de film comprennent un élément entre parenthèses de plus, par exemple `"`r boxoffice$Movie_Distributor[which(sapply(res_split, length) == 3)[1]]`"`. Pour eux, la longueur du vecteur est 3. 
 
-La commande suivante permet d'extraire le dernier élément de chacun des vecteurs se trouvant dans `resSplit`. Elle utilise la fonction `sapply` vue dans le cours sur les [calculs de base en R](https://stt4230.rbind.io/calculs/calculs_base_r/#fonctions-lapply-sapply-et-mapply).
+La commande suivante permet d'extraire le dernier élément de chacun des vecteurs se trouvant dans `res_split`. Elle utilise la fonction `sapply` vue dans le cours sur les [calculs par sections d'un objet R](https://stt4230.rbind.io/calculs/calculs_apply_r/#fonctions-lapply-sapply-et-mapply).
 
 ```{r}
-distributeur <- sapply(resSplit, tail, n = 1)
+distributeur <- sapply(res_split, tail, n = 1)
 head(distributeur, n = 2)
 ```
 
 
-### Fonction `substr` :
+### Fonction `substr`\ :
 
 Afin d'avoir vraiment isolé le nom du distributeur, il ne reste plus qu'à retirer la parenthèse fermante à la fin des chaînes de caractères dans `distributeur`. La [fonction `substr`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/substr.html) permet d'extraire une partie de chaînes de caractères en spécifiant les positions, dans les chaînes, des caractères à conserver.
 
@@ -455,7 +486,7 @@ Ici nous voulons extraire les caractères de la première position jusqu'à l'av
 
 Notons que nous aurions aussi pu effectuer ce traitement avec la fonction `strsplit`, en utilisant `)` comme point de coupure, ou encore avec la fonction `sub`, comme dans l'exemple suivant.
 
-### Fonctions `sub` et `gsub` :
+### Fonctions `sub` et `gsub`\ :
 
 Voyons maintenant comment il est possible de remplacer une sous-chaîne de caractères par une autre. Dans les données `boxoffice`, les recettes des films comprennent un signe de dollar au début, ainsi que des virgules pour séparer les milliers. À cause de ces caractères, cette colonne ne peut pas être transformée sous un format numérique directement. Nous allons donc retirer ces caractères en les remplaçant par des chaînes de caractères vides. Ensuite, nous pourrons convertir le vecteur au format numérique plutôt que caractère.
 
@@ -472,10 +503,10 @@ str(recettes)
 
 Il est maintenant possible de faire des calculs numériques sur les recettes des films, puisqu'elles sont stockées sous un format numérique.
 
-Les [fonctions `sub` et `gsub`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/grep.html) servent donc à chercher les occurrences d'un « motif » (argument `pattern`) dans des chaînes de caractères (argument `x`), puis à remplacer ces occurrences par un autre motif (argument `replacement`). La fonction `sub` remplace seulement la première occurrence de `pattern`, alors que la fonction `gsub` remplace toutes les occurrences. Tout comme la fonction `strsplit`, les fonctions `sub` et `gsub` travaillent par défaut avec des motifs exprimés sous forme d'expressions régulières. L'argument `fixed = TRUE` empêche ce comportement et implique le traitement des motifs comme des chaînes de caractères.
+Les [fonctions `sub` et `gsub`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/grep.html) servent donc à chercher les occurrences d'un «\ motif\ » (argument `pattern`) dans des chaînes de caractères (argument `x`), puis à remplacer ces occurrences par un autre motif (argument `replacement`). La fonction `sub` remplace seulement la première occurrence de `pattern`, alors que la fonction `gsub` remplace toutes les occurrences. Tout comme la fonction `strsplit`, les fonctions `sub` et `gsub` travaillent par défaut avec des motifs exprimés sous forme d'expressions régulières. L'argument `fixed = TRUE` empêche ce comportement et implique le traitement des motifs comme des chaînes de caractères.
 
 
-### Fonctions `grep` et `grepl` :
+### Fonctions `grep` et `grepl`\ :
 
 Supposons que nous désirions avoir une variable logique prenant la valeur `TRUE` si la compagnie Disney a distribué le film, `FALSE` sinon. Nous pourrions utiliser la fonction `grepl` comme suit pour obtenir cette variable.
 
@@ -486,14 +517,14 @@ sum(Disney)
 
 Ainsi, `r sum(Disney)` des `r nrow(boxoffice)` films du jeu de données `boxoffice` ont été distribués par Disney.
 
-Les [fonctions `grep` et `grepl`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/grep.html) identifient les éléments d'un vecteur de chaînes de caractères (argument `x`) contenant un certain « motif » (argument `pattern`). Pour ne pas que ce motif soit traité comme une expression régulière, il faut fournir la valeur `TRUE` à l’argument `fixed`. La fonction `grep` retourne un vecteur numérique contenant les positions dans `x` des éléments possédant le motif. Comme nous l'avons constaté dans l'exemple précédent, la fonction `grepl` retourne pour sa part un vecteur logique aussi long que `x`, contenant la valeur `TRUE` pour les éléments possédant le motif, `FALSE` sinon.
+Les [fonctions `grep` et `grepl`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/grep.html) identifient les éléments d'un vecteur de chaînes de caractères (argument `x`) contenant un certain «\ motif\ » (argument `pattern`). Pour ne pas que ce motif soit traité comme une expression régulière, il faut fournir la valeur `TRUE` à l'argument `fixed`. La fonction `grep` retourne un vecteur numérique contenant les positions dans `x` des éléments possédant le motif. Comme nous l'avons constaté dans l'exemple précédent, la fonction `grepl` retourne pour sa part un vecteur logique aussi long que `x`, contenant la valeur `TRUE` pour les éléments possédant le motif, `FALSE` sinon.
 
-Les fonctions `sub`, `gsub`, `grep` et `grepl` sont toutes documentées dans la même fiche d'aide : [celle de la fonction `grep`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/grep.html). Quelques autres fonctions de manipulation de chaînes de caractères sont documentées dans cette fiche, mais ne sont pas présentées ici.
+Les fonctions `sub`, `gsub`, `grep` et `grepl` sont toutes documentées dans la même fiche d'aide\ : [celle de la fonction `grep`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/grep.html). Quelques autres fonctions de manipulation de chaînes de caractères sont documentées dans cette fiche, mais ne sont pas présentées ici.
 
 
-### Fonction `chartr` :
+### Fonction `chartr`\ :
 
-Lorsque nous avons besoin de remplacer une série de caractères par d'autres (chaque caractère de la série ayant une valeur de remplacement spécifique), il est possible de procéder en appelant la fonction `gsub` séparément pour chaque caractère de la série. Il existe cependant une façon de faire plus rapide : utiliser la [fonction `chartr`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/chartr.html). Il faut fournir à cette fonction une chaîne de caractères comprenant tous les caractères à traduire (argument `old`). Il faut aussi lui fournir une chaîne de caractères comprenant tous les caractères de remplacement (argument `new`), en respectant l'ordre des caractères dans le premier vecteur. Finalement, il faut fournir à `chartr` le vecteur des chaînes de caractères dans lesquelles effectuer les remplacements.
+Lorsque nous avons besoin de remplacer une série de caractères par d'autres (chaque caractère de la série ayant une valeur de remplacement spécifique), il est possible de procéder en appelant la fonction `gsub` séparément pour chaque caractère de la série. Il existe cependant une façon de faire plus rapide\ : utiliser la [fonction `chartr`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/chartr.html). Il faut fournir à cette fonction une chaîne de caractères comprenant tous les caractères à traduire (argument `old`). Il faut aussi lui fournir une chaîne de caractères comprenant tous les caractères de remplacement (argument `new`), en respectant l'ordre des caractères dans le premier vecteur. Finalement, il faut fournir à `chartr` le vecteur des chaînes de caractères dans lesquelles effectuer les remplacements.
 
 Par exemple, la commande suivante permet de retirer les accents français d'un vecteur de chaînes de caractères.
 
@@ -506,13 +537,13 @@ chartr(
 ```
 
 
-### Fonction `iconv` :
+### Fonction `iconv`\ :
 
 Pour la tâche spécifique de retirer des accents, il est en fait encore plus simple d'utiliser la [fonction `iconv`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/iconv.html). Celle-ci permet de convertir l'encodage de chaîne de caractères. Un bon truc pour retirer des accents de chaînes de caractères, peu importe la langue utilisée dans ces chaînes, est de convertir vers l'encodage `"ASCII//TRANSLIT"`. Voici un exemple.
 
 ```{r, R.options = list(width = 90)}
 iconv(
-  x = c("François va à l'École des Pionniers.", "Où est situé cette école?"), 
+  x = c("François va à l'École des Pionniers.", "Où est située cette école?"), 
   to = "ASCII//TRANSLIT"
 )
 ```
@@ -522,7 +553,7 @@ La sortie de cette commande peut varier d'un système d'exploitation à l'autre 
 
 ### Package `stringr`
 
-Un package du `tidyverse` se spécialise en manipulation de chaînes de caractères. Il s'agit du package [`stringr`](https://stringr.tidyverse.org/), qui propose des solutions de rechange à à peu près tout ce qui a été présenté dans cette sous-section. Les noms des fonctions de ce package, et de leurs arguments, ont été choisis de façon à être cohérents entre eux, ce qui n'est pas vraiment le cas pour les fonctions de manipulation de chaînes de caractères dans le R de base. En outre, quelques fonctions du package  `stringr` simplifient la réalisation de tâches courantes en manipulation de chaînes de caractères. Par exemple, la fonction `str_trim` permet de retirer tout espace blanc en début et fin de chaînes de caractères. Les espaces blancs (en anglais [*whitespace*](https://en.wikipedia.org/wiki/Whitespace_character)) les plus courants sont les espaces, les tabulations (`\t`), et les retour à la ligne (`\n`).
+Un package du `tidyverse` se spécialise en manipulation de chaînes de caractères. Il s'agit du package [`stringr`](https://stringr.tidyverse.org/), qui propose des solutions de rechange à à peu près tout ce qui a été présenté dans cette sous-section. Les noms des fonctions de ce package, et de leurs arguments, ont été choisis de façon à être cohérents entre eux, ce qui n'est pas vraiment le cas pour les fonctions de manipulation de chaînes de caractères dans le R de base. En outre, quelques fonctions du package  `stringr` simplifient la réalisation de tâches courantes en manipulation de chaînes de caractères. Par exemple, la fonction `str_trim` permet de retirer tout espace blanc en début et fin de chaînes de caractères. Les espaces blancs (en anglais [*whitespace*](https://en.wikipedia.org/wiki/Whitespace_character)) les plus courants sont les espaces, les tabulations (`\t`), et les retours à la ligne (`\n`).
 
 ```{r}
 library(stringr)
@@ -536,7 +567,7 @@ Des références sont fournies à la fin de ce document pour en apprendre davant
 
 ## Manipulation de dates
 
-Une des variables de `boxoffice` est une date : la variable `Release_Date` contenant la date de sortie des films. Elle est pour l'instant stockée sous format caractère.
+Une des variables de `boxoffice` est une date\ : la variable `Release_Date` contenant la date de sortie des films. Elle est pour l'instant stockée sous format caractère.
 
 ```{r}
 str(boxoffice$Release_Date)
@@ -559,10 +590,10 @@ Dans mon cas, j'utilise un système d'exploitation en anglais. En conséquence, 
 Sys.setlocale("LC_TIME", locale = "English")
 ```
 
-Les valeurs comprises comme argument `locale` dépendent du système d'exploitation. Sous un système d'exploitation Mac OS X / OS X / macOS ou Unix / Linux, tentez une des valeurs suivantes : `"en_CA"`, `"en_CA.UTF-8"` ou `"en_CA.utf8"` (ou la version US de ces valeurs, soit `"en_US"`, `"en_US.UTF-8"` ou `"en_US.utf8"`).
+Les valeurs comprises comme argument `locale` dépendent du système d'exploitation. Sous un système d'exploitation macOS ou Linux, tentez une des valeurs suivantes\ : `"en_CA"`, `"en_CA.UTF-8"` ou `"en_CA.utf8"` (ou la version US de ces valeurs, soit `"en_US"`, `"en_US.UTF-8"` ou `"en_US.utf8"`).
 
 ```{r eval = FALSE}
-# Sous Mac OS X / OS X / macOS
+# Sous macOS
 Sys.setlocale("LC_TIME", locale = "en_CA.UTF-8")
 ```
 
@@ -571,7 +602,7 @@ Une fois s'être assuré d'avoir un paramètre `"LC_TIME"` en anglais, nous pouv
 ```{r}
 boxoffice$Date <- as.Date(boxoffice$Release_Date, format = "%b %d, %Y")
 str(boxoffice[, c("Release_Date", "Date")])
-head(subset(boxoffice, select = - c(Ranking, Gross)))
+head(subset(boxoffice, select = -c(Ranking, Gross)))
 ```
 
 
@@ -596,7 +627,7 @@ boxoffice$Age <- difftime(aujourdui, boxoffice$Date, units = "years")
 ```
 
 ```
-## Error in match.arg(units) : 
+## Error in match.arg(units)\ : 
 ##   'arg' should be one of “auto”, “secs”, “mins”, “hours”, “days”, “weeks”
 ```
 
@@ -604,7 +635,7 @@ La fonction `difftime` ne calcule pas de différence entre des dates en années,
 
 ```{r}
 boxoffice$Age <- as.numeric(difftime(aujourdui, boxoffice$Date, units = "days") / 365.25)
-head(subset(boxoffice, select = - c(Ranking, Gross)))
+head(subset(boxoffice, select = -c(Ranking, Gross)))
 ```
 
 Cet âge est presque exact. Cependant, il y a une petite erreur due au fait que nous ne savons pas combien il y a eu d'années bissextiles entre aujourd'hui et la date de sortie des films. Une année ne comporte pas 365.25 jours, mais bien 365 ou 366 jours.
@@ -627,60 +658,118 @@ boxoffice$Month <- as.integer(format(boxoffice$Date, "%m"))
 Voyons ce que ça donne.
 
 ```{r R.options = list(width = 85)}
-head(subset(boxoffice, select = - c(Ranking, Gross)))
+head(subset(boxoffice, select = -c(Ranking, Gross)))
 ```
 
-&nbsp;
 
-**Note** : Il existe d'autres classes dédiées à la manipulation de dates en R qui permettent d'inclure l'heure dans la date (heure, minute, seconde) : [`"POSIXlt"` et `"POSIXct"`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/DateTimeClasses.html). Avec ces classes, la prise en compte des fuseaux horaires est primordiale. Nous n'approfondirons pas l'utilisation de ces classes.  Seule une petite partie des possibilités de manipulation de dates en R est abordée ici.
+**Note**\ : Il existe d'autres classes dédiées à la manipulation de dates en R qui permettent d'inclure l'heure dans la date (heure, minute, seconde)\ : [`"POSIXlt"` et `"POSIXct"`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/DateTimeClasses.html). Avec ces classes, la prise en compte des fuseaux horaires est primordiale. Nous n'approfondirons pas l'utilisation de ces classes.  Seule une petite partie des possibilités de manipulation de dates en R est abordée ici.
 
 
 ### Package `lubridate`
 
-Le `tidyverse` offre aussi un outil pour manipuler des dates en R : le package [`lubridate`](https://lubridate.tidyverse.org/). Par exemple, le calcul approximatif de temps en années entre deux dates que nous avons effectué précédemment peut être fait de façon exacte avec `lubridate` comme suit.
+Le `tidyverse` offre aussi un outil pour manipuler des dates en R\ : le package [`lubridate`](https://lubridate.tidyverse.org/). Par exemple, le calcul approximatif de temps en années entre deux dates que nous avons effectué précédemment peut être fait de façon exacte avec `lubridate` comme suit.
 
 ```{r eval = FALSE, message = FALSE, R.options = list(width = 85)}
 library(lubridate)
-boxoffice$Date2 <- mdy(boxoffice$Release_Date, locale = "English")
-boxoffice$Age2 <- time_length(interval(start = boxoffice$Date2, end = now()), "years")
-head(subset(boxoffice, select = c(Movie_Distributor, Date, Date2, Age, Age2)))
+boxoffice$Date_2 <- mdy(boxoffice$Release_Date, locale = "English")
+boxoffice$Age_2 <- time_length(interval(start = boxoffice$Date_2, end = now()), "years")
+head(subset(boxoffice, select = c(Movie_Distributor, Date, Date_2, Age, Age_2)))
 ```
 
 ```{r echo = FALSE, message = FALSE, R.options = list(width = 85)}
 library(lubridate)
-boxoffice$Date2 <- mdy(boxoffice$Release_Date, locale = "English")
-boxoffice$Age2 <- time_length(interval(start = boxoffice$Date2, end = aujourdui), "years")
-head(subset(boxoffice, select = c(Movie_Distributor, Date, Date2, Age, Age2)))
+boxoffice$Date_2 <- mdy(boxoffice$Release_Date, locale = "English")
+boxoffice$Age_2 <- time_length(interval(start = boxoffice$Date_2, end = aujourdui), "years")
+head(subset(boxoffice, select = c(Movie_Distributor, Date, Date_2, Age, Age_2)))
 ```
 
-La fonction `time_length` tient compte des années bisextiles. Elles peut aussi calculer des durées en mois tout en considérant les durées variables de ceux-ci. Remarquons que l'argument `locale` de la fonction `mdy` nous a permis de spécifier un paramète régional s'appliquant uniquement à la conversion à effectuer. La modification d'un paramètre régional global de la session R n'est pas nécessaire avec les fonctions du packages `lubridate`. Des références sont fournies à la fin de ce document pour en apprendre davantage sur le package `lubridate`.
+La fonction `time_length` tient compte des années bissextiles. Elle peut aussi calculer des durées en mois tout en considérant les durées variables de ceux-ci. Remarquons que l'argument `locale` de la fonction `mdy` nous a permis de spécifier un paramètre régional s'appliquant uniquement à la conversion à effectuer. La modification d'un paramètre régional global de la session R n'est pas nécessaire avec les fonctions du packages `lubridate`. Des références sont fournies à la fin de ce document pour en apprendre davantage sur le package `lubridate`.
 
 
 ***
 
 # Manipulation de jeux de données
 
-Nous venons de voir différentes façons de manipuler des variables dans un jeu de données sous forme de data frame. Voyons maintenant différentes manipulations usuelles de jeux de données entiers, soit :
+Nous venons de voir différentes façons de manipuler des variables dans un jeu de données sous forme de data frame. Voyons maintenant différentes manipulations usuelles de jeux de données entiers, soit\ :
 
-- la sélection de sous-ensembles du jeu de données
+- le retrait d'observations dupliquées ou contenant des données manquantes,
+- la sélection de sous-ensembles du jeu de données,
 - la fusion de plusieurs jeux de données,
 - la modification de l'ordre des observations ou des variables dans un jeu de données,
 - la modification de la mise en forme de jeux de données.
 
-Pour illustrer des manipulations, reprenons le data frame `dataEx` créé dans le cours concernant la [lecture et l'écriture dans des fichiers externes à partir de R](https://stt4230.rbind.io/manipulation_donnees/lecture_ecriture_r/#lecture-de-fichiers) afin d'illustrer quelques mises en forme de jeux de données.
+Pour illustrer des manipulations, reprenons le data frame `data_ex` créé dans le cours concernant la [lecture et l'écriture dans des fichiers externes à partir de R](https://stt4230.rbind.io/manipulation_donnees/lecture_ecriture_r/#lecture-de-fichiers), en modifiant une valeur afin d'introduire une observation dupliquée.
 
 ```{r}
-de1 <- c(2, 3, 4, 1, 2, 3, 5, 6, 5, 4)
-de2 <- c(1, 4, 2, 3, 5, 4, 6, 2, 5, 3)
+de_1 <- c(2, 3, 4, 1, 2, 3, 5, 6, 5, 4)
+de_2 <- c(1, 4, 2, 3, 1, 4, 6, 2, 5, 3)  # 5e valeur pas comme dans les notes précédentes
 lanceur <- rep(c("Luc", "Kim"), each = 5)
-dataEx <- data.frame(de1, de2, lanceur)
+data_ex <- data.frame(de1 = de_1, de2 = de_2, lanceur = lanceur)
 # Introduction de valeurs manquantes
-dataEx$de2[7] <- NA
-dataEx$lanceur[3] <- NA
+data_ex$de2[7] <- NA
+data_ex$lanceur[3] <- NA
 # Affichage du date frame
-dataEx
+data_ex
 ```
 
+
+## Omission d'observations
+
+### Retrait des observations dupliquées
+
+Il est parfois utile de gérer les observations dupliquées dans un jeu de données. En R, les fonctions suivantes sont utiles avec des observations dupliquées\ :
+
+- pour tester la présence d'observations dupliquées\ : `duplicated`,
+- pour retirer les observations dupliquées\ : `unique`.
+
+Une observation est ici définie par l'ensemble des valeurs observées de toutes les variables pour un individu (ou une unité) de la population statistique à l'étude. Donc une observation dupliquée est une ligne répétée (donc deux lignes ou plus complètement identiques) dans une matrice ou un data frame. Dans le cas d'une seule variable, stockée dans un vecteur, une observation dupliquée est une valeur présente plus d'une fois dans le vecteur.
+
+Dans le jeu de données `data_ex`, les lignes 1 et 5 de sont identiques. La fonction `duplicated` identifie la 5e observation comme une duplication d'une autre observation.
+```{r}
+duplicated(data_ex)
+```
+L'observation peut être retirée avec la fonction `unique` comme suit.
+```{r}
+unique(data_ex)
+```
+Si elles reçoivent un vecteur en entrée, les fonctions `duplicated` et `unique` réagissent comme suit.
+```{r}
+duplicated(c(1, 3, 2, 1, 2, 1))
+unique(c(1, 3, 2, 1, 2, 1))
+```
+
+
+### Retrait des observations avec données manquantes
+
+Comme pour les observations dupliquées, il existe des outils en R pour identifier ou retirer les observations contenant des données manquantes\ :
+
+- pour identifier les observations sans données manquantes\ : `complete.cases`,
+- pour retirer les observations contenant au moins une donnée manquante\ : `na.omit`.
+
+Dans le jeu de données `data_ex`, les lignes 3 et 7 contiennent chacune une donnée manquante. La fonction `complete.cases` identifie ces lignes comme n'étant pas des cas complets (`FALSE` retourné pour les lignes contenant des `NA`).
+```{r}
+complete.cases(data_ex)
+```
+Ces deux observations peuvent facilement être retirées avec la fonction `na.omit` comme suit.
+```{r}
+na.omit(data_ex)
+```
+La fonction `na.omit` a déjà été vue dans les [notes sur les calculs statistiques en R](https://stt4230.rbind.io/calculs/calculs_stat_r/#traitement-des-donn%C3%A9es-manquantes-et-argument-na.rm)). Cette fonction ajoute des attributs à l'objet retourné pour identifier les observations omises.
+```{r}
+data_ex_no_NA <- na.omit(data_ex)
+str(data_ex_no_NA)
+```
+Les fonctions `complete.cases` et `na.omit` fonctionnent aussi avec des vecteurs, comme le montre ces exemples.
+```{r}
+complete.cases(c(1, 3, 2, NA, 2, 1))  # équivalent à !is.na(c(1, 3, 2, NA, 2, 1))
+na.omit(c(1, 3, 2, NA, 2, 1))
+```
+La fonction `is.na` (vue dans les [notes sur les calculs mathématiques en R](https://stt4230.rbind.io/calculs/calculs_math_r/#fonctions-de-comparaison-pour-constantes-sp%C3%A9ciales)), utilisée avec l'opérateur `[`, permet aussi de retirer les données manquantes d'un vecteur.
+```{r}
+x <- c(1, 3, 2, NA, 2, 1)
+x[!is.na(x)]
+```
+Remarquons que cette solution de rechange à `na.omit` n'ajoute pas d'attributs au résultat.
 
 ## Sélection de sous-ensembles de données
 
@@ -692,82 +781,78 @@ Sélectionner un sous-ensemble de données signifie **extraire** d'un jeu de don
 Les principaux outils permettant d'extraire des sous-ensembles de données stockées dans un data frame ont déjà été présentés dans les notes sur les
 structures de données en R. Il s'agit de [l'opérateur d'indiçage `[` et de la fonction d'extraction `subset`](https://stt4230.rbind.io/manipulation_donnees/structures_r/#extraction-d%C3%A9l%C3%A9ments). La fonction `subset` a d'ailleurs été utilisée dans les derniers exemples pour sélectionner seulement certaines variables dans l'affichage des résultats.
 
-Pour illustrer l'utilisation de ces outils dans un contexte de sélection de sous-ensembles de données, voyons comment conserver du jeu de données `dataEx` seulement les résultats de lancers de dés effectués par Kim et ne comprenant aucune donnée manquante. Dans ce sous-ensemble, la variable `lanceur` prendra toujours la même valeur. Elle ne sera donc plus vraiment pertinente et sera retirée.
+Pour illustrer l'utilisation de ces outils dans un contexte de sélection de sous-ensembles de données, voyons comment conserver du jeu de données `data_ex` seulement les résultats de lancers de dés effectués par Kim et ne comprenant aucune donnée manquante. Dans ce sous-ensemble, la variable `lanceur` prendra toujours la même valeur. Elle ne sera donc plus vraiment pertinente et sera retirée.
 
 Tout d'abord, voyons comment effectuer cette tâche avec l'opérateur `[`, étape par étape. Pour limiter les observations à celles pour lesquelles la variable `lanceur` prend la valeur `Kim`, nous écrivons la condition logique représentant ce critère et la fournissons au premier argument de l'opérateur `[` à plusieurs dimensions.
 
-\newpage
 
 ```{r}
-dataEx[dataEx$lanceur == "Kim", ]
+data_ex[data_ex$lanceur == "Kim", ]
 ```
 
-Remarquons que l'observation pour laquelle la valeur de la variable `lanceur` est manquante a été conservée. Ensuite, la façon la plus simple de retirer les lignes comprenant au moins une donnée manquante est d'utiliser la [fonction `na.omit`](https://stt4230.rbind.io/calculs/calculs_base_r/#traitement-des-observations-manquantes-et-argument-na.rm) déjà mentionnée dans les notes sur les calculs de base en R.
+Remarquons que l'observation pour laquelle la valeur de la variable `lanceur` est manquante a été conservée. Ensuite, la façon la plus simple de retirer les lignes comprenant au moins une donnée manquante est d'utiliser la fonction `na.omit` mentionnée précédemment.
 
 ```{r}
-na.omit(dataEx[dataEx$lanceur == "Kim", ])
+na.omit(data_ex[data_ex$lanceur == "Kim", ])
 ```
 
 Finalement, la variable lanceur peut être retirée en fournissant les noms des autres variables, celles à conserver, au deuxième argument de l'opérateur `[`. Dans un cas de manipulation de data frame, l'identification des variables par leur nom plutôt que par leur position permet d'éviter des erreurs.
 
 ```{r}
-na.omit(dataEx[dataEx$lanceur == "Kim", c("de1", "de2")])
+na.omit(data_ex[data_ex$lanceur == "Kim", c("de1", "de2")])
 ```
 
 Effectuons maintenant le même travail avec la fonction `subset`, encore une fois étape par étape, pour bien comprendre les traitements réalisés.
 
 ```{r}
-subset(dataEx, subset = lanceur == "Kim")
+subset(data_ex, subset = lanceur == "Kim")
 ```
 
 Tout d'abord, remarquons que le comportement de la fonction `subset` diffère un peu de celui de l'opérateur `[`. L'observation pour laquelle la valeur de la variable `lanceur` est manquante n'a pas été conservée. Nous pourrions retirer les observations contenant des valeurs manquantes pour les autres variables en combinant des conditions logiques comme suit. 
 
 ```{r}
-subset(dataEx, subset = ! is.na(de1) & ! is.na(de2) & lanceur == "Kim")
+subset(data_ex, subset = !is.na(de1) & !is.na(de2) & lanceur == "Kim")
 ```
 
 Cependant, il est plus simple d'utiliser encore une fois la fonction `na.omit`. Pour retirer la variable `lanceur`, l'argument `select` de la fonction `subset` peut être spécifié comme dans la commande suivante, qui accompli la tâche souhaitée.
 
 ```{r}
-na.omit(subset(dataEx, subset = lanceur == "Kim", select = - lanceur))
+na.omit(subset(data_ex, subset = lanceur == "Kim", select = -lanceur))
 ```
 
-La possibilité de pouvoir retirer des variables en utilisant l'opéreur `-` devant leur nom permet de simplifier des commandes. Pour conserver ou retirer plus d'une variable, il faut fournir leurs noms dans un vecteur, comme nous l'avons fait précédemment dans la commande suivante (non exécutée ici).
+La possibilité de pouvoir retirer des variables en utilisant l'opérateur `-` devant leur nom permet de simplifier des commandes. Pour conserver ou retirer plus d'une variable, il faut fournir leurs noms dans un vecteur, comme nous l'avons fait précédemment dans la commande suivante (non exécutée ici).
 
 ```{r eval = FALSE}
-head(subset(boxoffice, select = - c(Ranking, Gross)))
+head(subset(boxoffice, select = -c(Ranking, Gross)))
 ```
 
 
 ### Fonctions `filter` et `select` du package `dplyr`
 
-Le package `dplyr` attribue les tâches de sélection d'observations et de variables à deux fonctions distinctes :
+Le package `dplyr` attribue les tâches de sélection d'observations et de variables à deux fonctions distinctes\ :
 
 - [`filter`](https://dplyr.tidyverse.org/reference/filter.html) pour la sélection d'observations (lignes),
 - [`select`](https://dplyr.tidyverse.org/reference/select.html) pour la sélection de variables (colonnes).
 
-Par exemple, nous pouvons sélectionner les observations de `dataEx` pour lesquelles la valeur de la variable `lancer` est `"Kim"` avec la fonction `filter` comme suit.
+Par exemple, nous pouvons sélectionner les observations de `data_ex` pour lesquelles la valeur de la variable `lancer` est `"Kim"` avec la fonction `filter` comme suit.
 
 ```{r}
-filter(dataEx, lanceur == "Kim")
+filter(data_ex, lanceur == "Kim")
 ```
 
 Tout comme le fait la fonction `subset`, les lignes pour lesquelles la condition vaut `NA` n'ont pas été conservées. Pour retirer les observations contenant des données manquantes, nous pouvons utiliser `na.omit`, ou encore [`drop_na`](https://tidyr.tidyverse.org/reference/drop_na.html), une fonction similaire contenue dans le package `tidyr`.
 
 ```{r}
-drop_na(filter(dataEx, lanceur == "Kim"))
+drop_na(filter(data_ex, lanceur == "Kim"))
 ```
 
-Notons que la fonction `drop_na` permet de limiter la recherche de valeurs manquantes à un sous-ensemble de variables, ce qui n'est pas possible avec `na.omit`. La fonction [`complete.cases`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/complete.cases.html) du packages `stats` permet cependant de faire l'équivalent (non illustré ici[^1]).
-
-[^1]: voir https://stackoverflow.com/questions/4862178/remove-rows-with-all-or-some-nas-missing-values-in-data-frame pour un exemple d'utilisation de complete.cases
+Notons que la fonction `drop_na` permet de limiter la recherche de valeurs manquantes à un sous-ensemble de variables, ce qui n'est pas possible avec `na.omit`.
 
 Ensuite, la variable `lanceur` peut être retirée à l'aide de la fonction `select` comme suit.
 
-\newpage
 
 ```{r}
-select(drop_na(filter(dataEx, lanceur == "Kim")), - lanceur)
+select(drop_na(filter(data_ex, lanceur == "Kim")), -lanceur)
 ```
 
 Cette commande est un peu difficile à lire en raison du grand nombre d'appels de fonctions imbriqués qu'elle contient. Elle serait peut-être plus claire en ajoutant des retours à la ligne et des indentations comme suit.
@@ -776,84 +861,86 @@ Cette commande est un peu difficile à lire en raison du grand nombre d'appels d
 select(
   drop_na(
     filter(
-      dataEx, 
+      data_ex, 
       lanceur == "Kim"
     )
   ), 
-  - lanceur
+  -lanceur
 )
 ```
 
-La pratique courante avec les packages du `tidyverse` est cependant d'utiliser l'[opérateur « pipe » `%>%`](https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html) du package `magrittr` pour rendre les commandes plus lisibles. En utilisant cet opérateur, la commande aurait l'allure suivante.
+La pratique courante avec les packages du `tidyverse` est cependant d'utiliser l'[opérateur «\ pipe\ » `%>%`](https://magrittr.tidyverse.org/) du package `magrittr` pour rendre les commandes plus lisibles. En utilisant cet opérateur, la commande aurait l'allure suivante.
 
 ```{r}
-dataEx %>% filter(lanceur == "Kim") %>% drop_na() %>% select(- lanceur) 
+data_ex %>% filter(lanceur == "Kim") %>% drop_na() %>% select(-lanceur) 
 ```
 
-Je ne fais que mentionner cet opérateur ici. Il est recommandé mais pas obligatoire de l'employer lors de l'utilisation de packages du `tidyverse`. J'y reviendrai cependant dans un [prochain cours](https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/#operateur-pipe).
+Je ne fais que mentionner cet opérateur ici. Il est recommandé, mais pas obligatoire, de l'employer lors de l'utilisation de packages du `tidyverse`. L'utilisation de cet opérateur est expliqué dans les [notes sur les bonnes pratiques de programmation en R](https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/#op%C3%A9rateur-pipe).
 
 
 ### Opérateur `[` et fonction `subset` du package `data.table`
 
 Pour effectuer de la sélection de sous-ensembles de données avec la package `data.table`, nous pouvons exploiter son [opérateur `[` et ses arguments `i` et `j`](https://rdatatable.gitlab.io/data.table/reference/data.table.html) ou encore sa [méthode pour la fonction `subset`](https://rdatatable.gitlab.io/data.table/reference/subset.data.table.html) (qui est en fait une fonction générique) spécifique aux data tables. Illustrons ici l'utilisation de l'opérateur `[`. La fonction `subset` s'utilise à peu près de la même façon avec un data table qu'avec un data frame.
 
-Après avoir transformé le data frame `dataEx` en data table, 
+Après avoir transformé le data frame `data_ex` en data table, 
 
 ```{r}
-dataEx_dt <- as.data.table(dataEx)
+data_ex_dt <- as.data.table(data_ex)
 ```
 
 nous pouvons l'indicer à l'aide de l'opérateur `[` de `data.table` en fournissant une condition logique à l'argument `i` pour sélectionner des lignes.
 
 ```{r}
-dataEx_dt[i = lanceur == "Kim"]
+data_ex_dt[i = lanceur == "Kim"]
 ```
 
-Dans les commandes suivantes, je vais omettre l'assignation explicite à l'argument `i` puisque ce n'est vraiment pas une pratique courante d'inclure cette assignation dans un appel à `[`. Selon l'ordre des arguments de l'opérateur dans sa définition (voir la section Usage de sa [fiche d'aide](https://rdatatable.gitlab.io/data.table/reference/data.table.html)), la première valeur fournie après `[` est assignée à l'argument `i` et la deuxième à l'argument `j` si elles ne sont pas explicitement assignées à un nom d'argument (et si aucune valeur fournie en troisième position ou plus loin n'est assignée à `i` ou `j`, selon les [règles d'assignation implicite de valeurs aux arguments](https://stt4230.rbind.io/introduction/base_r/#comment-sont-interpr%C3%A9t%C3%A9es-les-valeurs-darguments-non-assign%C3%A9es-%C3%A0-un-nom) présentée dans les notes sur les concepts de base en R).
+Dans les commandes suivantes, je vais omettre l'assignation explicite à l'argument `i` puisque ce n'est vraiment pas une pratique courante d'inclure cette assignation dans un appel à `[`. Selon l'ordre des arguments de l'opérateur dans sa définition (voir la section Usage de sa [fiche d'aide](https://rdatatable.gitlab.io/data.table/reference/data.table.html)), la première valeur fournie après `[` est assignée à l'argument `i` et la deuxième à l'argument `j` si elles ne sont pas explicitement assignées à un nom d'argument (et si aucune valeur fournie en troisième position ou plus loin n'est assignée à `i` ou `j`, selon les [règles d'assignation implicite de valeurs aux arguments](https://stt4230.rbind.io/introduction/base_r/#%C3%A9criture-dun-appel-%C3%A0-une-fonction) présentée dans les notes sur les concepts de base en R).
 
 
 Le package `data.table` offre une [méthode pour la fonction `na.omit`](https://rdatatable.gitlab.io/data.table/reference/na.omit.data.table.html) spécifique aux data tables.
 
 ```{r}
-na.omit(dataEx_dt[lanceur == "Kim"])
+na.omit(data_ex_dt[lanceur == "Kim"])
 ```
 
-La sélection de variables dans un data table s'effectue en fournissant une valeur à l'argument `j`. Par exemple, nous pouvons sélectionner les variables `de1` et `de2` de `dataEx_dt` comme suit (commande non évaluée),
+La sélection de variables dans un data table s'effectue en fournissant une valeur à l'argument `j`. Par exemple, nous pouvons sélectionner les variables `de1` et `de2` de `data_ex_dt` comme suit (commande non évaluée),
 
 ```{r eval = FALSE}
-na.omit(dataEx_dt[lanceur == "Kim", .(de1, de2)])
+na.omit(data_ex_dt[lanceur == "Kim", .(de1, de2)])
 ```
 
 ou encore omettre la variable `lanceur`, comme suit.
 
 ```{r}
-na.omit(dataEx_dt[lanceur == "Kim", ! c("lanceur")])
+na.omit(data_ex_dt[lanceur == "Kim", !c("lanceur")])
 ```
+
+Remarquons que l'omission de variables s'indique avec l'opérateur `!` avec `data.table`, plutôt qu'avec `-`.
 
 
 ## Combinaison de données
 
-Combiner des données signifie de mettre en commun deux jeux de données ou plus. Ils peuvent être mis en commun par une simple concaténation, c'est-à-dire une mise bout à bout, de lignes ou de colonnes. Ils peuvent aussi être fusionné par association en tenant compte des valeurs prises par des variables communes aux jeux de données.
+Combiner des données signifie de mettre en commun deux jeux de données ou plus. Ils peuvent être mis en commun par une simple concaténation, c'est-à-dire une mise bout à bout, de lignes ou de colonnes. Ils peuvent aussi être fusionnés par association en tenant compte des valeurs prises par des variables communes aux jeux de données.
 
 
 ### Concaténation d'observations (lignes) - Fonction `rbind`
 
-Supposons que nous avons en main deux jeux de données contenant différentes observations pour les mêmes variables. Par exemple, en plus du data frame `dataEx`, disons que nous avons les observations supplémentaires suivantes.
+Supposons que nous avons en main deux jeux de données contenant différentes observations pour les mêmes variables. Par exemple, en plus du data frame `data_ex`, disons que nous avons les observations supplémentaires suivantes.
 
 ```{r}
 supp <- data.frame(de1 = c(2, 5), lanceur = c("Luc", "Kim"), de2 = c(5, 6))
 supp
 ```
 
-Pour concaténer les jeux de données `dataEx` et `supp` en un seul jeu de données, nous pourrions utiliser la [fonction `rbind`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/cbind.html) comme suit :
+Pour concaténer les jeux de données `data_ex` et `supp` en un seul jeu de données, nous pourrions utiliser la [fonction `rbind`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/cbind.html) comme suit\ :
 
 ```{r rbind}
-rbind(dataEx, supp)
+rbind(data_ex, supp)
 ```
 
 Remarquons que `rbind` a su mettre dans les mêmes colonnes les observations des variables portant les mêmes noms, même si elles n'étaient pas dans le même ordre dans les deux jeux de données à combiner.
 
-Il serait maintenant judicieux d'assigner cette concaténation à un nom afin de conserver le résultat obtenu dans un objet. Si nous assignions cet appel à `rbind` au nom `dataEx`, le jeu de données `dataEx` d'origine serait remplacé par le résultat de la concaténation. Nous pourrions aussi créer un nouvel objet pour stocker le résultat. 
+Il serait maintenant judicieux d'assigner cette concaténation à un nom afin de conserver le résultat obtenu dans un objet. Si nous assignions cet appel à `rbind` au nom `data_ex`, le jeu de données `data_ex` d'origine serait remplacé par le résultat de la concaténation. Nous pourrions aussi créer un nouvel objet pour stocker le résultat. 
 
 
 ### Concaténation de variables (colonnes) - Fonction `cbind` ou `data.table`
@@ -861,31 +948,31 @@ Il serait maintenant judicieux d'assigner cette concaténation à un nom afin de
 Lorsque nous avons ajouté des variables à un jeu de données dans la section précédente, nous avons réalisé une forme de concaténation de jeux de données en colonnes. Voici une copie d'un exemple réalisé.
 
 ```{r eval = FALSE}
-cars2 <- data.frame(cars2, dist_m = cars2$dist * 0.3048)
+cars <- data.frame(cars, dist_m = cars$dist * 0.3048)
 ```
 
 Dans cette forme de concaténation, le deuxième jeu de données fusionné est constitué d'une seule variable, stockée dans un vecteur, et le résultat de la concaténation remplace le premier jeu de données fusionné.
 
 La concaténation de variables peut être plus générale que ça. Nous pourrions concaténer deux jeux de données contenant chacun plus d'une variable et stocker le résultat de la concaténation dans un nouvel objet.
 
-Par exemple, disons que nous avons un jeu de données contenant des informations sur les lanceurs de dés du jeu de données `dataEx`.
+Par exemple, disons que nous avons un jeu de données contenant des informations sur les lanceurs de dés du jeu de données `data_ex`.
 
 ```{r}
-dataExLanceurs <- data.frame(
+data_ex_lanceurs <- data.frame(
   lateralite = rep(c("gaucher", "droitier"), each = 5),
   age = rep(c(22, 51), each = 5)
 )
-dataExLanceurs
+data_ex_lanceurs
 ```
 
-Pour concaténer en colonnes les jeux de données `dataEx` et `dataExLanceurs`, nous pourrions utiliser la [fonction `cbind`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/cbind.html) ou `data.frame` comme suit.
+Pour concaténer en colonnes les jeux de données `data_ex` et `data_ex_lanceurs`, nous pourrions utiliser la [fonction `cbind`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/cbind.html) ou `data.frame` comme suit.
 
 ```{r cbind, eval = FALSE}
-cbind(dataEx, dataExLanceurs)
+cbind(data_ex, data_ex_lanceurs)
 ```
 ```{r data.frame}
 # ou encore
-data.frame(dataEx, dataExLanceurs)
+data.frame(data_ex, data_ex_lanceurs)
 ```
 
 Le résultat de la concaténation pourrait être assigné à un nom d'objet R existant ou à un nouveau nom, créant du coup un nouvel objet.
@@ -893,11 +980,11 @@ Le résultat de la concaténation pourrait être assigné à un nom d'objet R ex
 
 ### Fusion par association - Fonction `merge`
 
-Une concaténation de variables crée un jeu de données utile seulement si les valeurs sur une même ligne réfèrent toutes à un même individu (ou unité statistique) et les valeurs sur une même colonne à une même variable. Par exemple, le résultat que nous venons d'obtenir nous porte à croire que Luc est gaucher et qu'il a 22 ans, et que Kim est droitière et a 51 ans. Mais rien dans le jeu de données `dataExLanceurs` ne dit à quels lanceurs correspondent les caractéristiques. Et la ligne 3 de ce jeu de données est surprenante. Le nom du lanceur est manquant, mais sa latéralité et son âge sont connus.
+Une concaténation de variables crée un jeu de données utile seulement si les valeurs sur une même ligne réfèrent toutes à un même individu (ou unité statistique) et les valeurs sur une même colonne à une même variable. Par exemple, le résultat que nous venons d'obtenir nous porte à croire que Luc est gaucher et qu'il a 22 ans, et que Kim est droitière et a 51 ans. Mais rien dans le jeu de données `data_ex_lanceurs` ne dit à quels lanceurs correspondent les caractéristiques. Et la ligne 3 de ce jeu de données est surprenante. Le nom du lanceur est manquant, mais sa latéralité et son âge sont connus.
 
 Avec une fusion par concaténation de variables, les risques d'erreurs sont présents. Il est plus prudent de fusionner des jeux de données en spécifiant par rapport à quelles variables établir les correspondances entre les lignes des deux jeux de données. Appelons ce type de combinaison de données jointure ou fusion par association. Une telle fusion peut s'effectuer en R avec la [fonction `merge`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/merge.html).
 
-Dans l'exemple précédent, nous aurions préféré fusionner le jeu de données `dataEx` au jeu de données suivant.
+Dans l'exemple précédent, nous aurions préféré fusionner le jeu de données `data_ex` au jeu de données suivant.
 
 ```{r}
 lanceurs <- data.frame(
@@ -910,10 +997,14 @@ lanceurs
 
 Ce jeu de données indique clairement à quel lanceur sont associées les différentes caractéristiques.
 
-Une fusion par association selon la valeur de la variable identifiant le lanceur entre les data frames `dataEx` et `lanceurs` peut s'effectuer comme suit.
+Une fusion par association selon la valeur de la variable identifiant le lanceur entre les data frames `data_ex` et `lanceurs` peut s'effectuer comme suit.
 
 ```{r merge}
-merge(x = dataEx, y = lanceurs, by.x = "lanceur", by.y = "nom", all = TRUE, sort = FALSE)
+merge(
+  x = data_ex, y = lanceurs, 
+  by.x = "lanceur", by.y = "nom", 
+  all = TRUE, sort = FALSE
+)
 ```
 
 Ici, étant donné que la variable selon laquelle établir les correspondances ne porte pas le même nom dans les deux jeux de données, nous avons dû spécifier les arguments `by.x` et `by.y`. Ces arguments prennent comme valeur un vecteur contenant les noms des variables d'association dans le jeu de données fourni en entrée à l'argument `x` pour `by.x` et `y` pour `by.y`. Lorsque les variables d'association portent le même nom partout, seul l'argument `by` a besoin d'être spécifié. Si aucune valeur n'est fournie aux arguments `by.x` et `by.y` ou `by`, les variables utilisées pour associer les lignes sont celles portant le même nom dans les deux jeux de données.
@@ -928,21 +1019,21 @@ L'argument `all` permet quant à lui de spécifier à `merge` quelles observatio
 Le package `dplyr` propose la [fonction `bind_rows`](https://dplyr.tidyverse.org/reference/bind.html) en remplacement de `rbind` et [`bind_cols`](https://dplyr.tidyverse.org/reference/bind.html) en remplacement de `cbind`. Une capacité intéressante de `bind_rows` est d'arriver à concaténer en lignes des jeux de données ne comportant pas toutes les mêmes variables. Des valeurs manquantes sont ajoutées dans les colonnes des variables non communes aux deux jeux de données.
 
 ```{r}
-supp2 <- data.frame(supp, lateralite = c("gaucher", "droitier"))
-supp2
-bind_rows(dataEx, supp2)
+supp_2 <- data.frame(supp, lateralite = c("gaucher", "droitier"))
+supp_2
+bind_rows(data_ex, supp_2)
 ```
 
 Le fonction `bind_rows` peut aussi ajouter une colonne dans le résultat de la concaténation pour identifier la provenance des lignes grâce à son argument `.id`. 
 
 ```{r}
-bind_rows(jeu1 = dataEx, jeu2 = supp2, .id = "origine")
+bind_rows(jeu1 = data_ex, jeu2 = supp_2, .id = "origine")
 ```
 
-De plus, au lieu d'offrir une seule fonction capable d'effectuer plusieurs types de fusions par association, le package `dplyr` comporte plusieurs [fonctions de jointure](https://dplyr.tidyverse.org/reference/join.html) effectuant chancunes un seul type de jointure, identifié par le nom de la fonction : `inner_join`, `full_join`, `left_join`, `right_join`, etc. L'exemple de fusion par association effectué avec `merge` se reproduit comme suit avec une fonction de `dplyr`.
+De plus, au lieu d'offrir une seule fonction capable d'effectuer plusieurs types de fusions par association, le package `dplyr` comporte plusieurs [fonctions de jointure](https://dplyr.tidyverse.org/reference/join.html) effectuant chacune un seul type de jointure, identifié par le nom de la fonction\ : `inner_join`, `full_join`, `left_join`, `right_join`, etc. L'exemple de fusion par association effectué avec `merge` se reproduit comme suit avec une fonction de `dplyr`.
 
 ```{r}
-full_join(x = dataEx, y = lanceurs, by = c("lanceur" = "nom"))
+full_join(x = data_ex, y = lanceurs, by = c("lanceur" = "nom"))
 ```
 
 Contrairement à `merge`, les fonctions de jointure de `dplyr` ne modifient aucunement l'ordre des variables et l'ordre des observations. Ainsi, la ou les variables d'association ne sont pas placées au début et les observations avec des valeurs d'association manquantes ne sont pas placées à la fin dans le jeu de données produit en sortie.
@@ -950,18 +1041,21 @@ Contrairement à `merge`, les fonctions de jointure de `dplyr` ne modifient aucu
 
 ### Fonctions `rbindlist` et `merge` du package `data.table`
 
-Le package `data.table` contient la [fonction `rbindlist`](https://rdatatable.gitlab.io/data.table/reference/rbindlist.html), qui est une solution de rechange à `rbind` du R de base ou `bind_rows` de `dplyr`. Elle a les mêmes capacité que cette dernière.
+Le package `data.table` contient la [fonction `rbindlist`](https://rdatatable.gitlab.io/data.table/reference/rbindlist.html), qui est une solution de rechange à `rbind` du R de base ou `bind_rows` de `dplyr`. Elle a les mêmes capacités que cette dernière.
 
 ```{r}
-rbindlist(list(jeu1 = dataEx, jeu2 = supp2), fill = TRUE, idcol = "origine")
+rbindlist(list(jeu1 = data_ex, jeu2 = supp_2), fill = TRUE, idcol = "origine")
 ```
 
 Le package `data.table` comporte aussi une [méthode pour la fonction `merge`](https://rdatatable.gitlab.io/data.table/reference/merge.html) spécifique aux data tables qui s'utilise de la même façon que la méthode `merge` pour data frames (celle dont nous avons parlé précédemment). 
 
 ```{r}
 lanceurs_dt <- as.data.table(lanceurs)
-merge(x = dataEx_dt, y = lanceurs_dt, by.x = "lanceur", by.y = "nom", 
-      all = TRUE, sort = FALSE)
+merge(
+  x = data_ex_dt, y = lanceurs_dt, 
+  by.x = "lanceur", by.y = "nom", 
+  all = TRUE, sort = FALSE
+)
 ```
 
 Il est aussi possible de fusionner des données avec l'opérateur `[` du package `data.table` et son argument `on`, mais cette fonctionnalité ne sera pas illustrée ici.
@@ -972,11 +1066,11 @@ Il existe différentes fonctions en R pour ordonner les éléments d'un objet.
 
 ### Fonction `rev`
 
-Une des fonctions les plus simples pour effectuer un  ordonnancement d'éléments est la [fonction `rev`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/rev.html), qui renverse l’ordre des éléments d'un vecteur (ou un facteur).
+Une des fonctions les plus simples pour effectuer un  ordonnancement d'éléments est la [fonction `rev`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/rev.html), qui renverse l'ordre des éléments d'un vecteur (ou un facteur).
 
 ```{r rev}
-dataEx$de1
-rev(dataEx$de1)
+data_ex$de1
+rev(data_ex$de1)
 ```
 
 ### Fonction `sort`
@@ -984,13 +1078,13 @@ rev(dataEx$de1)
 Pour effectuer l'ordonnancement des éléments d'un vecteur (ou un facteur) selon les valeurs des données en éléments, de façon à replacer les éléments en ordre croissant ou décroissant de valeur, il faut plutôt utiliser la [fonction `sort`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/sort.html). Par exemple, ordonnons des valeurs numériques en ordre décroissant.
 
 ```{r}
-dataEx$de1
-sort(dataEx$de1, decreasing = TRUE)
+data_ex$de1
+sort(data_ex$de1, decreasing = TRUE)
 ```
 
 Par défaut, l'ordre croissant est retourné. Alors pour obtenir un ordre décroissant, il faut spécifier `decreasing = TRUE`.
 
-Nous avons vu dans les notes sur les [calculs de base en R](https://stt4230.rbind.io/calculs/calculs_base_r/#operateurs-de-comparaison) comment connaître l'ordre utilisé par notre session R pour classer des caractères. Rappeleons qu'il suffit de fournir à la fonction `sort` un vecteur contenant tous les caractères potentiels, par exemple.
+Nous avons vu dans les [notes sur les calculs mathématiques en R](https://stt4230.rbind.io/calculs/calculs_math_r/#op%C3%A9rateurs-de-comparaison) comment connaître l'ordre utilisé par notre session R pour classer des caractères. Rappelons qu'il suffit de fournir à la fonction `sort` un vecteur contenant tous les caractères potentiels, par exemple.
 
 ```{r eval = FALSE}
 caracteres_speciaux <- 
@@ -1005,91 +1099,110 @@ paste(catacteres_ordonnes, collapse = "")
 Dans cette commande, l'appel à la fonction `paste` sert uniquement à raccourcir la sortie en mettant bout à bout les caractères ordonnés dans une seule chaîne de caractères. J'obtiens le résultat suivant, qui sera peut-être différent sur votre ordinateur si vous n'avez pas les mêmes paramètres régionaux que moi.
 
 ```
-"'-!\"#$%&()*,./:;?@[\\]^_{|}~+<=>0123456789aAàÀâÂbBcCçÇdDeEéÉèÈêÊëËfFgGhHiIîÎïÏjJkKlLmM
+"'-!\"#$%&()*,./:;?@[\]^_{|}~+<=>0123456789aAàÀâÂbBcCçÇdDeEéÉèÈêÊëËfFgGhHiIîÎïÏjJkKlLmM
 nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ"
 ```
 
-Ordonnons en ordre alphabétique croissant les noms des lanceurs dans le jeu de données `dataEx`.
+Ordonnons en ordre alphabétique croissant les noms des lanceurs dans le jeu de données `data_ex`.
 
 ```{r}
-dataEx$lanceur
+data_ex$lanceur
 ```
 
 
 ```{r}
-sort(dataEx$lanceur)
+sort(data_ex$lanceur)
 ```
 
 Remarquons que la valeur manquante est omise dans la sortie. C'est le comportement par défaut de la fonction `sort`. Pour forcer `sort` à inclure les valeurs manquantes dans la sortie, il faut lui dire où les placer avec l'argument `na.last` comme suit.
 
 ```{r}
-sort(dataEx$lanceur, na.last = TRUE)
+sort(data_ex$lanceur, na.last = TRUE)
 ```
 
+
+### Opérateur `[`
+
+L'[opérateur d'indiçage `[`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Extract.html) a pratiquement toujours été utilisé jusqu'à maintenant comme un outil d'extraction d'éléments. Dans les [notes sur les structures de données](https://stt4230.rbind.io/manipulation_donnees/structures_r/#op%C3%A9rateurs-dindi%C3%A7age), il a été mentionné que cet opérateur acceptait différents types de données en entrée pour identifier les éléments à extraire\ : entiers positifs, entiers négatifs, chaînes de caractères ou valeurs logiques. Deux de ces types de données permettent également de réordonner les éléments\ : les entiers positifs et les chaînes de caractères.
+
+Par exemple, pour modifier l'ordre des colonnes du data frame `data_ex` afin de placer la colonne nommée `lanceur` en première position plutôt qu'en dernière, il suffirait d'utiliser l'opérateur `[` et de donner comme valeur au deuxième argument un vecteur contenant les noms des colonnes dans l'ordre désiré, comme dans cet exemple.
+
+```{r}
+# Data frame d'origine
+data_ex
+# Data frame avec colonnes réordonnées
+data_ex[, c("lanceur", "de1", "de2")]
+```
+
+Ce réordonnancement des colonnes aurait aussi pu être effectué en fournissant un vecteur de nombres entiers, comme suit.
+```{r}
+data_ex[, c(3, 1, 2)]
+```
+
+Cette instruction a dit à R de placer la colonne qui est à l'origine en position 3 à la position 1 (car le nombre 3 est en position 1 dans le vecteur fourni au deuxième argument de `[`), la colonne à l'origine en position 1 à la position 2 et finalement celle à l'origine en position 2 à la position 3. Nous pouvons appeler le vecteur `c(3, 1, 2)` de la commande précédente une permutation des données.
+
+Une permutation fournie comme premier argument à `[` (avant la virgule) ordonne les lignes et une permutation fournie comme deuxième argument à `[` (après la virgule, comme dans l'exemple précédent) ordonne les colonnes. Les lignes et les colonnes peuvent être ordonner simultanément. Par exemple, pour déplacer en une commande la dernière observation du data frame `data_ex` en première position et la variable `lanceur` en première position, nous pouvons procéder ainsi.
+
+```{r}
+data_ex[c(nrow(data_ex), 1:(nrow(data_ex) - 1)), c("lanceur", "de1", "de2")]
+```
+
+Notons que l'opérateur `[` permet aussi de réordonner les éléments d'un vecteur ou d'une liste, ou encore les lignes ou les colonnes d'une matrice. Pour terminer, notons également que les opérateurs d'indiçage `[[` et `$` ne permettent pas de réordonner des éléments, car ils servent à extraire un seul élément.
 
 
 ### Fonction `order`
 
 Pour modifier l'ordre des observations ou des variables dans un jeu de données R, la [fonction `order`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/order.html) est utile. Elle permet d'obtenir un vecteur d'indice des observations dans l'ordre désiré.
 
-Par exemple, pour ordonner les observations du jeu de données `dataEx` en ordre croissant de la valeur de la variable `de1`, 
+Par exemple, pour ordonner les observations du jeu de données `data_ex` en ordre croissant de la valeur de la variable `de1`, 
 
 ```{r}
-dataEx$de1
+data_ex$de1
 ```
 
-nous devons d'abord obtenir le vecteur d'indices suivant avec la fonction `order` :
+nous devons d'abord obtenir le vecteur d'indices suivant avec la fonction `order`\ :
 
 ```{r}
-permutation <- order(dataEx$de1)
+permutation <- order(data_ex$de1)
 permutation
 ```
 
-Ce vecteur s'interprète comme suit : la plus petite valeur de `dataEx$de1` se trouve en position 4 (valeur 1), les deuxièmes plus petites (valeur 2 qui revient 2 fois) se trouvent dans les positions 1 et 5, ..., la plus grande valeur (6) se trouve en position 8. Ensuite, il suffit de fournir ce vecteur à l'opérateur d'indiçage `[` pour ordonner les lignes de `dataEx`.
+Ce vecteur s'interprète comme suit\ : la plus petite valeur de `data_ex$de1` se trouve en position 4 (valeur 1), les deuxièmes plus petites (valeur 2 qui revient 2 fois) se trouvent dans les positions 1 et 5, ..., la plus grande valeur (6) se trouve en position 8. Ensuite, il suffit de fournir ce vecteur au premier argument de l'opérateur d'indiçage `[` pour ordonner les lignes de `data_ex`. 
 
 ```{r}
-dataEx[permutation, ]
+data_ex[permutation, ]
 ```
 
-Notons que nous aurions pu jumeler l'appel à `order` à l'appel à `[` comme suit :
+Notons que nous aurions pu jumeler l'appel à `order` à l'appel à `[` comme suit\ :
 
 ```{r eval = FALSE}
-dataEx[order(dataEx$de1), ]
+data_ex[order(data_ex$de1), ]
 ```
 
-La fonction `order` accepte plus d'un vecteur de valeurs pour déterminer le nouvel ordre. Par exemple, la commande suivante permet d'ordonner les observations de `dataEx` en ordre croissant de valeur de la variable `de1`, en résolvant les égalités en `de1` en considérant l'ordre alphabétique croissant de la variable `lanceur`.
+La fonction `order` accepte plus d'un vecteur de valeurs pour déterminer le nouvel ordre. Par exemple, la commande suivante permet d'ordonner les observations de `data_ex` en ordre croissant de valeur de la variable `de1`, en résolvant les égalités en `de1` en considérant l'ordre alphabétique croissant de la variable `lanceur`.
 
 ```{r order}
-dataEx[order(dataEx$de1, dataEx$lanceur), ]
+data_ex[order(data_ex$de1, data_ex$lanceur), ]
 ```
 
-La fonction `order` a un argument `decreasing`, tout comme `sort`, pour demander un ordre décroissant plutôt que croissant. Par exemple, pour modifier l'ordre des colonnes de `dataEx` selon l'ordre alphabétique décroissant des noms de colonnes, nous pourrions procéder comme suit.
+La fonction `order` a un argument `decreasing`, tout comme `sort`, pour demander un ordre décroissant plutôt que croissant. Par exemple, pour modifier l'ordre des colonnes de `data_ex` selon l'ordre alphabétique décroissant des noms de colonnes, nous pourrions procéder comme suit.
 
 ```{r}
-dataEx[, order(names(dataEx), decreasing = TRUE)]
+data_ex[, order(names(data_ex), decreasing = TRUE)]
 ```
 
-Ainsi, la fonction `order` fournie la permutation selon l'ordre voulue, mais c'est l'opérateur `[` qui effectue la tâche d'ordonner des lignes ou des colonnes. Une permutation fournie comme premier argument à `[` (avant la virgule) ordonne les lignes et une permutation fournie comme deuxième argument à `[` (après la virgule) ordonne les colonnes. Les lignes et les colonnes peuvent être ordonner simultanément.
-
-Nous pourrions fournir à l'opérateur `[` des permutations arbitraires. Par exemple, pour déplacer en une commande la dernière observation du data frame `dataEx` en première position et la variable `lanceur` en premier position nous pouvons procéder ainsi.
-
-```{r}
-dataEx[c(nrow(dataEx), 1:(nrow(dataEx) - 1)), c("lanceur", "de1", "de2")]
-```
-
-Notons finalement que ce genre de manipulation fonctionne aussi avec une matrice plutôt qu'un data frame.
-
+Ainsi, la fonction `order` fournie la permutation selon l'ordre voulue, mais c'est l'opérateur `[` qui effectue la tâche de réordonner des lignes ou des colonnes.
 
 ### Fonction `arrange` du package `dplyr`
 
 Si l'utilisation de la fonction `order` vous paraît peu conviviale, vous pouvez vous tourner vers la [fonction `arrange` du package `dplyr`](https://dplyr.tidyverse.org/reference/arrange.html) pour l'ordonnancement d'observations dans un data frame. Voici un exemple d'utilisation de cette fonction, produisant presque le même résultat que la commande suivante.
 
 ```{r}
-dataEx[order(dataEx$de1, dataEx$lanceur), ]
+data_ex[order(data_ex$de1, data_ex$lanceur), ]
 ```
 
 ```{r}
-arrange(dataEx, de1, lanceur)
+arrange(data_ex, de1, lanceur)
 ```
 
 La seule différence entre les deux sorties est les noms des lignes. La fonction `arrange` renomme les lignes 1 au nombre total de lignes.
@@ -1099,45 +1212,45 @@ Dans l'appel à la fonction `arrange`, il suffit de fournir d'abord le data fram
 Avec `arrange`, pour demander un ordre décroissant par rapport à une certaine variable, il faut envelopper le nom de la variable par un appel à la [fonction `desc`](https://dplyr.tidyverse.org/reference/desc.html) comme dans cet exemple.
 
 ```{r}
-arrange(dataEx, desc(de1), lanceur)
+arrange(data_ex, desc(de1), lanceur)
 ```
 
-La fonction `arrange` s'avère donc plus souple que `order`, qui applique le même type d'ordre (ascendant ou descendant) à toutes les variables. Toutefois, pour des variables numériques, le type d'ordre peut toujours être inversé en transformant la variable par elle-même multiplitée par -1.
+La fonction `arrange` s'avère donc plus souple que `order`, qui applique le même type d'ordre (ascendant ou descendant) à toutes les variables. Toutefois, pour des variables numériques, le type d'ordre peut toujours être inversé en transformant la variable par elle-même multipliée par -1.
 
 ```{r}
-dataEx[order(- dataEx$de1, dataEx$lanceur), ]
+data_ex[order(-data_ex$de1, data_ex$lanceur), ]
 ```
 
-Notons que la fonction `arrange` permet seulement d'ordonner les lignes d'un data frame (ou d'un [tibble](https://stt4230.rbind.io/manipulation_donnees/structures_r/#le-tibble)), alors que la fonction `order` utilisée avec l'opérateur `[` permet en fait d'ordonner les éléments de n'importe quel type de structure de données et selon n'importe laquelle de ses dimensions.
+Notons que la fonction `arrange` permet seulement d'ordonner les lignes d'un data frame (ou d'un [tibble](https://stt4230.rbind.io/manipulation_donnees/structures_r/#tibbles)), alors que la fonction `order` utilisée avec l'opérateur `[` permet en fait d'ordonner les éléments de n'importe quel type de structure de données et selon n'importe laquelle de ses dimensions.
 
 
 ### Fonctions `setorder` et `setcolorder` du package `data.table`
 
-Les fonctions [`setorder`](https://rdatatable.gitlab.io/data.table/reference/setorder.html) et [`setcolorder`](https://rdatatable.gitlab.io/data.table/reference/setcolorder.html) du package `data.table` permettent d'ordonner, respectivement, les lignes et les colonnes d'un data table. Tout comme l'opérateur `:=`, ces fonctions modifient un data table par référence (donc « sur place »), sans créer de copie.
+Les fonctions [`setorder`](https://rdatatable.gitlab.io/data.table/reference/setorder.html) et [`setcolorder`](https://rdatatable.gitlab.io/data.table/reference/setcolorder.html) du package `data.table` permettent d'ordonner, respectivement, les lignes et les colonnes d'un data table. Tout comme l'opérateur `:=`, ces fonctions modifient un data table par référence (donc «\ sur place\ »), sans créer de copie.
 
-Par exemple, reprenons la version data table du jeu de données `dataEx`.
+Par exemple, reprenons la version data table du jeu de données `data_ex`.
 
 ```{r}
-dataEx_dt
+data_ex_dt
 ```
 
 Réordonnons ses lignes en ordre décroissant de valeur de la variable `de1` et en ordre alphabétique ascendant de valeur de la variable `lanceur` en cas d'égalité. Un type d'ordre descendant pour une variable s'obtient en précédent son nom de l'opérateur `-` dans l'appel à la fonction `setorder`. Mis à part la façon de demander un ordre descendant qui diffère, la fonction `setorder` s'utilise comme la fonction `arrange` de `dplyr`.
 
 ```{r}
-setorder(dataEx_dt, - de1, lanceur)
+setorder(data_ex_dt, -de1, lanceur)
 ```
 
-Remarquons que cette commande ne retourne rien. Elle a toutefois eu un effet (que nous pourrions qualifier d'effet de bord). Elle a modifié le data table `dataEx_dt`.
+Remarquons que cette commande ne retourne rien. Elle a toutefois eu un effet (que nous pourrions qualifier d'effet de bord). Elle a modifié le data table `data_ex_dt`.
 
 ```{r}
-dataEx_dt
+data_ex_dt
 ```
 
 Pour changer l'ordre des variables d'un data table par référence, il suffit de fournir à la fonction `setcolorder` ce data table, puis un vecteur des noms de variables dans l'ordre souhaité.
 
 ```{r}
-setcolorder(dataEx_dt,  c("lanceur", "de1", "de2"))
-dataEx_dt
+setcolorder(data_ex_dt,  c("lanceur", "de1", "de2"))
+data_ex_dt
 ```
 
 
@@ -1147,17 +1260,17 @@ La mise en forme de jeux de données est définie ici, de façon générale, par
 
 Par exemple, en statistique, les variables sont habituellement positionnées en colonnes et les observations en lignes dans un tableau de données. Que faire avec un tableau de données dans lequel les variables sont en lignes et les observations en colonnes ? Il serait judicieux de transposer le tableau (inverser les lignes et les colonnes), afin de retomber sur une mise en forme plus standard.
 
-Toutefois, l'expression mise en forme de jeux de données réfère le plus souvent en statistique à la distinction entre les mises en forme «&nbsp;large&nbsp;» et «&nbsp;longue&nbsp;», qui sont définies un peu plus bas.
+Toutefois, l'expression mise en forme de jeux de données réfère le plus souvent en statistique à la distinction entre les mises en forme «\ large\ » et «\ longue\ », qui sont définies un peu plus bas.
 
 ### Transposition avec la fonction `t`
 
 La [fonction `t`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/t.html) sert à transposer (inverser les lignes et les colonnes) une matrice ou un data frame.
 
 ```{r t}
-dataEx
-dataEx_transpo <- t(dataEx)
-dataEx_transpo
-str(dataEx_transpo)
+data_ex
+data_ex_transpo <- t(data_ex)
+data_ex_transpo
+str(data_ex_transpo)
 ```
 
 Cependant, la fonction `t` est en fait conçue pour effectuer des calculs d'algèbre linéaire et elle retourne toujours une matrice.
@@ -1166,32 +1279,30 @@ Cependant, la fonction `t` est en fait conçue pour effectuer des calculs d'alg�
 
 Tout d'abord, introduisons un peu de terminologie informelle qui nous aidera à décrire les mises en forme.
 
-- Individus (ou unités statistiques, ou sujets) :
+- Individus (ou unités statistiques, ou sujets)\ :
     + unités sur lesquelles des mesures sont prises;
     + possèdent des identifiants.
 
-- Variables :
+- Variables\ :
     + ce qui est mesuré;
     + possèdent aussi des identifiants.
 
-- Valeurs :
+- Valeurs\ :
     + mesures obtenues;
     + chaque valeur est associée à un individu et une variable.
 
-#### Mise en forme large (en anglais *wide*) :
+#### Mise en forme large (en anglais *wide*)\ :
 
 \mbox{}
 
-Lorsqu'un jeu de données comprend une seule ligne par individu et que les différentes variables mesurées se trouvent dans différentes colonnes, la mise en forme du jeu de données est dite «&nbsp;large&nbsp;».
+Lorsqu'un jeu de données comprend une seule ligne par individu et que les différentes variables mesurées se trouvent dans différentes colonnes, la mise en forme du jeu de données est dite «\ large\ ».
 
 ##### Exemple de notes d'étudiants - Mise en forme large
 
 \mbox{}
 
 - Individus = étudiants (au nombre de 4),
-- Variables = notes pour deux travaux pratiques : `TP1` et `TP2`
-
-&nbsp;
+- Variables = notes pour deux travaux pratiques\ : `TP1` et `TP2`
 
 ```{r}
 notes_large <- data.frame(
@@ -1205,11 +1316,11 @@ notes_large
 ```
 
 
-#### Mise en forme longue (en anglais *long*) :  
+#### Mise en forme longue (en anglais *long*)\ :  
 
 \mbox{}
 
-Si un jeu de données comporte plutôt plus d'une ligne par individu, sa mise en forme est dite «&nbsp;longue&nbsp;».
+Si un jeu de données comporte plutôt plus d'une ligne par individu, sa mise en forme est dite «\ longue\ ».
 
 ##### Exemple de notes d'étudiants - Mise en forme longue
 
@@ -1226,14 +1337,14 @@ notes_long <- data.frame(
 notes_long
 ```
 
-Le data frame `notes_long` contient exactement les mêmes données que celles dans le data frame `notes_large`, mais disposées différemment. Dans `notes_long`, il y a deux lignes par individu. Le tableau de mise en forme longue contient plus de lignes, donc est plus long, que le tableau de mise en forme large, d'où les qualificatifs «&nbsp;large&nbsp;» et «&nbsp;longue&nbsp;» pour les mises en forme.
+Le data frame `notes_long` contient exactement les mêmes données que celles dans le data frame `notes_large`, mais disposées différemment. Dans `notes_long`, il y a deux lignes par individu. Le tableau de mise en forme longue contient plus de lignes, donc est plus long, que le tableau de mise en forme large, d'où les qualificatifs «\ large\ » et «\ longue\ » pour les mises en forme.
 
 Dans un jeu de données avec une mise en forme longue, les mesures pour plus d'une variable sont combinées dans une même colonne. Cependant, il doit aussi nécessairement y avoir une ou des colonnes servant à identifier à quelle variable est associée chaque valeur (colonne `evaluation` dans l'exemple).
 
-Lors d'une analyse statistique de données stockées sous une mise en forme longue, l'analyste doit être vigilant. Il est important d'être conscient que certaines lignes concernent les mêmes individus, donc qu'il s'agit de *mesures répétées* sur les mêmes individus et non d’observations indépendantes.
+Lors d'une analyse statistique de données stockées sous une mise en forme longue, l'analyste doit être vigilant. Il est important d'être conscient que certaines lignes concernent les mêmes individus, donc qu'il s'agit de *mesures répétées* sur les mêmes individus et non d'observations indépendantes.
 
 
-#### Mise en forme intermédiaire :
+#### Mise en forme intermédiaire\ :
 
 \mbox{}
 
@@ -1246,11 +1357,11 @@ Il peut arriver qu'un jeu de données ait une mise en forme mi-large, mi-longue.
 - Individus = plants (au nombre de 3),
 - Variables = `Hauteur_Temps1`, `Hauteur_Temps2`, `Diametre_Temps1`, `Diametre_Temps2`
 
-##### Mise en forme large pure : une ligne par individu, une colonne par variable
+##### Mise en forme large pure\ : une ligne par individu, une colonne par variable
 
 \mbox{}
 
-Dimension de la sous-matrice contenant les valeurs : 3 x 4
+Dimension de la sous-matrice contenant les valeurs\ : 3 x 4
 
 ```{r}
 plants_large <- data.frame(
@@ -1266,11 +1377,11 @@ plants_large <- data.frame(
 plants_large
 ```
 
-##### Mise en forme intermédiaire : plus d'une ligne par individu, mais valeurs réparties dans plus d'une colonne
+##### Mise en forme intermédiaire\ : plus d'une ligne par individu, mais valeurs réparties dans plus d'une colonne
 
 \mbox{}
 
-Dimension de la sous-matrice contenant les valeurs : 6 x 2
+Dimension de la sous-matrice contenant les valeurs\ : 6 x 2
 
 ```{r}
 plants_inter <- data.frame(
@@ -1286,11 +1397,11 @@ plants_inter
 ```
 
 
-##### Mise en forme longue pure : toutes les valeurs sont empilées dans une seule colonne
+##### Mise en forme longue pure\ : toutes les valeurs sont empilées dans une seule colonne
 
 \mbox{}
 
-Dimension de la sous-matrice contenant les valeurs : 12 x 1
+Dimension de la sous-matrice contenant les valeurs\ : 12 x 1
 
 ```{r}
 plants_long <- data.frame(
@@ -1308,7 +1419,7 @@ plants_long
 ou encore
 
 ```{r}
-plants_long2 <- data.frame(
+plants_long_2 <- data.frame(
   Plant = rep(c("a", "b", "c"), times = 4),
   Variable = rep(
     c("Hauteur_Temps1", "Hauteur_Temps2", "Diametre_Temps1", "Diametre_Temps2"), 
@@ -1319,7 +1430,7 @@ plants_long2 <- data.frame(
 )
 ```
 ```{r}
-plants_long2
+plants_long_2
 ```
 
 
@@ -1353,17 +1464,17 @@ Le but de cet exemple était de montrer qu'il est utile en R de savoir convertir
 
 ### Fonctions `stack` et `unstack`
 
-Revenons maintenant au jeu de données `dataEx`. Celui-ci est sous une mise en forme large, car il contient une seule ligne par individu. Dans ce jeu de données, un individu est un lancer de dés.
+Revenons maintenant au jeu de données `data_ex`. Celui-ci est sous une mise en forme large, car il contient une seule ligne par individu. Dans ce jeu de données, un individu est un lancer de dés.
 
 ```{r}
-dataEx
+data_ex
 ```
 
 Il est possible de faire passer ce jeu de données à une mise en forme longue avec la [fonction `stack`](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/stack.html) comme suit. 
 
 ```{r}
-dataEx_long <- stack(dataEx)
-dataEx_long
+data_ex_long <- stack(data_ex)
+data_ex_long
 ```
 
 Cette fonction n'est pas très puissante. Elle n'a pas su traiter la colonne `lanceur` et l'a laissé tomber.
@@ -1371,11 +1482,11 @@ Cette fonction n'est pas très puissante. Elle n'a pas su traiter la colonne `la
 Nous pourrions réaliser la transformation inverse avec la [fonction `unstack`](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/stack.html), pour revenir à la mise en forme originale.
 
 ```{r}
-dataEx_large <- unstack(dataEx_long)
-dataEx_large
+data_ex_large <- unstack(data_ex_long)
+data_ex_large
 ```
 
-Les noms `stack` et `unstack` viennent du fait que pour passer d'une mise en forme large vers une mise en forme longue, des valeurs doivent être empilées (en anglais *stacked*) dans une même colonne, alors que pour réaliser la transformation inverse elles doivent être désempilées (en anglais *unstacked*).
+Les noms `stack` et `unstack` viennent du fait que pour passer d'une mise en forme large vers une mise en forme longue, des valeurs doivent être empilées (en anglais *stacked*) dans une même colonne, alors que pour réaliser la transformation inverse elles doivent être «\ désempilées\ » (en anglais *unstacked*).
 
 Voyons maintenant une autre fonction qui nous permettra de réaliser les mêmes transformations, sans mettre de côté la variable `lanceur`.
 
@@ -1384,64 +1495,62 @@ Voyons maintenant une autre fonction qui nous permettra de réaliser les mêmes 
 
 Le package `stats`, chargé en R par défaut, comprend une [fonction nommée `reshape`](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/reshape.html) dont l'utilité est de faire passer un jeu de donnée d'une mise en forme large vers une mise en forme longue, et aussi de réaliser la transformation inverse, d'une mise en forme longue vers une mise en forme large. Cette fonction est puissante, mais un peu difficile à utiliser, il faut l'avouer. Il est facile de se perdre dans ses nombreux arguments.
 
-#### Exemple de transformation vers une mise en forme longue :
+#### Exemple de transformation vers une mise en forme longue\ :
 
 \mbox{}
 
-Pour faire passer le data frame `dataEx` vers une mise en forme longue avec `reshape`, nous pouvons procéder comme suit.
-
-\newpage
+Pour faire passer le data frame `data_ex` vers une mise en forme longue avec `reshape`, nous pouvons procéder comme suit.
 
 ```{r}
-dataEx_long2 <- reshape(
-  data = dataEx, 
+data_ex_long_2 <- reshape(
+  data = data_ex, 
   direction = "long", 
   varying = c("de1", "de2"),
   v.names = "resultat"
 )
-dataEx_long2
+data_ex_long_2
 ```
 
-Il faut toujours fournir à la fonction `reshape` les arguments :
+Il faut toujours fournir à la fonction `reshape` les arguments\ :
 
-- `data` : le data frame dont la mise en forme est à transformer;
-- `direction` : la direction de la transformation, `"long"` pour une transformation vers une mise en forme longue, `"wide"` pour une transformation vers une mise en forme large.
+- `data`\ : le data frame dont la mise en forme est à transformer;
+- `direction`\ : la direction de la transformation, `"long"` pour une transformation vers une mise en forme longue, `"wide"` pour une transformation vers une mise en forme large.
 
-Lors d'une transformation vers une mise en forme longue, il faut aussi spécifier l'argument :
+Lors d'une transformation vers une mise en forme longue, il faut aussi spécifier l'argument\ :
 
-- `varying` : les noms ou les indices des colonnes dans le jeu de données d'origine (`data`) sous la mise en forme large contenant les valeurs à combiner dans des colonnes uniques sous la mise en forme longue.
+- `varying`\ : les noms ou les indices des colonnes dans le jeu de données d'origine (`data`) sous la mise en forme large contenant les valeurs à combiner dans des colonnes uniques sous la mise en forme longue.
 
-La fonction `reshape` va alors tenter de deviner le ou les noms à donner à cette ou ces nouvelles colonnes, mais il est préférable de lui spécifier ce ou ces noms avec l'argument :
+La fonction `reshape` va alors tenter de deviner le ou les noms à donner à cette ou ces nouvelles colonnes, mais il est préférable de lui spécifier ce ou ces noms avec l'argument\ :
 
-- `v.names` : nom(s) de la ou des colonnes dans la mise en forme longue où sont empilées les valeurs provenant de plusieurs colonnes dans la mise en forme large.
+- `v.names`\ : nom(s) de la ou des colonnes dans la mise en forme longue où sont empilées les valeurs provenant de plusieurs colonnes dans la mise en forme large.
 
-Par défaut, `reshape` a nommé `time` la colonne contenant les identifiants des variables dont les valeurs ont été empilées. Aussi, `reshape` a utilisé comme identifiants dans cette colonne les entiers allant de 1 jusqu'au nombre de variables spécifiées dans `varying`. Il est possible de contrôler cette colonne avec les arguments :
+Par défaut, `reshape` a nommé `time` la colonne contenant les identifiants des variables dont les valeurs ont été empilées. Aussi, `reshape` a utilisé comme identifiants dans cette colonne les entiers allant de 1 jusqu'au nombre de variables spécifiées dans `varying`. Il est possible de contrôler cette colonne avec les arguments\ :
 
-- `timevar` : nom de la colonne dans la mise en forme longue contenant, pour chaque ligne, l'identifiant de la variable de laquelle la valeur qui se trouve dans la colonne identifiée par `v.names` est une mesure (ou de laquelle les valeurs qui se trouvent dans les colonnes identifiées par `v.names` sont des mesures).
-- `times` : les valeurs d'identifiants à utiliser dans la colonne spécifiée par `timevar`.
+- `timevar`\ : nom de la colonne dans la mise en forme longue contenant, pour chaque ligne, l'identifiant de la variable de laquelle la valeur qui se trouve dans la colonne identifiée par `v.names` est une mesure (ou de laquelle les valeurs qui se trouvent dans les colonnes identifiées par `v.names` sont des mesures).
+- `times`\ : les valeurs d'identifiants à utiliser dans la colonne spécifiée par `timevar`.
 
-Les noms de ces arguments contiennent le mot `time` en référence à un cas classique de données pour lesquelles nous sommes susceptibles de vouloir modifier la mise en forme : des mesures répétées dans le temps.
+Les noms de ces arguments contiennent le mot `time` en référence à un cas classique de données pour lesquelles nous sommes susceptibles de vouloir modifier la mise en forme\ : des mesures répétées dans le temps.
 
 ```{r}
-dataEx_long2 <- reshape(
-  data = dataEx,
+data_ex_long_2 <- reshape(
+  data = data_ex,
   direction = "long",
   varying = c("de1", "de2"),
   v.names = "resultat",
   timevar = "de",
   times = c("de1", "de2")
 )
-dataEx_long2
+data_ex_long_2
 ```
 
-Sous une mise en forme longue, `reshape` inclut aussi toujours au moins une colonne pour contenir un identifiant des individus. Il nomme par défaut cette colonne `id` et utilise comme identifiants les entiers allant de 1 jusqu'au nombre de lignes dans le jeu de données d'origine (`data`) sous la mise en forme large. Pour contrôler cette colonne, il faut utiliser les arguments :
+Sous une mise en forme longue, `reshape` inclut aussi toujours au moins une colonne pour contenir un identifiant des individus. Il nomme par défaut cette colonne `id` et utilise comme identifiants les entiers allant de 1 jusqu'au nombre de lignes dans le jeu de données d'origine (`data`) sous la mise en forme large. Pour contrôler cette colonne, il faut utiliser les arguments\ :
 
-- `idvar` : nom(s) de la ou des colonnes pour identifier les individus sous la mise en forme longue.
-- `ids` : les valeurs d'identifiants à utiliser dans la ou les colonnes spécifiées par `idvar`.
+- `idvar`\ : nom(s) de la ou des colonnes pour identifier les individus;
+- `ids`\ : les valeurs d'identifiants à utiliser dans la ou les colonnes spécifiées par `idvar`.
 
 ```{r}
-dataEx_long2 <- reshape(
-  data = dataEx,
+data_ex_long_2 <- reshape(
+  data = data_ex,
   direction = "long",
   varying = c("de1", "de2"),
   v.names = "resultat",
@@ -1450,203 +1559,219 @@ dataEx_long2 <- reshape(
   idvar = "IDlancer",
   ids = paste0("l", 1:10)
 )
-dataEx_long2
+data_ex_long_2
 ```
 
 Dans le jeu de données de mise en forme longue obtenu en sortie de `reshape`, les données pour les variables (colonnes) ne contenant pas de mesures répétées ont simplement été recopiées autant de fois que nécessaire. Il serait possible de laisser tomber ces variables grâce à l'argument `drop`. Il serait aussi possible de contrôler les noms des lignes du data frame obtenu avec l'argument `new.row.names`.
 
-#### Exemple de transformation vers une mise en forme large :
+#### Exemple de transformation vers une mise en forme large\ :
 
 \mbox{}
 
 Lorsque nous avons obtenu un jeu de données avec la fonction `reshape`, il est toujours possible de retourner à la mise en forme d'origine simplement avec la commande
 
 ```{r}
-reshape(dataEx_long2)
+reshape(data_ex_long_2)
 ```
 
 en raison d'un attribut inséré par `reshape` dans sa sortie.
 
 ```{r}
-str(dataEx_long2)
+str(data_ex_long_2)
 ```
 
-Mais supposons que nous n'avons pas créé `dataEx_long2` avec la fonction `reshape` et que nous voulons transformer ce jeu de données vers une mise en forme large. Afin de réellement simuler une telle situation, nous allons effacer de `dataEx_long2` son attribut nommé `reshapeLong` comme suit.
+Mais supposons que nous n'avons pas créé `data_ex_long_2` avec la fonction `reshape` et que nous voulons transformer ce jeu de données vers une mise en forme large. Afin de réellement simuler une telle situation, nous allons effacer de `data_ex_long_2` son attribut nommé `reshapeLong` comme suit.
 
 ```{r}
-attr(dataEx_long2, "reshapeLong") <- NULL
-str(dataEx_long2)
+attr(data_ex_long_2, "reshapeLong") <- NULL
+str(data_ex_long_2)
 ```
 
 Nous pourrions procéder ainsi pour effectuer la transformation de mise en forme.
 
 ```{r}
-dataEx_large2 <- reshape(
-  data = dataEx_long2,
+data_ex_large2 <- reshape(
+  data = data_ex_long_2,
   direction = "wide",
   timevar = "de",
   idvar = "IDlancer"
 )
-dataEx_large2
+data_ex_large2
 ```
 
 Les seuls arguments obligatoires pour réaliser cette transformation vers une mise en forme large sont `data`, `direction`, `timevar` et `idvar`, dont les descriptions ont été fournies ci-dessus. Cependant, `reshape` a par défaut considéré que toutes les variables autres que celles identifiées avec `timevar` et `idvar` contiennent des mesures répétées. Nous nous retrouvons donc maintenant avec deux colonnes identiques contenant le nom du lanceur. Pour spécifier à `reshape` la ou les colonnes pour lesquelles les valeurs doivent être réparties en plusieurs colonnes, il faut aussi spécifier l'argument `v.names`.
 
 ```{r}
-dataEx_large2 <- reshape(
-  dataEx_long2,
+data_ex_large2 <- reshape(
+  data_ex_long_2,
   direction = "wide",
   timevar = "de",
   idvar = "IDlancer",
   v.names = "resultat"
 )
-dataEx_large2
+data_ex_large2
 ```
 
 Et voilà!
 
-Afin de reconstruire un data frame vraiment identique à `dataEx`, 
+Afin de reconstruire un data frame vraiment identique à `data_ex`, 
 
 ```{r}
-dataEx
+data_ex
 ```
 
 il suffirait de retirer la colonne `IDlancer`, renommer les colonnes contenant les résultats des lancers de dés, réordonner les colonnes et renommer les lignes.
 
 ```{r}
-dataEx_large2$IDlancer <- NULL                                # retirer une colonne
-colnames(dataEx_large2)[2:3] <- c("de1", "de2")               # renommer des colonnes
-dataEx_large2 <- dataEx_large2[, c("de1", "de2", "lanceur")]  # réordonner les colonnes
-rownames(dataEx_large2) <- 1:10                               # renommer les lignes
-dataEx_large2
+data_ex_large2$IDlancer <- NULL                                 # retirer une colonne
+colnames(data_ex_large2)[2:3] <- c("de1", "de2")                # renommer des colonnes
+data_ex_large2 <- data_ex_large2[, c("de1", "de2", "lanceur")]  # réordonner les colonnes
+rownames(data_ex_large2) <- 1:10                                # renommer les lignes
+data_ex_large2
 ```
+
+
+#### Récapitulatif concernant les arguments de `reshape`\ :
+
+En résumé, les arguments de `reshape` sont les suivants\ :
+
+- En lien avec le contexte\ :
+    + `data`\ : data frame à remettre en forme;
+    + `direction`\ : direction de la remise en forme (`"wide"` ou `"long"`).
+- En lien avec les individus\ :
+    + `idvar`\ : nom(s) colonne(s) contenant les identifiants des individus;
+    + `ids`\ : identifiants des individus.
+- En lien avec les variables\ :
+    + `timevar`\ : nom colonne contenant les identifiants des variables;
+    + `times`\ : identifiants des variables.
+- En lien avec les valeurs\ :
+    + `v.names`\ : nom(s) colonne(s) contenant les valeurs empilées dans le mise en forme longue ou intermédiaire;
+    + `varying`\ : noms colonnes contenant les valeurs dans le mise en forme large ou intermédiaire.
 
 
 ### Fonctions `pivot_longer` et `pivot_wider` du package `tidyr`
 
-Le package `tidyr` offre les fonctions suivantes, permettant d'effectuer des transformations de mise en forme :
+Le package `tidyr` offre les fonctions suivantes, permettant d'effectuer des transformations de mise en forme\ :
 
-- mise en forme large vers longue : [`pivot_longer`](https://tidyr.tidyverse.org/dev/reference/pivot_longer.html),
-- mise en forme longue vers large : [`pivot_wider`](https://tidyr.tidyverse.org/dev/reference/pivot_wider.html).
+- mise en forme large vers longue\ : [`pivot_longer`](https://tidyr.tidyverse.org/dev/reference/pivot_longer.html),
+- mise en forme longue vers large\ : [`pivot_wider`](https://tidyr.tidyverse.org/dev/reference/pivot_wider.html).
 
 Ces fonctions remplacent les fonctions `gather` et `spread` [depuis septembre 2019](https://www.tidyverse.org/blog/2019/09/tidyr-1-0-0/). Illustrons l'utilisation des [fonctions `pivot_longer` et `pivot_wider`](https://tidyr.tidyverse.org/dev/articles/pivot.html).
 
 
-#### Exemple de transformation vers une mise en forme longue :
+#### Exemple de transformation vers une mise en forme longue\ :
 
 \mbox{}
 
-Voici une commande pour transformer le data frame `dataEx` de sa mise en forme d'origine, large, vers une mise en forme longue avec la fonction `pivot_longer`.
+Voici une commande pour transformer le data frame `data_ex` de sa mise en forme d'origine, large, vers une mise en forme longue avec la fonction `pivot_longer`.
 
 ```{r}
-dataEx_long3 <- pivot_longer(
-  data = dataEx, 
+data_ex_long_3 <- pivot_longer(
+  data = data_ex, 
   cols = c(de1, de2), 
   names_to = "de", 
   values_to = "resultat"
 )
-dataEx_long3
+data_ex_long_3
 ```
 
-Il faut fournir à `pivot_longer` les arguments :
+Il faut fournir à `pivot_longer` les arguments\ :
 
-- `data` : le data frame (ou tibble) dont la mise en forme est à transformer;
-- `cols` : les noms des colonnes dans le jeu de données d’origine (`data`) sous la mise en forme large contenant les données à empiler dans une seule colonne sous la mise en forme longue.
+- `data`\ : le data frame (ou tibble) dont la mise en forme est à transformer;
+- `cols`\ : les noms des colonnes dans le jeu de données d'origine (`data`) sous la mise en forme large contenant les données à empiler dans une seule colonne sous la mise en forme longue.
 
-Pour rendre le résultat plus facilement interprétable, il est ausi recommandé de fournir une valeur aux arguments suivants :
+Pour rendre le résultat plus facilement interprétable, il est aussi recommandé de fournir une valeur aux arguments suivants\ :
 
-- `names_to` : le nom de la colonne dans la mise en forme longue servant à identifier les variables dont les valeurs dans la nouvelle colonne de valeurs empilées sont des mesures;
-- `values_to` : le nom de la colonne dans la mise en forme longue où seront empilées les valeurs provenant de plusieurs colonnes sous la mise en forme large.
+- `names_to`\ : le nom de la colonne dans la mise en forme longue servant à identifier les variables dont les valeurs dans la nouvelle colonne de valeurs empilées sont des mesures;
+- `values_to`\ : le nom de la colonne dans la mise en forme longue où seront empilées les valeurs provenant de plusieurs colonnes sous la mise en forme large.
 
-Remarquons que la fonction `pivot_longer` retourne un [tibble](https://stt4230.rbind.io/manipulation_donnees/structures_r/#le-tibble) et n'empile pas les valeurs dans le même ordre que `reshape`. De plus, `pivot_longer` n'ajoute pas une colonne pour identifier les individus comme le fait la fonction `reshape`. Il aurait fallu que le jeu de données d'origine contienne déjà une colonne avec ces identifiants. Dans `dataEx`, ce sont plutôt les noms de lignes qui identifient en quelque sorte les individus.
+Remarquons que la fonction `pivot_longer` retourne un [tibble](https://stt4230.rbind.io/manipulation_donnees/structures_r/#tibbles) et n'empile pas les valeurs dans le même ordre que `reshape`. De plus, `pivot_longer` n'ajoute pas une colonne pour identifier les individus comme le fait la fonction `reshape`. Il aurait fallu que le jeu de données d'origine contienne déjà une colonne avec ces identifiants. Dans `data_ex`, ce sont plutôt les noms de lignes qui identifient en quelque sorte les individus.
 
-\newpage
 
-#### Exemple de transformation vers une mise en forme large :
+
+#### Exemple de transformation vers une mise en forme large\ :
 
 \mbox{}
 
-Afin d'effectuer une transformation d'une mise en forme longue vers une mise en forme large avec la fonction `pivot_wider` de `tidyr`, le jeu de données fourni en entrée à la fonction doit contenir une colonne pour identifier les individus. Voici donc un exemple d'utilisation de la fonction `pivot_wider`, réalisé en utilisant comme jeu de données d'origine `dataEx_long2`.
+Afin d'effectuer une transformation d'une mise en forme longue vers une mise en forme large avec la fonction `pivot_wider` de `tidyr`, le jeu de données fourni en entrée à la fonction doit contenir une colonne pour identifier les individus. Voici donc un exemple d'utilisation de la fonction `pivot_wider`, réalisé en utilisant comme jeu de données d'origine `data_ex_long_2`.
 
 ```{r}
-dataEx_large3 <- pivot_wider(
-  data = dataEx_long2,
+data_ex_large_3 <- pivot_wider(
+  data = data_ex_long_2,
   names_from = de, 
   values_from = resultat
 )
-dataEx_large3
+data_ex_large_3
 ```
 
-La fonction a réussi à réaliser la tâche souhaitée en fournissant seulement des valeurs aux arguments `data`, `names_from` et `values_from`, définis comme suit : 
+La fonction a réussi à réaliser la tâche souhaitée en fournissant seulement des valeurs aux arguments `data`, `names_from` et `values_from`, définis comme suit\ : 
 
-- `data` : le data frame (ou tibble) dont la mise en forme est à transformer;
-- `names_from` : le nom de la colonne dans la mise en forme longue contenant les identifiants des variables desquelles les valeurs empilées sont des mesures;
-- `values_from` : le nom de la ou des colonnes dans la mise en forme longue où sont empilées les valeurs qui doivent maintenant être réparties dans plusieurs colonnes.
+- `data`\ : le data frame (ou tibble) dont la mise en forme est à transformer;
+- `names_from`\ : le nom de la colonne dans la mise en forme longue contenant les identifiants des variables desquelles les valeurs empilées sont des mesures;
+- `values_from`\ : le nom de la ou des colonnes dans la mise en forme longue où sont empilées les valeurs qui doivent maintenant être réparties dans plusieurs colonnes.
 
 Les références proposent de bonnes sources d'information pour en apprendre davantage à propos des fonctions `pivot_longer` et `pivot_wider`.
 
 
 ### Fonctions `melt` et `dcast` du package `data.table`
 
-Le package `data.table` contient les fonctions suivantes, permettant d'effectuer des transformations de mise en forme :
+Le package `data.table` contient les fonctions suivantes, permettant d'effectuer des transformations de mise en forme\ :
 
-- mise en forme large vers longue : [`melt`](https://rdatatable.gitlab.io/data.table/reference/melt.data.table.html),
-- mise en forme longue vers large : [`dcast`](https://rdatatable.gitlab.io/data.table/reference/dcast.data.table.html).
+- mise en forme large vers longue\ : [`melt`](https://rdatatable.gitlab.io/data.table/reference/melt.data.table.html),
+- mise en forme longue vers large\ : [`dcast`](https://rdatatable.gitlab.io/data.table/reference/dcast.data.table.html).
 
 Ces fonctions sont en fait des extensions aux data tables des [fonctions portant les mêmes noms dans le package `reshape2`](https://cran.r-project.org/web/packages/reshape2/index.html), qui n'est maintenant plus mis à jour. Illustrons l'utilisation des [fonctions `melt` et `dcast`](https://rdatatable.gitlab.io/data.table/articles/datatable-reshape.html).
 
 
 
-#### Exemple de transformation vers une mise en forme longue :
+#### Exemple de transformation vers une mise en forme longue\ :
 
 \mbox{}
 
-Voici une commande pour transformer le data table `dataEx_dt` de sa mise en forme d'origine, large, vers une mise en forme longue avec la fonction `melt` du package `data.table`.
+Voici une commande pour transformer le data table `data_ex_dt` de sa mise en forme d'origine, large, vers une mise en forme longue avec la fonction `melt` du package `data.table`.
 
-\newpage
+
 
 ```{r}
-dataEx_long4 <- melt(
-  data = dataEx_dt, 
+data_ex_long_4 <- melt(
+  data = data_ex_dt, 
   measure.vars = c("de1", "de2"), 
   variable.name = "de", 
   value.name = "resultat"
 )
-dataEx_long4
+data_ex_long_4
 ```
 
-Les arguments de `melt` portent des noms différents de ceux de `pivot_longer` (mis à part `data`), mais ils peuvent être définis de façon similaire :
+Les arguments de `melt` portent des noms différents de ceux de `pivot_longer` (mis à part `data`), mais ils peuvent être définis de façon similaire\ :
 
-- `data` : le data table dont la mise en forme est à transformer;
-- `measure.vars` : les noms des colonnes dans le jeu de données d’origine (`data`) sous la mise en forme large contenant les données à empiler dans une seule colonne sous la mise en forme longue;
-- `variable.name` : le nom de la colonne dans la mise en forme longue servant à identifier les variables dont les valeurs dans la nouvelle colonne de valeurs empilées sont des valeurs;
-- `value.name` : le nom de la colonne dans la mise en forme longue où seront empilées les valeurs provenant de plusieurs colonnes sous la mise en forme large.
+- `data`\ : le data table dont la mise en forme est à transformer;
+- `measure.vars`\ : les noms des colonnes dans le jeu de données d'origine (`data`) sous la mise en forme large contenant les données à empiler dans une seule colonne sous la mise en forme longue;
+- `variable.name`\ : le nom de la colonne dans la mise en forme longue servant à identifier les variables dont les valeurs dans la nouvelle colonne de valeurs empilées sont des valeurs;
+- `value.name`\ : le nom de la colonne dans la mise en forme longue où seront empilées les valeurs provenant de plusieurs colonnes sous la mise en forme large.
 
-#### Exemple de transformation vers une mise en forme large :
+#### Exemple de transformation vers une mise en forme large\ :
 
 \mbox{}
 
-Comme pour la fonction `pivot_wider`, la fonction `dcast` a besoin que le jeu de données à transformer contiennent une colonne pour identifier les individus. Voici donc un exemple d'utilisation de la fonction `dcast`, réalisé en utilisant comme jeu de données d'origine le data frame `dataEx_long2` converti en data table.
+Comme pour la fonction `pivot_wider`, la fonction `dcast` a besoin que le jeu de données à transformer contienne une colonne pour identifier les individus. Voici donc un exemple d'utilisation de la fonction `dcast`, réalisé en utilisant comme jeu de données d'origine le data frame `data_ex_long_2` converti en data table.
 
 ```{r}
-dataEx_long2_dt <-as.data.table(dataEx_long2)
-dataEx_large4 <- dcast(
-  data = dataEx_long2_dt,
+data_ex_long_2_dt <- as.data.table(data_ex_long_2)
+data_ex_large_4 <- dcast(
+  data = data_ex_long_2_dt,
   formula = lanceur + IDlancer ~ de,
   value.var = "resultat"
 )
 ```
 
-\newpage
-
 ```{r}
-dataEx_large4
+data_ex_large_4
 ```
 
 Les arguments de `dcast` sont différents des arguments de toutes les fonctions de modification de mise en forme vues jusqu'à maintenant.
 
-- `data` : le data table dont la mise en forme est à transformer;
-- `formula` : formule de la forme `LHS` ~ `RHS`, où 
+- `data`\ : le data table dont la mise en forme est à transformer;
+- `formula`\ : formule de la forme `LHS` ~ `RHS`, où 
     + `LHS` = noms des colonnes identifiant les individus ou à conserver telles quelles dans la sortie (séparées par `+` s'il y en a plus d'une),
     + `RHS` = nom de la colonne identifiant les variables desquelles les valeurs empilées sont des mesures;
 - `value.var` = le nom de la colonne dans la mise en forme longue où sont empilées les valeurs qui doivent maintenant être réparties dans plusieurs colonnes.
@@ -1655,219 +1780,340 @@ La fonction `dcast` va plus loin que la modification de mise en forme de jeux de
 
 ***
 
-# Résumé
+# Comparaison de deux objets R
 
-#### R de base (principalement les packages `base` et `stats`)
+Les opérateurs de comparaison vus dans les [notes sur les calculs mathématiques en R](https://stt4230.rbind.io/calculs/calculs_math_r/) permettent de comparer les éléments d'objets R. Mais comment comparer des objets entiers? Cela dépend de ce qui doit être comparé.
+
+- Pour comparer toutes les données contenues dans deux objets atomiques, mais pas les métadonnées (attributs)\ : `all(x == y)`
+    + retourne `TRUE` si toutes les données sont égales, 
+    + `FALSE` sinon,
+    + `NA` si un des deux objets comparés contient au moins une donnée manquante et que l'argument `na.rm` de la fonction `all` prend la valeur `FALSE`,
+    + la règle de recyclage s'applique si les objets ne sont pas de mêmes dimensions.
+- Pour comparer deux objets dans leur totalité (éléments, attributs, type de l'objet et de ses éléments)\ :  `identical(x, y)`
+    + retourne `TRUE` si les deux objets comparés sont totalement identiques,
+    + `FALSE` sinon.
+- Pour comparer tous les éléments et les attributs de deux objets, en acceptant des différences dans les données numériques selon une certaine tolérance\ :  `all.equal(x, y)`
+    + retourne `TRUE` en cas d'égalité respectant la tolérance, 
+    + sinon retourne des informations sur les différences.
+
+
+Voici quelques exemples.
+
+#### Données identiques, mais métadonnées différentes {-}
 
 \mbox{}
 
-##### Transformation de variables
+```{r}
+# Objets comparés
+x <- 1:5
+y <- 1:5
+names(x) <- letters[1:5]
+str(x)
+str(y)
+```
 
-- Ajout ou modification de variables dans un data frame :
+&nbsp;
+
+```{r}
+# Résultats des différentes comparaisons
+all(x == y)
+identical(x, y)
+all.equal(x, y)
+```
+
+#### Données équivalentes, mais de types différents, métadonnées identiques {-}
+
+\mbox{}
+
+```{r}
+# Objets comparés
+x <- as.double(x)
+str(x)
+str(y)
+```
+
+&nbsp;
+
+```{r}
+# Résultats des différentes comparaisons
+all(x == y)
+identical(x, y)
+all.equal(x, y)
+```
+
+#### Données numériques pas tout à fait identiques, métadonnées et types identiques {-}
+
+\mbox{}
+
+```{r}
+# Objets comparés
+y <- 1:5 + 1e-10
+str(x)
+str(y)
+```
+
+Bien que les données numériques dans `x` et `y` ne soient pas tout à fait identiques, elles semblent identiques à l'affichage de `x` et `y`.
+
+```{r}
+# Résultats des différentes comparaisons
+all(x == y)
+identical(x, y)
+all.equal(x, y)
+```
+
+**Rappel**\ : Il est possible de contrôler le nombre de chiffres composant un nombre affiché dans la console R avec l'option `digits` de la session R.
+```{r options}
+optionsDefaut <- options()
+options(digits = 11)
+y
+options(digits = optionsDefaut$digits)
+```
+
+***
+
+# Résumé
+
+#### R de base (principalement les packages `base` et `stats`) {-}
+
+\mbox{}
+
+##### Transformation de variables {-}
+
+- Ajout ou modification de variables dans un data frame\ :
     + assignation à une colonne, nouvelle pour un ajout,
     + fonction `transform`,
     + concaténation de colonnes avec `cbind` ou `data.frame`;
-- Variable conditionnelle à une autre : `ifelse`;
-- Catégorisation d'une variable numérique : `cut`, `ave`;
-- Normalisation de valeurs : `scale`;
-- Manipulation de chaînes de caractères :
-    + `paste` : concatène des chaînes de caractères,
-    + `nchar` : calcule le nombre de caractères,
-    + `toupper` : transforme toutes les lettres en majuscules,
-    + `tolower` : transforme toutes les lettres en minuscules,
-    + `strsplit` : brise des chaînes de caractères, en coupant lors de la rencontre d'une certaine sous-chaîne de caractères,
-    + `substr` : extrait les caractères entre deux positions,
-    + `sub` ou `gsub` : remplacent la première ou toutes les occurrences d'une certaine sous-chaîne de caractères par une autre,
-    + `grep` et `grepl` : testent la présence d'une certaine sous-chaîne de caractères,
-    + `chartr` : remplace des caractères par d'autres,
-    + `iconv` : convertit l’encodage de chaîne de caractères;
-- Manipulation de dates :
-    + `as.Date` : convertit une chaîne de caractère en format date,
-    + `Sys.setlocale` : permet de modifier les paramètres régionaux d'une session R (utile lorsque nous voulons convertir en format `Date` des chaînes de caractères contenant des noms de mois dans une langue autre que celle du système d'exploitation de notre ordinateur),
-    + `difftime` : calcule l'intervalle de temps entre deux dates,
-    + `Sys.Date` : retourne la date courante,
-    + `format` : permet de modifier le format d'une date.
+- Variable conditionnelle à une autre\ : `ifelse`;
+- Catégorisation d'une variable numérique\ : `cut`, `ave`;
+- Normalisation de valeurs\ : `scale`;
+- Manipulation de chaînes de caractères\ :
+    + `paste`\ : concatène des chaînes de caractères,
+    + `nchar`\ : calcule le nombre de caractères,
+    + `toupper`\ : transforme toutes les lettres en majuscules,
+    + `tolower`\ : transforme toutes les lettres en minuscules,
+    + `strsplit`\ : brise des chaînes de caractères, en coupant lors de la rencontre d'une certaine sous-chaîne de caractères,
+    + `substr`\ : extrait les caractères entre deux positions,
+    + `sub` ou `gsub`\ : remplacent la première ou toutes les occurrences d'une certaine sous-chaîne de caractères par une autre,
+    + `grep` et `grepl`\ : testent la présence d'une certaine sous-chaîne de caractères,
+    + `chartr`\ : remplace des caractères par d'autres,
+    + `iconv`\ : convertit l'encodage de chaîne de caractères;
+- Manipulation de dates\ :
+    + `as.Date`\ : convertit une chaîne de caractère en format date,
+    + `Sys.setlocale`\ : permet de modifier les paramètres régionaux d'une session R (utile lorsque nous voulons convertir en format `Date` des chaînes de caractères contenant des noms de mois dans une langue autre que celle du système d'exploitation de notre ordinateur),
+    + `difftime`\ : calcule l'intervalle de temps entre deux dates,
+    + `Sys.Date`\ : retourne la date courante,
+    + `format`\ : permet de modifier le format d'une date.
 
 
-##### Manipulation de jeux de données
+##### Manipulation de jeux de données {-}
 
 \mbox{}
 
-###### Sélection de sous-ensembles de données
+###### Omission d'observations {-}
 
-- Sélectionner des observations (lignes) et des variables (colonnes) : opérateur `[`, fonction `subset`.
-- Sélectionner les observations (lignes) ne contenant aucune donnée manquante : `na.omit`.
+- Identifier les observations dupliquées\ : `duplicated`,
+- Retirer les observations dupliquées\ : `unique`.
+- Identifier les observations sans données manquantes\ : `complete.cases`,
+- Retirer les observations contenant au moins une donnée manquante\ : `na.omit`.
 
 
-###### Combinaison de données
+###### Sélection de sous-ensembles de données {-}
 
-- Concaténer des vecteurs, matrices ou data frames en lignes (lignes = observations dans un data frame) : `rbind`.
-- Concaténer des vecteurs, matrices ou data frames en colonnes  (lignes = variables dans un data frame) : `cbind`, `data.frame`.
-- Fusionner par association deux jeux de données (jointure en identifiant les lignes correspondantes) : `merge`
+- Sélectionner des observations (lignes) et des variables (colonnes)\ : opérateur `[`, fonction `subset`.
+
+
+###### Combinaison de données {-}
+
+- Concaténer des vecteurs, matrices ou data frames en lignes (lignes = observations dans un data frame)\ : `rbind`.
+- Concaténer des vecteurs, matrices ou data frames en colonnes  (lignes = variables dans un data frame)\ : `cbind`, `data.frame`.
+- Fusionner par association deux jeux de données (jointure en identifiant les lignes correspondantes)\ : `merge`
     + argument `by`, ou arguments `by.x` et `by.y`, pour spécifier les variables d'association (celles à partir desquelles établir les correspondances entre les lignes);
     + argument `all`, ou arguments `all.x` et `all.y`, pour spécifier les lignes à conserver (donc le type de jointure à réaliser).
     
 
-###### Modification de l'ordre des données
+###### Modification de l'ordre des données {-}
 
-- `rev` : renverse l'ordre des éléments;
-- `sort` : ordonne les éléments d'un vecteur atomique
+- `rev`\ : renverse l'ordre des éléments;
+- `sort`\ : ordonne les éléments d'un vecteur atomique
     + argument `decreasing = TRUE` pour ordre décroissant;
-- `order` : retourne la permutation des données requise pour ordonner les données selon l'ordre spécifié  
-$\rightarrow$ pour effectuer l'ordonnancement, il faut fournir le résultat retourné par `order` en argument à l'opérateur d'extraction `[`
+- `[`\ : permet de réordonner les lignes ou les colonnes d'un objet à deux dimensions dans un ordre quelconque;
+- `order`\ : retourne la permutation des données requise pour ordonner les données selon l'ordre spécifié $\rightarrow$ pour effectuer l'ordonnancement, il faut fournir le résultat retourné par `order` en argument à l'opérateur `[`
     + argument `decreasing = TRUE` pour ordre décroissant;
 
 
-###### Changement de mise en forme de jeux de données
+###### Changement de mise en forme de jeux de données {-}
 
-- `t` : transpose des matrices
-- **Mise en forme « large »** :
+- `t`\ : transpose des matrices
+- **Mise en forme «\ large\ »**\ :
     + une seule ligne par individu (lorsque la largeur est maximale),
     + les vecteurs de mesures (valeurs) de certaines variables sont placés dans différentes colonnes.
-- **Mise en forme « longue »** :
+- **Mise en forme «\ longue\ »**\ :
     + plus d'une ligne par individu,
     + les vecteurs de mesures (valeurs) de certaines variables sont empilés dans une même colonne, les uns en dessous des autres,
     + comprend une ou des colonnes ayant pour but d'identifier à quelle variable est associée chaque donnée.
-- `stack` et `unstack` : modifient la mise en forme, fonctions simplistes
-- `reshape` : modifie la mise en forme; les arguments de `reshape` sont les suivants
-    - En lien avec le contexte :
-        + `data` : data frame à remettre en forme;
-        + `direction` : direction de la remise en forme (`"wide"` ou `"long"`).
-    - En lien avec les individus :
-        + `idvar` : nom(s) colonne(s) contenant les identifiants des individus;
-        + `ids` : identifiants des individus.
-    - En lien avec les variables :
-        + `timevar` : nom colonne contenant les identifiants des variables;
-        + `times` : identifiants des variables.
-    - En lien avec les valeurs :
-        + `v.names` : nom(s) colonne(s) contenant les valeurs empilées dans le mise en forme longue ou intermédiaire;
-        + `varying` : noms colonnes contenant les valeurs dans le mise en forme large ou intermédiaire.
+- `stack` et `unstack`\ : modifient la mise en forme, fonctions simplistes
+- `reshape`\ : modifie la mise en forme; les arguments de `reshape` sont les suivants
+    - En lien avec le contexte\ :
+        + `data`\ : data frame à remettre en forme;
+        + `direction`\ : direction de la remise en forme (`"wide"` ou `"long"`).
+    - En lien avec les individus\ :
+        + `idvar`\ : nom(s) colonne(s) contenant les identifiants des individus;
+        + `ids`\ : identifiants des individus.
+    - En lien avec les variables\ :
+        + `timevar`\ : nom colonne contenant les identifiants des variables;
+        + `times`\ : identifiants des variables.
+    - En lien avec les valeurs\ :
+        + `v.names`\ : nom(s) colonne(s) contenant les valeurs empilées dans la mise en forme longue ou intermédiaire;
+        + `varying`\ : noms colonnes contenant les valeurs dans la mise en forme large ou intermédiaire.
 
 
-#### Packages du `tidyverse` (principalement `dplyr` et `tidyr`)
+#### Packages du `tidyverse` (principalement `dplyr` et `tidyr`) {-}
 
-- Transformation de variables : `mutate` du package `dplyr`.
-- Variable conditionnelle à une autre : `if_else` du package `dplyr`.
-- Manipulation de chaînes de caractères : package `stringr`.
-- Manipulation de dates : package `lubridate`.
-- Sélection de sous-ensembles de données :
-    + sélection de lignes : `filter` du package `dplyr`;
-    + sélection de colonnes : `select` du package `dplyr`;
-    + sélection des lignes ne contenant aucune donnée manquante : `drop_na` du package `tidyr`.
-- Combinaison de données :
-    + concaténation de lignes : `bind_rows` ;
-    + concaténation de colonnes : `bind_cols` du package `dplyr`;
-    + fusion par association : `inner_join`, `full_join`, `left_join`, `right_join`, etc., du package `dplyr`.
-- Modification de l’ordre des données : `arrange` du package `dplyr`,
+- Transformation de variables\ : `mutate` du package `dplyr`.
+- Variable conditionnelle à une autre\ : `if_else` du package `dplyr`.
+- Manipulation de chaînes de caractères\ : package `stringr`.
+- Manipulation de dates\ : package `lubridate`.
+- Sélection de sous-ensembles de données\ :
+    + sélection de lignes\ : `filter` du package `dplyr`;
+    + sélection de colonnes\ : `select` du package `dplyr`;
+    + sélection des lignes ne contenant aucune donnée manquante\ : `drop_na` du package `tidyr`.
+- Combinaison de données\ :
+    + concaténation de lignes\ : `bind_rows` ;
+    + concaténation de colonnes\ : `bind_cols` du package `dplyr`;
+    + fusion par association\ : `inner_join`, `full_join`, `left_join`, `right_join`, etc., du package `dplyr`.
+- Modification de l'ordre des données\ : `arrange` du package `dplyr`,
     + encadrer les noms de variables (colonnes) d'un appel à la fonction `desc` du package `tidyr` pour obtenir un ordre décroissant.
-- Changement de mise en forme de jeux de données :
-    + transformation vers un format plus long : `pivot_longer` du package `tidyr`;
-    + transformation vers un format plus large : `pivot_wider` du package `tidyr`.
- 
-#### Package `data.table`
+- Changement de mise en forme de jeux de données\ :
+    + transformation vers un format plus long\ : `pivot_longer` du package `tidyr`;
+    + transformation vers un format plus large\ : `pivot_wider` du package `tidyr`.
 
-- Transformation de variables : opérateur `:=` (modification par référence).
-- Variable conditionnelle à une autre : `fifelse`.
-- Sélection de sous-ensembles de données :
-    + sélection de lignes et de colonnes : opérateur `[`, méthode `subset`;
-    + sélection des lignes ne contenant aucune donnée manquante : méthode `na.omit`.
-- Combinaison de données :
-    + concaténation de lignes : `rbindlist`;
-    + fusion par association : méthode `merge`.
-- Modification de l’ordre des données (modification par référence) :
-    + ordre des lignes : `setorder`;
-    + ordre des colonnes : `setcolorder`.
-- Changement de mise en forme de jeux de données :
-    + transformation vers un format plus long : `melt`;
-    + transformation vers un format plus large : `dcast`.
 
-#### Tableau résumé des fonctions pour la transformation de mise en forme :
+#### Package `data.table` {-}
+
+- Transformation de variables\ : opérateur `:=` (modification par référence).
+- Variable conditionnelle à une autre\ : `fifelse`.
+- Sélection de sous-ensembles de données\ :
+    + sélection de lignes et de colonnes\ : opérateur `[`, méthode `subset`;
+    + sélection des lignes ne contenant aucune donnée manquante\ : méthode `na.omit`.
+- Combinaison de données\ :
+    + concaténation de lignes\ : `rbindlist`;
+    + fusion par association\ : méthode `merge`.
+- Modification de l'ordre des données (modification par référence)\ :
+    + ordre des lignes\ : `setorder`;
+    + ordre des colonnes\ : `setcolorder`.
+- Changement de mise en forme de jeux de données\ :
+    + transformation vers un format plus long\ : `melt`;
+    + transformation vers un format plus large\ : `dcast`.
+
+#### Tableau résumé des fonctions pour la transformation de mise en forme\ : {-}
 
 Transformation  | Package `utils` | Package `stats` | Package `tidyr` | Package `data.table`
 --------------- | --------------- | --------------- | --------------- | ---------------
 large vers long | `stack` | `reshape` (`direction = "long"`) | `pivot_longer` | `melt`
 long vers large | `unstack` | `reshape` (`direction = "wide"`) | `pivot_wider` | `dcast`
 
-    
-***
 
-# Références 
-
-- Spector, P. (2008). Data Manipulation with R. Springer, New York.
+#### Comparaison de deux objets R {-}
 
 
-#### Pour aller plus loin en manipulation de chaînes de caractères :
-
-Package `stringr` :
-
-- https://stringr.tidyverse.org/
-- Vignette : [Introduction to stringr](https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html)
-- Tutoriel d'étudiants : [Faciliter la manipulation de chaînes de caractères avec le package stringr](https://stt4230.rbind.io/tutoriels_etudiants/hiver_2017/stringr/)
-
-Expressions régulières :
-
-- documentation R : [`help(regexp)`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/regex.html)
-- Page Wikipédia : [Expression régulière](https://fr.wikipedia.org/wiki/Expression_r%C3%A9guli%C3%A8re)
-- Wickham, H. et Grolemund, G. (2016). R for Data Science. O'Reilly Media, Inc., Chapitre 14. URL https://r4ds.had.co.nz/strings.html
-- Feuille de triche : [Basic regular expressions in R](https://rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf)
-
-Autres références en manipulation de chaînes de caractères en R :
-
-- Sanchez, G. (2013) Handling and Processing Strings in R. Trowchez Editions. Berkeley. URL http://gastonsanchez.com/Handling_and_Processing_Strings_in_R.pdf
-- Article de blogue : [How to work with strings in base R - An overview of 20+ methods for daily use](https://jozefhajnala.gitlab.io/r/r007-string-manipulation/)
-
-
-#### Pour aller plus loin en manipulation de dates :
-
-- documentation R à propos de tous les format possibles : [`help(strptime)`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/strptime.html),
-
-Package `lubridate` :
-
-- https://lubridate.tidyverse.org/
-- Vignette : [Do more with dates and times in R with lubridate 1.3.0](https://cran.r-project.org/web/packages/lubridate/vignettes/lubridate.html)
-- Tutoriel d'étudiants : [Manipuler facilement vos formats date avec lubridate](https://stt4230.rbind.io/tutoriels_etudiants/hiver_2017/lubridate/)
-- Article de blogue : [Using Dates and Times in R](http://www.noamross.net/blog/2014/2/10/using-times-and-dates-in-r---presentation-code.html)  
-
-
-
-#### Pour aller plus loin en manipulation de jeux de données :
-
-- Article de blogue : [A data.table and dplyr tour](https://atrebas.github.io/post/2019-03-03-datatable-dplyr/)
-
-Package `dplyr` :
-
-- https://dplyr.tidyverse.org/
-- Tutoriel d'étudiants : [Manipulations de base sur un jeu de données](https://stt4230.rbind.io/tutoriels_etudiants/hiver_2016/manipuler_donnees_dplyr/)
-
-Package `tidyr` :
-
-- https://tidyr.tidyverse.org/
-- Tutoriel d'étudiants : [Réorganisation des données par concaténation et séparation d’observations](https://stt4230.rbind.io/tutoriels_etudiants/hiver_2016/transformer_donnees_tidyr/)
-- Article de blogue : [Tidy Animated Verbs](https://www.garrickadenbuie.com/project/tidyexplain/)
-- Présentation : [A Graphical Introduction to tidyr's pivot_*()](https://speakerdeck.com/yutannihilation/a-graphical-introduction-to-tidyrs-pivot-star)
-
-
-Package `data.table` :
-
-- https://rdatatable.gitlab.io/data.table/index.html
-- Tutoriel d'étudiants : [Fonctionnalités de l'opérateur `[` du package data.table](https://stt4230.rbind.io/tutoriels_etudiants/hiver_2017/data.table/)
-
-
-
-#### Pour manipuler des data frames R en utilisant le langage SQL :
-
-- Package `sqldf` : https://CRAN.R-project.org/package=sqldf
+- Pour comparer uniquement données contenues dans deux objets atomiques, pas les métadonnées (attributs)\ :
+`all(x == y)`.
+- Pour comparer deux objets dans leur totalité (éléments, attributs, type
+de l'objet et de ses éléments)\ : `identical(x, y)`.
+- Pour comparer tous les éléments et les attributs de deux objets, en acceptant des différences dans les données numériques selon une certaine tolérance\ :
+`all.equal(x, y)`.
 
 
 ***
 
-# Annexe
+# Références {-}
 
-## Exemples supplémentaires de changement de mise en forme
+R Core Team (2020). *R: A language and environment for statistical computing*. R Foundation for Statistical Computing, Vienna, Austria. URL https://www.R-project.org/
+
+
+**Sites web abordant le prétraitement de données en R**\ :
+
+- http://larmarange.github.io/analyse-R/
+- http://www.cookbook-r.com/Manipulating_data/
+- https://www.statmethods.net/management/index.html
+
+
+#### Pour aller plus loin en manipulation de jeux de données\ :  {-}
+
+- Billet de blogue\ : [A data.table and dplyr tour](https://atrebas.github.io/post/2019-03-03-datatable-dplyr/)
+
+Package `dplyr`\ :
+
+- Page web du package sur le CRAN\ : https://CRAN.R-project.org/package=dplyr
+- Documentation du package\ : https://dplyr.tidyverse.org/
+- Tutoriel d'étudiants\ : [Manipulations de base sur un jeu de données](https://stt4230.rbind.io/tutoriels_etudiants/hiver_2016/manipuler_donnees_dplyr/)
+
+Package `tidyr`\ :
+
+- Page web du package sur le CRAN\ : https://CRAN.R-project.org/package=tidyr
+- Documentation du package\ : https://tidyr.tidyverse.org/
+- Tutoriel d'étudiants\ : [Réorganisation des données par concaténation et séparation d’observations](https://stt4230.rbind.io/tutoriels_etudiants/hiver_2016/transformer_donnees_tidyr/)
+- Article de blogue\ : [Tidy Animated Verbs](https://www.garrickadenbuie.com/project/tidyexplain/)
+- Présentation\ : [A Graphical Introduction to tidyr's pivot_*()](https://speakerdeck.com/yutannihilation/a-graphical-introduction-to-tidyrs-pivot-star)
+
+
+Package `data.table`\ :
+
+- Page web du package sur le CRAN\ : https://CRAN.R-project.org/package=data.table
+- Documentation du package\ : https://rdatatable.gitlab.io/data.table/index.html
+- Tutoriel d'étudiants\ : [Fonctionnalités de l'opérateur `[` du package data.table](https://stt4230.rbind.io/tutoriels_etudiants/hiver_2017/data.table/)
+
+
+#### Pour aller plus loin en manipulation de chaînes de caractères\ :  {-}
+
+Package `stringr`\ :
+
+- Page web du package sur le CRAN\ : https://CRAN.R-project.org/package=stringr
+- Documentation du package\ : https://stringr.tidyverse.org/
+- Vignette\ : [Introduction to stringr](https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html)
+- Tutoriel d'étudiants\ : [Faciliter la manipulation de chaînes de caractères avec le package stringr](https://stt4230.rbind.io/tutoriels_etudiants/hiver_2017/stringr/)
+
+Expressions régulières\ :
+
+- Documentation R\ : [`help(regexp)`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/regex.html)
+- Page Wikipédia\ : [Expression régulière](https://fr.wikipedia.org/wiki/Expression_r%C3%A9guli%C3%A8re)
+- Goulet, V. (2020). *Programmer avec R*. Université Laval, École d'actuariat. Section 11.3. URL https://vigou3.gitlab.io/programmer-avec-r/
+- Wickham, H. et Grolemund, G. (2016). *R for Data Science*. O'Reilly Media, Inc., Chapitre 14. URL https://r4ds.had.co.nz/strings.html
+- Feuille de triche\ : [Basic regular expressions in R](https://rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf)
+
+Autres références en manipulation de chaînes de caractères en R\ :
+
+- Sanchez, G. (2013). Handling and Processing Strings in R. Trowchez Editions. Berkeley. URL http://gastonsanchez.com/Handling_and_Processing_Strings_in_R.pdf
+- Billet de blogue\ : [How to work with strings in base R - An overview of 20+ methods for daily use](https://jozefhajnala.gitlab.io/r/r007-string-manipulation/)
+
+
+#### Pour aller plus loin en manipulation de dates\ :  {-}
+
+- Documentation R à propos de tous les format possibles\ : [`help(strptime)`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/strptime.html),
+
+Package `lubridate`\ :
+
+- Page web du package sur le CRAN\ : https://CRAN.R-project.org/package=lubridate
+- Documentation du package\ : https://lubridate.tidyverse.org/
+- Vignette\ : [Do more with dates and times in R](https://cran.r-project.org/web/packages/lubridate/vignettes/lubridate.html)
+- Tutoriel d'étudiants\ : [Manipuler facilement vos formats date avec lubridate](https://stt4230.rbind.io/tutoriels_etudiants/hiver_2017/lubridate/)
+- Billet de blogue\ : [Using Dates and Times in R](http://www.noamross.net/blog/2014/2/10/using-times-and-dates-in-r---presentation-code.html)  
+
+
+#### Pour manipuler des data frames R en utilisant le langage SQL\ :  {-}
+
+- Package `sqldf`\ : https://CRAN.R-project.org/package=sqldf
+
+
+***
+
+# Annexe {-}
+
+## Exemples supplémentaires de changement de mise en forme  {-}
 
 Voici quelques exemples supplémentaires de changements de mise en forme effectués avec la fonction `reshape` ou avec le package `tidyr`.
 
-#### Mise en forme large pure vers mise en forme intermédiaire
+#### Mise en forme large pure vers mise en forme intermédiaire  {-}
 
 \mbox{}
 
@@ -1911,7 +2157,7 @@ full_join(
 )
 ```
 
-#### Mise en forme large pure vers mise en forme longue pure
+#### Mise en forme large pure vers mise en forme longue pure  {-}
 
 \mbox{}
 
@@ -1938,7 +2184,7 @@ pivot_longer(
 )
 ```
 
-#### Mise en forme intermédiaire vers mise en forme longue pure
+#### Mise en forme intermédiaire vers mise en forme longue pure  {-}
 
 \mbox{}
 
@@ -1965,7 +2211,7 @@ pivot_longer(
 )
 ```
 
-#### Mise en forme longue pure vers mise en forme intermédiaire
+#### Mise en forme longue pure vers mise en forme intermédiaire  {-}
 
 \mbox{}
 
@@ -1991,16 +2237,16 @@ pivot_wider(
 )
 ```
 
-#### Mise en forme longue pure vers mise en forme large pure
+#### Mise en forme longue pure vers mise en forme large pure  {-}
 
 \mbox{}
 
-Il faut partir de `plants_long2`.
+Il faut partir de `plants_long_2`.
 
 ```{r}
 # Avec reshape :
 reshape(
-  data = plants_long2,
+  data = plants_long_2,
   direction = "wide",
   idvar = "Plant",
   timevar = "Variable",
@@ -2011,18 +2257,18 @@ reshape(
 ```{r}
 # Avec pivot_wider :
 pivot_wider(
-  data = plants_long2,
+  data = plants_long_2,
   names_from = Variable,
   values_from = Valeur
 )
 ```
 
-#### Mise en forme intermédiaire vers mise en forme large pure
+#### Mise en forme intermédiaire vers mise en forme large pure  {-}
 
 \mbox{}
 
 ```{r}
-# Avec reshape
+# Avec reshape :
 reshape(
   data = plants_inter,
   direction = "wide",
