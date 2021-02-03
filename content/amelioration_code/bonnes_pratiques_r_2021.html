@@ -2,7 +2,7 @@
 title: "Bonnes pratiques de programmation en R"
 linkTitle: "Bonnes pratiques R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2021-01-29"
+date: "2021-02-03"
 weight: 1
 slug: "bonnes_pratiques_r"
 lastmodifierdisplayname&nbsp;: "Sophie Baillargeon"
@@ -259,7 +259,7 @@ français et le point manquant à la fin de la phrase. Voici une instruction R p
 <p>Nous pouvons facilement évaluer son temps d’exécution en encadrant l’expression d’un appel à la fonction <code>system.time</code> comme suit.</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(res <span class="ot">&lt;-</span> <span class="fu">apply</span>(<span class="at">X =</span> <span class="fu">matrix</span>(<span class="dv">1</span>, <span class="at">nrow =</span> <span class="dv">10000</span>, <span class="at">ncol =</span> <span class="dv">1000</span>), <span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> median))</span></code></pre></div>
 <pre><code>##    user  system elapsed 
-##    0.78    0.02    0.80</code></pre>
+##    0.78    0.02    0.79</code></pre>
 <p>Cependant, si dans cette expression l’opérateur d’assignation <code>=</code> avait été utilisé, nous aurions obtenu une erreur.</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(<span class="at">res =</span> <span class="fu">apply</span>(<span class="at">X =</span> <span class="fu">matrix</span>(<span class="dv">1</span>, <span class="at">nrow =</span> <span class="dv">10000</span>, <span class="at">ncol =</span> <span class="dv">1000</span>), <span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> median))</span></code></pre></div>
 <pre><code>## Error: in system.time(res = apply(X = matrix(1, nrow = 10000, ncol = 1000),  : 
@@ -303,9 +303,9 @@ français et le point manquant à la fin de la phrase. Voici une instruction R p
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(magrittr)</span></code></pre></div>
 <p>Pour résumer le fonctionnement de cet opérateur, voici comment il transforme quelques appels de fonction :</p>
 <ul>
-<li><code>f(x)</code> devient <code>x %&gt;% f</code>,</li>
+<li><code>f(x)</code> devient <code>x %&gt;% f()</code>,</li>
 <li><code>f(x, y)</code> devient <code>x %&gt;% f(y)</code>,</li>
-<li><code>h(g(f(x)))</code> devient <code>x %&gt;% f %&gt;% g %&gt;% h</code>.</li>
+<li><code>h(g(f(x)))</code> devient <code>x %&gt;% f() %&gt;% g() %&gt;% h()</code>.</li>
 </ul>
 <p>Les auteurs du <code>tidyverse</code> considèrent que cet opérateur permet d’écrire du <strong>code R plus clair</strong>. En lisant de gauche à droite l’instruction <code>h(g(f(x)))</code>, nous voyons d’abord l’appel à la fonction <code>h</code>, puis l’appel à la fonction <code>g</code> et finalement l’appel à la fonction <code>f</code>. Pourtant, pour évaluer cette instruction, R va d’abord :</p>
 <ul>
@@ -321,9 +321,9 @@ français et le point manquant à la fin de la phrase. Voici une instruction R p
 <p>Mais ce code a le défaut de créer des objets que nous ne souhaitons pas nécessairement conserver. L’opérateur <code>%&gt;%</code> n’a pas ce défaut! <strong>Une instruction écrite en utilisant l’opérateur <code>%&gt;%</code> permet de suivre l’ordre des évaluations</strong>, sans créer inutilement d’objets dans l’environnement de travail.</p>
 <p>Pour encore plus de clarté, certains étendent sur plusieurs lignes une instruction contenant plus d’un opérateur <code>%&gt;%</code> comme suit :</p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>x <span class="sc">%&gt;%</span> </span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  f <span class="sc">%&gt;%</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  g <span class="sc">%&gt;%</span></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  h</span></code></pre></div>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">f</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">g</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">h</span>()</span></code></pre></div>
 <p>Si l’argument que nous souhaitons passer avec l’opérateur <code>%&gt;%</code> n’est pas celui en première position, il faut utiliser un <code>.</code> comme suit :</p>
 <ul>
 <li><code>f(y, x)</code> devient <code>x %&gt;% f(y, .)</code>,</li>
@@ -331,7 +331,7 @@ français et le point manquant à la fin de la phrase. Voici une instruction R p
 </ul>
 <p>Reprenons un exemple précédent pour illustrer l’utilisation de l’opérateur <code>%&gt;%</code>. Supposons que nous avons la chaîne de caractères suivante :</p>
 <div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>text <span class="ot">&lt;-</span> <span class="st">&quot;Ceci est un example&quot;</span></span></code></pre></div>
-<p>et que nous souhaitons la corriger avec l’instruction suivante :</p>
+<p>et que nous souhaitons la corriger (remplacer example par exemple et ajouter un point à la fin) avec l’instruction suivante :</p>
 <div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">&quot;example&quot;</span>, <span class="at">replacement =</span> <span class="st">&quot;exemple&quot;</span>, <span class="at">x =</span> text), <span class="st">&quot;.&quot;</span>)</span></code></pre></div>
 <pre><code>## [1] &quot;Ceci est un exemple.&quot;</code></pre>
 <p>Cette instruction est un peu difficile à lire en raison de l’appel à la fonction <code>gsub</code> imbriqué dans un appel à la fonction <code>paste0</code>. Nous pourrions la réécrire comme suit avec l’opérateur <code>%&gt;%</code> :</p>

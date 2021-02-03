@@ -2,7 +2,7 @@
 title: "Bonnes pratiques de programmation en R"
 linkTitle: "Bonnes pratiques R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2021-01-29"
+date: "2021-02-03"
 weight: 1
 slug: "bonnes_pratiques_r"
 lastmodifierdisplayname&nbsp;: "Sophie Baillargeon"
@@ -298,9 +298,9 @@ library(magrittr)
 
 Pour résumer le fonctionnement de cet opérateur, voici comment il transforme quelques appels de fonction&nbsp;:
 
-- `f(x)` devient `x %>% f`,
+- `f(x)` devient `x %>% f()`,
 - `f(x, y)` devient `x %>% f(y)`,
-- `h(g(f(x)))` devient `x %>% f %>% g %>% h`.
+- `h(g(f(x)))` devient `x %>% f() %>% g() %>% h()`.
 
 Les auteurs du `tidyverse` considèrent que cet opérateur permet d'écrire du **code R plus clair**. En lisant de gauche à droite l'instruction `h(g(f(x)))`, nous voyons d'abord l'appel à la fonction `h`, puis l'appel à la fonction `g` et finalement l'appel à la fonction `f`. Pourtant, pour évaluer cette instruction, R va d'abord&nbsp;:
 
@@ -324,9 +324,9 @@ Pour encore plus de clarté, certains étendent sur plusieurs lignes une instruc
 
 ```{r eval = FALSE}
 x %>% 
-  f %>%
-  g %>%
-  h
+  f() %>%
+  g() %>%
+  h()
 ```
 
 Si l'argument que nous souhaitons passer avec l'opérateur `%>%` n'est pas celui en première position, il faut utiliser un `.` comme suit&nbsp;:
@@ -340,7 +340,7 @@ Reprenons un exemple précédent pour illustrer l'utilisation de l'opérateur `%
 text <- "Ceci est un example"
 ```
 
-et que nous souhaitons la corriger avec l'instruction suivante&nbsp;:
+et que nous souhaitons la corriger (remplacer example par exemple et ajouter un point à la fin) avec l'instruction suivante&nbsp;:
 
 ```{r}
 paste0(gsub(pattern = "example", replacement = "exemple", x = text), ".")
