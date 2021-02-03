@@ -1,6 +1,6 @@
 +++
 title = "STT-4230"
-date = "2020-01-10"
+date = "2021-02-03"
 lastmodifierdisplayname = "Sophie Baillargeon"
 lastmodifieremail = "sophie.baillargeon@mat.ulaval.ca"
 +++

@@ -4,7 +4,7 @@ linkTitle = "Classement par semaine"
 weight = 9
 +++
 
-## Session d'hiver 2020
+## Session d'hiver 2021
 
 * Semaine 1
     * [Présentation de R]({{< relref "introduction/presentation_r_2021.html" >}})
@@ -23,8 +23,8 @@ weight = 9
 * Semaine 6
     * [Graphiques en R]
 * Semaine 9
+    * [Informations techniques concernant R]
     * [Structures de contrôle en R]
-    * [Évaluation d'expressions et environnements en R]
     * [Fonctions en R]
 * Semaine 11
     * [Rédaction de documents en R Markdown]
