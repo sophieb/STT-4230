@@ -1,7 +1,7 @@
 ---
 title: "Prétraitement de données en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2021-02-08"
+date: "2021-02-11"
 weight: 3
 slug: "pretraitement_donnees_r"
 lastmodifierdisplayname: "Sophie Baillargeon"
@@ -2576,19 +2576,25 @@ de l’objet et de ses éléments) : <code>identical(x, y)</code>.</li>
 <div id="exemples-supplémentaires-de-changement-de-mise-en-forme" class="section level2 unnumbered">
 <h2>Exemples supplémentaires de changement de mise en forme</h2>
 <p>Voici quelques exemples supplémentaires de changements de mise en forme effectués avec la fonction <code>reshape</code> ou avec le package <code>tidyr</code>.</p>
+<p>Données utilisées :</p>
+<div class="sourceCode" id="cb343"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb343-1"><a href="#cb343-1" aria-hidden="true" tabindex="-1"></a>plants_large</span></code></pre></div>
+<pre><code>##   Plant Hauteur_Temps1 Hauteur_Temps2 Diametre_Temps1 Diametre_Temps2
+## 1     a             67             69              15              15
+## 2     b             59             65              16              17
+## 3     c             62             66              13              14</code></pre>
 <div id="mise-en-forme-large-pure-vers-mise-en-forme-intermédiaire" class="section level4 unnumbered">
 <h4>Mise en forme large pure vers mise en forme intermédiaire</h4>
 <p></p>
-<div class="sourceCode" id="cb343"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb343-1"><a href="#cb343-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec reshape :</span></span>
-<span id="cb343-2"><a href="#cb343-2" aria-hidden="true" tabindex="-1"></a><span class="fu">reshape</span>(</span>
-<span id="cb343-3"><a href="#cb343-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_large,</span>
-<span id="cb343-4"><a href="#cb343-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">&quot;long&quot;</span>,</span>
-<span id="cb343-5"><a href="#cb343-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">idvar =</span> <span class="st">&quot;Plant&quot;</span>,</span>
-<span id="cb343-6"><a href="#cb343-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">timevar =</span> <span class="st">&quot;Temps&quot;</span>,</span>
-<span id="cb343-7"><a href="#cb343-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,</span>
-<span id="cb343-8"><a href="#cb343-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">v.names =</span> <span class="fu">c</span>(<span class="st">&quot;Hauteur&quot;</span>, <span class="st">&quot;Diametre&quot;</span>),</span>
-<span id="cb343-9"><a href="#cb343-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">varying =</span> <span class="fu">c</span>(<span class="st">&quot;Diametre_Temps1&quot;</span>, <span class="st">&quot;Hauteur_Temps1&quot;</span>, <span class="st">&quot;Diametre_Temps2&quot;</span>, <span class="st">&quot;Hauteur_Temps2&quot;</span>)</span>
-<span id="cb343-10"><a href="#cb343-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb345"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb345-1"><a href="#cb345-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec reshape :</span></span>
+<span id="cb345-2"><a href="#cb345-2" aria-hidden="true" tabindex="-1"></a><span class="fu">reshape</span>(</span>
+<span id="cb345-3"><a href="#cb345-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_large,</span>
+<span id="cb345-4"><a href="#cb345-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">&quot;long&quot;</span>,</span>
+<span id="cb345-5"><a href="#cb345-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">idvar =</span> <span class="st">&quot;Plant&quot;</span>,</span>
+<span id="cb345-6"><a href="#cb345-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">timevar =</span> <span class="st">&quot;Temps&quot;</span>,</span>
+<span id="cb345-7"><a href="#cb345-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,</span>
+<span id="cb345-8"><a href="#cb345-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">v.names =</span> <span class="fu">c</span>(<span class="st">&quot;Hauteur&quot;</span>, <span class="st">&quot;Diametre&quot;</span>),</span>
+<span id="cb345-9"><a href="#cb345-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">varying =</span> <span class="fu">c</span>(<span class="st">&quot;Diametre_Temps1&quot;</span>, <span class="st">&quot;Hauteur_Temps1&quot;</span>, <span class="st">&quot;Diametre_Temps2&quot;</span>, <span class="st">&quot;Hauteur_Temps2&quot;</span>)</span>
+<span id="cb345-10"><a href="#cb345-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>##     Plant Temps Hauteur Diametre
 ## a.1     a     1      67       15
 ## b.1     b     1      59       16
@@ -2596,29 +2602,29 @@ de l’objet et de ses éléments) : <code>identical(x, y)</code>.</li>
 ## a.2     a     2      69       15
 ## b.2     b     2      65       17
 ## c.2     c     2      66       14</code></pre>
-<div class="sourceCode" id="cb345"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb345-1"><a href="#cb345-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec pivot_longer :</span></span>
-<span id="cb345-2"><a href="#cb345-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Il faut réaliser la transformation en deux temps, </span></span>
-<span id="cb345-3"><a href="#cb345-3" aria-hidden="true" tabindex="-1"></a><span class="co"># parce que l&#39;argument values_to accepte seulement un nom.</span></span>
-<span id="cb345-4"><a href="#cb345-4" aria-hidden="true" tabindex="-1"></a>hauteur_long <span class="ot">&lt;-</span> <span class="fu">pivot_longer</span>(</span>
-<span id="cb345-5"><a href="#cb345-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_large,</span>
-<span id="cb345-6"><a href="#cb345-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">cols =</span> <span class="fu">c</span>(Hauteur_Temps1, Hauteur_Temps2),</span>
-<span id="cb345-7"><a href="#cb345-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_to =</span> <span class="st">&quot;Temps&quot;</span>,</span>
-<span id="cb345-8"><a href="#cb345-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_prefix =</span> <span class="st">&quot;Hauteur_Temps&quot;</span>,</span>
-<span id="cb345-9"><a href="#cb345-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">values_to =</span>  <span class="st">&quot;Hauteur&quot;</span></span>
-<span id="cb345-10"><a href="#cb345-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb345-11"><a href="#cb345-11" aria-hidden="true" tabindex="-1"></a>diametre_long <span class="ot">&lt;-</span> <span class="fu">pivot_longer</span>(</span>
-<span id="cb345-12"><a href="#cb345-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_large,</span>
-<span id="cb345-13"><a href="#cb345-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">cols =</span> <span class="fu">c</span>(Diametre_Temps1, Diametre_Temps2),</span>
-<span id="cb345-14"><a href="#cb345-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_to =</span> <span class="st">&quot;Temps&quot;</span>,</span>
-<span id="cb345-15"><a href="#cb345-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_prefix =</span> <span class="st">&quot;Diametre_Temps&quot;</span>,</span>
-<span id="cb345-16"><a href="#cb345-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">values_to =</span>  <span class="st">&quot;Diametre&quot;</span>,</span>
-<span id="cb345-17"><a href="#cb345-17" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb345-18"><a href="#cb345-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Il ne reste qu&#39;à fusionner les deux `data frames tibbles </span></span>
-<span id="cb345-19"><a href="#cb345-19" aria-hidden="true" tabindex="-1"></a><span class="co"># et à éliminer des variables.</span></span>
-<span id="cb345-20"><a href="#cb345-20" aria-hidden="true" tabindex="-1"></a><span class="fu">full_join</span>(</span>
-<span id="cb345-21"><a href="#cb345-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="fu">select</span>(hauteur_long, Plant, Temps, Hauteur),</span>
-<span id="cb345-22"><a href="#cb345-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> <span class="fu">select</span>(diametre_long, Plant, Temps, Diametre)</span>
-<span id="cb345-23"><a href="#cb345-23" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb347"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb347-1"><a href="#cb347-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec pivot_longer :</span></span>
+<span id="cb347-2"><a href="#cb347-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Il faut réaliser la transformation en deux temps, </span></span>
+<span id="cb347-3"><a href="#cb347-3" aria-hidden="true" tabindex="-1"></a><span class="co"># parce que l&#39;argument values_to accepte seulement un nom.</span></span>
+<span id="cb347-4"><a href="#cb347-4" aria-hidden="true" tabindex="-1"></a>hauteur_long <span class="ot">&lt;-</span> <span class="fu">pivot_longer</span>(</span>
+<span id="cb347-5"><a href="#cb347-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_large,</span>
+<span id="cb347-6"><a href="#cb347-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">cols =</span> <span class="fu">c</span>(Hauteur_Temps1, Hauteur_Temps2),</span>
+<span id="cb347-7"><a href="#cb347-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_to =</span> <span class="st">&quot;Temps&quot;</span>,</span>
+<span id="cb347-8"><a href="#cb347-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_prefix =</span> <span class="st">&quot;Hauteur_Temps&quot;</span>,</span>
+<span id="cb347-9"><a href="#cb347-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">values_to =</span>  <span class="st">&quot;Hauteur&quot;</span></span>
+<span id="cb347-10"><a href="#cb347-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb347-11"><a href="#cb347-11" aria-hidden="true" tabindex="-1"></a>diametre_long <span class="ot">&lt;-</span> <span class="fu">pivot_longer</span>(</span>
+<span id="cb347-12"><a href="#cb347-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_large,</span>
+<span id="cb347-13"><a href="#cb347-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">cols =</span> <span class="fu">c</span>(Diametre_Temps1, Diametre_Temps2),</span>
+<span id="cb347-14"><a href="#cb347-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_to =</span> <span class="st">&quot;Temps&quot;</span>,</span>
+<span id="cb347-15"><a href="#cb347-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_prefix =</span> <span class="st">&quot;Diametre_Temps&quot;</span>,</span>
+<span id="cb347-16"><a href="#cb347-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">values_to =</span>  <span class="st">&quot;Diametre&quot;</span>,</span>
+<span id="cb347-17"><a href="#cb347-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb347-18"><a href="#cb347-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Il ne reste qu&#39;à fusionner les deux `data frames tibbles </span></span>
+<span id="cb347-19"><a href="#cb347-19" aria-hidden="true" tabindex="-1"></a><span class="co"># et à éliminer des variables.</span></span>
+<span id="cb347-20"><a href="#cb347-20" aria-hidden="true" tabindex="-1"></a><span class="fu">full_join</span>(</span>
+<span id="cb347-21"><a href="#cb347-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="fu">select</span>(hauteur_long, Plant, Temps, Hauteur),</span>
+<span id="cb347-22"><a href="#cb347-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> <span class="fu">select</span>(diametre_long, Plant, Temps, Diametre)</span>
+<span id="cb347-23"><a href="#cb347-23" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## Joining, by = c(&quot;Plant&quot;, &quot;Temps&quot;)</code></pre>
 <pre><code>## # A tibble: 6 x 4
 ##   Plant Temps Hauteur Diametre
@@ -2633,16 +2639,16 @@ de l’objet et de ses éléments) : <code>identical(x, y)</code>.</li>
 <div id="mise-en-forme-large-pure-vers-mise-en-forme-longue-pure" class="section level4 unnumbered">
 <h4>Mise en forme large pure vers mise en forme longue pure</h4>
 <p></p>
-<div class="sourceCode" id="cb348"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb348-1"><a href="#cb348-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec reshape :</span></span>
-<span id="cb348-2"><a href="#cb348-2" aria-hidden="true" tabindex="-1"></a><span class="fu">reshape</span>(</span>
-<span id="cb348-3"><a href="#cb348-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_large,</span>
-<span id="cb348-4"><a href="#cb348-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">&quot;long&quot;</span>,</span>
-<span id="cb348-5"><a href="#cb348-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">idvar =</span> <span class="st">&quot;Plant&quot;</span>,</span>
-<span id="cb348-6"><a href="#cb348-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">timevar =</span> <span class="st">&quot;Variable&quot;</span>,</span>
-<span id="cb348-7"><a href="#cb348-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="fu">c</span>(<span class="st">&quot;Hauteur_Temps1&quot;</span>, <span class="st">&quot;Hauteur_Temps2&quot;</span>, <span class="st">&quot;Diametre_Temps1&quot;</span>, <span class="st">&quot;Diametre_Temps2&quot;</span>),</span>
-<span id="cb348-8"><a href="#cb348-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">v.names =</span> <span class="st">&quot;Valeur&quot;</span>,</span>
-<span id="cb348-9"><a href="#cb348-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">varying =</span> <span class="fu">c</span>(<span class="st">&quot;Hauteur_Temps1&quot;</span>, <span class="st">&quot;Hauteur_Temps2&quot;</span>, <span class="st">&quot;Diametre_Temps1&quot;</span>, <span class="st">&quot;Diametre_Temps2&quot;</span>)</span>
-<span id="cb348-10"><a href="#cb348-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb350"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb350-1"><a href="#cb350-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec reshape :</span></span>
+<span id="cb350-2"><a href="#cb350-2" aria-hidden="true" tabindex="-1"></a><span class="fu">reshape</span>(</span>
+<span id="cb350-3"><a href="#cb350-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_large,</span>
+<span id="cb350-4"><a href="#cb350-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">&quot;long&quot;</span>,</span>
+<span id="cb350-5"><a href="#cb350-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">idvar =</span> <span class="st">&quot;Plant&quot;</span>,</span>
+<span id="cb350-6"><a href="#cb350-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">timevar =</span> <span class="st">&quot;Variable&quot;</span>,</span>
+<span id="cb350-7"><a href="#cb350-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="fu">c</span>(<span class="st">&quot;Hauteur_Temps1&quot;</span>, <span class="st">&quot;Hauteur_Temps2&quot;</span>, <span class="st">&quot;Diametre_Temps1&quot;</span>, <span class="st">&quot;Diametre_Temps2&quot;</span>),</span>
+<span id="cb350-8"><a href="#cb350-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">v.names =</span> <span class="st">&quot;Valeur&quot;</span>,</span>
+<span id="cb350-9"><a href="#cb350-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">varying =</span> <span class="fu">c</span>(<span class="st">&quot;Hauteur_Temps1&quot;</span>, <span class="st">&quot;Hauteur_Temps2&quot;</span>, <span class="st">&quot;Diametre_Temps1&quot;</span>, <span class="st">&quot;Diametre_Temps2&quot;</span>)</span>
+<span id="cb350-10"><a href="#cb350-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>##                   Plant        Variable Valeur
 ## a.Hauteur_Temps1      a  Hauteur_Temps1     67
 ## b.Hauteur_Temps1      b  Hauteur_Temps1     59
@@ -2656,13 +2662,13 @@ de l’objet et de ses éléments) : <code>identical(x, y)</code>.</li>
 ## a.Diametre_Temps2     a Diametre_Temps2     15
 ## b.Diametre_Temps2     b Diametre_Temps2     17
 ## c.Diametre_Temps2     c Diametre_Temps2     14</code></pre>
-<div class="sourceCode" id="cb350"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb350-1"><a href="#cb350-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec pivot_longer :</span></span>
-<span id="cb350-2"><a href="#cb350-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_longer</span>(</span>
-<span id="cb350-3"><a href="#cb350-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_large,</span>
-<span id="cb350-4"><a href="#cb350-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">cols =</span> <span class="fu">c</span>(Hauteur_Temps1, Hauteur_Temps2, Diametre_Temps1, Diametre_Temps2),</span>
-<span id="cb350-5"><a href="#cb350-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_to =</span> <span class="st">&quot;Variable&quot;</span>,</span>
-<span id="cb350-6"><a href="#cb350-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">values_to =</span>  <span class="st">&quot;Valeur&quot;</span></span>
-<span id="cb350-7"><a href="#cb350-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb352"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb352-1"><a href="#cb352-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec pivot_longer :</span></span>
+<span id="cb352-2"><a href="#cb352-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_longer</span>(</span>
+<span id="cb352-3"><a href="#cb352-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_large,</span>
+<span id="cb352-4"><a href="#cb352-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">cols =</span> <span class="fu">c</span>(Hauteur_Temps1, Hauteur_Temps2, Diametre_Temps1, Diametre_Temps2),</span>
+<span id="cb352-5"><a href="#cb352-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_to =</span> <span class="st">&quot;Variable&quot;</span>,</span>
+<span id="cb352-6"><a href="#cb352-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">values_to =</span>  <span class="st">&quot;Valeur&quot;</span></span>
+<span id="cb352-7"><a href="#cb352-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## # A tibble: 12 x 3
 ##    Plant Variable        Valeur
 ##    &lt;chr&gt; &lt;chr&gt;            &lt;dbl&gt;
@@ -2682,16 +2688,16 @@ de l’objet et de ses éléments) : <code>identical(x, y)</code>.</li>
 <div id="mise-en-forme-intermédiaire-vers-mise-en-forme-longue-pure" class="section level4 unnumbered">
 <h4>Mise en forme intermédiaire vers mise en forme longue pure</h4>
 <p></p>
-<div class="sourceCode" id="cb352"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb352-1"><a href="#cb352-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec reshape :</span></span>
-<span id="cb352-2"><a href="#cb352-2" aria-hidden="true" tabindex="-1"></a><span class="fu">reshape</span>(</span>
-<span id="cb352-3"><a href="#cb352-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_inter,</span>
-<span id="cb352-4"><a href="#cb352-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">&quot;long&quot;</span>,</span>
-<span id="cb352-5"><a href="#cb352-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">idvar =</span> <span class="fu">c</span>(<span class="st">&quot;Plant&quot;</span>, <span class="st">&quot;Temps&quot;</span>), <span class="co"># n&#39;accepte pas &quot;Plant&quot; seul, car la colonne</span></span>
-<span id="cb352-6"><a href="#cb352-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">timevar =</span> <span class="st">&quot;Variable&quot;</span>,        <span class="co"># contient des combinaisons répétées</span></span>
-<span id="cb352-7"><a href="#cb352-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="fu">c</span>(<span class="st">&quot;Hauteur&quot;</span>, <span class="st">&quot;Diametre&quot;</span>),</span>
-<span id="cb352-8"><a href="#cb352-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">v.names =</span> <span class="st">&quot;Valeur&quot;</span>,</span>
-<span id="cb352-9"><a href="#cb352-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">varying =</span> <span class="fu">c</span>(<span class="st">&quot;Hauteur&quot;</span>, <span class="st">&quot;Diametre&quot;</span>)</span>
-<span id="cb352-10"><a href="#cb352-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb354"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb354-1"><a href="#cb354-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec reshape :</span></span>
+<span id="cb354-2"><a href="#cb354-2" aria-hidden="true" tabindex="-1"></a><span class="fu">reshape</span>(</span>
+<span id="cb354-3"><a href="#cb354-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_inter,</span>
+<span id="cb354-4"><a href="#cb354-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">&quot;long&quot;</span>,</span>
+<span id="cb354-5"><a href="#cb354-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">idvar =</span> <span class="fu">c</span>(<span class="st">&quot;Plant&quot;</span>, <span class="st">&quot;Temps&quot;</span>), <span class="co"># n&#39;accepte pas &quot;Plant&quot; seul, car la colonne</span></span>
+<span id="cb354-6"><a href="#cb354-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">timevar =</span> <span class="st">&quot;Variable&quot;</span>,        <span class="co"># contient des combinaisons répétées</span></span>
+<span id="cb354-7"><a href="#cb354-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="fu">c</span>(<span class="st">&quot;Hauteur&quot;</span>, <span class="st">&quot;Diametre&quot;</span>),</span>
+<span id="cb354-8"><a href="#cb354-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">v.names =</span> <span class="st">&quot;Valeur&quot;</span>,</span>
+<span id="cb354-9"><a href="#cb354-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">varying =</span> <span class="fu">c</span>(<span class="st">&quot;Hauteur&quot;</span>, <span class="st">&quot;Diametre&quot;</span>)</span>
+<span id="cb354-10"><a href="#cb354-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>##              Plant Temps Variable Valeur
 ## a.1.Hauteur      a     1  Hauteur     67
 ## b.1.Hauteur      b     1  Hauteur     59
@@ -2705,13 +2711,13 @@ de l’objet et de ses éléments) : <code>identical(x, y)</code>.</li>
 ## a.2.Diametre     a     2 Diametre     15
 ## b.2.Diametre     b     2 Diametre     17
 ## c.2.Diametre     c     2 Diametre     14</code></pre>
-<div class="sourceCode" id="cb354"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb354-1"><a href="#cb354-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec pivot_longer :</span></span>
-<span id="cb354-2"><a href="#cb354-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_longer</span>(</span>
-<span id="cb354-3"><a href="#cb354-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_inter,</span>
-<span id="cb354-4"><a href="#cb354-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">cols =</span> <span class="fu">c</span>(Hauteur, Diametre),</span>
-<span id="cb354-5"><a href="#cb354-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_to =</span> <span class="st">&quot;Variable&quot;</span>,</span>
-<span id="cb354-6"><a href="#cb354-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">values_to =</span>  <span class="st">&quot;Valeur&quot;</span></span>
-<span id="cb354-7"><a href="#cb354-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb356"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb356-1"><a href="#cb356-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec pivot_longer :</span></span>
+<span id="cb356-2"><a href="#cb356-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_longer</span>(</span>
+<span id="cb356-3"><a href="#cb356-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_inter,</span>
+<span id="cb356-4"><a href="#cb356-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">cols =</span> <span class="fu">c</span>(Hauteur, Diametre),</span>
+<span id="cb356-5"><a href="#cb356-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_to =</span> <span class="st">&quot;Variable&quot;</span>,</span>
+<span id="cb356-6"><a href="#cb356-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">values_to =</span>  <span class="st">&quot;Valeur&quot;</span></span>
+<span id="cb356-7"><a href="#cb356-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## # A tibble: 12 x 4
 ##    Plant Temps Variable Valeur
 ##    &lt;chr&gt; &lt;int&gt; &lt;chr&gt;     &lt;dbl&gt;
@@ -2732,14 +2738,14 @@ de l’objet et de ses éléments) : <code>identical(x, y)</code>.</li>
 <h4>Mise en forme longue pure vers mise en forme intermédiaire</h4>
 <p></p>
 <p>Il faut partir de <code>plants_long</code>.</p>
-<div class="sourceCode" id="cb356"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb356-1"><a href="#cb356-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec reshape :</span></span>
-<span id="cb356-2"><a href="#cb356-2" aria-hidden="true" tabindex="-1"></a><span class="fu">reshape</span>(</span>
-<span id="cb356-3"><a href="#cb356-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_long,</span>
-<span id="cb356-4"><a href="#cb356-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">&quot;wide&quot;</span>,</span>
-<span id="cb356-5"><a href="#cb356-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">idvar =</span> <span class="fu">c</span>(<span class="st">&quot;Plant&quot;</span>, <span class="st">&quot;Temps&quot;</span>),</span>
-<span id="cb356-6"><a href="#cb356-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">timevar =</span> <span class="st">&quot;Variable&quot;</span>,</span>
-<span id="cb356-7"><a href="#cb356-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">v.names =</span> <span class="st">&quot;Valeur&quot;</span></span>
-<span id="cb356-8"><a href="#cb356-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb358"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb358-1"><a href="#cb358-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec reshape :</span></span>
+<span id="cb358-2"><a href="#cb358-2" aria-hidden="true" tabindex="-1"></a><span class="fu">reshape</span>(</span>
+<span id="cb358-3"><a href="#cb358-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_long,</span>
+<span id="cb358-4"><a href="#cb358-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">&quot;wide&quot;</span>,</span>
+<span id="cb358-5"><a href="#cb358-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">idvar =</span> <span class="fu">c</span>(<span class="st">&quot;Plant&quot;</span>, <span class="st">&quot;Temps&quot;</span>),</span>
+<span id="cb358-6"><a href="#cb358-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">timevar =</span> <span class="st">&quot;Variable&quot;</span>,</span>
+<span id="cb358-7"><a href="#cb358-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">v.names =</span> <span class="st">&quot;Valeur&quot;</span></span>
+<span id="cb358-8"><a href="#cb358-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>##   Plant Temps Valeur.Hauteur Valeur.Diametre
 ## 1     a     1             67              15
 ## 2     b     1             59              16
@@ -2747,12 +2753,12 @@ de l’objet et de ses éléments) : <code>identical(x, y)</code>.</li>
 ## 4     a     2             69              15
 ## 5     b     2             65              17
 ## 6     c     2             66              14</code></pre>
-<div class="sourceCode" id="cb358"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb358-1"><a href="#cb358-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec pivot_wider :</span></span>
-<span id="cb358-2"><a href="#cb358-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_wider</span>(</span>
-<span id="cb358-3"><a href="#cb358-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_long,</span>
-<span id="cb358-4"><a href="#cb358-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_from =</span> Variable,</span>
-<span id="cb358-5"><a href="#cb358-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">values_from =</span> Valeur</span>
-<span id="cb358-6"><a href="#cb358-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb360"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb360-1"><a href="#cb360-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec pivot_wider :</span></span>
+<span id="cb360-2"><a href="#cb360-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_wider</span>(</span>
+<span id="cb360-3"><a href="#cb360-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_long,</span>
+<span id="cb360-4"><a href="#cb360-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_from =</span> Variable,</span>
+<span id="cb360-5"><a href="#cb360-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">values_from =</span> Valeur</span>
+<span id="cb360-6"><a href="#cb360-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## # A tibble: 6 x 4
 ##   Plant Temps Hauteur Diametre
 ##   &lt;chr&gt; &lt;int&gt;   &lt;dbl&gt;    &lt;dbl&gt;
@@ -2767,14 +2773,14 @@ de l’objet et de ses éléments) : <code>identical(x, y)</code>.</li>
 <h4>Mise en forme longue pure vers mise en forme large pure</h4>
 <p></p>
 <p>Il faut partir de <code>plants_long_2</code>.</p>
-<div class="sourceCode" id="cb360"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb360-1"><a href="#cb360-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec reshape :</span></span>
-<span id="cb360-2"><a href="#cb360-2" aria-hidden="true" tabindex="-1"></a><span class="fu">reshape</span>(</span>
-<span id="cb360-3"><a href="#cb360-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_long_2,</span>
-<span id="cb360-4"><a href="#cb360-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">&quot;wide&quot;</span>,</span>
-<span id="cb360-5"><a href="#cb360-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">idvar =</span> <span class="st">&quot;Plant&quot;</span>,</span>
-<span id="cb360-6"><a href="#cb360-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">timevar =</span> <span class="st">&quot;Variable&quot;</span>,</span>
-<span id="cb360-7"><a href="#cb360-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">v.names =</span> <span class="st">&quot;Valeur&quot;</span></span>
-<span id="cb360-8"><a href="#cb360-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb362"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb362-1"><a href="#cb362-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec reshape :</span></span>
+<span id="cb362-2"><a href="#cb362-2" aria-hidden="true" tabindex="-1"></a><span class="fu">reshape</span>(</span>
+<span id="cb362-3"><a href="#cb362-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_long_2,</span>
+<span id="cb362-4"><a href="#cb362-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">&quot;wide&quot;</span>,</span>
+<span id="cb362-5"><a href="#cb362-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">idvar =</span> <span class="st">&quot;Plant&quot;</span>,</span>
+<span id="cb362-6"><a href="#cb362-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">timevar =</span> <span class="st">&quot;Variable&quot;</span>,</span>
+<span id="cb362-7"><a href="#cb362-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">v.names =</span> <span class="st">&quot;Valeur&quot;</span></span>
+<span id="cb362-8"><a href="#cb362-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>##   Plant Valeur.Hauteur_Temps1 Valeur.Hauteur_Temps2 Valeur.Diametre_Temps1
 ## 1     a                    67                    69                     15
 ## 2     b                    59                    65                     16
@@ -2783,12 +2789,12 @@ de l’objet et de ses éléments) : <code>identical(x, y)</code>.</li>
 ## 1                     15
 ## 2                     17
 ## 3                     14</code></pre>
-<div class="sourceCode" id="cb362"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb362-1"><a href="#cb362-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec pivot_wider :</span></span>
-<span id="cb362-2"><a href="#cb362-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_wider</span>(</span>
-<span id="cb362-3"><a href="#cb362-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_long_2,</span>
-<span id="cb362-4"><a href="#cb362-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_from =</span> Variable,</span>
-<span id="cb362-5"><a href="#cb362-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">values_from =</span> Valeur</span>
-<span id="cb362-6"><a href="#cb362-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb364"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb364-1"><a href="#cb364-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec pivot_wider :</span></span>
+<span id="cb364-2"><a href="#cb364-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_wider</span>(</span>
+<span id="cb364-3"><a href="#cb364-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_long_2,</span>
+<span id="cb364-4"><a href="#cb364-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_from =</span> Variable,</span>
+<span id="cb364-5"><a href="#cb364-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">values_from =</span> Valeur</span>
+<span id="cb364-6"><a href="#cb364-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## # A tibble: 3 x 5
 ##   Plant Hauteur_Temps1 Hauteur_Temps2 Diametre_Temps1 Diametre_Temps2
 ##   &lt;chr&gt;          &lt;dbl&gt;          &lt;dbl&gt;           &lt;dbl&gt;           &lt;dbl&gt;
@@ -2799,24 +2805,24 @@ de l’objet et de ses éléments) : <code>identical(x, y)</code>.</li>
 <div id="mise-en-forme-intermédiaire-vers-mise-en-forme-large-pure" class="section level4 unnumbered">
 <h4>Mise en forme intermédiaire vers mise en forme large pure</h4>
 <p></p>
-<div class="sourceCode" id="cb364"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb364-1"><a href="#cb364-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec reshape :</span></span>
-<span id="cb364-2"><a href="#cb364-2" aria-hidden="true" tabindex="-1"></a><span class="fu">reshape</span>(</span>
-<span id="cb364-3"><a href="#cb364-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_inter,</span>
-<span id="cb364-4"><a href="#cb364-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">&quot;wide&quot;</span>,</span>
-<span id="cb364-5"><a href="#cb364-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">idvar =</span> <span class="st">&quot;Plant&quot;</span>,</span>
-<span id="cb364-6"><a href="#cb364-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">timevar =</span> <span class="st">&quot;Temps&quot;</span>,</span>
-<span id="cb364-7"><a href="#cb364-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">v.names =</span> <span class="fu">c</span>(<span class="st">&quot;Hauteur&quot;</span>, <span class="st">&quot;Diametre&quot;</span>)</span>
-<span id="cb364-8"><a href="#cb364-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb366"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb366-1"><a href="#cb366-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec reshape :</span></span>
+<span id="cb366-2"><a href="#cb366-2" aria-hidden="true" tabindex="-1"></a><span class="fu">reshape</span>(</span>
+<span id="cb366-3"><a href="#cb366-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_inter,</span>
+<span id="cb366-4"><a href="#cb366-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">&quot;wide&quot;</span>,</span>
+<span id="cb366-5"><a href="#cb366-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">idvar =</span> <span class="st">&quot;Plant&quot;</span>,</span>
+<span id="cb366-6"><a href="#cb366-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">timevar =</span> <span class="st">&quot;Temps&quot;</span>,</span>
+<span id="cb366-7"><a href="#cb366-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">v.names =</span> <span class="fu">c</span>(<span class="st">&quot;Hauteur&quot;</span>, <span class="st">&quot;Diametre&quot;</span>)</span>
+<span id="cb366-8"><a href="#cb366-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>##   Plant Hauteur.1 Diametre.1 Hauteur.2 Diametre.2
 ## 1     a        67         15        69         15
 ## 2     b        59         16        65         17
 ## 3     c        62         13        66         14</code></pre>
-<div class="sourceCode" id="cb366"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb366-1"><a href="#cb366-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec pivot_wider :</span></span>
-<span id="cb366-2"><a href="#cb366-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_wider</span>(</span>
-<span id="cb366-3"><a href="#cb366-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_inter,</span>
-<span id="cb366-4"><a href="#cb366-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_from =</span> Temps,</span>
-<span id="cb366-5"><a href="#cb366-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">values_from =</span> <span class="fu">c</span>(Hauteur, Diametre)</span>
-<span id="cb366-6"><a href="#cb366-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb368"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb368-1"><a href="#cb368-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec pivot_wider :</span></span>
+<span id="cb368-2"><a href="#cb368-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_wider</span>(</span>
+<span id="cb368-3"><a href="#cb368-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> plants_inter,</span>
+<span id="cb368-4"><a href="#cb368-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">names_from =</span> Temps,</span>
+<span id="cb368-5"><a href="#cb368-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">values_from =</span> <span class="fu">c</span>(Hauteur, Diametre)</span>
+<span id="cb368-6"><a href="#cb368-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## # A tibble: 3 x 5
 ##   Plant Hauteur_1 Hauteur_2 Diametre_1 Diametre_2
 ##   &lt;chr&gt;     &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
