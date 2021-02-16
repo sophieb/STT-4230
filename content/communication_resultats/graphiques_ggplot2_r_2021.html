@@ -1,0 +1,1207 @@
+---
+title: "Graphiques avec ggplot2 en R"
+author: "Sophie Baillargeon, Université Laval"
+date: '2021-02-16'
+weight: 2
+slug: "graphiques_ggplot2_r"
+lastmodifierdisplayname: "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+    highlight: tango
+  blogdown::html_page:
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+    highlight: tango
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+editor_options:
+  chunk_output_type: console
+always_allow_html: yes
+---
+
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #f8f8f8; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction"><span class="toc-section-number">1</span> Introduction</a></li>
+<li><a href="#principes-de-base-de-ggplot2"><span class="toc-section-number">2</span> Principes de base de <code>ggplot2</code></a>
+<ul>
+<li><a href="#grammaire-graphique"><span class="toc-section-number">2.1</span> Grammaire graphique</a></li>
+<li><a href="#principales-fonctions-et-gabarit-de-code"><span class="toc-section-number">2.2</span> Principales fonctions et gabarit de code</a></li>
+<li><a href="#objet-de-classe-ggplot"><span class="toc-section-number">2.3</span> Objet de classe <code>ggplot</code></a></li>
+<li><a href="#démarche-de-création-dun-graphique-ggplot2"><span class="toc-section-number">2.4</span> Démarche de création d’un graphique <code>ggplot2</code></a></li>
+</ul></li>
+<li><a href="#quelques-exemples"><span class="toc-section-number">3</span> Quelques exemples</a>
+<ul>
+<li><a href="#exemples-de-configurations-graphiques-simples"><span class="toc-section-number">3.1</span> Exemples de configurations graphiques simples</a>
+<ul>
+<li><a href="#ajout-dun-titre-et-de-noms-daxes---fonction-labs"><span class="toc-section-number">3.1.1</span> Ajout d’un titre et de noms d’axes - fonction <code>labs</code></a></li>
+<li><a href="#ajout-dune-variable-associée-à-une-propriété-visuelle-autre-quun-axe"><span class="toc-section-number">3.1.2</span> Ajout d’une variable associée à une propriété visuelle autre qu’un axe</a></li>
+<li><a href="#échelles-de-couleurs---fonctions-de-type-scale_colour_-et-scale_fill_"><span class="toc-section-number">3.1.3</span> Échelles de couleurs - fonctions de type <code>scale_colour_*</code> et <code>scale_fill_*</code></a></li>
+<li><a href="#ajout-de-variables-par-lintermédiaire-dune-grille-de-sous-graphiques-facets"><span class="toc-section-number">3.1.4</span> Ajout de variables par l’intermédiaire d’une grille de sous-graphiques (<em>facets</em>)</a></li>
+</ul></li>
+<li><a href="#exemples-de-graphiques-de-différents-types"><span class="toc-section-number">3.2</span> Exemples de graphiques de différents types</a>
+<ul>
+<li><a href="#diagramme-à-barres---fonctions-geom_bar-et-geom_col"><span class="toc-section-number">3.2.1</span> Diagramme à barres - fonctions <code>geom_bar</code> et <code>geom_col</code></a></li>
+<li><a href="#diagramme-en-secteurs---coordonnées-polaires-avec-coord_polar"><span class="toc-section-number">3.2.2</span> Diagramme en secteurs - coordonnées polaires avec <code>coord_polar</code></a></li>
+<li><a href="#courbes-de-densité-à-noyau-superposées---fonction-geom_density"><span class="toc-section-number">3.2.3</span> Courbes de densité à noyau superposées - fonction <code>geom_density</code></a></li>
+<li><a href="#diagrammes-en-violons-juxtaposés---fonction-geom_violin"><span class="toc-section-number">3.2.4</span> Diagrammes en violons juxtaposés - fonction <code>geom_violin</code></a></li>
+<li><a href="#diagrammes-en-boîtes-juxtaposés---fonction-geom_boxplot"><span class="toc-section-number">3.2.5</span> Diagrammes en boîtes juxtaposés - fonction <code>geom_boxplot</code></a></li>
+</ul></li>
+<li><a href="#exemples-divers-plus-poussés"><span class="toc-section-number">3.3</span> Exemples divers plus poussés</a>
+<ul>
+<li><a href="#solutions-aux-observations-superposées-overplotting"><span class="toc-section-number">3.3.1</span> Solutions aux observations superposées (<em>overplotting</em>)</a></li>
+<li><a href="#représentation-graphique-dune-fonction"><span class="toc-section-number">3.3.2</span> Représentation graphique d’une fonction</a></li>
+<li><a href="#mise-en-forme-dune-légende"><span class="toc-section-number">3.3.3</span> Mise en forme d’une légende</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#packages-souvent-utilisés-avec-ggplot2"><span class="toc-section-number">4</span> Packages souvent utilisés avec <code>ggplot2</code></a>
+<ul>
+<li><a href="#le-tidyverse"><span class="toc-section-number">4.1</span> Le <code>tidyverse</code></a></li>
+<li><a href="#extensions"><span class="toc-section-number">4.2</span> Extensions</a></li>
+<li><a href="#cartes-géographiques"><span class="toc-section-number">4.3</span> Cartes géographiques</a></li>
+</ul></li>
+<li><a href="#comparaison-entre-ggplot2-et-le-système-graphique-r-de-base"><span class="toc-section-number">5</span> Comparaison entre <code>ggplot2</code> et le système graphique R de base</a></li>
+<li><a href="#résumé"><span class="toc-section-number">6</span> Résumé</a></li>
+<li><a href="#références">Références</a></li>
+</ul>
+</div>
+
+<hr />
+<p><em>Note préliminaire : Lors de leur dernière mise à jour, ces notes ont été révisées en utilisant R 4.0.3, le package <code>ggplot2</code> version 3.3.3, le package <code>dplyr</code> version 1.0.3, le package <code>forcats</code> version 0.5.1 et le package <code>maps</code> version 3.3.0. Pour d’autres versions, les informations peuvent différer.</em></p>
+<hr />
+<div id="introduction" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Introduction</h1>
+<p>Le <a href="http://ggplot2.tidyverse.org/">package <code>ggplot2</code></a> a été publié pour la première fois en 2006 sous le nom de <code>ggplot</code>. Il fut amélioré de façon importante et renommé <code>ggplot2</code> en 2007. Son créateur est Hadley Wickham, qui est aussi derrière plusieurs des packages du <a href="https://www.tidyverse.org/"><code>tidyverse</code></a>, duquel <code>ggplot2</code> fait partie. Le package est maintenant <a href="https://CRAN.R-project.org/package=ggplot2">développé par toute une équipe</a>, dont des employés de RStudio. Il implémente la <strong>grammaire graphique</strong> présentée dans : « Wilkinson, L. (2005). <em>The grammar of graphics</em>, 2<sup>e</sup> édition. Springer ».</p>
+<p>Le package <code>ggplot2</code> a été conçu en ayant comme objectif la <strong>simplicité d’utilisation</strong> et la <strong>qualité des graphiques produits</strong>. Il reprend les forces suivantes des systèmes graphiques R précédents :</p>
+<ul>
+<li>système de base : création de graphiques par <strong>couches</strong> (ajouts séquentiels d’éléments);</li>
+<li>package <code>lattice</code> : <strong>représentations multivariées</strong> simples.</li>
+</ul>
+<p>tout en apportant les améliorations suivantes :</p>
+<ul>
+<li><strong>esthétique</strong> par défaut pensée de façon à transmettre plus efficacement les informations contenues dans le graphique;</li>
+<li><strong>automatisation de certaines configurations</strong> graphiques, notamment les légendes;</li>
+<li><strong>ajout de transformations statistiques</strong> communes (p. ex. courbes de lissage, barres d’erreur) facilité.</li>
+</ul>
+<p>Dans le package <code>ggplot2</code>, tout a été repensé pour être plus simple d’utilisation et surtout pour que le graphique produit transmette plus efficacement l’information qu’il contient.</p>
+<p><img src="fig/ggplot2_masterpiece.png" width="100%" style="display: block; margin: auto;" /></p>
+<p><em>Illustration de <span class="citation">@allison_horst</span></em> : <a href="https://github.com/allisonhorst/stats-illustrations" class="uri">https://github.com/allisonhorst/stats-illustrations</a></p>
+<p>L’utilisation du package <code>ggplot2</code> est présentée ici de façon brève, mais avec tout de même assez de détails pour démarrer un apprentissage de cet outil aux possibilités vastes.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chargement du package</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div>
+<div id="présentation-des-données-utilisées-pour-les-exemples" class="section level4 unnumbered">
+<h4>Présentation des données utilisées pour les exemples</h4>
+<p></p>
+<p>Comme dans les <a href="https://stt4230.rbind.io/communication_resultats/graphiques_r/">autres notes sur les graphiques en R</a>, les données <code>quakes</code> auxquelles deux facteurs sont ajoutés sont utilisées dans les exemples de cette fiche.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>quakes<span class="sc">$</span>mag_catego <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">floor</span>(quakes<span class="sc">$</span>mag))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>quakes<span class="sc">$</span>region <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(quakes<span class="sc">$</span>long <span class="sc">&lt;</span> <span class="dv">175</span>, <span class="at">yes =</span> <span class="st">&quot;Ouest&quot;</span>, <span class="at">no =</span> <span class="st">&quot;Est&quot;</span>), </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Ouest&quot;</span>, <span class="st">&quot;Est&quot;</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(quakes)</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    1000 obs. of  7 variables:
+##  $ lat       : num  -20.4 -20.6 -26 -18 -20.4 ...
+##  $ long      : num  182 181 184 182 182 ...
+##  $ depth     : int  562 650 42 626 649 195 82 194 211 622 ...
+##  $ mag       : num  4.8 4.2 5.4 4.1 4 4 4.8 4.4 4.7 4.3 ...
+##  $ stations  : int  41 15 43 19 11 12 43 15 35 19 ...
+##  $ mag_catego: Factor w/ 3 levels &quot;4&quot;,&quot;5&quot;,&quot;6&quot;: 1 1 2 1 1 1 1 1 1 1 ...
+##  $ region    : Factor w/ 2 levels &quot;Ouest&quot;,&quot;Est&quot;: 2 2 2 2 2 2 1 2 2 2 ...</code></pre>
+</div>
+</div>
+<div id="principes-de-base-de-ggplot2" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Principes de base de <code>ggplot2</code></h1>
+<div id="grammaire-graphique" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Grammaire graphique</h2>
+<p>Le principe de base derrière la <strong>g</strong>rammaire <strong>g</strong>raphique (d’où le <code>gg</code> dans <code>ggplot</code>) est qu’un graphique statistique est une représentation de <strong>données</strong>, dans un <strong>système de coordonnées</strong> spécifique, divisée en éléments de base :</p>
+<ul>
+<li><strong>éléments géométriques</strong> (<em>geoms</em>) : points, lignes, barres, etc.;</li>
+<li><strong>propriétés visuelles</strong> (<em>aesthetics</em>) des éléments géométriques : axes, couleurs, formes, tailles, etc.</li>
+<li><strong>transformations statistiques</strong>, si désiré : courbe de régression ou de lissage, région d’erreur, etc.</li>
+</ul>
+<p>Un graphique est spécifié en <strong>associant des variables</strong>, provenant des données, <strong>à des propriétés visuelles</strong> des éléments géométriques du graphique. Ces principes sont représentés comme suit sur la feuille de triche officielle du package.</p>
+<p><img src="fig/grammarBasics.png" width="60%" style="display: block; margin: auto;" /></p>
+<p><em>Source</em> : <a href="https://github.com/rstudio/cheatsheets/blob/master/data-visualization-2.1.pdf" class="uri">https://github.com/rstudio/cheatsheets/blob/master/data-visualization-2.1.pdf</a></p>
+</div>
+<div id="principales-fonctions-et-gabarit-de-code" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Principales fonctions et gabarit de code</h2>
+<p>Les principales fonctions du package <code>ggplot2</code> sont les suivantes :</p>
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/ggplot.html"><code>ggplot</code></a> : initialisation d’un objet de classe <code>ggplot</code>;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/qplot.html"><code>qplot</code></a> : initialisation rapide (<code>q</code> pour <em>quick</em>) d’un objet <code>ggplot</code>;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/gg-add.html"><code>+</code></a> : opérateur pour l’ajout de couches ou la modification de configurations dans un objet <code>ggplot</code>;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/index.html#section-layer-geoms">fonctions de type <code>geom_*</code></a> (p. ex. <code>geom_point</code>, <code>geom_boxplot</code>, <code>geom_bar</code>, etc.) : spécification de couches à ajouter à un graphique;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/aes.html"><code>aes</code></a> : création d’un <code>mapping</code>, soit une association entre entre des propriétés visuelles et des variables;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/ggsave.html"><code>ggsave</code></a> : enregistrement d’un graphique.</li>
+</ul>
+<p>Notons que l’utilisation de la fonction <code>qplot</code> est plus intuitive que celle de <code>ggplot</code> pour des gens familiers avec <code>plot</code>. La fonction <code>qplot</code> n’offre cependant pas toutes les possibilités de <code>ggplot</code>. Elle ne sera pas couverte dans ce document.</p>
+<p>Voici un gabarit minimaliste de code de création d’un graphique <code>ggplot2</code> (<em>source</em> : <a href="http://r4ds.had.co.nz/data-visualisation.html#a-graphing-template" class="uri">http://r4ds.had.co.nz/data-visualisation.html#a-graphing-template</a>) :</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> <span class="sc">&lt;</span>DATA<span class="sc">&gt;</span>) <span class="sc">+</span> </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="er">&lt;</span>GEOM_FUNCTION<span class="sc">&gt;</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="sc">&lt;</span>MAPPINGS<span class="sc">&gt;</span>))</span></code></pre></div>
+<p>ou encore la version « tout sur la même ligne » :</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> <span class="sc">&lt;</span>DATA<span class="sc">&gt;</span>) <span class="sc">+</span> <span class="er">&lt;</span>GEOM_FUNCTION<span class="sc">&gt;</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="sc">&lt;</span>MAPPINGS<span class="sc">&gt;</span>))</span></code></pre></div>
+<p>Dans ce gabarit, il faut remplacer les éléments entre <code>&lt;</code> et <code>&gt;</code> comme suit :</p>
+<ul>
+<li><code>&lt;DATA&gt;</code> = jeu de données, stocké dans un <strong>data frame</strong> (ou un tibble), dans lequel les variables catégoriques doivent être des <strong>facteurs</strong> (dont <strong>les libellés des niveaux ont avantage à être informatifs</strong>, car ils apparaîtront dans le graphique);</li>
+<li><code>&lt;GEOM_FUNCTION&gt;</code> = le nom d’une fonction de type <code>geom_*</code> pour ajouter une couche au graphique;</li>
+<li><code>&lt;MAPPINGS&gt;</code> = arguments à fournir à la fonction <code>aes</code> (les arguments acceptés varient un peu selon la <code>&lt;GEOM_FUNCTION&gt;</code>).</li>
+</ul>
+<p>Voici un premier exemple simple.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> quakes) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mag, <span class="at">y =</span> stations))</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-8-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Les arguments <code>data</code> et <code>mapping</code> peuvent être fournis :</p>
+<ul>
+<li>à la fonction <code>ggplot</code> : leur valeur est alors commune à toutes le couches<br />
+(il est tout de même possible de forcer l’utilisation d’autres données ou d’autres associations pour des couches spécifiques);</li>
+<li>ou à une <code>&lt;GEOM_FUNCTION&gt;</code> : leur valeur est alors spécifique à la couche produite.</li>
+</ul>
+<p>Étant donné que le graphique produit par le gabarit minimaliste ne comprend qu’une seule couche, les syntaxes suivantes sont donc équivalentes à celle du gabarit.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Argument data spécifique (fourni dans l&#39;appel à la &lt;GEOM_FUNCTION&gt;)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="er">&lt;</span>GEOM_FUNCTION<span class="sc">&gt;</span>(<span class="at">data =</span> <span class="sc">&lt;</span>DATA<span class="sc">&gt;</span>, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="sc">&lt;</span>MAPPINGS<span class="sc">&gt;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Argument mapping global (fourni dans l&#39;appel à ggplot)</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> <span class="sc">&lt;</span>DATA<span class="sc">&gt;</span>, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="sc">&lt;</span>MAPPINGS<span class="sc">&gt;</span>)) <span class="sc">+</span> <span class="er">&lt;</span>GEOM_FUNCTION<span class="sc">&gt;</span>()</span></code></pre></div>
+<div id="quelques-fonctions-de-type-geom_" class="section level4 unnumbered">
+<h4>Quelques fonctions de type <code>geom_*</code> :</h4>
+<p></p>
+<table>
+<colgroup>
+<col width="16%" />
+<col width="29%" />
+<col width="54%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Fonction</th>
+<th>Type de graphique</th>
+<th>Élément(s) ajouté(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="http://ggplot2.tidyverse.org/reference/geom_point.html"><code>geom_point</code></a></td>
+<td>diagramme de dispersion</td>
+<td>points selon des coordonnées</td>
+</tr>
+<tr class="even">
+<td><a href="http://ggplot2.tidyverse.org/reference/geom_path.html"><code>geom_line</code></a></td>
+<td>diagramme en lignes</td>
+<td>segments de droites reliant des points</td>
+</tr>
+<tr class="odd">
+<td><a href="http://ggplot2.tidyverse.org/reference/geom_bar.html"><code>geom_bar</code></a></td>
+<td>diagramme à barres</td>
+<td>barres disjointes, de hauteurs spécifiées ou calculées = fréquences des niveaux d’un facteur</td>
+</tr>
+<tr class="even">
+<td><a href="http://ggplot2.tidyverse.org/reference/geom_histogram.html"><code>geom_histogram</code></a></td>
+<td>histogramme</td>
+<td>barres collées, de hauteurs calculées = fréquences d’observations d’une variable numérique tombant dans des intervalles joints (<em>bin</em>)</td>
+</tr>
+<tr class="odd">
+<td><a href="http://ggplot2.tidyverse.org/reference/geom_boxplot.html"><code>geom_boxplot</code></a></td>
+<td>diagramme en boîte</td>
+<td><em>boxplots</em></td>
+</tr>
+<tr class="even">
+<td><a href="http://ggplot2.tidyverse.org/reference/geom_density.html"><code>geom_density</code></a></td>
+<td>courbe de densité à noyau</td>
+<td>courbe de la densité estimée par noyau (<em>kernel density</em>)</td>
+</tr>
+<tr class="odd">
+<td><a href="http://ggplot2.tidyverse.org/reference/geom_qq.html"><code>geom_qq</code></a></td>
+<td>diagramme quantile-quantile théorique</td>
+<td>points pour les couples de quantiles empiriques et théoriques</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\vdots\)</span></td>
+<td>il en existe plusieurs autres</td>
+<td>voir <a href="http://ggplot2.tidyverse.org/reference/" class="uri">http://ggplot2.tidyverse.org/reference/</a></td>
+</tr>
+</tbody>
+</table>
+<p>La plupart de ces fonctions cachent des transformations statistiques (p. ex. <code>geom_bar</code> et <code>geom_histogram</code> calculent des fréquences, <code>geom_boxplot</code> calcule des quantiles, <code>geom_density</code> estime une densité, etc.)</p>
+</div>
+<div id="quelques-autres-fonctions-communes" class="section level4 unnumbered">
+<h4>Quelques autres fonctions communes :</h4>
+<p></p>
+<p>Voici quelques autres fonctions communes de <code>ggplot2</code> servant à ajouter des couches ou modifier des configurations dans un objet <code>ggplot</code> initialisé :</p>
+<ul>
+<li>fonctions <a href="http://ggplot2.tidyverse.org/reference/labs.html"><code>labs</code>, <code>ggtitle</code>, <code>xlab</code>, <code>ylab</code></a> : ajouter un titre, modifier les noms d’axes;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/index.html#section-coordinate-systems">fonctions de type <code>coord_*</code></a> : modifier des configurations reliées au système de coordonnées;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/index.html#section-facetting">fonctions de type <code>facet_*</code></a> : créer des grilles de sous-graphiques
+<ul>
+<li>chacun des sous-graphiques est conditionnel à la valeur de facteurs(s), il représente donc seulement le sous-ensemble des observations ayant une modalité particulière pour ce(s) facteur(s);</li>
+</ul></li>
+<li><a href="https://ggplot2.tidyverse.org/reference/index.html#section-scales">fonctions de type <code>scale_*</code></a> : modifier les échelles de certaines propriétés visuelles (p. ex. couleurs, formes, tailles, etc.)</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/index.html#section-themes">fonctions de type <code>theme_*</code></a> : modifier des configurations reliées à l’apparence du graphique;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/index.html#section-layer-stats">fonctions de type <code>stat_*</code></a> : ajouts d’éléments tirés d’un calcul mathématique ou statistique.</li>
+</ul>
+<p>Le gabarit minimaliste présenté précédemment pourrait être rendu plus complet comme suit.</p>
+<p><img src="fig/template.png" width="60%" style="display: block; margin: auto;" /></p>
+<p><em>Source</em> : <a href="https://github.com/rstudio/cheatsheets/blob/master/data-visualization-2.1.pdf" class="uri">https://github.com/rstudio/cheatsheets/blob/master/data-visualization-2.1.pdf</a></p>
+</div>
+</div>
+<div id="objet-de-classe-ggplot" class="section level2" number="2.3">
+<h2><span class="header-section-number">2.3</span> Objet de classe <code>ggplot</code></h2>
+<p>Un graphique produit en <code>ggplot2</code> est en fait un objet de classe <code>ggplot</code>. La fonction <code>ggplot</code> initialise un objet de cette classe.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>mon_graph <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> quakes)</span></code></pre></div>
+<p>Nous pouvons ajouter des couches à un objet <code>ggplot</code> avec l’opérateur <code>+</code>.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>mon_graph <span class="ot">&lt;-</span> mon_graph <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mag, <span class="at">y =</span> stations))</span></code></pre></div>
+<p>Il est possible d’observer le contenu de l’objet.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(mon_graph)  <span class="co"># non évalué, car la sortie est longue</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mon_graph)</span></code></pre></div>
+<pre><code>## data: lat, long, depth, mag, stations, mag_catego, region [1000x7]
+## faceting: &lt;ggproto object: Class FacetNull, Facet, gg&gt;
+##     compute_layout: function
+##     draw_back: function
+##     draw_front: function
+##     draw_labels: function
+##     draw_panels: function
+##     finish_data: function
+##     init_scales: function
+##     map_data: function
+##     params: list
+##     setup_data: function
+##     setup_params: function
+##     shrink: TRUE
+##     train_scales: function
+##     vars: function
+##     super:  &lt;ggproto object: Class FacetNull, Facet, gg&gt;
+## -----------------------------------
+## mapping: x = ~mag, y = ~stations 
+## geom_point: na.rm = FALSE
+## stat_identity: na.rm = FALSE
+## position_identity</code></pre>
+<p>C’est en affichant une objet de classe <code>ggplot</code> qu’un graphique est produit.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mon_graph <span class="co"># ou print(mon_graph)</span></span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-16-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>La fonction <a href="http://ggplot2.tidyverse.org/reference/ggsave.html"><code>ggsave</code></a> permet quant à elle d’enregistrer un graphique <code>ggpot2</code>.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="at">file =</span> <span class="st">&quot;ExempleGraphique_ggplot2.pdf&quot;</span>, <span class="at">plot =</span> mon_graph)</span></code></pre></div>
+<p>Le format du fichier à créer (p. ex. PDF, PNG, EPS, etc.) est déduit de l’extension du fichier si l’argument <code>device</code> n’est pas spécifié. Aussi, si aucune valeur n’est fourni à l’argument <code>plot</code>, c’est le dernier graphique <code>ggpot2</code> produit qui est enregistré. La dimension du graphique enregistré peut être contrôlée à l’aide des arguments <code>width</code>, <code>height</code> et <code>units</code>.</p>
+</div>
+<div id="démarche-de-création-dun-graphique-ggplot2" class="section level2" number="2.4">
+<h2><span class="header-section-number">2.4</span> Démarche de création d’un graphique <code>ggplot2</code></h2>
+<p>Voici une suggestion de démarche à suivre lors de la création d’une graphique <code>ggplot2</code>.</p>
+<ol style="list-style-type: decimal">
+<li><strong>Planifier</strong> le travail - Répondre aux questions suivantes :
+<ol style="list-style-type: lower-alpha">
+<li>Je veux représenter <strong>quelles variables</strong>, de <strong>quel jeu de données</strong> ?</li>
+<li>Je veux créer <strong>quel type de graphique</strong> ?</li>
+<li><strong>Quelle fonction de type <code>geom_*</code></strong> me permettra de produire les éléments géométriques de ce graphique ?</li>
+<li>Cette fonction accepte <strong>quelles propriétés visuelles</strong> ? (voir <a href="http://ggplot2.tidyverse.org/reference/" class="uri">http://ggplot2.tidyverse.org/reference/</a>)</li>
+<li>Je veux <strong>associer</strong> les variables concernées à quelles propriétés visuelles ?</li>
+</ol></li>
+<li>Écrire et soumettre la <strong>première version</strong> du code de création du graphique.</li>
+<li>Modifier le code de création du graphique pour <strong>ajuster la mise en forme</strong> (titre, nom d’axes, autres annotations, palette de couleur, etc.) selon mes besoins,
+<ul>
+<li>travail itératif : cycle « modification code » <span class="math inline">\(\rightarrow\)</span> « jugement du graphique créé » répété jusqu’à l’obtention d’un résultat satisfaisant.</li>
+</ul></li>
+</ol>
+<p>La planification effectuée avant de produire le premier exemple de graphique <code>ggplot</code> pourrait être représentée comme suit.</p>
+<p><img src="fig/mapping.png" width="90%" style="display: block; margin: auto;" /></p>
+<p>Pour réaliser cette planification, il a fallu obtenir de la fiche d’aide de la fonction <a href="https://ggplot2.tidyverse.org/reference/geom_point.html"><code>geom_point</code></a> la liste des propriétés visuelles qu’elle accepte.</p>
+</div>
+</div>
+<div id="quelques-exemples" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Quelques exemples</h1>
+<div id="exemples-de-configurations-graphiques-simples" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Exemples de configurations graphiques simples</h2>
+<div id="ajout-dun-titre-et-de-noms-daxes---fonction-labs" class="section level3" number="3.1.1">
+<h3><span class="header-section-number">3.1.1</span> Ajout d’un titre et de noms d’axes - fonction <code>labs</code></h3>
+<p>Ajoutons un titre et des noms d’axes à note premier graphique <code>ggplot</code>.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> quakes) <span class="sc">+</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mag, <span class="at">y =</span> stations)) <span class="sc">+</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;1000 séismes près de Fidji&quot;</span>,          <span class="co"># ou ggtitle(&quot;...&quot;) +</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;magnitude du séisme&quot;</span>,                     <span class="co"># ou xlab(&quot;...&quot;) +</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;nombre de stations rapportant le séisme&quot;</span>  <span class="co"># ou ylab(&quot;...&quot;)</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-19-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Vous avez envie de centrer le titre du graphique ? Voici comment faire.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> quakes) <span class="sc">+</span> </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mag, <span class="at">y =</span> stations)) <span class="sc">+</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;1000 séismes près de Fidji&quot;</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;magnitude du séisme&quot;</span>,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;nombre de stations rapportant le séisme&quot;</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>))  <span class="co"># permet de centrer le titre</span></span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-20-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Références :</p>
+<ul>
+<li>Ajout d’un titre et de noms d’axes :
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="uri">https://ggplot2.tidyverse.org/reference/labs.html</a></li>
+</ul></li>
+<li>Modification de l’alignement du titre :
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="uri">https://ggplot2.tidyverse.org/reference/theme.html</a></li>
+<li><a href="https://ggplot2.tidyverse.org/reference/element.html" class="uri">https://ggplot2.tidyverse.org/reference/element.html</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="ajout-dune-variable-associée-à-une-propriété-visuelle-autre-quun-axe" class="section level3" number="3.1.2">
+<h3><span class="header-section-number">3.1.2</span> Ajout d’une variable associée à une propriété visuelle autre qu’un axe</h3>
+<p>Le graphique précédent représente deux variables. Ajoutons une troisième variable au graphique, qui fera varier la couleur des points. Si la palette de couleur utilisée par défaut ne nous plaît pas, nous pouvons la changer.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>scatterplot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> quakes) <span class="sc">+</span> </span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> mag, </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> stations, </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour =</span> depth  <span class="co"># permet de faire varier la couleur des points en fonction de depth</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">+</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;1000 séismes près de Fidji&quot;</span>,</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;magnitude du séisme&quot;</span>,</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;nombre de stations rapportant le séisme&quot;</span>,</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour =</span> <span class="st">&quot;profondeur&quot;</span>  <span class="co"># permet de modifier le titre de la légende</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>)) <span class="sc">+</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_viridis_c</span>()       <span class="co"># permet d&#39;utiliser la palette de couleur viridis</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>scatterplot</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-21-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Référence :</p>
+<ul>
+<li>Modification de la palette de couleur :
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/scale_colour_continuous.html" class="uri">https://ggplot2.tidyverse.org/reference/scale_colour_continuous.html</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="échelles-de-couleurs---fonctions-de-type-scale_colour_-et-scale_fill_" class="section level3" number="3.1.3">
+<h3><span class="header-section-number">3.1.3</span> Échelles de couleurs - fonctions de type <code>scale_colour_*</code> et <code>scale_fill_*</code></h3>
+<p>Deux propriétés visuelles (<em>aesthetics</em>) permettent de spécifier des couleurs :</p>
+<ul>
+<li><code>colour</code> = couleur de points et de lignes,</li>
+<li><code>fill</code> = couleur de remplissage.</li>
+</ul>
+<p>Les fonctions permettant de contrôler les palettes de couleurs utilisées pour ses propriétés visuelles ont toutes un nom débutant par <code>scale_*</code> suivi du nom de la propriété visuelle concernée et de <code>_*</code>. Le nom de la fonction peut se terminer par :</p>
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html"><code>viridis_d</code> ou <code>viridis_c</code></a> : utiliser une palette de couleur offerte dans le package R <a href="https://github.com/sjmgarnier/viridisLite"><code>viridisLite</code></a>, soit discrète (<code>_d</code>) ou continue (<code>_c</code>);</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html"><code>brewer</code> ou <code>distiller</code></a> : utiliser une palette de couleur de <a href="http://colorbrewer2.org"><code>ColorBrewer</code></a>;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/scale_grey.html"><code>grey</code></a> : utiliser un dégradé de gris,</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html"><code>manual</code></a> : utiliser une palette discrète spécifiée manuellement;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html"><code>gradient</code>, <code>gradient2</code> ou <code>gradientn</code></a> : utiliser dégradé continu spécifié manuellement;</li>
+<li>etc.</li>
+</ul>
+<p>Une de ces fonctions a été utilisée dans l’exemple précédent : la fonction <code>scale_colour_viridis_c</code>.</p>
+</div>
+<div id="ajout-de-variables-par-lintermédiaire-dune-grille-de-sous-graphiques-facets" class="section level3" number="3.1.4">
+<h3><span class="header-section-number">3.1.4</span> Ajout de variables par l’intermédiaire d’une grille de sous-graphiques (<em>facets</em>)</h3>
+<div id="graphiques-côte-à-côte-selon-les-niveaux-dune-variable-catégorique" class="section level4 unnumbered">
+<h4>Graphiques côte à côte selon les niveaux d’une variable catégorique</h4>
+<p></p>
+<p>Ajoutons maintenant une quatrième variable au graphique, celle-ci catégorique, en créant des graphiques disjoints selon le niveau de la variable.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>scatterplot <span class="sc">+</span> </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="at">facets =</span> <span class="sc">~</span> region)   <span class="co"># permet de créer un sous-graphique par niveau de la variable region</span></span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-22-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Référence :</p>
+<ul>
+<li>Utilisation de <code>facet_wrap</code> :
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="uri">https://ggplot2.tidyverse.org/reference/facet_wrap.html</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="grilles-de-graphiques-selon-les-niveaux-de-deux-variables-catégoriques" class="section level4 unnumbered">
+<h4>Grilles de graphiques selon les niveaux de deux variables catégoriques</h4>
+<p></p>
+<p>Nous pourrions même facilement ajouter une cinquième variable en créant une grille à deux dimensions de sous-graphiques côte à côte.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>scatterplot <span class="sc">+</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(mag_catego <span class="sc">~</span> region)  <span class="co"># ou facet_grid(rows = vars(mag_catego), cols = vars(region))</span></span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-23-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Référence :</p>
+<ul>
+<li>Utilisation de <code>facet_grid</code> :
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="uri">https://ggplot2.tidyverse.org/reference/facet_grid.html</a></li>
+</ul></li>
+</ul>
+<p><strong>Remarque</strong> : Si une variable qui n’a pas été stockée sous forme de facteur doit être traitée comme une variable catégorique dans un graphique <code>ggplot</code>, il suffit d’encadrer son nom d’un appel à la fonction <code>factor</code> directement dans le code de création du graphique, comme dans l’exemple suivant.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>scatterplot <span class="sc">+</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(mag_catego <span class="sc">~</span> <span class="fu">factor</span>(region))</span></code></pre></div>
+</div>
+<div id="modification-des-libellés-des-niveaux-dune-variable-catégorique" class="section level4 unnumbered">
+<h4>Modification des libellés des niveaux d’une variable catégorique</h4>
+<p></p>
+<p>Les libellés des niveaux d’un facteur peuvent être modifiés ainsi.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Création d&#39;un vecteur faisant office de « lookup table », contenant l&#39;association entre </span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co"># - les niveaux d&#39;un facteur (nom des éléments dans le vecteur) et</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># - leurs étiquettes à afficher dans le graphique (éléments du vecteur)</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>mag_catego_labels <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;4&quot;</span> <span class="ot">=</span> <span class="st">&quot;mag 4&quot;</span>,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;5&quot;</span> <span class="ot">=</span> <span class="st">&quot;mag 5&quot;</span>,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;6&quot;</span> <span class="ot">=</span> <span class="st">&quot;mag 6&quot;</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Production du graphique</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>scatterplot <span class="sc">+</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    mag_catego <span class="sc">~</span> region, </span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">labeller =</span> <span class="fu">labeller</span>(<span class="at">mag_catego =</span> mag_catego_labels)</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-25-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Références :</p>
+<ul>
+<li>Modification des libellés des niveaux d’un facteur :
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/labeller.html" class="uri">https://ggplot2.tidyverse.org/reference/labeller.html</a></li>
+<li><a href="https://ggplot2.tidyverse.org/reference/labellers.html" class="uri">https://ggplot2.tidyverse.org/reference/labellers.html</a></li>
+</ul></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="exemples-de-graphiques-de-différents-types" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> Exemples de graphiques de différents types</h2>
+<p>Voici quelques exemples faisant intervenir divers types de graphiques, pour illustrer des possibilités de <code>ggplot2</code>. Si vous souhaitez voir encore plus d’exemples de code de création de graphique avec <code>ggplot2</code>, le web en regorge. Je recommande particulièrement la ressource suivante :</p>
+<ul>
+<li><a href="https://evamaerey.github.io/ggplot_flipbook/ggplot_flipbook_xaringan.html#1" class="uri">https://evamaerey.github.io/ggplot_flipbook/ggplot_flipbook_xaringan.html#1</a></li>
+</ul>
+<p>Il s’agit d’un <em>flipbook</em> très instructif, qui permet de visualiser l’impact de chaque petit ajout au code de création du graphique.</p>
+<div id="diagramme-à-barres---fonctions-geom_bar-et-geom_col" class="section level3" number="3.2.1">
+<h3><span class="header-section-number">3.2.1</span> Diagramme à barres - fonctions <code>geom_bar</code> et <code>geom_col</code></h3>
+<p>La fonction <code>geom_bar</code> calcule les fréquences des niveaux de facteurs et produit des diagrammes à barres. Avec cette fonction, pas besoin d’utiliser <code>table</code> ou une aute fonction similaire pour calculer les fréquences.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> quakes) <span class="sc">+</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mag_catego)) <span class="sc">+</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;classe de magnitude du séisme&quot;</span>,</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;fréquences&quot;</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  )  </span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-26-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Si nous avons déjà en main les fréquences, il faut utiliser la fonction <code>geom_bar</code> avec l’argument <code>stat = "identity"</code>, ou encore la fonction <code>geom_col</code>, comme suit.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>quakes_mag <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">xtabs</span>(<span class="sc">~</span> mag_catego, <span class="at">data =</span> quakes))</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>quakes_mag</span></code></pre></div>
+<pre><code>##   mag_catego Freq
+## 1          4  802
+## 2          5  193
+## 3          6    5</code></pre>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> quakes_mag) <span class="sc">+</span> </span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mag_catego, <span class="at">y =</span> Freq)) <span class="sc">+</span>  <span class="co"># aesthetic y ajoutée</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;classe de magnitude du séisme&quot;</span>,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;fréquences&quot;</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  ) </span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-28-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Pour obtenir des barres horizontales plutôt que verticales, il faut inverser les deux axes avec <code>coord_flip</code>.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> quakes) <span class="sc">+</span> </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mag_catego)) <span class="sc">+</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span>                               <span class="co"># permet d&#39;inverser les axes</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;classe de magnitude du séisme&quot;</span>,</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;fréquences&quot;</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  ) </span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-29-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>La fonction <code>geom_text</code> permet d’ajouter des annotations textuelles dans le graphique.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> quakes, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mag_catego)) <span class="sc">+</span> <span class="co"># aesthetics communs ici</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>() <span class="sc">+</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">stat</span>(count)),                <span class="co"># texte ajouté = fréquences</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour =</span> <span class="st">&quot;blue&quot;</span>,</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">stat =</span> <span class="st">&quot;count&quot;</span>,                                    <span class="co"># calcul des fréquences demandé ici </span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.2</span>                                       <span class="co"># ajustement vertical</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;classe de magnitude du séisme&quot;</span>,</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;fréquences&quot;</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>  ) </span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-30-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Pour représenter des fréquences croisées, on peut ajouter une variable catégorique au graphique via l’argument <code>fill</code>.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> quakes) <span class="sc">+</span> </span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mag_catego, <span class="at">fill =</span> region)) <span class="sc">+</span>  <span class="co"># aesthetic fill ajoutée</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;classe de magnitude du séisme&quot;</span>,</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;fréquences&quot;</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">&quot;région&quot;</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  ) </span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-31-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Pour avoir des bâtons groupés plutôt qu’empilés, il faut modifier la valeur de l’argument <code>position</code>.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> quakes) <span class="sc">+</span> </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mag_catego, <span class="at">fill =</span> region), </span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="st">&quot;dodge&quot;</span>                             <span class="co"># position des bâtons modifiée</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;classe de magnitude du séisme&quot;</span>,</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;fréquences&quot;</span>,</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">&quot;région&quot;</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  ) </span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-32-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Afin de présenter des fréquences relatives plutôt que brutes.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> quakes) <span class="sc">+</span> </span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">mapping =</span> <span class="fu">aes</span>(</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> mag_catego, </span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="fu">stat</span>(prop),  <span class="co"># permet le calcul de fréquences relatives (proportions)</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">group =</span> region,  <span class="co"># pour avoir les fréq. relatives de mag conditionnelles à region</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">fill =</span> region), </span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="st">&quot;dodge&quot;</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Proportions de séismes par classe de magnitude selon la région&quot;</span>,</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;classe de magnitude du séisme&quot;</span>,</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;fréquences&quot;</span>,</span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">&quot;région&quot;</span></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>  ) </span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-33-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Références :</p>
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="uri">https://ggplot2.tidyverse.org/reference/geom_bar.html</a></li>
+<li><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="uri">https://ggplot2.tidyverse.org/reference/coord_flip.html</a></li>
+<li><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="uri">https://ggplot2.tidyverse.org/reference/geom_text.html</a></li>
+</ul>
+</div>
+<div id="diagramme-en-secteurs---coordonnées-polaires-avec-coord_polar" class="section level3" number="3.2.2">
+<h3><span class="header-section-number">3.2.2</span> Diagramme en secteurs - coordonnées polaires avec <code>coord_polar</code></h3>
+<p>Les auteurs de <code>ggplot2</code> n’offrent pas de fonction conviviale pour la création de diagrammes en secteurs, probablement parce qu’ils ne recommandent pas leur utilisation. Malgré tout, tenter de tracer un diagramme en secteurs avec <code>ggplot2</code> aide à comprendre davantage les possibilités du package.</p>
+<p>Pour produire un diagramme en secteurs avec <code>ggplot2</code>, il faut d’abord produire un diagramme à barres empilées, puis demander l’utilisation d’un système de coordonnées polaires par un appel à la fonction <code>coord_polar</code>.</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> quakes) <span class="sc">+</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> <span class="dv">1</span>, <span class="at">fill =</span> mag_catego)) <span class="sc">+</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_polar</span>(<span class="at">theta =</span> <span class="st">&quot;y&quot;</span>) <span class="sc">+</span>                           <span class="co"># coordonnées polaires</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span>                                       <span class="co"># thème vide</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">&quot;classe de</span><span class="sc">\n</span><span class="st">magnitude&quot;</span>)</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-34-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Références :</p>
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/coord_polar.html" class="uri">https://ggplot2.tidyverse.org/reference/coord_polar.html</a></li>
+</ul>
+</div>
+<div id="courbes-de-densité-à-noyau-superposées---fonction-geom_density" class="section level3" number="3.2.3">
+<h3><span class="header-section-number">3.2.3</span> Courbes de densité à noyau superposées - fonction <code>geom_density</code></h3>
+<p>Il est facile avec <code>ggplot2</code> de superposer des histogrammes ou des courbes de densités à noyau (comme ci-dessous).</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> quakes) <span class="sc">+</span> </span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mag, <span class="at">fill =</span> region), </span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.5</span>  <span class="co"># niveau d&#39;opacité (0 = transparent, 1 = complètement opaque)</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;magnitude du séisme&quot;</span>,</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;densité&quot;</span>,</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">&quot;région&quot;</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-35-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Référence :</p>
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/geom_density.html" class="uri">https://ggplot2.tidyverse.org/reference/geom_density.html</a></li>
+</ul>
+</div>
+<div id="diagrammes-en-violons-juxtaposés---fonction-geom_violin" class="section level3" number="3.2.4">
+<h3><span class="header-section-number">3.2.4</span> Diagrammes en violons juxtaposés - fonction <code>geom_violin</code></h3>
+<p>Un autre outil, dérivé des courbes de densités à noyau, permettant d’explorer l’association potentielle entre une variable numérique et d’une variable catégorique est le <a href="https://en.wikipedia.org/wiki/Violin_plot">diagramme en violon (<em>violin plot</em>)</a>.</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>violinplots <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> quakes) <span class="sc">+</span> </span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_violin</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> region, <span class="at">y =</span> mag)) <span class="sc">+</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;région&quot;</span>,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;magnitude du séisme&quot;</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>violinplots</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-36-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Référence :</p>
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/geom_violin.html" class="uri">https://ggplot2.tidyverse.org/reference/geom_violin.html</a></li>
+</ul>
+</div>
+<div id="diagrammes-en-boîtes-juxtaposés---fonction-geom_boxplot" class="section level3" number="3.2.5">
+<h3><span class="header-section-number">3.2.5</span> Diagrammes en boîtes juxtaposés - fonction <code>geom_boxplot</code></h3>
+<p>Le diagramme en violon est en fait d’un mélange entre les courbes de densité à noyau et les diagrammes en boîtes (<em>boxplots</em>).</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>boxplots <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> quakes) <span class="sc">+</span> </span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> region, <span class="at">y =</span> mag)) <span class="sc">+</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;région&quot;</span>,</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;magnitude du séisme&quot;</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>boxplots</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-37-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Référence :</p>
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="uri">https://ggplot2.tidyverse.org/reference/geom_boxplot.html</a></li>
+</ul>
+</div>
+</div>
+<div id="exemples-divers-plus-poussés" class="section level2" number="3.3">
+<h2><span class="header-section-number">3.3</span> Exemples divers plus poussés</h2>
+<div id="solutions-aux-observations-superposées-overplotting" class="section level3" number="3.3.1">
+<h3><span class="header-section-number">3.3.1</span> Solutions aux observations superposées (<em>overplotting</em>)</h3>
+<p>Dans le diagramme de dispersion du nombre de stations rapportant le séisme en fonction de la magnitude du séisme (premier exemple), plusieurs points représentent en fait plus d’une observation. Cet <em>overplotting</em> est dû au fait que la variable <code>stations</code> ne prend que des valeurs entières (il s’agit d’un dénombrement) et la précision de mesure de la variable <code>mag</code> est limitée au dixième.</p>
+<div id="solution-1-ajout-de-jitter-aux-observations" class="section level4" number="3.3.1.1">
+<h4><span class="header-section-number">3.3.1.1</span> Solution 1 : Ajout de <em>jitter</em> aux observations</h4>
+<p></p>
+<p>Ajouter du <em>jitter</em> à des observations signifie de leur ajouter de petites quantités aléatoires, parfois appelées du bruit blanc.</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> quakes) <span class="sc">+</span> </span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(                             <span class="co"># geom_jitter est utilisé au lieu de geom_point</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mag, <span class="at">y =</span> stations),</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour =</span> <span class="st">&quot;blue&quot;</span>, </span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.3</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;1000 séismes près de Fidji&quot;</span>,</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;magnitude du séisme&quot;</span>,</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;nombre de stations rapportant le séisme&quot;</span></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-38-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Référence :</p>
+<ul>
+<li>Utilisation de <code>geom_jitter</code> :
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/geom_jitter.html" class="uri">https://ggplot2.tidyverse.org/reference/geom_jitter.html</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="solution-2-estimation-à-noyau-de-densité-2d" class="section level4" number="3.3.1.2">
+<h4><span class="header-section-number">3.3.1.2</span> Solution 2 : Estimation à noyau de densité 2D</h4>
+<p></p>
+<p>Nous pourrions ajouter en arrière-plan une estimation à noyau de la densité bivariée entre les deux représentées.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> quakes, </span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mag, <span class="at">y =</span> stations)              <span class="co"># aesthetics communs placées ici</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d</span>(                                  <span class="co"># ajout de l&#39;estimation de densité 2D</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">fill =</span> <span class="fu">stat</span>(density)),</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">geom =</span> <span class="st">&quot;tile&quot;</span>,</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">contour =</span> <span class="cn">FALSE</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">shape =</span> <span class="dv">20</span>,                                     <span class="co"># pour modifier le symbole des points</span></span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour =</span> <span class="st">&quot;dodgerblue4&quot;</span></span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;1000 séismes près de Fidji&quot;</span>,</span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;magnitude du séisme&quot;</span>,</span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;nombre de stations rapportant le séisme&quot;</span>,</span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">&quot;densité&quot;</span></span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(                              <span class="co"># pour modifier l&#39;échelle de couleur</span></span>
+<span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">low =</span> <span class="st">&quot;white&quot;</span>, </span>
+<span id="cb37-22"><a href="#cb37-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">high =</span> <span class="st">&quot;dodgerblue3&quot;</span></span>
+<span id="cb37-23"><a href="#cb37-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span>  </span>
+<span id="cb37-24"><a href="#cb37-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()                                   <span class="co"># pour avoir rapidement un fond blanc</span></span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-39-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Plus la couleur de fond est foncée, plus la densité de points est forte dans la région.</p>
+<p>Références :</p>
+<ul>
+<li>Densité 2D :
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/geom_density_2d.html" class="uri">https://ggplot2.tidyverse.org/reference/geom_density_2d.html</a></li>
+<li><a href="https://www.inwt-statistics.com/read-blog/smoothscatter-with-ggplot2-513.html" class="uri">https://www.inwt-statistics.com/read-blog/smoothscatter-with-ggplot2-513.html</a></li>
+</ul></li>
+<li>Type de points :
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/aes_linetype_size_shape.html" class="uri">https://ggplot2.tidyverse.org/reference/aes_linetype_size_shape.html</a></li>
+</ul></li>
+<li>Thèmes complets :
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="uri">https://ggplot2.tidyverse.org/reference/ggtheme.html</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="autres-solutions" class="section level4" number="3.3.1.3">
+<h4><span class="header-section-number">3.3.1.3</span> Autres solutions</h4>
+<p></p>
+<p>D’autres solutions sont proposées ici : <a href="https://ggplot2.tidyverse.org/reference/geom_point.html#overplotting" class="uri">https://ggplot2.tidyverse.org/reference/geom_point.html#overplotting</a></p>
+</div>
+</div>
+<div id="représentation-graphique-dune-fonction" class="section level3" number="3.3.2">
+<h3><span class="header-section-number">3.3.2</span> Représentation graphique d’une fonction</h3>
+<p>La fonction <code>stat_function</code> permet de représenter une fonction mathématique, un peu comme le fait la fonction <code>curve</code> du système graphique de base.</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Statistique dont nous aurons besoin</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>moy <span class="ot">&lt;-</span> <span class="fu">mean</span>(quakes<span class="sc">$</span>mag)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>et <span class="ot">&lt;-</span> <span class="fu">sd</span>(quakes<span class="sc">$</span>mag)</span></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>histogramme <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> quakes, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mag)) <span class="sc">+</span> </span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">stat</span>(density)), </span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">binwidth =</span> <span class="fl">0.1</span>, </span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour =</span> <span class="st">&quot;black&quot;</span>, </span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">&quot;white&quot;</span></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;Densité empirique des magnitudes dans le jeu de données quakes&quot;</span>,</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;magnitude du séisme&quot;</span>,</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;densité&quot;</span></span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>histogramme <span class="sc">+</span> <span class="fu">stat_function</span>(           <span class="co"># ajout d&#39;une courbe de densité normale </span></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">fun =</span> dnorm, </span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">args =</span> <span class="fu">list</span>(<span class="at">mean =</span> moy, <span class="at">sd =</span> et),  <span class="co"># avec paramètres estimés à partir des données</span></span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">xlim =</span> <span class="fu">c</span>(<span class="fl">3.95</span>, <span class="fl">6.45</span>)</span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-41-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Référence :</p>
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/geom_histogram.html" class="uri">https://ggplot2.tidyverse.org/reference/geom_histogram.html</a></li>
+<li><a href="https://ggplot2.tidyverse.org/reference/stat_function.html" class="uri">https://ggplot2.tidyverse.org/reference/stat_function.html</a></li>
+</ul>
+</div>
+<div id="mise-en-forme-dune-légende" class="section level3" number="3.3.3">
+<h3><span class="header-section-number">3.3.3</span> Mise en forme d’une légende</h3>
+<p>Ajoutons une courbe supplémentaire au graphique précédent.</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>histogramme <span class="sc">+</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>() <span class="sc">+</span>  <span class="co"># ajout d&#39;une courbe d&#39;estimation de densité à noyau</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_function</span>(    <span class="co"># ajout d&#39;une courbe de densité normale</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">fun =</span> dnorm, </span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">args =</span> <span class="fu">list</span>(<span class="at">mean =</span> moy, <span class="at">sd =</span> et),</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">xlim =</span> <span class="fu">c</span>(<span class="fl">3.95</span>, <span class="fl">6.45</span>)</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-42-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Afin de pouvoir identifier chacune des courbes, il faudrait choisir une propriété visuelle pour les distinguer. Choisissions la couleur.</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>histogramme <span class="ot">&lt;-</span> histogramme <span class="sc">+</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">colour =</span> <span class="st">&quot;density&quot;</span>),  <span class="co"># association de la propriété visuelle colour à une valeur</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_function</span>(</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">colour =</span> <span class="st">&quot;dnorm&quot;</span>),    <span class="co"># association de la propriété visuelle colour à une valeur</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">fun =</span> dnorm, </span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">args =</span> <span class="fu">list</span>(<span class="at">mean =</span> moy, <span class="at">sd =</span> et),</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">xlim =</span> <span class="fu">c</span>(<span class="fl">3.95</span>, <span class="fl">6.45</span>)</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>histogramme</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-43-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Dans les appels aux fonctions ajoutant les courbes, nous avons associé la propriété visuelle <code>colour</code> à une valeur fixe (et non à une variable comme nous avons l’habitude de le faire). Cet ajout a eu pour effet de provoquer un ajout automatique d’une légende. Les valeurs associées à <code>colour</code> se sont retrouvées par défaut dans la légende.</p>
+<p>Modifions les couleurs ainsi que les étiquettes des courbes et retirons le titre de la légende.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>histogramme <span class="sc">+</span> <span class="fu">scale_colour_manual</span>(</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">&quot;&quot;</span>,                                        <span class="co"># pour retirer le titre de la légende</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;density&quot;</span> <span class="ot">=</span> <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;dnorm&quot;</span> <span class="ot">=</span> <span class="st">&quot;red&quot;</span>),  <span class="co"># pour modifier les couleurs</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(                                       <span class="co"># pour modifier les étiquettes</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;density&quot;</span> <span class="ot">=</span> <span class="st">&quot;Densité à noyau&quot;</span>, </span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;dnorm&quot;</span> <span class="ot">=</span> <span class="st">&quot;Densité normale&quot;</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-44-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<div id="remarque" class="section level4 unnumbered">
+<h4>Remarque :</h4>
+<p></p>
+<p>Les annotations mathématiques sont toujours possibles avec <code>ggplot2</code>, comme dans le système graphique de base. La dernière couche du graphique prédécent pourrait par exemple être remplacée par la suivante.</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>histogramme <span class="sc">+</span> <span class="fu">scale_colour_manual</span>(</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">&quot;&quot;</span>,</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;density&quot;</span> <span class="ot">=</span> <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;dnorm&quot;</span> <span class="ot">=</span> <span class="st">&quot;red&quot;</span>),</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;density&quot;</span> <span class="ot">=</span> <span class="st">&quot;Densité à noyau&quot;</span>, </span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;dnorm&quot;</span> <span class="ot">=</span> <span class="fu">expression</span>(<span class="fu">paste</span>(<span class="st">&quot;N(&quot;</span>, mu, <span class="st">&quot; = &quot;</span>, <span class="fu">bar</span>(x), <span class="st">&quot;, &quot;</span>, sigma<span class="sc">^</span><span class="dv">2</span>, <span class="st">&quot; = &quot;</span>,  s[x]<span class="sc">^</span><span class="dv">2</span>, <span class="st">&quot;)&quot;</span>))</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-45-1.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="configuration-de-lapparence-de-la-légende" class="section level4" number="3.3.3.1">
+<h4><span class="header-section-number">3.3.3.1</span> Configuration de l’apparence de la légende</h4>
+<p></p>
+<p>Grâce à la fonction <code>theme</code>, nous pouvons aussi contrôler l’allure de la légende.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>histogramme <span class="sc">+</span> <span class="fu">scale_colour_manual</span>(</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">&quot;&quot;</span>,</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;density&quot;</span> <span class="ot">=</span> <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;dnorm&quot;</span> <span class="ot">=</span> <span class="st">&quot;red&quot;</span>),</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;density&quot;</span> <span class="ot">=</span> <span class="st">&quot;Densité à noyau&quot;</span>, <span class="st">&quot;dnorm&quot;</span> <span class="ot">=</span> <span class="st">&quot;Densité normale&quot;</span>) </span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">&quot;top&quot;</span>,           <span class="co"># modification de la position de la légende</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.background =</span> <span class="fu">element_rect</span>(  <span class="co"># ajout d&#39;une bordure rectangulaire autour de la légende</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">size =</span> <span class="fl">0.5</span>, <span class="at">linetype =</span> <span class="st">&quot;solid&quot;</span>, <span class="at">colour =</span> <span class="st">&quot;black&quot;</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-46-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Références :</p>
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="uri">https://ggplot2.tidyverse.org/reference/scale_manual.html</a></li>
+<li><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="uri">https://ggplot2.tidyverse.org/reference/theme.html</a></li>
+<li><a href="https://ggplot2.tidyverse.org/reference/element.html" class="uri">https://ggplot2.tidyverse.org/reference/element.html</a></li>
+<li><a href="http://www.sthda.com/french/wiki/ggplot2-legende-modifier-facilement-la-legende-d-un-graphique-logiciel-r-et-visualisation-de-donnees" class="uri">http://www.sthda.com/french/wiki/ggplot2-legende-modifier-facilement-la-legende-d-un-graphique-logiciel-r-et-visualisation-de-donnees</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="packages-souvent-utilisés-avec-ggplot2" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Packages souvent utilisés avec <code>ggplot2</code></h1>
+<div id="le-tidyverse" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Le <code>tidyverse</code></h2>
+<p>Le package <code>ggplot2</code> est souvent utilisé conjointement à d’autres packages du <code>tidyverse</code>, notamment :</p>
+<ul>
+<li><a href="https://dplyr.tidyverse.org/"><code>dplyr</code></a> pour la manipulation / le prétraitement de données;</li>
+<li><a href="https://magrittr.tidyverse.org/"><code>magrittr</code></a> qui offre l’opérateur « pipe » <code>%&gt;%</code>;</li>
+<li><a href="https://forcats.tidyverse.org/"><code>forcats</code></a> pour la manipulation de facteurs.</li>
+</ul>
+<div id="exemple-production-dun-graphique-à-partir-dun-sous-ensemble-de-données" class="section level4 unnumbered">
+<h4>Exemple : production d’un graphique à partir d’un sous-ensemble de données</h4>
+<p></p>
+<p>Supposons que nous voulions produire le diagramme de dispersion entre les variables <code>mag</code> et <code>stations</code> de <code>quakes</code> uniquement avec les observations dans la région Ouest. Nous pourrions nous servir de la fonction <a href="https://dplyr.tidyverse.org/reference/filter.html"><code>filter</code></a> de <a href="https://dplyr.tidyverse.org/"><code>dplyr</code></a> et de l’<a href="https://magrittr.tidyverse.org/reference/pipe.html">opérateur <code>%&gt;%</code></a> de <a href="https://magrittr.tidyverse.org/"><code>magrittr</code></a> de comme suit.</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>quakes <span class="sc">%&gt;%</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(region <span class="sc">==</span> <span class="st">&quot;Ouest&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mag, <span class="at">y =</span> stations)) <span class="sc">+</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">colour =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.3</span>) <span class="sc">+</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;magnitude du séisme&quot;</span>,</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;nombre de stations rapportant le séisme&quot;</span></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-47-1.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="exemple-modification-de-lordre-des-niveaux-dun-facteur" class="section level4 unnumbered">
+<h4>Exemple : modification de l’ordre des niveaux d’un facteur</h4>
+<p></p>
+<p>Nous avons vu dans les <a href="https://stt4230.rbind.io/communication_resultats/graphiques_r/">autres notes sur les graphiques en R</a> que les niveaux d’un facteur sont présentés dans un graphique en respectant leur ordre dans les attributs du facteur. Cette affirmation est encore vraie avec <code>ggplot2</code>. Le <code>tidyverse</code> contient un package appelé <a href="https://forcats.tidyverse.org/"><code>forcats</code></a> qui offre des fonctions facilitant la manipulation des facteurs. Ce package est particulièrement utile lors de la création de graphiques (avec <code>ggplot2</code> ou avec le système graphique de base).</p>
+<p>Par exemple, supposons que nous produisons des diagrammes en boîtes juxtaposés et que nous souhaitons que ceux-ci soient présentés dans l’ordre croissant des valeurs des médianes dans les diagrammes. La fonction <a href="https://forcats.tidyverse.org/reference/fct_reorder.html"><code>fct_reorder</code></a> du package <code>forcats</code> permet de réordonner les niveaux d’un facteur selon la valeur d’une statistique calculée sur une autre variable du jeu de données selon les niveaux du facteur. Par exemple, nous pourrions réordonner les niveaux du facteur <code>region</code> de <code>quakes</code> selon la médiane de la variable <code>mag</code> par région comme suit.</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forcats)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>region_reorder <span class="ot">&lt;-</span> <span class="fu">fct_reorder</span>(</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">.f =</span> quakes<span class="sc">$</span>region, </span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">.x =</span> quakes<span class="sc">$</span>mag, </span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">.fun =</span> median</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(region_reorder)</span></code></pre></div>
+<pre><code>##  Factor w/ 2 levels &quot;Est&quot;,&quot;Ouest&quot;: 1 1 1 1 1 1 2 1 1 1 ...</code></pre>
+<p>Lorsqu’une fonction du package <code>forcats</code> est utilisée avec <code>ggplot</code>, elle est typiquement appelée directement dans l’appel à la fonction <code>aes</code>, comme dans cet exemple. Les noms des variables du jeu de données fourni à l’argument <code>data</code> sont alors directement accessibles, même dans l’appel à la fonction du package <code>forcats</code>.</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> quakes) <span class="sc">+</span> </span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">fct_reorder</span>(<span class="at">.f =</span> region, <span class="at">.x =</span> mag, <span class="at">.fun =</span> median), </span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> mag</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">+</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;région&quot;</span>) <span class="sc">+</span></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;magnitude du séisme&quot;</span>)</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-49-1.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="extensions" class="section level2" number="4.2">
+<h2><span class="header-section-number">4.2</span> Extensions</h2>
+<p>Un nombre important d’extensions de <code>ggplot2</code> sont offertes. Plusieurs sont énumérées sur le site web suivant : <a href="https://exts.ggplot2.tidyverse.org/gallery/" class="uri">https://exts.ggplot2.tidyverse.org/gallery/</a></p>
+<p>Voici une liste d’extensions intéressantes qui ont été le sujet d’un tutoriel réalisé par d’anciens étudiants de ces cours. Des exemples d’utilisation des ces packages peuvent être visualisés dans les tutoriels.</p>
+<ul>
+<li><a href="https://ggrepel.slowkow.com/"><code>ggrepel</code></a> : fonction <code>geom_text_repel</code> pour éviter les textes superposés
+<ul>
+<li>tutoriel : <a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/ggrepel_ggthemes_paletteer/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/ggrepel_ggthemes_paletteer/</a></li>
+</ul></li>
+<li><a href="https://jrnold.github.io/ggthemes/"><code>ggthemes</code></a> : thèmes complets supplémentaires
+<ul>
+<li>tutoriel : <a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/ggrepel_ggthemes_paletteer/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/ggrepel_ggthemes_paletteer/</a></li>
+</ul></li>
+<li><a href="https://wilkelab.org/cowplot/"><code>cowplot</code></a> : thème adapté aux publications scientifiques et possibilité de combiner plusieurs graphiques en un
+<ul>
+<li>tutoriel : <a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2019/cowplot/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2019/cowplot/</a></li>
+</ul></li>
+<li><a href="https://patchwork.data-imaginist.com/"><code>patchwork</code></a> : combinaison facile de plusieurs graphiques en un
+<ul>
+<li>tutoriel : <a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/patchwork_ggextra/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/patchwork_ggextra/</a></li>
+</ul></li>
+<li><a href="https://github.com/daattali/ggExtra"><code>ggExtra</code></a> : fonction <code>ggMarginal</code> pour l’ajout facile d’histogrammes marginaux
+<ul>
+<li>tutoriel : <a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/patchwork_ggextra/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/patchwork_ggextra/</a></li>
+</ul></li>
+<li><a href="https://gganimate.com/"><code>gganimate</code></a> : gif animés (ou autres formats d’animation)
+<ul>
+<li>tutoriel : <a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/gganimate/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/gganimate/</a></li>
+</ul></li>
+<li><a href="https://davidgohel.github.io/ggiraph/"><code>ggiraph</code></a> : graphiques <code>ggplot</code> interactifs (format HTML)
+<ul>
+<li>tutoriel : <a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2018/ggiraph/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2018/ggiraph/</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="cartes-géographiques" class="section level2" number="4.3">
+<h2><span class="header-section-number">4.3</span> Cartes géographiques</h2>
+<p>Comme avec le système graphique de base, le package <a href="https://CRAN.R-project.org/package=maps"><code>maps</code></a> permet d’ajouter une carte en arrière-plan d’un graphique <code>ggplot</code>. Voici un exemple d’utilisation d’une carte tirée du package <code>maps</code> avec <code>ggplot2</code> :</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(maps)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>monde <span class="ot">&lt;-</span> <span class="fu">map_data</span>(<span class="st">&quot;world&quot;</span>)  <span class="co"># va chercher des données provenant du package maps</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_polygon</span>(</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> monde,</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> long, <span class="at">y =</span> lat, <span class="at">group =</span> group), </span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">&quot;gray90&quot;</span>, </span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">&quot;black&quot;</span></span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(</span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> quakes, </span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> long, <span class="at">y =</span> lat, <span class="at">colour =</span> depth), </span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> .<span class="dv">3</span></span>
+<span id="cb49-14"><a href="#cb49-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb49-15"><a href="#cb49-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_quickmap</span>(</span>
+<span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">115</span>, <span class="dv">190</span>),  </span>
+<span id="cb49-17"><a href="#cb49-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">50</span>, <span class="dv">0</span>)</span>
+<span id="cb49-18"><a href="#cb49-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb49-19"><a href="#cb49-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;longitude&quot;</span>, <span class="at">y =</span> <span class="st">&quot;latitude&quot;</span>, <span class="at">colour =</span> <span class="st">&quot;profondeur&quot;</span>) <span class="sc">+</span></span>
+<span id="cb49-20"><a href="#cb49-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div>
+<p><img src="/communication_resultats/graphiques_ggplot2_r_2021_files/figure-html/unnamed-chunk-50-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>L’extension <a href="https://github.com/dkahle/ggmap"><code>ggmap</code></a> permet également d’intégrer une carte <a href="https://developers.google.com/maps/documentation/maps-static/intro?hl=en">Google Maps</a> (requière un compte sur <a href="https://cloud.google.com/maps-platform/" class="uri">https://cloud.google.com/maps-platform/</a> pour avoir accès aux cartes) ou <a href="http://maps.stamen.com/#toner/12/37.7706/-122.3782">Stamen Maps</a> à un graphique produit avec <code>ggplot2</code>.</p>
+<p>Références :</p>
+<ul>
+<li><a href="https://ggplot2-book.org/maps.html" class="uri">https://ggplot2-book.org/maps.html</a></li>
+<li><a href="http://eriqande.github.io/rep-res-web/lectures/making-maps-with-R.html" class="uri">http://eriqande.github.io/rep-res-web/lectures/making-maps-with-R.html</a></li>
+</ul>
+<!--
+
+### Packages `ggmap`
+
+Carte tirée de Google Maps.
+
+
+
+
+
+Il est possible d'ajouter des éléments à ces cartes. 
+
+-->
+</div>
+</div>
+<div id="comparaison-entre-ggplot2-et-le-système-graphique-r-de-base" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Comparaison entre <code>ggplot2</code> et le système graphique R de base</h1>
+<p>Entre <code>ggplot2</code> et le système graphique R de base, lequel devrions-nous utiliser? Le graphique suivant résume bien ma réponse à cette question.</p>
+<p><img src="fig/gg-vs-base.png" width="100%" style="display: block; margin: auto;" /></p>
+<p><em>Source</em> : <a href="http://seananderson.ca/ggplot2-FISH554/" class="uri">http://seananderson.ca/ggplot2-FISH554/</a></p>
+<p>Lorsque le nombre de variables à représenter dans un graphique est grand (<em>Number of dimensions</em> élevé), utiliser <code>ggplot2</code> peut potentiellement permettre de sauver beaucoup de temps. Les représentations multivariées sont plus faciles à produire avec <code>ggplot2</code> qu’avec le système graphique R de base. En grande partie pour cette raison, la production de graphiques pour de l’analyse exploratoire de données est souvent plus rapide à réaliser avec <code>ggplot2</code> qu’avec le système graphique de base. Malgré tout, il existe encore une situation dans laquelle le système de base surpasse <code>ggplot2</code> : la production de graphiques à mises en formes spécifiques pour des publications scientifiques. Les configurations graphiques sont souvent plus simples à réaliser avec le système de base qu’avec <code>ggplot2</code>.</p>
+<hr />
+</div>
+<div id="résumé" class="section level1" number="6">
+<h1><span class="header-section-number">6</span> Résumé</h1>
+<p>Principes de base de la <strong>g</strong>rammaire <strong>g</strong>raphique :</p>
+<p>Graphique statistique = représentation de <strong>données</strong>, dans un <strong>système de coordonnées</strong> spécifique, divisée en éléments de base :</p>
+<ul>
+<li><strong>éléments géométriques</strong> (<em>geoms</em>) : points, lignes, barres, etc.;</li>
+<li><strong>propriétés visuelles</strong> (<em>aesthetics</em>) des éléments géométriques : axes, couleurs, formes, tailles, etc.</li>
+<li><strong>transformations statistiques</strong>, si désiré : courbe de régression ou de lissage, région d’erreur, etc.</li>
+</ul>
+<p>Un graphique est spécifié en <strong>associant des variables</strong>, provenant des données, <strong>à des propriétés visuelles</strong> des éléments géométriques du graphique.</p>
+<div id="survol-des-principales-fonctions-de-ggplot2" class="section level5 unnumbered">
+<h5>Survol des principales fonctions de <code>ggplot2</code></h5>
+<p></p>
+<ul>
+<li><a href="https://ggplot2.tidyverse.org/reference/ggplot.html"><code>ggplot</code></a> : initialisation d’un objet de classe <code>ggplot</code>;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/qplot.html"><code>qplot</code></a> : initialisation rapide (<code>q</code> pour <em>quick</em>) d’un objet <code>ggplot</code>;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/gg-add.html"><code>+</code></a> : opérateur pour l’ajout de couches ou la modification de configurations dans un objet <code>ggplot</code>;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/index.html#section-layer-geoms">fonctions de type <code>geom_*</code></a> (p. ex. <code>geom_point</code>, <code>geom_boxplot</code>, <code>geom_bar</code>, etc.) : spécification de couches à ajouter à un graphique;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/aes.html"><code>aes</code></a> : création d’un <code>mapping</code>, soit une association entre entre des propriétés visuelles et des variables;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/ggsave.html"><code>ggsave</code></a> : enregistrement d’un graphique.</li>
+</ul>
+<p><strong>Produire un graphique = afficher un objet <code>ggplot</code></strong></p>
+<p>Gabarit minimaliste de code de création d’un graphique <code>ggplot2</code> :</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> <span class="sc">&lt;</span>DATA<span class="sc">&gt;</span>) <span class="sc">+</span> </span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  <span class="er">&lt;</span>GEOM_FUNCTION<span class="sc">&gt;</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="sc">&lt;</span>MAPPINGS<span class="sc">&gt;</span>))</span></code></pre></div>
+</div>
+<div id="quelques-fonctions-de-type-geom_-1" class="section level5 unnumbered">
+<h5>Quelques fonctions de type <code>geom_*</code></h5>
+<p></p>
+<table>
+<colgroup>
+<col width="16%" />
+<col width="29%" />
+<col width="54%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Fonction</th>
+<th>Type de graphique</th>
+<th>Élément(s) ajouté(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="http://ggplot2.tidyverse.org/reference/geom_point.html"><code>geom_point</code></a></td>
+<td>diagramme de dispersion</td>
+<td>points selon des coordonnées</td>
+</tr>
+<tr class="even">
+<td><a href="http://ggplot2.tidyverse.org/reference/geom_path.html"><code>geom_line</code></a></td>
+<td>diagramme en lignes</td>
+<td>segments de droites reliant des points</td>
+</tr>
+<tr class="odd">
+<td><a href="http://ggplot2.tidyverse.org/reference/geom_bar.html"><code>geom_bar</code></a></td>
+<td>diagramme à barres</td>
+<td>barres disjointes, de hauteurs spécifiées ou calculées = fréquences des niveaux d’un facteur</td>
+</tr>
+<tr class="even">
+<td><a href="http://ggplot2.tidyverse.org/reference/geom_histogram.html"><code>geom_histogram</code></a></td>
+<td>histogramme</td>
+<td>barres collées, de hauteurs calculées = fréquences d’observations d’une variable numérique tombant dans des intervalles joints (<em>bin</em>)</td>
+</tr>
+<tr class="odd">
+<td><a href="http://ggplot2.tidyverse.org/reference/geom_boxplot.html"><code>geom_boxplot</code></a></td>
+<td>diagramme en boîte</td>
+<td><em>boxplots</em></td>
+</tr>
+<tr class="even">
+<td><a href="http://ggplot2.tidyverse.org/reference/geom_density.html"><code>geom_density</code></a></td>
+<td>courbe de densité à noyau</td>
+<td>courbe de la densité estimée par noyau (<em>kernel density</em>)</td>
+</tr>
+<tr class="odd">
+<td><a href="http://ggplot2.tidyverse.org/reference/geom_qq.html"><code>geom_qq</code></a></td>
+<td>diagramme quantile-quantile théorique</td>
+<td>points pour les couples de quantiles empiriques et théoriques</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\vdots\)</span></td>
+<td>il en existe plusieurs autres</td>
+<td>voir <a href="http://ggplot2.tidyverse.org/reference/" class="uri">http://ggplot2.tidyverse.org/reference/</a></td>
+</tr>
+</tbody>
+</table>
+<p>La plupart de ces fonctions cachent des transformations statistiques (p. ex. <code>geom_bar</code> et <code>geom_histogram</code> calculent des fréquences, <code>geom_boxplot</code> calcule des quantiles, <code>geom_density</code> estime une densité, etc.)</p>
+</div>
+<div id="quelques-autres-fonctions-de-ggplot2" class="section level5 unnumbered">
+<h5>Quelques autres fonctions de <code>ggplot2</code></h5>
+<p></p>
+<p>Pour ajouter des couches ou modifier des configurations dans un objet <code>ggplot</code> initialisé :</p>
+<ul>
+<li>fonctions <a href="http://ggplot2.tidyverse.org/reference/labs.html"><code>labs</code>, <code>ggtitle</code>, <code>xlab</code>, <code>ylab</code></a> : ajouter un titre, modifier les noms d’axes;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/index.html#section-coordinate-systems">fonctions de type <code>coord_*</code></a> : modifier des configurations reliées au système de coordonnées;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/index.html#section-facetting">fonctions de type <code>facet_*</code></a> : créer des grilles de sous-graphiques
+<ul>
+<li>chacun des sous-graphiques est conditionnel à la valeur de facteurs(s), il représente donc seulement le sous-ensemble des observations ayant une modalité particulière pour ce(s) facteur(s);</li>
+</ul></li>
+<li><a href="https://ggplot2.tidyverse.org/reference/index.html#section-scales">fonctions de type <code>scale_*</code></a> : modifier les échelles de certaines propriétés visuelles (p. ex. couleurs, formes, tailles, etc.)</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/index.html#section-themes">fonctions de type <code>theme_*</code></a> : modifier des configurations reliées à l’apparence du graphique;</li>
+<li><a href="https://ggplot2.tidyverse.org/reference/index.html#section-layer-stats">fonctions de type <code>stat_*</code></a> : ajouts d’éléments tirés d’un calcul mathématique ou statistique.</li>
+</ul>
+</div>
+<div id="exemple-de-code-avec-ggplot2" class="section level5 unnumbered">
+<h5>Exemple de code avec <code>ggplot2</code></h5>
+<p></p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Chargement du package</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialisation d&#39;un objet ggplot</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>graph <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> quakes,</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Définition de l&#39;associant entre les variables</span></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># et les propriétés visuelles du graphique</span></span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> mag, <span class="at">y =</span> stations)</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span> </span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Ajout de points</span></span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Ajout d&#39;une droite de régression</span></span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&#39;lm&#39;</span>)</span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Ajout d&#39;un titre</span></span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;1000 séismes près de Fidji&quot;</span>) <span class="sc">+</span></span>
+<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Affichage du graphique</span></span>
+<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a>graph</span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="références" class="section level1 unnumbered">
+<h1>Références</h1>
+<ul>
+<li><p>Page web du package <code>ggplot2</code> sur le CRAN : <a href="https://CRAN.R-project.org/package=ggplot2" class="uri">https://CRAN.R-project.org/package=ggplot2</a></p></li>
+<li><p>Documentation du package <code>ggplot2</code> : <a href="http://ggplot2.tidyverse.org/" class="uri">http://ggplot2.tidyverse.org/</a></p></li>
+<li><p>Livres :</p>
+<ul>
+<li>Wickham, H. (2016). <em>ggplot2: Elegant Graphics for Data Analysis</em>. 2<sup>e</sup> édition. Springer.
+<ul>
+<li>URL pour la 3<sup>e</sup> édition en développement : <a href="https://ggplot2-book.org" class="uri">https://ggplot2-book.org</a></li>
+</ul></li>
+<li>Wickham, H. et Grolemund, G. (2016). <em>R for Data Science</em>. O’Reilly Media, Inc. Chapitre 3. URL <a href="https://r4ds.had.co.nz/data-visualisation.html" class="uri">https://r4ds.had.co.nz/data-visualisation.html</a></li>
+<li>Wilkinson, L. (2005). <em>The grammar of graphics</em>, 2<sup>e</sup> édition. Springer.</li>
+<li>Chang, W. (2012). <em>R Graphics Cookbook: Practical Recipes for Visualizing Data</em>. O’Reilly Media, Inc.
+<ul>
+<li>URL pour le code R : <a href="http://www.cookbook-r.com/Graphs/" class="uri">http://www.cookbook-r.com/Graphs/</a></li>
+</ul></li>
+</ul></li>
+<li><p>Tutoriels web :</p>
+<ul>
+<li>Tierney, L. (2019). <strong>Data Visualization and Data Technologies</strong>, Notes de cours, STAT:4580, University of Iowa. URL <a href="https://homepage.divms.uiowa.edu/~luke/classes/STAT4580/index.html" class="uri">https://homepage.divms.uiowa.edu/~luke/classes/STAT4580/index.html</a></li>
+<li>Cook, D. (2019). <em>Visualising high-dimensional data</em>. Tutoriel offert à la conférence useR! 2019. URL <a href="https://github.com/dicook/useR2019_highd_vis" class="uri">https://github.com/dicook/useR2019_highd_vis</a></li>
+<li>Scherer, C. (2020). <em>A ggplot2 Tutorial for Beautiful Plotting in R</em>. Billet de blogue. URL <a href="https://cedricscherer.netlify.app/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r" class="uri">https://cedricscherer.netlify.app/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r</a></li>
+<li>Extension et tutoriel de la BBC : <a href="https://bbc.github.io/rcookbook/" class="uri">https://bbc.github.io/rcookbook/</a></li>
+</ul></li>
+<li><p>Vidéos de Roger Peng concernant <code>ggplot2</code> :</p>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=HeqHMM4ziXA" class="uri">https://www.youtube.com/watch?v=HeqHMM4ziXA</a></li>
+<li><a href="https://www.youtube.com/watch?v=n8kYa9vu1l8" class="uri">https://www.youtube.com/watch?v=n8kYa9vu1l8</a></li>
+</ul></li>
+<li><p>Feuilles de triche (cheat sheets) :</p>
+<ul>
+<li><a href="https://github.com/rstudio/cheatsheets/blob/master/data-visualization-2.1.pdf" class="uri">https://github.com/rstudio/cheatsheets/blob/master/data-visualization-2.1.pdf</a></li>
+<li>traduction française de ce document : <a href="http://thinkr.fr/pdf/ggplot2-french-cheatsheet.pdf" class="uri">http://thinkr.fr/pdf/ggplot2-french-cheatsheet.pdf</a></li>
+</ul></li>
+<li><p>Exemples de graphiques <code>ggplot</code> :</p>
+<ul>
+<li>Flipbook : <a href="https://evamaerey.github.io/ggplot_flipbook/ggplot_flipbook_xaringan.html#1" class="uri">https://evamaerey.github.io/ggplot_flipbook/ggplot_flipbook_xaringan.html#1</a></li>
+<li>Exemples (tous systèmes, mais beaucoup de <code>ggplot2</code>) avec leur code source permettant de les reproduire : <a href="http://www.r-graph-gallery.com/" class="uri">http://www.r-graph-gallery.com/</a></li>
+</ul></li>
+<li><p>Extensions de <code>ggplot2</code> :</p>
+<ul>
+<li><a href="https://exts.ggplot2.tidyverse.org" class="uri">https://exts.ggplot2.tidyverse.org</a></li>
+<li><a href="https://github.com/erikgahner/awesome-ggplot2" class="uri">https://github.com/erikgahner/awesome-ggplot2</a></li>
+</ul></li>
+<li><p>Conseils pour améliorer nos graphiques, illutrés avec <code>ggplot2</code> : <a href="http://www.thinkingondata.com/6-tips-to-make-your-visualizations-look-professional/" class="uri">http://www.thinkingondata.com/6-tips-to-make-your-visualizations-look-professional/</a></p></li>
+<li><p>Tutoriels rédigés par d’anciens étudiants du cours :</p>
+<ul>
+<li>Boxplot avec <code>ggplot2</code> : <a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2015/boxplot_ggplot2/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2015/boxplot_ggplot2/</a></li>
+<li>Graphique de série temporelle avec <code>ggplot2</code> :<br />
+<a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2015/graphique_temporel_ggplot2/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2015/graphique_temporel_ggplot2/</a></li>
+<li>Histogramme et courbe d’estimation de densité à noyau avec <code>ggplot2</code> :<br />
+<a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2015/histogramme_ggplot2/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2015/histogramme_ggplot2/</a></li>
+<li>Diagramme à barres avec <code>ggplot2</code> : <a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2015/diagramme_batons_ggplot2/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2015/diagramme_batons_ggplot2/</a></li>
+<li>Extensions <code>ggrepel</code> et <code>ggthemes</code> : <a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/ggrepel_ggthemes_paletteer/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/ggrepel_ggthemes_paletteer/</a></li>
+<li>Extension <code>cowplot</code> : <a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2019/cowplot/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2019/cowplot/</a></li>
+<li>Extension <code>patchwork</code> et <code>ggExtra</code> : <a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/patchwork_ggextra/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/patchwork_ggextra/</a></li>
+<li>Extension <code>gganimate</code> : <a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/gganimate/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/gganimate/</a></li>
+<li>Extension <code>ggiraph</code> : <a href="https://stt4230.rbind.io/tutoriels_etudiants/hiver_2018/ggiraph/" class="uri">https://stt4230.rbind.io/tutoriels_etudiants/hiver_2018/ggiraph/</a></li>
+</ul></li>
+</ul>
+</div>

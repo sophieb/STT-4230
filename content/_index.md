@@ -34,7 +34,8 @@ Le reste du matériel de cours (exercices, tutoriels, exemples supplémentaires,
     * [Calculs statistiques en R]({{< relref "calculs/calculs_stat_r_2021.html" >}})
     * [Calculs par sections d'un objet R]({{< relref "calculs/calculs_apply_r_2021.html" >}})
 * Communication de résultats en R
-    * [Graphiques en R]({{< relref "communication_resultats/graphiques_r_2020.html" >}})
+    * [Graphiques en R]({{< relref "communication_resultats/graphiques_r_2021.html" >}})
+    * [Graphiques avec ggplot2 en R]({{< relref "communication_resultats/graphiques_ggplot2_r_2021.html" >}})
     * [Rédaction de documents en R Markdown]({{< relref "communication_resultats/redaction_r_markdown_2020.html" >}})
 * Programmation en R
     * [Informations techniques concernant R]({{< relref "programmation/info_techniques_r_2020.html" >}})

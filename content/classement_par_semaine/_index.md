@@ -21,7 +21,8 @@ weight = 9
     * [Prétraitement de données en R]({{< relref "manipulation_donnees/pretraitement_donnees_r_2021.html" >}})
     * [Bonnes pratiques en R]({{< relref "amelioration_code/bonnes_pratiques_r_2021.html" >}})
 * Semaine 6
-    * [Graphiques en R]
+    * [Graphiques en R]({{< relref "communication_resultats/graphiques_r_2021.html" >}})
+    * [Graphiques avec ggplot2 en R]({{< relref "communication_resultats/graphiques_ggplot2_r_2021.html" >}})
 * Semaine 9
     * [Informations techniques concernant R]
     * [Structures de contrôle en R]
