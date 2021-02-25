@@ -1,7 +1,7 @@
 ---
 title: "Graphiques avec ggplot2 en R"
 author: "Sophie Baillargeon, Université Laval"
-date: '2021-02-16'
+date: '2021-02-25'
 weight: 2
 slug: "graphiques_ggplot2_r"
 lastmodifierdisplayname: "Sophie Baillargeon"
@@ -29,7 +29,7 @@ always_allow_html: yes
 
 ```{r echo = FALSE}
 knitr::opts_chunk$set(R.options = list(width = 85), fig.align = 'center', fig.show = 'hold',
-                      out.width = "100%")  # out.width = "70%" pour PDF, 100% pour HTML
+                      out.width = "70%")
 knitr::opts_knit$set(global.par = TRUE)
 par.default <- par(no.readonly = TRUE)
 ```
@@ -363,7 +363,7 @@ Une de ces fonctions a été utilisée dans l'exemple précédent\ : la fonction
 
 Ajoutons maintenant une quatrième variable au graphique, celle-ci catégorique, en créant des graphiques disjoints selon le niveau de la variable.
 
-```{r fig.height = 3.5}
+```{r fig.height = 3.5, out.width = "100%"}
 scatterplot + 
   facet_wrap(facets = ~ region)   # permet de créer un sous-graphique par niveau de la variable region
 ```
@@ -380,7 +380,7 @@ Référence\ :
 
 Nous pourrions même facilement ajouter une cinquième variable en créant une grille à deux dimensions de sous-graphiques côte à côte.
 
-```{r}
+```{r, out.width = "100%"}
 scatterplot +
   facet_grid(mag_catego ~ region)  # ou facet_grid(rows = vars(mag_catego), cols = vars(region))
 ```
@@ -393,7 +393,7 @@ Référence\ :
 
 **Remarque**\ : Si une variable qui n'a pas été stockée sous forme de facteur doit être traitée comme une variable catégorique dans un graphique `ggplot`, il suffit d'encadrer son nom d'un appel à la fonction `factor` directement dans le code de création du graphique, comme dans l'exemple suivant.
 
-```{r eval = FALSE}
+```{r eval = FALSE, out.width = "100%"}
 scatterplot +
   facet_grid(mag_catego ~ factor(region))
 ```
@@ -405,7 +405,7 @@ scatterplot +
 
 Les libellés des niveaux d'un facteur peuvent être modifiés ainsi.
 
-```{r}
+```{r, out.width = "100%"}
 # Création d'un vecteur faisant office de « lookup table », contenant l'association entre 
 # - les niveaux d'un facteur (nom des éléments dans le vecteur) et
 # - leurs étiquettes à afficher dans le graphique (éléments du vecteur)
@@ -461,17 +461,6 @@ quakes_mag
 ```{r}
 ggplot(data = quakes_mag) + 
   geom_col(mapping = aes(x = mag_catego, y = Freq)) +  # aesthetic y ajoutée
-  labs(
-    x = "classe de magnitude du séisme",
-    y = "fréquences"
-  ) 
-```
-
-Pour obtenir des barres horizontales plutôt que verticales, il faut inverser les deux axes avec `coord_flip`.
-
-```{r}
-ggplot(data = quakes) + 
-  geom_bar(mapping = aes(x = mag_catego)) +
   coord_flip() +                               # permet d'inverser les axes
   labs(
     x = "classe de magnitude du séisme",
@@ -479,13 +468,15 @@ ggplot(data = quakes) +
   ) 
 ```
 
+Un appel à la fonction `coord_flip` inverse les deux axes et permet d'obtenir des barres horizontales plutôt que verticales.
+
 La fonction `geom_text` permet d'ajouter des annotations textuelles dans le graphique.
 
 ```{r}
 ggplot(data = quakes, mapping = aes(x = mag_catego)) + # aesthetics communs ici
   geom_bar() +
   geom_text(
-    mapping = aes(label = stat(count)),                # texte ajouté = fréquences
+    mapping = aes(label = after_stat(count)),          # texte ajouté = fréquences
     colour = "blue",
     stat = "count",                                    # calcul des fréquences demandé ici 
     vjust = -0.2                                       # ajustement vertical
@@ -530,8 +521,8 @@ ggplot(data = quakes) +
   geom_bar(
     mapping = aes(
       x = mag_catego, 
-      y = stat(prop),  # permet le calcul de fréquences relatives (proportions)
-      group = region,  # pour avoir les fréq. relatives de mag conditionnelles à region
+      y = after_stat(prop),  # permet le calcul de fréquences relatives (proportions)
+      group = region,        # pour avoir les fréq. relatives de mag conditionnelles à region
       fill = region), 
     position = "dodge"
   ) +
@@ -676,7 +667,7 @@ ggplot(
   mapping = aes(x = mag, y = stations)              # aesthetics communs placées ici
 ) +
   stat_density_2d(                                  # ajout de l'estimation de densité 2D
-    aes(fill = stat(density)),
+    aes(fill = after_stat(density)),
     geom = "tile",
     contour = FALSE
   ) +
@@ -731,7 +722,7 @@ et <- sd(quakes$mag)
 ```{r}
 histogramme <- ggplot(data = quakes, mapping = aes(x = mag)) + 
   geom_histogram(
-    mapping = aes(y = stat(density)), 
+    mapping = aes(y = after_stat(density)), 
     binwidth = 0.1, 
     colour = "black", 
     fill = "white"
@@ -795,28 +786,14 @@ histogramme + scale_colour_manual(
     values = c("density" = "blue", "dnorm" = "red"),  # pour modifier les couleurs
     labels = c(                                       # pour modifier les étiquettes
       "density" = "Densité à noyau", 
-      "dnorm" = "Densité normale"
-    )
-  )
-```
-
-
-#### Remarque\ : {-}
-
-\mbox{}
-
-Les annotations mathématiques sont toujours possibles avec `ggplot2`, comme dans le système graphique de base. La dernière couche du graphique prédécent pourrait par exemple être remplacée par la suivante.
-
-```{r}
-histogramme + scale_colour_manual(
-    name = "",
-    values = c("density" = "blue", "dnorm" = "red"),
-    labels = c(
-      "density" = "Densité à noyau", 
       "dnorm" = expression(paste("N(", mu, " = ", bar(x), ", ", sigma^2, " = ",  s[x]^2, ")"))
     )
   )
 ```
+
+
+**Remarque**\ : Les annotations mathématiques sont toujours possibles avec `ggplot2`, comme dans le système graphique de base. Dans le graphique précédent, des annotations mathématiques ont été insérées dans la légende.
+
 
 #### Configuration de l'apparence de la légende 
 
@@ -872,6 +849,7 @@ quakes %>%
   ggplot(mapping = aes(x = mag, y = stations)) +
   geom_jitter(colour = "blue", alpha = 0.3) +
   labs(
+    title = "Séismes dans la région Ouest",
     x = "magnitude du séisme",
     y = "nombre de stations rapportant le séisme"
   )
@@ -934,7 +912,7 @@ Voici une liste d'extensions intéressantes qui ont été le sujet d'un tutoriel
 
 Comme avec le système graphique de base, le package [`maps`]( https://CRAN.R-project.org/package=maps) permet d'ajouter une carte en arrière-plan d'un graphique `ggplot`. Voici un exemple d'utilisation d'une carte tirée du package `maps` avec `ggplot2`\ :
 
-```{r}
+```{r, out.width = "100%"}
 library(maps)
 monde <- map_data("world")  # va chercher des données provenant du package maps
 ggplot() + 
@@ -949,7 +927,7 @@ ggplot() +
     aes(x = long, y = lat, colour = depth), 
     alpha = .3
   ) +
-  coord_quickmap(
+  coord_quickmap(           # ou coord_map() si le package mapproj est installé
     xlim = c(115, 190),  
     ylim = c(-50, 0)
   ) +
