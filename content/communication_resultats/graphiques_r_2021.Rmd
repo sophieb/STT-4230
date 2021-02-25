@@ -1,7 +1,7 @@
 ---
 title: "Graphiques en R"
 author: "Sophie Baillargeon, Université Laval"
-date: '2021-02-16'
+date: '2021-02-25'
 weight: 1
 slug: "graphiques_r"
 lastmodifierdisplayname: "Sophie Baillargeon"
@@ -32,9 +32,9 @@ always_allow_html: yes
 
 ```{r echo = FALSE}
 knitr::opts_chunk$set(R.options = list(width = 85), fig.align = 'center', fig.show = 'hold',
-                      out.width = "100%")  # out.width = "70%" pour PDF, 100% pour HTML
+                      out.width = "70%")
 knitr::opts_knit$set(global.par = TRUE)
-par.default <- par(no.readonly = TRUE)
+all_par_default <- par(no.readonly = TRUE)
 ```
 
 ***
@@ -176,7 +176,7 @@ Voici un exemple de programme créant un graphique avec le système graphique de
 
 ```{r}
 # 1. Configuration de paramètres graphiques
-par.default <- par(bty = 'n')
+par_default <- par(bty = 'n')
 
 # 2. Initialisation d'un graphique (contenant ici des diagrammes en boîtes)
 plot(
@@ -207,7 +207,7 @@ legend(
 )
 
 # Réattribution des valeurs par défaut aux paramètres graphiques modifiés
-par(par.default)
+par(par_default)
 ```
 
 Les prochaines sections présentent les concepts à connaître pour suivre la procédure de création de graphique avec le système graphique de base en R et contiennent beaucoup d'exemples. Cependant, la matière n'est pas couverte dans le même ordre que les étapes de la procédure. Même si dans le code de création d'un graphique la configuration des paramètres est l'étape 1, il faut d'abord savoir créer un graphique pour que cette étape ait du sens. De plus, la configuration des paramètres graphique est une étape facultative. Parfois, les valeurs par défaut des paramètres font l'affaire.
@@ -287,12 +287,20 @@ Type de graphique | Exemple d'appel de fonction | Type de `x` | Type de `y`
 
 La méthode [`plot.default`](https://stat.ethz.ch/R-manual/R-patched/library/graphics/html/plot.default.html) (via la fonction générique `plot` ou directement) produit par défaut un [diagramme de dispersion (en anglais *scatterplot*)](https://en.wikipedia.org/wiki/Scatter_plot), aussi appelé [nuage de points](https://fr.wikipedia.org/wiki/Nuage_de_points_(statistique)).
 
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
+
 ```{r}
 plot(
   x = quakes$mag, y = quakes$stations,
   xlab = "magnitude du séisme", 
   ylab = "nombre de stations rapportant le séisme"
 )
+```
+
+```{r, echo = FALSE}
+par(all_par_default)
 ```
 
 La fonction [`pairs`](https://stat.ethz.ch/R-manual/R-patched/library/graphics/html/pairs.html) produit quant à elle une matrice de diagrammes de dispersion entre plusieurs paires de variables.
@@ -302,6 +310,10 @@ pairs( ~ depth + mag + stations, data = quakes)
 ```
 
 La fonction [`matplot`](https://stat.ethz.ch/R-manual/R-patched/library/graphics/html/matplot.html) permet de facilement superposer plusieurs diagrammes de dispersion. Elle associe les colonnes de la structure à deux dimensions fournie en `x` à celles de la structure à deux dimensions fournie en `y` (colonne $i$ de `x` associée à la colonne $i$ de `y`). Voici un exemple d'utilisation de cette fonction exploitant un jeu de données créé à partir de `quakes` contenant les valeurs des variables `mag` et `stations` dans des colonnes distinctes par région.
+
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
 
 ```{r}
 quakes_large <- reshape(
@@ -321,6 +333,10 @@ matplot(
 )
 ```
 
+```{r, echo = FALSE}
+par(all_par_default)
+```
+
 Il faudrait ajouter une légende au graphique pour indiquer la signification des deux symboles et couleurs de points. La fonction `matplot` ne peut pas faire cet ajout. Il devra donc être fait avec la fonction `legend`, que nous verrons plus loin.
 
 
@@ -330,9 +346,23 @@ En assignant la valeur `"l"` à l'argument `type` de la méthode [`plot.default`
 
 Voici un exemple de diagramme en lignes exploitant un jeu de données créé à partir de `quakes` contenant les valeurs moyennes de nombres de stations par valeur de magnitude. 
 
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
+
 ```{r}
 mean_stations_per_mag <- aggregate(stations ~ mag, data = quakes, FUN = mean)
-plot(stations ~ mag, data = mean_stations_per_mag, type = "l")
+plot(
+  stations ~ mag, 
+  data = mean_stations_per_mag,
+  type = "l",
+  xlab = "magnitude du séisme", 
+  ylab = "nombre de stations rapportant le séisme"
+)
+```
+
+```{r, echo = FALSE}
+par(all_par_default)
 ```
 
 Cet exemple illustre aussi le fait que la fonction `plot` accepte en entrée une formule.
@@ -355,6 +385,10 @@ pie(x = table(quakes$mag_catego), main = "Fréquences des modalités de magnitud
 
 La fonction [`barplot`](https://stat.ethz.ch/R-manual/R-patched/library/graphics/html/barplot.html) produit un [diagramme à barres](https://fr.wikipedia.org/wiki/Diagramme_%C3%A0_barres) (en anglais [*bar plot*](https://en.wikipedia.org/wiki/Bar_chart)), aussi nommé diagramme en bâtons ou à bandes. Celles-ci peuvent être placées à la verticale (fait par défaut) ou à l'horizontale (argument `horiz = TRUE`).
 
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
+
 ```{r}
 barplot(
   height = table(quakes$mag_catego), 
@@ -364,15 +398,24 @@ barplot(
 )
 ```
 
+```{r, echo = FALSE}
+par(all_par_default)
+```
+
 La hauteur des barres dans un diagramme à barres représentent souvent les fréquences des modalités d'une variable catégorique. C'est le cas dans l'exemple précédent. Ces sont ces fréquences qui doivent être fournies à la fonction `barplot` et non les observations d'origine. Un appel à la fonction `barplot` est donc souvent accompagné d'une appel à une fonction pour calculer des fréquences comme [`table`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/table.html) ou [`xtabs`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/xtabs.html).
 
 Pour les graphiques suivants, nous aurons besoin des fréquences des combinaisons de modalités des variables `region` et `mag_catego`. Calculons-les tout de suite et stockons les dans un objet.
 
 ```{r}
 quakes_freq <- xtabs(~ region + mag_catego, data = quakes)
+quakes_freq
 ```
 
 Lorsque qu'un diagramme à barres est utilisé pour représenter des fréquences croisées entre deux variables, les barres pour les différentes variables peuvent être empilés (comportement par défaut de `barplot`)\ :
+
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
 
 ```{r}
 barplot(
@@ -383,7 +426,15 @@ barplot(
 )
 ```
 
+```{r, echo = FALSE}
+par(all_par_default)
+```
+
 ou groupés (grâce à l'argument `beside = TRUE`)\ :
+
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
 
 ```{r}
 barplot(
@@ -395,6 +446,10 @@ barplot(
 )
 ```
 
+```{r, echo = FALSE}
+par(all_par_default)
+```
+
 Il est important d'identifier à quelles modalités des variables sont associées les barres. Dans le cas d'un diagramme à barres bivarié, une légende est souvent nécessaire pour ce faire, car l'axe perpendiculaire aux barres ne suffit pas. La fonction `barplot` peut ajouter une légende au graphique grâce à son argument `legend.text`.
 
 
@@ -402,10 +457,23 @@ Il est important d'identifier à quelles modalités des variables sont associée
 
 Les [diagrammes en points de Cleveland (en anglais *Cleveland dot plots*)](https://en.wikipedia.org/wiki/Dot_plot_(statistics)) peuvent remplacer les diagrammes à barres. Ils offrent une présentation allégée, donc une lisibilité potentiellement accrue dans certaines situations.
 
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
+
 ```{r}
-dotchart(x = quakes_freq[2:1, 3:1], bg = "grey", xlab = "Fréquence")
+dotchart(
+  x = quakes_freq[2:1, 3:1], 
+  bg = "grey", 
+  xlab = "Fréquence",
+  ylab = "Région par modalité de magnitude"
+)
 # L'ordre des lignes et des colonnes de quakes_freq est ajusté pour
 # assurer la présentations des fréquences dans l'ordre désiré.
+```
+
+```{r, echo = FALSE}
+par(all_par_default)
 ```
 
 <!--
@@ -446,21 +514,16 @@ Voici quelques références pour en apprendre davantage à propos de ce type de 
 
 L'[histogramme](https://en.wikipedia.org/wiki/Histogram) sert à représenter la distribution empirique d'une variable numérique. La fonction [`hist`](http://stat.ethz.ch/R-manual/R-patched/library/graphics/html/hist.html) permet d'en produire.
 
-```{r, echo = FALSE}
-par(mar = c(4, 4, 2, 0.5) + 0.1)
-```
-
 ```{r}
-hist(x = quakes$mag)
+hist(
+  x = quakes$mag,
+  main = "Distribution empirique de la magnitude",
+  xlab = "magnitude",
+  ylab = "fréquence"
+)
 ```
 
-```{r, echo = FALSE}
-par(mar = c(4, 4, 0.5, 0.5) + 0.1)
-```
-
-Un titre et des noms d'axes ont été produits par défaut par le fonction `hist`, mais il faudrait les adapter pour une publication en français.
-
-Mine de rien, cette fonction fait beaucoup de travail afin de pouvoir produire un histogramme. Elle commence par briser l'étendue des valeurs de la variable en intervalles disjoints mais contigus, puis elle calcule les fréquences des observations tombant dans les intervalles. Ensuite, elle trace un genre de diagramme à barres en insérant aucun espace entre les barres (puisqu'elles réfèrent à des intervalles contigus). La façon dont les intervalles sont formés peut être contrôlée par les arguments `breaks`, `include.lowest` et `right`. La fonction retourne aussi toutes les statistiques qu'elle calcule, mais il faut accompagner l'appel à la fonction `hist` d'une assignation pour garder une trace de ces statistiques 
+Mine de rien, cette fonction fait beaucoup de travail afin de pouvoir produire un histogramme. Elle commence par briser l'étendue des valeurs de la variable en intervalles disjoints mais contigus, puis elle calcule les fréquences des observations tombant dans les intervalles. Ensuite, elle trace un genre de diagramme à barres en insérant aucun espace entre les barres (puisqu'elles réfèrent à des intervalles contigus). La façon dont les intervalles sont formés peut être contrôlée par les arguments `breaks`, `include.lowest` et `right`. La fonction retourne aussi toutes les statistiques qu'elle calcule, mais il faut accompagner l'appel à la fonction `hist` d'une assignation pour garder une trace de ces statistiques .
 
 ```{r}
 stats <- hist(x = quakes$mag, plot = FALSE)
@@ -473,21 +536,29 @@ stats
 Un autre graphique conçu pour représenter la distribution empirique d'une variable numérique est le [diagramme en boîte (en anglais *boxplot*)](https://en.wikipedia.org/wiki/Box_plot), aussi appelé [boîte à moustaches](https://fr.wikipedia.org/wiki/Bo%C3%AEte_%C3%A0_moustaches) ou diagramme de quartiles. Ce type de graphique peut être produit en R avec la fonction [`boxplot`](https://stat.ethz.ch/R-manual/R-patched/library/graphics/html/boxplot.html).
 
 ```{r, echo = FALSE}
-par(mar = c(4, 4, 2, 0.5) + 0.1)
+par(mar = c(4, 4, 0.5, 2) + 0.1)
 ```
 
 ```{r}
-boxplot(x = quakes$mag, main = "Distribution empirique de la magnitude")
+boxplot(x = quakes$mag, ylab = "magnitude")
 ```
 
 ```{r, echo = FALSE}
-par(mar = c(4, 4, 0.5, 0.5) + 0.1)
+par(all_par_default)
 ```
 
 L'association entre une variable numérique et une variable catégorique peut être représentée par des diagrammes en boîtes juxtaposés.
 
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
+
 ```{r}
-boxplot(mag ~ region, data = quakes)
+boxplot(mag ~ region, data = quakes, xlab = "région", ylab = "magnitude")
+```
+
+```{r, echo = FALSE}
+par(all_par_default)
 ```
 
 Par exemple, pour produire des diagrammes en boîtes pour les observations de la variable numérique `mag` en fonction de la variable catégorique `region`, la fonction `boxplot` peut être appelée en lui fournissant en entrée une formule contenant dans sa partie de droite la variable numérique et dans sa partie de gauche la variable catégorique.
@@ -497,15 +568,14 @@ Par exemple, pour produire des diagrammes en boîtes pour les observations de la
 
 La fonction [`density`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/density.html) estime une densité empirique par la [méthode à noyau (en anglais *Kernel density estimation*)](https://en.wikipedia.org/wiki/Kernel_density_estimation) à partir des observations d'une variable numérique. Une représentation graphique de cette densité empirique avec la méthode [`plot.density`](https://stat.ethz.ch/R-manual/R-patched/library/stats/html/plot.density.html) (via la fonction générique `plot` ou directement) est une autre alternative pour visualiser les observations d'une variable numérique.
 
-```{r, echo = FALSE}
-par(mar = c(4, 4, 2, 0.5) + 0.1)
-```
-
 ```{r}
-plot(x = density(quakes$mag))
+plot(
+  x = density(quakes$mag),
+  main = "Distribution empirique de la magnitude",
+  xlab = "magnitude",
+  ylab = "densité à noyau"
+)
 ```
-
-Comme la fonction `hist`, la méthode `plot.density` produit un titre et des noms d'axes par défaut, qu'il faut bien souvent adapter avant d'intégrer le graphique à une publication.
 
 
 ### Diagramme quantile-quantile - fonctions `qqnorm` et `qqplot`
@@ -513,17 +583,23 @@ Comme la fonction `hist`, la méthode `plot.density` produit un titre et des nom
 Les [diagrammes quantile-quantile](https://fr.wikipedia.org/wiki/Diagramme_Quantile-Quantile) (en anglais [*Q-Q plot*](https://en.wikipedia.org/wiki/Q%E2%80%93Q_plot)) servent à comparer des distributions. Le plus connus des diagrammes quantile-quantile est probablement le diagramme quantile-quantile théorique normal qui permet de comparer une distribution empirique à une distribution théorique normale. Ce type de graphique peut être produit en R avec la fonction [`qqnorm`](http://stat.ethz.ch/R-manual/R-patched/library/stats/html/qqnorm.html).
 
 ```{r}
-qqnorm(y = quakes$mag)
-```
-
-```{r, echo = FALSE}
-par(mar = c(4, 4, 0.5, 0.5) + 0.1)
+qqnorm(
+  y = quakes$mag,
+  main = "Diagramme quantile-quantile normal",
+  xlab = "qantiles théoriques normaux",
+  ylab = "quantiles empiriques de la magnitude"
+)
 ```
 
 Les [diagrammes quantile-quantile empiriques](https://www.itl.nist.gov/div898/handbook/eda/section3/qqplot.htm) servent quant à eux à comparer deux distributions empiriques. La fonction [`qqplot`](http://stat.ethz.ch/R-manual/R-patched/library/stats/html/qqnorm.html) permet d'en produire.
 
 ```{r}
-qqplot(x = quakes$mag, y = quakes$stations)
+qqplot(
+  x = quakes$stations, y = quakes$mag,
+  main = "Diagramme quantile-quantile empirique",
+  xlab = "quantiles empiriques du nombre de stations",
+  ylab = "quantiles empiriques de la magnitude"
+)
 ```
 
 
@@ -531,14 +607,30 @@ qqplot(x = quakes$mag, y = quakes$stations)
 
 La représentation graphique d'une fonction mathématique est possible en R avec la fonction [`curve`](https://stat.ethz.ch/R-manual/R-patched/library/graphics/html/curve.html).
 
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
+
 ```{r}
 curve(expr = log)
 ```
 
+```{r, echo = FALSE}
+par(all_par_default)
+```
+
 Par défaut, la fonction `curve` fait une évaluation de la valeur de la fonction en 101 points également répartis entre 0 et 1. Il est possible de modifier ces points grâce aux arguments `from`, `to` et `n` (une séquence de points est créée avec la fonction `seq`). De plus, le premier argument n'est pas contraint à être une fonction. Il peut s'agir de n'importe quelle expression écrite comme une fonction de `x`.
+
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
 
 ```{r}
 curve(expr = x^2 + 5*x - 25, from = -23, to = 18, n = 200)
+```
+
+```{r, echo = FALSE}
+par(all_par_default)
 ```
 
 Le code suivant produit le même graphique, mais l'utilisation de la fonction `curve` crée une commande plus succincte.
@@ -553,8 +645,16 @@ plot(x = x, y = x^2 + 5*x - 25, type = "l")
 
 Lorsqu'un facteur est représenté dans un graphique, ses niveaux (ou modalités) sont présentés en respectant leur ordre dans les attributs (métadonnées) du facteur. Par exemple, dans les diagrammes en boîtes juxtaposés créés précédemment (et repris ci-dessous), le niveau `Ouest` du facteur `region` de `quakes` est présenté avant le niveau `Est` (même si selon l'ordre alphabétique, `Est` vient avant `Ouest`).
 
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
+
 ```{r}
-boxplot(mag ~ region, data = quakes)
+boxplot(mag ~ region, data = quakes, xlab = "région", ylab = "magnitude")
+```
+
+```{r, echo = FALSE}
+par(all_par_default)
 ```
 
 Cet ordre est utilisé, car il s'agit de l'ordre officiel des niveaux de ce facteur.
@@ -565,12 +665,19 @@ levels(quakes$region)
 
 Si nous voulions voir apparaître dans le graphique les niveaux du facteur dans un autre ordre, il faudrait aller modifier les attributs du facteur, comme nous avons appris à le faire dans les [notes sur les structures de données en R](https://stt4230.rbind.io/manipulation_donnees/structures_r/#r%C3%A9ordonnancement-des-niveaux). Voici un exemple.
 
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
+
 ```{r}
 quakes_modif <- quakes
 quakes_modif$region <- factor(quakes_modif$region, levels = c("Est", "Ouest"))
-boxplot(mag ~ region, data = quakes_modif)
+boxplot(mag ~ region, data = quakes_modif, xlab = "région", ylab = "magnitude")
 ```
 
+```{r, echo = FALSE}
+par(all_par_default)
+```
 
 
 ## Arguments et paramètres graphiques
@@ -581,25 +688,35 @@ Les arguments permettant de contrôler la mise en forme sont appelés paramètre
 
 Un paramètre graphique fourni dans un appel à une fonction graphique est effectif seulement pour le graphique produit, alors qu'un paramètre graphique fourni dans un appel à `par` reste effectif jusqu'à ce que nous le modifions de nouveau. Alors, avant de modifier des paramètres graphiques avec `par`, il est bon d'enregistrer les valeurs par défaut des paramètres, comme suit,
 
-```{r}
-par.default <- par(no.readonly = TRUE)
+```{r eval = FALSE}
+all_par_default <- par(no.readonly = TRUE)
 ```
 
 afin de pouvoir facilement réattribuer ces valeurs par défaut aux paramètres, comme suit,  
 
 ```{r eval = FALSE}
-par(par.default)
+par(all_par_default)
 ```
 
-à la fin des nos commandes pour produire un graphique. L'objet `par.default` est une liste contenant les valeurs par défaut de tous les paramètres graphiques modifiables. Il est aussi possible d'enregistrer seulement les paramètres graphiques modifiés par un appel à la fonction `par` en l'accompagnant d'une assignation. Par exemple, l'objet `par.default` obtenu ainsi\ :
+à la fin des nos commandes pour produire un graphique. L'objet `all_par_default` est une liste contenant les valeurs par défaut de tous les paramètres graphiques modifiables. Il est aussi possible d'enregistrer seulement les valeurs des paramètres graphiques modifiés par un appel à la fonction `par` en l'accompagnant d'une assignation. Les valeurs enregistrées sont celles que prenaient les paramètres avant d'être modifiés. Par exemple, l'objet `par_default` obtenu ainsi\ :
 
-```{r eval = FALSE}
-par.default <- par(mar = c(1, 1, 2, 1))
+```{r}
+par_default <- par(mar = c(1, 1, 2, 1))
 ```
 
 contient uniquement la valeur par défaut du paramètre `mar`.
 
-Notons que les changements apportés aux paramètres graphiques ne sont pas conservés lors de la fermeture de la session R. À l'ouverture d'une session R, les paramètres graphiques prennent donc leurs valeurs par défaut.
+```{r}
+par_default
+```
+
+La valeur initiale du paramètre `mar` est réactivée comme suit.
+
+```{r}
+par(par_default)
+```
+
+Notons que les changements apportés aux paramètres graphiques ne sont pas conservés lors de la fermeture de la session R. À l'ouverture d'une session R, les paramètres graphiques prennent donc toujours leurs valeurs par défaut.
 
 Voici deux tableaux résumant les arguments et paramètres graphiques les plus communs\ :
 
@@ -671,14 +788,14 @@ Remarquons que les accents ne causent pas de problèmes dans le titre et les nom
 Nous pouvons aussi modifier certains paramètres graphiques par un appel à la fonction `par` comme suit.
 
 ```{r eval = FALSE}
-par.default <- par(font.lab = 3, font.main = 4, cex.axis = 0.8, bty="n")
+par_default <- par(font.lab = 3, font.main = 4, cex.axis = 0.8, bty="n")
 plot(
   x = quakes$mag, y = quakes$stations,
   main = "1000 séismes près de Fidji",
   xlab = "magnitude du séisme", 
   ylab = "nombre de stations rapportant le séisme"
 )
-par(par.default)
+par(par_default)
 ```
 
 Utiliser la fonction `par` est pratique si nous avons plusieurs graphiques à produire avec les mêmes paramètres.
@@ -690,16 +807,12 @@ Utiliser la fonction `par` est pratique si nous avons plusieurs graphiques à pr
 
 Voici un graphique qui représente toutes les valeurs que peut prendre l'argument `type`.
 
-```{r, echo = FALSE}
-par(mar = c(4, 4, 1.5, 0.5) + 0.1)
-```
-
 ```{r echo = FALSE, out.width = "100%"}
-par.default <- par(mfrow = c(3, 3)) 
+par_default <- par(mfrow = c(3, 3), mar = c(4, 4, 1.5, 0.5) + 0.1) 
 opts <- c("p", "l", "o", "b", "c", "s", "S", "h", "n") 
 titres <- paste0("type =\"", opts, "\"")
 for (i in 1:length(opts)) plot(x = 1:5, y = 1:5, type = opts[i], main = titres[i]) 
-par(par.default)
+par(par_default)
 ```
 
 Ce graphique est une adaptation d'un graphique sur la page web suivante\ :   
@@ -713,13 +826,13 @@ http://www.statmethods.net/graphs/line.html.
 Voici un graphique qui représente toutes les valeurs que peut prendre le paramètre `lty`.
 
 ```{r  echo = FALSE, fig.width = 4, fig.height = 1.5, out.width = "50%"}
-par.default <- par(mar = c(0, 0, 0, 0))
+par_default <- par(mar = c(0, 0, 0, 0))
 plot(x = c(0, 1), y = c(0,6.5), type = "n", axes = FALSE, ann = FALSE)
 for (i in 0:6) lines(c(0.35, 1), c(i, i), lty = 6 - i, lwd = 2)
 text(rep(0.3,6), 6:0, pos = 2, 
      labels = c("0 ou \"blank\"", "1 ou \"solid\"", "2 ou \"dashed\"", "3 ou \"dotted\"", 
                 "4 ou \"dotdash\"", "5 ou \"longdash\"", "6 ou \"twodash\""))
-par(par.default)
+par(par_default)
 ```
 
 Ce graphique est une adaptation d'un graphique sur la page web suivante\ :   
@@ -733,13 +846,13 @@ http://www.sthda.com/french/wiki/les-differents-types-de-traits-dans-r-lty
 Voici un graphique qui représente toutes les valeurs numériques que peut prendre le paramètre `pch`. Ce paramètre accepte aussi comme valeur un caractère quelconque.
 
 ```{r  echo = FALSE, fig.width = 7, fig.height = 1, out.width = "90%"}
-par.default <- par(mar = c(0,0,0,0))
+par_default <- par(mar = c(0,0,0,0))
 y <- rep(2:1, each = 13)
 x <- rep(1:13, 2)
 plot(x, y, pch = 0:25, cex = 1.5, ylim = c(0.8, 2.5), xlim = c(0.9, 13.1), 
      axes = FALSE, ann = FALSE, bg = "blue")
 text(x, y, labels = 0:25, pos = 3)
-par(par.default)
+par(par_default)
 ```
 
 Ce graphique est une adaptation d'un graphique sur la page web suivante\ :   
@@ -858,7 +971,7 @@ opacite <- rgb(red = 0, green = 33/255, blue = 78/255, alpha = seq(from = 0, to 
 # Fonction inspirée de prismatic::plot.color
 plot_palette <- function(x, labels, xlab = NULL, col.labels = "black"){
   x <- prismatic::color(x)
-  par.default <- par(mar = c(1,0,0,0) + 0.1)
+  par_default <- par(mar = c(1,0,0,0) + 0.1)
   plot(0, type = "n", axes = FALSE, ann = FALSE, xlim = c(0, 
       length(x) + 1), ylim = c(-0.1, 1.1))
   rect(xleft = seq_along(x) - 0.5, ybottom = 0, xright = seq_along(x) + 
@@ -869,7 +982,7 @@ plot_palette <- function(x, labels, xlab = NULL, col.labels = "black"){
       ytop = 1)
   text(x = seq_along(x), y = 0, labels = labels, pos = 1)
   if (!is.null(xlab)) mtext(text = xlab, side = 1, line = 0)
-  par(par.default)
+  par(par_default)
 }
 plot_palette(x = opacite, labels = seq(from = 0, to = 1, by = 0.1), xlab = "alpha")
 ```
@@ -941,46 +1054,70 @@ Nous pouvons ajouter des éléments étape par étape à un graphique en R, en a
 
 Aussi, certaines fonctions de création de graphique peuvent devenir des fonctions d'ajout d'éléments à un graphique grâce à l'argument `add`. C'est la cas notamment des fonctions suivantes\ : `matplot`, `barplot`, `hist`, `boxplot` et `curve`. 
 
-En donnant la valeur `TRUE` à l'argument `add` lors de l'appel de ces fonctions, elle ajoute des éléments au graphique de la fenêtre graphique active au lieu de créer un nouveau graphique.
+En donnant la valeur `TRUE` à l'argument `add` lors de l'appel d'une de ces fonctions, elle ajoute des éléments au graphique de la fenêtre graphique active au lieu de créer un nouveau graphique.
 
 
 #### Exemple d'ajout de lignes - fonctions `abline` vs `lines` {-}
 
+\mbox{}
+
 La fonction `abline` permet d'ajouter à un graphique une droite qui traverse toute la zone graphique.
 
 ```{r, echo = FALSE}
-par(mar = c(4, 4, 0.5, 0.5) + 0.1)
+par(mar = c(4, 4, 0.5, 2) + 0.1)
 ```
 
 ```{r}
-plot(stations ~ mag, data = quakes)
+plot(
+  stations ~ mag, data = quakes,
+  xlab = "magnitude du séisme", 
+  ylab = "nombre de stations rapportant le séisme"
+)
 
 # Ajustement et ajout d'une droite de régression
 lm_out <- lm(stations ~ mag, data = quakes) 
 abline(lm_out)
 ```
 
+```{r, echo = FALSE}
+par(all_par_default)
+```
+
 La fonction `abline` est capable de détecter que l'objet `lm_out` est une sortie de la fonction `lm`. Elle trace une droite ayant comme ordonnée à l'origine le premier coefficients du modèles ajusté et comme pente le deuxième coefficient. Nous aurions pu spécifier manuellement l'ordonnée à l'origine et la pente de la droite avec les arguments `a` et `b`, ou encore tracer une ligne horizontale avec l'argument `h` ou verticale avec l'argument `v`.
 
 Avec la fonction `lines`, nous pouvons ajouter des segments de droites reliant des points pour lesquels les coordonnées sont fournies.
 
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
+
 ```{r}
 # Calcul des médianes de stations par modalité de mag_catego
-aggout <- aggregate(stations ~ mag_catego, data = quakes, FUN = median)
-aggout$mag_catego <- as.numeric(aggout$mag_catego)
+out_agg <- aggregate(stations ~ mag_catego, data = quakes, FUN = median)
+out_agg$mag_catego <- as.numeric(out_agg$mag_catego)
 
-boxplot(stations ~ mag_catego, data = quakes)
-lines(x = aggout, lty = 6, lwd = 2, col = 4)
+boxplot(
+  stations ~ mag_catego, data = quakes,
+  xlab = "modalité de magnitude", 
+  ylab = "nombre de stations"
+)
+lines(x = out_agg, lty = 6, lwd = 2, col = 4)
 ```
 
 ```{r, echo = FALSE}
-par(par.default)
-par(mar = c(5, 4, 4, 2) + 0.1)
+par(all_par_default)
 ```
+
 
 #### Exemple d'ajout d'une légende - fonction `legend` {-}
 
+\mbox{}
+
 Nous avions mentionné précédemment que le graphique que nous avons produit avec la fonction `matplot` devrait contenir une légende. Ajoutons-lui en une maintenant.
+
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
 
 ```{r}
 matplot(
@@ -998,10 +1135,15 @@ legend(
 )
 ```
 
+```{r, echo = FALSE}
+par(all_par_default)
+```
+
 La localisation de la légende peut être spécifiée comme ici par un mot clé fourni à l'argument `x` (`"bottomright"`, `"bottom"`, `"bottomleft"`, `"left"`, `"topleft"`, `"top"`, `"topright"`, `"right"` ou `"center"`), ou par des coordonnées exactes (arguments `x` et `y`).
 
 #### Exemple d'ajout de courbes à un histogramme et d'une légende {-}
 
+\mbox{}
 
 Voici un exemple plus élaboré, dans lequel nous exploitons notamment l'argument `add` de la fonction `curve` pour ajouter des éléments à un graphique.
 
@@ -1010,7 +1152,7 @@ Voici un exemple plus élaboré, dans lequel nous exploitons notamment l'argumen
 hist(
   x = quakes$mag, freq = FALSE,
   main = "Densité empirique des magnitudes\ndans le jeu de données quakes",
-  xlab = "magnitude du séisme", ylab = "densité"
+  xlab = "magnitude", ylab = "densité"
 )
 
 # Ajout de la courbe de densité à noyau
@@ -1105,7 +1247,7 @@ Dans le graphique intitulé «&nbsp;Densité empirique des magnitudes dans le je
 hist(
   x = quakes$mag, freq = FALSE,
   main = "Densité empirique des magnitudes\ndans le jeu de données quakes",
-  xlab = "magnitude du séisme", ylab = "densité"
+  xlab = "magnitude", ylab = "densité"
 )
 
 # Ajout de la courbe de densité à noyau
@@ -1200,11 +1342,15 @@ Il est même possible d'utiliser une valeur tirée d'un objet R dans des annotat
 Voici un exemple, qui reprend l'exemple dans lequel une droite de régression a été ajoutée à un diagramme de dispersion.
 
 ```{r, echo = FALSE}
-par(mar = c(4, 4, 0.5, 0.5) + 0.1)
+par(mar = c(4, 4, 0.5, 2) + 0.1)
 ```
 
 ```{r}
-plot(stations ~ mag, data = quakes)
+plot(
+  stations ~ mag, data = quakes,
+  xlab = "magnitude du séisme", 
+  ylab = "nombre de stations rapportant le séisme"
+)
 
 # Ajustement et ajout d'une droite de régression
 lm_out <- lm(stations ~ mag, data = quakes) 
@@ -1222,7 +1368,7 @@ text(
 ```
 
 ```{r, echo = FALSE}
-par(mar = c(4, 4, 0.5, 0.5) + 0.1)
+par(all_par_default)
 ```
 
 Dans ce graphique, nous avons ajouté une annotation textuelle mentionnant la valeur du R^2^ ajusté de la régression.  Avec `substitute`, nous avons créé une expression R dans laquelle un élément a été évalué avant de créer l'expression. Cette évaluation s'est effectuée à partir d'un environnement spécifié dans le deuxième argument.
@@ -1237,7 +1383,6 @@ text(
 ```
 
 Les possibilités d'annotations mathématiques sont grandes, mais un peu compliquées à comprendre, car elles font intervenir de la métaprogrammation (des notes sont consacrées à ce sujet). 
-
 
 
 
@@ -1258,22 +1403,22 @@ Réunissons quatre représentations de la variable `mag` du jeu de données `qua
 ```{r out.width = "100%"}
 # Modification du paramètre graphique mfrow de façon à diviser la
 # fenêtre graphique en 4 sous-fenêtres sur une grille 2 par 2
-par.default <- par(mfrow = c(2, 2))
+par_default <- par(mfrow = c(2, 2))
 
 # Graphique dans la première sous-fenêtre
 hist(
   x = quakes$mag, freq = FALSE, 
-  main = "", xlab = "magnitude du séisme", ylab = "densité", 
+  main = "", xlab = "magnitude", ylab = "densité", 
 )
 
 # Graphique dans la deuxième sous-fenêtre
 plot(
   x = density(quakes$mag), 
-  main = "", xlab = "magnitude du séisme", ylab = "densité"
+  main = "", xlab = "magnitude", ylab = "densité"
 )
 
 # Graphique dans la troisième sous-fenêtre
-boxplot(x = quakes$mag, horizontal = TRUE, xlab = "magnitude du séisme")
+boxplot(x = quakes$mag, horizontal = TRUE, xlab = "magnitude")
 
 # Graphique dans la quatrième sous-fenêtre
 qqnorm(
@@ -1283,10 +1428,10 @@ qqnorm(
 qqline(quakes$mag)
 
 # Réattribution des valeurs par défaut aux paramètres graphiques
-par(par.default)
+par(par_default)
 ```
 
-L'argument `mfrow = c(2, 2)` a provoqué la division de la fenêtre graphique en une grille de sous-fenêtres comprenant 2 lignes et 2 colonnes. Les quatre graphiques produits après avoir modifié cet argument ont été distribués, ligne par ligne, dans cette grille. Si l'argument `mfcol` avait été utilisé au lieu de `mfrow`, les graphiques auraient été distribués en remplissant la grille une colonne à la fois, de la première à la dernière. Afin de retrouver une fenêtre graphique non divisée en sous-fenêtre, il ne faut pas oublier de remettre à `c(1, 1)` la valeur du paramètre graphique `mfrow` ou `mfcol` (ce qui est fait ci-dessus par la commande `par(par.default)`).
+L'argument `mfrow = c(2, 2)` a provoqué la division de la fenêtre graphique en une grille de sous-fenêtres comprenant 2 lignes et 2 colonnes. Les quatre graphiques produits après avoir modifié cet argument ont été distribués, ligne par ligne, dans cette grille. Si l'argument `mfcol` avait été utilisé au lieu de `mfrow`, les graphiques auraient été distribués en remplissant la grille une colonne à la fois, de la première à la dernière. Afin de retrouver une fenêtre graphique non divisée en sous-fenêtre, il ne faut pas oublier de remettre à `c(1, 1)` la valeur du paramètre graphique `mfrow` ou `mfcol` (ce qui est fait ci-dessus par la commande `par(par_default)`).
 
 
 #### Exemple\ : Sous-fenêtres de tailles inégales - fonction `layout` {-}
@@ -1313,11 +1458,11 @@ layout(matrix(c(1, 2, 3, 3), nrow = 2), widths = c(3, 2))
 # Graphique dans la première sous-fenêtre
 hist(
   x = quakes$mag, freq = FALSE, 
-  main = "", xlab = "magnitude du séisme", ylab = "densité", 
+  main = "", xlab = "magnitude", ylab = "densité", 
 )
 
 # Graphique dans la deuxième sous-fenêtre
-boxplot(x = quakes$mag, horizontal = TRUE, xlab = "magnitude du séisme")
+boxplot(x = quakes$mag, horizontal = TRUE, xlab = "magnitude")
 
 # Graphique dans la troisième sous-fenêtre
 qqnorm(
@@ -1335,9 +1480,9 @@ Comme pour les paramètres modifiés avec la fonction `par`, le découpage effec
 
 Nous pourrions améliorer ce graphique en ajustant les marges. Nous pourrions également mettre des sous-titres et un titre global.
 
-```{r }
+```{r out.width = "100%"}
 # Enregistrement des valeurs par défaut aux paramètres graphiques
-par.default <- par(no.readonly = TRUE)
+all_par_default <- par(no.readonly = TRUE)
 
 # Configuration des sous-fenêtres
 layout(matrix(c(1, 2, 3, 3), nrow = 2), widths = c(3, 2))
@@ -1353,7 +1498,7 @@ hist(x = quakes$mag, freq = FALSE, main = "Histogramme", ylab = "densité")
 par(mar = c(5.1, 4.1, 2.1, 2.1))
 boxplot(
   x = quakes$mag, horizontal = TRUE, 
-  main = "Diagramme en boîte", xlab = "magnitude du séisme"
+  main = "Diagramme en boîte", xlab = "magnitude"
 )
 
 # Graphique dans la troisième sous-fenêtre
@@ -1372,7 +1517,7 @@ mtext(
 )
 
 # Réattribution des valeurs par défaut aux paramètres graphiques
-par(par.default)
+par(all_par_default)
 layout(matrix(1))
 ```
 
@@ -1480,19 +1625,31 @@ Aussi, il est bon de savoir que plusieurs fonctions graphiques de base peuvent, 
 
 \mbox{}
 
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
+
 ```{r}
 # Calcul des fréquences
-freq <- table(quakes$mag_catego)
+freq_mag_catego <- table(quakes$mag_catego)
 # Production du diagramme à barres
-out_barplot <- barplot(freq)
-out_barplot
-# Ajout de texte au-dessus du deuxième bâton
-text(
-  x = out_barplot[2, 1],  # coordonnée en x du centre du bâton tirée de out_barplot
-  y = freq[2],
-  labels = freq[2],
-  pos = 3
+out_barplot <- barplot(
+  height = freq_mag_catego, 
+  xlab = "modalité de magnitude",
+  ylab = "fréquence",
 )
+out_barplot
+# Ajout d'annotations textuelles (valeurs des fréquences représentées)
+text(
+  x = out_barplot,      # coordonnées en x (centres des bâtons) tirées de out_barplot
+  y = freq_mag_catego,  # coordonnées en y (hauteurs des bâtons) tirées de freq_mag_catego
+  labels = freq_mag_catego,
+  pos = c(1, 1, 3)      # annotations positionnée sous la coordonnée pour les 2 premiers
+)                       # bâtons, mais au dessus de la coordonnée pour le dernier bâton
+```
+
+```{r, echo = FALSE}
+par(all_par_default)
 ```
 
 
@@ -1509,6 +1666,8 @@ Les graphiques initialisés sont typiquement minimalistes. Nous y ajoutons ce qu
 
 #### Faiblesse du système graphique de base  {-}
 
+\mbox{}
+
 Les représentations multivariées ne sont pas simples à produire. Il n'est pas toujours facile, avec les fonctions graphiques de base, de représenter trois variables et plus sur le même graphique.
 
 #### Exemple - Représenter deux variables numériques et une variable catégorique  {-}
@@ -1523,11 +1682,11 @@ Tentons de représenter la relation entre les variables numériques `stations` e
 
 Graphiques par niveau du facteur placés côte-à-côte.
 
-```{r}
-par.default <- par(mfrow = c(1,2))
+```{r out.width = "100%"}
+par_default <- par(mfrow = c(1,2))
 plot(stations ~ mag, data = quakes, subset = region == "Ouest", main = "Region Ouest")
 plot(stations ~ mag, data = quakes, subset = region == "Est", main = "Region Est")
-par(par.default)
+par(par_default)
 ```
 
 Il faudrait idéalement\ :
@@ -1544,12 +1703,22 @@ Faisons varier le symbole utilisé pour les points et sa couleur selon le niveau
 
 Nous pouvons donner aux arguments graphiques un vecteur de valeurs, plutôt qu'une seule valeur. Ce vecteur doit être de même longueur que le nombre d'observations à représenter (sinon il sera recyclé ou tronqué).
 
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
+
 ```{r}
 plot(
   stations ~ mag, data = quakes, 
   pch = as.numeric(region), col = as.numeric(region) + 2
 )
 ```
+
+```{r, echo = FALSE}
+par(all_par_default)
+```
+
+Il faudrait ajouter une légende pour identifier à quoi réfère les couleurs et les symboles. 
 
 Notons que nous avions déjà produit un graphique similaire avec `matplot`. Ce graphique pourrait aussi être produit en ajoutant les points pour chaque groupe dans des étapes séparées, comme suit.
 
@@ -1562,7 +1731,6 @@ points(stations ~ mag, data = quakes, subset = region == "Ouest", pch = 1, col =
 points(stations ~ mag, data = quakes, subset = region == "Est", pch = 2, col = 4)
 ```
 
-Il faudrait ajouter une légende pour identifier à quoi réfère les couleurs et les symboles. 
 
 
 #### Exemple - Représenter trois variables numériques et une variable catégorique  {-}
@@ -1571,13 +1739,15 @@ Il faudrait ajouter une légende pour identifier à quoi réfère les couleurs e
 
 Tentons maintenant de représenter dans un même graphique les variables suivantes de `quakes`\ : `lat`, `long`, `mag` et `region`.
 
+```{r, echo = FALSE}
+par(mar = c(4, 4, 0.5, 2) + 0.1)
+```
+
 ```{r}
-par.default <- par(pty = "s")
-# pty = "s" permet d'avoir une région graphique carrée
+par_default <- par(pty = "s")  # pty = "s" permet d'avoir une région graphique carrée
 plot(
   lat ~ long, data = quakes,
-  asp = 1,
-  # asp = 1 permet d'avoir des axes sur la même échelle, 
+  asp = 1,  # asp = 1 permet d'avoir des axes sur la même échelle, 
   # ce qui est préférable ici, car les variables sont des coordonnées géographiques
   cex = 3*(mag - min(mag))/(max(mag) - min(mag)) + 1, pch = 20,
   # la taille du symbole dépend de la valeur de la variable mag
@@ -1585,7 +1755,11 @@ plot(
   # la couleur du symbole dépend du facteur région
   # des couleurs transparentes sont utilisées
 )
-par(par.default)
+par(par_default)
+```
+
+```{r, echo = FALSE}
+par(all_par_default)
 ```
 
 Il faudrait ajouter une légende pour identifier à quoi réfère les couleurs différents (`region`) et les tailles différentes (`mag`). 
@@ -1636,7 +1810,7 @@ xyplot(stations ~ mag, data = quakes)
 
 \mbox{}
 
-```{r}
+```{r out.width = "100%"}
 xyplot(stations ~ mag | region, data = quakes)
 ```
 
@@ -1644,7 +1818,7 @@ xyplot(stations ~ mag | region, data = quakes)
 
 \mbox{}
 
-```{r, fig.width = 6, fig.height = 4.5}
+```{r out.width = "100%"}
 xyplot(
   stations ~ mag | region, data = quakes, 
   type = c("p", "smooth"), lwd = 3
@@ -1663,12 +1837,14 @@ L'argument `auto.key` permet d'ajouter automatiquement une légende.
 
 ##### Exemple complet de représentation simultané de quatre variables  {-}
 
-```{r}
+\mbox{}
+
+```{r out.width = "100%"}
 xyplot(
   stations ~ depth | region, data = quakes, groups = mag_catego,
   main = "Nombres de stations ayant rapporté les séismes\nselon différentes variables",
   xlab = "profondeur", ylab = "nombre de stations",
-  auto.key = list(title = "classe de\nmagnitude", space = "right", cex.title = 0.8)
+  auto.key = list(title = "modalité de\nmagnitude", space = "right", cex.title = 0.8)
 )
 ```
 
@@ -1676,13 +1852,13 @@ xyplot(
 
 \mbox{}
 
-L'auteur du système graphique derrière le package `lattice`, soit William S. Cleveland, est aussi celui qui a proposé les diagrammes en points pouvant remplacer les diagrammes à barres. Le package `lattice` possède une fonction pour créer facilement de type de graphique\ : la fonction `dotplot`.
+L'auteur du système graphique derrière le package `lattice`, soit William S. Cleveland, est aussi celui qui a proposé les diagrammes en points pouvant remplacer les diagrammes à barres. Le package `lattice` possède une fonction pour créer facilement ce type de graphique\ : la fonction `dotplot`.
 
 ```{r}
-quakes_freq <- as.data.frame(xtabs(~ region + mag_catego, data = quakes))
+quakes_freq_df <- as.data.frame(xtabs(~ region + mag_catego, data = quakes))
 dotplot(
-  mag_catego ~ Freq, data = quakes_freq, groups = region, 
-  xlab = "Fréquence", auto.key = TRUE
+  mag_catego ~ Freq, data = quakes_freq_df, groups = region, 
+  xlab = "Fréquence", ylab = "Modalité de magnitude", auto.key = TRUE
 )
 ```
 
@@ -1711,9 +1887,11 @@ L'utilisation de 3D pour la représentation de données catégoriques est à év
 
 #### Fonction `persp` du système de base {-}
 
+\mbox{}
+
 Voici un exemple de graphique 3D produit avec la fonction [`persp`](https://stat.ethz.ch/R-manual/R-patched/library/graphics/html/persp.html) du système graphique de base\ :
 
-```{r}
+```{r out.width = "100%"}
 x <- y <- seq(from = -1, to = 1, length = 100)
 grille <- expand.grid(x = x, y = y)
 z <- grille$x^2 + grille$y^2
@@ -1724,6 +1902,8 @@ Cette fonction ne permet pas de représenter un diagramme de dispersion (nuage d
 
 
 #### Graphiques 3D orientables - package `rgl` {-}
+
+\mbox{}
 
 Le package [`rgl`](https://CRAN.R-project.org/package=rgl) permet de produire des graphiques 3D orientables, ce qui facilite grandement la visualisation de ce type de graphique. Chaque graphique produit par `rgl` est affiché dans une fenêtre interactive qui permet à l'utilisateur de faire tourner le graphique dans n'importe quel sens. Des exemples de graphiques produits avec le package `rgl` peuvent être visualisés dans le tutoriel suivant, réalisé par d'anciens étudiants du cours\ : https://stt4230.rbind.io/tutoriels_etudiants/hiver_2019/rgl/
 
@@ -1757,6 +1937,8 @@ Retiré, car je peux référer au tutoriel étudiant pour des exemples. Concerna
 
 #### Graphiques interactifs Plotly - package `plotly`  {-}
 
+\mbox{}
+
 L'application web Plotly (https://plot.ly/) est devenue très populaire pour produire des graphiques interactifs. Le package R [`plotly`](https://plot.ly/r/) permet de créer facilement des graphiques Plotly en R. Voici un exemple affiché seulement dans la version HTML des notes.
 
 
@@ -1771,6 +1953,8 @@ plot_ly(quakes, x = ~mag, y = ~stations, color = ~depth,
 
 
 ####  Google Charts - package `googleVis`  {-}
+
+\mbox{}
 
 Google Charts est un outil de création de graphiques développé par Google (https://developers.google.com/chart/). Il permet d'intégrer des graphiques à des pages web. Il propose plusieurs types de graphiques. Le package R [`googleVis`](https://CRAN.R-project.org/package=googleVis) permet de créer des Google charts en R. Voici un exemple affiché seulement dans la version HTML des notes.
 
@@ -1804,7 +1988,7 @@ options(op)
 
 Il est possible de créer des cartes géographiques avec R. Sans entrer dans les détails les références suivantes présentent divers packages R pour la création de cartes\ :
 
-- packages [`maps`](https://CRAN.R-project.org/package=maps)
+- package [`maps`](https://CRAN.R-project.org/package=maps) (au besoin avec [`mapdata`](https://CRAN.R-project.org/package=mapdata) et [`mapproj`](https://CRAN.R-project.org/package=mapproj))
 - package [`leaflet`](https://rstudio.github.io/leaflet/)\ : permet de créer des cartes interactives avec la librairie JavaScript du même nom https://leafletjs.com/
     + tutoriel réalisé par un ancien étudiant du cours\ : https://stt4230.rbind.io/tutoriels_etudiants/hiver_2020/leaflet/
 - package [`cartography`](https://github.com/riatelab/cartography/)\ : permet de créer différentes représentations cartographiques en R
@@ -1820,9 +2004,11 @@ Il est possible de créer des cartes géographiques avec R. Sans entrer dans les
 
 #### Package `maps` {-}
 
+\mbox{}
+
 Des packages énumérés ci-dessus, le plus simple d'utilisation (mais pas le plus puissant) est probablement le package [`maps`](https://CRAN.R-project.org/package=maps). Voici un petit exemple d'utilisation de la fonction `map` du package `maps` avec les données `quakes`.
 
-```{r}
+```{r out.width = "100%"}
 library(maps)
 map(
   database = "world", 
@@ -1862,12 +2048,9 @@ Pour produire des graphiques en R, on procède parfois par essais/erreurs jusqu'
 - [`lattice`](https://CRAN.R-project.org/package=lattice)\ : emphase sur les représentations multivariées
 - [`ggplot2`](https://CRAN.R-project.org/package=ggplot2)\ : conçu en ayant comme objectif la simplicité d'utilisation et la qualité des graphiques produits
 
-**Packages offrant d'autres types de graphiques, notamment\ :**
+**Autres packages** permettant de créer divers types de graphiques :  
+[`rgl`](https://cran.r-project.org/web/packages/rgl/vignettes/rgl.html) (graphiques 3D orientables), [`plotly`](https://plot.ly/r/) (graphiques interactifs), [`maps`]( https://CRAN.R-project.org/package=maps ), etc. (Il en existe beaucoup!)
 
-- graphiques 3D orientables\ : [`rgl`](https://cran.r-project.org/web/packages/rgl/vignettes/rgl.html)
-- graphiques interactifs\ : [`plotly`](https://plot.ly/r/), etc.
-- cartes géographiques\ : [`maps`]( https://CRAN.R-project.org/package=maps ), [`mapdata`]( https://CRAN.R-project.org/package=mapdata), etc.
-- et bien d'autres\ : https://cran.r-project.org/web/views/Graphics.html
 
 #### Système graphique de base {-}
 
@@ -1984,7 +2167,7 @@ Type de graphique | Exemple d'appel de fonction | Type de `x` | Type de `y`
 
 ```{r eval = FALSE}
 # Configuration de paramètres graphiques
-par.default <- par(bty="n")
+par_default <- par(bty="n", mar = c(5, 5, 4, 2))
 # Initialisation du graphique
 plot(
   x = quakes$mag, y = quakes$stations,
@@ -1995,9 +2178,8 @@ plot(
 # Ajout d'une droite de régression
 lm_out <- lm(stations ~ mag, data = quakes) 
 abline(lm_out)
-# Réattribution des valeurs par défaut 
-# aux paramètres graphiques
-par(par.default)
+# Réattribution des valeurs par défaut aux paramètres graphiques
+par(par_default)
 ```
 
 
@@ -2050,6 +2232,8 @@ $\rightarrow$ `dev.off()`.
 
 #### Références supplémentaires\ : {-}
 
+\mbox{}
+
 #### Système de base\ : {-}
 
 \mbox{}
@@ -2098,7 +2282,7 @@ https://socviz.co/
 ## Graphiques produits par `plot` selon les types d'objets donnés en entrée aux arguments `x` et `y` {-}
 
 ```{r, echo = FALSE}
-par(mar = c(4, 4, 0.5, 0.5) + 0.1)
+par(mar = c(4, 4, 0.5, 2) + 0.1)
 ```
 
 Voici quelques essais pour mieux comprendre la fonction `plot`. Appelons la fonction en lui fournissant en entrée des arguments `x` et `y` de différentes classes et observons le résultat. Les données `quakes` sont utilisées ici.
@@ -2218,7 +2402,7 @@ plot(quakes[, "mag_catego", drop = FALSE])
 Si la colonne contient plutôt un facteur, c'est un diagramme à barres qui est produit par la fonction `barplot`.
 
 
-**Remarque**\ : Sans l'argument `drop = FALSE` dans l'extraction d'une colonne de `quakes`, le résultat de l'extraction aurait été un vecteur ou un facteur (un objet à une dimension) plutôt qu'un data frame à une colonne.
+**Rappel**\ : Sans l'argument `drop = FALSE` dans l'extraction d'une colonne de `quakes`, le résultat de l'extraction aurait été un vecteur ou un facteur (un objet à une dimension) plutôt qu'un data frame à une colonne.
 
 ```{r}
 str(quakes[, "mag_catego"])
@@ -2297,6 +2481,9 @@ plot(exp, from = -4, to = 4, n = 501)
 En fait, la méthode `plot.function` appelle la fonction `curve`.
 
 
+```{r}
+par(all_par_default)
+```
 
 
 
