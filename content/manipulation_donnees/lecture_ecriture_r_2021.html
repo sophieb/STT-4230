@@ -2,7 +2,7 @@
 title: "Lecture et écriture dans des fichiers externes à partir de R"
 linkTitle: "Lecture/écriture dans fichiers en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2021-02-14"
+date: "2021-03-02"
 weight: 2
 slug: "lecture_ecriture_r"
 lastmodifierdisplayname: "Sophie Baillargeon"
@@ -94,10 +94,11 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 
 <div id="TOC">
 <ul>
-<li><a href="#répertoire-de-travail"><span class="toc-section-number">1</span> Répertoire de travail</a>
+<li><a href="#accéder-au-système-de-fichiers"><span class="toc-section-number">1</span> Accéder au système de fichiers</a>
 <ul>
-<li><a href="#accéder-au-système-de-fichiers"><span class="toc-section-number">1.1</span> Accéder au système de fichiers</a></li>
-<li><a href="#projets-rstudio"><span class="toc-section-number">1.2</span> Projets RStudio</a></li>
+<li><a href="#répertoire-de-travail"><span class="toc-section-number">1.1</span> Répertoire de travail</a></li>
+<li><a href="#explorer-le-contenu-du-système-de-fichiers"><span class="toc-section-number">1.2</span> Explorer le contenu du système de fichiers</a></li>
+<li><a href="#projets-rstudio"><span class="toc-section-number">1.3</span> Projets RStudio</a></li>
 </ul></li>
 <li><a href="#lecture-de-fichiers"><span class="toc-section-number">2</span> Lecture de fichiers</a>
 <ul>
@@ -131,31 +132,52 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <hr />
 <p>Maintenant que les objets R pouvant servir de structure de données ont été vus, voyons comment lire et écrire dans des fichiers externes à partir de R. Dans un cadre d’analyse de données, lire et écrire dans des fichiers permet d’importer et d’exporter des données. Nous traiterons ici seulement du cas pour lequel l’importation ou l’exportation consiste à lire ou écrire dans un fichier externe de format texte, JSON, EXCEL, HTML ou dans un format propre à R.</p>
 <p>Pour apprendre comment lire ou écrire des données stockées dans une base de données, le lecteur est référé à la documentation d’un package permettant de communiquer avec la base de données qu’il utilise. La page web suivante répertorie plusieurs de ces packages : <a href="https://CRAN.R-project.org/view=Databases" class="uri">https://CRAN.R-project.org/view=Databases</a>.</p>
-<div id="répertoire-de-travail" class="section level1" number="1">
-<h1><span class="header-section-number">1</span> Répertoire de travail</h1>
-<p>Avant toute chose, revenons sur le répertoire de travail (ou répertoire courant, en anglais <em>working directory</em>). Afin d’accéder à des données en R, il faut typiquement aller les lire là où elles se trouvent. Si les données se trouvent dans un fichier situé sur l’ordinateur local, dans un certain répertoire, il faut aller lire son contenu à cet endroit.</p>
-<p>Dans toute commande R effectuant une lecture ou de l’écriture dans un fichier, il faut identifier le fichier. Il peut être identifié en utilisant son chemin d’accès complet, ou encore en utilisant un chemin d’accès relatif à un emplacement courant. Peu importe l’option choisie, le chemin doit se terminer par le nom complet du fichier, incluant son extension.</p>
+<div id="accéder-au-système-de-fichiers" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Accéder au système de fichiers</h1>
+<p>Afin d’accéder à des données à partir de R, il faut souvent aller les lire là où elles se trouvent. Si les données sont dans un fichier situé sur l’ordinateur local, dans un certain répertoire, il faut aller lire son contenu à cet endroit.</p>
+<p>Dans toute commande R effectuant de la lecture ou de l’écriture dans un fichier, il faut identifier ce fichier. Il peut être identifié en utilisant son chemin d’accès complet (en anglais <em>full</em> ou <em>absolute path</em>), ou encore en utilisant un chemin d’accès relatif à un emplacement courant (en anglais <em>relative path</em>). Peu importe l’option choisie, le chemin doit se terminer par le nom complet du fichier, incluant son extension.</p>
 <p>Par exemple, supposons que le fichier <code>data_ex.txt</code> se trouve dans le répertoire <code>C:\coursR</code> de l’ordinateur d’un utilisateur de R sous Windows. Le chemin d’accès complet de ce fichier est <code>C:\coursR\data_ex.txt</code>. Le chemin d’accès du fichier relatif au répertoire <code>C:\coursR</code> est pour sa part simplement le nom du fichier, soit <code>data_ex.txt</code>.</p>
-<p><strong>Remarque importante</strong> : Bien que le caractère utilisé pour séparer les composantes dans un chemin d’accès sous Windows soit <code>\</code>, ce caractère est réservé en R pour les « séquences d’échappement ». Il s’agit de séquences ayant une signification particulière dans une chaîne de caractères (par exemple <code>"\t"</code> représente une tabulation, <code>"\n"</code> représente un retour de chariot, etc.). Dans un chemin d’accès en R, il faut plutôt séparer les composantes par le caractère <code>/</code>, ou encore par <code>\\</code>.</p>
-<p>Lorsqu’un fichier est identifié par un chemin relatif dans une instruction, R doit faire une supposition quant au répertoire à partir duquel chercher le fichier. C’est justement l’utilité du répertoire de travail. Il s’agit de l’emplacement de base, celui à partir duquel débuter un chemin d’accès à un fichier lorsque le début du chemin n’est pas spécifié par l’utilisateur.</p>
+<div id="remarques-importantes" class="section level4 unnumbered">
+<h4>Remarques importantes</h4>
+<p></p>
+<p>Bien que le caractère utilisé pour séparer les composantes dans un chemin d’accès sous Windows soit <code>\</code>, ce caractère est réservé en R pour les « séquences d’échappement ». Il s’agit de séquences ayant une signification particulière dans une chaîne de caractères (par exemple <code>"\t"</code> représente une tabulation, <code>"\n"</code> représente une nouvelle ligne, etc.). Dans un chemin d’accès en R, il faut plutôt séparer les composantes par le caractère <code>/</code>, ou encore par <code>\\</code>.</p>
+<p>De plus, dans une commande R, un chemin d’accès doit toujours être présenté sous forme de chaîne de caractères, donc être encadré de guillemets.</p>
+<p>Ainsi, dans une commande R, le chemin d’accès <code>C:\coursR\data_ex.txt</code> devrait être écrit ainsi : <code>"C:/coursR/data_ex.txt"</code>. Ce chemin pourrait aussi être produit avec la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/file.path.html">fonction <code>file.path</code></a> comme suit.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">file.path</span>(<span class="st">&quot;C:&quot;</span>, <span class="st">&quot;coursR&quot;</span>, <span class="st">&quot;data_ex.txt&quot;</span>)</span></code></pre></div>
+<pre><code>## [1] &quot;C:/coursR/data_ex.txt&quot;</code></pre>
+</div>
+<div id="répertoire-de-travail" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> Répertoire de travail</h2>
+<p>Lorsqu’un fichier est identifié par un chemin d’accès relatif dans une commande, R doit faire une supposition quant au répertoire à partir duquel chercher le fichier. C’est justement l’utilité du répertoire de travail (ou répertoire courant, en anglais <em>working directory</em>). Il s’agit de l’emplacement de base, celui à partir duquel débuter un chemin d’accès à un fichier lorsque le début du chemin n’est pas spécifié par l’utilisateur.</p>
 <p>Pour connaître le répertoire de travail d’une session R, il suffit de soumettre la commande suivante :</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getwd</span>()</span></code></pre></div>
-<p>Pour accéder au fichier <code>data_ex.txt</code> en utilisant seulement son nom, il faut d’abord s’assurer que le répertoire de travail de la session R correspond au répertoire contenant le fichier. La fonction <code>setwd</code> permet de modifier le répertoire de travail. Par exemple, la commande suivante change le répertoire de travail pour <code>C:\coursR</code>.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setwd</span>(<span class="st">&quot;C:/coursR&quot;</span>)</span></code></pre></div>
-<p>Dans une commande R, un chemin d’accès doit toujours être présenté sous forme de chaîne de caractères, donc être encadré de guillemets.</p>
-<p>Si le répertoire de travail avait été fixé à <code>"C:"</code>, le chemin d’accès relatif du fichier aurait été <code>"/coursR/data_ex.txt"</code> (le <code>"/"</code> au début du chemin indique que <code>coursR</code> est un répertoire et non un fichier).</p>
-<div id="accéder-au-système-de-fichiers" class="section level2" number="1.1">
-<h2><span class="header-section-number">1.1</span> Accéder au système de fichiers</h2>
-<p>R a donc accès au système de fichiers de l’ordinateur à partir duquel la session a été démarrée. Par défaut, l’accès se fait à partir du répertoire de travail. Directement dans la console R, il est possible de voir le contenu du répertoire de travail, créer des fichiers et des répertoires, effacer des fichiers, etc. Par exemple, la fonction <code>dir</code> permet d’afficher le contenu d’un répertoire (par défaut le répertoire de travail). Pour plus d’information à ce propos, la fiche d’aide nommée <code>files</code> (ouverte avec la commande <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/files.html"><code>help(files)</code></a>) est un bon point de départ.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dir</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getwd</span>()</span></code></pre></div>
+<p>Pour accéder au fichier <code>data_ex.txt</code> en utilisant seulement son nom, il faut d’abord s’assurer que le répertoire de travail de la session R correspond au répertoire contenant le fichier. La fonction <code>setwd</code> permet de modifier le répertoire de travail. Par exemple, la commande suivante change le répertoire de travail pour <code>"C:/coursR"</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setwd</span>(<span class="st">&quot;C:/coursR&quot;</span>)</span></code></pre></div>
+<p>Si le répertoire de travail avait été fixé à <code>"C:"</code>, le chemin d’accès relatif du fichier aurait été <code>"coursR/data_ex.txt"</code>.</p>
+<div id="symboles-reconnus-dans-les-chemins-daccès" class="section level4 unnumbered">
+<h4>Symboles reconnus dans les chemins d’accès</h4>
+<p></p>
+<p>Dans les chemins d’accès à des fichiers en R, les symboles <code>.</code>, <code>..</code> et <code>~</code> ont les significations usuelles suivantes :</p>
+<ul>
+<li><code>.</code> : répertoire de travail courant,</li>
+<li><code>..</code> : répertoire parent du répertoire de travail courant,</li>
+<li><code>~</code> : répertoire de travail par défaut (en anglais <em>home directory</em>).</li>
+</ul>
+<p>Ainsi, si le répertoire de travail était <code>"C:/coursR"</code>, les chemins d’accès <code>"C:/coursR/data_ex.txt"</code>, <code>"../coursR/data_ex.txt"</code>, <code>"./data_ex.txt"</code> et <code>"data_ex.txt"</code> seraient tous équivalents.</p>
+</div>
+</div>
+<div id="explorer-le-contenu-du-système-de-fichiers" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> Explorer le contenu du système de fichiers</h2>
+<p>R a donc accès au système de fichiers de l’ordinateur à partir duquel la session a été démarrée. Directement dans la console R, il est possible de voir le contenu d’un répertoire, de créer des fichiers et des répertoires, d’effacer des fichiers, etc. Pour de l’information à ce propos, la fiche d’aide nommée <code>files</code> (ouverte avec la commande <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/files.html"><code>help(files)</code></a>) est un bon point de départ. Contentons-nous ici d’illustrer l’utilisation de la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/list.files.html">fonction <code>dir</code></a>, qui permet d’énumérer le contenu d’un répertoire (par défaut le répertoire de travail).</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dir</span>()</span></code></pre></div>
 <pre><code>## [1] &quot;data_ex.csv&quot;  &quot;data_ex.json&quot; &quot;data_ex.txt&quot;  &quot;data_ex.xlsx&quot;</code></pre>
-<p>Note : Tous les fichiers de la liste ci-dessus sont disponibles dans le fichier <code>lecture_ecriture_r_2020.zip</code> afin de vous permettre de reproduire les exemples de ces notes de cours.</p>
+<p><strong>Note</strong> : Tous les fichiers de la liste ci-dessus sont disponibles dans le fichier <code>lecture_ecriture_r_2020.zip</code> afin de vous permettre de reproduire les exemples de ces notes de cours.</p>
 <p>Un bon truc pour trouver facilement le nom complet d’un fichier, qui respecte la syntaxe de R, est d’utiliser la commande suivante :</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">file.choose</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">file.choose</span>()</span></code></pre></div>
 <p>Cette commande ouvre une fenêtre pour naviguer dans le système de fichiers et sélectionner un fichier. Une fois la sélection du fichier complétée, la commande <code>file.choose()</code> retourne une chaîne de caractères contenant le chemin d’accès complet du fichier sélectionné.</p>
 </div>
-<div id="projets-rstudio" class="section level2" number="1.2">
-<h2><span class="header-section-number">1.2</span> Projets RStudio</h2>
+<div id="projets-rstudio" class="section level2" number="1.3">
+<h2><span class="header-section-number">1.3</span> Projets RStudio</h2>
 <p>Il est souvent judicieux de rassembler sous un même répertoire un programme R et tous les fichiers qu’il utilise. Les fichiers de données peuvent même être placés dans un sous-répertoire, surtout s’ils sont nombreux.</p>
 <p>RStudio offre l’option de transformer un répertoire qui rassemble un ou des programmes R et leurs fichiers associés en « projet ». Des explications à propos de l’utilisation de projets RStudio se trouvent sur la page web suivante : <a href="https://support.rstudio.com/hc/en-us/articles/200526207-Using-Projects" class="uri">https://support.rstudio.com/hc/en-us/articles/200526207-Using-Projects</a>.</p>
 <p>Les projets RStudio facilitent la gestion du répertoire de travail. En ouvrant un projet RStudio, une nouvelle session R est démarrée ayant pour répertoire de travail le répertoire de base du projet.</p>
@@ -167,15 +189,15 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <p>Une analyse de données en R débute typiquement par l’importation de données. Les données à importer en R peuvent provenir de toutes sortes de sources. Elles peuvent se trouver dans des fichiers sous un certain format, dans des bases de données, ou provenir directement du web. En outre, il existe plusieurs formats de fichiers pour stocker des données : texte (dont CSV), JSON, EXCEL, formats propres à un logiciel statistique particulier, etc. Nous aborderons ici uniquement les formats texte, CSV, JSON, EXCEL, ainsi que les formats propres à R (vus plus loin). La lecture de table HTML sur le web sera aussi introduite. Pour en savoir plus sur les autres possibilités, des références sont fournies en fin de document.</p>
 <p>Les fonctions de base en R pour lire dans des fichiers externes sont <code>scan</code> et <code>readLines</code>. Nous ne verrons pas comment utiliser ces fonctions, car il existe des fonctions mieux adapter à la lecture de fichiers contenant des données à analyser.</p>
 <p>Les données du data frame suivant seront utilisées dans les exemples. Il s’agit de données créées dans les notes sur les <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/">structures de données en R</a>, dans lesquelles deux valeurs ont été remplacées par des valeurs manquantes. Ces données se rapportent à une expérience fictive de lancers de dés.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>de_1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">5</span>, <span class="dv">4</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>de_2 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">3</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>lanceur <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&quot;Luc&quot;</span>, <span class="st">&quot;Kim&quot;</span>), <span class="at">each =</span> <span class="dv">5</span>)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>data_ex <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">de1 =</span> de_1, <span class="at">de2 =</span> de_2, <span class="at">lanceur =</span> lanceur)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Introduction de valeurs manquantes</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>data_ex<span class="sc">$</span>de2[<span class="dv">7</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>data_ex<span class="sc">$</span>lanceur[<span class="dv">3</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Affichage du date frame</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>data_ex</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>de_1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">5</span>, <span class="dv">4</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>de_2 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">3</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>lanceur <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&quot;Luc&quot;</span>, <span class="st">&quot;Kim&quot;</span>), <span class="at">each =</span> <span class="dv">5</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>data_ex <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">de1 =</span> de_1, <span class="at">de2 =</span> de_2, <span class="at">lanceur =</span> lanceur)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Introduction de valeurs manquantes</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>data_ex<span class="sc">$</span>de2[<span class="dv">7</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>data_ex<span class="sc">$</span>lanceur[<span class="dv">3</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Affichage du date frame</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>data_ex</span></code></pre></div>
 <pre><code>##    de1 de2 lanceur
 ## 1    2   1     Luc
 ## 2    3   4     Luc
@@ -203,10 +225,10 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 5   5   Kim
 4   3   Kim</code></pre>
 <p>Remarquons que les valeurs manquantes dans ce fichier sont représentées par des points. Importons ces données avec <code>read.table</code>.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>data_ex_txt <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;C:/coursR/data_ex.txt&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>data_ex_txt <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;C:/coursR/data_ex.txt&quot;</span>)</span></code></pre></div>
 <p>Le seul argument obligatoire dans la fonction <code>read.table</code> est le chemin d’accès au fichier à lire. Ici, il n’aurait pas été nécessaire de spécifier le chemin d’accès complet du fichier puisque ce fichier se trouve dans le répertoire de travail de la session R. Dans tous les exemples suivants, seul le nom du fichier sera fourni.</p>
 <p>Les autres arguments de la fonction <code>read.table</code> doivent être adaptés selon le formatage du fichier à lire (voir la <a href="https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html">fiche d’aide de la fonction <code>read.table</code></a>). Dans l’exemple ci-dessus, est-ce que toutes les valeurs par défaut des arguments convenaient vraiment? Jetons un coup d’oeil à l’objet obtenu.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>data_ex_txt</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>data_ex_txt</span></code></pre></div>
 <pre><code>##     V1  V2      V3
 ## 1  de1 de2 lanceur
 ## 2    2   1     Luc
@@ -219,22 +241,22 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ## 9    6   2     Kim
 ## 10   5   5     Kim
 ## 11   4   3     Kim</code></pre>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_txt)</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_txt)</span></code></pre></div>
 <pre><code>## &#39;data.frame&#39;:    11 obs. of  3 variables:
 ##  $ V1: chr  &quot;de1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; ...
 ##  $ V2: chr  &quot;de2&quot; &quot;1&quot; &quot;4&quot; &quot;2&quot; ...
 ##  $ V3: chr  &quot;lanceur&quot; &quot;Luc&quot; &quot;Luc&quot; &quot;.&quot; ...</code></pre>
 <p>Il s’agit d’un data frame. La fonction <code>read.table</code> retourne toujours un objet de ce type.</p>
 <p>Nous pouvons tout de suite remarquer un problème avec ce data frame. Le nom des variables a été interprété comme une observation. Il faudrait utiliser l’argument <code>header</code> pour indiquer que la première ligne du fichier contient les noms des variables.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>data_ex_txt <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;data_ex.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_txt)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>data_ex_txt <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;data_ex.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_txt)</span></code></pre></div>
 <pre><code>## &#39;data.frame&#39;:    10 obs. of  3 variables:
 ##  $ de1    : int  2 3 4 1 2 3 5 6 5 4
 ##  $ de2    : chr  &quot;1&quot; &quot;4&quot; &quot;2&quot; &quot;3&quot; ...
 ##  $ lanceur: chr  &quot;Luc&quot; &quot;Luc&quot; &quot;.&quot; &quot;Luc&quot; ...</code></pre>
 <p>La première variable, <code>de1</code>, a été correctement lu, mais il y a un problème avec la deuxième variable, <code>de2</code>. Elle contient des données de type caractères, alors qu’il s’agit d’une variable numérique (le résultat d’un lancer de dé). Afin de pouvoir faire des calculs numériques sur cette variable, elle doit être stockée dans un vecteur (= colonne du data frame) de valeurs numériques. R a cru que les valeurs dans cette colonne étaient de type caractère à cause de la valeur manquante représentée par un point. L’argument <code>na.strings</code> de <code>read.table</code> indique à R les chaînes de caractères à interpréter comme des valeurs manquantes. Par défaut, <code>na.strings</code> prend la valeur <code>"NA"</code>. Il faut donc changer la valeur de cet argument comme suit.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>data_ex_txt <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;data_ex.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">na.strings =</span> <span class="st">&quot;.&quot;</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_txt)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>data_ex_txt <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">&quot;data_ex.txt&quot;</span>, <span class="at">header =</span> <span class="cn">TRUE</span>, <span class="at">na.strings =</span> <span class="st">&quot;.&quot;</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_txt)</span></code></pre></div>
 <pre><code>## &#39;data.frame&#39;:    10 obs. of  3 variables:
 ##  $ de1    : int  2 3 4 1 2 3 5 6 5 4
 ##  $ de2    : int  1 4 2 3 5 4 NA 2 5 3
@@ -319,15 +341,15 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 4;3;&quot;Kim&quot;</code></pre>
 <p>La fonction <code>read.csv2</code> est tout indiquée pour importer ce fichier puisque la valeur par défaut de son argument <code>sep</code> est <code>";"</code>. Cette fonction appelle en fait la fonction <code>read.table</code>, mais avec des valeurs par défaut différentes pour les arguments. Ce type de fonction est appelé fonction enveloppe (en anglais <em>wrapper</em>). La fonction <code>read.table</code> possède 4 fonctions enveloppe : <code>read.csv</code>, <code>read.csv2</code>, <code>read.delim</code> et <code>read.delim2</code>.</p>
 <p>Les arguments de la fonction <code>read.csv2</code> ont-ils toutes les bonnes valeurs par défaut pour importer le fichier <code>data_ex.csv</code>?</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>data_ex_csv <span class="ot">&lt;-</span> <span class="fu">read.csv2</span>(<span class="st">&quot;data_ex.csv&quot;</span>)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_csv)</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>data_ex_csv <span class="ot">&lt;-</span> <span class="fu">read.csv2</span>(<span class="st">&quot;data_ex.csv&quot;</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_csv)</span></code></pre></div>
 <pre><code>## &#39;data.frame&#39;:    10 obs. of  3 variables:
 ##  $ de1    : int  2 3 4 1 2 3 5 6 5 4
 ##  $ de2    : int  1 4 2 3 5 4 NA 2 5 3
 ##  $ lanceur: chr  &quot;Luc&quot; &quot;Luc&quot; &quot;&quot; &quot;Luc&quot; ...</code></pre>
 <p>Ici, la première ligne a correctement été interprétée comme le nom des variables, parce que l’argument <code>header</code> de <code>read.csv2</code> prend par défaut la valeur <code>TRUE</code>. Aussi, la valeur manquante a été bien interprétée pour la variable numérique, mais pas pour la variable catégorique. Utilisons donc l’argument <code>na.strings</code> comme suit pour faire correctement l’importation.</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>data_ex_csv <span class="ot">&lt;-</span> <span class="fu">read.csv2</span>(<span class="st">&quot;data_ex.csv&quot;</span>, <span class="at">na.strings =</span> <span class="st">&quot;&quot;</span>)</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_csv)</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>data_ex_csv <span class="ot">&lt;-</span> <span class="fu">read.csv2</span>(<span class="st">&quot;data_ex.csv&quot;</span>, <span class="at">na.strings =</span> <span class="st">&quot;&quot;</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_csv)</span></code></pre></div>
 <pre><code>## &#39;data.frame&#39;:    10 obs. of  3 variables:
 ##  $ de1    : int  2 3 4 1 2 3 5 6 5 4
 ##  $ de2    : int  1 4 2 3 5 4 NA 2 5 3
@@ -340,9 +362,9 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <h4><span class="header-section-number">2.1.3.1</span> Package <code>readr</code></h4>
 <p></p>
 <p>Le package <a href="https://readr.tidyverse.org/"><code>readr</code></a> du <a href="https://www.tidyverse.org/"><code>tidyverse</code></a> offre différentes fonctions pour lire des fichiers textes, selon leur format. Par exemple, il offre la fonction <a href="https://readr.tidyverse.org/reference/read_delim.html"><code>read_csv2</code></a>, similaire à la fonction <code>read.csv2</code> du R de base. Voici un exemple d’utilisation de cette fonction.</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>data_ex_csv_readr <span class="ot">&lt;-</span> <span class="fu">read_csv2</span>(<span class="st">&quot;data_ex.csv&quot;</span>)</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_csv_readr)</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>data_ex_csv_readr <span class="ot">&lt;-</span> <span class="fu">read_csv2</span>(<span class="st">&quot;data_ex.csv&quot;</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_csv_readr)</span></code></pre></div>
 <pre><code>## spec_tbl_df [10 x 3] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
 ##  $ de1    : num [1:10] 2 3 4 1 2 3 5 6 5 4
 ##  $ de2    : num [1:10] 1 4 2 3 5 4 NA 2 5 3
@@ -359,9 +381,9 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <h4><span class="header-section-number">2.1.3.2</span> Package <code>data.table</code></h4>
 <p></p>
 <p>Bien que les fonctions du package <code>readr</code> tendent à être plus rapides que la fonction <code>read.table</code>, une autre fonction est capable d’être encore plus rapide : la fonction <a href="https://rdatatable.gitlab.io/data.table/reference/fread.html"><code>fread</code></a> du package <a href="https://rdatatable.gitlab.io/data.table/"><code>data.table</code></a>. Voici un exemple d’utilisation de cette fonction.</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>data_ex_csv_fread <span class="ot">&lt;-</span> <span class="fu">fread</span>(<span class="st">&quot;data_ex.csv&quot;</span>, <span class="at">na.strings =</span> <span class="st">&quot;&quot;</span>)</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_csv_fread)</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>data_ex_csv_fread <span class="ot">&lt;-</span> <span class="fu">fread</span>(<span class="st">&quot;data_ex.csv&quot;</span>, <span class="at">na.strings =</span> <span class="st">&quot;&quot;</span>)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_csv_fread)</span></code></pre></div>
 <pre><code>## Classes &#39;data.table&#39; and &#39;data.frame&#39;:   10 obs. of  3 variables:
 ##  $ de1    : int  2 3 4 1 2 3 5 6 5 4
 ##  $ de2    : int  1 4 2 3 5 4 NA 2 5 3
@@ -428,9 +450,9 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ]</code></pre>
 <p>Le fichier comporte un élément pour chacune des 10 observations. Pour chaque observation, la valeur prise pour chacune des variables est spécifiée. Ce format est plus souple qu’un tableau de données, car la valeur d’une variable pour une observation pourrait être de n’importe quelle dimension, plutôt que d’être une seule donnée. Remarquons que dans le format JSON, une donnée manquante est représentée par <code>null</code> plutôt que <code>NA</code>.</p>
 <p>Aucune fonction de l’installation de base de R ne permet de lire ce format de fichier. Cependant, quelques packages offrent des fonctions pour ce faire. C’est le cas de la fonction <code>fromJSON</code> du <a href="https://CRAN.R-project.org/package=jsonlite">package <code>jsonlite</code></a>. Voici un exemple d’utilisation de cette fonction.</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(jsonlite)</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>data_ex_json <span class="ot">&lt;-</span> <span class="fu">fromJSON</span>(<span class="st">&quot;data_ex.json&quot;</span>)</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_json)</span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(jsonlite)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>data_ex_json <span class="ot">&lt;-</span> <span class="fu">fromJSON</span>(<span class="st">&quot;data_ex.json&quot;</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_json)</span></code></pre></div>
 <pre><code>## &#39;data.frame&#39;:    10 obs. of  3 variables:
 ##  $ de1    : int  2 3 4 1 2 3 5 6 5 4
 ##  $ de2    : int  1 4 2 3 5 4 NA 2 5 3
@@ -442,9 +464,9 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <p>Afin de lire en R des données provenant d’un fichier EXCEL, une première option est d’enregistrer le fichier dans un format texte, puis de l’importer en R avec les moyens vus précédemment. Cette procédure n’est cependant pas automatique. Il existe quelques packages R offrant des fonctions pour lire directement dans un fichier EXCEL. Un de ces packages est <a href="https://readxl.tidyverse.org"><code>readxl</code></a>. Supposons que nous voulons importer en R le fichier EXCEL <code>data_ex.xlsx</code> ayant l’allure suivante.</p>
 <p><img src="../fig/data_ex_xlsx.png" width="50%" style="display: block; margin: auto;" /></p>
 <p>Nous pourrions procéder comme suit.</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>data_ex_xlsx <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">&quot;data_ex.xlsx&quot;</span>)</span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_xlsx)</span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>data_ex_xlsx <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">&quot;data_ex.xlsx&quot;</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(data_ex_xlsx)</span></code></pre></div>
 <pre><code>## tibble [10 x 3] (S3: tbl_df/tbl/data.frame)
 ##  $ de1    : num [1:10] 2 3 4 1 2 3 5 6 5 4
 ##  $ de2    : num [1:10] 1 4 2 3 5 4 NA 2 5 3
@@ -463,12 +485,12 @@ https://www.java.com/fr/download/manual.jsp
 <p>La plupart des données disponibles sur le web ne sont cependant pas distribuées dans un fichier. Souvent, elles sont simplement présentées sous forme de tableaux dans des tables HTML. Une façon d’importer en R les données d’une table HTML serait de copier/coller le contenu de la table dans un fichier (texte ou autre), puis d’importer ce fichier en R. Si la table HTML en question provient d’une page sur un Wiki, tel que Wikipédia, le site web <a href="https://wikitable2csv.ggor.de/" class="uri">https://wikitable2csv.ggor.de/</a> facilite même cette tâche en créant des fichiers au format CSV contenant les données dans les tables HTML.</p>
 <p>Ces façons de procéder ne sont cependant pas automatiques. Certains packages R permettent d’éviter les étapes intermédiaires manuelles et permettent de lire directement dans une table HTML. Il est ainsi facile d’accéder à un très grand nombre de données en R. C’est une forme de ce qui est appelé en anglais le « <em>web harvesting</em> » ou « <em>web scraping</em> ».</p>
 <p>Voici un exemple de lecture de données directement à partir d’une table HTML avec le <a href="https://rvest.tidyverse.org/">package <code>rvest</code></a>.</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rvest)</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>url <span class="ot">&lt;-</span> <span class="st">&quot;https://en.wikipedia.org/wiki/List_of_highest-grossing_films&quot;</span></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>page <span class="ot">&lt;-</span> <span class="fu">read_html</span>(url)</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>tables <span class="ot">&lt;-</span> <span class="fu">html_table</span>(page, <span class="at">fill =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>boxoffice <span class="ot">&lt;-</span> tables[[<span class="dv">1</span>]]</span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(boxoffice)</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rvest)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>url <span class="ot">&lt;-</span> <span class="st">&quot;https://en.wikipedia.org/wiki/List_of_highest-grossing_films&quot;</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>page <span class="ot">&lt;-</span> <span class="fu">read_html</span>(url)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>tables <span class="ot">&lt;-</span> <span class="fu">html_table</span>(page, <span class="at">fill =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>boxoffice <span class="ot">&lt;-</span> tables[[<span class="dv">1</span>]]</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(boxoffice)</span></code></pre></div>
 <pre><code>## &#39;data.frame&#39;:    50 obs. of  6 variables:
 ##  $ Rank           : int  1 2 3 4 5 6 7 8 9 10 ...
 ##  $ Peak           : chr  &quot;1&quot; &quot;1&quot; &quot;1&quot; &quot;3&quot; ...
@@ -504,7 +526,7 @@ https://www.java.com/fr/download/manual.jsp
 <div id="fichier-texte-1" class="section level2" number="3.1">
 <h2><span class="header-section-number">3.1</span> Fichier texte</h2>
 <p>Le format de fichier le plus universel pour exporter des données est le format texte. Un grand nombre de logiciels peuvent lire ce format. Les fonctions de base en R pour écrire dans un fichier texte sont <code>write</code> et <code>write.table</code>. Nous verrons ici seulement comment utiliser <code>write.table</code>, qui est plus adaptée à l’exportation de jeux de données. Par exemple, exportons le contenu du data frame <code>data_ex</code> dans le fichier texte <code>data_ex_export.txt</code></p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write.table</span>(data_ex, <span class="at">file =</span> <span class="st">&quot;data_ex_export.txt&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write.table</span>(data_ex, <span class="at">file =</span> <span class="st">&quot;data_ex_export.txt&quot;</span>)</span></code></pre></div>
 <p>Il faut spécifier à la fonction l’objet dans lequel se trouvent les données à exporter (typiquement une matrice ou un data frame), ainsi que le fichier dans lequel écrire les données.
 Tout comme son équivalent pour lire des données <code>read.table</code>, la fonction <code>write.table</code> possède plusieurs arguments permettant de contrôler notamment le symbole de décimale (<code>dec</code>), le symbole représentant les valeurs manquantes (<code>na</code>), le séparateur entre les différentes colonnes (<code>sep</code>), la présence ou non des noms des lignes ou des colonnes (<code>row.names</code> et <code>col.names</code>), etc.</p>
 <p>Il existe aussi deux fonctions enveloppe à la fonction <code>write.table</code> pour les formats CSV, nommées <code>write.csv</code> et <code>write.csv2</code>.</p>
@@ -512,26 +534,26 @@ Tout comme son équivalent pour lire des données <code>read.table</code>, la fo
 <div id="fichier-json" class="section level2" number="3.2">
 <h2><span class="header-section-number">3.2</span> Fichier JSON</h2>
 <p>Pour exporter les données dans un data frame en format JSON avec le package <code>jsonlite</code>, il faut d’abord transformer les données au format JSON avec la fonction <code>toJSON</code>. Ensuite, l’objet obtenu doit être écrit dans un fichier externe avec la fonction <code>write</code> du R de base.</p>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>data_ex_json <span class="ot">&lt;-</span> <span class="fu">toJSON</span>(data_ex, <span class="at">pretty =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write</span>(data_ex_json, <span class="st">&quot;data_ex_export.json&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>data_ex_json <span class="ot">&lt;-</span> <span class="fu">toJSON</span>(data_ex, <span class="at">pretty =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write</span>(data_ex_json, <span class="st">&quot;data_ex_export.json&quot;</span>)</span></code></pre></div>
 </div>
 <div id="fichier-excel-1" class="section level2" number="3.3">
 <h2><span class="header-section-number">3.3</span> Fichier EXCEL</h2>
 <p>Le <a href="https://ycphs.github.io/openxlsx/index.html">package <code>openxlsx</code></a> offre des fonctions pour exporter des données stockées dans un objet R dans un fichier EXCEL. Par exemple, le contenu du data frame <code>data_ex</code> peut être écrit dans un fichier EXCEL comme suit.</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(openxlsx)</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.xlsx</span>(data_ex, <span class="at">file =</span> <span class="st">&quot;data_ex_export.xlsx&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(openxlsx)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.xlsx</span>(data_ex, <span class="at">file =</span> <span class="st">&quot;data_ex_export.xlsx&quot;</span>)</span></code></pre></div>
 </div>
 <div id="enregistrement-dobjets-r-dans-un-fichier-externe" class="section level2" number="3.4">
 <h2><span class="header-section-number">3.4</span> Enregistrement d’objets R dans un fichier externe</h2>
 <p>R propose aussi ses formats de fichiers pour enregistrer des objets entiers, en conservant à la fois les données contenues dans les objets et les structures des objets.</p>
 <p><strong>Formats binaires</strong></p>
 <p>Une image de session est l’ensemble des objets dans l’environnement de travail d’une session R. Lors de la fermeture de R, il nous est proposé par défaut d’enregistrer cette image. La fonction <code>save.image</code> peut aussi être utilisée en tout temps pour enregistrer cette image.</p>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">save.image</span>(<span class="at">file =</span> <span class="st">&quot;image.RData&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">save.image</span>(<span class="at">file =</span> <span class="st">&quot;image.RData&quot;</span>)</span></code></pre></div>
 <p>La fonction <code>save</code> permet pour sa part d’enregistrer un ou des objets en particulier, par exemple :</p>
-<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(data_ex, de_1, <span class="at">file =</span> <span class="st">&quot;deux_obj.rda&quot;</span>)</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(data_ex, <span class="at">file =</span> <span class="st">&quot;data_ex.rda&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(data_ex, de_1, <span class="at">file =</span> <span class="st">&quot;deux_obj.rda&quot;</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(data_ex, <span class="at">file =</span> <span class="st">&quot;data_ex.rda&quot;</span>)</span></code></pre></div>
 <p>R offre aussi un format binaire alternatif pour enregistrer un seul objet, sans inclure le nom de l’objet dans le fichier (contrairement aux fonctions précédentes). Il s’agit du format .rds, obtenu avec la fonction <code>saveRDS</code>.</p>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(data_ex, <span class="at">file =</span> <span class="st">&quot;data_ex.rds&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(data_ex, <span class="at">file =</span> <span class="st">&quot;data_ex.rds&quot;</span>)</span></code></pre></div>
 <p>L’utilisateur peut en réalité donner les extensions de son choix aux fichiers. Il est cependant recommandé d’utiliser les extensions suivantes :</p>
 <ul>
 <li>.RData ou .rda pour un objet créé avec les fonctions <code>save.image</code> ou <code>save</code>,</li>
@@ -544,11 +566,11 @@ Tout comme son équivalent pour lire des données <code>read.table</code>, la fo
 <div id="écriture-de-sorties-r-dans-un-fichier-externe" class="section level2" number="3.5">
 <h2><span class="header-section-number">3.5</span> Écriture de sorties R dans un fichier externe</h2>
 <p>Finalement, il est possible d’envoyer les résultats de nos commandes dans un fichier texte externe plutôt que dans la console grâce aux fonctions <code>capture.output</code> et <code>sink</code>.</p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">capture.output</span>(<span class="fu">summary</span>(data_ex), <span class="at">file =</span> <span class="st">&quot;data_ex_summary.out&quot;</span>)</span></code></pre></div>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sink</span>(<span class="st">&quot;data_ex.out&quot;</span>)</span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>data_ex</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colMeans</span>(data_ex[, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sink</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">capture.output</span>(<span class="fu">summary</span>(data_ex), <span class="at">file =</span> <span class="st">&quot;data_ex_summary.out&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sink</span>(<span class="st">&quot;data_ex.out&quot;</span>)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>data_ex</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colMeans</span>(data_ex[, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sink</span>()</span></code></pre></div>
 <hr />
 </div>
 </div>
@@ -561,8 +583,8 @@ Tout comme son équivalent pour lire des données <code>read.table</code>, la fo
 <li><code>readRDS</code> : pour les fichiers produits avec la fonction <code>saveRDS</code> (format .rds, ne peut contenir qu’un seul objet, le nom de l’objet n’est pas inclus dans le fichier); la fonction <code>readRDS</code> doit être utilisée avec une assignation pour stocker le résultat de l’importation dans un objet.</li>
 </ul>
 <p>Voici deux exemples d’appel de ces fonctions.</p>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">&quot;deux_obj.rda&quot;</span>)</span></code></pre></div>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>data_ex_copie <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">&quot;data_ex.rds&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">&quot;deux_obj.rda&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>data_ex_copie <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">&quot;data_ex.rds&quot;</span>)</span></code></pre></div>
 <p>La fonction <code>load</code> ajoute des objets dans l’environnement de travail. Si des objets portant les mêmes noms que ceux à importer sont déjà présents dans l’environnement de travail, ils sont remplacés sans même qu’un avertissement ne soit émis. Avec cette fonction, il y a donc un risque d’écraser sans s’en rendre compte des objets présents dans notre environnement de travail.</p>
 <p><strong>Rappel</strong> : Si le répertoire de travail par défaut de R contient un fichier nommé <code>.RData</code>, les objets dans ce fichier seront automatiquement chargés en R lors d’une ouverture de session. <em>Pour empêcher ce chargement automatique, il faut effacer ce fichier <code>.RData</code> .</em></p>
 <hr />
@@ -584,7 +606,7 @@ Tout comme son équivalent pour lire des données <code>read.table</code>, la fo
 <li>encadrer le chemin de <strong>guillemets</strong>.</li>
 </ul>
 <p>Exemple :</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;C:/coursR/data_ex.txt&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;C:/coursR/data_ex.txt&quot;</span></span></code></pre></div>
 <p style="font-size:110%">
 <strong>Lecture (importation) dans des fichiers</strong>
 </p>

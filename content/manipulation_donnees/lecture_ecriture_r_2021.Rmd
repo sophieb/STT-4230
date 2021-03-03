@@ -2,7 +2,7 @@
 title: "Lecture et écriture dans des fichiers externes à partir de R"
 linkTitle: "Lecture/écriture dans fichiers en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2021-02-14"
+date: "2021-03-02"
 weight: 2
 slug: "lecture_ecriture_r"
 lastmodifierdisplayname: "Sophie Baillargeon"
@@ -32,7 +32,6 @@ knitr::opts_knit$set(root.dir = "./files")
 knitr::opts_chunk$set(R.options = list(width = 85))
 ```
 
-
 ***
 
 *Note préliminaire : Lors de leur dernière mise à jour, ces notes ont été révisées en utilisant R version 4.0.3, le package `readr` version 1.4.0, le package `data.table` version 1.13.6, le package `jsonlite` version 1.7.2,  le package `readxl` version 1.3.1,  le package `rvest` version 0.3.6 et  le package `openxlsx` version 4.2.3. Pour d'autres versions, les informations peuvent différer.*
@@ -44,17 +43,33 @@ Maintenant que les objets R pouvant servir de structure de données ont été vu
 Pour apprendre comment lire ou écrire des données stockées dans une base de données, le lecteur est référé à la documentation d'un package permettant de communiquer avec la base de données qu'il utilise. La page web suivante répertorie plusieurs de ces packages&nbsp;: https://CRAN.R-project.org/view=Databases.
 
 
-# Répertoire de travail
+# Accéder au système de fichiers
 
-Avant toute chose, revenons sur le répertoire de travail (ou répertoire courant, en anglais *working directory*). Afin d'accéder à des données en R, il faut typiquement aller les lire là où elles se trouvent. Si les données se trouvent dans un fichier situé sur l'ordinateur local, dans un certain répertoire, il faut aller lire son contenu à cet endroit.
+Afin d'accéder à des données à partir de R, il faut souvent aller les lire là où elles se trouvent. Si les données sont dans un fichier situé sur l'ordinateur local, dans un certain répertoire, il faut aller lire son contenu à cet endroit.
 
-Dans toute commande R effectuant une lecture ou de l'écriture dans un fichier, il faut identifier le fichier. Il peut être identifié en utilisant son chemin d'accès complet, ou encore en utilisant un chemin d'accès relatif à un emplacement courant. Peu importe l'option choisie, le chemin doit se terminer par le nom complet du fichier, incluant son extension.
+Dans toute commande R effectuant de la lecture ou de l'écriture dans un fichier, il faut identifier ce fichier. Il peut être identifié en utilisant son chemin d'accès complet (en anglais *full* ou *absolute path*), ou encore en utilisant un chemin d'accès relatif à un emplacement courant (en anglais *relative path*). Peu importe l'option choisie, le chemin doit se terminer par le nom complet du fichier, incluant son extension.
 
 Par exemple, supposons que le fichier `data_ex.txt` se trouve dans le répertoire `C:\coursR` de l'ordinateur d'un utilisateur de R sous Windows. Le chemin d'accès complet de ce fichier est `C:\coursR\data_ex.txt`. Le chemin d'accès du fichier relatif au répertoire `C:\coursR` est pour sa part simplement le nom du fichier, soit `data_ex.txt`.
 
-**Remarque importante**&nbsp;: Bien que le caractère utilisé pour séparer les composantes dans un chemin d'accès sous Windows soit `\`, ce caractère est réservé en R pour les «&nbsp;séquences d'échappement&nbsp;». Il s'agit de séquences ayant une signification particulière dans une chaîne de caractères (par exemple `"\t"` représente une tabulation, `"\n"` représente un retour de chariot, etc.). Dans un chemin d'accès en R, il faut plutôt séparer les composantes par le caractère `/`, ou encore par `\\`.
 
-Lorsqu'un fichier est identifié par un chemin relatif dans une instruction, R doit faire une supposition quant au répertoire à partir duquel chercher le fichier. C'est justement l'utilité du répertoire de travail. Il s'agit de l'emplacement de base, celui à partir duquel débuter un chemin d'accès à un fichier lorsque le début du chemin n'est pas spécifié par l'utilisateur. 
+#### Remarques importantes {-}
+
+\mbox{}
+
+Bien que le caractère utilisé pour séparer les composantes dans un chemin d'accès sous Windows soit `\`, ce caractère est réservé en R pour les «&nbsp;séquences d'échappement&nbsp;». Il s'agit de séquences ayant une signification particulière dans une chaîne de caractères (par exemple `"\t"` représente une tabulation, `"\n"` représente une nouvelle ligne, etc.). Dans un chemin d'accès en R, il faut plutôt séparer les composantes par le caractère `/`, ou encore par `\\`.
+
+De plus, dans une commande R, un chemin d'accès doit toujours être présenté sous forme de chaîne de caractères, donc être encadré de guillemets.
+
+Ainsi, dans une commande R, le chemin d'accès `C:\coursR\data_ex.txt` devrait être écrit ainsi : `"C:/coursR/data_ex.txt"`. Ce chemin pourrait aussi être produit avec la [fonction `file.path`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/file.path.html) comme suit.
+
+```{r}
+file.path("C:", "coursR", "data_ex.txt")
+```
+
+
+## Répertoire de travail
+
+Lorsqu'un fichier est identifié par un chemin d'accès relatif dans une commande, R doit faire une supposition quant au répertoire à partir duquel chercher le fichier. C'est justement l'utilité du répertoire de travail (ou répertoire courant, en anglais *working directory*). Il s'agit de l'emplacement de base, celui à partir duquel débuter un chemin d'accès à un fichier lorsque le début du chemin n'est pas spécifié par l'utilisateur. 
 
 Pour connaître le répertoire de travail d'une session R, il suffit de soumettre la commande suivante&nbsp;:
 
@@ -62,20 +77,31 @@ Pour connaître le répertoire de travail d'une session R, il suffit de soumettr
 getwd()
 ```
 
-Pour accéder au fichier `data_ex.txt` en utilisant seulement son nom, il faut d'abord s'assurer que le répertoire de travail de la session R correspond au répertoire contenant le fichier. La fonction `setwd` permet de modifier le répertoire de travail. Par exemple, la commande suivante change le répertoire de travail pour `C:\coursR`.
+Pour accéder au fichier `data_ex.txt` en utilisant seulement son nom, il faut d'abord s'assurer que le répertoire de travail de la session R correspond au répertoire contenant le fichier. La fonction `setwd` permet de modifier le répertoire de travail. Par exemple, la commande suivante change le répertoire de travail pour `"C:/coursR"`.
 
 ```{r eval = FALSE}
 setwd("C:/coursR")
 ```
 
-Dans une commande R, un chemin d'accès doit toujours être présenté sous forme de chaîne de caractères, donc être encadré de guillemets.
-
-Si le répertoire de travail avait été fixé à  `"C:"`, le chemin d'accès relatif du fichier aurait été `"/coursR/data_ex.txt"` (le `"/"` au début du chemin indique que `coursR` est un répertoire et non un fichier).
+Si le répertoire de travail avait été fixé à `"C:"`, le chemin d'accès relatif du fichier aurait été `"coursR/data_ex.txt"`.
 
 
-## Accéder au système de fichiers
+#### Symboles reconnus dans les chemins d'accès {-}
 
-R a donc accès au système de fichiers de l'ordinateur à partir duquel la session a été démarrée. Par défaut, l'accès se fait à partir du répertoire de travail. Directement dans la console R, il est possible de voir le contenu du répertoire de travail, créer des fichiers et des répertoires, effacer des fichiers, etc. Par exemple, la fonction `dir` permet d'afficher le contenu d'un répertoire (par défaut le répertoire de travail). Pour plus d'information à ce propos, la fiche d'aide nommée `files` (ouverte avec la commande [`help(files)`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/files.html)) est un bon point de départ.
+\mbox{}
+
+Dans les chemins d'accès à des fichiers en R, les symboles `.`, `..` et `~` ont les significations usuelles suivantes :
+
+- `.` : répertoire de travail courant,
+- `..` : répertoire parent du répertoire de travail courant,
+- `~` : répertoire de travail par défaut (en anglais *home directory*).
+
+Ainsi, si le répertoire de travail était `"C:/coursR"`, les chemins d'accès `"C:/coursR/data_ex.txt"`, `"../coursR/data_ex.txt"`, `"./data_ex.txt"` et `"data_ex.txt"` seraient tous équivalents.
+
+
+## Explorer le contenu du système de fichiers
+
+R a donc accès au système de fichiers de l'ordinateur à partir duquel la session a été démarrée. Directement dans la console R, il est possible de voir le contenu d'un répertoire, de créer des fichiers et des répertoires, d'effacer des fichiers, etc. Pour de l'information à ce propos, la fiche d'aide nommée `files` (ouverte avec la commande [`help(files)`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/files.html)) est un bon point de départ. Contentons-nous ici d'illustrer l'utilisation de la [fonction `dir`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/list.files.html), qui permet d'énumérer le contenu d'un répertoire (par défaut le répertoire de travail). 
 
 ```{r, eval = FALSE}
 dir()
@@ -85,9 +111,9 @@ dir()
 c("data_ex.csv", "data_ex.json", "data_ex.txt", "data_ex.xlsx")
 ```
 
-Note&nbsp;: Tous les fichiers de la liste ci-dessus sont disponibles dans le fichier `lecture_ecriture_r_2020.zip` afin de vous permettre de reproduire les exemples de ces notes de cours.
+**Note**\ : Tous les fichiers de la liste ci-dessus sont disponibles dans le fichier `lecture_ecriture_r_2020.zip` afin de vous permettre de reproduire les exemples de ces notes de cours.
 
-Un bon truc pour trouver facilement le nom complet d'un fichier, qui respecte la syntaxe de R, est d'utiliser la commande suivante&nbsp;:
+Un bon truc pour trouver facilement le nom complet d'un fichier, qui respecte la syntaxe de R, est d'utiliser la commande suivante\ :
 
 ```{r, eval = FALSE}
 file.choose()
