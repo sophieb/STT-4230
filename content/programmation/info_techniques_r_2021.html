@@ -1,0 +1,492 @@
+---
+title: "Informations techniques concernant R"
+linkTitle: "Infos techniques R"
+author: "Sophie Baillargeon, Université Laval"
+date: "2021-03-08"
+weight: 1
+slug: "infos_techniques_r"
+lastmodifierdisplayname: "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+    highlight: tango
+  blogdown::html_page:
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+    highlight: tango
+bibliography: ../references.bib
+csl: ../custom.csl
+link-citations: true
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+- \usepackage{ragged2e}
+editor_options: 
+  chunk_output_type: console
+---
+
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #f8f8f8; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<div id="TOC">
+<ul>
+<li><a href="#imprécision-numérique"><span class="toc-section-number">1</span> Imprécision numérique</a>
+<ul>
+<li><a href="#nombres-décimaux"><span class="toc-section-number">1.1</span> Nombres décimaux</a>
+<ul>
+<li><a href="#différence-entre-unique-et-table-ou-factor"><span class="toc-section-number">1.1.1</span> Différence entre <code>unique</code> et <code>table</code> ou <code>factor</code></a></li>
+<li><a href="#petits-nombres-en-valeur-absolue"><span class="toc-section-number">1.1.2</span> Petits nombres en valeur absolue</a></li>
+</ul></li>
+<li><a href="#grands-nombres-en-valeur-absolue"><span class="toc-section-number">1.2</span> Grands nombres en valeur absolue</a></li>
+</ul></li>
+<li><a href="#évaluation-dexpressions-en-r-et-environnements"><span class="toc-section-number">2</span> Évaluation d’expressions en R et environnements</a>
+<ul>
+<li><a href="#chemin-de-recherche"><span class="toc-section-number">2.1</span> Chemin de recherche</a></li>
+<li><a href="#évaluation-dun-appel-à-une-fonction"><span class="toc-section-number">2.2</span> Évaluation d’un appel à une fonction</a></li>
+<li><a href="#fonctions-ajoutant-un-data-frame-au-début-du-chemin-de-recherche"><span class="toc-section-number">2.3</span> Fonctions ajoutant un data frame au début du chemin de recherche</a>
+<ul>
+<li><a href="#fonctions-with-et-within"><span class="toc-section-number">2.3.1</span> Fonctions <code>with</code> et <code>within</code></a></li>
+</ul></li>
+<li><a href="#fonction-attach"><span class="toc-section-number">2.4</span> Fonction <code>attach</code></a></li>
+<li><a href="#opérateur"><span class="toc-section-number">2.5</span> Opérateur <code>::</code></a></li>
+</ul></li>
+<li><a href="#complètement-automatique"><span class="toc-section-number">3</span> Complètement automatique</a></li>
+<li><a href="#résumé"><span class="toc-section-number">4</span> Résumé</a></li>
+<li><a href="#références">Références</a></li>
+</ul>
+</div>
+
+<hr />
+<p><em>Note préliminaire : Lors de leur dernière mise à jour, ces notes ont été révisées en utilisant R version 4.0.3 et le package <code>dplyr</code> version 1.0.3. Pour d’autres versions, les informations peuvent différer.</em></p>
+<hr />
+<div id="imprécision-numérique" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Imprécision numérique</h1>
+<p>R ne garde pas en mémoire de façon tout à fait exacte certains nombres décimaux, ainsi que les nombres plus grands en valeur absolue qu’une certaine limite. Il faut faire attention à ces imprécisions numériques, car elles peuvent causer des bogues dans nos programmes R. Ces imprécisions sont dues à la représentation en <a href="http://fr.wikipedia.org/wiki/Virgule_flottante">virgules flottantes</a> utilisée par R pour stocker en mémoire les nombres réels (voir <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/double.html"><code>help(double)</code></a>). Elles sont présentes dans à peu près tout langage informatique commun.</p>
+<div id="nombres-décimaux" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> Nombres décimaux</h2>
+<p>Voici quelques exemples de tours que peut nous jouer l’imprécision numérique en R sur des nombre décimaux (exemples tirés de <span class="citation">[<a href="#ref-burns" role="doc-biblioref">1</a>]</span>).</p>
+<p>Pourquoi la commande suivante ne retourne-t-elle pas <code>TRUE</code>?</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>.<span class="dv">1</span> <span class="sc">==</span> .<span class="dv">3</span><span class="sc">/</span><span class="dv">3</span></span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<p>Pourquoi le 4<sup>e</sup> élément du vecteur suivant n’est-il pas <code>TRUE</code>?</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="fl">0.1</span>) <span class="sc">==</span> .<span class="dv">3</span></span></code></pre></div>
+<pre><code>##  [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE</code></pre>
+<p>Pourquoi la longueur de cet objet n’est-elle pas 1?</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(<span class="fu">c</span>(.<span class="dv">3</span>, .<span class="dv">4</span> <span class="sc">-</span> .<span class="dv">1</span>, .<span class="dv">5</span> <span class="sc">-</span> .<span class="dv">2</span>, .<span class="dv">6</span> <span class="sc">-</span> .<span class="dv">3</span>, .<span class="dv">7</span> <span class="sc">-</span> .<span class="dv">4</span>))</span></code></pre></div>
+<pre><code>## [1] 0.3 0.3 0.3</code></pre>
+<p>Parce R a une précision limitée pour garder des nombres en mémoire. Nous sommes portés à croire que 0.1 en R est réellement le nombre 0.1, soit un dixième (1/10), mais en fait R a stocké en mémoire la valeur suivante :</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(.<span class="dv">1</span>, <span class="at">digits =</span> <span class="dv">20</span>)</span></code></pre></div>
+<pre><code>## [1] 0.10000000000000001</code></pre>
+<p>alors que .3/3 a été stocké en mémoire comme suit :</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(.<span class="dv">3</span><span class="sc">/</span><span class="dv">3</span>, <span class="at">digits =</span> <span class="dv">20</span>)</span></code></pre></div>
+<pre><code>## [1] 0.099999999999999992</code></pre>
+<p>donc ces deux nombres ne sont pas exactement égaux! Par contre, ils sont approximativement égaux. D’où l’intérêt d’être « tolérant » dans nos comparaisons entre deux nombres réels.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">all.equal</span>(.<span class="dv">1</span>, .<span class="dv">3</span><span class="sc">/</span><span class="dv">3</span>)</span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<div id="différence-entre-unique-et-table-ou-factor" class="section level3" number="1.1.1">
+<h3><span class="header-section-number">1.1.1</span> Différence entre <code>unique</code> et <code>table</code> ou <code>factor</code></h3>
+<p>La fonction <code>table</code> (ainsi que <code>xtabs</code> ou <code>ftable</code>), qui calcule des fréquences, commence par trouver les valeurs uniques dans les vecteurs reçus en entrée, puis elle compte combien de fois chacune des combinaisons de valeurs uniques sont répétées dans les vecteurs. Cependant, l’exemple suivant nous montre qu’elle ne trouve pas toujours les mêmes valeurs uniques que la fonction <code>unique</code>.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(.<span class="dv">3</span>, .<span class="dv">4</span> <span class="sc">-</span> .<span class="dv">1</span>, .<span class="dv">5</span> <span class="sc">-</span> .<span class="dv">2</span>, .<span class="dv">6</span> <span class="sc">-</span> .<span class="dv">3</span>, .<span class="dv">7</span> <span class="sc">-</span> .<span class="dv">4</span>) </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>x <span class="co"># même vecteur que précédemment</span></span></code></pre></div>
+<pre><code>## [1] 0.3 0.3 0.3 0.3 0.3</code></pre>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(x, <span class="at">digits =</span> <span class="dv">20</span>)</span></code></pre></div>
+<pre><code>## [1] 0.29999999999999999 0.30000000000000004 0.29999999999999999 0.29999999999999999
+## [5] 0.29999999999999993</code></pre>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(x)</span></code></pre></div>
+<pre><code>## x
+## 0.3 
+##   5</code></pre>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(x)</span></code></pre></div>
+<pre><code>## [1] 0.3 0.3 0.3</code></pre>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">unique</span>(x), <span class="at">digits =</span> <span class="dv">20</span>)</span></code></pre></div>
+<pre><code>## [1] 0.29999999999999999 0.30000000000000004 0.29999999999999993</code></pre>
+<p>Ici, <code>table</code> considère que <code>x</code> contient une seule valeur distincte (répétée 5 fois), alors que <code>unique</code> trouve 3 valeurs distinctes.</p>
+<p>La fonction <code>factor</code> (ou <code>as.factor</code>) doit aussi trouver les valeurs uniques dans un vecteur avant de pouvoir le transformer en facteur (chaque valeur unique devient un niveau du facteur). Cependant, elle non plus ne trouve pas toujours les mêmes valeurs uniques que la fonction <code>unique</code>.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">factor</span>(x)</span></code></pre></div>
+<pre><code>## [1] 0.3 0.3 0.3 0.3 0.3
+## Levels: 0.3</code></pre>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nlevels</span>(<span class="fu">factor</span>(x))</span></code></pre></div>
+<pre><code>## [1] 1</code></pre>
+<p>Il semble donc que <code>table</code> (ainsi que <code>xtabs</code> et <code>ftable</code>) et <code>factor</code> (ou <code>as.factor</code>) comparent les valeurs en ne tenant pas compte de différences vraiment minimes, alors que <code>unique</code> en tient compte.</p>
+<div id="conseils" class="section level4 unnumbered">
+<h4>Conseils :</h4>
+<p></p>
+<p>Lors de comparaison de nombres en R, il faut garder en tête que l’opérateur <code>==</code>, ainsique les fonctions <code>identical</code> et <code>unique</code> sont affectés par les imprécisions numériques, car ils font des comparaisons exactes. Cependant, les fonctions <code>all.equal</code>, <code>table</code> (ainsi que les autres fonctions de calcul de fréquences du R de base) et <code>factor</code> (et <code>as.factor</code>) ne se préoccupent pas de différences inférieures à une certaine tolérance.</p>
+</div>
+</div>
+<div id="petits-nombres-en-valeur-absolue" class="section level3" number="1.1.2">
+<h3><span class="header-section-number">1.1.2</span> Petits nombres en valeur absolue</h3>
+<p>Aussi, l’imprécision numérique sur des nombres décimaux implique que R n’arrive pas à garder en mémoire des nombres vraiment très petits en valeur absolue. Ces nombres sont stockés comme s’ils étaient des zéros.</p>
+<p>Par exemple, sur mon installation de R, le nombre <span class="math inline">\(10^{\text{-}325}\)</span> est ramené à 0 par R.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="dv">10</span><span class="sc">^</span>(<span class="sc">-</span><span class="dv">325</span>))</span></code></pre></div>
+<pre><code>## [1] 0</code></pre>
+<p>Le nombre <span class="math inline">\(10^{\text{-}310}\)</span> ne l’est cependant pas.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="dv">10</span><span class="sc">^</span>(<span class="sc">-</span><span class="dv">310</span>))</span></code></pre></div>
+<pre><code>## [1] 1e-310</code></pre>
+<p>Si ces deux nombres sont divisés, nous pouvons facilement trouver à la main le résultat de la division :</p>
+<ul>
+<li><span class="math inline">\(\frac{10^{\text{-}325}}{10^{\text{-}310}} = 10^{(\text{-}325 \ - \ \text{-}310)} = 10^{\text{-}15}\)</span>, ou</li>
+<li><span class="math inline">\(\frac{10^{\text{-}310}}{10^{\text{-}325}} = 10^{(\text{-}310 \ - \ \text{-}325)} = 10^{15}\)</span>.</li>
+</ul>
+<p>Cependant, si nous demandons à R de calculer ces quotients, nous obtenons :</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span><span class="sc">^</span>(<span class="sc">-</span><span class="dv">325</span>) <span class="sc">/</span> <span class="dv">10</span><span class="sc">^</span>(<span class="sc">-</span><span class="dv">310</span>)</span></code></pre></div>
+<pre><code>## [1] 0</code></pre>
+<p>car ici R considère que le numérateur vaut 0, et</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span><span class="sc">^</span>(<span class="sc">-</span><span class="dv">310</span>) <span class="sc">/</span> <span class="dv">10</span><span class="sc">^</span>(<span class="sc">-</span><span class="dv">325</span>)</span></code></pre></div>
+<pre><code>## [1] Inf</code></pre>
+<p>car cette fois R considère que le dénominateur vaut 0.</p>
+<div id="solution" class="section level4 unnumbered">
+<h4>Solution :</h4>
+<p></p>
+<p>Lorsque nous travaillons avec de tels nombres, il est bon de les <strong>changer d’échelle afin de les éloigner de 0</strong>. Typiquement, c’est une <strong>transformation logarithmique</strong> qui est utilisée pour arriver à ça. Par exemple, en statistique, il est plus facile de travailler numériquement avec une log-vraisemblance qu’avec une <a href="https://en.wikipedia.org/wiki/Likelihood_function">vraisemblance</a>, dont la valeur peut être très proche de zéro étant donné qu’il s’agit d’une fonction de densité conjointe.</p>
+<p>Pour revenir à l’exemple précédent, tentons à nouveau de calculer en R le quotient <span class="math inline">\(\frac{10^{\text{-}325}}{10^{\text{-}310}}\)</span>, mais cette fois en passant par une transformation logarithmique en base 10. En raison des propriétés des logarithmes, nous savons que</p>
+<p><span class="math inline">\(\frac{10^{\text{-}325}}{10^{\text{-}310}} = 10^{\log_{10}{ \left( \frac{10^{\text{-}325}}{10^{\text{-}310}} \right) }} = 10^{ \log_{10}{(10^{\text{-}325})} - \log_{10}{(10^{\text{-}310})}}.\)</span></p>
+<p>Ainsi, si ce que nous conservons en mémoire est le logarithme en base 10 des nombres à manipuler, soit <span class="math inline">\(\log_{10}{(10^{\text{-}325})}\)</span> et <span class="math inline">\(\log_{10}{(10^{\text{-}310})}\)</span>, que nous pouvons simplifier à <span class="math inline">\(\text{-}325\)</span> et <span class="math inline">\(\text{-}310\)</span>, calculer le quotient qui nous intéresse revient à effectuer le calcul suivant :</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span><span class="sc">^</span>(<span class="sc">-</span><span class="dv">325</span> <span class="sc">-</span> <span class="sc">-</span><span class="dv">310</span>)</span></code></pre></div>
+<pre><code>## [1] 1e-15</code></pre>
+<p>qui n’est affecté par aucune imprécision numérique.</p>
+</div>
+</div>
+</div>
+<div id="grands-nombres-en-valeur-absolue" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> Grands nombres en valeur absolue</h2>
+<p>Il faut aussi se méfier lorsque nous manipulons en R de grands nombres en valeur absolue.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="dv">100000000000000</span> <span class="sc">+</span> <span class="dv">1</span> <span class="sc">==</span> <span class="dv">100000000000000</span>  <span class="co"># Ces deux nombres sont bel et bien différents.</span></span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fl">1e14</span> <span class="sc">+</span> <span class="dv">1</span> <span class="sc">==</span> <span class="fl">1e14</span>  <span class="co"># Même comparaison, en notation scientifique.</span></span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span><span class="sc">^</span><span class="dv">53</span> <span class="sc">==</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">53</span> <span class="sc">-</span> <span class="dv">1</span>  <span class="co"># Nous obtenons encore le résultat attendu.</span></span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span><span class="sc">^</span><span class="dv">53</span> <span class="sc">==</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">53</span> <span class="sc">+</span> <span class="dv">1</span>  <span class="co"># Oups, c&#39;est à partir d&#39;ici que ça ne marche plus!</span></span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p>Le plus grand nombre entier positif représentable en R 64 bits sur mon ordinateur est 2^53. Quel est ce nombre ?</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="dv">2</span><span class="sc">^</span><span class="dv">53</span>)</span></code></pre></div>
+<pre><code>## [1] 9.007199e+15</code></pre>
+<p>Modifions l’option de la session R relative à la notation scientifique de façon à voir le nombre en notation fixe.</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">10</span>)</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="dv">2</span><span class="sc">^</span><span class="dv">53</span>)</span></code></pre></div>
+<pre><code>## [1] 9007199254740992</code></pre>
+<p>Maintenant, observons un phénomène étonnant. Demandons à R d’afficher le nombre 2^53 + 1, soit 9007199254740993.</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="dv">9007199254740993</span>)</span></code></pre></div>
+<pre><code>## [1] 9007199254740992</code></pre>
+<p>R affiche plutôt le nombre 2^53, soit 9007199254740992.
+Pourtant, ceci est correct :</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="dv">9007199254740994</span>)</span></code></pre></div>
+<pre><code>## [1] 9007199254740994</code></pre>
+<p>Mais pas ceci :</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="dv">9007199254740995</span>)</span></code></pre></div>
+<pre><code>## [1] 9007199254740996</code></pre>
+<p>L’explication à ces inexactitudes est que les nombres sont stockés dans la mémoire d’un ordinateur sous forme de <a href="https://fr.wikipedia.org/wiki/Bit">bits</a>. Cependant, le nombre de bits pouvant être utilisé pour stocker un nombre possède une limite maximale. Si le nombre à stocker requière plus de bits pour être représenté dans son intégralité que le nombre maximum de bits utilisables, il est légèrement arrondi.</p>
+<p>La limite dans le nombre de bits utilisables en R pour stocker un nombre dépend du <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#types-de-donn%C3%A9es">type de données</a> utilisé pour le stocker (réel versus entier), du nombre de bits de la version de R utilisée (32 versus 64) ainsi que des spécifications de l’ordinateur utilisé. R 32 bits utilise moins de bits que R 64 bits.</p>
+<p>Notez que la plus grande valeur représentable de 2^53 sur mon installation de R 64 bits s’applique à des nombres entiers d’un point de vue mathématique, mais stockés sous le type réel en R. Le type entier ne permet pas de représenter des nombres supérieurs en valeur absolue à l’objet R <code>.Machine$integer.max</code> (= 2147483647 sur mon installation de R 64 bits).</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as.integer</span>(<span class="sc">-</span><span class="dv">2147483647</span>)</span></code></pre></div>
+<pre><code>## [1] -2147483647</code></pre>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as.integer</span>(<span class="sc">-</span><span class="dv">2147483647</span> <span class="sc">-</span> <span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## Warning: NAs introduced by coercion to integer range</code></pre>
+<pre><code>## [1] NA</code></pre>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">0</span>)  <span class="co"># réattribution de sa valeur par défaut à l&#39;option scipen</span></span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="évaluation-dexpressions-en-r-et-environnements" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Évaluation d’expressions en R et environnements</h1>
+<p>Lorsque nous soumettons des instructions dans la console, R doit chercher la valeur des objets nommés dans ces instructions. Ces objets peuvent être de n’importe quel type : des fonctions, des vecteurs, des listes, etc. La façon dont R s’y prend pour trouver les valeurs de ces objets est plutôt complexe. Dans ce qui suit, je vais expliquer le principe général simplifié derrière l’évaluation d’expressions en R.</p>
+<div id="chemin-de-recherche" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Chemin de recherche</h2>
+<p>À l’ouverture d’une session R, certains packages sont automatiquement chargés. Le contenu de chaque package chargé est placé dans ce qui est appelé un <em>environnement</em>. Les objets R que nous créons pendant une session R sont aussi conservés dans un environnement : l’environnement de travail (aussi appelé environnement courant ou environnement global). Lorsque R a besoin d’évaluer un objet apparaissant dans une expression soumise dans la console, il démarre une recherche de cet objet dans les environnements ouverts. La recherche débute dans l’environnement de travail. Si l’objet recherché n’est pas trouvé dans cet environnement, la recherche se poursuit dans les environnements des packages chargés, en commençant par les packages les plus récemment chargés.</p>
+<p>La figure 1 illustre le chemin de recherche parcouru par R pour évaluer les expressions soumises dans la console. La recherche part de l’environnement du haut et descend dans les environnements en dessous, jusqu’à ce que l’objet recherché soit trouvé. C’est le nom d’un objet qui permet de l’identifier.</p>
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-21"></span>
+<img src="fig/chemin.png" alt="Chemin de recherche parcouru par R pour évaluer les expressions soumises dans la console" width="25%" />
+<p class="caption">
+Figure 2.1: Chemin de recherche parcouru par R pour évaluer les expressions soumises dans la console
+</p>
+</div>
+<p>Il existe quelques exceptions à cette façon de rechercher la valeur d’expressions en R. Les sous-sections suivantes décrivent quelques-unes de ces exceptions.</p>
+</div>
+<div id="évaluation-dun-appel-à-une-fonction" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Évaluation d’un appel à une fonction</h2>
+<p>Lors de l’évaluation d’un appel à une fonction, des environnements s’ajoutent au début du chemin de recherche décrit ci-dessous, uniquement le temps de l’évaluation de la fonction. Tous les détails sont fournis dans les <a href="https://stt4230.rbind.io/programmation/fonctions_r/">notes sur les fonctions en R</a>.</p>
+</div>
+<div id="fonctions-ajoutant-un-data-frame-au-début-du-chemin-de-recherche" class="section level2" number="2.3">
+<h2><span class="header-section-number">2.3</span> Fonctions ajoutant un data frame au début du chemin de recherche</h2>
+<p>Les fonctions R prenant en entrée une formule, prennent aussi toutes en entrée un argument <code>data</code>. Si un data frame est donné à cet argument, ce data frame devient un environnement de plus, qui s’ajoute à la liste des environnements parcourus lors de la recherche de la valeur d’un objet R. Cet environnement vient en premier dans la liste, la recherche débute donc par lui. Dans une formule, les noms des colonnes de <code>data</code> deviennent des objets directement accessibles (plus besoin d’utiliser la syntaxe <code>data$nomColonne</code>). Il en est de même dans l’expression fournie à l’argument <code>subset</code> souvent présent dans les fonctions prenant en entrée une formule.</p>
+<p>Les fonctions <a href="https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#op%C3%A9rateur-et-fonction-subset"><code>subset</code></a> et <a href="https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#op%C3%A9rateurs-dindi%C3%A7age-et-fonction-transform"><code>transform</code></a>, que nous avons <a href="https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/">déjà vues</a>, ainsi que toutes les fonctions du <code>tidyverse</code> possédant un argument <code>data</code> ou <code>.data</code>, ont le même genre de comportement. Le data frame (ou le tibble) donné au premier argument devient l’environnement d’où part la recherche des valeurs associées aux noms d’objets dans les expressions fournies aux arguments suivants.</p>
+<p>Illustrons ce type d’évaluation avec la fonction <code>subset</code>. Supposons que nous voulons extraire du <a href="https://stat.ethz.ch/R-manual/R-patched/library/datasets/html/iris.html">jeu de données <code>iris</code> du package <code>datasets</code></a> les observations de <code>Petal.Length</code> et <code>Petal.Width</code> pour lesquelles <code>Sepal.Width</code> est supérieure à 4, nous pouvons utiliser la commande</p>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(iris, <span class="at">subset =</span> Sepal.Width <span class="sc">&gt;</span> <span class="dv">4</span>, <span class="at">select =</span> <span class="fu">c</span>(Petal.Length, Petal.Width))</span></code></pre></div>
+<pre><code>##    Petal.Length Petal.Width
+## 16          1.5         0.4
+## 33          1.5         0.1
+## 34          1.4         0.2</code></pre>
+<p>plutôt que</p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(iris, <span class="at">subset =</span> iris<span class="sc">$</span>Sepal.Width <span class="sc">&gt;</span> <span class="dv">4</span>, <span class="at">select =</span> <span class="fu">c</span>(<span class="st">&quot;Petal.Length&quot;</span>, <span class="st">&quot;Petal.Width&quot;</span>))</span></code></pre></div>
+<p>ou</p>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>iris[iris<span class="sc">$</span>Sepal.Width <span class="sc">&gt;</span> <span class="dv">4</span>, <span class="fu">c</span>(<span class="st">&quot;Petal.Length&quot;</span>, <span class="st">&quot;Petal.Width&quot;</span>)]</span></code></pre></div>
+<p>La commande suivante ne fonctionne pas</p>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>iris[Sepal.Width <span class="sc">&gt;</span> <span class="dv">4</span>, <span class="fu">c</span>(Petal.Length, Petal.Width)]</span></code></pre></div>
+<pre><code>## Error in `[.data.frame`(iris, Sepal.Width &gt; 4, c(Petal.Length, Petal.Width)) : 
+##   object &#39;Petal.Length&#39; not found</code></pre>
+<p>parce que <code>Sepal.Width</code>, <code>Petal.Length</code> et <code>Petal.Width</code> sont des noms d’objets dont R doit trouver les valeurs. Le chemin de recherche parcouru par R pour trouver ces valeurs débute dans l’environnement de travail et se poursuit dans les environnements des packages chargés, en commençant par les packages les plus récemment chargés. R retourne une erreur, car il ne trouve nulle part ces objets. Il y a bien des colonnes du data frame <code>iris</code> qui portent les noms de ces objets, mais il ne s’agit pas d’objets directement accessibles. Ce sont des éléments dans un objet.</p>
+<p>Dans la commande <code>subset(iris, subset = Sepal.Width &gt; 4, select = c(Petal.Length, Petal.Width))</code>, R doit aussi trouver la valeur des objets <code>Sepal.Width</code>, <code>Petal.Length</code> et <code>Petal.Width</code>. Il trouve cette fois ces objets, car la fonction <code>subset</code> modifie le chemin de recherche de R (mais uniquement le temps de l’évaluation de l’appel à cette fonction). Elle ajoute au tout début du chemin de recherche un environnement, contenant les colonnes du data frame fourni comme premier argument. Dans l’exemple, l’environnement ajouté au chemin de recherche contient donc des vecteurs nommés <code>"Sepal.Length"</code>, <code>"Sepal.Width"</code>, <code>"Petal.Length"</code>, <code>"Petal.Width"</code> et <code>"Species"</code>, soit les colonnes de <code>iris</code>.</p>
+<p>Le chemin de recherche utilisé par R pour évaluer les expressions données à <code>subset</code> dans cet exemple est illustré dans la figure 2.</p>
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-26"></span>
+<img src="fig/chemin_with.png" alt="Chemin de recherche parcouru par R pour évaluer les expressions données en argument à la fonction subset dans l'exemple" width="25%" />
+<p class="caption">
+Figure 2.2: Chemin de recherche parcouru par R pour évaluer les expressions données en argument à la fonction subset dans l’exemple
+</p>
+</div>
+<div id="fonctions-with-et-within" class="section level3" number="2.3.1">
+<h3><span class="header-section-number">2.3.1</span> Fonctions <code>with</code> et <code>within</code></h3>
+<p>Les fonctions <code>with</code> et <code>within</code> permettent d’étendre la possibilité d’ajouter un data frame au début de la liste des environnements dans le chemin de recherche à n’importe quelles instructions R. Elles s’emploient avec la syntaxe suivante :<br />
+<code>with(data = nom_data_frame, expr = expression)</code><br />
+où <code>expression</code> est une commande R, ou encore plusieurs commandes R encadrées d’accolades.</p>
+<p>Par exemple, les deux bouts de code suivants retournent le même résultat.</p>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>var_catego <span class="ot">&lt;-</span> <span class="fu">cut</span>(</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> iris<span class="sc">$</span>Sepal.Length, </span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="fu">quantile</span>(iris<span class="sc">$</span>Sepal.Length, <span class="at">probs =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>)), <span class="cn">Inf</span>),</span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">right =</span> <span class="cn">FALSE</span></span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(var_catego, iris<span class="sc">$</span>Species)</span>
+<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-8"><a href="#cb67-8" aria-hidden="true" tabindex="-1"></a><span class="co"># équivalent à :</span></span>
+<span id="cb67-9"><a href="#cb67-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-10"><a href="#cb67-10" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(</span>
+<span id="cb67-11"><a href="#cb67-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> iris,</span>
+<span id="cb67-12"><a href="#cb67-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb67-13"><a href="#cb67-13" aria-hidden="true" tabindex="-1"></a>    var_catego <span class="ot">&lt;-</span> <span class="fu">cut</span>(</span>
+<span id="cb67-14"><a href="#cb67-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> Sepal.Length, </span>
+<span id="cb67-15"><a href="#cb67-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, <span class="fu">quantile</span>(Sepal.Length, <span class="at">probs =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>)), <span class="cn">Inf</span>),</span>
+<span id="cb67-16"><a href="#cb67-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">right =</span> <span class="cn">FALSE</span></span>
+<span id="cb67-17"><a href="#cb67-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb67-18"><a href="#cb67-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">table</span>(var_catego, Species)</span>
+<span id="cb67-19"><a href="#cb67-19" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb67-20"><a href="#cb67-20" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>##             Species
+## var_catego   setosa versicolor virginica
+##   [-Inf,5.4)     40          5         1
+##   [5.4,6.3)      10         31        12
+##   [6.3, Inf)      0         14        37</code></pre>
+<p> </p>
+<p>Avec <code>with</code>, les préfixes <code>nom_data_frame$</code> ne sont plus requis.</p>
+<p>La fonction <code>within</code> est pour sa part une sorte d’alternative à la fonction <code>transform</code>. Les expressions fournies en entrée vont modifier le data frame ou la liste donné comme premier argument. La fonction retourne une copie modifiée de cet objet. Voici un exemple.</p>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(women)</span></code></pre></div>
+<pre><code>##   height weight
+## 1     58    115
+## 2     59    117
+## 3     60    120
+## 4     61    123
+## 5     62    126
+## 6     63    129</code></pre>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>women2 <span class="ot">&lt;-</span> </span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">within</span>(</span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> women,</span>
+<span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">expr =</span> {</span>
+<span id="cb71-5"><a href="#cb71-5" aria-hidden="true" tabindex="-1"></a>      height <span class="ot">&lt;-</span> height <span class="sc">/</span> <span class="dv">12</span></span>
+<span id="cb71-6"><a href="#cb71-6" aria-hidden="true" tabindex="-1"></a>      weight2 <span class="ot">&lt;-</span> weight<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb71-7"><a href="#cb71-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb71-8"><a href="#cb71-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb71-9"><a href="#cb71-9" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(women2)</span></code></pre></div>
+<pre><code>##     height weight weight2
+## 1 4.833333    115   13225
+## 2 4.916667    117   13689
+## 3 5.000000    120   14400
+## 4 5.083333    123   15129
+## 5 5.166667    126   15876
+## 6 5.250000    129   16641</code></pre>
+</div>
+</div>
+<div id="fonction-attach" class="section level2" number="2.4">
+<h2><span class="header-section-number">2.4</span> Fonction <code>attach</code></h2>
+<p>Certains d’entre vous connaissent peut-être la fonction <code>attach</code>. Cette fonction permet d’ajouter un data frame dans le chemin de recherche, juste <strong>en dessous</strong> de l’environnement de travail. Par exemple, la commande</p>
+<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">attach</span>(iris)</span></code></pre></div>
+<p>modifie le chemin suivant
+<img src="fig/chemin.png" width="25%" style="display: block; margin: auto;" /><img src="fig/par.png" width="25%" style="display: block; margin: auto;" /><img src="fig/chemin_attach.png" width="25%" style="display: block; margin: auto;" /></p>
+<p>Je ne recommande pas l’utilisation de <code>attach</code>, car si l’environnement de travail contient déjà un objet portant le même nom qu’une colonne du data frame attaché, c’est l’objet dans l’environnement de travail qui sera retourné plutôt que la colonne du data frame si nous utilisons ce nom dans nos instructions. Ce comportement s’explique par le fait que l’environnement de travail demeure le point de départ du chemin de recherche avec <code>attach</code>, alors qu’avec <code>with</code> c’est le data frame qui est le point de départ du chemin de recherche.</p>
+<p>Pour retirer du chemin de recherche un data frame attaché, il faut utiliser la fonction <code>detach</code>.</p>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="fu">detach</span>(iris)</span></code></pre></div>
+</div>
+<div id="opérateur" class="section level2" number="2.5">
+<h2><span class="header-section-number">2.5</span> Opérateur <code>::</code></h2>
+<p>Plutôt que de laisser R parcourir tout son chemin de recherche pour retrouver un objet dans un environnement associé à un package, il est possible d’indiquer à R dans quel environnement chercher un objet avec l’opérateur <code>::</code> (double deux-points). Cet opérateur est utile lorsque des fonctions sont masquées par un nouveau package chargé.</p>
+<p>Par exemple, le package <code>dplyr</code> contient des fonctions portant le même nom que des fonctions des packages <code>stats</code> et <code>base</code>.</p>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<p>Le chargement d’un nouveau package ajoute un environnement dans le chemin de recherche, juste en dessous de l’environnement de travail. Ainsi, la commande <code>library(dplyr)</code> a modifié le chemin suivant
+<img src="fig/chemin.png" width="25%" style="display: block; margin: auto;" /><img src="fig/par.png" width="25%" style="display: block; margin: auto;" /><img src="fig/chemin_library.png" width="25%" style="display: block; margin: auto;" /></p>
+<p>Un appel à un des noms de fonction en double, par exemple à <code>union</code>, va utiliser par défaut la fonction <code>union</code> du package <code>dplyr</code> puisque l’environnement de ce package est plus haut dans le chemin de recherche que l’environnement du package <code>base</code>.</p>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>union</span></code></pre></div>
+<pre><code>## function (x, y, ...) 
+## UseMethod(&quot;union&quot;)
+## &lt;bytecode: 0x000000001482c478&gt;
+## &lt;environment: namespace:generics&gt;</code></pre>
+<p>La dernière ligne de la sortie R générée identifie l’environnement de provenance de la fonction. Il s’agit de l’espace de nom du package <code>generics</code>. Il faut savoir ici que le package <code>dplyr</code> importe la fonction <code>union</code> du package nommé <code>generics</code>. Ainsi, la fonction <code>union</code> atteinte est bel et bien celle provenant du package <code>dplyr</code>. (Nous reviendrons sur les espaces de noms dans les <a href="https://stt4230.rbind.io/packages/utilisation_packages_r/#espace-de-noms-namespace-dun-package">notes sur l’utilisation de packages R</a>.)</p>
+<p>Pour accéder à la fonction <code>union</code> du package <code>base</code> avec le chemin de recherche courant, il faut utiliser l’opérateur <code>::</code> comme suit.</p>
+<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a>base<span class="sc">::</span>union  <span class="co"># remarquez le nom de l&#39;environnement de provenance de la fonction</span></span></code></pre></div>
+<pre><code>## function (x, y) 
+## unique(c(as.vector(x), as.vector(y)))
+## &lt;bytecode: 0x000000001ed80008&gt;
+## &lt;environment: namespace:base&gt;</code></pre>
+<p>En fait, nous pourrions toujours utiliser l’opérateur <code>::</code> pour indiquer la provenance des fonctions que nous utilisons. Avec le chemin de recherche courant, le fonction <code>union</code> sélectionnée sans utilisation de l’opérateur <code>::</code> est bel et bien celle provenant de <code>dplyr</code>, comme le prouve la sortie suivante.</p>
+<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a>dplyr<span class="sc">::</span>union</span></code></pre></div>
+<pre><code>## function (x, y, ...) 
+## UseMethod(&quot;union&quot;)
+## &lt;bytecode: 0x000000001482c478&gt;
+## &lt;environment: namespace:generics&gt;</code></pre>
+<p>Notez que les auteurs du package <code>dplyr</code> ont délibérément repris des noms de fonctions du R de base. Il s’agit de versions de ces fonctions qu’ils jugent meilleures.</p>
+<p>Un package peut être retiré du chemin de recherche avec la fonction <code>detach</code> comme suit :</p>
+<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="fu">detach</span>(<span class="st">&quot;package:dplyr&quot;</span>)</span></code></pre></div>
+<p>Notons que l’utilisation d’une fonction d’un package via l’opérateur <code>::</code> ne requière pas que ce package soit chargé dans la session R. Il a simplement besoin d’être installé pour la version de R utilisée. Ainsi, même si nous venons de retirer le package <code>dplyr</code> du chemin de recherche, nous pouvons encore accéder aux fonctions qu’il contient, par exemple la fonction <code>arrange</code>, en utilisant l’opérateur <code>::</code>, comme le prouve ce qui suit.</p>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>arrange</span></code></pre></div>
+<pre><code>## Error in eval(expr, envir, enclos): object &#39;arrange&#39; not found</code></pre>
+<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>dplyr<span class="sc">::</span>arrange</span></code></pre></div>
+<pre><code>## function (.data, ..., .by_group = FALSE) 
+## {
+##     UseMethod(&quot;arrange&quot;)
+## }
+## &lt;bytecode: 0x0000000013bdfaf8&gt;
+## &lt;environment: namespace:dplyr&gt;</code></pre>
+</div>
+</div>
+<div id="complètement-automatique" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Complètement automatique</h1>
+<p>Ceux qui utilisent <code>attach</code>, mentionné précédemment, le font souvent pour que le code soit moins long à taper. Si c’est votre cas, vous pourriez aimer utiliser les capacités de <a href="https://fr.wikipedia.org/wiki/Compl%C3%A8tement">complètement automatique</a> (en anglais <em>completion</em> ou <em>autocompletion</em>) d’un éditeur de code R. Cette fonctionnalité a justement pour but d’aider l’utilisateur à programmer plus rapidement, tout en diminuant les risques d’erreur de frappe.</p>
+<p>Comme il a déjà été mentionné dans les <a href="https://stt4230.rbind.io/introduction/base_r/#rstudio">notes sur concepts de base en R</a>, RStudio offre du complètement automatique. Lorsque l’utilisateur saisit une commande en RStudio, que ce soit dans la console R, dans un script R ou même dans un bloc de code R à l’intérieur du document R Markdown, une fenêtre de complètement automatique s’ouvrent automatiquement par défaut pour suggérer des suites à la commande (sauf si la valeur par défaut « Automatically » de l’option « Show code completions » dans le menu « Global options… &gt; Code &gt; Onglet Completion » a été modifiée). Par exemple, si nous tapons le nom d’un data frame suivi de l’opérateur <code>$</code>, la fenêtre de complètement automatique contient tous les noms des colonnes du data frame. Il suffit de sélectionner la colonne désirée avec les flèches, puis d’enfoncer la touche Enter ou Tab, pour que R s’occupe de compléter notre commande.</p>
+<p>Les fenêtres de complètement automatique peuvent aussi être ouvertes avec la touche Tab. S’il y a seulement une possibilité de complètement, la touche Tab ne fait pas qu’ouvrir la fenêtre, elle complète aussi la commande.</p>
+<p>Plus d’informations sur les capacités de complètement automatique de RStudio peuvent être trouvées sur la page web suivante : <a href="https://support.rstudio.com/hc/en-us/articles/205273297-Code-Completion" class="uri">https://support.rstudio.com/hc/en-us/articles/205273297-Code-Completion</a></p>
+<hr />
+</div>
+<div id="résumé" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Résumé</h1>
+<div id="imprécision-numérique-1" class="section level4 unnumbered">
+<h4>Imprécision numérique</h4>
+<p></p>
+<p>R ne garde pas en mémoire de façon tout à fait exacte :</p>
+<ul>
+<li>certains nombres décimaux et</li>
+<li>les nombres plus grands, en valeur absolue, qu’une certaine limite.</li>
+</ul>
+<p><span class="math inline">\(\longrightarrow\)</span> Attention aux comparaison avec <code>==</code>, <code>identical</code> ou <code>unique</code> : elles sont exactes.</p>
+<p>Les comparaison avec <code>all.equal</code>, <code>table</code> et <code>factor</code> sont plus souples.</p>
+<p><span class="math inline">\(\longrightarrow\)</span> Attention aux très petits nombres en valeur absolue : ils peuvent être ramenés à zéro par R.</p>
+</div>
+<div id="évaluation-dexpressions-en-r-et-environnements-1" class="section level4 unnumbered">
+<h4>Évaluation d’expressions en R et environnements</h4>
+<p></p>
+<p>Chemin de recherche parcouru par R pour évaluer les expressions soumises dans la console :</p>
+<p><img src="fig/chemin.png" width="30%" style="display: block; margin: auto;" /></p>
+<p>Environnement = groupe d’objets</p>
+<p>Ajouter un jeu de données <strong>au début</strong> du chemin de recherche :</p>
+<ul>
+<li>argument <code>data</code> venant avec un argument <code>formula</code>,</li>
+<li>fonctions <code>subset</code> et <code>transform</code> (déjà vues),</li>
+<li>fonctions du <code>tidyverse</code> possédant un argument <code>data</code> ou <code>.data</code>,</li>
+<li>fonction <code>with</code> et <code>within</code>.</li>
+</ul>
+<p>Ajouter un environnement provenant d’un package dans le chemin de recherche (en d’autres mots, charger un package) : <code>library</code>.</p>
+<ul>
+<li>L’environnement du package est ajouté en 2<sup>e</sup> position, soit sous l’environnement de travail.</li>
+</ul>
+<p><code>::</code> = opérateur pour identifier l’environnement où aller chercher un objet plutôt que de laisser R effectuer une recherche dans tous les environnements ouverts.</p>
+<hr />
+</div>
+</div>
+<div id="références" class="section level1 unnumbered">
+<h1>Références</h1>
+<div id="référence-citée-dans-le-texte" class="section level4 unnumbered">
+<h4>Référence citée dans le texte :</h4>
+<p></p>
+<div id="refs" class="references csl-bib-body">
+<div id="ref-burns" class="csl-entry">
+<div class="csl-right-inline">[1] Burns, P. (2011). <em><span class="nocase">The R inferno</span></em>. Chapitre 1. URL <a href="http://www.burns-stat.com/pages/Tutor/R_inferno.pdf">http://www.burns-stat.com/pages/Tutor/R_inferno.pdf</a></div>
+</div>
+</div>
+</div>
+<div id="références-supplémentaires" class="section level4 unnumbered">
+<h4>Références supplémentaires :</h4>
+<p></p>
+<ul>
+<li>Représentation en virgules flottantes:
+<ul>
+<li><a href="http://fr.wikipedia.org/wiki/Virgule_flottante" class="uri">http://fr.wikipedia.org/wiki/Virgule_flottante</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format" class="uri">https://en.wikipedia.org/wiki/Double-precision_floating-point_format</a></li>
+</ul></li>
+<li>Évaluation d’expressions en R : <a href="http://blog.obeautifulcode.com/R/How-R-Searches-And-Finds-Stuff/" class="uri">http://blog.obeautifulcode.com/R/How-R-Searches-And-Finds-Stuff/</a></li>
+<li>Environnements : Wickham, H. (2019). <em>Advanced R</em>. 2e édition. Chapman and Hall/CRC. Chapitre 7. URL <a href="https://adv-r.hadley.nz/environments.html" class="uri">https://adv-r.hadley.nz/environments.html</a></li>
+<li>R Core Team (2020). <em>The R Language Definition</em>. R version 4.0.3. URL<br />
+<a href="https://cran.r-project.org/doc/manuals/r-release/R-lang.html" class="uri">https://cran.r-project.org/doc/manuals/r-release/R-lang.html</a></li>
+</ul>
+</div>
+</div>

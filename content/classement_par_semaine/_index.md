@@ -24,7 +24,7 @@ weight = 9
     * [Graphiques en R]({{< relref "communication_resultats/graphiques_r_2021.html" >}})
     * [Graphiques avec ggplot2 en R]({{< relref "communication_resultats/graphiques_ggplot2_r_2021.html" >}})
 * Semaine 9
-    * [Informations techniques concernant R]
+    * [Informations techniques concernant R]({{< relref "programmation/info_techniques_r_2021.html" >}})
     * [Structures de contrôle en R]
     * [Fonctions en R]
 * Semaine 11
