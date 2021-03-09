@@ -26,7 +26,7 @@ weight = 9
 * Semaine 9
     * [Informations techniques concernant R]({{< relref "programmation/info_techniques_r_2021.html" >}})
     * [Structures de contrôle en R]({{< relref "programmation/struct_controle_r_2021.html" >}})
-    * [Fonctions en R]
+    * [Fonctions en R]({{< relref "programmation/fonctions_r_2021.html" >}})
 * Semaine 11
     * [Rédaction de documents en R Markdown]
     * [Programmation orientée objet en R]
