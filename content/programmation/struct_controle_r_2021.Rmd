@@ -1,7 +1,7 @@
 ---
 title: "Structures de contrôle en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2021-03-08"
+date: "2021-03-12"
 weight: 2
 slug: "struct_controle_r"
 lastmodifierdisplayname: "Sophie Baillargeon"
@@ -24,7 +24,6 @@ header-includes:
 editor_options: 
   chunk_output_type: console
 ---
-
 
 ***
 
@@ -65,8 +64,7 @@ if (<condition>) {
 }
 ```
 
-Un `if` doit être suivi d'une paire de parenthèses dans laquelle est inséré une instruction R retournant une seule valeur logique (`TRUE` ou `FALSE`). C'est la condition de l'alternative. Ensuite viennent la ou les instructions à exécuter si la condition est vraie (c'est-à-dire si l'instruction `<condition>` produit le résultat `TRUE`). S'il y a plus d'une instruction à exécuter, les accolades sont nécessaires pour les encadrer. Pour une seule instruction, les accolades sont optionnelles.
-
+Un `if` doit être suivi d'une paire de parenthèses dans laquelle est inséré une expression R retournant une seule valeur logique (`TRUE` ou `FALSE`). C'est la condition de l'alternative. Ensuite viennent la ou les instructions à exécuter si la condition est vraie (c'est-à-dire si l'instruction `<condition>` produit le résultat `TRUE`). S'il y a plus d'une instruction à exécuter, les accolades sont nécessaires pour les encadrer. Pour une seule instruction, les accolades sont optionnelles.
 
 Voici un exemple\ :
 
@@ -75,10 +73,10 @@ Voici un exemple\ :
 lancer <- sample(x = c("Pile", "Face"), size = 1)
 
 # Structure qui affiche ou non un message, en fonction du résultat du lancer
-if (lancer == "Pile")    # sans accolades
+if (isTRUE(lancer == "Pile"))    # sans accolades
   print("Je gagne!")
 # ou encore
-if (lancer == "Pile") {  # avec accolades
+if (isTRUE(lancer == "Pile")) {  # avec accolades
   print("Je gagne!")
 }
 ```
@@ -88,12 +86,27 @@ Lorsqu'il y a des instructions à exécuter si la condition est fausse, il faut 
 Voici un exemple\ :
 
 ```{r eval = FALSE}
-if (lancer == "Pile") {
+if (isTRUE(lancer == "Pile")) {
   print("Je gagne!")
 } else {
   print("Je perds...")
 }
 ```
+
+#### Condition d'un `if ... else` {-}
+
+\mbox{}
+
+La condition d'un `if ... else` doit donc être une expression R retournant une seule valeur logique (`TRUE` ou `FALSE`). En fait, il peut aussi s'agir d'une expression pouvant être convertie en logique (avec la fonction `as.logical`). Si la condition est de longueur supérieure à 1, un avertissement est généré et seulement le premier élément de la condition est considéré (les autres éléments sont ignorés).
+
+Les opérateurs et fonctions R mentionnées à la section 3.2 des [notes sur les calculs mathématiques en R](https://stt4230.rbind.io/calculs/calculs_math_r/#conditions-logiques-de-longueur-1) (section intitulée «\ Conditions logiques de longueur 1\ ») sont très utiles pour écrire des conditions d'alternatives. En effet, les opérateurs `&&` et `||`, ainsi que les fonctions `isTRUE`, `isFALSE`, `all`, `any` et toutes les fonctions de la famille des `is.*`, garantissent la production d'une seule valeur logique.
+
+Dans la condition de l'alternative de l'exemple précédent, l'expression `lancer == "Pile"` retourne un vecteur logique de la même longueur que le vecteur `lancer`. Ici, un vecteur de longueur 1 a été assigné à `lancer` lors de sa création, alors `lancer == "Pile"` est de longueur 1. Par mesure de précaution, nous avons tout de même encadré l'expression `lancer == "Pile"` par un appel à la fonction `isTRUE` afin de s'assurer que la condition de l'alternative soit de longueur 1 peu importe le contexte. Rappelons que la fonction `isTRUE` retourne `TRUE` si la valeur qu'elle reçoit en entrée contient des données logiques, est de longueur 1, ne prend pas la valeur `NA`, mais bien la valeur `TRUE`. Elle retourne `FALSE` si au moins une de ses caractéristiques n'est pas rencontrée.
+
+
+#### Structures `if ... else` imbriquées {-}
+
+\mbox{}
 
 Plusieurs structures `if ... else` peuvent être imbriquées. Pour ce faire, il suffit d'insérer une autre structure `if ... else` à la place de l'accolade suivant le dernier `else`, comme suit.
 
@@ -168,45 +181,50 @@ Cette écriture est recommandée seulement si elle rend le code plus lisible pou
 Voici un exemple\ :
 
 ```{r eval = FALSE}
-message <- if (lancer == "Pile") "Je gagne!" else "Je perds..."
+message <- if (isTRUE(lancer == "Pile")) "Je gagne!" else "Je perds..."
 ```
 
 
 ### Distinction entre une structure `if ... else` et la fonction `ifelse`
 
-Sous sa forme condensée, une structure `if ... else` fait penser à un appel à la fonction `ifelse`. Quelles sont les différences entre les deux?
+Sous sa forme condensée, une structure `if ... else` fait penser à un appel à la [fonction `ifelse`](https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#variable-conditionnelle-%C3%A0-une-autre-avec-la-fonction-ifelse). Quelles sont les différences entre les deux?
 
-Premièrement, la condition dans une structure `if ... else` doit être une instruction qui retourne un seul `TRUE` ou un seul `FALSE`, pas un vecteur logique de longueur supérieure à 1. Si la condition est un vecteur logique de longueur supérieure à 1, seul le premier élément est utilisé et un avertissement est affiché comme dans l'exemple suivant\ :
+En fait, la fonction `ifelse` n'est pas une structure de contrôle. Elle teste une condition sur tous les éléments d'un objet et retourne une valeur par élément en fonction du résultat du test. La fonction `ifelse` accepte comme premier argument (`test`) un objet atomique logique de dimension quelconque. La dimension de la sortie d'un `ifelse` est la même que la dimension du premier argument qu'elle reçoit. Cette fonction agit de façon vectorielle.
 
-```{r}
-x <- 1:10
-xmodif <- if (x > 2.5 & x < 7.5) 5 else x
-xmodif
-```
-
-Si nous avions utilisé l'opérateur logique `&&` au lieu de `&`, nous n'aurions pas obtenu cet avertissement, mais exactement le même résultat aurait été obtenu.
+Supposons que nous voulons vérifier pour chaque élément d'un vecteur nommé `x` si sa valeur est comprise entre 2.5 et 7.5 exclusivement; si c'est le cas retourner la valeur 5, sinon retourner l'élément de `x` inchangé. Nous pourrions faire ça avec la fonction `ifelse` comme suit.
 
 ```{r}
-xmodif <- if (x > 2.5 && x < 7.5) 5 else x
-xmodif
+x <- 1:10  # initialisation d'un vecteur x numérique quelconque
+
+ifelse(test = x > 2.5 & x < 7.5, yes = 5, no = x)
 ```
 
-&nbsp;
-
-> **Les opérateurs logiques `&&` et `||` sont utiles pour écrire une condition d'un `if`, car ils assurent la production d'une seule valeur logique.** 
-
-&nbsp;
-
-Cependant, dans cet exemple, la structure de contrôle `if ... else` n'est probablement pas ce que nous voulions utiliser. Si notre but est de vérifier pour chaque élément de `x` si la valeur est comprise entre 2.5 et 7.5, si c'est le cas retourner la valeur 5, sinon retourner l'élément de `x` inchangé, alors c'est la fonction `ifelse` que nous devrions utiliser. 
+Si, par erreur, nous avions utilisé la structure `if ... else` au lieu de la fonction `ifelse` pour réaliser cette tâche, nous aurions obtenu ce qui suit.
 
 ```{r}
-xmodif <- ifelse(test = x > 2.5 & x < 7.5, yes = 5, no = x)
-xmodif
+if (x > 2.5 & x < 7.5) 5 else x
 ```
 
-[La fonction `ifelse` agit de façon vectorielle](https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#variable-conditionnelle-%C3%A0-une-autre-avec-la-fonction-ifelse). Elle teste une condition sur tous les éléments d'un objet et retourne une valeur en fonction du résultat. La dimension de la sortie d'un `ifelse` est la même que la dimension du premier argument qu'elle reçoit.
+Remarquons premièrement qu'un avertissement a été généré, car la condition dans la structure `if ... else` n'est pas de longueur 1. Seul le premier élément du vecteur créé par l'expression `x > 2.5 & x < 7.5` a été utilisé.
 
-Ainsi, la fonction `ifelse` n'est pas une structure de contrôle.
+```{r}
+x > 2.5 & x < 7.5
+```
+
+Ce premier élément est `FALSE`. Ainsi, c'est l'instruction après le `else` de l'alternative qui a été exécutée. Donc `x` a été retourné intacte.
+
+Si nous avions utilisé l'opérateur logique `&&` au lieu de `&` dans la condition, nous n'aurions pas obtenu d'avertissement, mais le même résultat aurait été retourné.
+
+```{r}
+if (x > 2.5 && x < 7.5) 5 else x
+```
+
+L'opérateur `&&` a restreint l'évaluation de la condition au premier élément de `x` (les autres éléments ont été ignorés).
+
+```{r}
+x > 2.5 && x < 7.5
+```
+
 
 
 ## Fonction `switch`
@@ -261,6 +279,7 @@ switch(
 Dans cet exemple, `<expression>` est l'instruction `class(x)`. Celle-ci retourne `"numeric"` pour un vecteur `x` contenant des données de type réel, mais retourne `"integer"` pour un vecteur `x` contenant des données de type entier. La condition `is.numeric(x)` retourne quant à elle `TRUE` pour tout vecteur numérique `x`, que ses données soient réelles ou entières. Afin de créer un appel à la fonction `switch` équivalent aux structures `if ... else` imbriquées à reproduire, il fallait donc définir les résultats `"numeric"` et `"integer"`. Les deux solutions implémentent la même alternative aussi parce que `is.character(x)` est équivalent à `class(x) == "character"` et `is.factor(x)` est équivalent à `class(x) == "factor"`.
 
 Notons que `<expression>` peut aussi retourner un entier, interprété comme le numéro du bloc d'instructions à exécuter. Par exemple, si `<expression>` produit le résultat `2` lorsqu'exécuté, c'est le deuxième bloc d'instructions (troisième argument fourni à la fonction `switch`) qui sera exécuté. Dans ce cas, les blocs d'instructions n'ont pas besoin d'être assignés à des noms.
+
 
 # Boucles
 
@@ -481,7 +500,7 @@ n_lancers <- 0
 repeat {
   resultat <- sample(1:6, size = 1)
   n_lancers <- n_lancers + 1
-  if (resultat == 6) {
+  if (isTRUE(resultat == 6)) {
     break
   }
 }
@@ -531,19 +550,19 @@ Illustrons maintenant l'utilisation du mot-clé `next`. Reprenons l'exemple de l
 
 ```{r}
 for (lettre in LETTERS) {
-  if (lettre %in% c("A", "E", "I", "O", "U")) {
+  if (isTRUE(lettre %in% c("A", "E", "I", "O", "U"))) {
     next
   }
   cat(lettre, " ")
 }
 ```
 
-Dans ce programme, si la condition `lettre %in% c("A", "E", "I", "O", "U")` est rencontrée, nous passons à l'itération suivante de la boucle, sans soumettre l'instruction `cat(lettre, " ")`. Le mot-clé `next` permet donc d'omettre l'exécution de certaines instructions. 
+Dans ce programme, si la condition `isTRUE(lettre %in% c("A", "E", "I", "O", "U"))` est rencontrée, nous passons à l'itération suivante de la boucle, sans soumettre l'instruction `cat(lettre, " ")`. Le mot-clé `next` permet donc d'omettre l'exécution de certaines instructions. 
 
 En fait, le dernier programme fait la même chose que le programme suivant.
 ```{r}
 for (lettre in LETTERS) {
-  if (!(lettre %in% c("A", "E", "I", "O", "U"))) {
+  if (isFALSE(lettre %in% c("A", "E", "I", "O", "U"))) {
     cat(lettre, " ")
   }
 }
@@ -648,7 +667,7 @@ if (<condition>) {
 }
 ```
 
-- `<condition>` = instruction qui retourne *un seul logique* (`TRUE` ou `FALSE`).
+- `<condition>` = expression qui retourne *un seul logique* (`TRUE` ou `FALSE`).
 
 Écriture condensée d'une alternative\ :
 
