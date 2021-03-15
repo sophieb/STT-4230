@@ -2,7 +2,7 @@
 title: "Lecture et écriture dans des fichiers externes à partir de R"
 linkTitle: "Lecture/écriture dans fichiers en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2021-03-02"
+date: "2021-03-15"
 weight: 2
 slug: "lecture_ecriture_r"
 lastmodifierdisplayname: "Sophie Baillargeon"
@@ -111,7 +111,7 @@ dir()
 c("data_ex.csv", "data_ex.json", "data_ex.txt", "data_ex.xlsx")
 ```
 
-**Note**\ : Tous les fichiers de la liste ci-dessus sont disponibles dans le fichier `lecture_ecriture_r_2020.zip` afin de vous permettre de reproduire les exemples de ces notes de cours.
+**Note**\ : Tous les fichiers de la liste ci-dessus sont disponibles dans le fichier `lecture_ecriture_r_2020.zip`. Il s'agit des fichiers utilisés à la section 2 dans les exemples de lecture de données.
 
 Un bon truc pour trouver facilement le nom complet d'un fichier, qui respecte la syntaxe de R, est d'utiliser la commande suivante\ :
 
@@ -139,8 +139,6 @@ Les projets RStudio facilitent la gestion du répertoire de travail. En ouvrant 
 
 Une analyse de données en R débute typiquement par l'importation de données. Les données à importer en R peuvent provenir de toutes sortes de sources. Elles peuvent se trouver dans des fichiers sous un certain format, dans des bases de données, ou provenir directement du web. En outre, il existe plusieurs formats de fichiers pour stocker des données&nbsp;: texte (dont CSV), JSON, EXCEL, formats propres à un logiciel statistique particulier, etc. Nous aborderons ici uniquement les formats texte, CSV, JSON, EXCEL, ainsi que les formats propres à R (vus plus loin). La lecture de table HTML sur le web sera aussi introduite. Pour en savoir plus sur les autres possibilités, des références sont fournies en fin de document.
 
-Les fonctions de base en R pour lire dans des fichiers externes sont `scan` et `readLines`. Nous ne verrons pas comment utiliser ces fonctions, car il existe des fonctions mieux adapter à la lecture de fichiers contenant des données à analyser.
-
 Les données du data frame suivant seront utilisées dans les exemples. Il s'agit de données créées dans les notes sur les [structures de données en R](https://stt4230.rbind.io/manipulation_donnees/structures_r/), dans lesquelles deux valeurs ont été remplacées par des valeurs manquantes. Ces données se rapportent à une expérience fictive de lancers de dés.
 
 ```{r}
@@ -159,7 +157,7 @@ Avant de lire en R un fichier de données, il est utile de d'abord le visualiser
 
 ## Fichier texte
 
-La lecture de données dans un fichier texte se fait principalement avec la fonction R `read.table`. Par exemple, allons lire les données contenues dans le fichier `data_ex.txt`, qui a l'allure suivante.
+Le fichier `data_ex.txt` (partagé dans le fichier `lecture_ecriture_r_2021.zip` au haut de cette page afin que vous puissiez reproduire les exemples proposés) contient les données exemple sous un format texte. Le contenu du fichier a l'allure suivante.
 
 ```
 de1	de2	lanceur
@@ -174,14 +172,35 @@ de1	de2	lanceur
 5	5	Kim
 4	3	Kim
 ```
+Remarquons que les valeurs manquantes dans ce fichier sont représentées par des points. 
 
-Remarquons que les valeurs manquantes dans ce fichier sont représentées par des points. Importons ces données avec `read.table`.
+Les fonctions les plus simplistes en R pour lire dans des fichiers texte externes sont [`readLines`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/readLines.html) et [`scan`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/scan.html). Cependant, ces fonctions ne sont pas les meilleurs outils pour la lecture de tableaux de données.
+
+Comme son nom l'indique, la fonction `readLines` lit un fichier texte ligne par ligne. Par exemple, voici ce que nous obtenons en lisant le contenu du fichier `data_ex.txt` avec la fonction `readLines`.
+
+```{r}
+lecture_readLines <- readLines("C:/coursR/data_ex.txt")
+lecture_readLines
+```
+
+Le résultat est un vecteur contenant un élément par ligne du fichier lu. Pour chaque ligne, tout son contenu a été laissé dans une seule chaîne de caractère. Nous pouvons constater que le caractère séparant les champs dans le fichier `data_ex.txt` est `\t`, ce qui représente une tabulation.
+
+La fonction `scan` permet quant à elle de lire des données en les considérant toutes du même type et stocke les données lues dans un vecteur ou une liste. Voici le résultat de la lecture du fichier `data_ex.txt` avec `scan`.
+
+```{r}
+lecture_scan <- scan("C:/coursR/data_ex.txt", what = "character")
+lecture_scan
+```
+
+Par défaut, `scan` suppose que le caractère séparant les champs dans le fichier lu est un «&nbsp;blanc&nbsp;», soit un ou plusieurs espaces, tabulations, fins de ligne ou retours de chariot. Ce comportement par défaut a bien convenu au fichier `data_ex.txt`. Il resterait cependant encore du travail à faire pour mettre ces données sous un format facilitant leur utilisation en R, par exemple un data frame utilisant les 3 premières valeurs comme noms de variables. 
+
+Pour l'importation d'un tableau de données provenant d'un fichier texte, la meilleure fonction offerte dans le R de base est plutôt [`read.table`](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html) du package `utils` (chargé par défaut à l'ouverture d'une session R). Par exemple, lisons les données contenues dans le fichier `data_ex.txt` avec `read.table`.
 
 ```{r import_texte_1}
 data_ex_txt <- read.table("C:/coursR/data_ex.txt")
 ```
 
-Le seul argument obligatoire dans la fonction `read.table` est le chemin d'accès au fichier à lire. Ici, il n'aurait pas été nécessaire de spécifier le chemin d'accès complet du fichier puisque ce fichier se trouve dans le répertoire de travail de la session R. Dans tous les exemples suivants, seul le nom du fichier sera fourni. 
+Le seul argument obligatoire dans la fonction `read.table` est le chemin d'accès au fichier à lire. Ici (comme dans les exemples précédents), il n'aurait pas été nécessaire de spécifier le chemin d'accès complet du fichier puisque ce fichier se trouve dans le répertoire de travail de la session R. Dans tous les exemples suivants, seul le nom du fichier sera fourni. 
 
 Les autres arguments de la fonction `read.table` doivent être adaptés selon le formatage du fichier à lire (voir la [fiche d'aide de la fonction `read.table`](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html)). Dans l'exemple ci-dessus, est-ce que toutes les valeurs par défaut des arguments convenaient vraiment? Jetons un coup d'oeil à l'objet obtenu.
 
@@ -219,7 +238,7 @@ Voici un résumé des arguments les plus utiles de la fonction `read.table`. Cha
     + Si oui, utiliser `header = TRUE`, sinon `header = FALSE`. 
     + Par défaut `header = FALSE`, sauf si la première ligne contient un élément de moins que les lignes suivantes. Dans ce cas, R considère que la première ligne contient les noms des variables et que les lignes suivantes contiennent les observations précédées d'un nom de ligne.
     
-- Quel caractère sépare les valeurs ?
+- Quel caractère sépare les champs (différentes valeurs) ?
     + Fournir ce caractère comme valeur à l'argument `sep`. 
     + Par défaut `sep = ""`, ce qui signifie que le séparateur est un «&nbsp;blanc&nbsp;», soit un ou plusieurs espaces, tabulations, fins de ligne ou retours de chariot.
     
@@ -495,21 +514,20 @@ Pour les exemples à venir, reprenons le data frame `data_ex` et voyons comment 
 
 ## Fichier texte
 
-Le format de fichier le plus universel pour exporter des données est le format texte. Un grand nombre de logiciels peuvent lire ce format. Les fonctions de base en R pour écrire dans un fichier texte sont `write` et `write.table`. Nous verrons ici seulement comment utiliser `write.table`, qui est plus adaptée à l'exportation de jeux de données. Par exemple, exportons le contenu du data frame `data_ex` dans le fichier texte `data_ex_export.txt`
+Le format de fichier le plus universel pour exporter des données est le format texte. Un grand nombre de logiciels peuvent lire ce format. Les fonctions de base en R pour écrire dans un fichier texte sont [`writeLines`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/writeLines.html), [`write`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/write.html) et [`write.table`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/write.table.html). Les fonctions `writeLines` et `write` sont l'équivalent de `readLines` et `scan`, respectivement, pour l'écriture dans des fichiers au lieu de la lecture. Pour réaliser une tâche d'exportation de jeux de données, la fonction `write.table` est la mieux adaptée des trois. Par exemple, exportons le contenu du data frame `data_ex` dans le fichier texte `data_ex_export.txt`
 
 ```{r exportTexte, eval = FALSE}
 write.table(data_ex, file = "data_ex_export.txt")
 ```
 
-Il faut spécifier à la fonction l'objet dans lequel se trouvent les données à exporter (typiquement une matrice ou un data frame), ainsi que le fichier dans lequel écrire les données. 
-Tout comme son équivalent pour lire des données `read.table`, la fonction `write.table` possède plusieurs arguments permettant de contrôler notamment le symbole de décimale (`dec`), le symbole représentant les valeurs manquantes (`na`), le séparateur entre les différentes colonnes (`sep`), la présence ou non des noms des lignes ou des colonnes (`row.names` et `col.names`), etc. 
+Il faut spécifier à la fonction l'objet dans lequel se trouvent les données à exporter (typiquement une matrice ou un data frame), ainsi que le fichier dans lequel écrire les données. Tout comme `read.table`, la fonction `write.table` possède plusieurs arguments permettant de contrôler le formatage des données, notamment le symbole de décimale (`dec`), le symbole représentant les valeurs manquantes (`na`), le séparateur entre les champs (`sep`), la présence ou non des noms des lignes ou des colonnes (`row.names` et `col.names`), etc. 
 
 Il existe aussi deux fonctions enveloppe à la fonction `write.table` pour les formats CSV, nommées `write.csv` et `write.csv2`.
 
 
 ## Fichier JSON
 
-Pour exporter les données dans un data frame en format JSON avec le package `jsonlite`, il faut d'abord transformer les données au format JSON avec la fonction `toJSON`. Ensuite, l'objet obtenu doit être écrit dans un fichier externe avec la fonction `write` du R de base.
+Pour exporter les données dans un data frame en format JSON avec le [package `jsonlite`](https://CRAN.R-project.org/package=jsonlite), il faut d'abord transformer les données au format JSON avec la fonction `toJSON`. Ensuite, l'objet obtenu doit être écrit dans un fichier externe avec la fonction `write` du R de base.
 
 ```{r eval = FALSE}
 data_ex_json <- toJSON(data_ex, pretty = TRUE)
@@ -518,7 +536,7 @@ write(data_ex_json, "data_ex_export.json")
 
 ## Fichier EXCEL
 
-Le [package `openxlsx`](https://ycphs.github.io/openxlsx/index.html) offre des fonctions pour exporter des données stockées dans un objet R dans un fichier EXCEL. Par exemple, le contenu du data frame `data_ex` peut être écrit dans un fichier EXCEL comme suit.
+Le [package `openxlsx`](https://ycphs.github.io/openxlsx/index.html) offre des fonctions pour exporter des données stockées dans un objet R dans un fichier EXCEL. Par exemple, le contenu du data frame `data_ex` peut être écrit dans un fichier EXCEL avec la [fonction `write.xlsx`](https://ycphs.github.io/openxlsx/reference/write.xlsx.html) comme suit.
 
 ```{r, eval = FALSE}
 library(openxlsx)
