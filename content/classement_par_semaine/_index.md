@@ -29,7 +29,7 @@ weight = 9
     * [Fonctions en R]({{< relref "programmation/fonctions_r_2021.html" >}})
 * Semaine 11
     * [Rédaction de documents en R Markdown]({{< relref "communication_resultats/redaction_r_markdown_2021.html" >}})
-    * [Programmation orientée objet en R]
+    * [Programmation orientée objet en R]({{< relref "programmation/oop_r_2021.html" >}})
     * [Tests et exceptions en R]
 * Semaine 12
     * [Utilisation de packages R]
