@@ -1,0 +1,880 @@
+---
+title: "Tests et exceptions en R"
+author: "Sophie Baillargeon, Université Laval"
+date: "2021-03-24"
+weight: 5
+slug: "tests_exceptions_r"
+lastmodifierdisplayname: "Sophie Baillargeon"
+lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+    highlight: tango
+  blogdown::html_page:
+    toc: yes
+    toc_depth: 3
+    number_sections: yes
+    highlight: tango
+header-includes:
+- \usepackage[french]{babel}
+- \frenchbsetup{StandardLayout}
+- \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
+editor_options: 
+  chunk_output_type: console
+---
+
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #f8f8f8; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<div id="TOC">
+<ul>
+<li><a href="#bonnes-pratiques-dans-le-développement-de-fonctions"><span class="toc-section-number">1</span> Bonnes pratiques dans le développement de fonctions</a>
+<ul>
+<li><a href="#démarche-de-travail-recommandée"><span class="toc-section-number">1.1</span> Démarche de travail recommandée</a>
+<ul>
+<li><a href="#exemple-de-développement-de-fonction"><span class="toc-section-number">1.1.1</span> Exemple de développement de fonction</a></li>
+</ul></li>
+<li><a href="#organisation-du-code"><span class="toc-section-number">1.2</span> Organisation du code</a></li>
+</ul></li>
+<li><a href="#tests"><span class="toc-section-number">2</span> Tests</a>
+<ul>
+<li><a href="#objectif-1-obtenir-le-résultat-escompté"><span class="toc-section-number">2.1</span> Objectif 1 : obtenir le résultat escompté</a></li>
+<li><a href="#objectif-2-correctement-gérer-les-exceptions"><span class="toc-section-number">2.2</span> Objectif 2 : correctement gérer les exceptions</a></li>
+<li><a href="#formaliser-des-tests-avec-le-package-testthat"><span class="toc-section-number">2.3</span> Formaliser des tests avec le package testthat</a></li>
+</ul></li>
+<li><a href="#débogage"><span class="toc-section-number">3</span> Débogage</a>
+<ul>
+<li><a href="#outil-1-la-fonction-traceback"><span class="toc-section-number">3.1</span> Outil 1 : la fonction <code>traceback</code></a></li>
+<li><a href="#outil-2-la-fonction-browser"><span class="toc-section-number">3.2</span> Outil 2 : la fonction <code>browser</code></a></li>
+<li><a href="#outil-3-loption-error"><span class="toc-section-number">3.3</span> Outil 3 : l’option <code>error</code></a></li>
+<li><a href="#outil-4-print-et-cat"><span class="toc-section-number">3.4</span> Outil 4 : <code>print</code> et <code>cat</code></a></li>
+</ul></li>
+<li><a href="#gestion-dexceptions"><span class="toc-section-number">4</span> Gestion d’exceptions</a>
+<ul>
+<li><a href="#produire-des-erreurs-et-avertissements"><span class="toc-section-number">4.1</span> Produire des erreurs et avertissements</a></li>
+<li><a href="#manipuler-des-erreurs-et-avertissements"><span class="toc-section-number">4.2</span> Manipuler des erreurs et avertissements</a></li>
+</ul></li>
+<li><a href="#résumé"><span class="toc-section-number">5</span> Résumé</a></li>
+<li><a href="#références">Références</a></li>
+</ul>
+</div>
+
+<hr />
+<p><em>Note préliminaire : Lors de leur dernière mise à jour, ces notes ont été révisées en utilisant R version 4.0.3 et le package <code>testthat</code> version 3.0.2. Pour d’autres versions, les informations peuvent différer.</em></p>
+<hr />
+<p>Ces notes présentent comment tester et déboguer nos fonctions en R. Nous allons également y apprendre à contrôler les messages d’erreur et d’avertissement produits par nos fonctions. Cependant, avant d’entrer dans le vif du sujet, revenons sur les étapes conseillées de développement de fonctions.</p>
+<div id="bonnes-pratiques-dans-le-développement-de-fonctions" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Bonnes pratiques dans le développement de fonctions</h1>
+<p>Rappelons-nous que l’objectif numéro 1 des <a href="https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/">bonnes pratiques de programmation en R</a> est de développer du code qui produit les résultats escomptés. Voici quelques conseils pour atteindre cet objectif.</p>
+<div id="démarche-de-travail-recommandée" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> Démarche de travail recommandée</h2>
+<p>Les <a href="https://stt4230.rbind.io/programmation/fonctions_r/#%C3%A9tapes-de-d%C3%A9veloppement-conseill%C3%A9es">étapes de développement de fonction conseillées dans les notes sur les fonctions R</a> peuvent être complétées comme suit :</p>
+<ol style="list-style-type: decimal">
+<li><strong>Planifier</strong> le travail (pas de programmation encore)
+<ul>
+<li>définir clairement la tâche à accomplir par la fonction et la sortie qu’elle doit produire;</li>
+<li>prévoir les étapes à suivre afin d’effectuer cette tâche;</li>
+<li>identifier les arguments devant être fournis en entrée à la fonction.</li>
+</ul></li>
+<li><strong>Développer le corps de la fonction</strong>
+<ul>
+<li>écrire le programme par étapes, d’abord sans former la fonction, en commentant bien le code et en travaillant sur des mini-données test;</li>
+<li>pour chaque petite étape ou sous-tâche, tester interactivement si le programme produit le résultat escompté (tester souvent en cours de travail, ainsi il y a moins de débogage à faire).</li>
+</ul></li>
+<li><strong>Créer la fonction</strong> à partir du programme développé.</li>
+<li><strong>Documenter</strong> la fonction : les informations minimales à fournir sont
+<ul>
+<li>ce que la fonction fait,</li>
+<li>quels arguments la fonction accepte en entrée (utilités, formats acceptés, valeurs par défaut),</li>
+<li>ce que la fonction produit comme résultat (sortie retournée et/ou effet de bord).</li>
+</ul></li>
+<li><strong>Tester</strong> la fonction : sauvegarder nos tests et bien les structurer, car ils serviront souvent.</li>
+<li><strong>Déboguer</strong> la fonction si nous rencontrons des comportements indésirables lors des tests :
+<ul>
+<li>cerner le ou les problèmes,</li>
+<li>apporter les correctifs nécessaires à la fonction (que ce soit dans son corps ou dans la liste de ses arguments),</li>
+<li>adapter la documentation et les tests au besoin,</li>
+<li>rouler de nouveau les tests,</li>
+<li>répéter ces sous-étapes jusqu’à ce que les tests ne révèlent plus aucun problème à régler ou aucune amélioration à apporter.</li>
+</ul></li>
+</ol>
+<p>Les étapes 5 et 6 ont été ajoutées à celles déjà présentées. L’étape 5 sert à s’assurer de rencontrer l’objectif de produire les résultats escomptés. L’étape 6, celle du débogage, est nécessaire lorsque quelque chose cloche dans le comportement de la fonction. Les sous-étapes du débogage nous mène, espérons le, à régler les anomalies.</p>
+<p>La démarche de travail recommandée ici a aussi pour but d’aider à atteindre le deuxième objectif des bonnes pratiques : développer du code facile à maintenir. Au fil du temps, il n’est pas rare d’avoir besoin de modifier une fonction que nous avons créée. La modification peut avoir pour but de :</p>
+<ul>
+<li>ajouter une fonctionnalité,</li>
+<li>corriger un bogue découvert par un utilisateur,</li>
+<li>rendre la fonction plus facile d’utilisation,</li>
+<li>rendre la fonction plus rapide,</li>
+<li>etc.</li>
+</ul>
+<p>Quand vient le temps de modifier une fonction, notre travail est facilité si celle-ci a été bien documentée et testée. Avant d’apporter des changements au code, il est encore recommandé de bien planifier le travail (donc de réfléchir avant de programmer). Après avoir modifié la fonction, il faut mettre à jour la documentation et les tests au besoin. Exécuter ces tests de nouveau nous permet de nous assurer que les modifications apportées n’ont pas altéré d’anciens comportements de la fonction qui ne doivent pas changer.</p>
+<div id="exemple-de-développement-de-fonction" class="section level3" number="1.1.1">
+<h3><span class="header-section-number">1.1.1</span> Exemple de développement de fonction</h3>
+<p>Créons ensemble une fonction qui calcule la distance de Manhattan entre deux points.</p>
+<p> </p>
+<p><strong>Planification</strong> (étape 1) :</p>
+<ul>
+<li>implanter la formule (simple, une seule étape) : <a href="http://fr.wikipedia.org/wiki/Distance_de_Manhattan" class="uri">http://fr.wikipedia.org/wiki/Distance_de_Manhattan</a></li>
+<li>sortie = la distance (une seule valeur)</li>
+<li>entrée = les coordonnées de deux points (2 arguments)</li>
+</ul>
+<p> </p>
+<p><strong>Développement du corps de la fonction</strong> (étape 2) :</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># mini-données test</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>pt1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>pt2 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Code le plus simple qui me vient en tête</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">abs</span>(pt1[<span class="dv">1</span>] <span class="sc">-</span> pt2[<span class="dv">1</span>]) <span class="sc">+</span> <span class="fu">abs</span>(pt1[<span class="dv">2</span>] <span class="sc">-</span> pt2[<span class="dv">2</span>])</span></code></pre></div>
+<pre><code>## [1] 2</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Il faudrait que ça fonctionne peu importe la dimension de l&#39;espace dans lequel mes </span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># points sont représentés (donc peu importe la longueur des vecteurs pt1 et pt2)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">abs</span>(pt1 <span class="sc">-</span> pt2))</span></code></pre></div>
+<pre><code>## [1] 2</code></pre>
+<p> </p>
+<p><strong>Création de la fonction</strong> à partir du programme développé (étape 3) :</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dist_manhattan <span class="ot">&lt;-</span> <span class="cf">function</span>(point1, point2) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(<span class="fu">abs</span>(point1 <span class="sc">-</span> point2))</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p> </p>
+<p><strong>Documentation de la fonction</strong> (étape 4) :</p>
+<p>Le plus simple est de fournir des informations en commentaires avant la définition de la fonction ou au début du corps de celle-ci. Mentionnons ici ce que la fonction fait, quels arguments elle accepte en entrée et ce qu’elle retourne en sortie.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcule la distance de Manhattan entre deux points</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Arguments :</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># - point1 : Un vecteur numerique des coordonnees du premier point.</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># - point2 : Un vecteur numerique des coordonnees du deuxieme point.</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Sortie : La distance de Manhattan entre point1 et point2 (une seule valeur).</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>dist_manhattan <span class="ot">&lt;-</span> <span class="cf">function</span>(point1, point2) {</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(<span class="fu">abs</span>(point1 <span class="sc">-</span> point2))</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Nous allons revenir sur ce point dans le cours sur la création de packages, car toute fonction d’un package doit avoir une fiche d’aide. Nous verrons donc une façon plus formelle de documenter des fonctions.</p>
+<p> </p>
+<p><strong>Test et débogage</strong> (étapes 5 et 6) :</p>
+<p>Nous allons faire les tests et le débogage après avoir vu la théorie à ce sujet dans les sections suivantes.</p>
+</div>
+</div>
+<div id="organisation-du-code" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> Organisation du code</h2>
+<p>Une bonne pratique dans l’organisation de notre code est de placer les définitions de nos fonctions dans un ou des fichiers dédiés (donc contenant uniquement ces définitions). Ainsi, les instructions comportant des appels à nos fonctions ne sont pas dans le même programme R que les définitions des fonctions.</p>
+<p>Cependant, afin de pouvoir utiliser nos fonctions, elles doivent être présentes dans un des environnements du chemin de recherche de R. Nous pourrions les mettre dans un package que nous créons et charger ce package. Plus simplement, nous pourrions soumettre le code définissant les fonctions dans la console R afin de créer les fonctions dans notre environnement de travail. C’est la façon de faire utilisée dans le cours jusqu’à maintenant.</p>
+<p>Si nous avons placé les définitions de fonctions dans un fichier à part, il est facile de soumettre d’un coup tout le code contenu dans le fichier en une seule commande : un appel à la fonction <code>source</code>. Par exemple, si nos fonctions sont définies dans le fichier <code>mes_fonctions.R</code> du répertoire <code>C:\coursR</code>, la commande suivante :</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&quot;C:/coursR/mes_fonctions.R&quot;</span>)</span></code></pre></div>
+<p>évalue toutes les instructions contenues dans <code>mes_fonctions.R</code>. Les objets créés par ces instructions sont stockés par défaut dans l’environnement de travail.</p>
+<p>Appeler la fonction <code>source</code> est donc similaire à sélectionner tout le code contenu dans un fichier et le soumettre dans la console. Cependant, les deux façons de faire ne sont pas identiques. Avec <code>source</code>, dès que le code dans le fichier comporte au moins une erreur de syntaxe, aucune ligne de code du fichier n’est soumise. Aussi, seuls les appels spécifiques à la fonction <code>print</code> provoquent des impressions, alors qu’une instruction contenant seulement le nom d’un objet ne génère aucune impression. Mais la plus grande différence entre les deux approches est que soumettre une commande <code>source</code> est plus efficace en terme de temps de travail que de sélectionner des lignes de code dans un script R, puis de soumettre toutes ces lignes. Avec <code>source</code>, le script R contenant les définitions des fonctions n’a même pas besoin d’être ouvert.</p>
+<p>Ainsi, pour compléter la bonne pratique de placer les définitions de nos fonctions dans des fichiers distincts, il est recommandé d’inclure un appel à la fonction <code>source</code> au début d’un programme R utilisant des fonctions définies dans un autre fichier, afin de soumettre le contenu de ce fichier pour avoir accès aux fonctions qui y sont définies. Ces appels à la fonction <code>source</code> devraient accompagner les chargements des packages utilisés dans le programme.</p>
+<hr />
+</div>
+</div>
+<div id="tests" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Tests</h1>
+<p>Tester ses fonctions consiste à appeler les fonctions en donnant en entrée des valeurs d’arguments pour lesquelles nous savons quel résultat devrait être obtenu.</p>
+<ul>
+<li>Nous pouvons faire ça avec des mini-exemples pour lesquels nous pouvons faire les calculs à la main pour trouver le résultat escompté. Il est bien que ces cas soient représentatifs (en plus simple) de diverses situations qui peuvent être rencontrées en pratique.</li>
+<li>Si des fonctions qui font le même calcul existent déjà, il est bon de comparer les résultats de nos fonctions aux résultats de ces fonctions.</li>
+<li>Nous pouvons aussi comparer les résultats de nos fonctions à des résultats publiés dans des articles scientifiques ou des résultats théoriques. Si nos fonctions proposent de nouvelles méthodes de calculs, nous ne nous attendons pas nécessairement à reproduire de façon exacte les résultats publiés, mais nos résultats devraient être cohérents avec ceux publiés.</li>
+</ul>
+<p>Les objectifs sont d’obtenir les résultats escomptés, mais aussi de générer des erreurs et avertissement en temps opportun.</p>
+<div id="objectif-1-obtenir-le-résultat-escompté" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Objectif 1 : obtenir le résultat escompté</h2>
+<p>Afin de vérifier si une fonction retourne le résultat escompté, il faut la tester dans toutes sortes de situations.</p>
+<div id="exemple" class="section level4 unnumbered">
+<h4>Exemple :</h4>
+<p></p>
+<p>Testons la fonction <code>dist_manhattan</code> avec d’autres points que ceux utilisés pour développer la fonction.</p>
+<p> </p>
+<ul>
+<li>Points avec coordonnées négatives :</li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist_manhattan</span>(<span class="at">point1 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="dv">5</span>), <span class="at">point2 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="dv">15</span>))</span></code></pre></div>
+<pre><code>## [1] 10</code></pre>
+<p>Résultat attendu selon un calcul à la main : 10 = résultat obtenu (nous passons le test avec succès).</p>
+<p> </p>
+<ul>
+<li>Points de dimension supérieure à 2 :</li>
+</ul>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist_manhattan</span>(<span class="at">point1 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>), <span class="at">point2 =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span></code></pre></div>
+<pre><code>## [1] 5</code></pre>
+<p>Résultat attendu selon un calcul à la main : 5 = résultat obtenu (nous passons le test avec succès).</p>
+<p> </p>
+<ul>
+<li>Comparaisons avec la fonction <code>dist</code> qui implémente le même calcul que notre fonction <code>dist_manhattan</code> :</li>
+</ul>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist_manhattan</span>(<span class="at">point1 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="at">point2 =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code></pre></div>
+<pre><code>## [1] 2</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist</span>(<span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)), <span class="at">method =</span> <span class="st">&quot;manhattan&quot;</span>)</span></code></pre></div>
+<pre><code>##   1
+## 2 2</code></pre>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist_manhattan</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)) <span class="sc">==</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dist</span>(<span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)), <span class="at">method =</span> <span class="st">&quot;manhattan&quot;</span>)[<span class="dv">1</span>]</span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist_manhattan</span>(<span class="at">point1 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="dv">5</span>), <span class="at">point2 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="dv">15</span>))</span></code></pre></div>
+<pre><code>## [1] 10</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist</span>(<span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="dv">5</span>), <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="dv">15</span>)), <span class="at">method =</span> <span class="st">&quot;manhattan&quot;</span>)</span></code></pre></div>
+<pre><code>##    1
+## 2 10</code></pre>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist_manhattan</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="dv">5</span>), <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="dv">15</span>)) <span class="sc">==</span> </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dist</span>(<span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="dv">5</span>), <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="dv">15</span>)), <span class="at">method =</span> <span class="st">&quot;manhattan&quot;</span>)[<span class="dv">1</span>]</span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist_manhattan</span>(<span class="at">point1 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>), <span class="at">point2 =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span></code></pre></div>
+<pre><code>## [1] 5</code></pre>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist</span>(<span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>)), <span class="at">method =</span> <span class="st">&quot;manhattan&quot;</span>)</span></code></pre></div>
+<pre><code>##   1
+## 2 5</code></pre>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist_manhattan</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>)) <span class="sc">==</span> </span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dist</span>(<span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>)), <span class="at">method =</span> <span class="st">&quot;manhattan&quot;</span>)[<span class="dv">1</span>]</span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p>Nous obtenons les mêmes distances.</p>
+<p>Si nous n’avions pas obtenu les résultats escomptés, il aurait fallu apporter des correctifs à notre fonction.</p>
+</div>
+</div>
+<div id="objectif-2-correctement-gérer-les-exceptions" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Objectif 2 : correctement gérer les exceptions</h2>
+<p>Les tests visent aussi à vérifier si une fonction réagit correctement aux exceptions. Qu’est-ce qu’une exception?</p>
+<blockquote>
+<p>Une <strong>exception</strong> est une situation anormale ou exceptionnelle qui requiert un traitement spécial (souvent l’arrêt de la fonction).</p>
+</blockquote>
+<p>Des exemples d’exceptions sont :</p>
+<ul>
+<li>des arguments incorrects fournis en entrée,</li>
+<li>des résultats de calcul inattendus.</li>
+</ul>
+<p>Lors de la rencontre d’exceptions, les fonctions R réagissent en générant des erreurs ou des avertissements.</p>
+<blockquote>
+<p>Les erreurs et avertissements sont appelés <strong>conditions</strong> en R.</p>
+</blockquote>
+<p>En plus des erreurs et avertissements, R comporte un troisième type de condition : les messages.</p>
+<p>Les différents types de conditions sont définis ainsi :</p>
+<ul>
+<li><strong>Erreur</strong> : L’exécution de la fonction est interrompue et un message d’erreur est affiché.</li>
+<li><strong>Avertissement</strong> : Un message d’avertissement est affiché pour signifier un problème potentiel. L’exécution de la fonction n’est pas interrompue.</li>
+<li><strong>Message</strong> : Un message est affiché pour apporter une information supplémentaire (par exemple la valeur par défaut utilisée pour un argument important non fourni en entrée). L’exécution de la fonction n’est pas interrompue. (Ce type de condition est moins utilisé que les deux autres.)</li>
+</ul>
+<p>Notons que les messages associés à une condition R, peu importe son type, sont parfois traduits de façon automatique en fonction de la langue de notre système d’exploitation.</p>
+<div id="exemple-1" class="section level4 unnumbered">
+<h4>Exemple :</h4>
+<p></p>
+<p>Testons si notre fonction <code>dist_manhattan</code> gère correctement quelques exceptions.</p>
+<p> </p>
+<ul>
+<li>Si nous donnons en entrée à notre fonction <code>dist_manhattan</code> des points de dimensions différentes, que se passe-t-il?</li>
+</ul>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist_manhattan</span>(<span class="at">point1 =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">0</span>), <span class="at">point2 =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>))</span></code></pre></div>
+<pre><code>## Warning in point1 - point2: longer object length is not a multiple of shorter
+## object length</code></pre>
+<pre><code>## [1] 8</code></pre>
+<p>Nous pourrions préférer que la fonction retourne une erreur plutôt qu’un avertissement. Nous y reviendrons plus loin.</p>
+<p> </p>
+<ul>
+<li>Si nous donnons en entrée à <code>dist_manhattan</code> des arguments non numériques, que se passe-t-il?</li>
+</ul>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist_manhattan</span>(<span class="at">point1 =</span> <span class="fu">c</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>), <span class="at">point2 =</span> <span class="fu">c</span>(<span class="st">&quot;c&quot;</span>, <span class="st">&quot;d&quot;</span>))</span></code></pre></div>
+<pre><code>## Error in point1 - point2: non-numeric argument to binary operator</code></pre>
+<p>L’exécution de la fonction s’arrête et le message d’erreur affiché est informatif. Un <strong>message informatif</strong> aide l’utilisateur à comprendre ce qu’il a fait incorrectement. Un message non informatif ne guide pas suffisamment l’utilisateur dans la modification de son appel de la fonction afin de ne plus avoir d’erreur.</p>
+<p> </p>
+<ul>
+<li>Si nous donnons en entrée des matrices, que se passe-t-il?</li>
+</ul>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist_manhattan</span>(<span class="at">point1 =</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>)), <span class="at">point2 =</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">2</span>), <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>)))</span></code></pre></div>
+<pre><code>## [1] 9</code></pre>
+<p>Ce résultat peut être surprenant pour quelqu’un qui pensait obtenir plus d’une distance, par exemple une entre la ligne i de <code>point1</code> et la ligne i de <code>point2</code> pour tout i = 1, …, <code>nrow(point1)</code>. Nous pourrions envisager de produire un message d’avertissement (nous verrons comment faire plus loin).</p>
+</div>
+</div>
+<div id="formaliser-des-tests-avec-le-package-testthat" class="section level2" number="2.3">
+<h2><span class="header-section-number">2.3</span> Formaliser des tests avec le package testthat</h2>
+<p>Le <a href="http://testthat.r-lib.org/">package <code>testthat</code></a> offre des fonctions facilitant l’écriture, l’organisation et l’exécution automatique de tests unitaires en R. Voici quelques fonctions du package :</p>
+<ul>
+<li><p>fonctions d’écriture (un appel à une de ces fonctions = un test unitaire) :</p>
+<ul>
+<li><code>expect_equal</code> : pour tester la quasi égalité entre des valeurs (différences inférieures à une certaine tolérance ignorées), à l’image de ce que fait <code>all.equal</code> (mais <code>expect_equal</code> donne plus d’information que <code>all.equal</code> en cas de différences);</li>
+<li><code>expect_error</code> : pour tester la génération d’une erreur;</li>
+<li><code>expect_warning</code> : pour tester la génération d’un avertissement;</li>
+<li>etc. (le package <code>testthat</code> propose plusieurs fonctions de type <code>expect_*</code>, voir <a href="https://testthat.r-lib.org/reference/index.html#section-expectations" class="uri">https://testthat.r-lib.org/reference/index.html#section-expectations</a>);</li>
+</ul></li>
+<li><p>fonction d’organisation : <code>test_that</code>;</p></li>
+<li><p>fonctions d’exécution : <code>test_file</code>, <code>test_package</code>, etc.</p></li>
+</ul>
+<p>L’utilisation de ce package n’est pas décrite en détail ici, mais un court exemple est présenté pour illustrer son utilisation. Écrire ses tests avec <code>testthat</code> demande un certain investissement en temps, mais une fois cette étape terminée, il est facile de lancer ses tests à plusieurs reprises en cours de travail.</p>
+<div id="exemple-2" class="section level4 unnumbered">
+<h4>Exemple :</h4>
+<p></p>
+<p>Voici quelques exemples qui reprennent des tests effectués précédemment sur la fonction <code>dist_manhattan</code>.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(testthat)</span></code></pre></div>
+<ul>
+<li>Cas simple pour lequel nous pouvons calculer à la main le résultat escompté :</li>
+</ul>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_that</span>(<span class="st">&quot;nous reproduisons un calcul à la main&quot;</span>, {</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">expect_equal</span>(<span class="fu">dist_manhattan</span>(<span class="at">point1 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="dv">5</span>), <span class="at">point2 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="dv">15</span>)), <span class="dv">10</span>)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<pre><code>## Test passed</code></pre>
+<ul>
+<li>Comparaison avec le résultat d’une autre fonction :</li>
+</ul>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_that</span>(<span class="st">&quot;nous obtenons le même résultat que la fonction dist&quot;</span>, {</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">expect_equal</span>(</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dist_manhattan</span>(<span class="at">point1 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="at">point2 =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)),</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.vector</span>(<span class="fu">dist</span>(<span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)), <span class="at">method =</span> <span class="st">&quot;manhattan&quot;</span>))</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<pre><code>## Test passed</code></pre>
+<ul>
+<li>Vérification de la gestion d’exceptions</li>
+</ul>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_that</span>(<span class="st">&quot;des vecteurs de dimensions différentes génèrent une erreur&quot;</span>, {</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">expect_error</span>(<span class="fu">dist_manhattan</span>(<span class="at">point1 =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">0</span>), <span class="at">point2 =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)))</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<pre><code>## -- Warning (&lt;text&gt;:2:3): des vecteurs de dimensions différentes génèrent une erreur --
+## longer object length is not a multiple of shorter object length
+## Backtrace:
+##  1. testthat::expect_error(...)
+##  6. global::dist_manhattan(point1 = c(-1, 0), point2 = c(1, 2, 3))
+## 
+## -- Failure (&lt;text&gt;:2:3): des vecteurs de dimensions différentes génèrent une erreur --
+## `dist_manhattan(point1 = c(-1, 0), point2 = c(1, 2, 3))` did not throw an error.</code></pre>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_that</span>(<span class="st">&quot;des matrices génèrent un avertissement&quot;</span>, {</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  mat1 <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>))</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  mat2 <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">2</span>), <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>))</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">expect_warning</span>(<span class="fu">dist_manhattan</span>(<span class="at">point1 =</span> mat1, <span class="at">point2 =</span> mat2))</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<pre><code>## -- Failure (&lt;text&gt;:4:3): des matrices génèrent un avertissement ----------------
+## `dist_manhattan(point1 = mat1, point2 = mat2)` did not produce any warnings.</code></pre>
+<p>Nous allons apporter plus loin des changements à <code>dist_manhattan</code> afin de passer avec succès tous ces tests. Pour l’instant, nous passons avec succès les 2 premiers, mais échouons les deux derniers.</p>
+<hr />
+</div>
+</div>
+</div>
+<div id="débogage" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Débogage</h1>
+<blockquote>
+<p>Le <strong>débogage</strong> est un processus méthodique pour trouver et régler les bogues dans un programme informatique, soit les anomalies de fonctionnement du programme.</p>
+</blockquote>
+<p>Si nos tests ont révélé des résultats inattendus ou des exceptions mal gérées, un débogage est de mise. La première étape du débogage est de repérer le bout de code responsable du bogue et de comprendre pourquoi le bogue est rencontré. Ensuite, il faut modifier le code pour corriger le problème.</p>
+<p>Les outils présentés pour accomplir la première étape du débogage peuvent aussi servir à comprendre une condition obtenue lors de l’utilisation d’une fonction programmée par quelqu’un d’autre.</p>
+<p>Lorsque nous obtenons une erreur en appelant une fonction, le message d’erreur explique parfois suffisamment clairement pourquoi la fonction ne peut pas retourner de résultats.</p>
+<p><strong>Exemple</strong> : argument fourni dans un mauvais format</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aggregate</span>(<span class="at">x =</span> iris<span class="sc">$</span>Sepal.Length, <span class="at">by =</span> iris<span class="sc">$</span>Species, <span class="at">FUN =</span> min)</span></code></pre></div>
+<pre><code>## Error in aggregate.data.frame(as.data.frame(x), ...): &#39;by&#39; must be a list</code></pre>
+<p>Dans cet exemple, le message d’erreur nous aide à comprendre que nous avons mal utilisé la fonction et nous met sur une piste pour modifier notre appel à la fonction.</p>
+<p>Dans d’autres cas, les messages d’erreur ou d’avertissement ne sont pas très informatifs. Dans un tel cas, la documentation de la fonction peut parfois nous aider. Une autre option est d’utiliser des outils de débogage pour comprendre la nature de l’exception rencontrée et comment utiliser correctement la fonction.</p>
+<div id="rapporter-un-bogue" class="section level4 unnumbered">
+<h4>Rapporter un bogue</h4>
+<p></p>
+<p>Lorsque nous croyons avoir découvert un bogue dans du code que nous n’avons pas développé nous même, il est bien de contacter le mainteneur du code pour lui en faire part. Il faut par contre d’abord s’assurer d’utiliser la dernière version du code. Le mainteneur des fonctions de base de R est le R Core Team. La page web <a href="https://www.r-project.org/bugs.html" class="uri">https://www.r-project.org/bugs.html</a> explique comment faire part de bogues potentiels à cette équipe. Pour signaler un bogue dans un package R, il suffit de contacter son mainteneur par courriel. Toute documentation de package contient l’adresse courriel de son mainteneur. Si le package est développé en utilisant un service web public d’hébergement et de gestion de versions, tel que GitHub, la meilleure façon de rapporter un bogue est de créer un nouvel <em>issue</em>.</p>
+<p>Faire part d’un bogue potentiel à un mainteneur présente des avantages pour tous. L’utilisateur arrive souvent ainsi à régler le problème qu’il rencontre et le mainteneur a l’opportunité d’améliorer son code en corrigeant des bogues ou en identifiant les aspects moins compris de son code ou de sa documentation.</p>
+</div>
+<div id="exemple-de-bogue-dans-notre-propre-code" class="section level4 unnumbered">
+<h4>Exemple de bogue dans notre propre code :</h4>
+<p></p>
+<p>Supposons que nous développons une fonction qui calcule des moyennes. Si l’argument donné en entrée est un vecteur, la fonction doit calculer une seule moyenne, celle des observations dans le vecteur. Si l’argument donné en entrée a plus d’une dimension, la fonction <code>colMeans</code> doit être appelée. Pour une matrice en entrée, nous obtiendrions donc la moyenne des observations dans chaque colonne.</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>mean_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(<span class="fu">dim</span>(x))) {</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">colMeans</span>(x)</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mean</span>(x)</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tentatives d&#39;utilisation de la fonction</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean_2</span>(<span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] 2.5</code></pre>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean_2</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)</span></code></pre></div>
+<pre><code>## Error in colMeans(x): &#39;x&#39; must be an array of at least two dimensions</code></pre>
+<p>La fonction ne fait pas ce que nous voulions. Déboguons-la.</p>
+</div>
+<div id="outil-1-la-fonction-traceback" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Outil 1 : la fonction <code>traceback</code></h2>
+<p>La première chose à faire en cas d’erreur rencontrée est de tenter de comprendre le message d’erreur affiché. La fonction <code>traceback</code> peut apporter plus d’informations concernant la provenance de l’erreur.</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">traceback</span>()</span></code></pre></div>
+<pre><code>## 3: stop(&quot;&#39;x&#39; must be an array of at least two dimensions&quot;)
+## 2: colMeans(x) at #3
+## 1: mean_2(1:4)</code></pre>
+<p>Cette fonction retourne la séquence des appels de fonctions qui a mené à l’erreur. Nous apprenons ici que l’erreur a été générée par la fonction <code>stop</code>, dans un appel à la fonction <code>colMeans</code>, à l’intérieur de l’appel à <code>mean_2</code>. En fait, ici, le message d’erreur nous avait déjà informés que l’erreur provenait d’un appel à <code>colMeans</code>. Pourquoi la fonction <code>colMeans</code> est-elle appelée alors que la valeur de <code>x</code> fournie en entrée est un vecteur?</p>
+</div>
+<div id="outil-2-la-fonction-browser" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> Outil 2 : la fonction <code>browser</code></h2>
+<p>La fonction <code>browser</code> permet d’interrompre l’exécution d’une fonction, de donner accès à l’environnement d’exécution de la fonction et d’exécuter le corps de la fonction une instruction à la fois. Pour ce faire, il suffit d’insérer l’instruction</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">browser</span>()</span></code></pre></div>
+<p>dans le corps de la fonction, à l’endroit où nous souhaitons interrompre l’exécution. Ensuite, il faut soumettre de nouveau la définition de la fonction. Le prochain appel à cette fonction sera interrompu lorsque l’instruction <code>browser()</code> sera rencontré.</p>
+<blockquote>
+<p>La commande <code>browser()</code> peut être appelée un point d’arrêt (<em>breakpoint</em>), pour réutiliser un terme usuel en débogage informatique.</p>
+</blockquote>
+<p>Lorsque l’outil d’inspection de code ouvert par la fonction <code>browser</code> est actif, le symbole d’invite de commandes (<em>prompt</em>) dans la console devient <code>&gt; Browse[d]</code> au lieu de <code>&gt;</code>. Ici, <code>d</code> représente la profondeur de la séquence d’appels de fonctions. Les <strong>mots-clés</strong> suivants sont alors compris (voir <a href="http://stat.ethz.ch/R-manual/R-patched/library/base/html/browser.html"><code>help(browser)</code></a> pour la liste complète des mots-clés) :</p>
+<ul>
+<li><code>n</code> : pour exécuter la prochaine commande,</li>
+<li><code>c</code> : pour exécuter jusqu’au prochain point d’arrêt (ex. une autre commande <code>browser()</code>),</li>
+<li><code>Q</code> : pour sortir de l’outil d’inspection de code et retourner au mode R interactif usuel.</li>
+</ul>
+<p>Il est aussi possible de soumettre n’importe quelle commande R dans l’outil d’inspection de code. Par contre, si un objet porte le nom d’un des mots-clés, nous ne pouvons plus taper directement son nom dans la console pour l’afficher. Il faut passer par une commande telle que <code>print(n)</code>.</p>
+<div id="rstudio" class="section level4 unnumbered">
+<h4>RStudio :</h4>
+<p></p>
+<p>L’environnement intégré de développement RStudio offre des fonctionnalités facilitant grandement l’utilisation de la fonction <code>browser</code>. Lorsque la fonction <code>browser</code> est appelée, RStudio :</p>
+<ul>
+<li>ouvre une fenêtre contenant le corps de la fonction dans laquelle <code>browser</code> a été appelé et souligne en jaune le prochain bout de code à être soumis dans l’exécution pas à pas,</li>
+<li>permet de visualiser le contenu de l’environnement d’exécution de la fonction dans laquelle <code>browser</code> a été appelé à partir de la sous-fenêtre <em>Environment</em>,</li>
+<li>ajoute dans l’entête de la console une barre de boutons pouvant remplacer l’utilisation des mots-clés <code>n</code>, <code>c</code>, <code>Q</code>, etc.</li>
+</ul>
+</div>
+<div id="différentes-façons-dinsérer-un-appel-à-la-fonction-browser-dans-le-corps-dune-fonction" class="section level4 unnumbered">
+<h4>Différentes façons d’insérer un appel à la fonction <code>browser</code> dans le corps d’une fonction</h4>
+<p> </p>
+<ul>
+<li>À la main, en éditant le code source.</li>
+</ul>
+<p>Il ne faut pas oublier d’aller retirer la commande et de soumettre de nouveau le code source de la fonction lorsque le débogage est terminé. Ainsi, l’outil d’inspection de code ne sera plus ouvert à chaque fois que la fonction est appelée.</p>
+<p> </p>
+<ul>
+<li>En utilisant la fonction <code>trace</code>, comme suit :</li>
+</ul>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">trace</span>(mean_2, <span class="at">tracer =</span> browser)</span></code></pre></div>
+<p>L’argument <code>at</code> permet de spécifier à quel endroit dans le code la commande <code>browser()</code> doit être insérée. Par défaut elle est mise dans la première ligne. La commande <code>browser()</code> est ensuite retirée avec la fonction <code>untrace</code>, comme suit :</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">untrace</span>(mean_2)</span></code></pre></div>
+<p> </p>
+<ul>
+<li>En utilisant la fonction <code>debug</code>, comme suit :</li>
+</ul>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">debug</span>(mean_2)</span></code></pre></div>
+<p>La commande <code>browser()</code> est alors insérée dans la première ligne du corps de la fonction <code>mean_2</code>. La commande <code>browser()</code> est ensuite retirée avec la fonction <code>undebug</code>, comme suit :</p>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">undebug</span>(mean_2)</span></code></pre></div>
+<p> </p>
+<ul>
+<li>En utilisant une fonctionnalité de RStudio : insérer un point d’arrêt dans un code source, soit en cliquant dans la marge de droite dans l’éditeur de script R de RStudio, ou par le menu <em>Debug -&gt; Toggle Breakpoint</em>.</li>
+</ul>
+</div>
+</div>
+<div id="outil-3-loption-error" class="section level2" number="3.3">
+<h2><span class="header-section-number">3.3</span> Outil 3 : l’option <code>error</code></h2>
+<p>Il est possible du faire du <strong>débogage post mortem</strong> en R. Ce type de débogage consiste à tenter de trouver la cause d’une erreur après que l’exécution de la fonction ait été interrompue. La fonction <code>traceback</code> est donc en fait un outil de débogage post mortem, mais pas très puissant.</p>
+<p>Si nous donnons comme valeur à l’option globale nommée <code>error</code> la fonction <code>recover</code> comme suit</p>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">error =</span> recover)</span></code></pre></div>
+<p>R donne accès à l’environnement d’exécution de toute fonction dans laquelle une erreur est générée. Par exemple, essayons de soumettre la commande</p>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean_2</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)  <span class="co"># fonction non soumise ici, à essayer dans une session R</span></span></code></pre></div>
+<p>R nous demande alors d’identifier l’environnement que nous souhaitons inspecter : celui de l’exécution de <code>mean_2</code> ou celui de l’exécution de <code>colMeans</code> (car l’erreur a été rencontrée dans un appel à <code>colMeans</code>, qui a eu lieu dans un appel à <code>mean_2</code>). Après avoir fait notre choix, nous pouvons visualiser les objets dans l’environnement d’exécution choisi.</p>
+<p>Pour remettre l’option <code>error</code> à sa valeur par défaut, il faut soumettre le code suivant :</p>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">error =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<p> </p>
+<p>Dans l’exemple de la fonction <code>mean_2</code>, vous l’avez déjà trouvé, l’erreur est simplement que ce n’est pas la bonne branche du <code>if</code> qui est sélectionné selon la nature de <code>x</code>.</p>
+<p>Correction :</p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>mean_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(<span class="fu">dim</span>(x))) { <span class="co"># ajout d&#39;une négation ici</span></span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">colMeans</span>(x)</span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mean</span>(x)</span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tentatives d&#39;utilisation de la fonction</span></span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean_2</span>(<span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>))</span></code></pre></div>
+<pre><code>## [1] 1.5 3.5</code></pre>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean_2</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)</span></code></pre></div>
+<pre><code>## [1] 2.5</code></pre>
+</div>
+<div id="outil-4-print-et-cat" class="section level2" number="3.4">
+<h2><span class="header-section-number">3.4</span> Outil 4 : <code>print</code> et <code>cat</code></h2>
+<p>Les fonctions <code>print</code> et <code>cat</code> s’avère aussi être des outils de débogage très simples en R. Ces fonctions permettent d’imprimer une trace des calculs effectués dans la fonction.</p>
+<div id="exemple-3" class="section level4 unnumbered">
+<h4>Exemple :</h4>
+<p></p>
+<p>Intéressons-nous au cas particulier d’une boucle qui est arrêtée à cause d’une erreur. Il est alors informatif de savoir quelle itération de la boucle est problématique.</p>
+<p>Voici un exemple de fonction qui sert à inverser une série de matrices fournies en entrée.</p>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>inverses <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>  matrices <span class="ot">&lt;-</span> <span class="fu">list</span>(...)</span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a>  inverses <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">&quot;list&quot;</span>, <span class="at">length =</span> <span class="fu">length</span>(matrices))</span>
+<span id="cb68-4"><a href="#cb68-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(matrices)) {</span>
+<span id="cb68-5"><a href="#cb68-5" aria-hidden="true" tabindex="-1"></a>    inverses[[i]] <span class="ot">&lt;-</span> <span class="fu">solve</span>(matrices[[i]])</span>
+<span id="cb68-6"><a href="#cb68-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb68-7"><a href="#cb68-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(inverses)</span>
+<span id="cb68-8"><a href="#cb68-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tentative d&#39;utilisation de la fonction</span></span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a><span class="fu">inverses</span>(</span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">a =</span> <span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>),</span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">b =</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="sc">-</span><span class="dv">2</span>), <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">3</span>), </span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">c =</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">6</span>) , <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">3</span>)</span>
+<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## Error in solve.default(matrices[[i]]) : 
+##  Lapack routine dgesv: system is exactly singular: U[3,3] = 0 </code></pre>
+<p>Il est possible d’obtenir de l’information concernant l’itération problématique avec du débogage post mortem utilisant l’option <code>error</code>. Une autre possibilité serait de faire imprimer une trace temporaire des calculs à chaque itération.</p>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>inverses <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>  matrices <span class="ot">&lt;-</span> <span class="fu">list</span>(...)</span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>  inverses <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">&quot;list&quot;</span>, <span class="at">length =</span> <span class="fu">length</span>(matrices))</span>
+<span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(matrices)) {</span>
+<span id="cb71-5"><a href="#cb71-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;itération&quot;</span>, i, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb71-6"><a href="#cb71-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ou  </span></span>
+<span id="cb71-7"><a href="#cb71-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># print(i)</span></span>
+<span id="cb71-8"><a href="#cb71-8" aria-hidden="true" tabindex="-1"></a>    inverses[[i]] <span class="ot">&lt;-</span> <span class="fu">solve</span>(matrices[[i]])</span>
+<span id="cb71-9"><a href="#cb71-9" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb71-10"><a href="#cb71-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(inverses)</span>
+<span id="cb71-11"><a href="#cb71-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tentative d&#39;utilisation de la fonction</span></span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a><span class="fu">inverses</span>(</span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">a =</span> <span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>),</span>
+<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">b =</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="sc">-</span><span class="dv">2</span>), <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">3</span>), </span>
+<span id="cb72-5"><a href="#cb72-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">c =</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">6</span>) , <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">3</span>)</span>
+<span id="cb72-6"><a href="#cb72-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## itération 1 
+## itération 2 
+## Error in solve.default(matrices[[i]]) : 
+##  Lapack routine dgesv: system is exactly singular: U[3,3] = 0</code></pre>
+<p>Nous savons maintenant que l’erreur est causée par la deuxième matrice fournie en entrée, soit la matrice <code>b</code>.</p>
+<p>Une fois le problème compris et réglé (ce qui sera fait plus loin pour cet exemple), nous souhaitons la plupart du temps retirer les appels à la fonction <code>print</code> ou <code>cat</code> de la fonction.</p>
+<hr />
+</div>
+</div>
+</div>
+<div id="gestion-dexceptions" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Gestion d’exceptions</h1>
+<div id="produire-des-erreurs-et-avertissements" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Produire des erreurs et avertissements</h2>
+<p>Nous avons parfois besoin que nos fonctions génèrent des erreurs et des avertissements, notamment :</p>
+<ul>
+<li>pour communiquer avec l’utilisateur dans le cas de résultats de calcul inattendus,</li>
+<li>pour la validation des arguments fournis en entrée.</li>
+</ul>
+<p>Il vaut mieux arrêter l’exécution de la fonction si les arguments fournis en entrée sont incorrects et que le comportement de la fonction n’est pas approprié (mauvais calcul ou message d’erreur non informatif).</p>
+<div id="fonctions-utiles" class="section level4 unnumbered">
+<h4>Fonctions utiles :</h4>
+<p></p>
+<ul>
+<li>Pour générer une erreur : <code>stop</code>, <code>stopifnot</code>, <code>match.arg</code> (vue dans les notes sur la <a href="https://stt4230.rbind.io/programmation/fonctions_r/#arguments-acceptant-seulement-quelques-cha%C3%AEnes-de-caract%C3%A8res-sp%C3%A9cifiques">création de fonctions en R</a>),</li>
+<li>Pour générer un avertissement : <code>warning</code>.</li>
+</ul>
+<p>Remarque : Pour la tâche spécifique de valider les valeurs fournies en argument, le <a href="https://CRAN.R-project.org/package=checkmate">package <code>checkmate</code></a> propose plusieurs fonctions rendant la tâche plus facile au développeur, par exemple les fonctions <code>checkCount</code>, <code>checkScalar</code>, <code>checkIntegerish</code>, etc. Nous ne verrons cependant pas ce package ici.</p>
+</div>
+<div id="exemple-4" class="section level4 unnumbered">
+<h4>Exemple :</h4>
+<p></p>
+<p>Faisons générer une erreur à notre fonction <code>dist_manhattan</code> lorsqu’elle reçoit en entrée deux vecteurs qui ne sont pas de mêmes longueurs.</p>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>dist_manhattan <span class="ot">&lt;-</span> <span class="cf">function</span>(point1, point2) {</span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(point1) <span class="sc">!=</span> <span class="fu">length</span>(point2)) {</span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">&quot;&#39;point1&#39; and &#39;point2&#39; must have the same length&quot;</span>)</span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">sum</span>(<span class="fu">abs</span>(point1 <span class="sc">-</span> point2)))</span>
+<span id="cb74-6"><a href="#cb74-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb74-7"><a href="#cb74-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-8"><a href="#cb74-8" aria-hidden="true" tabindex="-1"></a><span class="fu">dist_manhattan</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>))</span></code></pre></div>
+<pre><code>## Error in dist_manhattan(c(-1, 0), c(1, 2, 3)) : 
+##   &#39;point1&#39; and &#39;point2&#39; must have the same length</code></pre>
+<p>ou encore</p>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>dist_manhattan <span class="ot">&lt;-</span> <span class="cf">function</span>(point1, point2) {</span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stopifnot</span>(<span class="fu">length</span>(point1) <span class="sc">==</span> <span class="fu">length</span>(point2))</span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">sum</span>(<span class="fu">abs</span>(point1 <span class="sc">-</span> point2)))</span>
+<span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb76-5"><a href="#cb76-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-6"><a href="#cb76-6" aria-hidden="true" tabindex="-1"></a><span class="fu">dist_manhattan</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>))</span></code></pre></div>
+<pre><code>## Error in dist_manhattan(c(-1, 0), c(1, 2, 3)): length(point1) == length(point2) is not TRUE</code></pre>
+<p>Faisons générer un avertissement à notre fonction <code>dist_manhattan</code> si les arguments <code>point1</code> et <code>point2</code> sont de dimension supérieure à 1.</p>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>dist_manhattan <span class="ot">&lt;-</span> <span class="cf">function</span>(point1, point2) {</span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(point1) <span class="sc">!=</span> <span class="fu">length</span>(point2)) {</span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">&quot;&#39;point1&#39; and &#39;point2&#39; must have the same length&quot;</span>)</span>
+<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(<span class="fu">dim</span>(point1)) <span class="sc">||</span> <span class="sc">!</span><span class="fu">is.null</span>(<span class="fu">dim</span>(point2))) {</span>
+<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">warning</span>(<span class="st">&quot;&#39;point1&#39; and &#39;point2&#39; are treated as dimension 1 vectors&quot;</span>)</span>
+<span id="cb78-7"><a href="#cb78-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb78-8"><a href="#cb78-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">sum</span>(<span class="fu">abs</span>(point1 <span class="sc">-</span> point2)))</span>
+<span id="cb78-9"><a href="#cb78-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb78-10"><a href="#cb78-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-11"><a href="#cb78-11" aria-hidden="true" tabindex="-1"></a><span class="fu">dist_manhattan</span>(<span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>)), <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">2</span>), <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>)))</span></code></pre></div>
+<pre><code>## Warning in dist_manhattan(rbind(c(0, 0), c(1, 0)), rbind(c(3, 2), c(2, 3))):
+## &#39;point1&#39; and &#39;point2&#39; are treated as dimension 1 vectors</code></pre>
+<pre><code>## [1] 9</code></pre>
+<p>Nos tests ne devraient maintenant plus échouer.</p>
+<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_that</span>(<span class="st">&quot;nous reproduisons un calcul à la main&quot;</span>, {</span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">expect_equal</span>(<span class="fu">dist_manhattan</span>(<span class="at">point1 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="dv">5</span>), <span class="at">point2 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="dv">15</span>)), <span class="dv">10</span>)</span>
+<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<pre><code>## Test passed</code></pre>
+<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_that</span>(<span class="st">&quot;nous obtenons le même résultat que la fonction dist&quot;</span>, {</span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">expect_equal</span>(</span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dist_manhattan</span>(<span class="at">point1 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="at">point2 =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)),</span>
+<span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.vector</span>(<span class="fu">dist</span>(<span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)), <span class="at">method =</span> <span class="st">&quot;manhattan&quot;</span>))</span>
+<span id="cb83-5"><a href="#cb83-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb83-6"><a href="#cb83-6" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<pre><code>## Test passed</code></pre>
+<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_that</span>(<span class="st">&quot;des vecteurs de dimensions différentes génèrent une erreur&quot;</span>, {</span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">expect_error</span>(<span class="fu">dist_manhattan</span>(<span class="at">point1 =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">0</span>), <span class="at">point2 =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)))</span>
+<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<pre><code>## Test passed</code></pre>
+<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_that</span>(<span class="st">&quot;des matrices génèrent un avertissement&quot;</span>, {</span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>  mat1 <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>))</span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a>  mat2 <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">2</span>), <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>))</span>
+<span id="cb87-4"><a href="#cb87-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">expect_warning</span>(<span class="fu">dist_manhattan</span>(<span class="at">point1 =</span> mat1, <span class="at">point2 =</span> mat2))</span>
+<span id="cb87-5"><a href="#cb87-5" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<pre><code>## Test passed</code></pre>
+<p>C’est bien le cas.</p>
+</div>
+</div>
+<div id="manipuler-des-erreurs-et-avertissements" class="section level2" number="4.2">
+<h2><span class="header-section-number">4.2</span> Manipuler des erreurs et avertissements</h2>
+<p>Il est possible d’attraper des erreurs et de les manipuler avec la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/try.html">fonction <code>try</code></a>. Cette fonction permet entre autres d’éviter l’arrêt d’une boucle lorsqu’une erreur est rencontrée pour une certaine itération.</p>
+<p>Mentionnons que la fonction <code>try</code> est en fait une fonction enveloppe de la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/conditions.html">fonction <code>tryCatch</code></a>, qui est un peu plus compliquée à utiliser, mais qui est plus flexible. Le <code>tidyverse</code> offre aussi des fonctions permettant de manipuler des conditions : <a href="https://purrr.tidyverse.org/reference/safely.html">les fonctions <code>safely</code>, <code>possibly</code> et <code>quietly</code> du package<code>purrr</code></a>.</p>
+<p>Nous allons ici seulement illustré comment utiliser <code>try</code>.</p>
+<div id="exemple-5" class="section level4 unnumbered">
+<h4>Exemple :</h4>
+<p></p>
+<p>Rappelons que l’exécution de notre fonction <code>inverses</code> est arrêtée dès qu’elle rencontre une matrice non inversible :</p>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="fu">inverses</span>(</span>
+<span id="cb89-2"><a href="#cb89-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">a =</span> <span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>),</span>
+<span id="cb89-3"><a href="#cb89-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">b =</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="sc">-</span><span class="dv">2</span>), <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">3</span>), </span>
+<span id="cb89-4"><a href="#cb89-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">c =</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">6</span>) , <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">3</span>)</span>
+<span id="cb89-5"><a href="#cb89-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## Error in solve.default(matrices[[i]]) : 
+##  Lapack routine dgesv: system is exactly singular: U[3,3] = 0 </code></pre>
+<p>Il serait plutôt souhaitable que le calcul soit fait pour toutes les matrices, en sautant celles non inversibles.</p>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>inverses <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a>  matrices <span class="ot">&lt;-</span> <span class="fu">list</span>(...)</span>
+<span id="cb91-3"><a href="#cb91-3" aria-hidden="true" tabindex="-1"></a>  inverses <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">&quot;list&quot;</span>, <span class="at">length =</span> <span class="fu">length</span>(matrices))</span>
+<span id="cb91-4"><a href="#cb91-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(matrices)) {</span>
+<span id="cb91-5"><a href="#cb91-5" aria-hidden="true" tabindex="-1"></a>    tentative <span class="ot">&lt;-</span> <span class="fu">try</span>(<span class="fu">solve</span>(matrices[[i]]), <span class="at">silent =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb91-6"><a href="#cb91-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">inherits</span>(tentative, <span class="st">&quot;try-error&quot;</span>)) {</span>
+<span id="cb91-7"><a href="#cb91-7" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Si la commande a généré une erreur, retourner une matrice de NA</span></span>
+<span id="cb91-8"><a href="#cb91-8" aria-hidden="true" tabindex="-1"></a>      inverses[[i]] <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="at">nrow =</span> <span class="fu">nrow</span>(matrices[[i]]), <span class="at">ncol =</span> <span class="fu">ncol</span>(matrices[[i]]))</span>
+<span id="cb91-9"><a href="#cb91-9" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb91-10"><a href="#cb91-10" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Sinon, retourner la matrice inversée</span></span>
+<span id="cb91-11"><a href="#cb91-11" aria-hidden="true" tabindex="-1"></a>      inverses[[i]] <span class="ot">&lt;-</span> tentative</span>
+<span id="cb91-12"><a href="#cb91-12" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb91-13"><a href="#cb91-13" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb91-14"><a href="#cb91-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(inverses)</span>
+<span id="cb91-15"><a href="#cb91-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a><span class="fu">inverses</span>(</span>
+<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">a =</span> <span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>),</span>
+<span id="cb92-3"><a href="#cb92-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">b =</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="sc">-</span><span class="dv">2</span>), <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">3</span>), </span>
+<span id="cb92-4"><a href="#cb92-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">c =</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">4</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">6</span>) , <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">3</span>)</span>
+<span id="cb92-5"><a href="#cb92-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## [[1]]
+##      [,1] [,2]
+## [1,]   -2  1.5
+## [2,]    1 -0.5
+## 
+## [[2]]
+##      [,1] [,2] [,3]
+## [1,]   NA   NA   NA
+## [2,]   NA   NA   NA
+## [3,]   NA   NA   NA
+## 
+## [[3]]
+##       [,1]  [,2]  [,3]
+## [1,] -0.35  0.75 -0.45
+## [2,]  0.20  0.00 -0.10
+## [3,]  0.05 -0.25  0.35</code></pre>
+<p>Il faut donner comme premier argument à la fonction <code>try</code> une expression. Dans l’exemple précédent, il s’agissait d’une seule instruction. Il aurait aussi pu s’agir d’une série d’instructions, entre accolades. L’argument <code>silent = TRUE</code> a signifié à <code>try</code> de ne pas afficher de messages.</p>
+<p>L’objet retourné par <code>try</code> est l’objet retourné par l’expression fournie en premier argument si aucune erreur n’est rencontrée. Sinon, il s’agit d’un objet de classe <code>"try-error"</code> contenant le message d’erreur. L’instruction <code>inherits(tentative, "try-error")</code> retourne <code>TRUE</code> si l’objet <code>tentative</code> possède la classe <code>"try-error"</code>, <code>FALSE</code> sinon. Rappelons que l’utilisation de la fonction <code>inherits</code> est l’outil recommandé pour tester l’appartenance d’un objet à une classe.</p>
+</div>
+<div id="autres-outils-pour-manipuler-des-erreurs-et-des-avertissements-en-r" class="section level4 unnumbered">
+<h4>Autres outils pour manipuler des erreurs et des avertissements en R :</h4>
+<p></p>
+<ul>
+<li>l’option globale <code>warn</code>
+<ul>
+<li>si <code>warn</code> prend une valeur négative : tous les avertissements sont ignorés,</li>
+<li>si <code>warn</code> prend la valeur 0 (option par défaut) : les avertissements sont affichés à la fin de l’exécution de la fonction,</li>
+<li>si <code>warn</code> prend la valeur 1 : les avertissements sont affichés au fur et à mesure qu’ils surviennent,</li>
+<li>si <code>warn</code> prend la valeur 2 : tous les avertissements sont transformés en erreurs;</li>
+</ul></li>
+<li>la fonction <code>suppressWarnings</code> : permet d’ignorer les avertissements générés par des instructions R spécifiques.</li>
+</ul>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exemple d&#39;utilisation de la fonction suppressWarnings</span></span>
+<span id="cb94-2"><a href="#cb94-2" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(<span class="fu">dist_manhattan</span>(<span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>)), <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">2</span>), <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>))))</span></code></pre></div>
+<pre><code>## [1] 9</code></pre>
+<hr />
+</div>
+</div>
+</div>
+<div id="résumé" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Résumé</h1>
+<div id="bonnes-pratiques-dans-le-développement-de-fonctions-1" class="section level4 unnumbered">
+<h4>Bonnes pratiques dans le développement de fonctions</h4>
+<p></p>
+<ol style="list-style-type: decimal">
+<li><strong>Planifier</strong> le travail (pas de programmation encore)
+<ul>
+<li>définir clairement la tâche à accomplir par la fonction et la sortie qu’elle doit produire;</li>
+<li>prévoir les étapes à suivre afin d’effectuer cette tâche;</li>
+<li>identifier les arguments devant être fournis en entrée à la fonction.</li>
+</ul></li>
+<li><strong>Développer le corps de la fonction</strong>
+<ul>
+<li>écrire le programme par étapes, d’abord sans former la fonction, en commentant bien le code et en travaillant sur des mini-données test;</li>
+<li>pour chaque petite étape ou sous-tâche, tester interactivement si le programme produit le résultat escompté (tester souvent en cours de travail, ainsi il y a moins de débogage à faire).</li>
+</ul></li>
+<li><strong>Créer la fonction</strong> à partir du programme développé.</li>
+<li><strong>Documenter</strong> la fonction : les informations minimales à fournir sont
+<ul>
+<li>ce que la fonction fait,</li>
+<li>quels arguments la fonction accepte en entrée (utilités, formats acceptés, valeurs par défaut),</li>
+<li>ce que la fonction produit comme résultat (sortie retournée et/ou effet de bord).</li>
+</ul></li>
+<li><strong>Tester</strong> la fonction : sauvegarder nos tests et bien les structurer, car ils serviront souvent.</li>
+<li><strong>Déboguer</strong> la fonction si nous rencontrons des comportements indésirables lors des tests :
+<ul>
+<li>cerner le ou les problèmes,</li>
+<li>apporter les correctifs nécessaires à la fonction (que ce soit dans son corps ou dans la liste de ses arguments),</li>
+<li>adapter la documentation et les tests au besoin,</li>
+<li>rouler de nouveau les tests,</li>
+<li>répéter ces sous-étapes jusqu’à ce que les tests ne révèlent plus aucun problème à régler ou aucune amélioration à apporter.</li>
+</ul></li>
+</ol>
+</div>
+<div id="organisation-du-code-1" class="section level4 unnumbered">
+<h4>Organisation du code</h4>
+<p></p>
+<ul>
+<li>placer la définition de nos fonctions dans un fichier distinct, disons <code>mes_fonctions.R</code>;</li>
+<li>inclure en entête de tout programme R utilisant ces fonctions la commande <code>source("chemin/mes_fonctions.R")</code>.</li>
+</ul>
+</div>
+<div id="tests-1" class="section level4 unnumbered">
+<h4>Tests</h4>
+<p></p>
+<p>Appeler les fonctions en donnant en entrée des valeurs d’arguments pour lesquelles nous savons quel résultat nous devrions obtenir.</p>
+<ul>
+<li>Mini-exemples pour lesquels nous pouvons faire les calculs à la main pour trouver le résultat escompté.</li>
+<li>Comparer les résultats de nos fonctions aux résultats de fonctions effectuant le même calcul, s’il en existe.</li>
+<li>Comparer les résultats de nos fonctions à des résultats théoriques ou des résultats publiés dans des articles scientifiques, si applicable.</li>
+</ul>
+<p>Objectifs :</p>
+<ol style="list-style-type: decimal">
+<li>obtenir le résultat escompté</li>
+<li>correctement gérer les exceptions</li>
+</ol>
+<p><strong>Exception</strong> = situation anormale ou particulière qui requiert un traitement spécial</p>
+<p>Des exemples d’exceptions sont :</p>
+<ul>
+<li>des arguments incorrects fournis en entrée,</li>
+<li>des résultats de calcul inattendus.</li>
+</ul>
+<p>Réaction à des exceptions : erreurs ou avertissements générés.</p>
+<p>Différents types de <strong>conditions en R</strong> :</p>
+<ul>
+<li><strong>Erreur</strong> : exécution interrompue, message d’erreur affiché.</li>
+<li><strong>Avertissement</strong> : exécution non interrompue, message d’avertissement affiché pour signaler un problème potentiel.</li>
+<li><strong>Message</strong> (moins fréquent) : exécution non interrompue, message affiché pour apporter une information supplémentaire.</li>
+</ul>
+</div>
+<div id="formaliser-des-tests-avec-le-package-testthat-1" class="section level4 unnumbered">
+<h4>Formaliser des tests avec le package testthat</h4>
+<p></p>
+<p>Fonctions pour l’écriture, l’organisation et l’exécution automatique de tests unitaires en R :</p>
+<ul>
+<li>fonctions d’écriture (un appel à une de ces fonctions = un test unitaire) : <code>expect_equal</code>, <code>expect_error</code>, <code>expect_warning</code>, etc.;</li>
+<li>fonction d’organisation : <code>test_that</code>;</li>
+<li>fonction d’exécution : <code>test_file</code>, <code>test_package</code>, etc.</li>
+</ul>
+</div>
+<div id="débogage-1" class="section level4 unnumbered">
+<h4>Débogage</h4>
+<p></p>
+<ul>
+<li><strong>débogage</strong> = processus méthodique pour trouver et régler des bogues informatiques</li>
+<li><strong>bogues</strong> = anomalies de fonctionnement d’un programme</li>
+</ul>
+<p>Outils de débogage en R :</p>
+<ol style="list-style-type: decimal">
+<li><code>traceback()</code> : retourne la séquence des appels de fonctions provoquant une erreur</li>
+<li>fonction <code>browser</code> (seule, avec <code>trace</code> et <code>untrace</code> ou avec <code>debug</code> et <code>undebug</code>) : permet
+<ul>
+<li>d’interrompre l’exécution d’une fonction,</li>
+<li>de donner accès à l’environnement d’exécution de la fonction et</li>
+<li>d’exécuter le corps de la fonction une commande à la fois;</li>
+</ul></li>
+<li>option <code>error = recover</code> : débogage post mortem<br />
+donne accès à l’environnement d’exécution de la fonction juste avant la génération d’une erreur.</li>
+<li><code>print</code> et <code>cat</code> : imprime une trace des calculs</li>
+</ol>
+</div>
+<div id="gestion-dexceptions-1" class="section level4 unnumbered">
+<h4>Gestion d’exceptions</h4>
+<p></p>
+<p><em>Produire des erreurs et des avertissements</em></p>
+<ul>
+<li>générer une erreur : <code>stop</code>, <code>stopifnot</code>, <code>match.arg</code>;</li>
+<li>générer un avertissement : <code>warning</code>.</li>
+</ul>
+<p><em>Manipuler des erreurs et des avertissements</em></p>
+<ul>
+<li>attraper des erreurs et les manipuler : <code>try</code>;</li>
+<li>modifier la gestion des avertissements dans la session R : option globale <code>warn</code>;</li>
+<li>ignorer des avertissements : <code>suppressWarnings</code>.</li>
+</ul>
+<hr />
+</div>
+</div>
+<div id="références" class="section level1 unnumbered">
+<h1>Références</h1>
+<p>Tests :</p>
+<ul>
+<li>Wickham, H., RStudio et R Core team (2021). testthat: Unit Testing for R. R package version
+3.0.2. URL <a href="https://CRAN.R-project.org/package=testthat" class="uri">https://CRAN.R-project.org/package=testthat</a>
+<ul>
+<li>documentation du package : <a href="http://testthat.r-lib.org/" class="uri">http://testthat.r-lib.org/</a></li>
+<li>Wickham, H and Bryan, J. (2021). <em>R packages</em>. 2<sup>e</sup> édition (en développement). O’Reilly Media, Inc. Chapitre 12. URL <a href="https://r-pkgs.org/tests.html" class="uri">https://r-pkgs.org/tests.html</a></li>
+</ul></li>
+</ul>
+<p>Débogage :</p>
+<ul>
+<li>Matloff, N. (2011). <em>The Art of R Programming : A Tour of Statistical Software Design</em>. No Starch Press. Chapitre 13.</li>
+<li>Peng, R. D. (2019). <em>R Programming for Data Science</em>. Chapitre 18. URL
+<a href="https://bookdown.org/rdpeng/rprogdatascience/debugging.html" class="uri">https://bookdown.org/rdpeng/rprogdatascience/debugging.html</a></li>
+<li>R Core Team (2021). <em>Writing R Extensions</em>. R Foundation for Statistical Computing. Chapitre 4. URL <a href="https://cran.r-project.org/doc/manuals/r-release/R-exts.html" class="uri">https://cran.r-project.org/doc/manuals/r-release/R-exts.html</a></li>
+<li>Wickham, H. (2019). <em>Advanced R</em>. 2<sup>e</sup> édition. Chapman and Hall/CRC. Chapitres 12 à 16. URL <a href="https://adv-r.hadley.nz/debugging.html" class="uri">https://adv-r.hadley.nz/debugging.html</a>.</li>
+</ul>
+</div>
