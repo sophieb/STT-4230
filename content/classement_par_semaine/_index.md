@@ -33,7 +33,7 @@ weight = 9
     * [Tests et exceptions en R]({{< relref "programmation/tests_exceptions_r_2021.html" >}})
 * Semaine 12
     * [Utilisation de packages R]({{< relref "packages/utilisation_packages_r_2021.html" >}})
-    * [Développement de packages R]
+    * [Développement de packages R]({{< relref "packages/developpement_packages_r_2021.html" >}})
 * Semaine 13
     * [Optimisation de temps d'exécution en R]
     * [Métaprogrammation en R]

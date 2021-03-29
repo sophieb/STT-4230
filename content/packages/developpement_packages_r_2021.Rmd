@@ -1,27 +1,26 @@
 ---
 title: "Développement de packages R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2020-03-25"
+date: "2021-03-29"
 weight: 2
 slug: "devel_packages_r"
-categories: ["cours_2020-03-31"]
-categories_weight: 2
-lastmodifierdisplayname : "Sophie Baillargeon"
+lastmodifierdisplayname: "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
 output:
   pdf_document:
     toc: yes
     toc_depth: 3
+    number_sections: yes
     highlight: tango
   blogdown::html_page:
     toc: yes
     toc_depth: 3
+    number_sections: yes
     highlight: tango
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
 - \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
-- \renewcommand{\linethickness}{0.05em}
 - \DeclareUnicodeCharacter{2714}{-}
 - \DeclareUnicodeCharacter{221A}{-}
 - \DeclareUnicodeCharacter{25CF}{*}
@@ -31,14 +30,16 @@ editor_options:
 
 ***
 
-\newpage
+*Note préliminaire\ : Lors de leur dernière mise à jour, ces notes ont été révisées en utilisant R version 4.0.3, le package `devtools` version 2.3.2, le package `usethis` version 2.0.1, le package `roxygen2` version 7.1.1 et le package `pkgbuild` version 1.2.0. Le package `ggplot2` version 3.3.3 aussi est utilisé dans un exemple. Pour d'autres versions, les informations peuvent différer.*
 
-Les packages R sont le meilleur moyen de partager des fonctions R. Pour créer un package R, il faut d'abord développer une arborescence de répertoires et fichiers similaire à ce qui se retrouve dans n'importe quel *package source*. Pour voir de quoi a l'air une telle arborescence, il suffit de :
+***
 
-- télécharger un *package source* à partir du CRAN (par exemple *ggplot2_3.3.0.tar.gz* sur http://CRAN.R-project.org/package=ggplot2),
+Les packages R sont le meilleur moyen de partager des fonctions R. Pour créer un package R, il faut d'abord développer une arborescence de répertoires et fichiers similaire à ce qui se retrouve dans n'importe quel *package source*. Pour voir de quoi a l'air une telle arborescence, il suffit de\ :
+
+- télécharger un *package source* à partir du CRAN (par exemple *ggplot2_3.3.3.tar.gz* sur http://CRAN.R-project.org/package=ggplot2),
 - décompresser le fichier (il y a 2 étapes de décompression à effectuer).
 
-L'exemple utilisé ici, soit le package `ggplot2`, est un gros package. L'arborescence de répertoires et fichiers formant son *package source* peut être représenté schématiquement comme suit :
+L'exemple utilisé ici, soit le package `ggplot2`, est un gros package. L'arborescence de répertoires et fichiers formant son *package source* peut être représentée schématiquement comme suit\ :
 
 ```
 ggplot2/
@@ -66,7 +67,7 @@ Après avoir développé les fichiers source, qui incluent le code source et de 
 
 La première étape, celle de l'écriture des fonctions, fait appel à ce que nous avons appris dans toutes les notes de cours précédentes, en particulier celles sur les [fonctions en R](https://stt4230.rbind.io/programmation/fonctions_r/).
 
-Lorsque nous créons des fonctions dans le but de les inclure dans un package, il faut garder en tête le chemin de recherche complet qu'utilisera R lors de l'exécution de ces fonctions. Ce chemin est le suivant : 
+Lorsque nous créons des fonctions dans le but de les inclure dans un package, il faut garder en tête le chemin de recherche complet qu'utilisera R lors de l'exécution de ces fonctions. Ce chemin est le suivant\ : 
 
 1. l'environnement local d'exécution de la fonction,
 2. l'environnement englobant de la fonction, soit l'espace de noms du package,
@@ -84,22 +85,25 @@ Ainsi, dans le corps des fonctions d'un package, nous pouvons toujours faire app
 3. aux objets provenant d'autres packages qui sont importés par le package,
 4. à des objets du package R de base, qui est toujours inclus dans le chemin de recherche. 
 
-Nous verrons comment inclure des objets provenant d'autres packages dans *l'environnement des objets importés par le package*. Dans le corps de nos fonctions, il est recommandé de faire appel à ces objets en utilisant l'opérateur `::` pour indiquer clairement de quel package ils proviennent. Par exemple, si nous voulons utiliser la fonction `dist` du package `stats`, il est préférable de l'appeler comme suit : `stats::dist()`.
+Nous verrons comment inclure des objets provenant d'autres packages dans *l'environnement des objets importés par le package*. Dans le corps de nos fonctions, il est recommandé de faire appel à ces objets en utilisant l'opérateur `::` pour indiquer clairement de quel package ils proviennent. Par exemple, si nous voulons utiliser la fonction `dist` du package `stats`, il est préférable de l'appeler comme suit\ : `stats::dist()`.
 
-Aussi, si notre but est éventuellement de rendre notre package public sur le CRAN, il faut respecter les politiques du CRAN, présentées ici : http://cran.r-project.org/web/packages/policies.html.  
-La plus importante de ces politiques est que notre package doit [passer le `R CMD check --as-cran`](https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Checking-packages) sans erreurs ni avertissements (nous en reparlons plus loin). Pour passer cette vérification sans problèmes, notre code **ne** devrait **pas**, notamment :
+Aussi, si notre but est éventuellement de rendre notre package public sur le CRAN, il faut respecter les politiques du CRAN, présentées ici\ : <http://cran.r-project.org/web/packages/policies.html>.  
+La plus importante de ces politiques est que notre package doit [passer le `R CMD check --as-cran`](https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Checking-packages) sans erreurs ni avertissements (nous en reparlons plus loin). Pour passer cette vérification sans problèmes, notre code **ne** devrait **pas**, notamment\ :
 
-- contenir des symboles non-[ASCII](https://fr.wikipedia.org/wiki/American_Standard_Code_for_Information_Interchange) (donc pas d'accents) :  
+- contenir des symboles non-[ASCII](https://fr.wikipedia.org/wiki/American_Standard_Code_for_Information_Interchange) (donc pas d'accents)\ :  
 *afin de s'assurer que le code est fonctionnel sur n'importe quelle plateforme informatique*;
-- utiliser d'association partielle d'argument (donc nous devons utiliser le nom complet des arguments dans les appels de fonction) :  
+- utiliser d'association partielle d'argument (donc nous devons utiliser le nom complet des arguments dans les appels de fonction)\ :  
 *afin de s'assurer que le code demeure fonctionnel si des arguments sont ajoutés aux définitions des fonctions appelées dans le code (ces nouveaux arguments pourraient porter des noms qui entrent en conflit avec l'association partielle)*;
-- toujours utiliser comme valeurs logiques `TRUE` ou `FALSE` (donc pas de `T` ou `F`) :  
+- toujours utiliser comme valeurs logiques `TRUE` ou `FALSE` (donc pas de `T` ou `F`)\ :  
 *parce qu'un objet R nommé* `T` *ou* `F` *peut être défini, écrasant du coup les définitions* `T <- TRUE` *et* `F <- FALSE`, *alors qu'il est impossible de créer un nouvel objet R nommé `TRUE` ou `FALSE` (mots-clés protégés)*;
-- contenir des exemples longs à rouler dans les fiches d'aide :  
+- contenir des exemples longs à rouler dans les fiches d'aide\ :  
 *parce que les gestionnaires du CRAN roulent quotidiennement le* `R CMD check --as-cran` *sur tous les packages du CRAN, et cette vérification comprend l'exécution des exemples; étant donné le très grand nombre de packages sur le CRAN, la vérification de chaque package séparément doit être rapide*;
 - etc.
 
-#### Exemple :
+Pour rendre un package disponible sur [Bioconductor](https://www.bioconductor.org/), encore plus de lignes directrices à suivre s'ajoutent (voir <https://www.bioconductor.org/developers/package-guidelines/>).
+
+
+#### Exemple\ : {-}
 
 \mbox{}
 
@@ -141,21 +145,21 @@ print.distman <- function(x, ...) {
 
 Un package, dans sa version source, est simplement une arborescence de répertoires et fichiers. Cependant, cette arborescence, ou structure, doit comprendre des fichiers et des sous-répertoires portant des noms et du contenu spécifiques.
 
-Nous pouvons créer cette arborescence :
+Nous pouvons créer cette arborescence\ :
 
 - manuellement (p. ex. dans un explorateur de fichiers offert par notre système d'exploitation),
 - en appelant la [fonction `package.skeleton`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/package.skeleton.html) du package `utils`, 
 - en appelant la [fonction `create_package`](https://usethis.r-lib.org/reference/create_package.html) du package `usethis`, chargé lors du chargement du package `devtools` (ce que nous ferons),
-- en utilisant les fonctionnalités de création de projets RStudio (ce qui revient en fait à l'utilisation du package `usethis`).
+- en utilisant les fonctionnalités de création de projets RStudio (ce qui résulte en fait en l'utilisation du package `usethis`).
 
-Peu importe la procédure utilisée, il faut d'abord avoir un **répertoire principal portant le nom du package**. Le contenu de base d'un répertoire de package est le suivant :
+Peu importe la procédure utilisée, il faut d'abord avoir un **répertoire principal portant le nom du package**. Le contenu de base d'un répertoire de package est le suivant\ :
 
-- sous-répertoire nommé `R` : emplacement du code source R,
-- sous-répertoire nommé `man` : emplacement du code source des fiches d'aide,
-- fichier nommé `DESCRIPTION` : fichier de configuration,
-- fichier nommé `NAMESPACE`: définition de l'espace de noms et de environnement des objets importés;
+- sous-répertoire nommé `R`\ : emplacement du code source R,
+- sous-répertoire nommé `man`\ : emplacement du code source des fiches d'aide,
+- fichier nommé `DESCRIPTION`\ : fichier de configuration,
+- fichier nommé `NAMESPACE`\ : définition de l'espace de noms et de l'environnement des objets importés.
 
-que nous pouvons représenter schématiquement comme suit :
+Nous pouvons représenter schématiquement ce contenu comme suit\ :
 
 ```
 <nomPackage>/
@@ -165,7 +169,7 @@ que nous pouvons représenter schématiquement comme suit :
   |-- NAMESPACE
 ```
 
-#### Package `devtools`
+#### Package `devtools` {-}
 
 \mbox{}
 
@@ -176,12 +180,14 @@ Pour la suite, le package `devtools` doit être installé sur notre ordinateur (
 
 ## Répertoire principal portant le nom du package
 
-Premièrement, un nom doit être choisi pour le package. Ce nom peut contenir uniquement les caractères ASCII suivants : lettres, chiffres et `.` (point). Il ne peut donc pas contenir de lettres accentuées, ni le caractère `_` (tiret bas ou *underscore* en anglais). Il doit être composé d'au moins 2 caractères, débuter par une lettre et ne pas terminer par un point. Ces règles sont tirées de la description du champ `Package` dans le fichier `DESCRIPTION` dans la documentation suivante : https://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file
+Premièrement, un nom doit être choisi pour le package. Ce nom peut contenir uniquement les caractères ASCII suivants\ : lettres, chiffres et `.` (point). Il ne peut donc pas contenir de lettres accentuées, ni le caractère `_` (tiret bas ou *underscore* en anglais). Il doit être composé d'au moins 2 caractères, débuter par une lettre et ne pas terminer par un point. Ces règles sont tirées de la description du champ `Package` dans le fichier `DESCRIPTION` dans la documentation suivante\ : <https://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file>
+
+Notons que si nous souhaitons ultimement rendre notre package public sur le CRAN ou Bioconductor, il faut aussi s'assurer que le nom que nous avons choisi n'est pas déjà utilisé par un package sur cette plateforme. Le [package R `available`](https://CRAN.R-project.org/package=available) permet de facilement vérifier la disponibilité d'un nom potentiel pour notre package.
 
 Ensuite, utilisons la fonction `usethis::create_package` pour créer ce répertoire et sa structure de base. Le premier argument à fournir obligatoirement à la fonction `usethis::create_package` est l'emplacement désiré pour le répertoire sur notre ordinateur. Nous allons aussi demander à la fonction de créer un projet RStudio à partir du répertoire principal du package en donnant la valeur `TRUE` à l'argument `rstudio`. Appeler la fonction `usethis::create_package` à partir de RStudio a aussi cet impact. Le projet RStudio nous sera utile plus tard, lors de la construction du package. Finalement, nous utiliserons l'argument `open = TRUE` pour ouvrir le projet RStudio dans une nouvelle session R.
 
 
-#### Exemple :
+#### Exemple\ : {-}
 
 \mbox{}
 
@@ -192,27 +198,31 @@ usethis::create_package(path = "C:/coursR/manhattan/", rstudio = TRUE, open = TR
 ```
 
 ```
-## ✔ Creating 'C:/coursR/manhattan/'
-## ✔ Setting active project to 'C:/coursR/manhattan'
-## ✔ Creating 'R/'
-## ✔ Writing 'DESCRIPTION'
+## √ Creating 'C:/coursR/manhattan/'
+## √ Setting active project to 'C:/coursR/manhattan'
+## √ Creating 'R/'
+## √ Writing 'DESCRIPTION'
 ## Package: manhattan
 ## Title: What the Package Does (One Line, Title Case)
 ## Version: 0.0.0.9000
 ## Authors@R (parsed):
-##     * First Last <first.last@example.com> [aut, cre] (<https://orcid.org/YOUR-ORCID-ID>)
+##     * First Last <first.last@example.com> [aut, cre] (YOUR-ORCID-ID)
 ## Description: What the package does (one paragraph).
-## License: What license it uses
-## Encoding: UTF-8
+## License: `use_mit_license()`, `use_gpl3_license()` or friends to
+##     pick a license
+## ## Encoding: UTF-8
 ## LazyData: true
-## ✔ Writing 'NAMESPACE'
-## ✔ Writing 'manhattan.Rproj'
-## ✔ Adding '.Rproj.user' to '.gitignore'
-## ✔ Adding '^manhattan\\.Rproj$', '^\\.Rproj\\.user$' to '.Rbuildignore'
-## ✔ Opening 'C:/coursR/manhattan/' in new RStudio session
-## ✔ Setting active project to '<no active project>'
+## Roxygen: list(markdown = TRUE)
+## RoxygenNote: 7.1.1
+## √ Writing 'NAMESPACE'
+## √ Writing 'manhattan.Rproj'
+## √ Adding '^manhattan\\.Rproj$' to '.Rbuildignore'
+## √ Adding '.Rproj.user' to '.gitignore'
+## √ Adding '^\\.Rproj\\.user$' to '.Rbuildignore'
+## √ Opening 'C:/coursR/manhattan/' in new RStudio session
+## √ Setting active project to '<no active project>'
 ```
-Le travail réalisé par cette commande est bien décrit par l'impression produite. L'arborescence de répertoires et fichiers suivante a été produite :
+Le travail réalisé par cette commande est bien décrit par l'impression produite. L'arborescence de répertoires et fichiers suivante a été produite\ :
 
 ```
 manhattan/
@@ -222,24 +232,24 @@ manhattan/
   |-- manhattan.Rproj
 ```
 
-Le répertoire créé contient aussi des fichiers et répertoires cachés, dont le nom débute par un point (notamment `.Rproj.user` et `.Rbuildignore`). Il s'agit de fichiers dont RStudio a besoin pour la gestion du projet, mais dont nous n'avons pas à nous soucier.
+Le répertoire créé contient aussi des fichiers et répertoires cachés, dont le nom débute par un point (notamment `.Rproj.user/` et `.Rbuildignore`). Il s'agit de fichiers dont RStudio a besoin pour la gestion du projet, mais dont nous n'avons pas à nous soucier.
 
 Toutes les manipulations futures décrites ci-dessous doivent être réalisées **dans le projet RStudio de notre package en développement**, qui vient d'être ouvert par l'appel à la fonction `usethis::create_package`.
 
 
-## Sous-répertoire nommé `R`
+## Sous-répertoire `R/`
 
-Le sous-répertoire `R` est l'endroit où placer les fichiers de scripts R (portant l'extension `.R`) contenant le code de création des fonctions. Ces fichiers doivent aussi contenir des commentaires `roxygen` si c'est l'outil utilisé pour générer la documentation, ce qui est le cas pour nous (nous y reviendrons plus loin).
+Le sous-répertoire `R/` est l'endroit où placer les fichiers de scripts R (portant l'extension `.R`) contenant le code de création des fonctions. Ces fichiers doivent aussi contenir des commentaires `roxygen` si c'est l'outil utilisé pour générer la documentation, ce qui est le cas pour nous (nous y reviendrons plus loin).
 
-Le développeur peut choisir les noms qu'il veut pour ces fichiers et il peut y répartir le code source comme il le veut. Évidemment, une bonne pratique est de répartir le code source de façon à ce que ce soit facile de s'y retrouver. Certains préconisent la stratégie «&nbsp;un fichier par fonction, portant le nom de la fonction&nbsp;», mais ce n'est pas obligatoire. La stratégie opposée, «&nbsp;un seul fichier contenant toutes les fonctions&nbsp;», représente rarement une bonne répartition du code, à moins que les fonctions soient très peu nombreuses.
+Le développeur peut choisir les noms qu'il veut pour ces fichiers et il peut y répartir le code source comme il le veut. Évidemment, une bonne pratique est de répartir le code source de façon à ce que ce soit facile de s'y retrouver. Certains préconisent la stratégie «\ un fichier par fonction, portant le nom de la fonction\ », mais ce n'est pas obligatoire. La stratégie opposée, «\ un seul fichier contenant toutes les fonctions\ », représente rarement une bonne répartition du code, à moins que les fonctions soient très peu nombreuses.
 
 Nous pouvons utiliser la [fonction `use_r`](https://usethis.r-lib.org/reference/use_r.html) du package `usethis` pour créer dans le sous-répertoire `R` des fichiers où nous enregistrerons le code source des fonctions. Cette fonction ouvre également le fichier.
 
-#### Exemple :
+#### Exemple\ : {-}
 
 \mbox{}
 
-Nous allons placer chacune des trois fonctions à mettre dans notre package dans trois fichiers séparés. Après cette étape, l'arborescence du package aura l'allure suivante : 
+Nous allons placer chacune des trois fonctions à mettre dans notre package dans trois fichiers séparés. Après cette étape, l'arborescence du package aura l'allure suivante\ : 
 
 ```
 manhattan/
@@ -252,7 +262,7 @@ manhattan/
   |-- manhattan.Rproj
 ```
 
-##### Fichier `dist_manhattan.R`
+##### Fichier `dist_manhattan.R` {-}
 
 \mbox{}
 
@@ -261,8 +271,9 @@ usethis::use_r(name = "dist_manhattan")
 ```
 
 ```
-## ✔ Setting active project to 'C:/coursR/manhattan'
-## ● Modify 'R/dist_manhattan.R'
+## √ Setting active project to 'C:/coursR/manhattan'
+## * Modify 'R/dist_manhattan.R'
+## * Call `use_test()` to create a matching test file
 ```
 
 Le fichier `dist_manhattan.R` a été créé dans le sous-répertoire `R`. L'extension `.R` lui a été donnée par la fonction `usethis::use_r`. Il faut maintenant copier le code R suivant dans ce fichier et enregistrer le fichier.
@@ -281,7 +292,7 @@ dist_manhattan <- function(point1, point2) {
 }
 ```
 
-##### Fichier `dist_manhattan_2.R`
+##### Fichier `dist_manhattan_2.R` {-}
 
 \mbox{}
 
@@ -290,7 +301,8 @@ usethis::use_r(name = "dist_manhattan_2")
 ```
 
 ```
-## ● Modify 'R/dist_manhattan_2.R'
+## * Modify 'R/dist_manhattan_2.R'
+## * Call `use_test()` to create a matching test file
 ```
 
 Copions le code R suivant dans le fichier ouvert et enregistrons le fichier.
@@ -305,7 +317,7 @@ dist_manhattan_2 <- function(point1, point2) {
 }
 ```
 
-##### Fichier `print.R`
+##### Fichier `print.R` {-}
 
 \mbox{}
 
@@ -314,10 +326,11 @@ usethis::use_r(name = "print.distman")
 ```
 
 ```
-## ● Modify 'R/print.R'
+## * Modify 'R/print.R'
+## * Call `use_test()` to create a matching test file
 ```
 
-Copions le code R suivant dans le fichier 'R/print.R' et enregistrons le fichier.
+Copions le code R suivant dans le fichier `R/print.R` et enregistrons le fichier.
 
 ```{r, eval = FALSE}
 print.distman <- function(x, ...) {
@@ -327,15 +340,15 @@ print.distman <- function(x, ...) {
 ```
 
 
-## Sous-répertoire nommé `data`
+## Sous-répertoire `data/`
 
-Bien qu'il ne soit pas obligatoire, décrivons ici le sous-répertoire `data`. Si le package doit contenir des données accessibles aux utilisateurs, c'est ici quelles doivent être placées. Elles doivent être stockées dans des objets R enregistrés dans des fichiers externes (un fichier par objet) sous un format propre à R (souvent `.rda` ou `.rdata`). Ces données sont utiles, notamment, pour avoir des données à utiliser dans les exemples inclus dans les fiches d'aide.
+Bien qu'il ne soit pas obligatoire, décrivons ici le sous-répertoire `data/`. Si le package doit contenir des données accessibles aux utilisateurs, c'est ici quelles doivent être placées. Elles doivent être stockées dans des objets R enregistrés dans des fichiers externes (un fichier par objet) sous un format propre à R (souvent `.rda` ou `.RData`). Ces données sont utiles, notamment, pour avoir des données à utiliser dans les exemples inclus dans les fiches d'aide.
 
 La [fonction `use_data`](https://usethis.r-lib.org/reference/use_data.html) du package `usethis` facilite l'intégration de données à un package R. Illustrons comment l'utiliser dans l'exemple du package `manhattan`.
 
-Notons qu'un package peut aussi contenir des données privées ou brutes (p. ex. un fichier texte comprenant des données). Nous ne verrons pas ici comment procéder pour intégrer ce type de données, mais voici une bonne source d'informations à ce sujet pour les intéressés : https://r-pkgs.org/data.html.
+Notons qu'un package peut aussi contenir des données privées ou brutes (p. ex. un fichier texte comprenant des données). Nous ne verrons pas ici comment procéder pour intégrer ce type de données, mais voici une bonne source d'informations à ce sujet pour les intéressés\ : <https://r-pkgs.org/data.html>.
 
-#### Exemple :
+#### Exemple\ : {-}
 
 \mbox{}
 
@@ -357,11 +370,13 @@ usethis::use_data(points)
 ```
 
 ```
-## ✔ Creating 'data/'
-## ✔ Saving 'points' to 'data/points.rda'
+## √ Adding 'R' to Depends field in DESCRIPTION
+## √ Creating 'data/'
+## √ Saving 'points' to 'data/points.rda'
+## * Document your data (see 'https://r-pkgs.org/data.html')
 ```
 
-L'arborescence de répertoires et fichiers du package est maintenant la suivante :
+L'arborescence de répertoires et fichiers du package est maintenant la suivante (toujours sans les répertoires et fichiers cachés)\ :
 
 ```
 manhattan/
@@ -376,16 +391,16 @@ manhattan/
   |-- manhattan.Rproj
 ```
 
-## Sous-répertoire nommé `man`
+## Sous-répertoire `man/`
 
-Malgré le fait que celui-ci soit obligatoire, aucun sous-répertoire `man` n'a été inclus dans le répertoire principal du package par la fonction `usethis::create_package`. Ce sous-répertoire est celui destiné à contenir des fichiers source de fiches d'aide R (portant l'extension `.Rd`). Nous allons voir à la prochaine étape comment générer ces fichiers de façon automatique à l'aide du package `roxygen2`.
+Malgré le fait que celui-ci soit obligatoire, aucun sous-répertoire `man/` n'a été inclus dans le répertoire principal du package par la fonction `usethis::create_package`. Ce sous-répertoire est celui destiné à contenir des fichiers source de fiches d'aide R (portant l'extension `.Rd`). Nous allons voir à la prochaine étape comment générer ces fichiers de façon automatique à l'aide du package `roxygen2`.
 
 
-## Fichier nommé `DESCRIPTION`
+## Fichier `DESCRIPTION`
 
-Le fichier `DESCRIPTION` est très important pour la construction du package. C'est un fichier court, comportant de l'information de base concernant la configuration du package. Ce fichier doit respecter une syntaxe précise.
+Le [fichier `DESCRIPTION`](https://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file) est très important pour la construction du package. C'est un fichier court, comportant de l'information de base décrivant l'utilité du package ainsi que ses configurations. Ce fichier doit respecter une syntaxe précise.
 
-Par exemple, voici le gabarit de fichier `DESCRIPTION` qu'a produit la fonction `usethis::create_package`. Ce fichier doit être édité pour y insérer les bonnes informations.
+Par exemple, voici le gabarit de fichier `DESCRIPTION` qu'a produit l'appel à la fonction `usethis::create_package` (et qu'a modifié l'appel à la fonction `usethis::use_data`). Ce fichier doit être édité pour y insérer les bonnes informations.
 
 ```
 Package: manhattan
@@ -398,39 +413,45 @@ Authors@R:
            email = "first.last@example.com",
            comment = c(ORCID = "YOUR-ORCID-ID"))
 Description: What the package does (one paragraph).
-License: What license it uses
+License: `use_mit_license()`, `use_gpl3_license()` or friends to
+    pick a license
 Encoding: UTF-8
 LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Depends: 
+    R (>= 2.10)
 ```
-&nbsp;
+
+\ 
 
 Un fichier `DESCRIPTION` contient des champs nommés. Un champ débute par son nom (première lettre toujours majuscule), immédiatement suivi d'un deux-points et d'un espace. Vient ensuite la valeur fournie à ce champ. Les valeurs données aux champs peuvent s'étendre sur plus d'une ligne. De plus, l'ordre des champs n'est pas important.
 
-Les champs obligatoires sont les suivants : `Package`, `Version`, `License`, `Title`, `Description`, `Author`, et `Maintainer`. Les champs `Author`, et `Maintainer` peuvent être remplacés par un seul champ `Authors@R`, comme dans le gabarit. Les codes de rôles acceptés dans ces champs sont énumérés dans la fiche d'aide ouverte par la commande [`help(person)`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/person.html). 
+Les champs obligatoires sont les suivants\ : `Package`, `Version`, `License`, `Title`, `Description`, `Author`, et `Maintainer`. Les champs `Author`, et `Maintainer` peuvent être remplacés par un seul champ `Authors@R`, comme dans le gabarit. Les codes de rôles acceptés dans ces champs sont énumérés dans la fiche d'aide ouverte par la commande [`help(person)`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/person.html). 
 
-Voici quelques informations spécifiques à certains champs :
+Voici quelques informations spécifiques à certains champs\ :
 
-- `Package` : le nom du package fourni dans ce champ doit correspondre parfaitement au nom du répertoire contenant les fichiers source du package;
-- `Version` : il s'agit d'une séquence d'au minimum 2 (souvent 3, parfois même 4) nombres entiers non négatifs séparés par un seul caractère `.` (point) ou `-` (tiret);
-- `Maintainer` : ce champ doit contenir un seul nom, celui de la personne à contacter pour toute question ou tout problème à rapporter concernant le package, suivi d'une adresse courriel valide placée entre les caractères `<` et `>`;
-- `Depends` : ce champ est requis si le bon fonctionnement du package nécessite une certaine version minimale de R ou si d'autres packages doivent être chargés lors du chargement de notre package;
-- `Imports` : ce champ contient la liste des autres packages à partir desquels des objets sont importés par le package (les packages d'où proviennent ceux-ci doivent être installés, mais ils n'ont pas besoin d'être chargés lors du chargement de notre package);
-- `LazyData`: si la valeur `true` est fournie dans ce champ, les jeux de données contenus dans le package seront directement accessibles dans l’environnement du package, sans que l'utilisateur ait besoin d'utiliser la commande `data` (nous avions discuté des différentes façons d'accéder à des jeux de données dans un package dans les [notes sur l'utilisation de packages R](https://stt4230.rbind.io/packages/utilisation_packages_r/#jeux-de-donn%C3%A9es)).
+- `Package`\ : le nom du package fourni dans ce champ doit correspondre parfaitement au nom du répertoire contenant les fichiers source du package;
+- `Version`\ : il s'agit d'une séquence d'au minimum 2 (souvent 3, parfois même 4) nombres entiers non négatifs séparés par un seul caractère `.` (point) ou `-` (tiret);
+- `Maintainer`\ : ce champ doit contenir un seul nom, celui de la personne à contacter pour toute question ou tout problème à rapporter concernant le package, suivi d'une adresse courriel valide placée entre les caractères `<` et `>`;
+- `Depends`\ : ce champ est requis si le bon fonctionnement du package nécessite une certaine version minimale de R ou si d'autres packages doivent être chargés lors du chargement de notre package;
+- `Imports`\ : ce champ contient la liste des autres packages à partir desquels des objets sont importés par le package (les packages d'où proviennent ceux-ci doivent être installés, mais ils n'ont pas besoin d'être chargés lors du chargement de notre package);
+- `LazyData`: si la valeur `true` est fournie dans ce champ, les jeux de données contenus dans le package seront directement accessibles dans l'environnement du package, sans que l'utilisateur ait besoin d'appeler la fonction `data` (nous avions discuté des différentes façons d'accéder à des jeux de données dans un package dans les [notes sur l'utilisation de packages R](https://stt4230.rbind.io/packages/utilisation_packages_r/#jeux-de-donn%C3%A9es)).
 
 Le fichier `DESCRIPTION` doit contenir uniquement des caractères ASCII, sauf s'il contient un champ `Encoding`.
 
-L'information complète et officielle concernant ce fichier peut être trouvée sur la page web suivante :   
-http://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file
+L'information complète et officielle concernant ce fichier peut être trouvée sur la page web suivante\ :   
+<http://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file>
 
-Le gabarit de fichier `DESCRIPTION` produit par la fonction `usethis::create_package` peut être modifié manuellement, en ouvrant le fichier (dans un éditeur de texte en RStudio par exemple), en remplaçant les informations génériques par les bonnes, puis en enregistrant le fichier. C'est la méthode que nous emploierons. Le package `usethis` possède aussi des fonctions permettant d'éditer le fichier `DESCRIPTION` par des commandes soumises dans la console, notamment :
+Le gabarit de fichier `DESCRIPTION` produit par la fonction `usethis::create_package` peut être modifié manuellement, en ouvrant le fichier (dans un éditeur de texte en RStudio par exemple), en remplaçant les informations génériques par les bonnes, puis en enregistrant le fichier. C'est la méthode que nous emploierons. Le package `usethis` possède aussi des fonctions permettant d'éditer le fichier `DESCRIPTION` par des commandes soumises dans la console, notamment\ :
 
 - la fonction `use_description` (pour modifier n'importe quel champ), 
-- la fonction `use_package` (pour modifier le champs `Imports` ou un autre champ relié aux dépendances à d'autres packages) et 
-- des fonctions pour spécifier la license utilisée (p. ex. `use_mit_license`, `use_gpl3_license`) : ces fonctions ajoutent même un fichier `LICENSE` au répertoire principal du package.
+- la fonction `use_package` (pour modifier le champ `Imports` ou un autre champ relié aux dépendances à d'autres packages) et 
+- des fonctions pour spécifier la licence utilisée (p. ex. `use_mit_license`, `use_gpl3_license`, etc.)\ : ces fonctions ajoutent même un fichier `LICENSE` au répertoire principal du package.
 
 Nous n'illustrerons pas ici l'utilisation de ces fonctions.
 
-#### Exemple :
+#### Exemple\ : {-}
 
 \mbox{}
 
@@ -438,18 +459,20 @@ Voici le contenu du fichier `DESCRIPTION` à utiliser pour notre package en dév
 
 ```
 Package: manhattan
-Version: 1.0.0
-Date: 2020-03-25
-License: GPL-3
 Title: Distance de Manhattan
-Description: Calcul de la distance de Manhattan entre deux points.
+Version: 1.0.0
 Author: Sophie Baillargeon [aut, cre], Autre Auteur [aut]
 Maintainer: Sophie Baillargeon <sophie.baillargeon@mat.ulaval.ca>
+Description: Calcul de la distance de Manhattan entre deux points.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
 Depends: R (>= 2.10)
 Imports: stats
-LazyData: true
 ```
-&nbsp;
+
+\ 
 
 Le champ `Depends` est nécessaire uniquement en raison d'un détail technique. Nous avons inclus un jeu de données dans le package avec la fonction `usethis::use_data`. Celle-ci a en fait utilisé la fonction `save` pour créer le fichier `.rda` contenant les données. Cependant, le format de fichier créé par cette fonction a légèrement changé au fil des ans. La fonction `usethis::use_data` a par défaut utilisé un format qui peut seulement être compris par une version de R égale ou plus récente que 2.10. Il s'agit d'une très vieille version de R. Ce n'est donc pas vraiment une contrainte de dépendre de l'utilisation d'une version de R >= 2.10.
 
@@ -465,7 +488,7 @@ Authors@R: c(
 ```
 
 
-## Fichier nommé `NAMESPACE`
+## Fichier `NAMESPACE`
 
 Le fichier `NAMESPACE` permet de définir quels objets sont accessibles dans un package, c'est-à-dire exportés de l'espace de noms du package. Ce fichier permet aussi d'identifier quels objets provenant d'autres packages sont utilisés dans le package, donc de définir le contenu de l'environnement des objets importés par le package. Nous allons voir comment utiliser `roxygen2` pour générer de façon automatique ce fichier.
 
@@ -473,18 +496,18 @@ Le fichier `NAMESPACE` permet de définir quels objets sont accessibles dans un 
 
 ## Autres fichiers et répertoires
 
-Un package peut contenir plusieurs autres fichiers et sous-répertoires, comme nous avons pu le constater avec le package `ggplot2`. Voici quelques autres répertoires parfois nécessaires :
+Un package peut contenir plusieurs autres fichiers et sous-répertoires, comme nous avons pu le constater avec le package `ggplot2`. Voici quelques autres répertoires parfois nécessaires\ :
 
-- Sous-répertoire nommé `src` : Si le package contient du code C, C++ ou Fortran, ce code doit se trouver dans ce répertoire.
-- Sous-répertoire nommé `vignettes` : Si le package contient de la documentation autre que les fiches d'aide (par exemple un guide d'utilisateur), il devrait idéalement se trouver dans ce répertoire.
-- Sous-répertoire nommé `tests` : Des tests, par exemple écrits avec `testthat`, peuvent être intégrés au package dans ce sous-répertoire et exécutés à chaque fois que le package est vérifié (`check` décrit à l'étape 4). Pour en savoir plus : https://r-pkgs.org/tests.html#test-structure
-- etc. : http://cran.r-project.org/doc/manuals/r-release/R-exts.html#Package-subdirectories
+- Sous-répertoire nommé `src`\ : Si le package contient du code C, C++ ou Fortran, ce code doit se trouver dans ce répertoire.
+- Sous-répertoire nommé `vignettes`\ : Si le package contient de la documentation autre que les fiches d'aide (par exemple un guide d'utilisateur), il devrait idéalement se trouver dans ce répertoire.
+- Sous-répertoire nommé `tests`\ : Des tests, par exemple écrits avec `testthat`, peuvent être intégrés au package dans ce sous-répertoire et exécutés à chaque fois que le package est vérifié (`check` décrit à l'étape 4). Pour en savoir plus\ : <https://r-pkgs.org/tests.html#test-structure>
+- etc.\ : <http://cran.r-project.org/doc/manuals/r-release/R-exts.html#Package-subdirectories>
 
 
-Autres fichiers utiles :
+Autres fichiers utiles\ :
 
-- Fichier nommé `NEWS` : Ce fichier décrit les modifications apportées à un package lors d'une mise à jour. Plusieurs types de mise en forme sont acceptés pour ce fichier.
-- etc. : http://cran.r-project.org/doc/manuals/r-release/R-exts.html#Package-structure
+- Fichier nommé `NEWS` ou `NEWS.md`\ : Ce fichier décrit les modifications apportées à un package lors d'une mise à jour. Plusieurs types de mise en forme sont acceptés pour ce fichier.
+- etc.\ : <http://cran.r-project.org/doc/manuals/r-release/R-exts.html#Package-structure>
 
 # Étape 3. Écrire la documentation des fonctions et du package
 
@@ -492,14 +515,14 @@ Documenter ses fonctions est une étape intégrée au développement des fonctio
 
 Ces fiches d'aide proviennent en fait de fichiers portant l'extension `.Rd`. Cependant, nous ne verrons pas comment éditer directement ces fichiers. Nous allons plutôt apprendre à utiliser le [package `roxygen2`](https://roxygen2.r-lib.org/), qui permet de générer des fichiers `.Rd`, ainsi que le fichier `NAMESAPCE`, de façon automatique, à partir de commentaires intégrés au code.
 
-L'utilisation de `roxygen2` comporte les avantages suivants :
+L'utilisation de `roxygen2` comporte les avantages suivants\ :
 
 - la documentation se situe dans le même fichier que le code, ce qui aide à se rappeler que la documentation doit être mise à jour si le code est modifié,
 - la syntaxe `roxygen2` est un peu plus simple que la syntaxe des fichiers `.Rd` (qui sera illustrée plus loin). 
 
-Rappelons que dans un package il faut obligatoirement documenter :
+Rappelons que dans un package il faut obligatoirement documenter\ :
 
-##### Les fonctions publiques
+##### Les fonctions publiques {-}
 
 \mbox{}
 
@@ -507,48 +530,48 @@ Il est essentiel de faire des fiches d'aide pour ces fonctions, afin que tout ut
 
 À l'opposé, les fonctions privées ou internes ne sont pas conçues pour être appelées par n'importe quel utilisateur. Ces fonctions ne sont pas exportées de l'espace de noms et elles ne sont pas documentées officiellement. Il est tout de même bon de documenter minimalement ces fonctions pour nous-mêmes, mais nous n'avons pas à produire de fiches d'aide pour elles. De plus, pour ne pas alourdir ces fonctions, elles comportent typiquement peu ou pas de validation d'arguments.
 
-##### Les jeux de données dans le répertoire `data`
+##### Les jeux de données dans le répertoire `data/` {-}
 
 \mbox{}
 
 Chaque jeu de données dans le répertoire `data` d'un package doit être décrit dans une fiche d'aide pour expliquer son contenu.
 
-##### Les classes et méthodes S4 ou RC publiques
+##### Les classes et méthodes S4 ou RC publiques {-}
 
 \mbox{}
 
-Les packages exploitant le système de programmation orientée objet S4[^2] ou le système RC[^3] doivent fournir des fiches d'aide pour les classes et méthodes publiques.
+Les packages exploitant le système de programmation orientée objet S4 ou le système RC doivent fournir des fiches d'aide pour les classes et méthodes publiques. Nous ne verrons pas ici comment écrire cette documentation, car nous utiliserons seulement le système orienté objet S3. Plus d'information peut être trouvée sur les pages web suivantes\ :
 
-[^2]: https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Documenting-S4-classes-and-methods
-[^3]: https://r-pkgs.org/man.html#man-classes
+- <https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Documenting-S4-classes-and-methods>
+- <https://r-pkgs.org/man.html#man-classes>
 
-##### Il est aussi recommandé de documenter :
+##### Il est aussi recommandé de documenter\ : {-}
 
 \mbox{}
 
-- Les méthodes S3 pour des fonctions génériques :  
+- Les méthodes S3 pour des fonctions génériques\ :  
 Nous pouvons leur faire une fiche d'aide indépendante ou encore les documenter dans la même fiche d'aide que la fonction qui crée les objets de la classe en question.
 
-- Le package lui-même :  
+- Le package lui-même\ :  
 Il est utile de créer une fiche d'aide présentant le package.
 
 
-## Comment écrire de la documentation avec `roxygen2` ?
+## Documentation avec `roxygen2` ?
 
-Il suffit d'insérer des « commentaires » `roxygen` dans le code source des fonctions, donc dans les scripts situés dans le sous-répertoire `R`. Un commentaire `roxygen` débute par `#'`, ce qui le distingue d'un commentaire ordinaire, qui débute par `#`. Il contient des tags ayant des significations particulières.
+Comment écrire de la documentation avec `roxygen2`\ ? Il suffit d'insérer des «\ commentaires\ » `roxygen` dans le code source des fonctions, donc dans les scripts situés dans le sous-répertoire `R`. Un commentaire `roxygen` débute par `#'`, ce qui le distingue d'un commentaire ordinaire, qui débute par `#`. Il contient des tags ayant des significations particulières.
 
-RStudio possède une fonctionnalité permettant d'ajouter un gabarit de commentaires `roxygen` en entête de nos fonctions. Cette fonctionnalité est accessible par le menu « Code > Insert Roxygen Skeleton ».
+RStudio possède une fonctionnalité permettant d'ajouter un gabarit de commentaires `roxygen` en entête de nos fonctions. Cette fonctionnalité est accessible par le menu «\ Code > Insert Roxygen Skeleton\ ».
 
 
-#### Exemple :
+#### Exemple\ : {-}
 
 \mbox{}
 
 D'abord, voici ce que nous obtenons si nous demandons à RStudio d'insérer un gabarit de commentaires `roxygen` en entête de la fonction `dist_manhattan`.
 
-&nbsp;
+\ 
 
-Fichier `C:/coursR/manhattan/R/dist_manhattan.R` :
+Fichier `C:/coursR/manhattan/R/dist_manhattan.R`\ :
 
 ```{r eval = FALSE}
 #' Title
@@ -573,15 +596,13 @@ dist_manhattan <- function(point1, point2) {
 }
 ```
 
-&nbsp;
-
+\ 
 
 Après adaptation, voici de quoi ce fichier pourrait avoir l'air.
 
-&nbsp;
+\ 
 
-
-Fichier `C:/coursR/manhattan/R/dist_manhattan.R` :
+Fichier `C:/coursR/manhattan/R/dist_manhattan.R`\ :
 
 ```{r, eval = FALSE}
 #' Distance de Manhattan
@@ -590,6 +611,7 @@ Fichier `C:/coursR/manhattan/R/dist_manhattan.R` :
 #' 
 #' @param point1 Un vecteur numerique des coordonnees du premier point.
 #' @param point2 Un vecteur numerique des coordonnees du deuxieme point.
+#'
 #' @return une seule valeur : la distance de Manhattan entre 
 #'                            \code{point1} et \code{point2}
 #' @author Sophie Baillargeon
@@ -607,13 +629,13 @@ dist_manhattan <- function(point1, point2) {
 }
 ```
 
-&nbsp;
+\ 
 
 Des explications concernant les différents tags se retrouvent après les exemples. Avant voyons aussi les commentaires `roxygen` que nous pourrions utiliser pour les fonctions `dist_manhattan_2` et `print.distman`.
 
-&nbsp;
+\ 
 
-Fichier `C:/coursR/manhattan/R/dist_manhattan_2.R` :
+Fichier `C:/coursR/manhattan/R/dist_manhattan_2.R`\ :
 
 ```{r, eval = FALSE}
 #' Distance de Manhattan
@@ -624,6 +646,7 @@ Fichier `C:/coursR/manhattan/R/dist_manhattan_2.R` :
 #' 
 #' @param point1 Un vecteur numerique des coordonnees du premier point.
 #' @param point2 Un vecteur numerique des coordonnees du deuxieme point.
+#'
 #' @return \item{dist}{ la distance de Manhattan entre \code{point1} et \code{point2} }
 #' @return \item{call}{ une copie de l'appel de la fonction }
 #' @author Sophie Baillargeon
@@ -640,9 +663,9 @@ dist_manhattan_2 <- function(point1, point2) {
 }
 ```
 
-&nbsp;
+\ 
 
-Fichier `C:/coursR/manhattan/R/print.R` :
+Fichier `C:/coursR/manhattan/R/print.R`\ :
 
 ```{r, eval = FALSE}
 #' @describeIn dist_manhattan Affiche un objet de classe \code{"distman"}
@@ -656,7 +679,7 @@ print.distman <- function(x, ...) {
 }
 ```
 
-&nbsp;
+\ 
 
 Finalement, pour produire une fiche d'aide minimalise pour le package lui-même, nous pourrions utiliser la [fonction `use_package_doc`](https://usethis.r-lib.org/reference/use_package_doc.html) du package `usethis`.
 
@@ -665,7 +688,8 @@ usethis::use_package_doc()
 ```
 
 ```
-## ✔ Writing 'R/manhattan-package.R'
+## √ Writing 'R/manhattan-package.R'
+## * Modify 'R/manhattan-package.R'
 ```
 
 Cette commande à créer le fichier `manhattan-package.R` dans le répertoire `R`. Voici un aperçu de son contenu initial.
@@ -686,9 +710,9 @@ Nous ne retoucherons pas ici à ces commentaires. La fiche d'aide du package con
 
 Il faut ajouter quelque part un dernier bloc de commentaires `roxygen` pour documenter le jeu de données inclus dans le package. Cet ajout pourrait être fait dans n'importe quel fichier du répertoire `R`. Nous ferons l'ajout dans le fichier  `manhattan-package.R`.
 
-&nbsp;
+\ 
 
-Fichier `C:/coursR/manhattan/R/manhattan-package.R` après l'ajout :
+Fichier `C:/coursR/manhattan/R/manhattan-package.R` après l'ajout\ :
 
 ```{r, eval = FALSE}
 #' @keywords internal
@@ -720,19 +744,21 @@ NULL
 "points"
 ```
 
-#### Explications :
+\ 
+
+#### Explications\ : {-}
 
 \mbox{}
 
-Pour les fonctions et les méthodes associées à des fonctions génériques, il suffit de mettre en entête du code source les commentaires `roxygen2` qui généreront la documentation. Pour le package et les jeux de données, il est recommandé d'ajouter un ou des fichiers d'extension `.R` dans le répertoire `R`. Ces fichiers doivent contenir les commentaires `roxygen2` pour documenter globalement le package, suivi de l'instruction `"_PACKAGE"`, et les commentaires pour documenter les jeux de données, chaque bloc suivi du nom du jeu de données sous forme de chaîne de caractères (par exemple `"points"`) .
+Pour les fonctions et les méthodes associées à des fonctions génériques, il suffit de mettre en entête du code source les commentaires `roxygen` qui généreront la documentation. Pour le package et les jeux de données, il est recommandé d'ajouter un ou des fichiers d'extension `.R` dans le répertoire `R`. Ces fichiers doivent contenir les commentaires `roxygen` pour documenter globalement le package, suivi de l'instruction `"_PACKAGE"`, et les commentaires pour documenter les jeux de données, chaque bloc suivi du nom du jeu de données sous forme de chaîne de caractères (par exemple `"points"`) .
 
 La première phrase d'un bloc de commentaires `roxygen`, si elle n'est précédée d'aucun tag `roxygen`, sera interprétée comme le **titre** de la fiche d'aide. Ce titre peut aussi être précédé du tag `@title`.
 
-Si le titre est suivi d'une ligne de commentaire `roxygen2` vide, puis de lignes de texte non précédées d'un tag, celles-ci constitueront la section **Description**. Ce paragraphe peut aussi être précédé du tag `@description`.
+Si le titre est suivi d'une ligne de commentaire `roxygen` vide, puis de lignes de texte non précédées d'un tag, celles-ci constitueront la section **Description**. Ce paragraphe peut aussi être précédé du tag `@description`.
 
-Si le paragraphe est aussi suivi d'une ligne de commentaire `roxygen2` vide, tout le texte après cette ligne vide, mais avant les lignes débutant par un tag `roxygen` formera la section **Details**. Ces paragraphes peuvent optionnellement être précédés du tag `@details`.
+Si le paragraphe est aussi suivi d'une ligne de commentaire `roxygen` vide, tout le texte après cette ligne vide, mais avant les lignes débutant par un tag `roxygen` formera la section **Details**. Ces paragraphes peuvent optionnellement être précédés du tag `@details`.
 
-Ainsi, les deux documentations suivantes sont équivalentes :
+Ainsi, les deux documentations suivantes sont équivalentes\ :
 
 ```{r, eval = FALSE}
 #' Distance de Manhattan
@@ -751,7 +777,7 @@ Ainsi, les deux documentations suivantes sont équivalentes :
 #' @examples
 #' dist_manhattan_2(point1 = c(0,-5, 3), point2 = c(2,-15, 4))  
 dist_manhattan_2 <- function(point1, point2) {
-  ... # (code omis ici)
+  # ... (code omis ici)
 }
 
 ```
@@ -772,74 +798,87 @@ et
 #' @examples
 #' dist_manhattan_2(point1 = c(0,-5, 3), point2 = c(2,-15, 4))  
 dist_manhattan_2 <- function(point1, point2) {
-  ... # (code omis ici)
+  # ... (code omis ici)
 }
 
 ```
 
-Les sections qui suivent le titre et la description, qui sont requises, et les informations détaillées (cette section est optionnelle), débutent toutes obligatoirement par des tags. Il faut obligatoirement décrire, si la fonction en possède&nbsp;
-:
+Les sections qui suivent le titre, la description (ces sections sont requises) et les informations détaillées (cette section est optionnelle), doivent toutes débuter par des tags. Il faut obligatoirement décrire, si la fonction en possède\ :
 
-- les arguments en entrée avec le tag `@param` :  
+- les arguments en entrée avec le tag `@param`\ :  
 il faut une description par argument, de la forme `@param <nom_argument> <description>`, où la description peut s'étendre sur plusieurs lignes;
-- la sortie avec le tag `@return` :  
+- la sortie avec le tag `@return`\ :  
 si la fonction retourne une liste, il est recommandé d'avoir une description par élément de la liste, de la forme `@return \item{<nom_element_liste>}{<description>}`, où la description peut encore une fois s'étendre sur plusieurs lignes. 
 
-Il est recommandé de toujours mettre un ou des exemples dans la fiche d'aide d'une fonction ou d'un jeu de données. Dans la documentation `roxygen2`, ceux-ci doivent être ajoutés à la fin du bloc de documentation, après le tag `@examples`.
+Il est recommandé de toujours mettre un ou des exemples dans la fiche d'aide d'une fonction ou d'un jeu de données. Dans la documentation `roxygen`, ceux-ci doivent être ajoutés à la fin du bloc de documentation, après le tag `@examples`.
 
-Nous pouvons aussi ajouter les informations suivantes :
+Nous pouvons aussi ajouter les informations suivantes\ :
 
 - les noms des auteurs avec le tag `@author`,
 - des références avec le tag `@references`,
 - des liens vers les fiches d'aide de fonction en lien avec la fonction documentée avec le tag `@seealso`,
-- etc. voir https://roxygen2.r-lib.org/articles/rd.html
+- etc. voir <https://roxygen2.r-lib.org/articles/rd.html>
 
-##### Documenter plusieurs fonctions dans la même fiche
+\ 
 
-\mbox{}
-
-Les tags `@rdname` et `@describeIn` servent à présenter plusieurs fonctions dans la même fiche d'aide. Dans l'exemple, la fonction `dist_manhattan` et la méthode `print.distman` sont documentées dans la même fiche d'aide grâce au tag `@describeIn`. Ce tag doit être suivi du nom de la fiche dans laquelle de l'information doit être ajoutée, puis d'une courte description à propos de la fonction ou méthode documentée. 
-
-##### Documenter des jeux de données
+##### Documenter plusieurs fonctions dans la même fiche {-}
 
 \mbox{}
 
-Pour documenter des jeux de données, deux tags supplémentaires sont disponibles :
+Le tag `@describeIn` sert à présenter plusieurs fonctions dans la même fiche d'aide. Dans l'exemple, la fonction `dist_manhattan` et la méthode `print.distman` sont documentées dans la même fiche d'aide grâce au tag `@describeIn`. Ce tag doit être suivi du nom de la fiche dans laquelle de l'information doit être ajoutée, puis d'une courte description à propos de la fonction ou méthode documentée.
+
+Le tag `@rdname` permet également de regrouper des fiches d'aide (voir <https://roxygen2.r-lib.org/articles/rd.html#documenting-multiple-functions-in-the-same-file-1> pour plus d'information).
+
+\ 
+
+##### Documenter des jeux de données {-}
+
+\mbox{}
+
+Pour documenter des jeux de données, deux tags supplémentaires sont disponibles\ :
 
 - `@format` pour décrire la structure R qui contient les données,
 - `@source` pour fournir une référence concernant la provenance des données.
 
+\ 
 
-##### Nom des fiches d'aide
-
-\mbox{}
-
-Nous pouvons contrôler le nom des fiches d'aide avec le tag `@name`. Sans ce tag, la fiche d'aide porte le nom de la fonction ou le nom du jeu de données qui suit le bloc de documentation `roxygen2`. Pour une documentation de package, l'instruction `"_PACKAGE"` qui suit le bloc de documentation indique à `roxygen2` d'utiliser le nom du package suivi de `-package` comme nom de fiche d'aide. Dans l'exemple, le nom de la fiche d'aide du package est donc `manhattan-package`. Cependant, `roxygen2` crée aussi un alias pour le nom de la fiche d'aide qui est le nom du package.
-
-Pour ouvrir une fiche d'aide avec la fonction `help` ou l'opérateur `?`, il faut lui donner en entrée le nom de la fiche ou un alias du nom de la fiche. Il est donc important de nommer intelligemment nos fiches d'aide. La norme est de donner à une fiche d'aide le nom de l'objet principal qu'elle documente et d'ajouter des alias pour les noms des autres objets documentés dans la fiche (c'est ce que fait `roxygen2` de façon automatique lorsque les tags `@rdname` et `@describeIn` sont utilisés).
-
-##### Texte formaté dans des fiches d'aide
+##### Nom des fiches d'aide {-}
 
 \mbox{}
 
-Dans les commentaires `roxygen2`, il est possible de formater du texte en utilisant les tags de mises en forme acceptés dans les fichiers `.Rd`. Ces tags, par exemple `\code{}`, `\pkg{}`, `\item{}`, `\link{}`, `\dots`, etc., sont documentés sur la page web suivante : https://roxygen2.r-lib.org/articles/rd-formatting.html
+Nous pouvons contrôler le nom des fiches d'aide avec le tag `@name`. Sans ce tag, la fiche d'aide porte le nom de la fonction ou le nom du jeu de données qui suit le bloc de documentation `roxygen`. Pour une documentation de package, l'instruction `"_PACKAGE"` qui suit le bloc de documentation indique à `roxygen2` d'utiliser le nom du package suivi de `-package` comme nom de fiche d'aide. Dans l'exemple, le nom de la fiche d'aide du package est donc `manhattan-package`. Cependant, `roxygen2` crée aussi un alias pour le nom de la fiche d'aide qui est le nom du package.
 
-##### Tags pour définir le `NAMESPACE` 
+Pour ouvrir une fiche d'aide avec la fonction `help` ou l'opérateur `?`, il faut lui donner en entrée le nom de la fiche ou un alias du nom de la fiche. Il est donc important de nommer intelligemment nos fiches d'aide. La norme est de donner à une fiche d'aide le nom de l'objet principal qu'elle documente et d'ajouter des alias pour les noms des autres objets documentés dans la fiche (c'est ce que fait `roxygen2` de façon automatique lorsque les tags `@describeIn` et `@rdname` sont utilisés).
+
+\ 
+
+##### Texte formaté dans des fiches d'aide {-}
 
 \mbox{}
 
-Il est aussi essentiel de mettre les tags pour l'écriture du `NAMESPACE` :
+Dans les commentaires `roxygen`, il est possible de formater du texte en utilisant les tags de mises en forme acceptés dans les fichiers `.Rd`. Cette possibilité été exploitée dans les exemples précédents. Ces tags, par exemple `\code{}`, `\pkg{}`, `\item{}`, `\link{}`, `\dots`, etc., sont documentés sur la page web suivante\ : <https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Marking-text>
+
+Depuis la version 6.0.0 de `roxygen2`, il est également possible d'utiliser la syntaxe Markdown dans des commentaires `roxygen` pour formater le texte. La fonction `usethis::create_package` avait d'ailleurs considéré par défaut que nous utiliserions cette option en ajoutant le champ `Roxygen: list(markdown = TRUE)` dans le fichier `DESCRIPTION`. Nous avons cependant retiré ce champ. Plus d'information à propos de l'utilisation de la syntaxe Markdown dans des commentaires `roxygen` peut être trouvée ici\ : <https://roxygen2.r-lib.org/articles/rd-formatting.html>
+
+\ 
+
+##### Tags pour définir le `NAMESPACE` {-}
+
+\mbox{}
+
+Il est aussi essentiel de mettre les tags pour l'écriture du `NAMESPACE`\ :
 
 - le tag `@export` exporte une fonction du `NAMESPACE` (donc la rend publique),
 - le tag `@importFrom` assure l'importation des fonctions provenant d'autres packages qui sont utilisées dans le code de notre package.
 
-D'autres tags de cette catégorie sont documentés ici : https://roxygen2.r-lib.org/articles/namespace.html
+D'autres tags de cette catégorie sont documentés ici\ : https://roxygen2.r-lib.org/articles/namespace.html
 
-## Comment générer les fichiers .Rd et le fichier `NAMESPACE` ?
+
+## Générer les fichiers .Rd et le fichier `NAMESPACE`
 
 Pour générer les fichiers `.Rd` et le fichier `NAMESPACE`, il suffit d'appeler la [fonction `roxygenize`](https://roxygen2.r-lib.org/reference/roxygenize.html) du package `roxygen2`. La [fonction `document`](https://devtools.r-lib.org/reference/document.html) du package `devtools` ou des fonctionnalités de RStudio peuvent aussi appeler cette fonction pour nous.
 
-#### Exemple :
+#### Exemple\ : {-}
 
 \mbox{}
 
@@ -849,7 +888,7 @@ devtools::document()
 
 ```
 ## Updating manhattan documentation
-## Updating roxygen version in C:\coursR\manhattan/DESCRIPTION
+## First time using roxygen2. Upgrading automatically...
 ## Loading manhattan
 ## Writing NAMESPACE
 ## Writing NAMESPACE
@@ -857,14 +896,11 @@ devtools::document()
 ## Writing dist_manhattan_2.Rd
 ## Writing manhattan-package.Rd
 ## Writing points.Rd
-## Warning message:
-## roxygen2 requires Encoding: UTF-8 
 ```
 
-&nbsp;
+\ 
 
-
-Dans l'exemple présenté précédemment, les commentaires `roxygen` des fichiers `dist_manhattan.R`, `dist_manhattan_2.R`, `print.R` et `manhattan-package.R`, du sous-répertoire `C:/coursR/manhattan/R`, ont produit (ou modifié) les fichiers suivants :
+Dans l'exemple présenté précédemment, les commentaires `roxygen` des fichiers `dist_manhattan.R`, `dist_manhattan_2.R`, `print.R` et `manhattan-package.R`, du sous-répertoire `C:/coursR/manhattan/R`, ont produit (ou modifié) les fichiers suivants\ :
 
 - `NAMESPACE` dans le répertoire `C:/coursR/manhattan/`;
 - `dist_manhattan.Rd`, `dist_manhattan_2.Rd`, `points.Rd` et `manhattan-package.Rd` dans le répertoire `C:/coursR/manhattan/man/`.
@@ -890,9 +926,9 @@ manhattan/
   |-- manhattan.Rproj
 ```
 
-&nbsp;
+\ 
 
-Le fichier `C:/coursR/manhattan/NAMESPACE` est maintenant le suivant :
+Le fichier `C:/coursR/manhattan/NAMESPACE` est maintenant le suivant\ :
 
 
 ```{r eval = FALSE}
@@ -904,11 +940,11 @@ export(dist_manhattan_2)
 importFrom(stats,dist)
 ```
 
-&nbsp;
+\ 
 
 Voici de quoi a l'air un des fichiers d'extension `.Rd` généré.
 
-Fichier `"C:/coursR/manhattan/man/dist_manhattan.Rd"` :
+Fichier `"C:/coursR/manhattan/man/dist_manhattan.Rd"`\ :
 
 ```{tikz eval = FALSE}
 % Generated by roxygen2: do not edit by hand
@@ -952,22 +988,22 @@ Sophie Baillargeon
 }
 ```
 
-&nbsp;
+\ 
 
-Ces fichiers utilisent une syntaxe inspirée de la syntaxe de LaTeX. Lorsque nous utilisons `roxygen2`, nous n'avons pas besoin d'éditer directement ces fichiers, donc nous n'avons pas besoin de comprendre leur syntaxe. La syntaxe de `roxygen2` est plus simple.
+Ces fichiers utilisent une syntaxe inspirée de la syntaxe de LaTeX. Lorsque nous utilisons `roxygen2`, nous n'avons pas besoin d'éditer directement ces fichiers, donc nous n'avons pas besoin de comprendre leur syntaxe (à l'exception peut-être des tags de mise en forme). La syntaxe `roxygen` est plus simple.
 
 
-Après construction et installation du package, cette fiche d'aide aura l'allure suivante :
+Après construction et installation du package, cette fiche d'aide aura l'allure suivante\ :
 
 \newpage
 
-&nbsp;
+\ 
 
 ```{r echo = FALSE,  out.width = "90%", fig.align = 'center'}
 knitr::include_graphics("fig/fiche_aide.png")
 ```
 
-&nbsp;
+\ 
 
 \newpage
 
@@ -975,21 +1011,21 @@ knitr::include_graphics("fig/fiche_aide.png")
 
 Une fois les étapes 1 à 3 complétées, nous sommes prêts à construire le fichier compressé du package à partir du répertoire contenant les fichiers source. En fait, nous allons d'abord à cette étape vérifier le répertoire afin de nous assurer qu'il produira un package conforme.
 
-Ces tâches se réalisent avec les utilitaires R :
+Ces tâches se réalisent avec les utilitaires R\ :
 
 - `R CMD check`,
 - `R CMD build`,
 - `R CMD INSTALL`.
 
-Ces utilitaires s'exploitent par des commandes soumises dans le *terminal* sous Unix / Linux ou Mac OS X / OS X / macOS et dans une fenêtre *invite de commandes* sous Windows. Dans ces notes, nous verrons comment utiliser un outil qui soumet ces commandes à notre place, sans que nous ayons besoin d'ouvrir le terminal ou la fenêtre d'invite de commandes.
+Ces utilitaires s'exploitent par des commandes soumises dans le *terminal* sous Linux ou macOS et dans une fenêtre *invite de commandes* sous Windows. Dans ces notes, nous verrons comment utiliser un outil qui soumet ces commandes à notre place, sans que nous ayons besoin d'ouvrir le terminal ou la fenêtre d'invite de commandes.
 
-Les utilitaires `R CMD` [`check`, `build`](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/PkgUtils.html) et [`INSTALL`](http://stat.ethz.ch/R-manual/R-devel/library/utils/html/INSTALL.html) sont inclus dans l'installation de base de R (dans le package `utils`). Cependant, ils nécessitent des outils supplémentaires pour fonctionner : les outils de développement de logiciel GNU, incluant un compilateur C/C++. Voici comment s'assurer que ces outils sont installés sur notre ordinateur, selon le système d'exploitation (plus de détails sur la page https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites) :
+Les utilitaires `R CMD` [`check`, `build`](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/PkgUtils.html) et [`INSTALL`](http://stat.ethz.ch/R-manual/R-devel/library/utils/html/INSTALL.html) sont inclus dans l'installation de base de R (dans le package `utils`). Cependant, ils nécessitent des outils supplémentaires pour fonctionner\ : les outils de développement de logiciel GNU, incluant un compilateur C/C++. Voici comment s'assurer que ces outils sont installés sur notre ordinateur, selon le système d'exploitation (plus de détails sur la page https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites)\ :
 
-- Windows : il faut installer les « Rtools », téléchargeable sur la page web https://cran.r-project.org/bin/windows/Rtools/ (plus de détails dans le [Guide d'installation ou de mise à jour de R et RStudio](https://stt4230.rbind.io/introduction/installation_r_rstudio/#rtools));
+- Windows\ : il faut installer les «\ Rtools\ », téléchargeable sur la page web https://cran.r-project.org/bin/windows/Rtools/ (plus de détails dans le [Guide d'installation ou de mise à jour de R et RStudio](https://stt4230.rbind.io/introduction/installation_r_rstudio/#rtools));
 
-- Mac OS X / OS X / macOS : il faut installer les « Apple Xcode developer tools », disponibles gratuitement sur le « App Store », s'ils ne sont pas déjà installés (souvent installés par défaut);
+- macOS\ : il faut installer les «\ Xcode command line tools\ », disponibles gratuitement, s’ils ne sont pas déjà installés (plus de détails dans le [Guide d'installation ou de mise à jour de R et RStudio](https://stt4230.rbind.io/introduction/installation_r_rstudio/#xcode));
 
-- Unix / Linux :  il faut s'assurer d'avoir installé R accompagné des ses « development tools » (`r-base-dev`).
+- Linux\ :  il faut s'assurer d'avoir installé R accompagné des ses «\ development tools\ » (`r-base-dev`).
 
 Le [package `pkgbuild`](https://CRAN.R-project.org/package=pkgbuild) comporte une fonction pour tester si tout le nécessaire au développement de package est installé et fonctionne correctement.
 
@@ -999,12 +1035,12 @@ pkgbuild::has_build_tools()
 
 Si cet appel à la fonction `pkgbuild::has_build_tools` retourne `TRUE`, alors tout est fonctionnel.
 
-De plus, une des commandes R pour le développement de packages, soit `R CMD check`, a besoin d'une installation de LaTeX pour tester la création de la documentation des packages en format PDF. Pour développer des packages, vous avez donc le choix entre :
+De plus, une des commandes R pour le développement de packages, soit `R CMD check`, a besoin d'une installation de LaTeX pour tester la création de la documentation des packages en format PDF. Pour développer des packages, vous avez donc le choix entre\ :
 
-- installer LaTeX sur votre ordinateur :
-    + une version gratuite pour Windows est MiKTeX (https://miktex.org/download),
-    + une version gratuite pour Mac OS X / OS X / macOS est MacTeX (http://www.tug.org/mactex/),
-    + les systèmes Unix / Linux viennent habituellement par défaut avec une distribution de LaTeX;
+- installer LaTeX sur votre ordinateur (tel que mentionné dans le [Guide d'installation ou de mise à jour de R et RStudio](https://stt4230.rbind.io/introduction/installation_r_rstudio/#latex))\ :
+    + un compilateur LaTeX multiplateforme gratuit est MiKTeX (<https://miktex.org/download>),
+    + un autre compilateur LaTeX gratuit pour macOS est MacTeX (<http://www.tug.org/mactex/>),
+    + les systèmes Linux viennent habituellement par défaut avec une distribution de LaTeX;
 - omettre la création de la documentation PDF lors de la soumission de la commande `R CMD check` grâce à l'option `--no-manual` (plus d'informations à venir en temps opportun).
 
 
@@ -1017,7 +1053,7 @@ Les commandes de construction et de vérification d'un package peuvent être sou
 
 Il est recommandé de d'abord vérifier le package avant de le construire. Cette vérification se lance avec `devtools` grâce à la [fonction `check`](https://devtools.r-lib.org/reference/check.html).
 
-#### Exemple :
+#### Exemple\ :
 
 \mbox{}
 
@@ -1031,30 +1067,30 @@ Nous souhaitons aussi éviter les avertissements. Il est recommandé de les rég
 
 Par défaut, la fonction `devtools::check` appelle d'abord la fonction `devtools::document`, ce qui assure que la documentation est à jour avant de vérifier le package.
 
-Notons ausi que la fonction `devtools::check` possède un argument `cran` prenant la valeur par défaut `TRUE`, ce qui signifie que la commande `R CMD check` est lancée avec l'option `--as-cran`. Pour omettre cette option, il faut appeler la fonction `devtools::check` comme suit :
+Notons aussi que la fonction `devtools::check` possède un argument `cran` prenant la valeur par défaut `TRUE`, ce qui signifie que la commande `R CMD check` est lancée avec l'option `--as-cran`. Pour omettre cette option, il faut appeler la fonction `devtools::check` comme suit\ :
 
 ```{r eval = FALSE}
 devtools::check(cran = FALSE)
 ```
 
-**Note** : Si vous n'avez pas de compilateur LaTeX sur votre ordinateur, ajoutez aussi l'argument `manual = FALSE`. Cette fonction indique à `R CMD check` de ne pas vérifier la compilation de la version PDF de la documentation du package.
+**Note**\ : Si vous n'avez pas de compilateur LaTeX sur votre ordinateur, ajoutez aussi l'argument `manual = FALSE`. Cette fonction indique à `R CMD check` de ne pas vérifier la compilation de la version PDF de la documentation du package.
 
 
 ### Construction de package avec la fonction `devtools::build`
 
-Une fois satisfaits des résultats de la vérification, nous pouvons passer à l'étape ultime : construire le package. Cette étape permet d'obtenir une archive (fichier compressé) contenant le package. Nous avons vu dans les notes sur l'[utilisation de packages R](https://stt4230.rbind.io/packages/utilisation_packages_r/#%C3%A0-partir-du-cran) que ceux-ci sont distribués sous trois formats d'archive différents :
+Une fois satisfaits des résultats de la vérification, nous pouvons passer à l'étape ultime\ : construire le package. Cette étape permet d'obtenir une archive (fichier compressé) contenant le package. Nous avons vu dans les notes sur l'[utilisation de packages R](https://stt4230.rbind.io/packages/utilisation_packages_r/#%C3%A0-partir-du-cran) que ceux-ci sont distribués sous trois formats d'archive différents\ :
 
-- `.tar.gz` (*package source*) pour Linux / Unix,
+- `.tar.gz` (*package source*) pour Linux,
 - `.zip` pour Windows,
-- `.tgz` pour Mac OS X / OS X / macOS.
+- `.tgz` pour macOS.
 
 Tous ces formats d'archive peuvent être créés avec la [fonction `build`](https://devtools.r-lib.org/reference/build.html) du package `devtools`. Pour créer le package source (`.tar.gz`), aucun argument n'a à être fourni en entrée à la fonction. Celle-ci lance en fait la commande `R CMD build` et un fichier nommé `"nomPackage_numeroVersion.tar.gz"` (dans notre exemple  
  `manhattan_1.0.0.tar.gz`) est créé dans le répertoire contenant le répertoire principal du package (donc le répertoire parent du répertoire portant le nom du package).
 
-Les archives de format `.zip` et `.tgz` sont des versions dites binaires d'un package. La fonction `devtools::build` avec l'argument `binary = TRUE` permet de les créer. Avec cet argument, cette fonction lance en fait la commande `R CMD INSTALL --build`. Si cette commande est lancée sur à partir d'un système d'exploitation Windows, une archive `.zip` est créée, alors que c'est plutôt une archive `.tgz` qui est créée lorsque la commande est lancée sur à partir d'un système d'exploitation Mac OS X / OS X / macOS. Le fichier sera nommé `nomPackage_numeroVersion.zip` (sous Windows) ou `nomPackage_numeroVersion.tgz` (sous Mac OS X / OS X / macOS) et créé dans le répertoire au-dessus du répertoire principal du package.
+Les archives de format `.zip` et `.tgz` sont des versions dites binaires d'un package. La fonction `devtools::build` avec l'argument `binary = TRUE` permet de les créer. Avec cet argument, cette fonction lance en fait la commande `R CMD INSTALL --build`. Si cette commande est lancée à partir d'un système d'exploitation Windows, une archive `.zip` est créée, alors que c'est plutôt une archive `.tgz` qui est créée lorsque la commande est lancée à partir d'un système d'exploitation macOS. Le fichier sera nommé `nomPackage_numeroVersion.zip` (sous Windows) ou `nomPackage_numeroVersion.tgz` (sous macOS) et créé dans le répertoire au-dessus du répertoire principal du package.
 
 
-#### Exemple :
+#### Exemple\ : {-}
 
 \mbox{}
 
@@ -1065,13 +1101,14 @@ devtools::build()
 ```
 
 ```
-## √  checking for file 'C:\coursR\manhattan/DESCRIPTION' ...
-## -  preparing 'manhattan':
-## √  checking DESCRIPTION meta-information ... 
+## √  checking for file 'C:\coursR\manhattan/DESCRIPTION' (435ms)
+## -  preparing 'manhattan': (374ms)
+## √  checking DESCRIPTION meta-information ...
 ## -  checking for LF line-endings in source and make files and shell scripts
 ## -  checking for empty or unneeded directories
-## -  looking to see if a 'data/datalist' file should be added
 ## -  building 'manhattan_1.0.0.tar.gz'
+##    
+## [1] "C:/coursR/manhattan_1.0.0.tar.gz"
 ```
 
 ```{r eval = FALSE}
@@ -1079,7 +1116,7 @@ devtools::build(binary = TRUE)
 ```
 
 ```
-## -  installing to library 'C:/Users/Sophie/AppData/Local/Temp/Rtmp6Z7mNd/temp_libpath40f0797d4f99'
+## -  installing to library 'C:/Users/Sophie/AppData/Local/Temp/Rtmpwpubsf/temp_libpath3d403f3b5c1' (375ms)
 ## -  installing *source* package 'manhattan' ...
 ##    ** using staged installation
 ##    ** R
@@ -1113,7 +1150,7 @@ devtools::build(binary = TRUE)
 
 Pour charger la définition de nos fonctions en cours de développement, par exemple pour les tester interactivement, la [fonction `load_all`](https://devtools.r-lib.org/reference/load_all.html) du package `devtools` est utile. Elle simule un chargement du package avec `library` sans réellement installer le package.
 
-Pour vraiment installer le package, nous pouvons utiliser la [fonction devtools::install](https://devtools.r-lib.org/reference/install.html). La feuille de triche du package devtools décrit schématiquement les différences entre ces fonctions : https://rawgit.com/rstudio/cheatsheets/master/package-development.pdf
+Pour vraiment installer le package, nous pouvons utiliser la [fonction install](https://devtools.r-lib.org/reference/install.html)  du package `devtools`. La feuille de triche du package devtools décrit schématiquement les différences entre ces fonctions\ : <https://rawgit.com/rstudio/cheatsheets/master/package-development.pdf>
 
 
 ## Lancement des commandes de vérification et de construction en RStudio
@@ -1122,78 +1159,83 @@ Pour vraiment installer le package, nous pouvons utiliser la [fonction devtools:
 
 Cette sous-section explique comment réaliser avec des menus de RStudio ce que nous venons de réaliser avec des fonctions du package `devtools`. Il s'agit d'une méthode de remplacement en cas de problèmes. Si tout a bien fonctionné à la sous-section précédente, ce qui est présenté ici ne nous est pas utile.
 
-### Sous-étape a) Créer un projet RStudio avec le répertoire principal du package
+#### Sous-étape a) Créer un projet RStudio avec le répertoire principal du package {-}
 
-Si nous n'avions pas utilisé la fonction `usethis::create_package` pour créer le répertoire principal du package, celui-ci ne serait peut-être pas un projet RStudio. S'il ne l'était pas, il faudrait tout d'abord créer un projet RStudio avec le répertoire principal de notre package. Pour ce faire, nous pourrions procéder comme suit :
+\mbox{}
 
-- ouvrir le menu «&nbsp;File&nbsp;» et sélectionner «&nbsp;New Project...&nbsp;» (il y a aussi un bouton dans la barre de RStudio en haut à droite, nommé à l'origine «&nbsp;Project: (None)&nbsp;» qui ouvre un menu contenant aussi l'élément «&nbsp;New Project...&nbsp;»),
-- sélectionner «&nbsp;Existing Directory&nbsp;»,
+Si nous n'avions pas utilisé la fonction `usethis::create_package` pour créer le répertoire principal du package, celui-ci ne serait peut-être pas un projet RStudio. S'il ne l'était pas, il faudrait tout d'abord créer un projet RStudio avec le répertoire principal de notre package. Pour ce faire, nous pourrions procéder comme suit\ :
+
+- ouvrir le menu «\ File\ » et sélectionner «\ New Project...\ » (il y a aussi un bouton dans la barre de RStudio en haut à droite, nommé à l'origine «\ Project: (None)\ » qui ouvre un menu contenant aussi l'élément «\ New Project...\ »),
+- sélectionner «\ Existing Directory\ »,
 - sélectionner le répertoire principal du package, c'est-à-dire le répertoire portant le nom du package et contenant les fichiers source,
-- cliquer sur «&nbsp;Create Project&nbsp;».
+- cliquer sur «\ Create Project\ ».
 
 Le projet sera créé et ouvert. Ça ajoute des fichiers dans le répertoire de notre package. Nous ne nous préoccuperons pas de ces fichiers. Ils sont automatiquement ignorés lors de la construction du package avec RStudio.
 
-**Note** : Si nous sélectionnons «&nbsp;New Directory&nbsp;» plutôt que «&nbsp;Existing Directory&nbsp;», puis «&nbsp;R package&nbsp;», RStudio crée un squelette de répertoire de fichiers source de package.
+**Note**\ : Si nous sélectionnons «\ New Directory\ » plutôt que «\ Existing Directory\ », puis «\ R package\ », RStudio crée un squelette de répertoire de fichiers source de package.
 
-### Sous-étape b) Configurer les options de RStudio
+#### Sous-étape b) Configurer les options de RStudio {-}
+
+\mbox{}
 
 Voici quelques configurations de RStudio que je conseille d'utiliser.
 
 
-#### Options globales :
+##### Options globales\ : {-}
 
 \mbox{}
 
 (à modifier une seule fois)
 
-- par le menu «&nbsp;Tools > Global Options...&nbsp;»,
-- dans «&nbsp;Packages&nbsp;», décocher «&nbsp;Cleanup output after successful R CMD check&nbsp;».
+- par le menu «\ Tools > Global Options...\ »,
+- dans «\ Packages\ », décocher «\ Cleanup output after successful R CMD check\ ».
 
 Les répertoires générés par la commande `R CMD check` ne seront ainsi pas effacés et nous pourrons, par exemple, aller y récupérer la version PDF de la documentation du package.
 
 
-#### Options du projet :
+##### Options du projet\ : {-}
 
 \mbox{}
 
 (à modifier pour chaque nouveau projet)
 
-- par le menu «&nbsp;Tools > Project Options...&nbsp;»;
-- dans «&nbsp;Build Tools&nbsp;» : 
-    + cocher «&nbsp;Generate documentation with Roxygen&nbsp;»,
-    + si le menu de configuration ne s'ouvre pas automatiquement, cliquez sur «&nbsp;Configure...&nbsp;», puis assurez-vous que les options suivantes soient cochées :
-        + «&nbsp;Use roxygen to generate&nbsp;» : «&nbsp;Rd files&nbsp;» et «&nbsp;NAMESPACE&nbsp;»,
-        + «&nbsp;Automatically roxygenize when running&nbsp;» : tout cocher.
+- par le menu «\ Tools > Project Options...\ »;
+- dans «\ Build Tools\ »\ : 
+    + cocher «\ Generate documentation with Roxygen\ »,
+    + si le menu de configuration ne s'ouvre pas automatiquement, cliquez sur «\ Configure...\ », puis assurez-vous que les options suivantes soient cochées\ :
+        + «\ Use roxygen to generate\ »\ : «\ Rd files\ » et «\ NAMESPACE\ »,
+        + «\ Automatically roxygenize when running\ »\ : tout cocher.
 
 <!--
-    + décocher «&nbsp;Use devtools package functions if available&nbsp;» (seulement nécessaire si nous souhaitons que la commande `R CMD check` génère la version PDF de la documentation du package),
+    + décocher «\ Use devtools package functions if available\ » (seulement nécessaire si nous souhaitons que la commande `R CMD check` génère la version PDF de la documentation du package),
 -->
 
-Avec ces dernières configurations, la majorité des commandes de construction et de vérification de package lancées par le menu «&nbsp;Build&nbsp;» (voir ci-dessous) vont d'abord soumettre la commande `roxygenize` sur le répertoire du package avant de faire leur travail. Ainsi, les fichiers `.Rd` de documentation et le fichier `NAMESPACE` seront mis à jour à chaque lancement d'une de ces commandes
+Avec ces dernières configurations, la majorité des commandes de construction et de vérification de package lancées par le menu «\ Build\ » (voir ci-dessous) vont d'abord soumettre la commande `roxygenize` sur le répertoire du package avant de faire leur travail. Ainsi, les fichiers `.Rd` de documentation et le fichier `NAMESPACE` seront mis à jour à chaque lancement d'une de ces commandes
 
-Nous pouvons aussi soumettre la commande `roxygenize` par le menu «&nbsp;**Build > Document**&nbsp;».
+Nous pouvons aussi soumettre la commande `roxygenize` par le menu «\ **Build > Document**\ ».
 
-**Note** : Si vous n'avez pas de compilateur LaTeX sur votre ordinateur, ajoutez l'option suivante à `R CMD check` : `--no-manual`. Cette fonction indique à `R CMD check` de ne pas vérifier la compilation de la version PDF de la documentation du package.
+**Note**\ : Si vous n'avez pas de compilateur LaTeX sur votre ordinateur, ajoutez l'option suivante à `R CMD check`\ : `--no-manual`. Cette fonction indique à `R CMD check` de ne pas vérifier la compilation de la version PDF de la documentation du package.
 
 
 
-### Sous-étape c) Vérifier ou construire à partir du menu «&nbsp;Build&nbsp;» de RStudio
+#### Sous-étape c) Vérifier ou construire à partir du menu «\ Build\ » de RStudio {-}
+
+\mbox{}
 
 Il est préférable de toujours d'abord s'assurer que le package passe sans erreur ou avertissements problématiques la vérification faite par la commande `R CMD check`. Ensuite, nous pouvons construire le package, soit dans sa version source, soit dans sa version binaire. Voici comment faire tout ça facilement en RStudio.
 
-- Pour vérifier le package :  
- menu «&nbsp;**Build > Check Package**&nbsp;» (lance en fait la commande `R CMD check`).
+- Pour vérifier le package\ :  
+ menu «\ **Build > Check Package**\ » (lance en fait la commande `R CMD check`).
 
-- Pour créer le package source (qui est aussi la version Unix / Linux) :  
- menu «&nbsp;**Build > Build Source Package**&nbsp;» (lance en fait la commande `R CMD build`)  
- $\rightarrow$ un fichier nommé `"nomPackage_numeroVersion.tar.gz"` (dans notre exemple  
- `manhattan_1.0.0.tar.gz`) sera créé dans le répertoire au-dessus du répertoire principal du package.
+- Pour créer le package source (qui est aussi la version Linux)\ :  
+ menu «\ **Build > Build Source Package**\ » (lance en fait la commande `R CMD build`)  
+ $\rightarrow$ un fichier nommé `"nomPackage_numeroVersion.tar.gz"` sera créé dans le répertoire au-dessus du répertoire principal du package.
 
-- Pour créer le package binaire (si nous travaillons sous Windows ou Mac OS X / OS X / macOS) :  
- menu «&nbsp;**Build > Build Binary Package**&nbsp;» (lance en fait la commande `R CMD INSTALL --build`)  
- $\rightarrow$ un fichier nommé `nomPackage_numeroVersion.zip` (sous Windows) ou `nomPackage_numeroVersion.tgz` (sous Mac OS X / OS X / macOS) sera créé dans le répertoire au-dessus du répertoire principal du package.
+- Pour créer le package binaire (si nous travaillons sous Windows ou macOS)\ :  
+ menu «\ **Build > Build Binary Package**\ » (lance en fait la commande `R CMD INSTALL --build`)  
+ $\rightarrow$ un fichier nommé `nomPackage_numeroVersion.zip` (sous Windows) ou `nomPackage_numeroVersion.tgz` (sous macOS) sera créé dans le répertoire au-dessus du répertoire principal du package.
 
-La commande «&nbsp;**Install and Restart**&nbsp;» est pratique en cours de travail. Elle permet de : 
+La commande «\ **Install and Restart**\ » est pratique en cours de travail. Elle permet de\ : 
 
 - construire le package dans le bon format pour notre système d'exploitation, 
 - l'installer (donc remplacer l'ancienne installation par la nouvelle) et 
@@ -1205,9 +1247,9 @@ Vous trouverez en annexe des solutions à certains problèmes techniques déjà 
 
 # Étape 5. Si désiré, partager le package
 
-Notre package est maintenant prêt à être utilisé. Si nous souhaitons le partager avec le grand public, nous pouvons le rendre disponible sur le CRAN. Pour ce faire, il faut d'abord s'assurer de respecter les politiques du CRAN : http://cran.r-project.org/web/packages/policies.html. Comme mentionné précédemment, il faut donc que notre package passe le `R CMD check --as-cran` sans erreurs ni avertissements.
+Notre package est maintenant prêt à être utilisé. Si nous souhaitons le partager avec le grand public, nous pouvons le rendre disponible sur le CRAN. Pour ce faire, il faut d'abord s'assurer de respecter les politiques du CRAN\ : http://cran.r-project.org/web/packages/policies.html. Comme mentionné précédemment, il faut donc que notre package passe le `R CMD check --as-cran` sans erreurs ni avertissements.
 
-Une fois s'être assuré de respecter les politiques du CRAN, nous pouvons soumettre notre package au CRAN en ligne par l'intermédiaire de l'interface web suivante : https://cran.r-project.org/submit.html
+Une fois s'être assuré de respecter les politiques du CRAN, nous pouvons soumettre notre package au CRAN en ligne par l'intermédiaire de l'interface web suivante\ : https://cran.r-project.org/submit.html
 
 Il suffit de suivre les instructions.
 
@@ -1216,7 +1258,7 @@ Il suffit de suivre les instructions.
 
 Mettre à jour un package signifie de le modifier pour ajouter des fonctionnalités et/ou corriger des bogues. Lors d'une mise à jour, il faut suivre les étapes suivantes.
 
-#### Sous-étape a) Incrémenter le numéro de version :
+#### Sous-étape a) Incrémenter le numéro de version\ : {-}
 
 \mbox{}
 
@@ -1228,22 +1270,22 @@ Voici les règles que plusieurs développeurs de packages R suivent dans la num�
 
 Ensuite, ils font évoluer les numéros de version comme suit.
 
-- Lors d'une mise à jour majeure (beaucoup de nouvelles fonctionnalités) : le premier nombre de la numérotation est incrémenté de 1, les nombres subséquents retombent à 0.
+- Lors d'une mise à jour majeure (beaucoup de nouvelles fonctionnalités)\ : le premier nombre de la numérotation est incrémenté de 1, les nombres subséquents retombent à 0.
 
-- Lors d'une mise à jour mineure (seulement quelques fonctionnalités pas trop importantes ont été ajoutées ou d'importants bogues ont été réglés) : le premier nombre est inchangé, par contre le deuxième est incrémenté de 1 et le dernier retombe à 0.
+- Lors d'une mise à jour mineure (seulement quelques fonctionnalités pas trop importantes ont été ajoutées ou d'importants bogues ont été réglés)\ : le premier nombre est inchangé, par contre le deuxième est incrémenté de 1 et le dernier retombe à 0.
 
-- Si seulement quelques bogues ont été corrigés, sans changer du tout les fonctionnalités : le troisième nombre de la numérotation est incrémenté de 1, sans modifier les deux premiers nombres.
+- Si seulement quelques bogues ont été corrigés, sans changer du tout les fonctionnalités\ : le troisième nombre de la numérotation est incrémenté de 1, sans modifier les deux premiers nombres.
 
 La page Wikipédia https://en.wikipedia.org/wiki/Software_versioning traite de ce sujet et propose d'autres règles.
 
 
-#### Sous-étape b) Faire les mises à jour dans le code :
+#### Sous-étape b) Faire les mises à jour dans le code\ : {-}
 
 \mbox{}
 
 L'ajout de fonctionnalités ou la correction de bogues impliquent des modifications à apporter au code.
 
-#### Sous-étape c) Documenter les mises à jour :
+#### Sous-étape c) Documenter les mises à jour\ : {-}
 
 \mbox{}
 
@@ -1251,7 +1293,7 @@ Les commentaires `roxygen` produisant les fiches d'aide doivent être mis à jou
 
 Je conseille vivement aussi de documenter les mises à jour dans un fichier `NEWS`. Ce fichier est un point de repère pour un utilisateur d'un package qui souhaite identifier ce qui a changé lors d'une mise à jour, donc ce qui pourrait affecter son utilisation du package.
 
-Il n'y a pas de consensus en R à propos de comment rédiger le fichier `NEWS`, ni de l'endroit où le placer dans les fichiers source. Nous pouvons observer, notamment, les pratiques suivantes :
+Il n'y a pas de consensus en R à propos de comment rédiger le fichier `NEWS`, ni de l'endroit où le placer dans les fichiers source. Nous pouvons observer, notamment, les pratiques suivantes\ :
 
 - fichier `NEWS` en format texte simple (dont le nom de fichier ne porte pas d'extension), placé dans le répertoire principal (au même niveau que les fichiers `DESCRIPTION` et `NAMESPACE`);
 - fichier `NEWS.md` en format Markdown, placé dans le répertoire principal;
@@ -1262,11 +1304,10 @@ La première des pratiques est probablement la plus répandue.
 
 Voici à quoi pourrait ressembler un fichier `NEWS` en format texte simple pour l'exemple du package `manhattan`, après l'avoir mis à jour.
 
+Fichier `"C:/coursR/manhattan/NEWS"`\ :
 
-Fichier `"C:/coursR/manhattan/NEWS"` :
-
-```{tikz eval = FALSE}
-Changements dans manhattan version 1.1.0 (2020-04-02)
+```
+Changements dans manhattan version 1.1.0 (2021-04-06)
  
 * modifications des fonctions dist_manhattan et dist_manhattan_2 afin qu'elles
   puissent calculer la distance entre plusieurs points
@@ -1274,24 +1315,25 @@ Changements dans manhattan version 1.1.0 (2020-04-02)
 * ajout d'une methode plot pour un objet de classe "distman"
  
 
-Changements dans manhattan version 1.0.0 (2020-03-25)
+Changements dans manhattan version 1.0.0 (2021-03-29)
 
 * premiere version du package manhattan
 ```
 
-&nbsp;
+\ 
 
-Si nous installions la version 1.1.0 du package et que nous  chargions le package en R avec la commande `library`, nous pourrions afficher son fichier `NEWS` dans la console avec les instructions suivantes :
+Nous pourrions également utiliser le commande `usethis::use_news_md()` pour produire un gabarit de fichier `NEWS.md` qu'il ne nous resterait plus qu'à éditer.
+
+Si nous installions la version 1.1.0 du package, nous pourrions afficher son fichier `NEWS` avec les instructions suivantes\ :
 
 ```{r eval = FALSE}
-nouvelles <- news(package = "manhattan")
-print(nouvelles, doBrowse = FALSE)
+news(package = "manhattan")
 ```
 
-Nous pouvons aussi voir le fichier `NEWS` des packages distribués sur le CRAN directement sur leur page web du CRAN.
+Nous pouvons aussi voir le fichier `NEWS` des packages distribués sur le CRAN directement sur leur page web du CRAN (dans le champ `Materials`).
 
 
-#### Sous-étape d) Revérifier et reconstruire le package
+#### Sous-étape d) Revérifier et reconstruire le package {-}
 
 \mbox{}
 
@@ -1303,45 +1345,45 @@ Il faut finalement construire et vérifier de nouveau le package. Un nouveau fic
 
 Étapes de création d'un package R
 
-#### 1. Écrire les fonctions
+#### 1. Écrire les fonctions {-}
 
 \mbox{}
 
-Objets utilisables dans le corps des fonctions d'un package :
+Objets utilisables dans le corps des fonctions d'un package\ :
 
 - arguments et variables locales,
 - tout objet, public ou privé, contenu dans le package,
 - objets provenant d'autres packages, à la condition d'inclure ces objets dans *l'environnement des objets importés par le package*, 
 - objets du package R de base. 
 
-Bonne pratique : Utiliser la forme `<nomPackage>::<nomFonction>()` pour appeler les fonctions provenant d'autres packages (sauf pour celles provenant du package `base`).
+Bonne pratique\ : Utiliser la forme `<nomPackage>::<nomFonction>()` pour appeler les fonctions provenant d'autres packages (sauf pour celles provenant du package `base`).
 
-Si but = mettre sur le CRAN $\rightarrow$ respecter http://cran.r-project.org/web/packages/policies.html
+Si but = mettre sur le CRAN $\rightarrow$ respecter <http://cran.r-project.org/web/packages/policies.html>
 
-#### 2. Créer l'arborescence de répertoires et fichiers du package
-
-\mbox{}
-
-Répertoire principal, portant le nom du package, contenant :
-
-- sous-répertoire nommé `R` : répertoire des fichiers contenant le code source R des fonctions;
-- sous-répertoire nommé `man` : répertoire des fichiers source des fiches d'aide;
-- sous-répertoire nommé `data` : répertoire pour les jeux de données publics (au besoin);
-- fichier nommé `DESCRIPTION` : informations descriptives générales du package (configurations);
-- fichier nommé `NAMESPACE` : fichier permettant de définir quels objets sont publics (exportés) et d’identifier les fonctions d'autres packages (excluant le package `base`) utilisées dans le package (objets importés);
-- autres éléments, selon les besoins : fichier `NEWS`, sous-répertoire `src`, etc.
-
-Fonctions du package `usethis` utiles à cette étape : 
-
-- `create_package` : création de l'arborescence de base, dans un projet RStudio;
-- `use_r` : création de fichiers script R dans le sous-répertoire nommé `R`;
-- `use_data` : ajout de jeux de données dans le sous-répertoire nommé `data`.
-
-#### 3. Écrire la documentation des fonctions et du package
+#### 2. Créer l'arborescence de répertoires et fichiers du package {-}
 
 \mbox{}
 
-Éléments à documenter :
+Répertoire principal, portant le nom du package, contenant\ :
+
+- sous-répertoire nommé `R`\ : répertoire des fichiers contenant le code source R des fonctions;
+- sous-répertoire nommé `man`\ : répertoire des fichiers source des fiches d'aide;
+- sous-répertoire nommé `data`\ : répertoire pour les jeux de données publics (au besoin);
+- fichier nommé `DESCRIPTION`\ : informations descriptives générales du package (configurations);
+- fichier nommé `NAMESPACE`\ : fichier permettant de définir quels objets sont publics (exportés) et d'identifier les fonctions d'autres packages (excluant le package `base`) utilisées dans le package (objets importés);
+- autres éléments, selon les besoins\ : fichier `NEWS`, sous-répertoire `src`, etc.
+
+Fonctions du package `usethis` utiles à cette étape\ : 
+
+- `create_package`\ : création de l'arborescence de base, dans un projet RStudio;
+- `use_r`\ : création de fichiers script R dans le sous-répertoire nommé `R`;
+- `use_data`\ : ajout de jeux de données dans le sous-répertoire nommé `data`.
+
+#### 3. Écrire la documentation des fonctions et du package {-}
+
+\mbox{}
+
+Éléments à documenter\ :
 
 + les fonctions publiques,
 + les jeux de données,
@@ -1349,89 +1391,87 @@ Fonctions du package `usethis` utiles à cette étape :
 + les méthodes S3 pour des fonctions génériques (si pertinent),
 + le package lui-même (recommandé).
 
-**Documentation d'un package avec `roxygen2` :**
+**Documentation d'un package avec `roxygen2`\ :**
 
 Commentaires dans le code source R pour générer les fiches d'aide (contenu du sous-répertoire `man`) et le fichier `NAMESPACE`
 
-- symbole de commentaire `roxygen` : `#'`;
+- symbole de commentaire `roxygen`\ : `#'`;
 - commentaires en entête des fonctions ou
     + avant `"_PACKAGE"` pour la fiche d'aide globale du package, 
     + avant une chaîne de caractères contenant le nom d'un objet contenant des données;
 - 1^ère^ ligne $\rightarrow$ titre de la fiche, suivi d'une ligne vide;
 - 1^er^ paragraphe $\rightarrow$ champ `Descripion` de la fiche, suivi d'une ligne vide;
 - autres paragraphes (optionnels) $\rightarrow$ champ `Details`;
-- tags :
-    + `@param` : description des paramètres $\rightarrow$ champ `Arguments`;
-    + `@return` : description de la sortie $\rightarrow$ champ `Value`;
-    + pour le fichier `NAMESPACE` : `@export`, `@importFrom`, etc.;
-    + autres sections : `@examples`, `@author`, `@references`, `@format`, etc.;
-    + pour jumeler des fiches : `@rdname`, `@describeIn`;
-    + métadonnées : `@name`, `@aliases`, etc.
+- tags\ :
+    + `@param`\ : description des paramètres $\rightarrow$ champ `Arguments`;
+    + `@return`\ : description de la sortie $\rightarrow$ champ `Value`;
+    + pour le fichier `NAMESPACE`\ : `@export`, `@importFrom`, etc.;
+    + autres sections\ : `@examples`, `@author`, `@references`, `@format`, etc.;
+    + pour jumeler des fiches\ : `@describeIn`, `@rdname`;
+    + métadonnées\ : `@name`, `@aliases`, etc.
 
-Pour générer la documentation : `devtools::document()` ou `devtools::check()`
+Pour générer la documentation\ : `devtools::document()` ou `devtools::check()`
 
-#### 4. Vérifier et construire le package
+#### 4. Vérifier et construire le package {-}
 
 \mbox{}
 
-Installations nécessaires :
+Installations nécessaires\ :
 
 - R, 
-- [outils de développement de logiciel GNU](https://stt4230.rbind.io/packages/devel_packages_r/#etape-4.-construire-et-verifier-le-package), 
+- [outils de développement de logiciel GNU](https://stt4230.rbind.io/packages/devel_packages_r/#%C3%A9tape-4.-v%C3%A9rifier-et-construire-le-package), 
 - compilateur LaTeX (uniquement pour générer la documentation au format PDF).
 
 **`R CMD check`**
 
-Effectue diverses vérifications du package :  
+Effectue diverses vérifications du package\ :  
 - option `--as-cran` avant de soumettre an CRAN,  
 - option `--no-manual` si aucun compilateur LaTeX n'est installé sur notre ordinateur.
 
 **`R CMD build`**
 
-Construit le package source (.tar.gz, = version Unix / Linux).
+Construit le package source (.tar.gz, = version Linux).
 
 **`R CMD INSTALL --build`**
 
-Construit le package binaire (.zip sous Windows, .tgz sous Mac OS X / OS X / macOS )
+Construit le package binaire (.zip sous Windows, .tgz sous macOS )
 
-**Vérifier et construire le package avec le package `devtools` :**
+**Vérifier et construire le package avec le package `devtools`\ :**
 
-Fonctions du package `devtools` (à appeler dans la console) : 
+Fonctions du package `devtools` (à appeler dans la console)\ : 
 
-- `check` : vérification, par défaut active l'option `--as-cran`;
-- `build` : construction, par défaut crée le package source, version binaire obtenue avec `binary = TRUE`;
-- `load_all` : utile en cours de développement pour charger les fonctions dans la session;
-- `install` : installation locale du package.
+- `check`\ : vérification, par défaut active l'option `--as-cran`;
+- `build`\ : construction, par défaut crée le package source, version binaire obtenue avec `binary = TRUE`;
+- `load_all`\ : utile en cours de développement pour charger les fonctions dans la session;
+- `install`\ : installation locale du package.
 
-**Vérifier et construire le package avec RStudio :**
+**Vérifier et construire le package avec RStudio\ :**
 
 - Sous-étape a) Créer un projet RStudio avec notre package
 - Sous-étape b) Configurer les options de RStudio
-- Sous-étape c) Compiler à partir du menu «&nbsp;**Build**&nbsp;» de RStudio
-    + vérifier le package : menu «&nbsp;**Build > Check Package**&nbsp;»,
-    + créer le package source : menu «&nbsp;**Build > Build Source Package**&nbsp;»,
-    + créer le package binaire : menu «&nbsp;**Build > Build Binary Package**&nbsp;».
+- Sous-étape c) Compiler à partir du menu «\ **Build**\ » de RStudio
+    + vérifier le package\ : menu «\ **Build > Check Package**\ »,
+    + créer le package source\ : menu «\ **Build > Build Source Package**\ »,
+    + créer le package binaire\ : menu «\ **Build > Build Binary Package**\ ».
 
 
-#### 5. Si désiré, partager le package
-
-\mbox{}
-
-Il n'est pas compliqué de soumettre un package au CRAN : https://cran.r-project.org/submit.html
-
-#### 6. Au besoin, mettre à jour le package
+#### 5. Si désiré, partager le package {-}
 
 \mbox{}
 
-Mise à jour = modification pour ajouter des fonctionnalités et/ou corriger des bogues :
+Il n'est pas compliqué de soumettre un package au CRAN\ : <https://cran.r-project.org/submit.html>
 
-- Sous-étape a) Incrémenter le numéro de version
-    + dans le fichier DESCRIPTION 
-    + dans la fiche d'aide du package
+#### 6. Au besoin, mettre à jour le package {-}
+
+\mbox{}
+
+Mise à jour = modification pour ajouter des fonctionnalités et/ou corriger des bogues\ :
+
+- Sous-étape a) Incrémenter le numéro de version dans le fichier DESCRIPTION (et dans la fiche d'aide du package s'il y est mentionné)
 - Sous-étape b) Faire les mises à jour dans le code
-- Sous-étape c) Documenter les mises à jour :
-    + mettre à jour les commentaires `roxygen2` produisant les fiches d'aide
-    + décrire brièvement les changements dans fichier NEWS  
+- Sous-étape c) Documenter les mises à jour\ :
+    + mettre à jour les commentaires `roxygen` produisant les fiches d'aide
+    + décrire brièvement les changements dans fichier `NEWS` ou `NEWS.md`  
     (non obligatoire, mais c'est une bonne pratique)
 - Sous-étape d) Reconstruire et revérifier le package
 
@@ -1439,54 +1479,55 @@ Mise à jour = modification pour ajouter des fonctionnalités et/ou corriger des
 
 ****
 
-# Références
+# Références {-}
 
 - R Core Team (2019). *Writing R Extensions*. R Foundation for Statistical Computing. Chapitre 4.  
-URL https://cran.r-project.org/doc/manuals/r-release/R-exts.html
+URL <https://cran.r-project.org/doc/manuals/r-release/R-exts.html>
 - Wickham, H. (2015). *R packages*. O'Reilly Media, Inc. 
-    + URL première édition (quelques informations dans cette version sont déjà obsolètes) :  
-    http://r-pkgs.had.co.nz/
-    + URL deuxième édition (en développement) : https://r-pkgs.org
-        * Bon chapitre résumé : https://r-pkgs.org/whole-game.html
+    + URL première édition (quelques informations dans cette version sont déjà obsolètes)\ :  
+    <http://r-pkgs.had.co.nz/>
+    + URL deuxième édition (en développement)\ : <https://r-pkgs.org>
+        * Bon chapitre résumé\ : <https://r-pkgs.org/whole-game.html>
 
-Packages exploités dans ces notes :
+Packages exploités dans ces notes\ :
 
-- Wickham, H., Danenberg, P., Csárdi, G. et Eugster, M. (2020). roxygen2: In-Line Documentation for R. R package version 7.1.0. URL https://CRAN.R-project.org/package=roxygen2
-    + URL documentation en ligne https://roxygen2.r-lib.org/
-- Wickham, H. et Bryan, J. (2019). usethis: Automate Package and Project Setup. R package version 1.5.1. https://CRAN.R-project.org/package=usethis
-    + URL documentation en ligne https://usethis.r-lib.org/
+- Wickham, H., Danenberg, P., Csárdi, G. et Eugster, M. (2020). roxygen2: In-Line Documentation for R. R package version 7.1.0. URL <https://CRAN.R-project.org/package=roxygen2>
+    + URL documentation en ligne <https://roxygen2.r-lib.org/>
+- Wickham, H. et Bryan, J. (2019). usethis: Automate Package and Project Setup. R package version 1.5.1. <https://CRAN.R-project.org/package=usethis>
+    + URL documentation en ligne <https://usethis.r-lib.org/>
 - Wickham, H., Hester, J. et Chang, W. (2020). devtools: Tools to Make Developing R Packages Easier.
-R package version 2.2.2. https://CRAN.R-project.org/package=devtools
-    + URL documentation en ligne https://devtools.r-lib.org/
-    + feuille de triche https://rawgit.com/rstudio/cheatsheets/master/package-development.pdf
+R package version 2.2.2. <https://CRAN.R-project.org/package=devtools>
+    + URL documentation en ligne <https://devtools.r-lib.org/>
+    + feuille de triche <https://rawgit.com/rstudio/cheatsheets/master/package-development.pdf>
 
-Pour le développement en utilisant les packages `usethis` et `devtools` : 
+Tutoriel sur le web concernant le développement de packages R en utilisant les packages `usethis` et `devtools`\ : 
 
-- Bryan, J., Hester, J. et Wickham, H. (2019). Tutoriel présenté dans le cadre de la conférence UseR 2019 intitulé « Package Development ». URL https://github.com/jennybc/pkg-dev-tutorial
-- Dray, M. (2019). Tutoriel web intitulé « Build an R package with {usethis} ». URL https://www.rostrum.blog/2019/11/01/usethis/
-- Gelfand, S. (2019). Tutoriel web intitulé « usethis for reporting ». URL https://sharla.party/post/usethis-for-reporting/
+- Bryan, J., Hester, J. et Wickham, H. (2019). Tutoriel présenté dans le cadre de la conférence UseR 2019 intitulé «\ Package Development\ ». URL <https://github.com/jennybc/pkg-dev-tutorial>
+- Dray, M. (2019). Tutoriel web intitulé «\ Build an R package with {usethis}\ ». URL <https://www.rostrum.blog/2019/11/01/usethis/>
+- Gelfand, S. (2019). Tutoriel web intitulé «\ usethis for reporting\ ». URL <https://sharla.party/post/usethis-for-reporting/>
+- Meyer, C. et Hammerschmidt, D. (2020). Tutoriel web intitulé «\ How to write your own R package and publish it on CRAN\ ». URL <https://www.mzes.uni-mannheim.de/socialsciencedatalab/article/r-package/>
+- Pileggi, S. (2020). Tutoriel web intitulé «\ Your first R package in 1 hour\ ». URL <https://www.pipinghotdata.com/posts/2020-10-25-your-first-r-package-in-1-hour/>
 
+Pour le développement avec RStudio\ :
 
-Pour le développement avec RStudio :
-
-- https://support.rstudio.com/hc/en-us/articles/200486488-Developing-Packages-with-RStudio
+- <https://support.rstudio.com/hc/en-us/articles/200486488-Developing-Packages-with-RStudio>
 
 
 
 ***
 
 
-# Annexe
+# Annexe {-}
 
-## Résolution de problèmes déjà rencontrés
+## Résolution de problèmes déjà rencontrés {-}
 
-Voici des problèmes déjà rencontrés par des étudiants du cours lors de la construction ou la vérification d'un package et leurs solutions.
+Voici des problèmes déjà rencontrés par des étudiants du cours lors de la construction ou la vérification d'un package avec RStudio et leurs solutions.
 
-#### Erreur « Installation failed »
+#### Erreur «\ Installation failed\ » {-}
 
 \mbox{}
 
-PROBLÈME : Une erreur de ce type est produite par l'outil «&nbsp;**Check Package**&nbsp;» :
+PROBLÈME\ : Une erreur de ce type est produite par l'outil «\ **Check Package**\ »\ :
 
 ```
    * checking whether package 'manhattan' can be installed ... ERROR
@@ -1494,58 +1535,58 @@ PROBLÈME : Une erreur de ce type est produite par l'outil «&nbsp;**Check Packa
    See 'C:/coursR/NomRépertoireAvecAccents/manhattan.Rcheck/00install.out' for details.
 ```
 
-CAUSE : Le nom complet du répertoire du package contient des accents ou des espaces. (Cela ne cause pas toujours une erreur, ça dépend de la version de R utilisée et de votre système d'exploitation.)
+CAUSE\ : Le nom complet du répertoire du package contient des accents ou des espaces. (Cela ne cause pas toujours une erreur, ça dépend de la version de R utilisée et de votre système d'exploitation.)
 
-SOLUTION : Utiliser un répertoire dont le nom complet ne comprend aucun accent, ni aucun espace.
+SOLUTION\ : Utiliser un répertoire dont le nom complet ne comprend aucun accent, ni aucun espace.
 
-&nbsp;
+\ 
 
-#### Erreur de permission d'écriture dans un répertoire d'installation
+#### Erreur de permission d'écriture dans un répertoire d'installation {-}
 
 \mbox{}
 
-PROBLÈME : Une erreur de ce type est produite par l'outil «&nbsp;**Build Binary Package**&nbsp;», «&nbsp;**Install and Restart**&nbsp;» ou «&nbsp;**Clean and Rebuild**&nbsp;» :
+PROBLÈME\ : Une erreur de ce type est produite par l'outil «\ **Build Binary Package**\ », «\ **Install and Restart**\ » ou «\ **Clean and Rebuild**\ »\ :
 
 ```
-   ERREUR : pas de permission pour installer dans le répertoire 
-   'C:/Program Files/R/R-3.5.2/library'
+   ERREUR\ : pas de permission pour installer dans le répertoire 
+   'C:/Program Files/R/R-4.0.3/library'
 ```
 
-CAUSE : Le compte utilisé n'a pas la permission d'écrire dans le répertoire où R cherche à installer le package. Si vous travaillez à partir d'un compte administrateur, vous ne devriez pas rencontrer ce problème.
+CAUSE\ : Le compte utilisé n'a pas la permission d'écrire dans le répertoire où R cherche à installer le package. Si vous travaillez à partir d'un compte administrateur, vous ne devriez pas rencontrer ce problème.
 
-SOLUTION : Modifier les options des outils de construction pour demander l'installation dans un autre répertoire, un pour lequel le compte utilisateur à une permission en écriture. 
+SOLUTION\ : Modifier les options des outils de construction pour demander l'installation dans un autre répertoire, un pour lequel le compte utilisateur à une permission en écriture. 
 
-Étape 1 : trouver le bon répertoire à utiliser
+Étape 1\ : trouver le bon répertoire à utiliser
 
-Il faut utiliser un des répertoires dans lesquels R recherche des installations de packages. Un vecteur contenant tous ces répertoires est retourné par la commande suivante  dans la console R :
+Il faut utiliser un des répertoires dans lesquels R recherche des installations de packages. Un vecteur contenant tous ces répertoires est retourné par la commande suivante  dans la console R\ :
 
 ```{r R.options = list(width = 85)}
 .libPaths()
 ```
 
-Dans mon cas, le premier répertoire énuméré, soit `"C:/Users/Sophie/Documents/R/win-library/3.5"`, est localisé dans les fichiers du compte utilisateur. J'y ai donc assurément une permission en écriture. C'est lui que je vais utiliser.
+Dans mon cas, le premier répertoire énuméré, soit `"C:/Users/Sophie/Documents/R/win-library/4.0"`, est localisé dans les fichiers du compte utilisateur. J'y ai donc assurément une permission en écriture. C'est lui que je vais utiliser.
 
-Étape 2 : ajouter une option aux outils de construction
+Étape 2\ : ajouter une option aux outils de construction
 
 a) ouvrir la fenêtre de configuration des outils de construction
-b) ajouter l'option `--library="C:/Users/Sophie/Documents/R/win-library/3.5"` (à adapter selon le nom du répertoire que vous avez choisi d'utiliser) à deux endroits :
+b) ajouter l'option `--library="C:/Users/Sophie/Documents/R/win-library/4.0"` (à adapter selon le nom du répertoire que vous avez choisi d'utiliser) à deux endroits\ :
 
-- la configuration de l'outil «&nbsp;**Install and Restart**&nbsp;» et «&nbsp;**Clean and Rebuild**&nbsp;» se fait dans le champ, nommé «&nbsp;Build and Reload - R CMD INSTALL additionnal options:&nbsp;» 
-- la configuration de l'outil «&nbsp;**Build Binary Package**&nbsp;» se fait dans le dernier champ, nommé «&nbsp;Build Binary Package - R CMD INSTALL additionnal options:&nbsp;»
+- la configuration de l'outil «\ **Install and Restart**\ » et «\ **Clean and Rebuild**\ » se fait dans le champ, nommé «\ Build and Reload - R CMD INSTALL additionnal options:\ » 
+- la configuration de l'outil «\ **Build Binary Package**\ » se fait dans le dernier champ, nommé «\ Build Binary Package - R CMD INSTALL additionnal options:\ »
 
-&nbsp;
+\ 
 
-#### Vérification qui gèle à l'étape « checking PDF version of manual »
+#### Vérification qui gèle à l'étape «\ checking PDF version of manual\ » {-}
 
 \mbox{}
 
-PROBLÈME : Outil «&nbsp;**Check Package**&nbsp;» qui n'arrive pas à terminer son check, qui gèle à l'étape « checking PDF version of manual ».
+PROBLÈME\ : Outil «\ **Check Package**\ » qui n'arrive pas à terminer son check, qui gèle à l'étape «\ checking PDF version of manual\ ».
 
-CAUSE : Je ne sais pas exactement... Ça ressemble à un bogue.
+CAUSE\ : Je ne sais pas exactement... Ça ressemble à un bogue.
 
-SOLUTION : Modifier les options de l'outil «&nbsp;**Check Package**&nbsp;»
+SOLUTION\ : Modifier les options de l'outil «\ **Check Package**\ »
 
 a) ouvrir la fenêtre de configuration des outils de construction
-b) ajouter dans le champ nommé «&nbsp;Check Package - R CMD check additionnal options:&nbsp;» l'option suivante : `--no-manual`
+b) ajouter dans le champ nommé «\ Check Package - R CMD check additionnal options:\ » l'option suivante\ : `--no-manual`
 
 
