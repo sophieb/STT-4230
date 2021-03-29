@@ -32,7 +32,7 @@ weight = 9
     * [Programmation orientée objet en R]({{< relref "programmation/oop_r_2021.html" >}})
     * [Tests et exceptions en R]({{< relref "programmation/tests_exceptions_r_2021.html" >}})
 * Semaine 12
-    * [Utilisation de packages R]
+    * [Utilisation de packages R]({{< relref "packages/utilisation_packages_r_2021.html" >}})
     * [Développement de packages R]
 * Semaine 13
     * [Optimisation de temps d'exécution en R]
