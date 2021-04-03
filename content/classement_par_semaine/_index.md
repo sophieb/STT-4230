@@ -35,7 +35,7 @@ weight = 9
     * [Utilisation de packages R]({{< relref "packages/utilisation_packages_r_2021.html" >}})
     * [Développement de packages R]({{< relref "packages/developpement_packages_r_2021.html" >}})
 * Semaine 13
-    * [Optimisation de temps d'exécution en R]
+    * [Optimisation de temps d'exécution en R]({{< relref "amelioration_code/optim_temps_r_2021.html" >}})
     * [Métaprogrammation en R]
 
     
