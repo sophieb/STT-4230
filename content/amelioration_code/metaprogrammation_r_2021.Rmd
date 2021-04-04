@@ -1,27 +1,26 @@
 ---
 title: "Métaprogrammation en R"
 author: "Sophie Baillargeon, Université Laval"
-date: "2020-03-31"
+date: "2021-04-04"
 weight: 3
 slug: "metaprogrammation_r"
-categories: ["cours_2020-04-07"]
-categories_weight: 2
-lastmodifierdisplayname : "Sophie Baillargeon"
+lastmodifierdisplayname: "Sophie Baillargeon"
 lastmodifieremail: "sophie.baillargeon@mat.ulaval.ca"
 output:
   pdf_document:
     toc: yes
     toc_depth: 3
+    number_sections: yes
     highlight: tango
   blogdown::html_page:
     toc: yes
     toc_depth: 3
+    number_sections: yes
     highlight: tango
 header-includes:
 - \usepackage[french]{babel}
 - \frenchbsetup{StandardLayout}
 - \hypersetup{colorlinks=true, urlcolor = {blue}, linkcolor = {blue}}
-- \renewcommand{\linethickness}{0.05em}
 editor_options: 
   chunk_output_type: console
 ---
@@ -30,15 +29,17 @@ editor_options:
 
 ***
 
-&nbsp;
+*Note préliminaire\ : Lors de leur dernière mise à jour, ces notes ont été révisées en utilisant R version 4.0.3.*
 
-La métaprogrammation se définit par **l'écriture d'un programme qui écrit lui-même un programme**. Par exemple, en R, il est possible d'écrire un bout de code qui compose d'abord une ou des instructions sous forme d'expressions ou de chaînes de caractères, puis qui évalue ces instructions dans un deuxième temps. La métaprogrammation est typiquement utilisée pour rendre un programme plus succinct, donc potentiellement plus facile à comprendre, ou pour automatiser certaines tâches.
+***
 
-Les sections qui suivent décrivent quelques outils en R pour manipuler des éléments de langage sans les évaluer, ce qui permet de réaliser de la métaprogrammation.
+La métaprogrammation se définit par l'écriture d'un programme qui écrit lui-même un programme. En d'autres mots, faire de la métaprogrammation signifie de manipuler des éléments de langage sans les évaluer. En R, des exemples d'éléments du langage sont les noms, les formules, les expressions, les appels de fonctions, etc. Il est donc possible en R d'écrire un bout de code qui compose d'abord une ou des instructions sous forme d'expressions ou de chaînes de caractères, puis qui évalue ces instructions dans un deuxième temps. La métaprogrammation est parfois utile pour automatiser des calculs. Elle sert aussi à réaliser certaines tâches spécifiques, par exemple l'ajout d'annotations mathématiques à un graphique (abordé dans les [notes sur les graphiques en R](https://stt4230.rbind.io/communication_resultats/graphiques_r/#annotations-math%C3%A9matiques))
+
+Les sections qui suivent décrivent quelques outils de métaprogrammation en R.
 
 # Assignation d'une valeur à un nom avec `assign`
 
-Voici un exemple d'instruction R qui utilise la façon usuelle d'écrire une assignation en R :
+Voici un exemple d'instruction R qui utilise la façon usuelle d'écrire une assignation en R\ :
 
 ```{r}
 obj <- head(letters)
@@ -46,8 +47,8 @@ obj <- head(letters)
 
 Dans cette instruction, qui utilise l'opérateur d'assignation `<-`, 
 
-- `obj` est le nom référant à l’objet créé en mémoire;
-- `head(letters)` est l'expression dont la valeur, obtenue après évaluation, est enregistrée dans l’objet créé en mémoire.
+- `obj` est le nom référant à l'objet créé en mémoire;
+- `head(letters)` est l'expression dont la valeur, obtenue après évaluation, est enregistrée dans l'objet créé en mémoire.
 
 Un nom est en fait un symbole relié à un objet.
 
@@ -57,7 +58,7 @@ Mais comment assigner une valeur à un nom stocké dans un objet sous forme de c
 nom <- "nom_objet"
 ```
 
-Nous voulons assigner une valeur au nom stocké dans `nom`, peu importe la chaîne de caractères que `nom` contient. Cette assignation peut être réalisée avec la fonction `assign` comme dans cet exemple :
+Nous voulons assigner une valeur au nom stocké dans `nom`, peu importe la chaîne de caractères que `nom` contient. Cette assignation peut être réalisée avec la fonction `assign` comme dans cet exemple\ :
 
 ```{r}
 assign(x = nom, value = head(letters))
@@ -87,6 +88,8 @@ Vérifions que ces objets ont bien été créés dans notre environnement de tra
 
 ```{r}
 ls()
+obj1
+obj5
 ```
 
 
@@ -121,7 +124,7 @@ Par exemple, pour afficher le contenu des objets nommés `obj1` à `obj5`, nous 
 
 ```{r}
 for (i in 1:5) {
-  cat(paste0("obj", i, " ="), get(paste0("obj", i)), "\n")
+  cat(paste0("obj", i), "=", get(paste0("obj", i)), "\n")
 }
 ```
 
@@ -130,7 +133,7 @@ for (i in 1:5) {
 
 Nous venons d'apprendre comment manipuler un nom que nous possédons sous forme de chaîne de caractères. Comment procéder lorsque ce nom est celui d'une fonction que nous souhaitons appeler?
 
-Il est alors possible d'utiliser `get`, mais une autre fonction peut aussi nous être utile : `do.call`.
+Il est alors possible d'utiliser `get`, mais une autre fonction peut aussi nous être utile\ : `do.call`.
 
 Par exemple, les trois instructions suivantes provoquent toute l'évaluation du même appel à la fonction `median`.
 
@@ -145,28 +148,24 @@ En fait, l'avantage de `do.call` n'est pas qu'il soit capable de manipuler une f
 Voici un exemple de fonction qui exploite le potentiel de la fonction `do.call`.
 
 ```{r }
-#' Calcul de statistiques descriptives
-#'
-#' Cette fonction permet de calculer des statistiques descriptives au choix
-#'
+#' @title Calcul de statistiques descriptives
+#' @description Cette fonction permet de calculer des statistiques descriptives au choix
 #' @param x vecteur d'observations
 #' @param choix une chaîne de caractères spécifiant le nom de la fonction à appeler pour
 #'              le calcul, soit "table" (par défaut), "mean", "median", "sd" ou "mad"
 #' @param retirer_NA un logique spécifiant si les valeurs manquantes (NA)
 #'                   doivent être retirées avant le calcul (par défaut TRUE)
-#'
 #' @return le résultat de l'appel à la fonction choisie
-#'
 choixstat <- function(x, choix = c("table", "mean", "median", "sd", "mad"),
                       retirer_NA = TRUE) {
   choix <- match.arg(choix)
   arguments <- list(x)
-  if (choix == "table"){
+  if (choix == "table") {
     arguments$useNA <- if (retirer_NA) "no" else "ifany"
   } else {
     arguments$na.rm <- retirer_NA
   }
-  do.call(what = choix, args = arguments)
+  return(do.call(what = choix, args = arguments))
 }
 ```
 
@@ -211,9 +210,9 @@ Les formules sont des éléments de langage R particuliers. Ils servent à spéc
 f1 <- y ~ x1 + x2
 ```
 
-Une formule contient un opérateur `~`, possiblement avec un argument à gauche pour spécifier la ou les variables réponses du modèle et un argument à droite pour spécifier la ou les variables explicatives du modèle. Des informations sur les formules ont été fournies dans le cours sur les [calculs statistiques et mathématiques en R](https://stt4230.rbind.io/calculs/calculs_stat_math_r/#formules).
+Une formule contient un opérateur `~`, possiblement avec un argument à gauche pour spécifier la ou les variables réponses du modèle et un argument à droite pour spécifier la ou les variables explicatives du modèle. Des informations sur les formules ont été fournies dans le cours sur les [calculs statistiques en R](https://stt4230.rbind.io/calculs/calculs_stat_r/#formules).
 
-R reconnaît que `f1` est bien une formule.  Il la décompose même en trois parties : l'opérateur `~`, la partie de gauche du modèle (en anglais *LHS* pour *left hand side*) et la partie de droite du modèle (en anglais *RHS* pour *right hand side*).
+R reconnaît que `f1` est bien une formule.  Il la décompose même en trois parties\ : l'opérateur `~`, la partie de gauche du modèle (en anglais *LHS* pour *left hand side*) et la partie de droite du modèle (en anglais *RHS* pour *right hand side*).
 
 
 ```{r}
@@ -239,22 +238,18 @@ Cette possibilité de transformer une chaîne de caractères en formule s'avère
 Voici un exemple de fonction qui utilise `as.formula` pour construire un modèle de régression polynomial.
 
 ```{r}
-#' Régression polynomiale
-#'
-#' Ajustement d'un modèle de régression polynomial entre deux variables
-#'
+#' @tital Régression polynomiale
+#' @description Ajustement d'un modèle de régression polynomial entre deux variables
 #' @param y vecteur des observations de la variable réponse
 #' @param x vecteur des observations de la variable explicative
 #' @param dg degré du modèle polynomial à ajuster
-#'
 #' @return sortie de la fonction lm pour le modèle demandé
-#'
 reg_poly <- function(y, x, dg){
   formule <- paste(
     "y ~", 
     paste(paste0("I(x^", 1:dg, ")"), collapse = " + ")
   )
-  lm(as.formula(formule))
+  return(lm(as.formula(formule)))
 }
 ```
 
@@ -290,20 +285,20 @@ Nous pourrions aussi transformer une variable.
 update(f1, sqrt(.) ~ .)
 ```
 
-La fonction `update` est générique. Si le premier argument qu'elle reçoit est une formule, elle appelle la méthode `update.formula`. Dans un appel à `update.formula`, un `.` représente une partie de la formule originale. Le `.` à gauche du `~` représente le LHS du modèle fourni comme premier argument et le `.` à droite du `~` le RHS du modèle fourni comme premier argument.
+La fonction `update` est générique. Si le premier argument qu'elle reçoit est une formule, elle appelle la méthode `update.formula`. Dans un appel à `update.formula`, un point (symbole `.`) représente une partie de la formule originale. Le `.` à gauche du `~` représente le LHS de la formule fournie comme premier argument et le `.` à droite du `~` le RHS la formule fournie comme premier argument.
 
 
 # Manipulation d'instructions
 
 Il est possible d'écrire des instructions R complètes, sous forme d'expression R ou de chaîne de caractères, sans les évaluer.
 
-Prenons par exemple l'instruction R suivante : `median(x = 1:10)`. Il s'agit d'un appel à la fonction `median`. Si nous soumettons cette instruction dans la console, elle est évaluée et sa valeur, ici l'objet retourné en sortie par la fonction `median`, est imprimée.
+Prenons par exemple l'instruction R suivante\ : `median(x = 1:10)`. Il s'agit d'un appel à la fonction `median`. Si nous soumettons cette instruction dans la console, elle est évaluée et sa valeur, ici l'objet retourné en sortie par la fonction `median`, est imprimée.
 
 ```{r}
 median(x = 1:10)
 ```
 
-Si nous ajoutons une assignation au début de l'instruction comme suit :
+Si nous ajoutons une assignation au début de l'instruction comme suit\ :
 
 ```{r}
 out <- median(x = 1:10)
@@ -317,24 +312,35 @@ out
 
 Mais comment stocker dans un objet l'instruction elle-même ?
 
-## Fonction `quote`
+## Fonctions `quote` et `expression`
 
-La fonction `quote` retourne une instruction R non évaluée, que nous pouvons appeler « expression ».
+La fonction `quote` retourne une instruction R non évaluée, que nous pouvons appeler «\ expression\ ».
 
 ```{r}
 out_quote <- quote(median(x = 1:10))
 str(out_quote)
 ```
 
-C'est un « élément de langage ».
+C'est un «\ élément de langage\ ».
+
+La fonction `expression`, mentionnée dans les [notes sur les graphiques en R](https://stt4230.rbind.io/communication_resultats/graphiques_r/#annotations-math%C3%A9matiques) pour l'ajout d'annotations mathématiques à un graphique, est similaire à la fonction `quote`, mais retourne un objet de langage un peu plus complexe.
+
+```{r}
+out_exp <- expression(median(x = 1:10))
+str(out_exp)
+```
+
+Nous n'entrerons pas ici dans les détails techniques de la distinction entre ces deux types d'objets.
 
 ## Fonction `eval`
 
-Lorsque nous désirons évaluer une expression R, nous pouvons la fournir en entrée à la fonction `eval`.
+Lorsque nous désirons évaluer une expression R, nous pouvons la fournir en entrée à la fonction `eval`. Les objets retournés par les fonctions `quote` et `expression` s'évaluent de la même façon.
 
 ```{r}
 eval(out_quote)
+eval(out_exp)
 ```
+
 
 ## Fonction `call`
 
@@ -351,7 +357,7 @@ Les objets `out_call` et `out_quote` sont équivalents.
 all.equal(out_quote, out_call)
 ```
 
-Évaluer `out_call` se réalise de la même façon qu'évaluer `out_quote`.
+Évaluer `out_call` se réalise de la même façon qu'évaluer `out_quote` ou `out_exp`.
 
 ```{r}
 eval(out_call)
@@ -362,7 +368,7 @@ eval(out_call)
 
 Étant donné que les chaînes de caractères se manipulent facilement, il serait utile de pouvoir transformer une chaîne de caractères en expression. C'est ce que nous permet de faire la fonction `parse`.
 
-Par exemple, si nous avons la chaîne de caractère suivante :
+Par exemple, si nous avons la chaîne de caractère suivante\ :
 
 ```{r}
 instruc_car <- "median(x = 1:10)"
@@ -376,19 +382,19 @@ out_parse <- parse(text = instruc_car)
 str(out_parse)
 ```
 
-L'objet `out_parse` n'a pas tout à fait la même structure que `out_quote` ou `out_call`, mais il s'évalue de la même façon, avec la fonction `eval`.
+L'objet `out_parse` ressemble à l'objet `out_exp` et s'évalue de la même façon, avec la fonction `eval`.
 
 ```{r}
 eval(out_parse)
 ```
 
-Nous avons donc parcouru le chemin de transformation suivant :
+Nous avons donc parcouru le chemin de transformation suivant\ :
 
 > instruction sous forme de chaîne de caractères,   
 > $\rightarrow$ expression non évaluée avec `parse`,   
 > $\rightarrow$ évaluation de l'expression avec `eval`.
 
-Grâce à ces outils, nous pourrions améliorer la fonction `reg_poly`. Vous aurez peut-être remarqué que dans l'impression de la sortie de cette fonction, le `Call` a toujours la même allure : ` lm(formula = as.formula(formule))`. Ce n'est pas très informatif. Voici une deuxième version de cette fonction, utilisant `parse` et `eval` plutôt que `as.formula`, qui produit un affichage amélioré.
+Grâce à ces outils, nous pourrions améliorer la fonction `reg_poly`. Vous aurez peut-être remarqué que dans l'impression de la sortie de cette fonction, le `Call` a toujours la même allure\ : `lm(formula = as.formula(formule))`. Ce n'est pas très informatif. Voici une deuxième version de cette fonction, utilisant `parse` et `eval` plutôt que `as.formula`, qui produit un affichage amélioré.
 
 ```{r}
 #' @inherit reg_poly title description params return
@@ -398,10 +404,9 @@ reg_poly_2 <- function(y, x, dg){
     paste(paste0("I(x^", 1:dg, ")"), collapse = " + "),
     ")"
   )
-  eval(parse(text = instruc))
+  return(eval(parse(text = instruc)))
 }
 ```
-
 
 ```{r}
 reg_poly_2(y = cars$dist, x = cars$speed, dg = 3)
@@ -434,13 +439,13 @@ View(hist.default)
 
 Les fonctions `substitute` et `deparse` sont utilisées pour créer l'objet `xname`, qui est ensuite utilisé dans les valeurs par défaut des arguments `main` et `xlab`.
 
-#### Exemples pour mieux comprendre `substitute` et `deparse` :
+#### Exemples pour mieux comprendre `substitute` et `deparse`\ : {-}
 
 \mbox{}
 
 ```{r}
 fct1 <- function(x){
-  x
+  return(x)
 }
 test <- fct1(1:10)
 str(test)
@@ -451,7 +456,7 @@ La fonction `fct1` retourne ici un vecteur, soit le résultat de l'évaluation d
 
 ```{r}
 fct2 <- function(x){
-  substitute(x)
+  return(substitute(x))
 }
 test <- fct2(1:10)
 str(test)
@@ -461,40 +466,41 @@ Lorsque `substitute` est utilisée dans le corps d'une fonction et qu'elle reço
 
 ```{r}
 fct3 <- function(x){
-  deparse(substitute(x))
+  return(deparse(substitute(x)))
 }
 test <- fct3(1:10)
 str(test)
 ```
 
-Dans le corps de la fonction `fct3`, l'expression non évaluée retournée par `substitute` est transformée en chaîne de caractères par la fonction `deparse`. La fonction `deparse` permet de faire l'inverse de la fonction `parse` :
+Dans le corps de la fonction `fct3`, l'expression non évaluée retournée par `substitute` est transformée en chaîne de caractères par la fonction `deparse`. La fonction `deparse` permet de faire l'inverse de la fonction `parse`\ :
 
-- `deparse` : expression $\rightarrow$ chaîne de caractères,
+- `deparse`\ : expression $\rightarrow$ chaîne de caractères,
 - `parse`: chaîne de caractères $\rightarrow$ expression.
 
 ## Fonction `match.call`
 
-Avec `substitute`, nous pouvons accéder à une expression assignée à un argument dans l'appel d'une fonction. La fonction `match.call`, que nous avons déjà mentionnée dans les notes sur les [fonctions](https://stt4230.rbind.io/programmation/fonctions_r/#fonction-match.call), permet quant à elle d'accéder à l'appel complet de la fonction.
+Avec `substitute`, nous pouvons accéder à une expression assignée à un argument dans l'appel d'une fonction. La fonction `match.call`, que nous avons déjà mentionnée dans les [notes sur les fonctions](https://stt4230.rbind.io/programmation/fonctions_r/#fonction-match.call), permet quant à elle d'accéder à l'appel complet de la fonction.
 
 ```{r}
 fct4 <- function(x){
-  match.call()
+  return(match.call())
 }
 test <- fct4(1:10)
 str(test)
 ```
 
-La fonction `match.call` retourne une expression non évaluée, comme `substitute`. Dans cette expression, il est possible d'accéder à des arguments en particulier.
+La fonction `match.call` retourne une expression non évaluée, comme `substitute`. Dans cette expression, il est possible d'accéder à des arguments en particulier grâce à l'opérateur `$`.
 
 ```{r}
 fct5 <- function(x, y){
   appel <- match.call()
-  list(
+  appel_details <- list(
     appel_complet = appel, 
     arg_x_exp = appel$x,
-    arg_y_car = deparse(appel$x),
+    arg_x_car = deparse(appel$x),
     arg_y_exp = appel$y
   )
+  return(appel_details)
 }
 test <- fct5(x = 1:10, y = "a")
 str(test)
@@ -508,29 +514,31 @@ Dans cet exemple, la valeur fournie à l'argument `y` ne contient pas un appel �
 
 **Manipuler des éléments de langage sans les évaluer**
 
-- assignation d'une valeur à un nom : `assign`;
-- retour de la valeur assignée à un nom : `get`;
-- appel à une fonction en fournissant les arguments dans une liste : `do.call`;
-- manipulation de formules : 
-    + créer une formule à partir d'une chaîne de caractères : `as.formula`,
-    + mettre à jour une formule : `update.formula`;
-- manipulation d'instructions : 
-    + capturer une instruction sans l'évaluer : `quote`, 
-    + évaluer une expression : `eval`, 
-    + écrire un appel de fonction sous forme d'expression (non évaluée) : `call`,
-    + créer une expression (non évaluée) à partir d'une chaîne de caractères : `parse` (argument `text`);
-- manipulation de l'appel d'une fonction : 
-    + capturer sans l'évaluer l'expression assignée à un argument dans un appel de fonction : `substitute`, 
-    + transformer une expression en chaîne de caractères : `deparse`, 
-    + capturer sous forme d'expression un appel de fonction : `match.call`.
+- assignation d'une valeur à un nom\ : `assign`;
+- retour de la valeur assignée à un nom\ : `get`;
+- appel à une fonction en fournissant les arguments dans une liste\ : `do.call`;
+- manipulation de formules\ : 
+    + créer une formule à partir d'une chaîne de caractères\ : `as.formula`,
+    + mettre à jour une formule\ : `update.formula`;
+- manipulation d'instructions\ : 
+    + capturer une instruction sans l'évaluer\ : `quote` ou `expression`, 
+    + évaluer une expression\ : `eval`, 
+    + écrire un appel de fonction sous forme d'expression (non évaluée)\ : `call`,
+    + créer une expression (non évaluée) à partir d'une chaîne de caractères\ : `parse` (argument `text`);
+- manipulation de l'appel d'une fonction\ : 
+    + capturer sans l'évaluer l'expression assignée à un argument dans un appel de fonction\ : `substitute`, 
+    + transformer une expression en chaîne de caractères\ : `deparse`, 
+    + capturer sous forme d'expression un appel de fonction\ : `match.call`.
 
 ***
 
-# Références
+# Références {-}
 
-- R Core Team (2020). *R Language Definition*. R Foundation for Statistical Computing. Chapitre 6. URL http://cran.r-project.org/doc/manuals/r-patched/R-lang.html#Computing-on-the-language
-- Wickham, H. (2014). *Advanced R*. CRC Press. Chapitres 13 et 14. URLs http://adv-r.had.co.nz/Computing-on-the-language.html, http://adv-r.had.co.nz/Expressions.html
-- Wickham, H. (2019). *Advanced R, Second Edition.* Chapman and Hall/CRC. Section 4. URL https://adv-r.hadley.nz/metaprogramming.html
+- R Core Team (2021). *R Language Definition*. R Foundation for Statistical Computing. Chapitre 6. URL <http://cran.r-project.org/doc/manuals/r-patched/R-lang.html#Computing-on-the-language>
+- Wickham, H. (2014). *Advanced R*. CRC Press.
+    + Chapitre 13 *Non-standard evaluation*, URL <http://adv-r.had.co.nz/Computing-on-the-language.html>
+    + Chapitre 14. *Expressions*, URL <http://adv-r.had.co.nz/Expressions.html>
+- Wickham, H. (2019). *Advanced R*. 2^e^ édition. Chapman and Hall/CRC. Section 4. *Metaprogramming* URL <https://adv-r.hadley.nz/metaprogramming.html>
 
 
 
