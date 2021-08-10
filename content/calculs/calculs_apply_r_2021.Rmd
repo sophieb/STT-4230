@@ -29,23 +29,23 @@ editor_options:
 
 ***
 
-*Note préliminaire&nbsp;: Lors de leur dernière mise à jour, ces notes ont été révisées en utilisant R version 4.0.3, le package `dplyr` version 1.0.3 et le package `data.table` version 1.13.6. Pour d'autres versions, les informations peuvent différer.*
+*Note préliminaire\ : Lors de leur dernière mise à jour, ces notes ont été révisées en utilisant R version 4.0.3, le package `dplyr` version 1.0.3 et le package `data.table` version 1.13.6. Pour d'autres versions, les informations peuvent différer.*
 
 ***
 
-Dans le cadre d'une analyse exploratoire de données, certains calculs doivent être répétés sur différentes parties d'un jeu de données, par exemple diverses variables ou des sous-groupes d'observations. Le R de base propose plusieurs fonctions pour arriver à réaliser de tels calculs répétitifs sans écrire de boucle&nbsp;: les fonctions de la famille des `apply`. Ces fonctions sont présentées ici. Deux solutions de rechange pour le cas particulier du calcul de statistiques selon les niveaux de facteurs sont également présentées.
+Dans le cadre d'une analyse exploratoire de données, certains calculs doivent être répétés sur différentes parties d'un jeu de données, par exemple diverses variables ou des sous-groupes d'observations. Le R de base propose plusieurs fonctions pour arriver à réaliser de tels calculs répétitifs sans écrire de boucle\ : les fonctions de la famille des `apply`. Ces fonctions sont présentées ici. Deux solutions de rechange pour le cas particulier du calcul de statistiques selon les niveaux de facteurs sont également présentées.
 
 ***
 
 # Fonctions de la famille des `apply`
 
-R propose plusieurs fonctions, dites «&nbsp;de la famille des `apply`&nbsp;», qui ont pour but d'appliquer itérativement une autre fonction sur des sections d'un objet. Les grandes étapes d'un traitement effectué par une de ces fonctions sont les suivantes&nbsp;:
+R propose plusieurs fonctions, dites «\ de la famille des `apply`\ », qui ont pour but d'appliquer itérativement une autre fonction sur des sections d'un objet. Les grandes étapes d'un traitement effectué par une de ces fonctions sont les suivantes\ :
 
 - séparer un objet en sous-objets;
-- répéter la même action pour tous les sous-objets&nbsp;: appeler une fonction en lui donnant comme premier argument le sous-objet;
+- répéter la même action pour tous les sous-objets\ : appeler une fonction en lui donnant comme premier argument le sous-objet;
 - combiner les résultats obtenus.
 
-Ces fonctions cachent en fait des boucles. Les fonctions de la famille des `apply` sont utiles pour&nbsp;:
+Ces fonctions cachent en fait des boucles. Les fonctions de la famille des `apply` sont utiles pour\ :
 
 - obtenir des statistiques marginales à partir d'une matrice ou d'un array,
 - appliquer le même traitement à tous les éléments d'une liste, 
@@ -53,7 +53,7 @@ Ces fonctions cachent en fait des boucles. Les fonctions de la famille des `appl
 - effectuer des calculs en parallèle (nous y reviendrons plus tard),
 - etc.
 
-Nous verrons ici les fonctions&nbsp;: `apply`, `lapply`, `sapply`, `mapply`, `tapply`, `by` et `aggregate`.
+Nous verrons ici les fonctions\ : `apply`, `lapply`, `sapply`, `mapply`, `tapply`, `by` et `aggregate`.
 
 ## Fonction `apply`
 
@@ -93,7 +93,7 @@ Si elle reçoit en entrée un data frame, elle le transformera en matrice avant 
 
 ### Fonctions raccourcies
 
-Pour le calcul de sommes et de moyennes par lignes ou colonnes d'une matrice, il existe des fonctions raccourcies à la fonction `apply`&nbsp;: `rowSums`, `colSums`, `rowMeans`, `colMeans`. Par exemple&nbsp;:
+Pour le calcul de sommes et de moyennes par lignes ou colonnes d'une matrice, il existe des fonctions raccourcies à la fonction `apply`\ : `rowSums`, `colSums`, `rowMeans`, `colMeans`. Par exemple\ :
 
 ```{r}
 colMeans(mat, na.rm = TRUE)
@@ -120,10 +120,9 @@ phrases <- list(
 ```
 
 
-\vspace{6pt}
-<p style="font-size:110%">
-**Fonction `sapply`**
-</p>
+#### Fonction `sapply` {-}
+
+\mbox{}
 
 Supposons que nous voulons isoler le dernier mot de chaque phrase dans la liste `phrases`. L'action que nous souhaitons réaliser revient à extraire le dernier élément d'un vecteur. Elle doit être réalisée pour tous les vecteurs qui sont des éléments de la liste `phrases`. Nous pourrions réaliser cette tâche avec la commande suivante.
 
@@ -141,10 +140,9 @@ tail(phrases[[i]], n = 1)
 séparément pour tous les éléments, donc pour `i` = 1, 2 et 3, puis que nous avions rassemblé les résultats.
 
 
-\vspace{6pt}
-<p style="font-size:110%">
-**Utilisation d'un opérateur comme valeur de l'argument `FUN`**
-</p>
+#### Utilisation d'un opérateur comme valeur de l'argument `FUN` {-}
+
+\mbox{}
 
 Si nous cherchions plutôt à isoler le deuxième mot de chaque phrase dans la liste `phrases`, nous pourrions réaliser cette extraction avec la commande suivante.
 ```{r}
@@ -164,10 +162,9 @@ Ainsi, l'objet duquel nous voulons extraire est le premier argument à fournir �
 Lorsque l'argument `FUN` d'une fonction de la famille des `apply` est un opérateur, il faut toujours l'encadrer de guillemets (simples ou doubles).
 
 
-\vspace{6pt}
-<p style="font-size:110%">
-**Fonction `lapply`**
-</p>
+#### Fonction `lapply` {-}
+
+\mbox{}
 
 La fonction `lapply` fait exactement le même calcul que la fonction `sapply`, mais retourne le résultat sous la forme d'une liste plutôt que sous une forme simplifiée. Voici un appel à `lapply` équivalent à l'appel à `sapply` qui a permis de créer `derniers_mots`. Les valeurs en sortie n'ont pas changé, mais elles sont stockées dans une liste plutôt que dans un vecteur.
 
@@ -176,29 +173,28 @@ lapply(phrases, FUN = tail, n = 1)
 ```
 
 
-\vspace{6pt}
-<p style="font-size:110%">
-**Fonction `mapply`**
-</p>
+#### Fonction `mapply` {-}
+
+\mbox{}
 
 Il aurait aussi été possible de solutionner le problème de l'extraction des derniers mots des phrases en utilisant la fonction `mapply`. La différence entre cette fonction et les fonctions `sapply` et `lapply` est qu'elle peut fournir à la fonction `FUN` plusieurs (ou de multiples, d'où le `m` dans `mapply`) arguments qui sont des vecteurs ou des listes.
 
 Par exemple, nous pourrions extraire les derniers mots en appliquant l'opérateur `[` à chaque élément de la liste `phrases`, mais en spécifiant comme argument pour l'opérateur d'extraction la position du dernier élément. Cette position diffère un peu d'un élément à l'autre. Elle est égale à la longueur de l'élément.
 
-Nous pourrions donc, dans un premier temps, calculer la longueur de chaque élément de `phrases` comme suit&nbsp;:
+Nous pourrions donc, dans un premier temps, calculer la longueur de chaque élément de `phrases` comme suit\ :
 
 ```{r}
 longueurs_phrases <- sapply(phrases, length)
 longueurs_phrases
 ```
 
-Ayant en main un vecteur contenant les longueurs, nous pouvons utiliser `mapply` pour extraire les derniers éléments des vecteurs dans `phrases` par la commande suivante&nbsp;:
+Ayant en main un vecteur contenant les longueurs, nous pouvons utiliser `mapply` pour extraire les derniers éléments des vecteurs dans `phrases` par la commande suivante\ :
 
 ```{r}
 mapply(FUN = "[", phrases, longueurs_phrases)
 ```
 
-La boucle cachée derrière cet appel à la fonction `mapply` est la suivante&nbsp;: pour `i` allant de 1 à `r length(phrases)`, soit le nombre total d'éléments dans la liste `phrases`, l'extraction suivante est effectuée.
+La boucle cachée derrière cet appel à la fonction `mapply` est la suivante\ : pour `i` allant de 1 à `r length(phrases)`, soit le nombre total d'éléments dans la liste `phrases`, l'extraction suivante est effectuée.
 
 ```{r, eval = FALSE}
 "["(phrases[[i]], longueurs_phrases[[i]])
@@ -213,7 +209,7 @@ liste2 <- list(c(3, 5, 4, 2, 3), c(3, 4, 2))
 liste3 <- list(c(0, 3, 9, 8, 6), c(7, 5, 0))
 ```
 
-Nous pourrions utiliser `mapply` pour former des matrices en concaténant en lignes tous les vecteurs à la même position dans les listes, comme suit&nbsp;:
+Nous pourrions utiliser `mapply` pour former des matrices en concaténant en lignes tous les vecteurs à la même position dans les listes, comme suit\ :
 
 ```{r}
 mapply(FUN = rbind, liste1, liste2, liste3)
@@ -233,10 +229,9 @@ str(Puromycin)
 ```
 
 
-\vspace{6pt}
-<p style="font-size:110%">
-**Fonction `tapply`**
-</p>
+#### Fonction `tapply` {-}
+
+\mbox{}
 
 Nous pourrions par exemple calculer la moyenne de la variable `rate` selon les niveaux du facteur `state` comme suit.
 ```{r}
@@ -249,10 +244,9 @@ tapply(Puromycin$rate, INDEX = Puromycin[, c("conc", "state")], FUN = mean)
 Dans l'exemple ci-dessous, nous avons fourni à `INDEX` un data frame, mais rappelons-nous que les data frames sont des cas particulier de listes. De plus, un élément de ce data frame n'est pas un facteur. Il s'agit de la variable `conc`. Cela n'a pas posé problème parce que `tapply` est arrivé à transformer l'élément en facteur.
 
 
-\vspace{6pt}
-<p style="font-size:110%">
-**Fonction `by`**
-</p>
+#### Fonction `by` {-}
+
+\mbox{}
 
 La fonction `by` prend comme objet en entrée un data frame et permet d'effectuer un calcul sur des sous-objets qui sont aussi des data frames. Par exemple, nous pourrions calculer la matrice de corrélations entre les observations des variables `conc` et `rate` selon les niveaux du facteur `state` comme suit.
 ```{r}
@@ -260,10 +254,9 @@ by(Puromycin[, c("conc", "rate")], INDICES = Puromycin$state, FUN = cor)
 ```
 
 
-\vspace{6pt}
-<p style="font-size:110%">
-**Fonction `aggregate`**
-</p>
+#### Fonction `aggregate` {-}
+
+\mbox{}
 
 Finalement, la fonction `aggregate` prend aussi en entrée un data frame, mais elle applique la fonction séparément pour chaque colonne du data frame.
 ```{r}
@@ -287,7 +280,7 @@ La structure de données peut être brisée en sous-objets de différentes faço
 
 Le format de la sortie retournée varie aussi d'une fonction à l'autre.
 
-Quand vient le temps de choisir une fonction de la famille des `apply` à utiliser, il faut donc se demander&nbsp;:
+Quand vient le temps de choisir une fonction de la famille des `apply` à utiliser, il faut donc se demander\ :
 
 - Quel est le type de l'objet sur lequel appliquer les calculs?
 - Comment les sous-objets doivent-ils être formés?
@@ -349,7 +342,7 @@ summarize(
 
 Ici, le calcul du nombre d'observations par sous-groupe a aussi été demandé avec la fonction `n` du package `dplyr`. Cette fonction n'a besoin d'aucun argument.
 
-Notons que les fonctions de `dplyr` sont souvent utilisées avec l'opérateur `%>%`, nommé «&nbsp;*forward-pipe operator*&nbsp;». En utilisant cet opérateur, la dernière instruction aurait l'allure suivante.
+Notons que les fonctions de `dplyr` sont souvent utilisées avec l'opérateur `%>%`, nommé «\ *forward-pipe operator*\ ». En utilisant cet opérateur, la dernière instruction aurait l'allure suivante.
 
 ```{r}
 Puromycin %>%
@@ -363,10 +356,10 @@ Puromycin %>%
 
 L'utilisation de l'opérateur `%>%` sera expliquée plus tard, dans les [notes sur les bonnes pratiques](https://stt4230.rbind.io/amelioration_code/bonnes_pratiques_r/#op%C3%A9rateur-pipe). Bien que son utilisation avec les fonctions du `tidyverse` soit très populaire, elle n'est pas obligatoire.
 
-Pour obtenir plus d'informations sur les calculs par niveaux de facteurs avec le package `dplyr`&nbsp;:
+Pour obtenir plus d'informations sur les calculs par niveaux de facteurs avec le package `dplyr`\ :
 
-- https://dplyr.tidyverse.org/articles/grouping.html#summarise-
-- https://stt4230.rbind.io/tutoriels_etudiants/hiver_2016/agreger_donnees_dplyr/
+- <https://dplyr.tidyverse.org/articles/grouping.html#summarise->
+- <https://stt4230.rbind.io/tutoriels_etudiants/hiver_2016/agreger_donnees_dplyr/>
 
 
 
@@ -394,27 +387,27 @@ Puromycin_dt[, j = .(rate = median(rate)), by = .(conc, state)]
 Ensuite, la clé est de spécifier adéquatement les arguments `j` et `by` de l'opérateur `[` pour le data table. Cet opérateur avait été présenté dans les [notes sur les structures de données en R](https://stt4230.rbind.io/manipulation_donnees/structures_r/#data-tables).
 
 
-Pour obtenir plus d'informations sur les calculs par niveaux de facteurs avec le package `data.table`&nbsp;:
+Pour obtenir plus d'informations sur les calculs par niveaux de facteurs avec le package `data.table`\ :
 
-- https://rdatatable.gitlab.io/data.table/articles/datatable-intro.html#aggregations
-- https://stt4230.rbind.io/tutoriels_etudiants/hiver_2017/data.table/
+- <https://rdatatable.gitlab.io/data.table/articles/datatable-intro.html#aggregations>
+- <https://stt4230.rbind.io/tutoriels_etudiants/hiver_2017/data.table/>
 
 
 ***
 
 # Résumé
 
-<p style="font-size:110%">
-**Fonctions de la famille des `apply`**
-</p>
+#### Fonctions de la famille des `apply` {-}
 
-Principe de base derrière ces fonctions (qui cachent des boucles)&nbsp;:
+\mbox{}
+
+Principe de base derrière ces fonctions (qui cachent des boucles)\ :
 
 - séparer un objet en sous-objets;
 - appeler une fonction en lui donnant comme premier argument tous les sous-objets, un à la fois;
 - combiner les résultats obtenus.
 
-Résumé du fonctionnement des fonctions présentées&nbsp;:
+Résumé du fonctionnement des fonctions présentées\ :
 
 Fonction | Objet typique en entrée | Formation des sous-objets  | Format de la sortie 
 ---------------|------------------------------------|---------------------------------------|--------------------------
@@ -429,25 +422,24 @@ Fonction | Objet typique en entrée | Formation des sous-objets  | Format de la 
 `aggregate` | data frame | selon les niveaux de facteurs et par colonne du data frame | data frame  
 
 
-Description des arguments à donner en entrée à ces fonctions&nbsp;:
+Description des arguments à donner en entrée à ces fonctions\ :
 
-- 1^e^ argument (sauf pour `mapply`)&nbsp;: objet à séparer et sur lequel appliquer la fonction;
+- 1^e^ argument (sauf pour `mapply`)\ : objet à séparer et sur lequel appliquer la fonction;
 
-- argument suivant&nbsp;: information pour spécifier comment séparer l'objet en sous-objets (sauf pour les fonctions prenant en entrée une liste, soit pour `lapply`, `sapply` et `mapply`, car dans ce cas les sous-objets sont les éléments de la liste);
+- argument suivant\ : information pour spécifier comment séparer l'objet en sous-objets (sauf pour les fonctions prenant en entrée une liste, soit pour `lapply`, `sapply` et `mapply`, car dans ce cas les sous-objets sont les éléments de la liste);
 
-- argument suivant (celui nommé `FUN`)&nbsp;: la fonction à appliquer (les sous-objets lui seront fournis comme premier argument);
+- argument suivant (celui nommé `FUN`)\ : la fonction à appliquer (les sous-objets lui seront fournis comme premier argument);
 
-- `...`&nbsp;: il est possible de passer des arguments supplémentaires à la fonction à appliquer (`FUN`) simplement en les donnant en argument à la fonction de la famille des `apply` grâce aux `...` (il s'agit de la deuxième utilité de l'argument `...` mentionnée dans les notes sur les [concepts de base en R](https://stt4230.rbind.io/introduction/base_r/#largument-...-et-ses-deux-utilites.)).
+- `...`\ : il est possible de passer des arguments supplémentaires à la fonction à appliquer (`FUN`) simplement en les donnant en argument à la fonction de la famille des `apply` grâce aux `...` (il s'agit de la deuxième utilité de l'argument `...` mentionnée dans les notes sur les [concepts de base en R](https://stt4230.rbind.io/introduction/base_r/#largument-...-et-ses-deux-utilites.)).
 
-Note&nbsp;: La fonction `aggregate` accepte aussi une formule en entrée.
+Note\ : La fonction `aggregate` accepte aussi une formule en entrée.
 
 
-\vspace{6pt}
-<p style="font-size:110%">
-**Autres fonctions pour réaliser des calculs par niveaux de facteurs**
-</p>
+#### Autres fonctions pour réaliser des calculs par niveaux de facteurs {-}
 
-Solutions de rechange à `tapply`, `by` et `aggregate`&nbsp;:
+\mbox{}
+
+Solutions de rechange à `tapply`, `by` et `aggregate`\ :
 
 - fonctions [`group_by`](https://dplyr.tidyverse.org/reference/group_by.html) et [`summarize`](https://dplyr.tidyverse.org/reference/summarise.html) du package [`dplyr`](https://CRAN.R-project.org/package=dplyr) utilisées conjointement;
 - opérateur `[` du package [`data.table`](https://rdatatable.gitlab.io/data.table/) utilisé en exploitant son argument `by`.
@@ -458,26 +450,26 @@ Solutions de rechange à `tapply`, `by` et `aggregate`&nbsp;:
 
 # Références {-}
 
-R Core Team (2020). *R: A language and environment for statistical computing*. R Foundation for Statistical Computing, Vienna, Austria. URL https://www.R-project.org/
+- R Core Team (2020). *R: A language and environment for statistical computing*. R Foundation for Statistical Computing, Vienna, Austria. URL <https://www.R-project.org/>
 
-Ressource web pour mieux comprendre les fonctions de la famille des `apply`&nbsp;:
+Ressource web pour mieux comprendre les fonctions de la famille des `apply`\ :
 
-- https://www.datacamp.com/community/tutorials/r-tutorial-apply-family
+- <https://www.datacamp.com/community/tutorials/r-tutorial-apply-family>
 
 
-Documentation des package mentionnés apportant des solutions de rechange pour des calculs par niveaux de facteurs&nbsp;:
+Documentation des package mentionnés apportant des solutions de rechange pour des calculs par niveaux de facteurs\ :
 
-- package `dplyr`&nbsp;:
-    + page web du package sur le CRAN&nbsp;: https://CRAN.R-project.org/package=dplyr
-    + documentation du package&nbsp;: https://dplyr.tidyverse.org/
-    + informations sur les calculs par niveaux de facteurs&nbsp;:
-        + https://dplyr.tidyverse.org/articles/grouping.html#summarise-
-        + https://stt4230.rbind.io/tutoriels_etudiants/hiver_2016/agreger_donnees_dplyr/
+- package `dplyr`\ :
+    + page web du package sur le CRAN\ : <https://CRAN.R-project.org/package=dplyr>
+    + documentation du package\ : <https://dplyr.tidyverse.org/>
+    + informations sur les calculs par niveaux de facteurs\ :
+        + <https://dplyr.tidyverse.org/articles/grouping.html#summarise->
+        + <https://stt4230.rbind.io/tutoriels_etudiants/hiver_2016/agreger_donnees_dplyr/>
 
-- package `data.table`&nbsp;:
-    + page web du package sur le CRAN&nbsp;: https://CRAN.R-project.org/package=data.table
-    + documentation du package&nbsp;: https://rdatatable.gitlab.io/data.table/
-    + informations sur les calculs par niveaux de facteurs&nbsp;:
-        + https://rdatatable.gitlab.io/data.table/articles/datatable-intro.html#aggregations
-        + https://stt4230.rbind.io/tutoriels_etudiants/hiver_2017/data.table/
+- package `data.table`\ :
+    + page web du package sur le CRAN\ : <https://CRAN.R-project.org/package=data.table>
+    + documentation du package\ : <https://rdatatable.gitlab.io/data.table/>
+    + informations sur les calculs par niveaux de facteurs\ :
+        + <https://rdatatable.gitlab.io/data.table/articles/datatable-intro.html#aggregations>
+        + <https://stt4230.rbind.io/tutoriels_etudiants/hiver_2017/data.table/>
 
