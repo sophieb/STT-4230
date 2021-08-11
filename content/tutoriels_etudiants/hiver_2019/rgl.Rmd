@@ -7,20 +7,23 @@ date: "2019-05-29"
 output:
   blogdown::html_page:
     toc: true
-    toc_depth: 3
+    toc_depth: 2
+    number_sections: true
 editor_options: 
   chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
+
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(fig.align = 'center', fig.show = 'hold', out.width = "100%")
+knitr::knit_hooks$set(webgl = 'hook_webgl')
 ```
 
 ***
 
-## Introduction
+# Introduction
 
-Le package `rgl` permet de réaliser des graphiques interactifs en 3D et la représentation d'objets géométriques. Il a été réalisé principalement par Ducan Murdoch qui est professeur de statistique à l'University of Western Ontario et Daniel Adler. Ce package exploite l'API graphique OpenGL, permettant la production de graphiques interactifs en 2D et 3D, comme moteur de rendu.
+Le package `rgl` permet de réaliser des graphiques interactifs en 3D et la représentation d'objets géométriques. Il a été réalisé principalement par Duncan Murdoch qui est professeur de statistique à la University of Western Ontario et Daniel Adler. Ce package exploite l'API graphique OpenGL, permettant la production de graphiques interactifs en 2D et 3D, comme moteur de rendu.
 
 Les avantages qui distinguent particulièrement ce package sont qu'il permet la création de scènes et l'ajout de contrôles permettant des actions dans une figure en trois dimensions. C'est-à-dire qu'il permet de programmer une série d'actions permettant de mettre en valeur certaines caractéristiques des graphiques générés grâce à celui-ci. Ce package permet aussi d'ajouter des contrôles, auxquels nous pouvons attribuer diverse actions permettant des manipulations contrôlées d'une figure.
 
@@ -28,7 +31,7 @@ Le package `rgl` est conçu pour que son utilisation ressemble à la librairie g
 
 Puisque la création de graphique en 2D n'est pas la force de ce package et n'offre aucun avantage par rapport à la librairie graphique de base de R ou `ggplot` par exemple, nous ne l'aborderons pas. 
 
-## Installation et chargement du package `rgl`
+# Installation et chargement du package `rgl`
 
 L'installation du package R `rgl` s'effectue avec la commande suivante :
 
@@ -38,13 +41,13 @@ install.packages("rgl")
 
 Pour charger le package dans votre environnement de travail, utilisez la fonction `library` :
 
-```{r, warning=FALSE}
+```{r, warning = FALSE}
 library(rgl)
 ```
 
-## Présentation des données utilisées
+# Présentation des données utilisées
 
-Afin d'illustrer l'utilisation des principales fonctions du package, nous utiliserons le jeu de données `quakes` du package `datasets`. Il contient des informations sur 1000 séismes, d'une magnétude supérieure à 4 MB, survenus dans les alentours des Îles Fidji depuis 1964. Pour le bien de l'exercice, nous ajoutons deux nouvelles variables au jeu de données. Celles-ci sont générées à partir de variables déjà contenues dans le jeu de données `quakes`.  Voici des informations sur les données contenues dans le jeu `quakes` : 
+Afin d'illustrer l'utilisation des principales fonctions du package, nous utiliserons le jeu de données `quakes` du package `datasets`. Il contient des informations sur 1000 séismes, d'une magnitude supérieure à 4 MB, survenus dans les alentours des Îles Fidji depuis 1964. Pour le bien de l'exercice, nous ajoutons deux nouvelles variables au jeu de données. Celles-ci sont générées à partir de variables déjà contenues dans le jeu de données `quakes`.  Voici des informations sur les données contenues dans le jeu `quakes` : 
 
 ```{r}
 #Création de la variable "magFactor" 
@@ -58,14 +61,14 @@ str(quakes)
 ```
 
 
-## Fonction de base `plot3d`
+# Fonction de base `plot3d`
 
 ```{r, echo = FALSE}
 #Permet de mettre en forme la taille des figures en 3D
 par3d(windowRect = c(0, 0, 512, 512))
 ```
 
-### Graphique de base 
+## Graphique de base 
 
 La fonction de base du package `rgl` est `plot3d`. À la base, chacune des figures produites par cette fonction sont interactives. C'est-à-dire qu'il est possible d'explorer l'environnement 3D de celles-ci, à l'aide d'une souris d'ordinateur. Les arguments minimaux à donner à la fonction `plot3d` sont les suivants : 
 
@@ -75,18 +78,19 @@ La fonction de base du package `rgl` est `plot3d`. À la base, chacune des figur
 
 Voici un exemple de graphique de base produit par la fonction `plot3d` si l'on ne fait que donner les arguments minimaux nécessaires : 
 
-```{r, echo = FALSE}
-#Overture d'une scène 3D vide
+```{r, echo = FALSE, results = 'hide'}
+#Ouverture d'une scène 3D vide
 open3d()
 ```
-```{r eval = TRUE}
+```{r eval = TRUE, webgl=TRUE}
 plot3d(x = quakes$long, y = quakes$lat, z = quakes$depth)
 ```
-```{r, echo = FALSE}
-rglwidget()
+```{r, echo = FALSE, results = 'hide'}
+#Fermeture de la scène 3D
+close3d()
 ```
 
-### Arguments de base
+## Arguments de base
 
 Pour modifier des éléments graphiques basiques, nous pouvons intégrer les arguments dans la fonction `plot3d`, comme dans l'exemple qui suit. Nous pouvons aussi les intégrer dans la fonction `decorate3d` incluse dans le package `rgl`. Voici un tableau résumant les principaux arguments pouvant être passés aux fonctions `plot3d` et `decorate3d` : 
 
@@ -110,7 +114,11 @@ Pour modifier des éléments graphiques basiques, nous pouvons intégrer les arg
 
 Dans l'exemple qui suit, nous ajoutons des noms aux trois axes et un titre, retirons la boite autour de la figure (effectif dans une fenêtre interactive, pas dans un document HTML) et modifions la représentation et la taille des points de la figure précédente.  
 
-```{r}
+```{r, echo = FALSE, results = 'hide'}
+#Ouverture d'une scène 3D vide
+open3d()
+```
+```{r, webgl=TRUE}
 #Création d'une couleur associée à chaque niveau de magFactor
 quakes$magCol <- ifelse(quakes$magFactor == 4, "red", 
                        ifelse(quakes$magFactor == 5, "blue", "green"))
@@ -121,12 +129,12 @@ plot3d(x = quakes$long, y = quakes$lat, z = quakes$depth,
        main = "Pronfondeur de 1000 seismes aux alentours de Fidji selon leur latitude et longitude",  
        col = quakes$magCol, type = "s", size = 1, box = FALSE)
 ```
-```{r, echo = FALSE}
-rglwidget()
+```{r, echo = FALSE, results = 'hide'}
+#Fermeture de la scène 3D
+close3d()
 ```
 
-
-## Bonification de graphiques
+# Bonification de graphiques
 
 Tout d'abord, dans la première sous-section, nous recréerons le graphique produit à l'exemple précédent, en le bonifiant quelque peu, à l'aide de fonctions permettant l'ajout de divers éléments dans une scène en 3 dimensions dans le but d'illustrer l'utilisation possible de celles-ci. 
 
@@ -134,7 +142,7 @@ Par la suite, nous traiterons l'ajout de formes géométriques en 3D plus comple
 
 Les manipulations des exemples qui suivent permettront de bonifier une scène vide en 3D générée à partir de la commande `open3d` du package `rgl`. Cependant, il est important de noter que ces manipulations auraient pu être effectuées sur n'importe quel graphique en 3 dimensions généré par une fonction du package.   
 
-### Ajout d'éléments graphiques de base
+## Ajout d'éléments graphiques de base
 
 Tout comme la librairie de production de graphique de base dans R, le package `rgl` permet l'ajout de divers éléments dans une représentation. Le tableau suivant présente les principales fonctions permettant des ajouts à un graphique initialisé. 
 
@@ -161,15 +169,15 @@ Tout comme la librairie de production de graphique de base dans R, le package `r
 `arc3d` | ajout d'arcs ou de spirales
 `planes3d` | ajout de plans
 `spheres3d` | ajout de sphères
-`surface3d`, `terrain3d` | ajout de sufaces
+`surface3d`, `terrain3d` | ajout de surfaces
 `arrow3d` | ajout de flèches
 
 La première section du tableau contient les éléments qui influencent l'apparence du graphique, la seconde contient des fonctions qui permettent l'ajout de données selon diverses représentations en 3D ou de formes géométriques selon une formule donnée. 
 
 Dans l'exemple qui suit, nous commençons par simplement recréer le graphique produit par la fonction `plot3d` à l'exemple précédent.
 
-```{r, results = "hide"}
-#Overture d'une scène 3D vide
+```{r, results = "hide", webgl=TRUE}
+#Ouverture d'une scène 3D vide
 open3d()
 
 #Dimensionnement de la scène
@@ -189,25 +197,22 @@ axes3d()
 title3d(xlab = "longitude", ylab = "latitude", zlab = "profondeur (km)", 
         main = "Pronfondeur de 1000 seismes aux alentours de Fidji selon leur latitude et longitude")
 ```
-```{r, echo = FALSE}
-rglwidget()
-```
 
 
 À cette étape, nous utilisons le graphique que nous venons de construire et ajoutons certains éléments comme un plan séparant l'ouest et l'est et différents textes pour donner des exemples supplémentaires sur l'utilisation de fonctions permettant l'ajout d'éléments graphiques.
 
-```{r}
+```{r, webgl=TRUE}
 #Création d'un plan séparant le graphique selon l'est et l'ouest
 planes3d(a = -1, b = 0, c = 0, d = 175, col = "blue", alpha = 0.3)
 
-#Ajout de text identifiant les différentes sections du graphique
+#Ajout de texte identifiant les différentes sections du graphique
 text3d(x = 187, y = -30, z =  600, text = "Est")
 text3d(x = 168, y = -30, z =  600, text = "Ouest")
 
-#Retrouve les informations du seisme le plus puissant du jeux de données
+#Retrouve les informations du séisme le plus puissant du jeux de données
 rowPlusGrosSeisme <- quakes[which.max(quakes$mag), ]
 
-#Ajout d'une flèche qui pointe la sphère correspondant au seisme le plus puissant
+#Ajout d'une flèche qui pointe la sphère correspondant au séisme le plus puissant
 arrow3d(p0 = c(170, -30, 490), p1 = c(rowPlusGrosSeisme$long, rowPlusGrosSeisme$lat, rowPlusGrosSeisme$depth),
         type = "rotation", s =  1/30, n = 4)
 
@@ -215,11 +220,8 @@ arrow3d(p0 = c(170, -30, 490), p1 = c(rowPlusGrosSeisme$long, rowPlusGrosSeisme$
 text3d(x = 170, y = -30, z = 500, text = "Seisme le plus fort", cex = 0.8)
 
 ```
-```{r, echo = FALSE}
-rglwidget()
-```
 
-### Ajout de formes géométriques complexes
+## Ajout de formes géométriques complexes
 
 Cette sous-section présente les principales fonctions utiles à la construction de formes en 3D complexes et propose un exemple permettant d'illustrer la création de ces formes. Le tableau qui suit présente les fonctions de base permettant la création de formes complexes. 
  
@@ -227,17 +229,17 @@ Cette sous-section présente les principales fonctions utiles à la construction
 ---------------------------|-----------------------
 `shape3d` | permet d'ajouter des forme géométrique
 `polygon3d` | génère un polygone
-`ellipse3d` | génère un élipse 
+`ellipse3d` | génère un ellipse 
 `shapelist3d` | permet de générer un liste de formes
 
 Voici un exemple sur la création de deux ellipses représentant la variance et la covariance des données de l'est et de l'ouest.
 
-```{r}
+```{r, webgl=TRUE}
 #Création de jeux de données contenant les données selon leur position géographique
 quakes_est <- quakes[quakes$region == "Est",]
 quakes_ouest <- quakes[quakes$region == "Ouest",]
 
-#Création d'une élipse à partir des informations sur la longitude, la latitude et 
+#Création d'une ellipse à partir des informations sur la longitude, la latitude et 
 #de la profondeur des différents séismes contenus dans le jeux de données quakes
 ellipse_est <- ellipse3d(
   x = cov(cbind(quakes_est$long, quakes_est$lat, quakes_est$depth)), 
@@ -249,25 +251,22 @@ ellipse_ouest <- ellipse3d(
   centre = c(mean(quakes_ouest$long), mean(quakes_ouest$lat), mean(quakes_ouest$depth))
 )
 
-#Ajout de l'élipse dans le graphique en 3D
+#Ajout de l'ellipse dans le graphique en 3D
 plot3d(ellipse_est, col = "orange", alpha = 0.2, add = TRUE, box = FALSE)
 plot3d(ellipse_ouest, col = "yellow", alpha = 0.2, add = TRUE, box = FALSE)
 
 aspect3d(x = 1, y = 1, z = 1)
 ```
-```{r, echo = FALSE}
-rglwidget()
-```
 
 
-## Ajout de contrôles
+# Ajout de contrôles
 
-L'ajout de contôles personnalisés est une particularité du package `rgl`. Ceux-ci permettent des options plaisantes pouvant améliorer l'interactivité et les manipulations possibles de l'utilisateur vis-à-vis les graphiques produits. Le tableau suivant énumère quelques fonctions permettant l'ajout de contôles ainsi qu'une légère description de leur utilité propre.
+L'ajout de contrôles personnalisés est une particularité du package `rgl`. Ceux-ci permettent des options plaisantes pouvant améliorer l'interactivité et les manipulations possibles de l'utilisateur vis-à-vis les graphiques produits. Le tableau suivant énumère quelques fonctions permettant l'ajout de contrôles ainsi qu'une légère description de leur utilité propre.
 
 **Fonction** | **Description** 
 ---------------------------|-----------------------
 `subsetControl` | Contrôle quels objets sont affichés
-`playWidget` | Affiche des contôles automatisés
+`playWidget` | Affiche des contrôles automatisés
 `toggleWidget` | Affichage de boutons contrôlant les données affichées
 `Polar` | Rotation du graphique selon les coordonnées polaires
 `%>%`| Opérateur *pipe* importé du package `magrittr`
@@ -277,9 +276,9 @@ L'ajout de contôles personnalisés est une particularité du package `rgl`. Ceu
 
 Les sous-sections qui suivent présentent des exemples d'utilisation de certaines de ces fonctions dans diverses situations.
 
-### Annimation automatisée
+## Annimation automatisée
 
-Certains boutons peuvent être ajoutés pour aider les interactions avec le graphique. Comme vous le verrez dans l'exemple ci-dessous, la fonction `playwidget` nous donne accès aux boutons "Reverse","Play","Slower","Faster" et "Reset" servant à lancer une vidéo. Le code suivant sert à créer une matrice de rotation afin que celle-ci soit utilisée pour faire tourner le graphique en trois dimensions durant la vidéo. L'option `userMatrix` permet de créer une matrice 4 par 4 spécifiant le point de vue de l'utilisateur. Pour sa part, la fonction `par3dinterp` permet d'ajuster au fil du temps des options `par3d` et ainsi être utilisée dans une animation. Nous pouvons aussi voir de quelle façon nous ferons apparaître ce widget tout en lui assignant la matrice de rotation. Ici, la fonction `par3dinterpControl`, sert à gérer toutes les options conçernant la vidéo comme la durée, la vitesse et bien plus.
+Certains boutons peuvent être ajoutés pour aider les interactions avec le graphique. Comme vous le verrez dans l'exemple ci-dessous, la fonction `playwidget` nous donne accès aux boutons "Reverse","Play","Slower","Faster" et "Reset" servant à lancer une vidéo. Le code suivant sert à créer une matrice de rotation afin que celle-ci soit utilisée pour faire tourner le graphique en trois dimensions durant la vidéo. L'option `userMatrix` permet de créer une matrice 4 par 4 spécifiant le point de vue de l'utilisateur. Pour sa part, la fonction `par3dinterp` permet d'ajuster au fil du temps des options `par3d` et ainsi être utilisée dans une animation. Nous pouvons aussi voir de quelle façon nous ferons apparaître ce widget tout en lui assignant la matrice de rotation. Ici, la fonction `par3dinterpControl`, sert à gérer toutes les options concernant la vidéo comme la durée, la vitesse et bien plus.
 
 ```{r}
 #Création du graphique
@@ -296,14 +295,14 @@ ModifParametre <- par3dinterp(time = (0:2), userMatrix = list(MatriceVue,
 #Permet à la sortie d'être affichée en HTML
 rglwidget() %>%
   
-#Permet de rajouter les boutons pour démarer et contrôler l'animation  
-playwidget(par3dinterpControl(ModifParametre, 0, 4, steps=10),
+#Permet de rajouter les boutons pour démarrer et contrôler l'animation  
+playwidget(par3dinterpControl(ModifParametre, 0, 4, steps = 10),
            step = 0.05, loop = TRUE, rate = 0.5)
 ```
 
-### Contrôles pour manipuler les données
+## Contrôles pour manipuler les données
 
-Une autre fonction plus avancée est de séparer le jeu de données en plusieurs classes afin de pouvoir faire apparaitre et disparaitre certaines classes précises. Cela est démontré dans l'exemple ci-dessous, où trois classes ont été créées en fonction de la magnitude des séismes. Encore une fois, c'est grâce à des boutons que nous serons capable de contrôler les données voulues. C'est la fonction `toggleWidget` qui nous sera utile pour cet exemple afin de faire apparaître différents boutons et de leur assigner une classe.
+Une autre fonction plus avancée est de séparer le jeu de données en plusieurs classes afin de pouvoir faire apparaître et disparaître certaines classes précises. Cela est démontré dans l'exemple ci-dessous, où trois classes ont été créées en fonction de la magnitude des séismes. Encore une fois, c'est grâce à des boutons que nous serons capable de contrôler les données voulues. C'est la fonction `toggleWidget` qui nous sera utile pour cet exemple afin de faire apparaître différents boutons et de leur assigner une classe.
 
 ```{r}
 #Supprime les paramètres du graphique précédent
@@ -340,13 +339,13 @@ asRow(last = 3)
 
 ```
 
-### Contrôle sur les fonctionnalités de la souris
+## Contrôle sur les fonctionnalités de la souris
 
 La fonction `rglMouse` nous permet de sélectionner l'interaction que nous voulons avoir avec le graphique. Par défaut, on y retrouve les options `Selecting`, `Trackball`,`xAxis`,`yAxis`,`zAxis`,`Polar`,`Zoom`,`Fov` et `None`. Lorsqu'une option est sélectionnée, celle-ci peut être utilisée avec le clic gauche de la souris. L'option `mouseMode` nous permet de choisir par défaut l'option que l'on veut au départ. Voici un petit tableau expliquant brièvement chaque option :
 
 **Options** | **Fonction réalisée par le clic gauche de la souris** 
 ---------------------------|-----------------------
-`Selecting` | Selection d'une portion des données du graphique
+`Selecting` | Sélection d'une portion des données du graphique
 `Trackball` | Rotation du graphique selon n'importe quelles axes
 `xAxis`, `yAxis`, `zAxis` | Rotation du graphique selon l'axe choisi
 `Polar` | Rotation du graphique selon les coordonnées polaires
@@ -360,17 +359,17 @@ plot <- plot3d(x = quakes$long, y = quakes$lat, z = quakes$depth,
                main = "Longitude, latitude et profondeur des seismes selon la region", 
                col = quakes$magCol, type = "s", size = 1, box = FALSE)
 
-#Sélection de l'option par défault
+#Sélection de l'option par défaut
 par3d(mouseMode = "trackball")
 
-#Nous permettons a l'option rglMouse d'intéragir avec les données du graphiques
+#Nous permettons a l'option rglMouse d'interagir avec les données du graphiques
 rglwidget(shared = rglShared(plot["data"])) %>%
   
 #Sélection des options contenus dans le boutons
 rglMouse(choice = c("trackball", "xAxis", "yAxis", "zAxis", "polar", "zoom", "fov"))
 ```
 
-## Plusieurs graphiques 3D dans une même fenêtre
+# Plusieurs graphiques 3D dans une même fenêtre
 
 Tout comme le système graphique de base dans R, la librairie `rgl` permet d'intégrer plusieurs représentations dans un seul graphique. Les fonctions utilisées pour y arriver sont très semblables à celles du système graphique R de base. Donc nous ne ferons pas d'exemple pour cette section. Cependant, le tableau qui suit indique les fonctions du package `rgl` qui permettent de faire plusieurs représentations dans un seul graphique et leur équivalence dans le système graphique de base. 
 
@@ -380,15 +379,15 @@ Tout comme le système graphique de base dans R, la librairie `rgl` permet d'int
 `layout3d` | division de la fenêtre (comme `layout`)
 `next3d` | permet d'aller à la scène suivante (comme `plot.new` ou `frame`)
 `subsceneList` | liste toutes les scènes dans la fenêtre
-`clearSubsceneList` | efface les scènes et revient à l'anciennes
+`clearSubsceneList` | efface les scènes et revient à l'ancienne
 
-## Intégration et enregistrement de graphiques en trois dimensions
+# Intégration et enregistrement de graphiques en trois dimensions
 
 Le package `rgl` contient plusieurs fonctions ayant pour but de créer des objets pour des types de fichiers particuliers afin de pouvoir utiliser les sorties produites dans des contextes précis. Le tableau ci-dessous énumère certaines de ces fonctions ainsi que leur description.
 
 **Fonction** | **Description** 
 ---------------|-----------------------------------------------
-`scene3d` | Enregistre une scene dans une variable R qui peut être sauvegardée et réutilisée
+`scene3d` | Enregistre une scène dans une variable R qui peut être sauvegardée et réutilisée
 `rglwidget` | Sortie imprimée comme un fichier HTML et Javascript afin de pouvoir être affiche dans une page web
 `writeASY`| Écriture de fichiers de type Asymptote
 `writePLY` | Écriture de fichiers de type PLY (Souvent utilisé pour les graphiques 3D)
@@ -406,19 +405,19 @@ plot3d(x = quakes$long, y = quakes$lat, z = quakes$depth, type = 's', col = quak
 rglwidget()
 ```
 
-## Conclusion et opinion
+# Conclusion et opinion
 
-Le package `rgl` est clairement un bon outil pour la création de graphiques en 3D. En effet, pusique les fonctions de celui-ci ressemblent beaucoup à celles de la librairie graphique de base dans R, le package permet facilement de créer des graphiques en trois dimensions d'une grande qualité. De plus, les graphiques sont souples et on peut facilement jouer avec des options comme les couleurs, la forme, la grosseur des points et encore plus. Les graphiques obtenus sont beaux et clairs, en plus d'être interactifs, ce qui permet une bonne exploration des données. En effet ils peuvent être zoomés et tournés pour aider la visualisation. Le package permet aussi d'ajouter plusieurs types de contrôles personnalisés permettant une interaction accrue des scènes générées avec le package, ce qui est un avantage indéniable de celui-ci. 
+Le package `rgl` est clairement un bon outil pour la création de graphiques en 3D. En effet, puisque les fonctions de celui-ci ressemblent beaucoup à celles de la librairie graphique de base dans R, le package permet facilement de créer des graphiques en trois dimensions d'une grande qualité. De plus, les graphiques sont souples et on peut facilement jouer avec des options comme les couleurs, la forme, la grosseur des points et encore plus. Les graphiques obtenus sont beaux et clairs, en plus d'être interactifs, ce qui permet une bonne exploration des données. En effet ils peuvent être zoomés et tournés pour aider la visualisation. Le package permet aussi d'ajouter plusieurs types de contrôles personnalisés permettant une interaction accrue des scènes générées avec le package, ce qui est un avantage indéniable de celui-ci. 
 
-Cependant, il comporte aussi de nombreuses faiblesses qui rendent son utilisation moins plaisante. Lorsque vient le temps d'ajouter des titres ou des axes sur les graphiques, le package ne supporte pas les caractères spéciaux comme les accents et les retours de chariots. De plus, les légendes ne s'ajustent pas si l'on modifie la taille d'une scène, ce qui fait qu'elles finissent pas s'étirer ou se compresser et qu'elles deveniennent peu esthétiques. Finalement, l'ajout de contrôles est différent d'un contrôle à un autre, ce qui nécessite de la recherche pour être en mesure d'en utiliser plusieurs. La documentation est généralement peu claire, ce qui rend les fonctions les plus complexes difficiles à utiliser.
+Cependant, il comporte aussi de nombreuses faiblesses qui rendent son utilisation moins plaisante. Lorsque vient le temps d'ajouter des titres ou des axes sur les graphiques, le package ne supporte pas les caractères spéciaux comme les accents et les retours de chariots. De plus, les légendes ne s'ajustent pas si l'on modifie la taille d'une scène, ce qui fait qu'elles finissent pas s'étirer ou se compresser et qu'elles deviennent peu esthétiques. Finalement, l'ajout de contrôles est différent d'un contrôle à un autre, ce qui nécessite de la recherche pour être en mesure d'en utiliser plusieurs. La documentation est généralement peu claire, ce qui rend les fonctions les plus complexes difficiles à utiliser.
 
-## Références
+# Références
 
-### Informations sur le jeux de données
+### Informations sur le jeux de données {-}
 
 - https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/quakes.html)
 
-### Informations sur le package `rgl`
+### Informations sur le package `rgl` {-}
 
 - https://cran.r-project.org/web/packages/rgl/rgl.pdf
 
