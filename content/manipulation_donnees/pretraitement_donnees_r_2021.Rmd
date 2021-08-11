@@ -1778,96 +1778,6 @@ Les arguments de `dcast` sont différents des arguments de toutes les fonctions 
 
 La fonction `dcast` va plus loin que la modification de mise en forme de jeux de données. Elle peut aussi agréger les données référant à un même individu en appliquant la fonction fournie à son argument `fun.aggregate`. Pour plus d'informations, voir les références.
 
-***
-
-# Comparaison de deux objets R
-
-Les opérateurs de comparaison vus dans les [notes sur les calculs mathématiques en R](https://stt4230.rbind.io/calculs/calculs_math_r/) permettent de comparer les éléments d'objets R. Mais comment comparer des objets entiers? Cela dépend de ce qui doit être comparé.
-
-- Pour comparer toutes les données contenues dans deux objets atomiques, mais pas les métadonnées (attributs)\ : `all(x == y)`
-    + retourne `TRUE` si toutes les données sont égales, 
-    + `FALSE` sinon,
-    + `NA` si un des deux objets comparés contient au moins une donnée manquante et que l'argument `na.rm` de la fonction `all` prend la valeur `FALSE`,
-    + la règle de recyclage s'applique si les objets ne sont pas de mêmes dimensions.
-- Pour comparer deux objets dans leur totalité (éléments, attributs, type de l'objet et de ses éléments)\ :  `identical(x, y)`
-    + retourne `TRUE` si les deux objets comparés sont totalement identiques,
-    + `FALSE` sinon.
-- Pour comparer tous les éléments et les attributs de deux objets, en acceptant des différences dans les données numériques selon une certaine tolérance\ :  `all.equal(x, y)`
-    + retourne `TRUE` en cas d'égalité respectant la tolérance, 
-    + sinon retourne des informations sur les différences.
-
-
-Voici quelques exemples.
-
-#### Données identiques, mais métadonnées différentes {-}
-
-\mbox{}
-
-```{r}
-# Objets comparés
-x <- 1:5
-y <- 1:5
-names(x) <- letters[1:5]
-str(x)
-str(y)
-```
-
-&nbsp;
-
-```{r}
-# Résultats des différentes comparaisons
-all(x == y)
-identical(x, y)
-all.equal(x, y)
-```
-
-#### Données équivalentes, mais de types différents, métadonnées identiques {-}
-
-\mbox{}
-
-```{r}
-# Objets comparés
-x <- as.double(x)
-str(x)
-str(y)
-```
-
-&nbsp;
-
-```{r}
-# Résultats des différentes comparaisons
-all(x == y)
-identical(x, y)
-all.equal(x, y)
-```
-
-#### Données numériques pas tout à fait identiques, métadonnées et types identiques {-}
-
-\mbox{}
-
-```{r}
-# Objets comparés
-y <- 1:5 + 1e-10
-str(x)
-str(y)
-```
-
-Bien que les données numériques dans `x` et `y` ne soient pas tout à fait identiques, elles semblent identiques à l'affichage de `x` et `y`.
-
-```{r}
-# Résultats des différentes comparaisons
-all(x == y)
-identical(x, y)
-all.equal(x, y)
-```
-
-**Rappel**\ : Il est possible de contrôler le nombre de chiffres composant un nombre affiché dans la console R avec l'option `digits` de la session R.
-```{r options}
-optionsDefaut <- options()
-options(digits = 11)
-y
-options(digits = optionsDefaut$digits)
-```
 
 ***
 
@@ -2011,17 +1921,6 @@ Transformation  | Package `utils` | Package `stats` | Package `tidyr` | Package 
 --------------- | --------------- | --------------- | --------------- | ---------------
 large vers long | `stack` | `reshape` (`direction = "long"`) | `pivot_longer` | `melt`
 long vers large | `unstack` | `reshape` (`direction = "wide"`) | `pivot_wider` | `dcast`
-
-
-#### Comparaison de deux objets R {-}
-
-
-- Pour comparer uniquement données contenues dans deux objets atomiques, pas les métadonnées (attributs)\ :
-`all(x == y)`.
-- Pour comparer deux objets dans leur totalité (éléments, attributs, type
-de l'objet et de ses éléments)\ : `identical(x, y)`.
-- Pour comparer tous les éléments et les attributs de deux objets, en acceptant des différences dans les données numériques selon une certaine tolérance\ :
-`all.equal(x, y)`.
 
 
 ***
