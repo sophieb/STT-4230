@@ -225,9 +225,9 @@ data_ex_txt <- read.table("data_ex.txt", header = TRUE, na.strings = ".")
 str(data_ex_txt)
 ```
 
-Nous avons réglé le problème de lecture de la deuxième colonne. Attardons-nous maintenant à la dernière colonne. Elle est enregistrée dans un vecteur de chaînes de caractères. Si nous avions préféré que `read.table` transforme les colonnes contenant des valeurs caractères en facteur, il aurait fallu assigner la valeur `TRUE` à l'argument `stringsAsFactors`. Avant sa version 4.0.0, R avait ce comportement par défaut. Le nouveau comportement par défaut est cependant bien ce que nous désirons ici.
+Nous avons réglé le problème de lecture de la deuxième colonne. Attardons-nous maintenant à la dernière colonne. Elle est enregistrée dans un vecteur de chaînes de caractères. Si nous avions préféré que `read.table` transforme les colonnes contenant des valeurs caractères en facteur, il aurait fallu assigner la valeur `TRUE` à l'argument `stringsAsFactors`. Avant sa version 4.0.0, R avait ce comportement par défaut. Le nouveau comportement par défaut correspond à ce que nous désirons ici.
 
-Nous avons illustré ici deux arguments de la fonction `read.table`. Elle en possède plusieurs autres, à adapter selon le fichier à lire. 
+Nous avons illustré deux arguments de la fonction `read.table`. Elle en possède plusieurs autres, à adapter selon le fichier à lire. 
 
 
 ### Arguments de la fonction `read.table`
@@ -255,7 +255,7 @@ Voici un résumé des arguments les plus utiles de la fonction `read.table`. Cha
     + Par défaut `quote = "\"'"`, ce qui signifie qu'un guillemet double ou simple indique le début ou la fin d'une valeur. La barre oblique inversée (`\`) devant le deuxième `"` dans `"\"'"` est nécessaire afin que ce `"` ne soit pas interprété comme la fin de la chaîne de caractères fournie en valeur d'entrée à `quote`.  
     
 -	Est-ce qu’il y a des caractères spéciaux, par exemple des accents ? Si oui, quel encodage est utilisé ?
-    + Un des encodages les plus courants est `UTF-8`. En cas de problèmes avec des accents mal lus, essayer l'argument `encoding = "UTF-8"`. Ça pourrait régler le problème.
+    + Un des encodages les plus courants est `UTF-8`. En cas de problèmes avec des accents mal lus, essayez l'argument `encoding = "UTF-8"` ou `fileEncoding = "UTF-8"`. Ça pourrait régler le problème.
     + Par défaut l'encodage est supposé inconnu.
     
 -	Est-ce que les données ou les noms des variables débutent à la ligne 1 ?
@@ -272,7 +272,7 @@ Voici un résumé des arguments les plus utiles de la fonction `read.table`. Cha
 
 -	Est-ce que les colonnes contenant des chaînes de caractères doivent être converties en facteurs ?
     + Si oui, utiliser `stringsAsFactors = TRUE`, sinon `stringsAsFactors = FALSE`.
-    + Par défaut `stringsAsFactors = FALSE`.
+    + Par défaut `stringsAsFactors = FALSE` (depuis la version 4.0.0 de R, pour des versions antérieures de R la valeur par défaut est `TRUE`).
     
 -	Est-ce que les données dans les différentes colonnes sont toutes du bon type ?
     + Si ce n'est pas le cas, les types désirés peuvent être spécifiés avec l'argument `colClasses`.
@@ -517,12 +517,16 @@ Pour les exemples à venir, reprenons le data frame `data_ex` et voyons comment 
 Le format de fichier le plus universel pour exporter des données est le format texte. Un grand nombre de logiciels peuvent lire ce format. Les fonctions de base en R pour écrire dans un fichier texte sont [`writeLines`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/writeLines.html), [`write`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/write.html) et [`write.table`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/write.table.html). Les fonctions `writeLines` et `write` sont l'équivalent de `readLines` et `scan`, respectivement, pour l'écriture dans des fichiers au lieu de la lecture. Pour réaliser une tâche d'exportation de jeux de données, la fonction `write.table` est la mieux adaptée des trois. Par exemple, exportons le contenu du data frame `data_ex` dans le fichier texte `data_ex_export.txt`
 
 ```{r exportTexte, eval = FALSE}
-write.table(data_ex, file = "data_ex_export.txt")
+write.table(x = data_ex, file = "data_ex_export.txt", fileEncoding = "UTF-8")
 ```
 
-Il faut spécifier à la fonction l'objet dans lequel se trouvent les données à exporter (typiquement une matrice ou un data frame), ainsi que le fichier dans lequel écrire les données. Tout comme `read.table`, la fonction `write.table` possède plusieurs arguments permettant de contrôler le formatage des données, notamment le symbole de décimale (`dec`), le symbole représentant les valeurs manquantes (`na`), le séparateur entre les champs (`sep`), la présence ou non des noms des lignes ou des colonnes (`row.names` et `col.names`), etc. 
+Il faut spécifier à la fonction l'objet, typiquement une matrice ou un data frame, dans lequel se trouvent les données à exporter (argument `x`), ainsi que le fichier dans lequel écrire les données (argument `file`).
 
-Il existe aussi deux fonctions enveloppe à la fonction `write.table` pour les formats CSV, nommées `write.csv` et `write.csv2`.
+Tout comme `read.table`, la fonction `write.table` possède plusieurs arguments permettant de contrôler le formatage des données. Un de ces arguments, nommé `fileEncoding`, est utilisé dans l'exemple précédent. En fournissant la valeur `"UTF-8"` à l'argument `fileEncoding`, on crée un fichier d'encodage `UTF-8`, dont l'usage est très répandu. Sans cet argument, `write.table` pourrait par défaut créer un fichier dont l'encodage est spécifique au système d'exploitation utilisé et qui pourrait causer problèmes sous un autre système d'exploitation. Par exemple, si vous travaillez sous Windows, le fichier créé pourrait contenir des lettres accentuées non reconnues sous macOS en raison d'un encodage mal compris. Spécifier l'argument `fileEncoding = "UTF-8"` permet d'éviter ce genre de souci.
+
+La fonction `write.table` possède d'autres arguments, tel que notamment `dec` pour spécifier le symbole de décimale, `na` pour spécifier le symbole représentant les valeurs manquantes, `sep` pour spécifier le séparateur entre les champs, `row.names` et `col.names` pour indiquer si les noms des lignes et des colonnes, respectivement, doivent être inclus dans le fichier créé. Tous les informations concernant ces arguments, ainsi que tous les autres arguments non mentionnés ici, se trouvent dans la [fiche d'aide de la fonction `write.table`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/write.table.html).
+
+Il existe aussi deux fonctions enveloppe à la fonction `write.table` pour les formats CSV, nommées [`write.csv` et `write.csv2`](https://stat.ethz.ch/R-manual/R-patched/library/utils/html/write.table.html).
 
 
 ## Fichier JSON
@@ -531,8 +535,9 @@ Pour exporter les données dans un data frame en format JSON avec le [package `j
 
 ```{r eval = FALSE}
 data_ex_json <- toJSON(data_ex, pretty = TRUE)
-write(data_ex_json, "data_ex_export.json")
+write(x = data_ex_json, file = "data_ex_export.json")
 ```
+
 
 ## Fichier EXCEL
 
@@ -540,7 +545,7 @@ Le [package `openxlsx`](https://ycphs.github.io/openxlsx/index.html) offre des f
 
 ```{r, eval = FALSE}
 library(openxlsx)
-write.xlsx(data_ex, file = "data_ex_export.xlsx")
+write.xlsx(x = data_ex, file = "data_ex_export.xlsx")
 ```
 
 

@@ -446,48 +446,102 @@ Les [fonctions R](https://stat.ethz.ch/R-manual/R-patched/library/base/html/sets
 - `intersect`\ : intersection, 
 - `setdiff`\ : différence, 
 - `setequal`\ : test d'égalité, 
-- `is.element`\ : test d'inclusion.
+- `is.element`\ : test d'appartenance.
 
-Voici quelques exemples utilisant les deux ensembles suivants, stockés sous forme de vecteur\ :
+Les quatre premières fonctions permettent de comparer de différentes façons deux ensembles. Pour présenter des exemples d'utilisation des fonctions, créons donc d'abord deux ensembles fictifs. Ceux-ci sont stockés sous forme de vecteurs puisque le langage R de base n'offre pas de structure de données spécifique aux ensembles (contrairement au langage Python par exemple qui propose des *sets*).
 
 ```{r}
-A <- c("m", "s", "e", "f", "m")
+A <- c("m", "s", "e", "f", "a")
 B <- c("m", "e", "h", "i")
 ```
 
-Union de tous les éléments des ensembles `A` et `B`, en retirant les doublons\ :
+Rappelons que, par définition, un ensemble mathématique est une collection non ordonnée d'éléments uniques et, en conséquence, ne contient aucun élément dupliqué.
+
+
+#### Union {-} 
+
+\mbox{}
+
+La fonction `union` permet d'obtenir l'union des éléments de deux ensembles. Il s'agit d'un nouvel ensemble réunissant tous les éléments présents dans le premier ou le deuxième ensemble. Les éléments qui étaient présents dans les deux ensembles ne sont cependant pas en double dans l'union, car celle-ci est aussi un ensemble dont tous les éléments sont uniques.
 
 ```{r}
 union(A, B)
 ```
 
-Identification des éléments communs entre `A` et `B`, en retirant les doublons\ :
+Pour arriver au même résultat sans utiliser une fonction d'opération sur des ensembles, nous aurions pu concaténer les vecteurs `A` et `B`,
+
+```{r}
+c(A, B)
+```
+
+puis retirer les doublons du vecteur résultant avec la [fonction `unique`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/unique.html) (que nous reverrons dans les [notes sur le prétraitement de données](https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#retrait-des-observations-dupliqu%C3%A9es)).
+
+```{r}
+unique(c(A, B))
+```
+
+
+#### Intersection {-} 
+
+\mbox{}
+
+La fonction `intersect` retourne l'intersection entre deux ensembles. Elle permet donc d'identifier les éléments communs à ces ensembles.
 
 ```{r}
 intersect(A, B)
 ```
 
-Identification des éléments de `A` ne se retrouvant pas dans `B`, en retirant les doublons\ :
+
+#### Différence {-}
+
+\mbox{}
+
+La fonction `setdiff` permet quant à elle d'identifier les éléments présents dans un premier ensemble sans être présents dans un second ensemble.
 
 ```{r}
 setdiff(A, B)
 ```
 
-Test sur l'égalité entre les ensembles `A` et `B`\ :
+Contrairement aux fonctions `union`, `intersect` et `setequal`, l'ordre dans lequel les deux ensembles sont fournis en entrée à la fonction `setdiff` a un impact sur le résultat produit. L'exemple précédent a permis d'identifier les éléments appartenant à `A` sans appartenir à `B`, alors que la commande suivante retourne les éléments appartenant à `B` sans appartenir à `A`.
+
+```{r}
+setdiff(B, A)
+```
+
+
+#### Test d'égalité {-}
+
+\mbox{}
+
+La fonction `setequal` retourne toujours une seule valeur logique : `TRUE` si les deux ensembles fournis en entrée sont égaux, `FALSE` sinon.
 
 ```{r}
 setequal(A, B)
 ```
 
-Test sur la présence de `"d"` et `"e"` dans l'ensemble `A`\ :
+Pour être égaux, deux ensembles doivent contenir les mêmes éléments, mais pas nécessairement dans le même ordre. 
+
+```{r}
+setequal(c(5, 3, 2), c(2, 3, 2, 5, 5))
+```
+
+Notons que les fonctions `union`, `intersect`, `setdiff` et `setequal` ne vont pas rechigner si les ensembles qu'elles reçoivent en entrée contiennent des éléments dupliqués. Si c'est le cas, elles vont simplement retirer les doublons avant de procéder à l'opération. 
+
+
+#### Test d'appartenance {-}
+
+\mbox{}
+
+Finalement, R offre le fonction `is.element` pour tester la présence d'éléments dans un ensemble. Par exemple, la commande suivante test l'appartenance de `"d"` et `"e"` à l'ensemble `A`\ :
 
 ```{r}
 is.element(el = c("d", "e"), set = A)
 ```
 
+La fonction retourne une valeur logique par élément testé, en respectant l'ordre dans lequel les éléments ont été identifiés via l'argument `el`. Ainsi, la sortie précédente indique que `"d"` n'est pas présent dans `A`, mais que `"e"` l'est.
+
 
 ## Calcul de distances
-
 
 #### Distance entre des variables numériques {-}
 
@@ -1240,7 +1294,7 @@ Ces fonctions prennent en entrée une fonction R
 
 Les informations présentées dans ces notes proviennent des fiches d'aide du logiciel R :
 
-- R Core Team (2020). *R: A language and environment for statistical computing*. R Foundation for Statistical Computing, Vienna, Austria. URL <https://www.R-project.org/>
+- R Core Team (2020). *R: A Language and Environment for Statistical Computing*. R Foundation for Statistical Computing, Vienna, Austria. URL <https://www.R-project.org/>
 
 Pour aller plus loin :
 

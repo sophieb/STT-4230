@@ -320,7 +320,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ## 
 ## $sortie_matrice
 ## [1] FALSE</code></pre>
-<p>Les arguments qui ne possèdent pas de valeur par défaut sont obligatoires. Si une fonction est appelée sans donner de valeur en entrée à un paramètre obligatoire, une erreur est produite.</p>
+<p>Les arguments qui ne possèdent pas de valeur par défaut sont obligatoires. Si une fonction est appelée sans donner de valeur en entrée à un argument obligatoire, une erreur est produite.</p>
 <div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc</span>(<span class="at">sortie_matrice =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 <pre><code>## Error in stats_desc(sortie_matrice = FALSE): argument &quot;x&quot; is missing, with no default</code></pre>
 <p>Les arguments ayant une valeur par défaut peuvent, pour leur part, ne pas être fournis en entrée, auquel cas leur valeur par défaut est utilisée.</p>
@@ -336,7 +336,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ## NULL</code></pre>
 <p>Dans la liste officielle des arguments de cette fonction, l’argument <code>size</code> ne possède pas de valeur par défaut. Pourtant, si la fonction <code>sample</code> est appelée sans fournir en entrée de valeur à cet argument, aucune erreur n’est générée et une sortie est produite.</p>
 <div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span></code></pre></div>
-<pre><code>## [1] 2 1 3 5 4</code></pre>
+<pre><code>## [1] 4 5 2 1 3</code></pre>
 <p>Allons voir le corps de la fonction pour comprendre ce qui se passe.</p>
 <div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">body</span>(sample)</span></code></pre></div>
 <pre><code>## {
@@ -367,44 +367,58 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <p>Nous pouvons également constater que la valeur par défaut de l’argument <code>useHash</code> est <code>(!replace &amp;&amp; is.null(prob) &amp;&amp; size &lt;= n/2 &amp;&amp; n &gt; 1e+07))</code>, soit une expression faisant intervenir les valeurs prises par tous les autres arguments de la fonction.</p>
 <p>Ainsi, la fonction <code>sample</code> aurait pu être programmée différemment. La liste de ses arguments aurait pu contenir la valeur par défaut suivante pour l’argument <code>size</code> : <code>if (length(x) == 1L &amp;&amp; is.numeric(x) &amp;&amp; is.finite(x) &amp;&amp; x &gt;= 1) x else length(x)</code>. Peut-être que les auteurs de la fonction ont trouvé cette expression trop lourde pour la mettre dans la liste des arguments.</p>
 </div>
+<div id="valeurs-par-défaut-null" class="section level4 unnumbered">
+<h4>Valeurs par défaut <code>NULL</code></h4>
+<p></p>
+<p>Pour éviter une valeur par défaut dont l’expression est trop complexe, certains auteurs de fonctions R utilisent <code>NULL</code> comme valeur par défaut dans la liste des arguments, puis définissent la vraie valeur par défaut dans le corps de la fonction. Par exemple, la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/cut.html">fonction <code>cut</code></a> vue dans les <a href="https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#fonction-cut">notes sur le prétraitement de données en R</a> implémente cette pratique pour son argument <code>labels</code>.</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">args</span>(cut.default)</span></code></pre></div>
+<pre><code>## function (x, breaks, labels = NULL, include.lowest = FALSE, right = TRUE, 
+##     dig.lab = 3L, ordered_result = FALSE, ...) 
+## NULL</code></pre>
+<p>Si un utilisateur appelle la fonction <code>cut</code> sans fournir de valeur à l’argument <code>labels</code>, alors celui-ci prend d’abord la valeur <code>NULL</code>. Cependant, la valeur de l’objet <code>labels</code> est ensuite modifié dans le corps de la fonction par des instructions ayant l’allure suivante.</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">is.null</span>(labels)) {</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">&lt;</span>instructions<span class="sc">&gt;</span>  <span class="co"># comportant une nouvelle assignation de valeur à labels</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Ainsi la fonction <code>is.null</code> est utilisée pour vérifier si une valeur a été fournie en entrée lors de l’appel de la fonction. Cette façon de faire est une solution de rechange l’utilisation de <code>missing</code> en omettant une valeur par défaut dans la liste des arguments. Elle comporte cependant l’avantage d’indiquer plus clairement dans la liste des arguments que l’argument n’est pas obligatoire.</p>
+</div>
 <div id="arguments-acceptant-seulement-quelques-chaînes-de-caractères-spécifiques" class="section level3" number="2.1.1">
 <h3><span class="header-section-number">2.1.1</span> Arguments acceptant seulement quelques chaînes de caractères spécifiques</h3>
 <p>Attardons-nous maintenant à un cas particulier de valeur par défaut en R. Supposons qu’une fonction possède un argument qui prend en entrée une chaîne de caractères et que seulement un petit nombre de chaînes de caractères distinctes sont acceptées pour cet argument. C’est le cas par exemple de l’argument <code>useNA</code> de la fonction <code>table</code>. La fonction accepte seulement les valeurs <code>"no"</code>, <code>"ifany"</code> ou <code>"always"</code> pour cet argument. Donner une valeur autre à l’argument produit une erreur.</p>
-<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(iris<span class="sc">$</span>Species, <span class="at">useNA =</span> <span class="st">&quot;test&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(iris<span class="sc">$</span>Species, <span class="at">useNA =</span> <span class="st">&quot;test&quot;</span>)</span></code></pre></div>
 <pre><code>## Error in match.arg(useNA): &#39;arg&#39; should be one of &quot;no&quot;, &quot;ifany&quot;, &quot;always&quot;</code></pre>
 <p>Une pratique courante en R pour un argument de ce type est de lui donner comme valeur dans l’énumération des arguments le vecteur de toutes ses valeurs possibles. C’est ce qui est fait dans la fonction table.</p>
-<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">args</span>(table)</span></code></pre></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">args</span>(table)</span></code></pre></div>
 <pre><code>## function (..., exclude = if (useNA == &quot;no&quot;) c(NA, NaN), useNA = c(&quot;no&quot;, 
 ##     &quot;ifany&quot;, &quot;always&quot;), dnn = list.names(...), deparse.level = 1) 
 ## NULL</code></pre>
 <p>La valeur par défaut de l’argument n’est pas, dans ce cas, le vecteur complet <code>c("no", "ifany", "always")</code>, mais plutôt le premier élément de ce vecteur, soit <code>"no"</code>. Il en est ainsi, car le corps de la fonction contient l’instruction suivante.</p>
-<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>useNA <span class="ot">&lt;-</span> <span class="fu">match.arg</span>(useNA)</span></code></pre></div>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>useNA <span class="ot">&lt;-</span> <span class="fu">match.arg</span>(useNA)</span></code></pre></div>
 <p>La fonction <code>match.arg</code> vérifie que la valeur donnée en entrée à un argument est bien une valeur acceptée ou retourne le premier élément du vecteur de valeurs possibles si aucune valeur n’a été donnée en entrée à l’argument.</p>
 <p>Nous devrions reproduire cette façon de faire dans nos propres fonctions qui possèdent un argument du même type que l’argument <code>useNA</code> de la fonction <code>table</code>. Par exemple, remplaçons l’argument <code>sortie_matrice</code> de notre fonction <code>stats_desc</code> par l’argument <code>format_sortie</code> comme suit.</p>
-<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>stats_desc <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">format_sortie =</span> <span class="fu">c</span>(<span class="st">&quot;vecteur&quot;</span>, <span class="st">&quot;matrice&quot;</span>, <span class="st">&quot;liste&quot;</span>)) {</span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calcul</span></span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.numeric</span>(x)) {</span>
-<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">min =</span> <span class="fu">min</span>(x), <span class="at">moy =</span> <span class="fu">mean</span>(x), <span class="at">max =</span> <span class="fu">max</span>(x))</span>
-<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">is.character</span>(x) <span class="sc">||</span> <span class="fu">is.factor</span>(x)) {</span>
-<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="fu">table</span>(x, <span class="at">dnn =</span> <span class="cn">NULL</span>)</span>
-<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Production de la sortie</span></span>
-<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>  format_sortie <span class="ot">&lt;-</span> <span class="fu">match.arg</span>(format_sortie)</span>
-<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (format_sortie <span class="sc">==</span> <span class="st">&quot;matrice&quot;</span>) {</span>
-<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(stats)</span>
-<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">colnames</span>(stats) <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">is.character</span>(x) <span class="sc">||</span> <span class="fu">is.factor</span>(x)) <span class="st">&quot;frequence&quot;</span> <span class="cf">else</span> <span class="st">&quot;stat&quot;</span></span>
-<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (format_sortie <span class="sc">==</span> <span class="st">&quot;liste&quot;</span>) {</span>
-<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="fu">as.list</span>(stats)</span>
-<span id="cb50-17"><a href="#cb50-17" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb50-18"><a href="#cb50-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(stats)</span>
-<span id="cb50-19"><a href="#cb50-19" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>stats_desc <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">format_sortie =</span> <span class="fu">c</span>(<span class="st">&quot;vecteur&quot;</span>, <span class="st">&quot;matrice&quot;</span>, <span class="st">&quot;liste&quot;</span>)) {</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calcul</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.numeric</span>(x)) {</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">min =</span> <span class="fu">min</span>(x), <span class="at">moy =</span> <span class="fu">mean</span>(x), <span class="at">max =</span> <span class="fu">max</span>(x))</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">is.character</span>(x) <span class="sc">||</span> <span class="fu">is.factor</span>(x)) {</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="fu">table</span>(x, <span class="at">dnn =</span> <span class="cn">NULL</span>)</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Production de la sortie</span></span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>  format_sortie <span class="ot">&lt;-</span> <span class="fu">match.arg</span>(format_sortie)</span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (format_sortie <span class="sc">==</span> <span class="st">&quot;matrice&quot;</span>) {</span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(stats)</span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">colnames</span>(stats) <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">is.character</span>(x) <span class="sc">||</span> <span class="fu">is.factor</span>(x)) <span class="st">&quot;frequence&quot;</span> <span class="cf">else</span> <span class="st">&quot;stat&quot;</span></span>
+<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (format_sortie <span class="sc">==</span> <span class="st">&quot;liste&quot;</span>) {</span>
+<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="fu">as.list</span>(stats)</span>
+<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb53-18"><a href="#cb53-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(stats)</span>
+<span id="cb53-19"><a href="#cb53-19" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p>La valeur par défaut de l’argument <code>format_sortie</code> est bel et bien <code>"vecteur"</code>.</p>
-<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc</span>(<span class="at">x =</span> iris<span class="sc">$</span>Sepal.Length)</span></code></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc</span>(<span class="at">x =</span> iris<span class="sc">$</span>Sepal.Length)</span></code></pre></div>
 <pre><code>##      min      moy      max 
 ## 4.300000 5.843333 7.900000</code></pre>
-<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc</span>(<span class="at">x =</span> iris<span class="sc">$</span>Sepal.Length, <span class="at">format_sortie =</span> <span class="st">&quot;vecteur&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc</span>(<span class="at">x =</span> iris<span class="sc">$</span>Sepal.Length, <span class="at">format_sortie =</span> <span class="st">&quot;vecteur&quot;</span>)</span></code></pre></div>
 <pre><code>##      min      moy      max 
 ## 4.300000 5.843333 7.900000</code></pre>
 <p>La présence du vecteur des chaînes de caractères possibles dans la définition des arguments est informative, car elle indique à l’utilisateur quelles valeurs sont acceptées par l’argument.</p>
@@ -419,24 +433,24 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <li>et finalement les arguments non nommés, selon leurs positions (assignation implicite).</li>
 </ol>
 <p>Voici quelques exemples.</p>
-<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>test_appel <span class="ot">&lt;-</span> <span class="cf">function</span>(x, option, param, parametre) {</span>
-<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;l&#39;argument x prend la valeur&quot;</span>, x, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;l&#39;argument option prend la valeur&quot;</span>, option, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;l&#39;argument param prend la valeur&quot;</span>, param, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;l&#39;argument parametre prend la valeur&quot;</span>, parametre, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
-<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_appel</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>test_appel <span class="ot">&lt;-</span> <span class="cf">function</span>(x, option, param, parametre) {</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;l&#39;argument x prend la valeur&quot;</span>, x, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;l&#39;argument option prend la valeur&quot;</span>, option, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;l&#39;argument param prend la valeur&quot;</span>, param, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;l&#39;argument parametre prend la valeur&quot;</span>, parametre, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_appel</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## l&#39;argument x prend la valeur 1 
 ## l&#39;argument option prend la valeur 2 
 ## l&#39;argument param prend la valeur 3 
 ## l&#39;argument parametre prend la valeur 4</code></pre>
-<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_appel</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="at">param =</span> <span class="dv">3</span>, <span class="at">opt =</span> <span class="dv">4</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_appel</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="at">param =</span> <span class="dv">3</span>, <span class="at">opt =</span> <span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## l&#39;argument x prend la valeur 1 
 ## l&#39;argument option prend la valeur 4 
 ## l&#39;argument param prend la valeur 3 
 ## l&#39;argument parametre prend la valeur 2</code></pre>
 <p>Le nom partiel <code>opt</code> a été reconnu comme représentant l’argument <code>option</code>. Un nom partiel pouvant représenter plus d’un argument génère cependant une erreur. C’est le cas du nom partiel <code>par</code> dans l’exemple suivant, qui pourrait référer à l’argument <code>param</code> ou encore à l’argument <code>parametre</code>.</p>
-<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_appel</span>(<span class="dv">1</span>, <span class="at">par =</span> <span class="dv">2</span>, <span class="at">option =</span> <span class="dv">3</span>, <span class="dv">4</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_appel</span>(<span class="dv">1</span>, <span class="at">par =</span> <span class="dv">2</span>, <span class="at">option =</span> <span class="dv">3</span>, <span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## Error in test_appel(1, par = 2, option = 3, 4): argument 2 matches multiple formal arguments</code></pre>
 <p>Une bonne pratique de programmation en R est d’utiliser l’assignation de valeurs aux arguments par positionnement seulement pour les premiers arguments, ceux les plus souvent utilisés. Les arguments moins communs devraient être nommés, en utilisant leurs noms complets, afin de conserver un code facile à comprendre.</p>
 </div>
@@ -446,12 +460,12 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <div id="utilité-1-recevoir-en-entrée-un-nombre-indéterminé-de-valeurs-à-traiter" class="section level3" number="2.3.1">
 <h3><span class="header-section-number">2.3.1</span> Utilité 1 : recevoir en entrée un nombre indéterminé de valeurs à traiter</h3>
 <p>L’argument <code>...</code> peut permettre de prendre en entrée un nombre indéterminé de valeurs à traiter. Voici un exemple de fonction qui exploite cette utilité de l’argument <code>...</code>. Il s’agit d’une extension de la fonction <code>stats_desc</code> qui permet de calculer des statistiques descriptives à partir d’observations d’un nombre quelconque de variables fournies sous forme de vecteurs ou facteurs.</p>
-<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>stats_desc_multi <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
-<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>  args <span class="ot">&lt;-</span> <span class="fu">list</span>(...)</span>
-<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lapply</span>(<span class="at">X =</span> args, <span class="at">FUN =</span> stats_desc)</span>
-<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>stats_desc_multi <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>  args <span class="ot">&lt;-</span> <span class="fu">list</span>(...)</span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lapply</span>(<span class="at">X =</span> args, <span class="at">FUN =</span> stats_desc)</span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p>Voici un exemple d’appel à cette fonction.</p>
-<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc_multi</span>(iris<span class="sc">$</span>Sepal.Length, iris<span class="sc">$</span>Petal.Width, iris<span class="sc">$</span>Species)</span></code></pre></div>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc_multi</span>(iris<span class="sc">$</span>Sepal.Length, iris<span class="sc">$</span>Petal.Width, iris<span class="sc">$</span>Species)</span></code></pre></div>
 <pre><code>## [[1]]
 ##      min      moy      max 
 ## 4.300000 5.843333 7.900000 
@@ -464,11 +478,11 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ##     setosa versicolor  virginica 
 ##         50         50         50</code></pre>
 <p>Il est possible d’attribuer des noms aux valeurs attrapées par le <code>...</code>. Pour la fonction <code>stats_desc_multi</code>, ces noms deviennent les noms des éléments de la liste retournée en sortie.</p>
-<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc_multi</span>(</span>
-<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Sepal.Length =</span> iris<span class="sc">$</span>Sepal.Length,</span>
-<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Petal.Width =</span> iris<span class="sc">$</span>Petal.Width,</span>
-<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Species =</span> iris<span class="sc">$</span>Species</span>
-<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc_multi</span>(</span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Sepal.Length =</span> iris<span class="sc">$</span>Sepal.Length,</span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Petal.Width =</span> iris<span class="sc">$</span>Petal.Width,</span>
+<span id="cb68-4"><a href="#cb68-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Species =</span> iris<span class="sc">$</span>Species</span>
+<span id="cb68-5"><a href="#cb68-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## $Sepal.Length
 ##      min      moy      max 
 ## 4.300000 5.843333 7.900000 
@@ -481,35 +495,35 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ##     setosa versicolor  virginica 
 ##         50         50         50</code></pre>
 <p>Le corps d’une fonction possédant l’argument <code>...</code> dans le but de recevoir autant de valeurs à traiter que désiré doit contenir une instruction pour récupérer les objets. Dans le corps de la fonction <code>stats_desc_multi</code>, ils sont récupérés par l’instruction <code>list(...)</code>. Les valeurs passées en entrée via <code>...</code> peuvent aussi être référées dans le corps de la fonction par les noms <code>..1</code>, <code>..2</code>, <code>..3</code> et ainsi de suite.</p>
-<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>test_trois_points <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
-<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;le premier argument prend la valeur&quot;</span>, ..<span class="dv">1</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;le deuxième argument prend la valeur&quot;</span>, ..<span class="dv">2</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
-<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_trois_points</span>(<span class="st">&quot;a&quot;</span>, <span class="dv">1</span>, <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>test_trois_points <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;le premier argument prend la valeur&quot;</span>, ..<span class="dv">1</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;le deuxième argument prend la valeur&quot;</span>, ..<span class="dv">2</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_trois_points</span>(<span class="st">&quot;a&quot;</span>, <span class="dv">1</span>, <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## le premier argument prend la valeur a 
 ## le deuxième argument prend la valeur 1</code></pre>
 <p>Il vaut cependant mieux s’assurer que suffisamment d’objets ont été passés en entrée avant d’utiliser un de ces noms. Par exemple, si la fonction <code>test_trois_points</code> est appelée en lui fournissant un seul objet en entrée, elle génère une erreur.</p>
-<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_trois_points</span>(<span class="st">&quot;a&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_trois_points</span>(<span class="st">&quot;a&quot;</span>)</span></code></pre></div>
 <pre><code>## Error in cat(&quot;le deuxième argument prend la valeur&quot;, ..2, &quot;\n&quot;) : 
 ##  the ... list contains fewer than 2 elements</code></pre>
 <p>L’instruction <code>...length()</code> retourne le nombre d’objets attrapés par l’argument <code>...</code>. Utilisons cette instruction pour améliorer la fonction <code>test_trois_points</code> comme suit.</p>
-<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>test_trois_points <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
-<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">...length</span>() <span class="sc">&gt;=</span> <span class="dv">1</span>) {</span>
-<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;le premier argument prend la valeur&quot;</span>, ..<span class="dv">1</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb72-5"><a href="#cb72-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">...length</span>() <span class="sc">&gt;=</span> <span class="dv">2</span>) {</span>
-<span id="cb72-6"><a href="#cb72-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;le deuxième argument prend la valeur&quot;</span>, ..<span class="dv">2</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb72-7"><a href="#cb72-7" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb72-8"><a href="#cb72-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
-<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_trois_points</span>(<span class="st">&quot;a&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>test_trois_points <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">...length</span>() <span class="sc">&gt;=</span> <span class="dv">1</span>) {</span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;le premier argument prend la valeur&quot;</span>, ..<span class="dv">1</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">...length</span>() <span class="sc">&gt;=</span> <span class="dv">2</span>) {</span>
+<span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;le deuxième argument prend la valeur&quot;</span>, ..<span class="dv">2</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb75-7"><a href="#cb75-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb75-8"><a href="#cb75-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_trois_points</span>(<span class="st">&quot;a&quot;</span>)</span></code></pre></div>
 <pre><code>## le premier argument prend la valeur a</code></pre>
 <p>Nous pouvons faire encore mieux en bouclant sur les objets fournis en entrée, peu importe leur nombre. Dans ce cas, plutôt que d’utiliser les noms <code>..1</code>, <code>..2</code>, <code>..3</code> et ainsi de suite, nous utilisons la fonction <code>...elt</code>, qui prend en entrée un entier spécifiant une position et retourne l’objet attrapé par <code>...</code> à cette position.</p>
-<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>test_trois_points <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
-<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">...length</span>())) {</span>
-<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;l&#39;argument&quot;</span>, i, <span class="st">&quot;prend la valeur&quot;</span>, <span class="fu">...elt</span>(i), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
-<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_trois_points</span>(<span class="st">&quot;a&quot;</span>, <span class="dv">1</span>, <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>test_trois_points <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">...length</span>())) {</span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;l&#39;argument&quot;</span>, i, <span class="st">&quot;prend la valeur&quot;</span>, <span class="fu">...elt</span>(i), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="fu">test_trois_points</span>(<span class="st">&quot;a&quot;</span>, <span class="dv">1</span>, <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## l&#39;argument 1 prend la valeur a 
 ## l&#39;argument 2 prend la valeur 1 
 ## l&#39;argument 3 prend la valeur TRUE</code></pre>
@@ -525,29 +539,29 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <h3><span class="header-section-number">2.3.2</span> Utilité 2 : passer des arguments à une autre fonction</h3>
 <p>L’argument <code>...</code> permet également de passer des arguments à une autre fonction appelée dans le corps de la fonction. Comme pour l’utilité 1, le nombre d’éléments attrapés par <code>...</code> peuvent être en quantité quelconque. Cependant, ceux-ci ne vont cette fois pas être traités directement par la fonction principale. Ils vont seulement être transférés à une autre fonction, appelée par la fonction principale.</p>
 <p>Par exemple, l’argument <code>...</code> serait utile à notre fonction <code>stats_desc</code> pour contrôler la façon dont les appels aux fonctions <code>min</code>, <code>mean</code> et <code>max</code> traitent les valeurs manquantes. Dans le corps de la fonction <code>stats_desc</code>, les appels aux fonctions auxquelles nous souhaitons permettre le passage d’arguments (ici <code>min</code>, <code>mean</code> et <code>max</code>) doivent contenir l’argument <code>...</code>, comme dans l’exemple suivant.</p>
-<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>stats_desc <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">format_sortie =</span> <span class="fu">c</span>(<span class="st">&quot;vecteur&quot;</span>, <span class="st">&quot;matrice&quot;</span>, <span class="st">&quot;liste&quot;</span>), ...) {</span>
-<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calcul</span></span>
-<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.numeric</span>(x)) {</span>
-<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">min =</span> <span class="fu">min</span>(x, ...), <span class="at">moy =</span> <span class="fu">mean</span>(x, ...), <span class="at">max =</span> <span class="fu">max</span>(x, ...))  <span class="co"># ... ici</span></span>
-<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">is.character</span>(x) <span class="sc">||</span> <span class="fu">is.factor</span>(x)) {</span>
-<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="fu">table</span>(x, <span class="at">dnn =</span> <span class="cn">NULL</span>)</span>
-<span id="cb78-7"><a href="#cb78-7" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb78-8"><a href="#cb78-8" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb78-9"><a href="#cb78-9" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb78-10"><a href="#cb78-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Production de la sortie</span></span>
-<span id="cb78-11"><a href="#cb78-11" aria-hidden="true" tabindex="-1"></a>  format_sortie <span class="ot">&lt;-</span> <span class="fu">match.arg</span>(format_sortie)</span>
-<span id="cb78-12"><a href="#cb78-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (format_sortie <span class="sc">==</span> <span class="st">&quot;matrice&quot;</span>) {</span>
-<span id="cb78-13"><a href="#cb78-13" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(stats)</span>
-<span id="cb78-14"><a href="#cb78-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">colnames</span>(stats) <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">is.character</span>(x) <span class="sc">||</span> <span class="fu">is.factor</span>(x)) <span class="st">&quot;frequence&quot;</span> <span class="cf">else</span> <span class="st">&quot;stat&quot;</span></span>
-<span id="cb78-15"><a href="#cb78-15" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (format_sortie <span class="sc">==</span> <span class="st">&quot;liste&quot;</span>) {</span>
-<span id="cb78-16"><a href="#cb78-16" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="fu">as.list</span>(stats)</span>
-<span id="cb78-17"><a href="#cb78-17" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb78-18"><a href="#cb78-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(stats)</span>
-<span id="cb78-19"><a href="#cb78-19" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
-<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc</span>(<span class="at">x =</span> <span class="fu">c</span>(iris<span class="sc">$</span>Sepal.Length, <span class="cn">NA</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a>stats_desc <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">format_sortie =</span> <span class="fu">c</span>(<span class="st">&quot;vecteur&quot;</span>, <span class="st">&quot;matrice&quot;</span>, <span class="st">&quot;liste&quot;</span>), ...) {</span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calcul</span></span>
+<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.numeric</span>(x)) {</span>
+<span id="cb81-4"><a href="#cb81-4" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">min =</span> <span class="fu">min</span>(x, ...), <span class="at">moy =</span> <span class="fu">mean</span>(x, ...), <span class="at">max =</span> <span class="fu">max</span>(x, ...))  <span class="co"># ... ici</span></span>
+<span id="cb81-5"><a href="#cb81-5" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">is.character</span>(x) <span class="sc">||</span> <span class="fu">is.factor</span>(x)) {</span>
+<span id="cb81-6"><a href="#cb81-6" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="fu">table</span>(x, <span class="at">dnn =</span> <span class="cn">NULL</span>)</span>
+<span id="cb81-7"><a href="#cb81-7" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb81-8"><a href="#cb81-8" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb81-9"><a href="#cb81-9" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb81-10"><a href="#cb81-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Production de la sortie</span></span>
+<span id="cb81-11"><a href="#cb81-11" aria-hidden="true" tabindex="-1"></a>  format_sortie <span class="ot">&lt;-</span> <span class="fu">match.arg</span>(format_sortie)</span>
+<span id="cb81-12"><a href="#cb81-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (format_sortie <span class="sc">==</span> <span class="st">&quot;matrice&quot;</span>) {</span>
+<span id="cb81-13"><a href="#cb81-13" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(stats)</span>
+<span id="cb81-14"><a href="#cb81-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">colnames</span>(stats) <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">is.character</span>(x) <span class="sc">||</span> <span class="fu">is.factor</span>(x)) <span class="st">&quot;frequence&quot;</span> <span class="cf">else</span> <span class="st">&quot;stat&quot;</span></span>
+<span id="cb81-15"><a href="#cb81-15" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (format_sortie <span class="sc">==</span> <span class="st">&quot;liste&quot;</span>) {</span>
+<span id="cb81-16"><a href="#cb81-16" aria-hidden="true" tabindex="-1"></a>    stats <span class="ot">&lt;-</span> <span class="fu">as.list</span>(stats)</span>
+<span id="cb81-17"><a href="#cb81-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb81-18"><a href="#cb81-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(stats)</span>
+<span id="cb81-19"><a href="#cb81-19" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc</span>(<span class="at">x =</span> <span class="fu">c</span>(iris<span class="sc">$</span>Sepal.Length, <span class="cn">NA</span>))</span></code></pre></div>
 <pre><code>## min moy max 
 ##  NA  NA  NA</code></pre>
-<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc</span>(<span class="at">x =</span> <span class="fu">c</span>(iris<span class="sc">$</span>Sepal.Length, <span class="cn">NA</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc</span>(<span class="at">x =</span> <span class="fu">c</span>(iris<span class="sc">$</span>Sepal.Length, <span class="cn">NA</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>##      min      moy      max 
 ## 4.300000 5.843333 7.900000</code></pre>
 <div id="unicité-de-largument-..." class="section level4 unnumbered">
@@ -556,14 +570,14 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <p>Tous les arguments d’une fonction doivent avoir des noms distincts. Par conséquent, une fonction ne peut pas contenir plus d’un argument <code>...</code>, ce qui l’empêche d’exploiter simultanément les deux utilités de cet argument.</p>
 <p>Il serait intéressant par exemple que la fonction <code>stats_desc_multi</code> puisse à la fois traiter un nombre indéterminé de variables fournies en entrée et passer un nombre indéterminé d’arguments à la fonction <code>stats_desc</code>, qu’elle appelle. Cependant, nous ne pourrions pas utiliser deux arguments <code>...</code> pour permettre cela.</p>
 <p>Une fonction mentionnée dans les <a href="https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#fonction-ave">notes sur le prétraitement de données, la fonction <code>ave</code></a>, souffre de cette limite. L’argument <code>...</code> que cette fonction possède permet à l’utilisateur de spécifier un nombre quelconque de variables de regroupement. Il n’est donc pas possible de passer des arguments à la fonction fournie à l’argument <code>FUN</code>. Par exemple, l’instruction suivante ne permet pas de calculer des moyennes tronquées de <span class="math inline">\(20\%\)</span> des observations le plus grandes et de <span class="math inline">\(20\%\)</span> des observations les plus petites.</p>
-<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ave</span>(<span class="at">x =</span> Orange<span class="sc">$</span>circumference, Orange<span class="sc">$</span>Tree, <span class="at">FUN =</span> mean, <span class="at">trim =</span> <span class="fl">0.2</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ave</span>(<span class="at">x =</span> Orange<span class="sc">$</span>circumference, Orange<span class="sc">$</span>Tree, <span class="at">FUN =</span> mean, <span class="at">trim =</span> <span class="fl">0.2</span>)</span></code></pre></div>
 <pre><code>##  [1]  99.57143  99.57143  99.57143  99.57143  99.57143  99.57143  99.57143 135.28571
 ##  [9] 135.28571 135.28571 135.28571 135.28571 135.28571 135.28571  94.00000  94.00000
 ## [17]  94.00000  94.00000  94.00000  94.00000  94.00000 139.28571 139.28571 139.28571
 ## [25] 139.28571 139.28571 139.28571 139.28571 111.14286 111.14286 111.14286 111.14286
 ## [33] 111.14286 111.14286 111.14286</code></pre>
 <p>Même si l’instruction ne génère pas d’erreur, elle a traité <code>trim</code> comme une variable de regroupement (pour laquelle toutes les observations sont associées à la même modalité). Pour que l’argument <code>trim</code> de la fonction <code>mean</code> soit pris en compte, il faut créer une nouvelle fonction, comme suit.</p>
-<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ave</span>(<span class="at">x =</span> Orange<span class="sc">$</span>circumference, Orange<span class="sc">$</span>Tree, <span class="at">FUN =</span> <span class="cf">function</span>(x) <span class="fu">mean</span>(x, <span class="at">trim =</span> <span class="fl">0.2</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ave</span>(<span class="at">x =</span> Orange<span class="sc">$</span>circumference, Orange<span class="sc">$</span>Tree, <span class="at">FUN =</span> <span class="cf">function</span>(x) <span class="fu">mean</span>(x, <span class="at">trim =</span> <span class="fl">0.2</span>))</span></code></pre></div>
 <pre><code>##  [1] 104.4 104.4 104.4 104.4 104.4 104.4 104.4 142.2 142.2 142.2 142.2 142.2 142.2 142.2
 ## [15]  97.6  97.6  97.6  97.6  97.6  97.6  97.6 145.8 145.8 145.8 145.8 145.8 145.8 145.8
 ## [29] 114.2 114.2 114.2 114.2 114.2 114.2 114.2</code></pre>
@@ -583,24 +597,24 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <li>ou, en l’absence d’appel à la fonction <code>return</code>, ce que retourne la dernière expression évaluée dans le corps de la fonction (retour implicite).</li>
 </ul>
 <p>Si cette dernière expression ne retourne rien, alors la fonction ne produit aucune sortie. Dans les exemples précédents, la fonction <code>HelloWorld</code> et les fonctions dont le nom débute par <code>test</code> ne contiennent aucun appel à la fonction <code>return</code> et possèdent un appel à la fonction <code>cat</code> comme dernière expression évaluée. La fonction <code>cat</code> imprime (en d’autres mots affiche) un résultat, ce qui constitue un type d’effet de bord, mais ne retourne rien.</p>
-<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>sortie_cat <span class="ot">&lt;-</span> <span class="fu">cat</span>(<span class="st">&quot;ceci est un test</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>sortie_cat <span class="ot">&lt;-</span> <span class="fu">cat</span>(<span class="st">&quot;ceci est un test</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
 <pre><code>## ceci est un test</code></pre>
-<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a>sortie_cat</span></code></pre></div>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>sortie_cat</span></code></pre></div>
 <pre><code>## NULL</code></pre>
 <p>Nous constatons que l’objet <code>sortie_cat</code> prend la valeur <code>NULL</code>. Ne rien retourner en sortie signifie en réalité, pour une fonction R, retourner l’objet spécial <code>NULL</code>.</p>
 <p>Les fonctions <code>test_appel</code> et <code>test_trois_points</code> ne produisent aucune sortie puisqu’elles retournent implicitement ce qu’un appel à la fonction <code>cat</code> retourne, c’est à dire rien. Elles provoquent cependant une impression comme effet de bord.</p>
-<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>sortie_test <span class="ot">&lt;-</span> <span class="fu">test_trois_points</span>(<span class="st">&quot;oui&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a>sortie_test <span class="ot">&lt;-</span> <span class="fu">test_trois_points</span>(<span class="st">&quot;oui&quot;</span>)</span></code></pre></div>
 <pre><code>## l&#39;argument 1 prend la valeur oui</code></pre>
-<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a>sortie_test</span></code></pre></div>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a>sortie_test</span></code></pre></div>
 <pre><code>## NULL</code></pre>
 <p>La fonction <code>stats_desc</code> utilise la fonction <code>return</code> à la dernière ligne du corps de la fonction pour retourner explicitement l’objet <code>stats</code>. Cependant, le corps de la fonction <code>stats_desc_multi</code> ne contient aucun appel à la fonction <code>return</code>. Celle-ci retourne donc le résultat de <code>lapply(X = args, FUN = stats_desc)</code>, car il s’agit de la dernière expression évaluée dans le corps de la fonction. Modifions cette dernière fonction pour expérimenter l’utilisation de la fonction <code>return</code>.</p>
-<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>stats_desc_multi <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
-<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a>  args <span class="ot">&lt;-</span> <span class="fu">list</span>(...)</span>
-<span id="cb95-3"><a href="#cb95-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(args)</span>
-<span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Est-ce que cette instruction est évaluée ?&quot;</span>)</span>
-<span id="cb95-5"><a href="#cb95-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lapply</span>(<span class="at">X =</span> args, <span class="at">FUN =</span> stats_desc)</span>
-<span id="cb95-6"><a href="#cb95-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
-<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc_multi</span>(<span class="at">rating =</span> attitude<span class="sc">$</span>rating, <span class="at">complaints =</span> attitude<span class="sc">$</span>complaints)</span></code></pre></div>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>stats_desc_multi <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
+<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a>  args <span class="ot">&lt;-</span> <span class="fu">list</span>(...)</span>
+<span id="cb98-3"><a href="#cb98-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(args)</span>
+<span id="cb98-4"><a href="#cb98-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Est-ce que cette instruction est évaluée ?&quot;</span>)</span>
+<span id="cb98-5"><a href="#cb98-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lapply</span>(<span class="at">X =</span> args, <span class="at">FUN =</span> stats_desc)</span>
+<span id="cb98-6"><a href="#cb98-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc_multi</span>(<span class="at">rating =</span> attitude<span class="sc">$</span>rating, <span class="at">complaints =</span> attitude<span class="sc">$</span>complaints)</span></code></pre></div>
 <pre><code>## $rating
 ##  [1] 43 63 71 61 81 43 58 71 72 67 64 67 69 68 77 81 74 65 65 50 50 64 53 40 63
 ## [26] 66 78 48 85 82
@@ -613,13 +627,13 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <div id="retour-de-plusieurs-éléments-dans-une-liste" class="section level2" number="3.2">
 <h2><span class="header-section-number">3.2</span> Retour de plusieurs éléments dans une liste</h2>
 <p>La sortie d’une fonction est toujours composée d’un seul objet. Pour retourner plusieurs objets, il faut les combiner en un seul objet (typiquement dans une liste), comme dans l’exemple suivant.</p>
-<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>stats_desc_multi <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
-<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a>  call <span class="ot">&lt;-</span> <span class="fu">match.call</span>()</span>
-<span id="cb98-3"><a href="#cb98-3" aria-hidden="true" tabindex="-1"></a>  args <span class="ot">&lt;-</span> <span class="fu">list</span>(...)</span>
-<span id="cb98-4"><a href="#cb98-4" aria-hidden="true" tabindex="-1"></a>  stats <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="at">X =</span> args, <span class="at">FUN =</span> stats_desc)</span>
-<span id="cb98-5"><a href="#cb98-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">stats =</span> stats, <span class="at">call =</span> call))</span>
-<span id="cb98-6"><a href="#cb98-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
-<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc_multi</span>(<span class="at">rating =</span> attitude<span class="sc">$</span>rating, <span class="at">complaints =</span> attitude<span class="sc">$</span>complaints)</span></code></pre></div>
+<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a>stats_desc_multi <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
+<span id="cb101-2"><a href="#cb101-2" aria-hidden="true" tabindex="-1"></a>  call <span class="ot">&lt;-</span> <span class="fu">match.call</span>()</span>
+<span id="cb101-3"><a href="#cb101-3" aria-hidden="true" tabindex="-1"></a>  args <span class="ot">&lt;-</span> <span class="fu">list</span>(...)</span>
+<span id="cb101-4"><a href="#cb101-4" aria-hidden="true" tabindex="-1"></a>  stats <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="at">X =</span> args, <span class="at">FUN =</span> stats_desc)</span>
+<span id="cb101-5"><a href="#cb101-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">stats =</span> stats, <span class="at">call =</span> call))</span>
+<span id="cb101-6"><a href="#cb101-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stats_desc_multi</span>(<span class="at">rating =</span> attitude<span class="sc">$</span>rating, <span class="at">complaints =</span> attitude<span class="sc">$</span>complaints)</span></code></pre></div>
 <pre><code>## $stats
 ## $stats$rating
 ##      min      moy      max 
@@ -637,8 +651,8 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <div id="fonction-match.call" class="section level2" number="3.3">
 <h2><span class="header-section-number">3.3</span> Fonction <code>match.call</code></h2>
 <p>L’exemple précédent fait intervenir la fonction <code>match.call</code>. Il est commun pour des fonctions d’ajustement de modèle telles que <code>lm</code> de retourner dans la sortie une copie de l’appel de la fonction.</p>
-<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a>exemple <span class="ot">&lt;-</span> <span class="fu">lm</span>(rating <span class="sc">~</span> raises, <span class="at">data =</span> attitude)</span>
-<span id="cb101-2"><a href="#cb101-2" aria-hidden="true" tabindex="-1"></a>exemple<span class="sc">$</span>call</span></code></pre></div>
+<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a>exemple <span class="ot">&lt;-</span> <span class="fu">lm</span>(rating <span class="sc">~</span> raises, <span class="at">data =</span> attitude)</span>
+<span id="cb104-2"><a href="#cb104-2" aria-hidden="true" tabindex="-1"></a>exemple<span class="sc">$</span>call</span></code></pre></div>
 <pre><code>## lm(formula = rating ~ raises, data = attitude)</code></pre>
 <p>C’est la fonction <code>match.call</code> qui permet de créer cet élément de la sortie.</p>
 <p>Les fonctions <code>match.call</code> et <code>return</code> sont des exemples de fonctions seulement utiles dans le corps d’une fonction. Les appeler directement dans la console retourne une erreur ou une sortie sans intérêt.</p>
@@ -647,15 +661,15 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">3.4</span> Effets de bord d’une fonction</h2>
 <p>Comme pour les fonctions <code>Hello World</code>, <code>test_appel</code> et <code>test_trois_points</code>, l’évaluation de l’appel à une fonction peut produire des « <a href="https://fr.wikipedia.org/wiki/Effet_de_bord_(informatique)">effets de bord</a> » (en anglais <em>side effects</em>). Ces effets de bords peuvent être en réalité le but principal de la fonction.</p>
 <p>En plus de la <strong>production d’une impression</strong> avec une fonction telle que <code>print</code> ou <code>cat</code>, un exemple courant d’effet de bord est la <strong>production d’un graphique</strong>.</p>
-<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a>sortie_plot <span class="ot">&lt;-</span> <span class="fu">plot</span>(rating <span class="sc">~</span> raises, <span class="at">data =</span> attitude)</span></code></pre></div>
-<p><img src="/programmation/fonctions_r_2021_files/figure-html/unnamed-chunk-54-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a>sortie_plot <span class="ot">&lt;-</span> <span class="fu">plot</span>(rating <span class="sc">~</span> raises, <span class="at">data =</span> attitude)</span></code></pre></div>
+<p><img src="/programmation/fonctions_r_2021_files/figure-html/unnamed-chunk-56-1.png" width="70%" style="display: block; margin: auto;" /></p>
 <p>Certaines fonctions graphiques ne retournent pas d’objet.</p>
-<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a>sortie_plot</span></code></pre></div>
+<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a>sortie_plot</span></code></pre></div>
 <pre><code>## NULL</code></pre>
 <p>Nous savons déjà cependant que d’autres fonctions graphiques retournent un objet en plus de produire un graphique. Il est donc possible pour une fonction R de produire à la fois un effet de bord et une sortie.</p>
-<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a>sortie_boxplot <span class="ot">&lt;-</span> <span class="fu">boxplot</span>(<span class="at">x =</span> attitude<span class="sc">$</span>rating, <span class="at">xlab =</span> <span class="st">&quot;rating&quot;</span>)</span></code></pre></div>
-<p><img src="/programmation/fonctions_r_2021_files/figure-html/unnamed-chunk-56-1.png" width="70%" style="display: block; margin: auto;" /></p>
-<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a>sortie_boxplot</span></code></pre></div>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a>sortie_boxplot <span class="ot">&lt;-</span> <span class="fu">boxplot</span>(<span class="at">x =</span> attitude<span class="sc">$</span>rating, <span class="at">xlab =</span> <span class="st">&quot;rating&quot;</span>)</span></code></pre></div>
+<p><img src="/programmation/fonctions_r_2021_files/figure-html/unnamed-chunk-58-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb110-1"><a href="#cb110-1" aria-hidden="true" tabindex="-1"></a>sortie_boxplot</span></code></pre></div>
 <pre><code>## $stats
 ##      [,1]
 ## [1,] 40.0
@@ -702,16 +716,16 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <p>Lors de l’appel de la plupart des fonctions R, lorsqu’un objet est assigné à un argument, une copie de cet objet est créée et l’évaluation des instructions du corps de la fonction affecte cette copie et non l’objet d’origine. Ce mécanisme est appelé en informatique le « <a href="https://fr.wikipedia.org/wiki/Param%C3%A8tre_(programmation_informatique)">passage d’arguments par valeur</a> ».</p>
 <p>Un autre mécanisme possible de passage d’arguments est le « <a href="https://fr.wikipedia.org/wiki/Param%C3%A8tre_(programmation_informatique)">passage par référence</a> ». Avec ce type de passage, les objets passés ne sont pas recopiés et les instructions du corps d’une fonction peuvent modifier l’objet d’origine. En R, ce type de passage est très rare. Une exception notable à cette observation est le package <a href="https://rdatatable.gitlab.io/data.table/"><code>data.table</code></a>, qui utilise le passage par référence pour certaines de ses fonctions (notamment l’opérateur <code>:=</code>, les fonctions <code>setorder</code> et <code>setcolorder</code>), comme nous l’avons mentionné dans les <a href="https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#op%C3%A9rateur-du-package-data.table">notes sur le prétraitement de données en R</a>.</p>
 <p>Illustrons ici le passage d’argument de loin le plus usuel en R : le passage d’arguments par valeur. Supposons que notre environnement de travail comporte un objet nommé <code>x</code> contenant le nombre 5.</p>
-<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">5</span></span>
-<span id="cb109-2"><a href="#cb109-2" aria-hidden="true" tabindex="-1"></a>x</span></code></pre></div>
+<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb112-2"><a href="#cb112-2" aria-hidden="true" tabindex="-1"></a>x</span></code></pre></div>
 <pre><code>## [1] 5</code></pre>
 <p>Créons une simple fonction R qui ajoute une unité à des nombres.</p>
-<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1" aria-hidden="true" tabindex="-1"></a>ajoute_1 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) x <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div>
+<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb114-1"><a href="#cb114-1" aria-hidden="true" tabindex="-1"></a>ajoute_1 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) x <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div>
 <p>Maintenant, appelons cette fonction en lui donnant en entrée l’objet <code>x</code> de notre environnement de travail.</p>
-<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ajoute_1</span>(<span class="at">x =</span> x)</span></code></pre></div>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ajoute_1</span>(<span class="at">x =</span> x)</span></code></pre></div>
 <pre><code>## [1] 6</code></pre>
 <p>La fonction retourne le résultat de <code>x + 1</code>, soit 6. Mais est-ce que l’objet <code>x</code> a pour autant changé?</p>
-<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb114-1"><a href="#cb114-1" aria-hidden="true" tabindex="-1"></a>x</span></code></pre></div>
+<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" aria-hidden="true" tabindex="-1"></a>x</span></code></pre></div>
 <pre><code>## [1] 5</code></pre>
 <p>Non. Il contient toujours la valeur 5.</p>
 <p>Remarquez qu’ici le nom <code>x</code> a été utilisé pour deux entités distinctes :</p>
@@ -721,10 +735,10 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 </ul>
 <p>Dans l’instruction <code>ajoute_1(x = x)</code>, nous avons assigné la valeur contenue dans l’objet <code>x</code> à l’argument portant le même nom.</p>
 <p>Comment pourrions-nous modifier l’objet <code>x</code> de notre environnement de travail à l’aide de la fonction <code>ajoute_1</code> ? Il faudrait assigner le résultat de l’instruction <code>ajoute_1(x = x)</code> au nom <code>x</code> comme suit.</p>
-<div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb116-1"><a href="#cb116-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">ajoute_1</span>(<span class="at">x =</span> x)</span></code></pre></div>
+<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">ajoute_1</span>(<span class="at">x =</span> x)</span></code></pre></div>
 <p>En fait, cette commande écrase l’ancien objet <code>x</code> par un nouveau, contenant la valeur retournée par<br />
 <code>ajoute_1(x = x)</code>.</p>
-<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" aria-hidden="true" tabindex="-1"></a>x</span></code></pre></div>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1" aria-hidden="true" tabindex="-1"></a>x</span></code></pre></div>
 <pre><code>## [1] 6</code></pre>
 </div>
 <div id="portée-lexicale" class="section level2" number="4.2">
@@ -735,54 +749,54 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <p>Avec une portée lexicale, si un objet appelé n’est pas trouvé dans l’environnement d’évaluation de l’appel à une fonction, le programme va le chercher dans l’environnement d’où la fonction a été <strong>créée</strong>, nommé <strong>environnement englobant</strong> (en anglais <em>enclosing environment</em>). Avec une portée dynamique, le programme va plutôt le chercher dans l’environnement d’où la fonction a été <strong>appelée</strong>, nommé <strong>environnement d’appel</strong> (en anglais <em>calling environment</em>).</p>
 <p><strong>R utilise la portée lexicale.</strong></p>
 <p>Voici un petit exemple pour illustrer la portée lexicale.</p>
-<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb119-2"><a href="#cb119-2" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb119-3"><a href="#cb119-3" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb119-4"><a href="#cb119-4" aria-hidden="true" tabindex="-1"></a>  a<span class="sc">*</span>x <span class="sc">+</span> b</span>
-<span id="cb119-5"><a href="#cb119-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb122-1"><a href="#cb122-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb122-2"><a href="#cb122-2" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb122-3"><a href="#cb122-3" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb122-4"><a href="#cb122-4" aria-hidden="true" tabindex="-1"></a>  a<span class="sc">*</span>x <span class="sc">+</span> b</span>
+<span id="cb122-5"><a href="#cb122-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p>Quelle valeur sera retournée par <code>f(x = 5)</code>? Est-ce 1*5 + 2 = 7? Oui!</p>
-<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1" aria-hidden="true" tabindex="-1"></a><span class="fu">f</span>(<span class="at">x =</span> <span class="dv">5</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb123"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb123-1"><a href="#cb123-1" aria-hidden="true" tabindex="-1"></a><span class="fu">f</span>(<span class="at">x =</span> <span class="dv">5</span>)</span></code></pre></div>
 <pre><code>## [1] 7</code></pre>
 <p>Les objets nommés <code>a</code> et <code>b</code> ne se retrouvaient pas dans l’environnement d’exécution de la fonction. Alors R a cherché leurs valeurs dans l’environnement englobant de la fonction <code>f</code>, qui est ici l’environnement de travail.</p>
-<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb122-1"><a href="#cb122-1" aria-hidden="true" tabindex="-1"></a><span class="fu">environment</span>(f)</span></code></pre></div>
+<div class="sourceCode" id="cb125"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb125-1"><a href="#cb125-1" aria-hidden="true" tabindex="-1"></a><span class="fu">environment</span>(f)</span></code></pre></div>
 <pre><code>## &lt;environment: R_GlobalEnv&gt;</code></pre>
 <p>Il a trouvé <code>a</code> = 1 et <code>b</code> = 2. La fonction <code>environment</code> retourne l’environnement englobant d’une fonction.</p>
 <p>Modifions maintenant l’exemple comme suit.</p>
-<div class="sourceCode" id="cb124"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb124-1"><a href="#cb124-1" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb124-2"><a href="#cb124-2" aria-hidden="true" tabindex="-1"></a>  a <span class="ot">&lt;-</span> <span class="dv">3</span></span>
-<span id="cb124-3"><a href="#cb124-3" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> <span class="dv">4</span></span>
-<span id="cb124-4"><a href="#cb124-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">f</span>(<span class="at">x =</span> x)</span>
-<span id="cb124-5"><a href="#cb124-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb127-2"><a href="#cb127-2" aria-hidden="true" tabindex="-1"></a>  a <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb127-3"><a href="#cb127-3" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb127-4"><a href="#cb127-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">f</span>(<span class="at">x =</span> x)</span>
+<span id="cb127-5"><a href="#cb127-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p>Quelle valeur sera retournée par <code>g(x = 5)</code>? Est-ce 3*5 + 4 = 19? Non!</p>
-<div class="sourceCode" id="cb125"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb125-1"><a href="#cb125-1" aria-hidden="true" tabindex="-1"></a><span class="fu">g</span>(<span class="at">x =</span> <span class="dv">5</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb128"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb128-1"><a href="#cb128-1" aria-hidden="true" tabindex="-1"></a><span class="fu">g</span>(<span class="at">x =</span> <span class="dv">5</span>)</span></code></pre></div>
 <pre><code>## [1] 7</code></pre>
 <p>La fonction <code>g</code> est appelée dans l’environnement de travail. Elle appelle elle-même <code>f</code>. L’environnement d’appel de <code>f</code> est donc l’environnement d’exécution de <code>g</code>. Par contre, l’environnement englobant de <code>f</code> n’a pas changé. Il est encore l’environnement de travail, car c’est dans cet environnement que la fonction a été définie.</p>
-<div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a><span class="fu">environment</span>(f)</span></code></pre></div>
+<div class="sourceCode" id="cb130"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb130-1"><a href="#cb130-1" aria-hidden="true" tabindex="-1"></a><span class="fu">environment</span>(f)</span></code></pre></div>
 <pre><code>## &lt;environment: R_GlobalEnv&gt;</code></pre>
 <p>La portée lexicale permet de s’assurer que le fonctionnement de l’évaluation de l’appel à une fonction ne dépende pas du contexte dans lequel la fonction est appelée. Il dépend seulement de l’environnement d’où la fonction a été créée.</p>
 <p>Si la portée en R était par défaut dynamique, <code>g(x = 5)</code> aurait retourné la valeur 19.</p>
 <p>Et si <code>f</code> était créée à l’intérieur de la fonction <code>g</code>?</p>
-<div class="sourceCode" id="cb129"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb129-1"><a href="#cb129-1" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb129-2"><a href="#cb129-2" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb129-3"><a href="#cb129-3" aria-hidden="true" tabindex="-1"></a>    a<span class="sc">*</span>x <span class="sc">+</span> b</span>
-<span id="cb129-4"><a href="#cb129-4" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb129-5"><a href="#cb129-5" aria-hidden="true" tabindex="-1"></a>  a <span class="ot">&lt;-</span> <span class="dv">3</span></span>
-<span id="cb129-6"><a href="#cb129-6" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> <span class="dv">4</span></span>
-<span id="cb129-7"><a href="#cb129-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">f</span>(<span class="at">x =</span> x)</span>
-<span id="cb129-8"><a href="#cb129-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb132"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb132-1"><a href="#cb132-1" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb132-2"><a href="#cb132-2" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb132-3"><a href="#cb132-3" aria-hidden="true" tabindex="-1"></a>    a<span class="sc">*</span>x <span class="sc">+</span> b</span>
+<span id="cb132-4"><a href="#cb132-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb132-5"><a href="#cb132-5" aria-hidden="true" tabindex="-1"></a>  a <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb132-6"><a href="#cb132-6" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb132-7"><a href="#cb132-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">f</span>(<span class="at">x =</span> x)</span>
+<span id="cb132-8"><a href="#cb132-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p>Que retourne <code>g(x = 5)</code> maintenant?</p>
-<div class="sourceCode" id="cb130"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb130-1"><a href="#cb130-1" aria-hidden="true" tabindex="-1"></a><span class="fu">g</span>(<span class="at">x =</span> <span class="dv">5</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb133"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb133-1"><a href="#cb133-1" aria-hidden="true" tabindex="-1"></a><span class="fu">g</span>(<span class="at">x =</span> <span class="dv">5</span>)</span></code></pre></div>
 <pre><code>## [1] 19</code></pre>
 <p>L’environnement englobant de <code>f</code> est maintenant l’environnement d’exécution de <code>g</code>, car <code>f</code> a été défini dans le corps de la fonction <code>g</code>.</p>
 <p>Notons que l’environnement englobant des fonctions disponibles en R autres que celles que nous avons créées en cours de session est l’espace de noms du package d’où provient la fonction. Par exemple, l’environnement englobant de la fonction <code>mean</code> est l’espace de noms du package <code>base</code>. Nous verrons ce qu’est un espace de noms dans les <a href="https://stt4230.rbind.io/packages/utilisation_packages_r/#espace-de-noms-namespace-dun-package">notes sur l’utilisation de packages R</a>.</p>
-<div class="sourceCode" id="cb132"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb132-1"><a href="#cb132-1" aria-hidden="true" tabindex="-1"></a><span class="fu">environment</span>(mean)</span></code></pre></div>
+<div class="sourceCode" id="cb135"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1" aria-hidden="true" tabindex="-1"></a><span class="fu">environment</span>(mean)</span></code></pre></div>
 <pre><code>## &lt;environment: namespace:base&gt;</code></pre>
 </div>
 <div id="chemin-de-recherche-complet" class="section level2" number="4.3">
 <h2><span class="header-section-number">4.3</span> Chemin de recherche complet</h2>
 <p>Le chemin de recherche des valeurs des objets lors de l’évaluation de l’appel à une fonction en R ne s’arrête pas à l’environnement d’exécution de la fonction suivi de l’environnement englobant de la fonction. Si l’environnement englobant est l’environnement d’exécution d’une autre fonction, alors la recherche se poursuit dans l’environnement englobant de cette fonction. Plusieurs environnements englobants peuvent ainsi être imbriqués. Ensuite, l’environnement de travail est toujours ajouté au chemin de recherche s’il n’est pas directement l’environnement englobant (potentiellement à la base d’une hiérarchie d’environnements englobants). Et de là, le chemin de recherche se poursuit par les environnements de tous les packages chargés, tel que vu dans les <a href="https://stt4230.rbind.io/programmation/infos_techniques_r/#%C3%A9valuation-dexpressions-en-r-et-environnements">notes sur des informations techniques concernant R</a>. Nous pouvons donc utiliser, dans les fonctions que nous créons, des fonctions provenant d’autres packages. Il faut seulement s’assurer que ces packages soient chargés pour que nos fonctions roulent sans erreur.</p>
 Dans le dernier exemple, le chemin de recherche complet lors de l’évaluation de l’appel à la fonction <code>f</code>, dans le corps de la fonction <code>g</code>, alors que <code>f</code> a aussi été créé dans le corps de <code>g</code>, est le suivant.
-<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-72"></span>
+<div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-74"></span>
 <img src="fig/chemin_fonction.png" alt="Exemple de chemin de recherche lors de l'évaluation de l'appel à une fonction R" width="25%" />
 <p class="caption">
 Figure 4.1: Exemple de chemin de recherche lors de l’évaluation de l’appel à une fonction R
@@ -837,62 +851,62 @@ Figure 4.1: Exemple de chemin de recherche lors de l’évaluation de l’appel 
 <h4>2. Développer le corps de la fonction :</h4>
 <p></p>
 <p>Création de mini-données test</p>
-<div class="sourceCode" id="cb134"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb134-1"><a href="#cb134-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">3</span>, <span class="fl">5.5</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="dv">5</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb137"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">3</span>, <span class="fl">5.5</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="dv">5</span>)</span></code></pre></div>
 <p>Ce vecteur contient 3 nombres entiers impairs. C’est le résultat que nous visons obtenir.</p>
 <p>Code le plus simple qui me vient en tête :</p>
-<div class="sourceCode" id="cb135"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(x <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb138"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb138-1"><a href="#cb138-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(x <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## [1] 3</code></pre>
 <p>Nous obtenons bien 3. Ça marche pour les mini-données test.</p>
 <p>Ce code est équivalent à la boucle suivante :</p>
-<div class="sourceCode" id="cb137"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb137-2"><a href="#cb137-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (n <span class="cf">in</span> x) {</span>
-<span id="cb137-3"><a href="#cb137-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (n <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">1</span>) {</span>
-<span id="cb137-4"><a href="#cb137-4" aria-hidden="true" tabindex="-1"></a>    k <span class="ot">&lt;-</span> k <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb137-5"><a href="#cb137-5" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb137-6"><a href="#cb137-6" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb137-7"><a href="#cb137-7" aria-hidden="true" tabindex="-1"></a>k</span></code></pre></div>
+<div class="sourceCode" id="cb140"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb140-1"><a href="#cb140-1" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb140-2"><a href="#cb140-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (n <span class="cf">in</span> x) {</span>
+<span id="cb140-3"><a href="#cb140-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (n <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">1</span>) {</span>
+<span id="cb140-4"><a href="#cb140-4" aria-hidden="true" tabindex="-1"></a>    k <span class="ot">&lt;-</span> k <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb140-5"><a href="#cb140-5" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb140-6"><a href="#cb140-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb140-7"><a href="#cb140-7" aria-hidden="true" tabindex="-1"></a>k</span></code></pre></div>
 <pre><code>## [1] 3</code></pre>
 </div>
 <div id="créer-la-fonction-à-partir-du-programme-développé" class="section level4 unnumbered">
 <h4>3. Créer la fonction à partir du programme développé :</h4>
 <p></p>
-<div class="sourceCode" id="cb139"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1" aria-hidden="true" tabindex="-1"></a>compte_impair_vectoriel <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb139-2"><a href="#cb139-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(x <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">1</span>)</span>
-<span id="cb139-3"><a href="#cb139-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb139-4"><a href="#cb139-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb139-5"><a href="#cb139-5" aria-hidden="true" tabindex="-1"></a>compte_impair_boucle <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb139-6"><a href="#cb139-6" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb139-7"><a href="#cb139-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (n <span class="cf">in</span> x) {</span>
-<span id="cb139-8"><a href="#cb139-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (n <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">1</span>) {</span>
-<span id="cb139-9"><a href="#cb139-9" aria-hidden="true" tabindex="-1"></a>      k <span class="ot">&lt;-</span> k <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb139-10"><a href="#cb139-10" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb139-11"><a href="#cb139-11" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb139-12"><a href="#cb139-12" aria-hidden="true" tabindex="-1"></a>  k</span>
-<span id="cb139-13"><a href="#cb139-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb142"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb142-1"><a href="#cb142-1" aria-hidden="true" tabindex="-1"></a>compte_impair_vectoriel <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb142-2"><a href="#cb142-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(x <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb142-3"><a href="#cb142-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb142-4"><a href="#cb142-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb142-5"><a href="#cb142-5" aria-hidden="true" tabindex="-1"></a>compte_impair_boucle <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb142-6"><a href="#cb142-6" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb142-7"><a href="#cb142-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (n <span class="cf">in</span> x) {</span>
+<span id="cb142-8"><a href="#cb142-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (n <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">1</span>) {</span>
+<span id="cb142-9"><a href="#cb142-9" aria-hidden="true" tabindex="-1"></a>      k <span class="ot">&lt;-</span> k <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb142-10"><a href="#cb142-10" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb142-11"><a href="#cb142-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb142-12"><a href="#cb142-12" aria-hidden="true" tabindex="-1"></a>  k</span>
+<span id="cb142-13"><a href="#cb142-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div id="documenter-la-fonction" class="section level4 unnumbered">
 <h4>4. Documenter la fonction :</h4>
 <p></p>
 <p><strong>Option 1</strong> : Documentation en commentaire dans le corps de la fonction.</p>
-<div class="sourceCode" id="cb140"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb140-1"><a href="#cb140-1" aria-hidden="true" tabindex="-1"></a>compte_impair_vectoriel <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb140-2"><a href="#cb140-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Fonction qui compte combien de nombres entiers impairs contient un vecteur numérique</span></span>
-<span id="cb140-3"><a href="#cb140-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Argument en entrée : x = vecteur numérique</span></span>
-<span id="cb140-4"><a href="#cb140-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Sortie : le nombre de nombres entiers impairs dans x</span></span>
-<span id="cb140-5"><a href="#cb140-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(x <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">1</span>)</span>
-<span id="cb140-6"><a href="#cb140-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb143"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1" aria-hidden="true" tabindex="-1"></a>compte_impair_vectoriel <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb143-2"><a href="#cb143-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Fonction qui compte combien de nombres entiers impairs contient un vecteur numérique</span></span>
+<span id="cb143-3"><a href="#cb143-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Argument en entrée : x = vecteur numérique</span></span>
+<span id="cb143-4"><a href="#cb143-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Sortie : le nombre de nombres entiers impairs dans x</span></span>
+<span id="cb143-5"><a href="#cb143-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(x <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb143-6"><a href="#cb143-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p><strong>Option 2</strong> : Documentation en commentaire avant la définition de la fonction.</p>
-<div class="sourceCode" id="cb141"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fonction qui compte combien de nombres entiers impairs contient un vecteur numérique</span></span>
-<span id="cb141-2"><a href="#cb141-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Argument en entrée : x = vecteur numérique</span></span>
-<span id="cb141-3"><a href="#cb141-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Sortie : le nombre de nombres entiers impairs dans x</span></span>
-<span id="cb141-4"><a href="#cb141-4" aria-hidden="true" tabindex="-1"></a>compte_impair_boucle <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb141-5"><a href="#cb141-5" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb141-6"><a href="#cb141-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (n <span class="cf">in</span> x) {</span>
-<span id="cb141-7"><a href="#cb141-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (n <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">1</span>) {</span>
-<span id="cb141-8"><a href="#cb141-8" aria-hidden="true" tabindex="-1"></a>      k <span class="ot">&lt;-</span> k <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb141-9"><a href="#cb141-9" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb141-10"><a href="#cb141-10" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb141-11"><a href="#cb141-11" aria-hidden="true" tabindex="-1"></a>  k</span>
-<span id="cb141-12"><a href="#cb141-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb144"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb144-1"><a href="#cb144-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fonction qui compte combien de nombres entiers impairs contient un vecteur numérique</span></span>
+<span id="cb144-2"><a href="#cb144-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Argument en entrée : x = vecteur numérique</span></span>
+<span id="cb144-3"><a href="#cb144-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Sortie : le nombre de nombres entiers impairs dans x</span></span>
+<span id="cb144-4"><a href="#cb144-4" aria-hidden="true" tabindex="-1"></a>compte_impair_boucle <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb144-5"><a href="#cb144-5" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb144-6"><a href="#cb144-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (n <span class="cf">in</span> x) {</span>
+<span id="cb144-7"><a href="#cb144-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (n <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">1</span>) {</span>
+<span id="cb144-8"><a href="#cb144-8" aria-hidden="true" tabindex="-1"></a>      k <span class="ot">&lt;-</span> k <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb144-9"><a href="#cb144-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb144-10"><a href="#cb144-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb144-11"><a href="#cb144-11" aria-hidden="true" tabindex="-1"></a>  k</span>
+<span id="cb144-12"><a href="#cb144-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p><strong>Options supplémentaires</strong> : Nous verrons d’autres options dans le cours sur les packages.</p>
 </div>
 <div id="comparaison-des-2-fonctions" class="section level4 unnumbered">
@@ -902,14 +916,14 @@ Figure 4.1: Exemple de chemin de recherche lors de l’évaluation de l’appel 
 <p>Dans ce cas, laquelle des 2 fonctions devrions-nous utiliser?</p>
 <p>Réponse : la plus rapide.</p>
 <p>Créons un vecteur très grand pour comparer le temps d’exécution des deux fonctions.</p>
-<div class="sourceCode" id="cb142"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb142-1"><a href="#cb142-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">runif</span>(<span class="dv">1000000</span>, <span class="sc">-</span><span class="dv">10</span>, <span class="dv">10</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb145"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">runif</span>(<span class="dv">1000000</span>, <span class="sc">-</span><span class="dv">10</span>, <span class="dv">10</span>))</span></code></pre></div>
 <p>Utilisons la fonction <code>system.time</code> pour évaluer les temps d’exécution.</p>
-<div class="sourceCode" id="cb143"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(<span class="fu">compte_impair_vectoriel</span>(x))</span></code></pre></div>
+<div class="sourceCode" id="cb146"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb146-1"><a href="#cb146-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(<span class="fu">compte_impair_vectoriel</span>(x))</span></code></pre></div>
 <pre><code>##    user  system elapsed 
-##    0.02    0.00    0.02</code></pre>
-<div class="sourceCode" id="cb145"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(<span class="fu">compte_impair_boucle</span>(x))</span></code></pre></div>
+##    0.01    0.02    0.03</code></pre>
+<div class="sourceCode" id="cb148"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb148-1"><a href="#cb148-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>(<span class="fu">compte_impair_boucle</span>(x))</span></code></pre></div>
 <pre><code>##    user  system elapsed 
-##    0.25    0.00    0.25</code></pre>
+##    0.20    0.00    0.22</code></pre>
 <p>L’écart dans les temps d’exécution des deux fonctions se creuse encore plus si nous augmentons la longueur du vecteur <code>x</code>.</p>
 <p>Nous devrions donc choisir d’utiliser <code>compte_impair_vectoriel</code> plutôt que <code>compte_impair_boucle</code>.</p>
 <p>Nous allons revenir plus tard sur l’optimisation des temps d’exécution de nos fonctions.</p>
@@ -920,37 +934,37 @@ Figure 4.1: Exemple de chemin de recherche lors de l’évaluation de l’appel 
 <h1><span class="header-section-number">6</span> Programmation fonctionnelle</h1>
 <p>Maintenant que vous savez écrire des fonctions en R, vous pouvez exploiter tout le potentiel de la <a href="https://en.wikipedia.org/wiki/Functional_programming">programmation fonctionnelle</a>, paradigme de programmation exploité par R. En fait, nous avons déjà parlé de ce paradigme dans ce cours. L’<a href="https://stt4230.rbind.io/calculs/calculs_apply_r/#fonctions-de-la-famille-des-apply">utilisation de fonctions de la famille des <code>apply</code></a> est une forme de programmation fonctionnelle. Contentons nous ici de parler de cet aspect de la programmation fonctionnelle : les fonctions de haut niveau qui prennent d’autres fonctions en entrée, comme les fonctions de la famille des <code>apply</code>.</p>
 <p>Nous avons déjà donné dans les <a href="https://stt4230.rbind.io/programmation/struct_controle_r/#fonction-de-la-famille-des-apply-versus-boucle">notes sur les structures de contrôle</a> un exemple de boucle <code>for</code> remplacé par un appel à une fonction de la famille des <code>apply</code>. En fait, pratiquement n’importe quelle boucle <code>for</code> en R peut être remplacée par un appel à une fonction de la famille des <code>apply</code> une fois que nous savons comment créer de nouvelles fonctions. Par exemple, reprenons l’exemple de boucle suivant, aussi tiré des <a href="https://stt4230.rbind.io/programmation/struct_controle_r/#enregistrement-des-r%C3%A9sultats-dans-une-boucle">notes sur les structures de contrôle</a>.</p>
-<div class="sourceCode" id="cb147"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb147-1"><a href="#cb147-1" aria-hidden="true" tabindex="-1"></a>modeles <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">length =</span> <span class="fu">ncol</span>(attitude) <span class="sc">-</span> <span class="dv">1</span>, <span class="at">mode =</span> <span class="st">&quot;list&quot;</span>)</span>
-<span id="cb147-2"><a href="#cb147-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(modeles) <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">names</span>(attitude), <span class="st">&quot;rating&quot;</span>)</span>
-<span id="cb147-3"><a href="#cb147-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb147-4"><a href="#cb147-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (variable <span class="cf">in</span> <span class="fu">names</span>(modeles)) {</span>
-<span id="cb147-5"><a href="#cb147-5" aria-hidden="true" tabindex="-1"></a>  modeles[[variable]] <span class="ot">&lt;-</span> <span class="fu">lm</span>(rating <span class="sc">~</span> ., <span class="at">data =</span> attitude[, <span class="fu">c</span>(<span class="st">&quot;rating&quot;</span>, variable)])</span>
-<span id="cb147-6"><a href="#cb147-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb150"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb150-1"><a href="#cb150-1" aria-hidden="true" tabindex="-1"></a>modeles <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">length =</span> <span class="fu">ncol</span>(attitude) <span class="sc">-</span> <span class="dv">1</span>, <span class="at">mode =</span> <span class="st">&quot;list&quot;</span>)</span>
+<span id="cb150-2"><a href="#cb150-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(modeles) <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">names</span>(attitude), <span class="st">&quot;rating&quot;</span>)</span>
+<span id="cb150-3"><a href="#cb150-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb150-4"><a href="#cb150-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (variable <span class="cf">in</span> <span class="fu">names</span>(modeles)) {</span>
+<span id="cb150-5"><a href="#cb150-5" aria-hidden="true" tabindex="-1"></a>  modeles[[variable]] <span class="ot">&lt;-</span> <span class="fu">lm</span>(rating <span class="sc">~</span> ., <span class="at">data =</span> attitude[, <span class="fu">c</span>(<span class="st">&quot;rating&quot;</span>, variable)])</span>
+<span id="cb150-6"><a href="#cb150-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p>Il s’agit d’une boucle ajustant plusieurs modèles de régression linéaire simple avec les variables du jeu de données <code>attitude</code>. Modifions un peu cet exemple pour conserver des modèles uniquement les coefficients de détermination, non ajustés et ajustés.</p>
-<div class="sourceCode" id="cb148"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb148-1"><a href="#cb148-1" aria-hidden="true" tabindex="-1"></a>R2 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="fu">ncol</span>(attitude) <span class="sc">-</span> <span class="dv">1</span>)</span>
-<span id="cb148-2"><a href="#cb148-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(R2) <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">names</span>(attitude), <span class="st">&quot;rating&quot;</span>)</span>
-<span id="cb148-3"><a href="#cb148-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(R2) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;r.squared&quot;</span>, <span class="st">&quot;adj.r.squared&quot;</span>)</span>
-<span id="cb148-4"><a href="#cb148-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb148-5"><a href="#cb148-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (variable <span class="cf">in</span> <span class="fu">colnames</span>(R2)) {</span>
-<span id="cb148-6"><a href="#cb148-6" aria-hidden="true" tabindex="-1"></a>  reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(rating <span class="sc">~</span> ., <span class="at">data =</span> attitude[, <span class="fu">c</span>(<span class="st">&quot;rating&quot;</span>, variable)])</span>
-<span id="cb148-7"><a href="#cb148-7" aria-hidden="true" tabindex="-1"></a>  R2[<span class="st">&quot;r.squared&quot;</span>, variable] <span class="ot">&lt;-</span> <span class="fu">summary</span>(reg)<span class="sc">$</span>r.squared</span>
-<span id="cb148-8"><a href="#cb148-8" aria-hidden="true" tabindex="-1"></a>  R2[<span class="st">&quot;adj.r.squared&quot;</span>, variable] <span class="ot">&lt;-</span> <span class="fu">summary</span>(reg)<span class="sc">$</span>adj.r.squared</span>
-<span id="cb148-9"><a href="#cb148-9" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb148-10"><a href="#cb148-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb148-11"><a href="#cb148-11" aria-hidden="true" tabindex="-1"></a>R2</span></code></pre></div>
+<div class="sourceCode" id="cb151"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1" aria-hidden="true" tabindex="-1"></a>R2 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="fu">ncol</span>(attitude) <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb151-2"><a href="#cb151-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(R2) <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">names</span>(attitude), <span class="st">&quot;rating&quot;</span>)</span>
+<span id="cb151-3"><a href="#cb151-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(R2) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;r.squared&quot;</span>, <span class="st">&quot;adj.r.squared&quot;</span>)</span>
+<span id="cb151-4"><a href="#cb151-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb151-5"><a href="#cb151-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (variable <span class="cf">in</span> <span class="fu">colnames</span>(R2)) {</span>
+<span id="cb151-6"><a href="#cb151-6" aria-hidden="true" tabindex="-1"></a>  reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(rating <span class="sc">~</span> ., <span class="at">data =</span> attitude[, <span class="fu">c</span>(<span class="st">&quot;rating&quot;</span>, variable)])</span>
+<span id="cb151-7"><a href="#cb151-7" aria-hidden="true" tabindex="-1"></a>  R2[<span class="st">&quot;r.squared&quot;</span>, variable] <span class="ot">&lt;-</span> <span class="fu">summary</span>(reg)<span class="sc">$</span>r.squared</span>
+<span id="cb151-8"><a href="#cb151-8" aria-hidden="true" tabindex="-1"></a>  R2[<span class="st">&quot;adj.r.squared&quot;</span>, variable] <span class="ot">&lt;-</span> <span class="fu">summary</span>(reg)<span class="sc">$</span>adj.r.squared</span>
+<span id="cb151-9"><a href="#cb151-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb151-10"><a href="#cb151-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb151-11"><a href="#cb151-11" aria-hidden="true" tabindex="-1"></a>R2</span></code></pre></div>
 <pre><code>##               complaints privileges  learning    raises    critical     advance
 ## r.squared      0.6813142  0.1815756 0.3889745 0.3482640  0.02447321  0.02405175
 ## adj.r.squared  0.6699325  0.1523461 0.3671521 0.3249877 -0.01036703 -0.01080355</code></pre>
 <p>À l’aide de la bonne fonction, nous allons obtenir exactement le même résultat avec un code plus court, qui n’utilise pas de boucle, mais qui utilise la fonction <code>sapply</code>. Voici une fonction qui extrait les deux statistiques à conserver pour un seul modèle de régression.</p>
-<div class="sourceCode" id="cb150"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb150-1"><a href="#cb150-1" aria-hidden="true" tabindex="-1"></a>R2_reg_rating_vs_var <span class="ot">&lt;-</span> <span class="cf">function</span>(variable) {</span>
-<span id="cb150-2"><a href="#cb150-2" aria-hidden="true" tabindex="-1"></a>  reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(rating <span class="sc">~</span> ., <span class="at">data =</span> attitude[, <span class="fu">c</span>(<span class="st">&quot;rating&quot;</span>, variable)])</span>
-<span id="cb150-3"><a href="#cb150-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(reg)[<span class="fu">c</span>(<span class="st">&quot;r.squared&quot;</span>, <span class="st">&quot;adj.r.squared&quot;</span>)]</span>
-<span id="cb150-4"><a href="#cb150-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb153"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb153-1"><a href="#cb153-1" aria-hidden="true" tabindex="-1"></a>R2_reg_rating_vs_var <span class="ot">&lt;-</span> <span class="cf">function</span>(variable) {</span>
+<span id="cb153-2"><a href="#cb153-2" aria-hidden="true" tabindex="-1"></a>  reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(rating <span class="sc">~</span> ., <span class="at">data =</span> attitude[, <span class="fu">c</span>(<span class="st">&quot;rating&quot;</span>, variable)])</span>
+<span id="cb153-3"><a href="#cb153-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(reg)[<span class="fu">c</span>(<span class="st">&quot;r.squared&quot;</span>, <span class="st">&quot;adj.r.squared&quot;</span>)]</span>
+<span id="cb153-4"><a href="#cb153-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p>Cette fonction prend en entrée le nom d’une variable provenant de <code>attitude</code>, mais autre que la variable réponse <code>rating</code>. Nous pouvons itérer sur tous les noms de variables possibles comme suit :</p>
-<div class="sourceCode" id="cb151"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(</span>
-<span id="cb151-2"><a href="#cb151-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">X =</span> <span class="fu">setdiff</span>(<span class="fu">names</span>(attitude), <span class="st">&quot;rating&quot;</span>), </span>
-<span id="cb151-3"><a href="#cb151-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">FUN =</span> R2_reg_rating_vs_var</span>
-<span id="cb151-4"><a href="#cb151-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb154"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb154-1"><a href="#cb154-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(</span>
+<span id="cb154-2"><a href="#cb154-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">X =</span> <span class="fu">setdiff</span>(<span class="fu">names</span>(attitude), <span class="st">&quot;rating&quot;</span>), </span>
+<span id="cb154-3"><a href="#cb154-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">FUN =</span> R2_reg_rating_vs_var</span>
+<span id="cb154-4"><a href="#cb154-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>##               complaints privileges learning  raises    critical    advance    
 ## r.squared     0.6813142  0.1815756  0.3889745 0.348264  0.02447321  0.02405175 
 ## adj.r.squared 0.6699325  0.1523461  0.3671521 0.3249877 -0.01036703 -0.01080355</code></pre>
@@ -963,9 +977,9 @@ Figure 4.1: Exemple de chemin de recherche lors de l’évaluation de l’appel 
 <div id="syntaxe-générale-dune-fonction" class="section level4 unnumbered">
 <h4>Syntaxe générale d’une fonction</h4>
 <p></p>
-<div class="sourceCode" id="cb153"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb153-1"><a href="#cb153-1" aria-hidden="true" tabindex="-1"></a><span class="sc">&lt;</span>nom_fonction<span class="sc">&gt;</span> <span class="er">&lt;</span><span class="sc">-</span> <span class="cf">function</span>(<span class="sc">&lt;</span>arg_1<span class="sc">&gt;</span>, <span class="sc">&lt;</span>arg_2<span class="sc">&gt;</span>, <span class="sc">&lt;</span>arg_3<span class="sc">&gt;</span>) {</span>
-<span id="cb153-2"><a href="#cb153-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">&lt;</span>instructions<span class="sc">&gt;</span>  <span class="co"># formant le corps de la fonction</span></span>
-<span id="cb153-3"><a href="#cb153-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb156"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb156-1"><a href="#cb156-1" aria-hidden="true" tabindex="-1"></a><span class="sc">&lt;</span>nom_fonction<span class="sc">&gt;</span> <span class="er">&lt;</span><span class="sc">-</span> <span class="cf">function</span>(<span class="sc">&lt;</span>arg_1<span class="sc">&gt;</span>, <span class="sc">&lt;</span>arg_2<span class="sc">&gt;</span>, <span class="sc">&lt;</span>arg_3<span class="sc">&gt;</span>) {</span>
+<span id="cb156-2"><a href="#cb156-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">&lt;</span>instructions<span class="sc">&gt;</span>  <span class="co"># formant le corps de la fonction</span></span>
+<span id="cb156-3"><a href="#cb156-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p>Les composantes d’une fonction R sont :</p>
 <ul>
 <li>la liste de ses arguments, possiblement avec des valeurs par défaut;</li>
@@ -977,7 +991,7 @@ Figure 4.1: Exemple de chemin de recherche lors de l’évaluation de l’appel 
 <div id="valeurs-par-défaut-des-arguments-1" class="section level4 unnumbered">
 <h4>Valeurs par défaut des arguments</h4>
 <p></p>
-<p>Les valeurs par défaut sont <strong>définies dans la liste des arguments</strong>, en accompagnant le nom d’un argument d’un <strong>opérateur <code>=</code></strong> et d’une <strong>instruction R retournant la valeur par défaut</strong>.</p>
+<p>Les valeurs par défaut sont <strong>définies dans la liste des arguments</strong>, en accompagnant le nom d’un argument d’un <strong>opérateur <code>=</code></strong> et d’une <strong>expression R retournant la valeur par défaut</strong>.</p>
 <p><strong>Cas particulier</strong> : argument qui prend en entrée <strong>une seule chaîne de caractères</strong> et que seulement un <strong>petit nombre de chaînes de caractères distinctes sont acceptées</strong> comme valeur de cet argument :</p>
 <ul>
 <li>valeur à droite de l’opérateur <code>=</code> dans la liste des arguments : vecteur de toutes les valeurs acceptées,</li>
@@ -1098,7 +1112,7 @@ Figure 4.1: Exemple de chemin de recherche lors de l’évaluation de l’appel 
 <li>Fonctions : Chapitre 6 <a href="https://adv-r.hadley.nz/functions.html" class="uri">https://adv-r.hadley.nz/functions.html</a></li>
 <li>Environnements : Chapitre 7 <a href="https://adv-r.hadley.nz/environments.html" class="uri">https://adv-r.hadley.nz/environments.html</a></li>
 </ul></li>
-<li>Fanara, C. (2019). Tutoriel web intitulé « A Tutorial on Using Functions in R! ». <a href="https://www.datacamp.com/community/tutorials/functions-in-r-a-tutorial" class="uri">https://www.datacamp.com/community/tutorials/functions-in-r-a-tutorial</a></li>
+<li>Fanara, C. (2019). Tutoriel web intitulé « <em>A Tutorial on Using Functions in R!</em> ». <a href="https://www.datacamp.com/community/tutorials/functions-in-r-a-tutorial" class="uri">https://www.datacamp.com/community/tutorials/functions-in-r-a-tutorial</a></li>
 <li>Passage d’arguments par valeur versus par référence : <a href="http://www.mathwarehouse.com/programming/passing-by-value-vs-by-reference-visual-explanation.php" class="uri">http://www.mathwarehouse.com/programming/passing-by-value-vs-by-reference-visual-explanation.php</a></li>
 <li>Pour en apprendre davantage concernant la programmation fonctionnelle :
 <ul>

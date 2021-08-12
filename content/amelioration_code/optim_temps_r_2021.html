@@ -183,10 +183,10 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <p>J’obtiens les temps suivants, qui indiquent que <code>compte_impair_vectoriel</code> est plus rapide que <code>compte_impair_boucle</code> :</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>temps_1</span></code></pre></div>
 <pre><code>##    user  system elapsed 
-##    0.05    0.01    0.06</code></pre>
+##    0.00    0.01    0.03</code></pre>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>temps_2</span></code></pre></div>
 <pre><code>##    user  system elapsed 
-##    0.34    0.00    0.47</code></pre>
+##    0.23    0.02    0.25</code></pre>
 <p>Les trois temps dans une sortie produite par <code>system.time</code> peuvent être définis ainsi :</p>
 <ul>
 <li><code>user</code> : temps écoulé par le logiciel R (<em>calling process</em>) pour évaluer l’expression;</li>
@@ -218,32 +218,35 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <pre><code>## [1] &quot;bench_mark&quot; &quot;tbl_df&quot;     &quot;tbl&quot;        &quot;data.frame&quot;</code></pre>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>sortie_mark</span></code></pre></div>
 <pre><code>## # A tibble: 2 x 13
-##   expression     min  median `itr/sec` mem_alloc `gc/sec` n_itr  n_gc total_time
-##   &lt;bch:expr&gt; &lt;bch:t&gt; &lt;bch:t&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt;   &lt;bch:tm&gt;
-## 1 vectoriel   27.9ms  33.7ms     28.4     11.4MB     5.69    15     3      527ms
-## 2 boucle     259.8ms 281.2ms      3.56        0B    21.3      2    12      562ms
-## # ... with 4 more variables: result &lt;list&gt;, memory &lt;list&gt;, time &lt;list&gt;, gc &lt;list&gt;</code></pre>
+##   expression   min  median `itr/sec` mem_alloc `gc/sec` n_itr  n_gc total_time result
+##   &lt;bch:expr&gt; &lt;bch&gt; &lt;bch:t&gt;     &lt;dbl&gt; &lt;bch:byt&gt;    &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt;   &lt;bch:tm&gt; &lt;list&gt;
+## 1 vectoriel   19ms  24.7ms     41.6     11.4MB     9.90    21     5      505ms &lt;int ~
+## 2 boucle     239ms 310.3ms      3.22        0B    17.7      2    11      621ms &lt;dbl ~
+## # ... with 3 more variables: memory &lt;list&gt;, time &lt;list&gt;, gc &lt;list&gt;</code></pre>
 <p>Pour simplifier l’analyse des résultats retournés par <code>mark</code>, je vais utiliser la fonction suivante pour imprimer les sorties produites par cette fonction dans le reste de ces notes.</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @title Impression simplifiée d&#39;une sortie de bench::mark</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @description Conserve six éléments et imprime sous forme de data frame</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @param x sortie produite par bench::mark</span></span>
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>print_bench_mark <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">expression =</span> <span class="fu">as.character</span>(x<span class="sc">$</span>expression),</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_itr =</span> x<span class="sc">$</span>n_itr,</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">min =</span> <span class="cf">if</span> (<span class="fu">inherits</span>(x<span class="sc">$</span>min, <span class="st">&quot;bench_time&quot;</span>)) <span class="fu">as.character</span>(x<span class="sc">$</span>min) <span class="cf">else</span> x<span class="sc">$</span>min,</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">median =</span> <span class="cf">if</span> (<span class="fu">inherits</span>(x<span class="sc">$</span>min, <span class="st">&quot;bench_time&quot;</span>)) <span class="fu">as.character</span>(x<span class="sc">$</span>median) <span class="cf">else</span> x<span class="sc">$</span>median,</span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">mem_alloc =</span> <span class="fu">as.character</span>(x<span class="sc">$</span>mem_alloc),</span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_gc =</span> x<span class="sc">$</span>n_gc,</span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(df)</span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">invisible</span>(df)</span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">inherits</span>(x, <span class="at">what =</span> <span class="st">&quot;bench_mark&quot;</span>)) {</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">&quot;&#39;x&#39; n&#39;est pas une sortie de bench::mark&quot;</span>)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">expression =</span> <span class="fu">as.character</span>(x<span class="sc">$</span>expression),</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_itr =</span> x<span class="sc">$</span>n_itr,</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">min =</span> <span class="cf">if</span> (<span class="fu">inherits</span>(x<span class="sc">$</span>min, <span class="st">&quot;bench_time&quot;</span>)) <span class="fu">as.character</span>(x<span class="sc">$</span>min) <span class="cf">else</span> x<span class="sc">$</span>min,</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">median =</span> <span class="cf">if</span> (<span class="fu">inherits</span>(x<span class="sc">$</span>min, <span class="st">&quot;bench_time&quot;</span>)) <span class="fu">as.character</span>(x<span class="sc">$</span>median) <span class="cf">else</span> x<span class="sc">$</span>median,</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">mem_alloc =</span> <span class="fu">as.character</span>(x<span class="sc">$</span>mem_alloc),</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_gc =</span> x<span class="sc">$</span>n_gc,</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(df)</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">invisible</span>(df)</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print_bench_mark</span>(sortie_mark)</span></code></pre></div>
-<pre><code>##   expression n_itr     min  median mem_alloc n_gc
-## 1  vectoriel    15  27.9ms  33.7ms    11.4MB    3
-## 2     boucle     2 259.8ms 281.2ms        0B   12</code></pre>
+<pre><code>##   expression n_itr   min  median mem_alloc n_gc
+## 1  vectoriel    21  19ms  24.7ms    11.4MB    5
+## 2     boucle     2 239ms 310.3ms        0B   11</code></pre>
 <p>Dans cette sortie, possédant une ligne par expression à profiler, les différentes colonnes contiennent :</p>
 <ul>
 <li><code>expression</code> : identifiant de l’expression,</li>
@@ -253,7 +256,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <li><code>mem_alloc</code> : quantité totale de mémoire allouée pendant une exécution de l’expression,</li>
 <li><code>n_gc</code> : nombre total de récupérations de mémoire (en anglais <em>garbage collections</em>, d’où l’abréviation <code>gc</code>) effectuées pendant toutes les répétitions d’exécution.</li>
 </ul>
-<p>Dans cet exemple, la fonction <code>compte_impair_vectoriel</code> est beaucoup plus rapide que la fonction <code>compte_impair_boucle</code> (temps médians de 33.7ms = 0.0337 secondes versus 281.2ms = 0.2812 secondes), mais elle utilise plus de mémoire (11.4MB versus approximativement 0B).</p>
+<p>Dans cet exemple, la fonction <code>compte_impair_vectoriel</code> est beaucoup plus rapide que la fonction <code>compte_impair_boucle</code> (temps médians de 24.7ms = 0.0247 secondes versus 310.3ms = 0.3103 secondes), mais elle utilise plus de mémoire (11.4MB versus approximativement 0B).</p>
 <p>Les unités de temps et de mémoire sont adaptées de façon à ce que les nombres imprimés ne soient pas trop gros, ni trop petits. Ici, la fonction <code>mark</code> a choisi de mesurer le temps en millisecondes (ms).
 Nous aurions pu demander à <code>mark</code> d’utiliser des unités de temps aussi petites que des nanosecondes (ns) via son argument <code>time_unit</code>. Remarquez que ces unités peuvent varier d’une expression à l’autre, comme c’est le cas pour les unités de mémoire dans l’exemple.</p>
 <p>Par défaut, la fonction <code>mark</code> vérifie si les sorties produites par les différentes expressions sont équivalentes avec la fonction <code>all.equal</code>. Dans l’exemple présenté ici, cette vérification est pertinente. Elle ne l’est cependant pas toujours. Parfois, il est normal que les expressions à comparer ne retournent pas des résultats équivalents (p. ex. pas sous le même format). Dans un tel cas, il faut ajouter l’argument <code>check = FALSE</code> dans l’appel à la fonction <code>mark</code>.</p>
@@ -266,8 +269,8 @@ Nous aurions pu demander à <code>mark</code> d’utiliser des unités de temps 
 <pre><code>## Warning: Some expressions had a GC in every iteration; so filtering is disabled.</code></pre>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print_bench_mark</span>(sortie_mark)</span></code></pre></div>
 <pre><code>##                     expression n_itr     min  median mem_alloc n_gc
-## 1 compte_impair_vectoriel(obs)    22  19.6ms  21.4ms    11.4MB    5
-## 2    compte_impair_boucle(obs)    10 249.1ms 308.1ms        0B   68</code></pre>
+## 1 compte_impair_vectoriel(obs)    18  18.8ms  27.2ms    11.4MB    4
+## 2    compte_impair_boucle(obs)    10 187.8ms 214.3ms        0B   68</code></pre>
 <p>Le message d’avertissement <code>"Some expressions had a GC in every iteration; so filtering is disabled."</code>, obtenu lors des deux appels précédents à la fonction <code>mark</code> n’est pas problématique. Dans le calcul du temps médian, la fonction <code>mark</code> cherche à considérer seulement les exécutions pendant lesquelles de la récupération de mémoire n’a pas eu lieu, car celle-ci ralentit l’exécution. Elle est contrainte à ne pas effectuer ce filtrage si toutes les exécutions d’une expression ont subi de la récupération de mémoire. La section suivante explique ce qu’est la récupération de mémoire.</p>
 <p>Avant de terminer, le package <code>bench</code> offre même une <a href="http://bench.r-lib.org/reference/autoplot.bench_mark.html">méthode pour la fonction générique <code>plot</code></a> permettant de représenter graphiquement les résultats du profilage.</p>
 <div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sortie_mark)</span></code></pre></div>
@@ -513,8 +516,8 @@ Figure 1.1: Fenêtre de profilage ouverte par l’exemple d’appel à la foncti
 <pre><code>## Warning: Some expressions had a GC in every iteration; so filtering is disabled.</code></pre>
 <div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print_bench_mark</span>(ex_astuce_1)</span></code></pre></div>
 <pre><code>##            expression n_itr      min   median mem_alloc n_gc
-## 1 ksmooth_double_loop    10 180.7488 318.8365      184B   22
-## 2             density   733   0.4927   0.5463     315KB    5</code></pre>
+## 1 ksmooth_double_loop    10 187.3237 203.4984      184B   22
+## 2             density   725   0.4889   0.5432     315KB    5</code></pre>
 <p>La fonction <code>density</code> retourne presque instantanément le résultat, alors que la fonction <code>ksmooth_double_loop</code> doit rouler pendant plusieurs secondes pour effectuer une estimation en 17 points, à partir de 10000 observations.</p>
 <p>Le coeur du calcul de la fonction <code>density</code> est effectué par du code en langage C. C’est pour cette raison qu’elle est à ce point plus rapide que la fonction <code>ksmooth_double_loop</code>. Nous allons y revenir à l’astuce 6.</p>
 </div>
@@ -530,8 +533,8 @@ Figure 1.1: Fenêtre de profilage ouverte par l’exemple d’appel à la foncti
 <span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a><span class="fu">print_bench_mark</span>(ex_astuce_2)</span></code></pre></div>
 <pre><code>##                              expression n_itr    min median mem_alloc n_gc
-## 1                      colSums(x = mat)  6191   63.4   65.4    7.86KB    2
-## 2 apply(X = mat, MARGIN = 2, FUN = sum)   142 2461.8 2762.6    2.02MB    7</code></pre>
+## 1                      colSums(x = mat)  6947   63.5   67.5    7.86KB    1
+## 2 apply(X = mat, MARGIN = 2, FUN = sum)   161 2361.7 2601.7    2.02MB    9</code></pre>
 <p>Ce résultat s’explique par le fait que la fonction <code>colSums</code> est spécialisée dans la tâche que nous cherchions à effectuer. Son code est simplifié, par rapport au code de <code>apply</code> qui peut appliquer n’importe quelle fonction sur n’importe quelle dimension d’un array. Nous pourrions aussi dire que la fonction <code>colSums</code> est une fonction optimisée.</p>
 <p>Remarquons que la fonction <code>apply</code> utilise ici beaucoup plus de mémoire que la fonction <code>colSums</code>.</p>
 <p>C’est cette astuce, de faire seulement ce qui est nécessaire, qui pousse certains programmeurs R à ne pas utiliser la fonction <code>return</code> pour retourner la sortie de leurs fonctions. L’appel à la fonction <code>return</code> amène une évaluation de plus à effectuer. Dans cette fiche, la fonction <code>return</code> n’a jamais été utilisée pour cette raison. Ne pas utiliser <code>return</code> comporte cependant le désavantage de rendre le code un peu moins clair.</p>
@@ -625,11 +628,11 @@ La fonction `compte_impair_vectoriel_return` est effectivement légèrement plus
 <span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## Warning: Some expressions had a GC in every iteration; so filtering is disabled.</code></pre>
 <div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print_bench_mark</span>(ex_astuce_3)</span></code></pre></div>
-<pre><code>##                      expression n_itr      min    median mem_alloc n_gc
-## 1              v1_double_boucle    10 182.6527 187.17695      184B   22
-## 2 v2_calcul_vectoriel_seulement    31  13.1607  14.13030    6.51MB    6
-## 3 v3_boucle_et_calcul_vectoriel    34  12.6717  13.41955     2.6MB    3
-## 4  v4_apply_et_calcul_vectoriel    28  12.8985  13.54730    2.63MB    3</code></pre>
+<pre><code>##                      expression n_itr      min   median mem_alloc n_gc
+## 1              v1_double_boucle    10 175.8289 186.5701      184B   23
+## 2 v2_calcul_vectoriel_seulement    35  13.0143  13.5004    6.51MB    5
+## 3 v3_boucle_et_calcul_vectoriel    39  12.5244  12.6730     2.6MB    3
+## 4  v4_apply_et_calcul_vectoriel    39  12.5518  12.7757    2.63MB    2</code></pre>
 <p>Nous constatons que les deux dernières versions sont légèrement plus rapides que la version 2 utilisant seulement du calcul vectoriel!</p>
 <p>Ce qu’il faut retenir de ces exemples est ceci :</p>
 <ul>
@@ -639,7 +642,7 @@ La fonction `compte_impair_vectoriel_return` est effectivement légèrement plus
 <div id="remarque-concernant-lutilisation-de-la-mémoire" class="section level4 unnumbered">
 <h4>Remarque concernant l’utilisation de la mémoire</h4>
 <p></p>
-<p>La fonction <code>ksmooth_outer</code> est environ 13 fois plus rapide que la fonction <code>ksmooth_double_loop</code>. Cependant, elle utilise beaucoup plus de mémoire ( 6.51MB versus 184B). Une matrice de dimension <code>length(x)</code> par <code>length(xpts)</code> est créée par la fonction. R impose une limite sur la taille des objets créés (pour plus de détails voir la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Memory-limits.html">fiche d’aide <code>help("Memory-limits")</code></a>). Ainsi, la fonction <code>ksmooth_outer</code> retourne une erreur sur mon ordinateur si je lui donne en entrée des arguments <code>x</code> et <code>xpts</code> trop grands, par exemple :</p>
+<p>La fonction <code>ksmooth_outer</code> est environ 14 fois plus rapide que la fonction <code>ksmooth_double_loop</code>. Cependant, elle utilise beaucoup plus de mémoire ( 6.51MB versus 184B). Une matrice de dimension <code>length(x)</code> par <code>length(xpts)</code> est créée par la fonction. R impose une limite sur la taille des objets créés (pour plus de détails voir la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Memory-limits.html">fiche d’aide <code>help("Memory-limits")</code></a>). Ainsi, la fonction <code>ksmooth_outer</code> retourne une erreur sur mon ordinateur si je lui donne en entrée des arguments <code>x</code> et <code>xpts</code> trop grands, par exemple :</p>
 <div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>x_test <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000000</span>)</span>
 <span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>xpts_test <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="sc">-</span><span class="dv">4</span>, <span class="at">to =</span> <span class="dv">4</span>, <span class="at">length.out =</span> <span class="dv">1000000</span>)</span>
 <span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>test_memoire <span class="ot">&lt;-</span> <span class="fu">ksmooth_outer</span>(<span class="at">x =</span> x_test, <span class="at">xpts =</span> xpts_test, <span class="at">h =</span> <span class="dv">1</span>)</span></code></pre></div>
@@ -705,9 +708,9 @@ La fonction `compte_impair_vectoriel_return` est effectivement légèrement plus
 <span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## Warning: Some expressions had a GC in every iteration; so filtering is disabled.</code></pre>
 <div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print_bench_mark</span>(ex_dim_crois)</span></code></pre></div>
-<pre><code>##                     expression n_itr      min   median mem_alloc n_gc
-## 1 somme_de_vecteur_croissant()    10 251.5063 276.9615     418MB  141
-## 2      somme_de_vecteur_fixe()    10  70.9802  82.0317      35MB    8</code></pre>
+<pre><code>##                     expression n_itr      min    median mem_alloc n_gc
+## 1 somme_de_vecteur_croissant()    10 254.5291 336.39325     418MB  142
+## 2      somme_de_vecteur_fixe()    10  65.0324  70.59515      35MB    8</code></pre>
 <p>Nous constatons donc qu’en termes de temps de calcul, et même en termes de quantité de mémoire utilisée, il est ici préférable de créer un très grand objet, de le remplir, puis de mettre de côté les éléments inutilisés que de faire croître la taille d’un objet. C’est de la préallocation de mémoire. Par contre, encore là, il y a une limite à la grandeur de l’objet qui peut être créé.</p>
 </div>
 <div id="modification-déléments-dans-un-data-frame" class="section level3" number="2.4.2">
@@ -820,9 +823,9 @@ tracemem[0x00000176dc193568 -&gt; 0x00000176dc1936b8]: [&lt;-.data.frame [&lt;- 
 <pre><code>## Warning: Some expressions had a GC in every iteration; so filtering is disabled.</code></pre>
 <div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print_bench_mark</span>(ex_compar_df)</span></code></pre></div>
 <pre><code>##              expression n_itr      min    median mem_alloc n_gc
-## 1 somme_de_data_frame()    10 772.8033 832.10190    2.69GB  486
-## 2    somme_de_matrice()    10  59.0391  66.48825    35.5MB    8
-## 3 somme_de_data_table()    10 212.8398 237.15260   39.78MB   25</code></pre>
+## 1 somme_de_data_frame()    10 767.9073 840.09420    2.69GB  473
+## 2    somme_de_matrice()    10  59.8008  65.13605    35.5MB    8
+## 3 somme_de_data_table()    10 189.3442 198.42650   39.78MB   25</code></pre>
 <p>Ici, l’utilisation du data frame est environ 13 fois plus lente que l’utilisation d’une matrice (et utilise plus de mémoire)! L’utilisation d’un data table est un peu plus lente que l’utilisation d’une matrice, mais le data table a l’avantage de pouvoir stocker des données de types différents entre ses colonnes.</p>
 <p>Le message à retenir ici est, qu’autant que possible, il vaut mieux <strong>éviter d’utiliser un data frame pour stocker des résultats générés dans une boucle</strong>.</p>
 <!---
@@ -918,9 +921,9 @@ enableJIT(3)
 <span id="cb102-3"><a href="#cb102-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">v5_parSapply =</span> <span class="fu">ksmooth_parallel</span>(<span class="at">grappe =</span> grappe, <span class="at">x =</span> x, <span class="at">xpts =</span> xpts, <span class="at">h =</span> <span class="dv">1</span>)</span>
 <span id="cb102-4"><a href="#cb102-4" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb102-5"><a href="#cb102-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print_bench_mark</span>(ex_astuce_5)</span></code></pre></div>
-<pre><code>##     expression n_itr     min  median mem_alloc n_gc
-## 1    v4_sapply    29 12.7202 14.0693     2.6MB    1
-## 2 v5_parSapply    58  7.2862  8.6015   121.5KB    0</code></pre>
+<pre><code>##     expression n_itr     min   median mem_alloc n_gc
+## 1    v4_sapply    38 12.5410 12.70390     2.6MB    1
+## 2 v5_parSapply    64  7.1775  7.62145   121.5KB    0</code></pre>
 <p>Le calcul en parallèle a permis de réduire un peu le temps d’exécution. Même si 3 coeurs ont été exploités, le calcul n’est pas 3 fois plus rapide, car :</p>
 <ul>
 <li>mon ordinateur possède en fait 2 coeurs physiques, chacun séparé en 2 coeurs logiques (pour un total de 4 coeurs logiques), et des coeurs logiques ne sont pas aussi rapides que des coeurs physiques;</li>
@@ -1019,11 +1022,11 @@ Le bloc suivant n'était pas évalué, car il provoquait une erreur lorsqu'éval
 <pre><code>## Warning: Some expressions had a GC in every iteration; so filtering is disabled.</code></pre>
 <div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print_bench_mark</span>(ex_astuce_6)</span></code></pre></div>
 <pre><code>##            expression n_itr      min   median mem_alloc n_gc
-## 1 ksmooth_double_loop    10 173.1250 178.0077      184B   26
-## 2       ksmooth_outer    37  13.0761  13.5164    6.49MB    3
-## 3        ksmooth_loop    39  12.6356  12.9561     2.6MB    2
-## 4           ksmooth_C    47  10.2273  10.7462  112.05KB    0
-## 5             density   581   0.4943   0.5204  315.33KB    3</code></pre>
+## 1 ksmooth_double_loop    10 181.5444 190.4726      184B   26
+## 2       ksmooth_outer    37  13.0084  13.3512    6.49MB    3
+## 3        ksmooth_loop    39  12.5023  12.6614     2.6MB    2
+## 4           ksmooth_C    48  10.0945  10.2055  112.05KB    0
+## 5             density   907   0.4845   0.4987  315.33KB    4</code></pre>
 <!---
 ```
 ## Unit: milliseconds
@@ -1157,18 +1160,18 @@ Le bloc suivant n'était pas évalué, car il provoquait une erreur lorsqu'éval
 <ul>
 <li>Wickham, H. (2019). <em>Advanced R</em>. 2<sup>e</sup> édition. Chapman and Hall/CRC.
 <ul>
-<li>Chapitre 2 <em>Names and values</em>, URL <a href="https://adv-r.hadley.nz/names-values.html" class="uri">https://adv-r.hadley.nz/names-values.html</a></li>
-<li>Chapitre 23 <em>Measuring performance</em>, URL <a href="https://adv-r.hadley.nz/perf-measure.html" class="uri">https://adv-r.hadley.nz/perf-measure.html</a></li>
-<li>Chapitre 24 <em>Improving performance</em>, URL <a href="https://adv-r.hadley.nz/perf-improve.html" class="uri">https://adv-r.hadley.nz/perf-improve.html</a></li>
+<li>Chapitre 2 <em>Names and Values</em>, URL <a href="https://adv-r.hadley.nz/names-values.html" class="uri">https://adv-r.hadley.nz/names-values.html</a></li>
+<li>Chapitre 23 <em>Measuring Performance</em>, URL <a href="https://adv-r.hadley.nz/perf-measure.html" class="uri">https://adv-r.hadley.nz/perf-measure.html</a></li>
+<li>Chapitre 24 <em>Improving Performance</em>, URL <a href="https://adv-r.hadley.nz/perf-improve.html" class="uri">https://adv-r.hadley.nz/perf-improve.html</a></li>
 </ul></li>
 <li>Matloff, N. (2011). <em>The Art of R Programming: A Tour of Statistical Software Design</em>, No Starch Press. Chapitre 14.</li>
-<li>Ross, N. (2014). Tutoriel web intitulé « Vectorization in R: Why? »<br />
+<li>Ross, N. (2014). Tutoriel web intitulé « <em>Vectorization in R: Why?</em> »<br />
 URL <a href="http://www.noamross.net/blog/2014/4/16/vectorization-in-r--why.html" class="uri">http://www.noamross.net/blog/2014/4/16/vectorization-in-r--why.html</a></li>
 <li>Adler, J. (2012). <em>R in a Nutshell</em>. 2<sup>e</sup> édition. O’Reilly. Chapitre 24.</li>
 </ul></li>
 <li><strong>Interfacer du code dans un autre langage (en particulier C ou C++)</strong>
 <ul>
-<li>Peng, R. D., &amp; de Leeuw, J. (2002). An Introduction to the .C Interface to R. UCLA: Academic Technology Services, Statistical Consulting Group. URL <a href="http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf" class="uri">http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf</a></li>
+<li>Peng, R. D., &amp; de Leeuw, J. (2002). <em>An Introduction to the .C Interface to R</em>. UCLA: Academic Technology Services, Statistical Consulting Group. URL <a href="http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf" class="uri">http://www.biostat.jhsph.edu/~rpeng/docs/interface.pdf</a></li>
 <li>R Core Team (2021). <em>Writing R Extensions</em>. R Foundation for Statistical Computing. Chapitre 5 et 6. URL <a href="http://cran.r-project.org/doc/manuals/r-release/R-exts.html#System-and-foreign-language-interfaces" class="uri">http://cran.r-project.org/doc/manuals/r-release/R-exts.html#System-and-foreign-language-interfaces</a></li>
 <li>Matloff, N. (2011). <em>The Art of R Programming: A Tour of Statistical Software Design</em>, No Starch Press. Chapitre 15.</li>
 <li>Utilisation du package <code>Rcpp</code> :
@@ -1179,7 +1182,7 @@ URL <a href="http://www.noamross.net/blog/2014/4/16/vectorization-in-r--why.html
 </ul></li>
 <li><strong>Calcul en parallèle</strong>
 <ul>
-<li>Baillargeon, S. (2017). Tutoriel intitulé « Calcul en parallèle sur CPU avec R ». URL <a href="https://stt4230.rbind.io/autre_materiel/calcul_parallele_r/" class="uri">https://stt4230.rbind.io/autre_materiel/calcul_parallele_r/</a></li>
+<li>Baillargeon, S. (2017). Tutoriel intitulé « <em>Calcul en parallèle sur CPU avec R</em> ». URL <a href="https://stt4230.rbind.io/autre_materiel/calcul_parallele_r/" class="uri">https://stt4230.rbind.io/autre_materiel/calcul_parallele_r/</a></li>
 <li>McCallum, E., &amp; Weston, S. (2011). <em>Parallel R</em>. O’Reilly.</li>
 <li>Matloff, N. (2011). <em>The Art of R Programming: A Tour of Statistical Software Design</em>, No Starch Press. Chapitre 16.</li>
 </ul></li>

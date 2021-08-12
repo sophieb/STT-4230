@@ -139,7 +139,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>print</span></code></pre></div>
 <pre><code>## function (x, ...) 
 ## UseMethod(&quot;print&quot;)
-## &lt;bytecode: 0x0000000012090be0&gt;
+## &lt;bytecode: 0x000000000e417ca8&gt;
 ## &lt;environment: namespace:base&gt;</code></pre>
 <p>Il n’y a qu’une seule instruction dans le corps de cette fonction : un appel à la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/UseMethod.html">fonction <code>UseMethod</code></a>. Toutes les fonctions génériques du système S3 ont cette forme. De plus, la plupart d’entre elles possèdent un argument « <code>...</code> ».</p>
 <p>Lorsqu’une fonction générique est appelée, la fonction <code>UseMethod</code> vérifie d’abord la classe de l’objet fourni au premier argument, ici <code>x</code>. Ensuite, elle appelle la méthode correspondant à la classe obtenue, si elle existe, en lui fournissant en entrée les arguments qui ont été fournis dans l’appel à la fonction générique.</p>
@@ -211,7 +211,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ##     }
 ##     invisible(x)
 ## }
-## &lt;bytecode: 0x0000000010656c50&gt;
+## &lt;bytecode: 0x00000000102e8e40&gt;
 ## &lt;environment: namespace:base&gt;</code></pre>
 <p>R va donc finalement appeler cette fonction.</p>
 <p>Donc, la commande</p>
@@ -354,7 +354,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>plot</span></code></pre></div>
 <pre><code>## function (x, y, ...) 
 ## UseMethod(&quot;plot&quot;)
-## &lt;bytecode: 0x0000000011fd6150&gt;
+## &lt;bytecode: 0x000000000e748d30&gt;
 ## &lt;environment: namespace:base&gt;</code></pre>
 <p>Quel impact ont ces autres arguments sur le choix de la méthode à utiliser ?</p>
 <p>Ils n’ont aucun impact sur le choix de la méthode. Cette méthode peut cependant utiliser ces autres arguments pour déterminer ce qu’elle va faire. Par exemple, le corps de la méthode <code>plot.factor</code> contient une série de <code>if</code> … <code>else</code> qui servent à sélectionner la fonction graphique à appeler en fonction des caractéristiques de l’objet assigné au deuxième argument, soit <code>y</code>.</p>
@@ -385,7 +385,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ##         boxplot(y ~ x, ...)
 ##     else NextMethod(&quot;plot&quot;)
 ## }
-## &lt;bytecode: 0x00000000122c1ab0&gt;
+## &lt;bytecode: 0x00000000110600c0&gt;
 ## &lt;environment: namespace:graphics&gt;</code></pre>
 </div>
 </div>
@@ -423,7 +423,8 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <div id="conception-dune-méthode-pour-une-classe" class="section level3" number="1.2.2">
 <h3><span class="header-section-number">1.2.2</span> Conception d’une méthode pour une classe</h3>
 <p>Les méthodes sont des fonctions. Alors créer une méthode signifie simplement créer une fonction. C’est le nom d’une fonction qui détermine si elle est une simple fonction ou une méthode associée à une fonction générique.</p>
-<p>Une fonction dont le nom est de la forme <code>nom_fonction_generique.nom_classe</code> est une méthode associée à la fonction générique nommée <code>nom_fonction_generique</code>, pour la classe nommée <code>nom_classe</code>. Il faut évidemment que <code>nom_fonction_generique</code> soit le nom d’une fonction générique. La fonction <code>data.frame</code> n’est pas une méthode associée à la fonction générique <code>data</code> pour la classe <code>frame</code>. Alors la simple présence d’un point dans le nom d’une fonction n’implique pas nécessairement qu’il s’agisse d’une méthode de type S3.</p>
+<p>Les méthodes de type S3 portent toutes un nom composé du nom de la fonction générique associée, suivi d’un point (caractère <code>.</code>), suivi du nom de la classe d’objet pour laquelle la méthode doit être utilisée. Ainsi, une fonction dont le nom est de la forme <code>nom_fonction_generique.nom_classe</code> est une méthode associée à la fonction générique nommée <code>nom_fonction_generique</code>, pour la classe nommée <code>nom_classe</code>.</p>
+<p>Notons que la simple présence d’un point dans le nom d’une fonction n’implique pas nécessairement qu’il s’agisse d’une méthode de type S3. Par exemple, la fonction <code>data.frame</code> n’est pas une méthode associée à la fonction générique <code>data</code> pour la classe <code>frame</code>, car <code>data</code> n’est pas le nom d’une fonction générique dans le R de base.</p>
 <p>Une méthode comporte typiquement les arguments suivants :</p>
 <ul>
 <li>même premier argument que la fonction générique (portant idéalement le même nom)</li>
@@ -436,7 +437,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>aggregate</span></code></pre></div>
 <pre><code>## function (x, ...) 
 ## UseMethod(&quot;aggregate&quot;)
-## &lt;bytecode: 0x000000000f940418&gt;
+## &lt;bytecode: 0x000000000e0c6670&gt;
 ## &lt;environment: namespace:stats&gt;</code></pre>
 <p>Il existe 4 méthodes pour cette fonction générique dans l’installation de base de R :</p>
 <div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">methods</span>(aggregate)</span></code></pre></div>
@@ -673,8 +674,8 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ## 
 ## function (obj, ...) 
 ## standardGeneric(&quot;coordinates&quot;)
-## &lt;bytecode: 0x000000001979fe90&gt;
-## &lt;environment: 0x000000001976d2f0&gt;
+## &lt;bytecode: 0x00000000188daab8&gt;
+## &lt;environment: 0x00000000188a7f18&gt;
 ## Methods may be defined for arguments: obj
 ## Use  showMethods(&quot;coordinates&quot;)  for currently available ones.</code></pre>
 <p>La méthode <code>coordinates</code> pour un objet de classe <code>"SpatialPoints"</code> extrait l’élément de l’objet <code>S</code> nommé <code>coords</code>.</p>
@@ -695,7 +696,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ##     obj@coords
 ##     .local(obj, ...)
 ## }
-## &lt;bytecode: 0x00000000197aa178&gt;
+## &lt;bytecode: 0x00000000188e8bd0&gt;
 ## &lt;environment: namespace:sp&gt;
 ## 
 ## Signatures:
@@ -828,7 +829,7 @@ appel à une fonction (p. ex. utile pour remettre à leurs valeurs par défaut 
 <div id="références" class="section level1 unnumbered">
 <h1>Références</h1>
 <ul>
-<li>Matloff, N. (2011). <em>The Art of R Programming : A Tour of Statistical Software Design</em>. No Starch Press. Chapitre 9.</li>
+<li>Matloff, N. (2011). <em>The Art of R Programming: A Tour of Statistical Software Design</em>. No Starch Press. Chapitre 9.</li>
 <li>Wickham, H. (2019). <em>Advanced R</em>. 2e édition. Chapman and Hall/CRC. Chapitres 12 à 16. URL <a href="https://adv-r.hadley.nz/oo.html" class="uri">https://adv-r.hadley.nz/oo.html</a></li>
 </ul>
 </div>

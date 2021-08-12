@@ -278,8 +278,16 @@ switch(
 
 Dans cet exemple, `<expression>` est l'instruction `class(x)`. Celle-ci retourne `"numeric"` pour un vecteur `x` contenant des données de type réel, mais retourne `"integer"` pour un vecteur `x` contenant des données de type entier. La condition `is.numeric(x)` retourne quant à elle `TRUE` pour tout vecteur numérique `x`, que ses données soient réelles ou entières. Afin de créer un appel à la fonction `switch` équivalent aux structures `if ... else` imbriquées à reproduire, il fallait donc définir les résultats `"numeric"` et `"integer"`. Les deux solutions implémentent la même alternative aussi parce que `is.character(x)` est équivalent à `class(x) == "character"` et `is.factor(x)` est équivalent à `class(x) == "factor"`.
 
-Notons que `<expression>` peut aussi retourner un entier, interprété comme le numéro du bloc d'instructions à exécuter. Par exemple, si `<expression>` produit le résultat `2` lorsqu'exécuté, c'est le deuxième bloc d'instructions (troisième argument fourni à la fonction `switch`) qui sera exécuté. Dans ce cas, les blocs d'instructions n'ont pas besoin d'être assignés à des noms.
+Notons que `<expression>` peut aussi retourner un entier, interprété comme le numéro du bloc d'instructions à exécuter. Par exemple, si `<expression>` produit le résultat `2` lorsqu'exécuté, c'est le deuxième bloc d'instructions (troisième argument fourni à la fonction `switch`) qui sera exécuté. Dans ce cas, les blocs d'instructions n'ont pas besoin d'être assignés à des noms. L'appel à la fonction `switch` suivant est donc aussi équivalent aux structures `if ... else` imbriquées présentées dans l'exemple précédent.
 
+```{r eval = FALSE}
+switch(
+  if (is.numeric(x)) 1 else if (is.character(x) || is.factor(x)) 2 else 3,
+  c(min = min(x), moy = mean(x), max = max(x)),
+  table(x),
+  NA
+)
+```
 
 # Boucles
 
@@ -744,7 +752,7 @@ repeat {
 
 # Références {-}
 
-- Matloff, N. (2011). *The art of R programming: A tour of statistical software design*. No Starch Press. Chapitre 7.
+- Matloff, N. (2011). *The Art of R Programming: A Tour of Statistical Software Design*. No Starch Press. Chapitre 7.
 - Grolemund, G. et Wickham, H. (2016). *R for Data Science*. O'Reilly Media, Inc.\ :
     * Alternatives\ : Section 19.4 <http://r4ds.had.co.nz/functions.html#conditional-execution>
     * Boucles\ : Chapitre 21 <http://r4ds.had.co.nz/iteration.html>

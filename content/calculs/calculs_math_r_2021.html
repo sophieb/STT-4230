@@ -485,26 +485,61 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <li><code>intersect</code> : intersection,</li>
 <li><code>setdiff</code> : différence,</li>
 <li><code>setequal</code> : test d’égalité,</li>
-<li><code>is.element</code> : test d’inclusion.</li>
+<li><code>is.element</code> : test d’appartenance.</li>
 </ul>
-<p>Voici quelques exemples utilisant les deux ensembles suivants, stockés sous forme de vecteur :</p>
-<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;m&quot;</span>, <span class="st">&quot;s&quot;</span>, <span class="st">&quot;e&quot;</span>, <span class="st">&quot;f&quot;</span>, <span class="st">&quot;m&quot;</span>)</span>
+<p>Les quatre premières fonctions permettent de comparer de différentes façons deux ensembles. Pour présenter des exemples d’utilisation des fonctions, créons donc d’abord deux ensembles fictifs. Ceux-ci sont stockés sous forme de vecteurs puisque le langage R de base n’offre pas de structure de données spécifique aux ensembles (contrairement au langage Python par exemple qui propose des <em>sets</em>).</p>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;m&quot;</span>, <span class="st">&quot;s&quot;</span>, <span class="st">&quot;e&quot;</span>, <span class="st">&quot;f&quot;</span>, <span class="st">&quot;a&quot;</span>)</span>
 <span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;m&quot;</span>, <span class="st">&quot;e&quot;</span>, <span class="st">&quot;h&quot;</span>, <span class="st">&quot;i&quot;</span>)</span></code></pre></div>
-<p>Union de tous les éléments des ensembles <code>A</code> et <code>B</code>, en retirant les doublons :</p>
+<p>Rappelons que, par définition, un ensemble mathématique est une collection non ordonnée d’éléments uniques et, en conséquence, ne contient aucun élément dupliqué.</p>
+<div id="union" class="section level4 unnumbered">
+<h4>Union</h4>
+<p></p>
+<p>La fonction <code>union</code> permet d’obtenir l’union des éléments de deux ensembles. Il s’agit d’un nouvel ensemble réunissant tous les éléments présents dans le premier ou le deuxième ensemble. Les éléments qui étaient présents dans les deux ensembles ne sont cependant pas en double dans l’union, car celle-ci est aussi un ensemble dont tous les éléments sont uniques.</p>
 <div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a><span class="fu">union</span>(A, B)</span></code></pre></div>
-<pre><code>## [1] &quot;m&quot; &quot;s&quot; &quot;e&quot; &quot;f&quot; &quot;h&quot; &quot;i&quot;</code></pre>
-<p>Identification des éléments communs entre <code>A</code> et <code>B</code>, en retirant les doublons :</p>
-<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a><span class="fu">intersect</span>(A, B)</span></code></pre></div>
+<pre><code>## [1] &quot;m&quot; &quot;s&quot; &quot;e&quot; &quot;f&quot; &quot;a&quot; &quot;h&quot; &quot;i&quot;</code></pre>
+<p>Pour arriver au même résultat sans utiliser une fonction d’opération sur des ensembles, nous aurions pu concaténer les vecteurs <code>A</code> et <code>B</code>,</p>
+<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(A, B)</span></code></pre></div>
+<pre><code>## [1] &quot;m&quot; &quot;s&quot; &quot;e&quot; &quot;f&quot; &quot;a&quot; &quot;m&quot; &quot;e&quot; &quot;h&quot; &quot;i&quot;</code></pre>
+<p>puis retirer les doublons du vecteur résultant avec la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/unique.html">fonction <code>unique</code></a> (que nous reverrons dans les <a href="https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#retrait-des-observations-dupliqu%C3%A9es">notes sur le prétraitement de données</a>).</p>
+<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(<span class="fu">c</span>(A, B))</span></code></pre></div>
+<pre><code>## [1] &quot;m&quot; &quot;s&quot; &quot;e&quot; &quot;f&quot; &quot;a&quot; &quot;h&quot; &quot;i&quot;</code></pre>
+</div>
+<div id="intersection" class="section level4 unnumbered">
+<h4>Intersection</h4>
+<p></p>
+<p>La fonction <code>intersect</code> retourne l’intersection entre deux ensembles. Elle permet donc d’identifier les éléments communs à ces ensembles.</p>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="fu">intersect</span>(A, B)</span></code></pre></div>
 <pre><code>## [1] &quot;m&quot; &quot;e&quot;</code></pre>
-<p>Identification des éléments de <code>A</code> ne se retrouvant pas dans <code>B</code>, en retirant les doublons :</p>
-<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(A, B)</span></code></pre></div>
-<pre><code>## [1] &quot;s&quot; &quot;f&quot;</code></pre>
-<p>Test sur l’égalité entre les ensembles <code>A</code> et <code>B</code> :</p>
-<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setequal</span>(A, B)</span></code></pre></div>
+</div>
+<div id="différence" class="section level4 unnumbered">
+<h4>Différence</h4>
+<p></p>
+<p>La fonction <code>setdiff</code> permet quant à elle d’identifier les éléments présents dans un premier ensemble sans être présents dans un second ensemble.</p>
+<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(A, B)</span></code></pre></div>
+<pre><code>## [1] &quot;s&quot; &quot;f&quot; &quot;a&quot;</code></pre>
+<p>Contrairement aux fonctions <code>union</code>, <code>intersect</code> et <code>setequal</code>, l’ordre dans lequel les deux ensembles sont fournis en entrée à la fonction <code>setdiff</code> a un impact sur le résultat produit. L’exemple précédent a permis d’identifier les éléments appartenant à <code>A</code> sans appartenir à <code>B</code>, alors que la commande suivante retourne les éléments appartenant à <code>B</code> sans appartenir à <code>A</code>.</p>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(B, A)</span></code></pre></div>
+<pre><code>## [1] &quot;h&quot; &quot;i&quot;</code></pre>
+</div>
+<div id="test-dégalité" class="section level4 unnumbered">
+<h4>Test d’égalité</h4>
+<p></p>
+<p>La fonction <code>setequal</code> retourne toujours une seule valeur logique : <code>TRUE</code> si les deux ensembles fournis en entrée sont égaux, <code>FALSE</code> sinon.</p>
+<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setequal</span>(A, B)</span></code></pre></div>
 <pre><code>## [1] FALSE</code></pre>
-<p>Test sur la présence de <code>"d"</code> et <code>"e"</code> dans l’ensemble <code>A</code> :</p>
-<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.element</span>(<span class="at">el =</span> <span class="fu">c</span>(<span class="st">&quot;d&quot;</span>, <span class="st">&quot;e&quot;</span>), <span class="at">set =</span> A)</span></code></pre></div>
+<p>Pour être égaux, deux ensembles doivent contenir les mêmes éléments, mais pas nécessairement dans le même ordre.</p>
+<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setequal</span>(<span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">3</span>, <span class="dv">2</span>), <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">5</span>))</span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p>Notons que les fonctions <code>union</code>, <code>intersect</code>, <code>setdiff</code> et <code>setequal</code> ne vont pas rechigner si les ensembles qu’elles reçoivent en entrée contiennent des éléments dupliqués. Si c’est le cas, elles vont simplement retirer les doublons avant de procéder à l’opération.</p>
+</div>
+<div id="test-dappartenance" class="section level4 unnumbered">
+<h4>Test d’appartenance</h4>
+<p></p>
+<p>Finalement, R offre le fonction <code>is.element</code> pour tester la présence d’éléments dans un ensemble. Par exemple, la commande suivante test l’appartenance de <code>"d"</code> et <code>"e"</code> à l’ensemble <code>A</code> :</p>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.element</span>(<span class="at">el =</span> <span class="fu">c</span>(<span class="st">&quot;d&quot;</span>, <span class="st">&quot;e&quot;</span>), <span class="at">set =</span> A)</span></code></pre></div>
 <pre><code>## [1] FALSE  TRUE</code></pre>
+<p>La fonction retourne une valeur logique par élément testé, en respectant l’ordre dans lequel les éléments ont été identifiés via l’argument <code>el</code>. Ainsi, la sortie précédente indique que <code>"d"</code> n’est pas présent dans <code>A</code>, mais que <code>"e"</code> l’est.</p>
+</div>
 </div>
 <div id="calcul-de-distances" class="section level2" number="2.5">
 <h2><span class="header-section-number">2.5</span> Calcul de distances</h2>
@@ -512,8 +547,8 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <h4>Distance entre des variables numériques</h4>
 <p></p>
 <p>Pour calculer des distances entre des observations numériques, la package <code>stats</code> offre la fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/dist.html"><code>dist</code></a>. Voici un exemple d’utilisation de cette fonction traitant les <a href="https://fr.wikipedia.org/wiki/Iris_de_Fisher">célèbres données iris</a>, incluses dans l’installation de base de R dans le data frame nommé <a href="https://stat.ethz.ch/R-manual/R-patched/library/datasets/html/iris.html"><code>iris</code></a> (du package <code>datasets</code>). Prenons uniquement les 5 premières observations du jeu de données et conservons uniquement les variables numériques.</p>
-<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a>iris_ech_num <span class="ot">&lt;-</span> iris[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="fu">c</span>(<span class="st">&quot;Sepal.Length&quot;</span>, <span class="st">&quot;Sepal.Width&quot;</span>, <span class="st">&quot;Petal.Length&quot;</span>, <span class="st">&quot;Petal.Width&quot;</span>)]</span>
-<span id="cb109-2"><a href="#cb109-2" aria-hidden="true" tabindex="-1"></a>iris_ech_num</span></code></pre></div>
+<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" aria-hidden="true" tabindex="-1"></a>iris_ech_num <span class="ot">&lt;-</span> iris[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="fu">c</span>(<span class="st">&quot;Sepal.Length&quot;</span>, <span class="st">&quot;Sepal.Width&quot;</span>, <span class="st">&quot;Petal.Length&quot;</span>, <span class="st">&quot;Petal.Width&quot;</span>)]</span>
+<span id="cb117-2"><a href="#cb117-2" aria-hidden="true" tabindex="-1"></a>iris_ech_num</span></code></pre></div>
 <pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width
 ## 1          5.1         3.5          1.4         0.2
 ## 2          4.9         3.0          1.4         0.2
@@ -521,7 +556,7 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 ## 4          4.6         3.1          1.5         0.2
 ## 5          5.0         3.6          1.4         0.2</code></pre>
 <p>Calculons les distances euclidiennes entre toutes les paires d’observations dans ce jeu de données, basées sur les 4 variables numériques.</p>
-<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist</span>(<span class="at">x =</span> iris_ech_num, <span class="at">method =</span> <span class="st">&quot;euclidean&quot;</span>, <span class="at">diag =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist</span>(<span class="at">x =</span> iris_ech_num, <span class="at">method =</span> <span class="st">&quot;euclidean&quot;</span>, <span class="at">diag =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>##           1         2         3         4         5
 ## 1 0.0000000                                        
 ## 2 0.5385165 0.0000000                              
@@ -529,7 +564,7 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 ## 4 0.6480741 0.3316625 0.2449490 0.0000000          
 ## 5 0.1414214 0.6082763 0.5099020 0.6480741 0.0000000</code></pre>
 <p>La distance euclidienne est un cas particulier de la <a href="https://fr.wikipedia.org/wiki/Distance_(math%C3%A9matiques)#Exemples_de_distances_classiques">distance de Minkowski</a>, avec un paramètre <span class="math inline">\(p = 2\)</span>.</p>
-<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist</span>(<span class="at">x =</span> iris_ech_num, <span class="at">method =</span> <span class="st">&quot;minkowski&quot;</span>, <span class="at">p =</span> <span class="dv">2</span>, <span class="at">diag =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dist</span>(<span class="at">x =</span> iris_ech_num, <span class="at">method =</span> <span class="st">&quot;minkowski&quot;</span>, <span class="at">p =</span> <span class="dv">2</span>, <span class="at">diag =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>##           1         2         3         4         5
 ## 1 0.0000000                                        
 ## 2 0.5385165 0.0000000                              
@@ -542,7 +577,7 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <h4>Distance entre des chaînes de caractères</h4>
 <p></p>
 <p>Pour faire le tour des fonctions de mesure de distances incluses dans l’installation R de base, mentionnons aussi la fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/utils/html/adist.html"><code>adist</code></a> du package <code>utils</code> qui calcule la <a href="https://fr.wikipedia.org/wiki/Distance_de_Levenshtein">distance de Levenshtein</a> entre des chaînes de caractères, par exemple :</p>
-<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1" aria-hidden="true" tabindex="-1"></a><span class="fu">adist</span>(<span class="at">x =</span> <span class="st">&quot;Allo&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Hello&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb123"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb123-1"><a href="#cb123-1" aria-hidden="true" tabindex="-1"></a><span class="fu">adist</span>(<span class="at">x =</span> <span class="st">&quot;Allo&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Hello&quot;</span>)</span></code></pre></div>
 <pre><code>##      [,1]
 ## [1,]    2</code></pre>
 <p>La distance de Levenshtein, aussi appelée distance minimale d’édition, compte le nombre minimal d’insertions, de retraits et de substitutions à effectuer pour transformer la première chaîne de caractères en la deuxième. Il est possible d’associer un coût différent à chacune de ces opérations. Par défaut, elles ont toutes un coût de 1. La distance de Levenshtein entre <code>"Allo"</code> et <code>"Hello"</code> vaut 2 parce que pour transformer <code>"Allo"</code> en <code>"Hello"</code> il faut au minimum faire les deux opérations suivantes :</p>
@@ -555,13 +590,13 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <div id="constantes-mathématiques" class="section level2" number="2.6">
 <h2><span class="header-section-number">2.6</span> Constantes mathématiques</h2>
 <p>En R, le nombre <span class="math inline">\(\pi\)</span> est représenté par la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Constants.html">constante <code>pi</code></a>.</p>
-<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" aria-hidden="true" tabindex="-1"></a>pi</span></code></pre></div>
+<div class="sourceCode" id="cb125"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb125-1"><a href="#cb125-1" aria-hidden="true" tabindex="-1"></a>pi</span></code></pre></div>
 <pre><code>## [1] 3.141593</code></pre>
 <p><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/is.finite.html"><code>Inf</code></a> est la constante R pour l’infini <span class="math inline">\(\infty\)</span>.</p>
-<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span><span class="dv">5</span> <span class="sc">/</span> <span class="dv">0</span></span></code></pre></div>
+<div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span><span class="dv">5</span> <span class="sc">/</span> <span class="dv">0</span></span></code></pre></div>
 <pre><code>## [1] -Inf</code></pre>
 <p><a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/is.finite.html"><code>NaN</code></a> est une constante signifiant <em>Not A Number</em>. Cette constante est retournée par R lorsqu’un utilisateur lui demande d’effectuer une opération mathématique impossible, par exemple :</p>
-<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(<span class="sc">-</span><span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb129"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb129-1"><a href="#cb129-1" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(<span class="sc">-</span><span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## Warning in log(-1): NaNs produced</code></pre>
 <pre><code>## [1] NaN</code></pre>
 <p><strong>Rappel</strong> : Attention à ne pas confondre la constante <code>NaN</code> avec la <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/NA.html">constante <code>NA</code></a> qui signifie plutôt <em>Not Available</em> et qui sert à représenter les données manquantes.</p>
@@ -585,25 +620,25 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <li>les <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/Logic.html">opérateurs et fonctions logiques vectoriels</a> : <code>!</code> (négation), <code>&amp;</code> (et), <code>|</code> (ou) et <code>xor</code> (ou exclusif).</li>
 </ul>
 <p>Voici des exemples d’écriture de conditions logiques utilisant le vecteur suivant, que nous avons déjà manipulé dans des <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#fonction-c">notes précédentes</a>.</p>
-<div class="sourceCode" id="cb124"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb124-1"><a href="#cb124-1" aria-hidden="true" tabindex="-1"></a>de <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">5</span>, <span class="dv">4</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb132"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb132-1"><a href="#cb132-1" aria-hidden="true" tabindex="-1"></a>de <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">5</span>, <span class="dv">4</span>)</span></code></pre></div>
 <p>Supposons que nous voulions connaître le nombre d’éléments dans ce vecteur numérique dont la valeur est supérieure à 3. La condition logique suivante nous permet d’identifier ces valeurs.</p>
-<div class="sourceCode" id="cb125"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb125-1"><a href="#cb125-1" aria-hidden="true" tabindex="-1"></a>condition <span class="ot">&lt;-</span> de <span class="sc">&gt;</span> <span class="dv">3</span></span>
-<span id="cb125-2"><a href="#cb125-2" aria-hidden="true" tabindex="-1"></a>condition</span></code></pre></div>
+<div class="sourceCode" id="cb133"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb133-1"><a href="#cb133-1" aria-hidden="true" tabindex="-1"></a>condition <span class="ot">&lt;-</span> de <span class="sc">&gt;</span> <span class="dv">3</span></span>
+<span id="cb133-2"><a href="#cb133-2" aria-hidden="true" tabindex="-1"></a>condition</span></code></pre></div>
 <pre><code>##  [1] FALSE FALSE  TRUE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE</code></pre>
 <p>Compter le nombre de valeurs supérieures à 3 dans <code>de</code> revient à compter le nombre de <code>TRUE</code> dans le vecteur précédent. Ce calcul se réalise facilement avec la fonction <code>sum</code> comme suit.</p>
-<div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(condition)</span></code></pre></div>
+<div class="sourceCode" id="cb135"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(condition)</span></code></pre></div>
 <pre><code>## [1] 5</code></pre>
 <p>Même si une somme est une opération mathématique sur des valeurs numériques, la commande précédente ne retourne par d’erreur, car R réalise d’abord une <a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#conversions">conversion implicite de type de données</a> pour transformer les valeurs logiques en nombres (<code>TRUE</code> devient 1 et <code>FALSE</code> devient 0), puis effectue la somme.</p>
 <div id="extraction-déléments-selon-une-condition-logique" class="section level3" number="3.1.1">
 <h3><span class="header-section-number">3.1.1</span> Extraction d’éléments selon une condition logique</h3>
 <p>Le vecteur <code>condition</code> serait aussi utile pour extraire les éléments de <code>de</code> ayant une valeur supérieure à 3. Nous savons que l’<a href="https://stt4230.rbind.io/manipulation_donnees/structures_r/#extraction">opérateur d’indiçage <code>[</code> et la fonction d’extraction <code>subset</code></a> acceptent en entrée un vecteur logique. Nous pouvons donc extraire les éléments respectant la condition comme suit.</p>
-<div class="sourceCode" id="cb129"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb129-1"><a href="#cb129-1" aria-hidden="true" tabindex="-1"></a>de[condition]</span></code></pre></div>
+<div class="sourceCode" id="cb137"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1" aria-hidden="true" tabindex="-1"></a>de[condition]</span></code></pre></div>
 <pre><code>## [1] 4 5 6 5 4</code></pre>
 <div id="fonction-which" class="section level4" number="3.1.1.1">
 <h4><span class="header-section-number">3.1.1.1</span> Fonction <code>which</code></h4>
 <p></p>
 <p>La <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/which.html">fonction <code>which</code></a> permet de connaître les positions des <code>TRUE</code> dans le vecteur, comme l’illustre cet exemple :</p>
-<div class="sourceCode" id="cb131"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb131-1"><a href="#cb131-1" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span>(condition)</span></code></pre></div>
+<div class="sourceCode" id="cb139"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span>(condition)</span></code></pre></div>
 <pre><code>## [1]  3  7  8  9 10</code></pre>
 <p>L’utilisation de <code>which</code> n’est cependant pas nécessaire lors de l’extraction d’éléments à partir d’un vecteur logique. Par exemple, les commandes <code>de[which(condition)]</code> et <code>de[condition]</code> produisent le même résultat, mais la commande sans appel à la fonction <code>which</code> a l’avantage d’être plus succincte.</p>
 </div>
@@ -611,38 +646,38 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <h4><span class="header-section-number">3.1.1.2</span> Conditions combinant des vecteurs logiques</h4>
 <p></p>
 <p>La condition précédente était plutôt simple. Une condition plus complexe requiert souvent de combiner des vecteurs logiques à l’aide d’un opérateur logique. Par exemple, l’instruction suivante identifie les éléments du vecteur <code>de</code> dont la valeur se situe dans l’intervalle <span class="math inline">\([3, 5]\)</span>.</p>
-<div class="sourceCode" id="cb133"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb133-1"><a href="#cb133-1" aria-hidden="true" tabindex="-1"></a>de <span class="sc">&gt;=</span> <span class="dv">3</span> <span class="sc">&amp;</span> de <span class="sc">&lt;=</span> <span class="dv">5</span></span></code></pre></div>
+<div class="sourceCode" id="cb141"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1" aria-hidden="true" tabindex="-1"></a>de <span class="sc">&gt;=</span> <span class="dv">3</span> <span class="sc">&amp;</span> de <span class="sc">&lt;=</span> <span class="dv">5</span></span></code></pre></div>
 <pre><code>##  [1] FALSE  TRUE  TRUE FALSE FALSE  TRUE  TRUE FALSE  TRUE  TRUE</code></pre>
 <p>L’instruction suivante identifie pour sa part les éléments du vecteur <code>de</code> égaux à 1, 4 ou 6.</p>
-<div class="sourceCode" id="cb135"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1" aria-hidden="true" tabindex="-1"></a>de <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> de <span class="sc">==</span> <span class="dv">4</span> <span class="sc">|</span> de <span class="sc">==</span> <span class="dv">6</span></span></code></pre></div>
+<div class="sourceCode" id="cb143"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1" aria-hidden="true" tabindex="-1"></a>de <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> de <span class="sc">==</span> <span class="dv">4</span> <span class="sc">|</span> de <span class="sc">==</span> <span class="dv">6</span></span></code></pre></div>
 <pre><code>##  [1] FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE FALSE  TRUE</code></pre>
 <p>Pour identifier les éléments du vecteur <code>de</code> non-égaux à 1, 4 ou 6, nous pourrions inverser le vecteur logique précédent avec l’opérateur de négation comme suit.</p>
-<div class="sourceCode" id="cb137"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1" aria-hidden="true" tabindex="-1"></a><span class="sc">!</span>(de <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> de <span class="sc">==</span> <span class="dv">4</span> <span class="sc">|</span> de <span class="sc">==</span> <span class="dv">6</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb145"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1" aria-hidden="true" tabindex="-1"></a><span class="sc">!</span>(de <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> de <span class="sc">==</span> <span class="dv">4</span> <span class="sc">|</span> de <span class="sc">==</span> <span class="dv">6</span>)</span></code></pre></div>
 <pre><code>##  [1]  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE FALSE</code></pre>
 <p>Rappelons qu’en logique mathématique, la <a href="https://fr.wikipedia.org/wiki/Table_de_v%C3%A9rit%C3%A9#NON-OU_logique">négation d’une disjonction est équivalente à la conjonction de négations</a>. L’instruction suivante retourne donc le même résultat que la précédente.</p>
-<div class="sourceCode" id="cb139"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1" aria-hidden="true" tabindex="-1"></a>de <span class="sc">!=</span> <span class="dv">1</span> <span class="sc">&amp;</span> de <span class="sc">!=</span> <span class="dv">4</span> <span class="sc">&amp;</span> de <span class="sc">!=</span> <span class="dv">6</span></span></code></pre></div>
+<div class="sourceCode" id="cb147"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb147-1"><a href="#cb147-1" aria-hidden="true" tabindex="-1"></a>de <span class="sc">!=</span> <span class="dv">1</span> <span class="sc">&amp;</span> de <span class="sc">!=</span> <span class="dv">4</span> <span class="sc">&amp;</span> de <span class="sc">!=</span> <span class="dv">6</span></span></code></pre></div>
 <pre><code>##  [1]  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE FALSE</code></pre>
 </div>
 </div>
 <div id="opérateur-in-de-comparaison-à-plusieurs-valeurs" class="section level3" number="3.1.2">
 <h3><span class="header-section-number">3.1.2</span> Opérateur <code>%in%</code> de comparaison à plusieurs valeurs</h3>
 <p>Pour effectuer une comparaison à un ensemble de valeur, telle que le fait l’instruction <code>de == 1 | de == 4 | de == 6</code>, R offre un opérateur raccourcissant la syntaxe : l’<a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/match.html">opérateur <code>%in%</code></a>. Cet opérateur compare les éléments d’un vecteur (placé avant l’opérateur) aux éléments d’un ensemble présenté sous la forme d’un vecteur (placé après). Il retourne <code>TRUE</code> pour un élément égal à n’importe lequel des éléments de l’ensemble, <code>FALSE</code> sinon. L’instruction <code>de == 1 | de == 4 | de == 6</code> est donc équivalent à la suivante.</p>
-<div class="sourceCode" id="cb141"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1" aria-hidden="true" tabindex="-1"></a>de <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">6</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb149"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb149-1"><a href="#cb149-1" aria-hidden="true" tabindex="-1"></a>de <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">6</span>)</span></code></pre></div>
 <pre><code>##  [1] FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE FALSE  TRUE</code></pre>
 <p>Combiné à un opérateur de négation <code>!</code>, l’opérateur <code>%in%</code> permet de facilement tester si les valeurs dans un vecteur sont différentes des valeurs d’un ensemble, comme dans cet exemple.</p>
-<div class="sourceCode" id="cb143"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1" aria-hidden="true" tabindex="-1"></a><span class="sc">!</span> de <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">6</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb151"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1" aria-hidden="true" tabindex="-1"></a><span class="sc">!</span> de <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">6</span>)</span></code></pre></div>
 <pre><code>##  [1]  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE FALSE</code></pre>
 </div>
 <div id="fonctions-de-comparaison-pour-constantes-spéciales" class="section level3" number="3.1.3">
 <h3><span class="header-section-number">3.1.3</span> Fonctions de comparaison pour constantes spéciales</h3>
 <p>Notons que tester si un ou des éléments sont égaux à <code>NA</code>, <code>NaN</code>, <code>Inf</code> ou <code>-Inf</code>, ne se fait pas directement avec l’opérateur <code>==</code> comme suit.</p>
-<div class="sourceCode" id="cb145"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="cn">NA</span>, <span class="dv">4</span>, <span class="dv">5</span>) <span class="sc">==</span> <span class="cn">NA</span></span></code></pre></div>
+<div class="sourceCode" id="cb153"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb153-1"><a href="#cb153-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="cn">NA</span>, <span class="dv">4</span>, <span class="dv">5</span>) <span class="sc">==</span> <span class="cn">NA</span></span></code></pre></div>
 <pre><code>## [1] NA NA NA NA NA</code></pre>
 <p>Il faut plutôt utiliser la fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/NA.html"><code>is.na</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/is.finite.html"><code>is.nan</code> ou <code>is.infinite</code></a>.</p>
-<div class="sourceCode" id="cb147"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb147-1"><a href="#cb147-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.na</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="cn">NA</span>, <span class="dv">4</span>, <span class="dv">5</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb155"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb155-1"><a href="#cb155-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.na</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="cn">NA</span>, <span class="dv">4</span>, <span class="dv">5</span>))</span></code></pre></div>
 <pre><code>## [1] FALSE FALSE  TRUE FALSE FALSE</code></pre>
 <p>La fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/is.finite.html"><code>is.finite</code></a> retourne pour sa part <code>TRUE</code> pour les éléments non égaux à <code>NA</code>, <code>NaN</code>, <code>Inf</code> ou <code>-Inf</code>.</p>
-<div class="sourceCode" id="cb149"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb149-1"><a href="#cb149-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.finite</span>(<span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NaN</span>, <span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>, <span class="fl">4.5</span>, <span class="dv">3</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb157"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb157-1"><a href="#cb157-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.finite</span>(<span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NaN</span>, <span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>, <span class="fl">4.5</span>, <span class="dv">3</span>))</span></code></pre></div>
 <pre><code>## [1] FALSE FALSE FALSE FALSE  TRUE  TRUE</code></pre>
 </div>
 </div>
@@ -658,26 +693,26 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <li><code>isTRUE</code> et <code>isFALSE</code>.</li>
 </ul>
 <p>Les opérateurs <code>&amp;&amp;</code> et <code>||</code> appliquent les mêmes tables de vérité que les opérateurs <code>&amp;</code> et <code>|</code>, mais ils ne travaillent pas de façon vectorielle. Si, par inadvertance, <code>&amp;&amp;</code> ou <code>||</code> reçoit en entrée des vecteurs de longueurs supérieures à 1, il effectue une opération seulement sur les premiers éléments de ces vecteurs, comme dans cet exemple.</p>
-<div class="sourceCode" id="cb151"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1" aria-hidden="true" tabindex="-1"></a>de <span class="sc">==</span> <span class="dv">1</span> <span class="sc">||</span> de <span class="sc">==</span> <span class="dv">4</span> <span class="sc">||</span> de <span class="sc">==</span> <span class="dv">6</span></span></code></pre></div>
+<div class="sourceCode" id="cb159"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb159-1"><a href="#cb159-1" aria-hidden="true" tabindex="-1"></a>de <span class="sc">==</span> <span class="dv">1</span> <span class="sc">||</span> de <span class="sc">==</span> <span class="dv">4</span> <span class="sc">||</span> de <span class="sc">==</span> <span class="dv">6</span></span></code></pre></div>
 <pre><code>## [1] FALSE</code></pre>
 <p>Les fonctions <code>isTRUE</code> et <code>isFALSE</code>, pour leur part, sont des fonctions raccourcies permettant d’effectuer les tests suivants.</p>
-<div class="sourceCode" id="cb153"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb153-1"><a href="#cb153-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.logical</span>(x) <span class="sc">&amp;&amp;</span> <span class="fu">length</span>(x) <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(x) <span class="sc">&amp;&amp;</span> x   <span class="co"># isTRUE</span></span>
-<span id="cb153-2"><a href="#cb153-2" aria-hidden="true" tabindex="-1"></a><span class="fu">is.logical</span>(x) <span class="sc">&amp;&amp;</span> <span class="fu">length</span>(x) <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(x) <span class="sc">&amp;&amp;</span> <span class="sc">!</span>x  <span class="co"># isFALSE</span></span></code></pre></div>
+<div class="sourceCode" id="cb161"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb161-1"><a href="#cb161-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.logical</span>(x) <span class="sc">&amp;&amp;</span> <span class="fu">length</span>(x) <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(x) <span class="sc">&amp;&amp;</span> x   <span class="co"># isTRUE</span></span>
+<span id="cb161-2"><a href="#cb161-2" aria-hidden="true" tabindex="-1"></a><span class="fu">is.logical</span>(x) <span class="sc">&amp;&amp;</span> <span class="fu">length</span>(x) <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(x) <span class="sc">&amp;&amp;</span> <span class="sc">!</span>x  <span class="co"># isFALSE</span></span></code></pre></div>
 <p>Elles permettent donc de s’assurer qu’une condition possède toutes les caractéristiques requises pour être fournie à un <code>if</code> (contenir des données logiques, être de longueur 1 et ne pas prendre la valeur <code>NA</code>).</p>
 </div>
 <div id="fonctions-all-et-any" class="section level3" number="3.2.2">
 <h3><span class="header-section-number">3.2.2</span> Fonctions <code>all</code> et <code>any</code></h3>
 <p>Les fonctions <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/all.html"><code>all</code></a> et <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/any.html"><code>any</code></a> font partie des fonctions R retournant toujours une seule valeur logique. La fonction <code>all</code> indique si tous les éléments d’un vecteur logique sont <code>TRUE</code>. Par exemple, pour tester si toutes les valeurs dans le vecteur <code>de</code> sont entières au sens mathématique, nous pourrions utiliser la commande suivante.</p>
-<div class="sourceCode" id="cb154"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb154-1"><a href="#cb154-1" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(de <span class="sc">%%</span> <span class="dv">1</span> <span class="sc">==</span> <span class="dv">0</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb162"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb162-1"><a href="#cb162-1" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(de <span class="sc">%%</span> <span class="dv">1</span> <span class="sc">==</span> <span class="dv">0</span>)</span></code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
 <p>La fonction <code>any</code> indique pour sa part si au moins un élément d’un vecteur logique est <code>TRUE</code>. Nous pourrions par exemple vérifier si le vecteur <code>de</code> comporte des valeurs négatives comme suit.</p>
-<div class="sourceCode" id="cb156"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb156-1"><a href="#cb156-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(de <span class="sc">&lt;</span> <span class="dv">0</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb164"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb164-1"><a href="#cb164-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(de <span class="sc">&lt;</span> <span class="dv">0</span>)</span></code></pre></div>
 <pre><code>## [1] FALSE</code></pre>
 </div>
 <div id="fonctions-de-vérification-de-type" class="section level3" number="3.2.3">
 <h3><span class="header-section-number">3.2.3</span> Fonctions de vérification de type</h3>
 <p>Finalement, les fonctions <code>is.numeric</code>, <code>is.character</code>, <code>is.logical</code>, <code>is.vector</code>, <code>is.matrix</code>, <code>is.data.frame</code>, <code>is.factor</code>, <code>is.null</code>, <code>is.function</code>, etc., testent une condition et retournent toujours un logique de longueur unitaire. Par exemple, testons si le vecteur <code>de</code> contient bien des données numériques.</p>
-<div class="sourceCode" id="cb158"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb158-1"><a href="#cb158-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.numeric</span>(de)</span></code></pre></div>
+<div class="sourceCode" id="cb166"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb166-1"><a href="#cb166-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.numeric</span>(de)</span></code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
 <hr />
 </div>
@@ -709,65 +744,65 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <div id="données-identiques-mais-métadonnées-différentes" class="section level4 unnumbered">
 <h4>Données identiques, mais métadonnées différentes</h4>
 <p></p>
-<div class="sourceCode" id="cb160"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb160-1"><a href="#cb160-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Objets comparés</span></span>
-<span id="cb160-2"><a href="#cb160-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span></span>
-<span id="cb160-3"><a href="#cb160-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span></span>
-<span id="cb160-4"><a href="#cb160-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(x) <span class="ot">&lt;-</span> letters[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
-<span id="cb160-5"><a href="#cb160-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(x)</span></code></pre></div>
+<div class="sourceCode" id="cb168"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb168-1"><a href="#cb168-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Objets comparés</span></span>
+<span id="cb168-2"><a href="#cb168-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span></span>
+<span id="cb168-3"><a href="#cb168-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span></span>
+<span id="cb168-4"><a href="#cb168-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(x) <span class="ot">&lt;-</span> letters[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
+<span id="cb168-5"><a href="#cb168-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(x)</span></code></pre></div>
 <pre><code>##  Named int [1:5] 1 2 3 4 5
 ##  - attr(*, &quot;names&quot;)= chr [1:5] &quot;a&quot; &quot;b&quot; &quot;c&quot; &quot;d&quot; ...</code></pre>
-<div class="sourceCode" id="cb162"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb162-1"><a href="#cb162-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(y)</span></code></pre></div>
+<div class="sourceCode" id="cb170"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb170-1"><a href="#cb170-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(y)</span></code></pre></div>
 <pre><code>##  int [1:5] 1 2 3 4 5</code></pre>
 <p> </p>
-<div class="sourceCode" id="cb164"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb164-1"><a href="#cb164-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Résultats des différentes comparaisons</span></span>
-<span id="cb164-2"><a href="#cb164-2" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(x <span class="sc">==</span> y)</span></code></pre></div>
+<div class="sourceCode" id="cb172"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb172-1"><a href="#cb172-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Résultats des différentes comparaisons</span></span>
+<span id="cb172-2"><a href="#cb172-2" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(x <span class="sc">==</span> y)</span></code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
-<div class="sourceCode" id="cb166"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb166-1"><a href="#cb166-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(x, y)</span></code></pre></div>
+<div class="sourceCode" id="cb174"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb174-1"><a href="#cb174-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(x, y)</span></code></pre></div>
 <pre><code>## [1] FALSE</code></pre>
-<div class="sourceCode" id="cb168"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb168-1"><a href="#cb168-1" aria-hidden="true" tabindex="-1"></a><span class="fu">all.equal</span>(x, y)</span></code></pre></div>
+<div class="sourceCode" id="cb176"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb176-1"><a href="#cb176-1" aria-hidden="true" tabindex="-1"></a><span class="fu">all.equal</span>(x, y)</span></code></pre></div>
 <pre><code>## [1] &quot;names for target but not for current&quot;</code></pre>
 </div>
 <div id="données-équivalentes-mais-de-types-différents-métadonnées-identiques" class="section level4 unnumbered">
 <h4>Données équivalentes, mais de types différents, métadonnées identiques</h4>
 <p></p>
-<div class="sourceCode" id="cb170"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb170-1"><a href="#cb170-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Objets comparés</span></span>
-<span id="cb170-2"><a href="#cb170-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">as.double</span>(x)</span>
-<span id="cb170-3"><a href="#cb170-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(x)</span></code></pre></div>
+<div class="sourceCode" id="cb178"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb178-1"><a href="#cb178-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Objets comparés</span></span>
+<span id="cb178-2"><a href="#cb178-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">as.double</span>(x)</span>
+<span id="cb178-3"><a href="#cb178-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(x)</span></code></pre></div>
 <pre><code>##  num [1:5] 1 2 3 4 5</code></pre>
-<div class="sourceCode" id="cb172"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb172-1"><a href="#cb172-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(y)</span></code></pre></div>
+<div class="sourceCode" id="cb180"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb180-1"><a href="#cb180-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(y)</span></code></pre></div>
 <pre><code>##  int [1:5] 1 2 3 4 5</code></pre>
 <p> </p>
-<div class="sourceCode" id="cb174"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb174-1"><a href="#cb174-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Résultats des différentes comparaisons</span></span>
-<span id="cb174-2"><a href="#cb174-2" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(x <span class="sc">==</span> y)</span></code></pre></div>
+<div class="sourceCode" id="cb182"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb182-1"><a href="#cb182-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Résultats des différentes comparaisons</span></span>
+<span id="cb182-2"><a href="#cb182-2" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(x <span class="sc">==</span> y)</span></code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
-<div class="sourceCode" id="cb176"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb176-1"><a href="#cb176-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(x, y)</span></code></pre></div>
+<div class="sourceCode" id="cb184"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb184-1"><a href="#cb184-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(x, y)</span></code></pre></div>
 <pre><code>## [1] FALSE</code></pre>
-<div class="sourceCode" id="cb178"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb178-1"><a href="#cb178-1" aria-hidden="true" tabindex="-1"></a><span class="fu">all.equal</span>(x, y)</span></code></pre></div>
+<div class="sourceCode" id="cb186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb186-1"><a href="#cb186-1" aria-hidden="true" tabindex="-1"></a><span class="fu">all.equal</span>(x, y)</span></code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
 </div>
 <div id="données-numériques-pas-tout-à-fait-identiques-métadonnées-et-types-identiques" class="section level4 unnumbered">
 <h4>Données numériques pas tout à fait identiques, métadonnées et types identiques</h4>
 <p></p>
-<div class="sourceCode" id="cb180"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb180-1"><a href="#cb180-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Objets comparés</span></span>
-<span id="cb180-2"><a href="#cb180-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span> <span class="sc">+</span> <span class="fl">1e-10</span></span>
-<span id="cb180-3"><a href="#cb180-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(x)</span></code></pre></div>
+<div class="sourceCode" id="cb188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb188-1"><a href="#cb188-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Objets comparés</span></span>
+<span id="cb188-2"><a href="#cb188-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span> <span class="sc">+</span> <span class="fl">1e-10</span></span>
+<span id="cb188-3"><a href="#cb188-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(x)</span></code></pre></div>
 <pre><code>##  num [1:5] 1 2 3 4 5</code></pre>
-<div class="sourceCode" id="cb182"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb182-1"><a href="#cb182-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(y)</span></code></pre></div>
+<div class="sourceCode" id="cb190"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb190-1"><a href="#cb190-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(y)</span></code></pre></div>
 <pre><code>##  num [1:5] 1 2 3 4 5</code></pre>
 <p>Bien que les données numériques dans <code>x</code> et <code>y</code> ne soient pas tout à fait identiques, elles semblent identiques à l’affichage de <code>x</code> et <code>y</code>.</p>
-<div class="sourceCode" id="cb184"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb184-1"><a href="#cb184-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Résultats des différentes comparaisons</span></span>
-<span id="cb184-2"><a href="#cb184-2" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(x <span class="sc">==</span> y)</span></code></pre></div>
+<div class="sourceCode" id="cb192"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb192-1"><a href="#cb192-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Résultats des différentes comparaisons</span></span>
+<span id="cb192-2"><a href="#cb192-2" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(x <span class="sc">==</span> y)</span></code></pre></div>
 <pre><code>## [1] FALSE</code></pre>
-<div class="sourceCode" id="cb186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb186-1"><a href="#cb186-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(x, y)</span></code></pre></div>
+<div class="sourceCode" id="cb194"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb194-1"><a href="#cb194-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(x, y)</span></code></pre></div>
 <pre><code>## [1] FALSE</code></pre>
-<div class="sourceCode" id="cb188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb188-1"><a href="#cb188-1" aria-hidden="true" tabindex="-1"></a><span class="fu">all.equal</span>(x, y)</span></code></pre></div>
+<div class="sourceCode" id="cb196"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb196-1"><a href="#cb196-1" aria-hidden="true" tabindex="-1"></a><span class="fu">all.equal</span>(x, y)</span></code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
 <p><strong>Rappel</strong> : Il est possible de contrôler le nombre de chiffres composant un nombre affiché dans la console R avec l’option <code>digits</code> de la session R.</p>
-<div class="sourceCode" id="cb190"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb190-1"><a href="#cb190-1" aria-hidden="true" tabindex="-1"></a>optionsDefaut <span class="ot">&lt;-</span> <span class="fu">options</span>()</span>
-<span id="cb190-2"><a href="#cb190-2" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">digits =</span> <span class="dv">11</span>)</span>
-<span id="cb190-3"><a href="#cb190-3" aria-hidden="true" tabindex="-1"></a>y</span></code></pre></div>
+<div class="sourceCode" id="cb198"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb198-1"><a href="#cb198-1" aria-hidden="true" tabindex="-1"></a>optionsDefaut <span class="ot">&lt;-</span> <span class="fu">options</span>()</span>
+<span id="cb198-2"><a href="#cb198-2" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">digits =</span> <span class="dv">11</span>)</span>
+<span id="cb198-3"><a href="#cb198-3" aria-hidden="true" tabindex="-1"></a>y</span></code></pre></div>
 <pre><code>## [1] 1.0000000001 2.0000000001 3.0000000001 4.0000000001 5.0000000001</code></pre>
-<div class="sourceCode" id="cb192"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb192-1"><a href="#cb192-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">digits =</span> optionsDefaut<span class="sc">$</span>digits)</span></code></pre></div>
+<div class="sourceCode" id="cb200"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb200-1"><a href="#cb200-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">digits =</span> optionsDefaut<span class="sc">$</span>digits)</span></code></pre></div>
 <hr />
 </div>
 </div>
@@ -795,32 +830,32 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <div id="opérateur" class="section level4" number="5.1.1.1">
 <h4><span class="header-section-number">5.1.1.1</span> Opérateur <code>%*%</code></h4>
 <p>L’opérateur usuel de multiplication effectue une multiplication terme à terme entre deux matrices.</p>
-<div class="sourceCode" id="cb193"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb193-1"><a href="#cb193-1" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
-<span id="cb193-2"><a href="#cb193-2" aria-hidden="true" tabindex="-1"></a>A</span></code></pre></div>
+<div class="sourceCode" id="cb201"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb201-1"><a href="#cb201-1" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb201-2"><a href="#cb201-2" aria-hidden="true" tabindex="-1"></a>A</span></code></pre></div>
 <pre><code>##      [,1] [,2]
 ## [1,]    1    4
 ## [2,]    2    5
 ## [3,]    3    6</code></pre>
-<div class="sourceCode" id="cb195"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb195-1"><a href="#cb195-1" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">6</span><span class="sc">:</span><span class="dv">1</span>, <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
-<span id="cb195-2"><a href="#cb195-2" aria-hidden="true" tabindex="-1"></a>B</span></code></pre></div>
+<div class="sourceCode" id="cb203"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb203-1"><a href="#cb203-1" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">6</span><span class="sc">:</span><span class="dv">1</span>, <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb203-2"><a href="#cb203-2" aria-hidden="true" tabindex="-1"></a>B</span></code></pre></div>
 <pre><code>##      [,1] [,2]
 ## [1,]    6    3
 ## [2,]    5    2
 ## [3,]    4    1</code></pre>
-<div class="sourceCode" id="cb197"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb197-1"><a href="#cb197-1" aria-hidden="true" tabindex="-1"></a>A<span class="sc">*</span>B</span></code></pre></div>
+<div class="sourceCode" id="cb205"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb205-1"><a href="#cb205-1" aria-hidden="true" tabindex="-1"></a>A<span class="sc">*</span>B</span></code></pre></div>
 <pre><code>##      [,1] [,2]
 ## [1,]    6   12
 ## [2,]   10   10
 ## [3,]   12    6</code></pre>
 <p>Pour effectuer une <a href="https://fr.wikipedia.org/wiki/Produit_matriciel">multiplication matricielle</a>, il faut utiliser l’opérateur <code>%*%</code>. Les dimensions des matrices doivent évidemment concorder.</p>
-<div class="sourceCode" id="cb199"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb199-1"><a href="#cb199-1" aria-hidden="true" tabindex="-1"></a>A <span class="sc">%*%</span> B</span></code></pre></div>
+<div class="sourceCode" id="cb207"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb207-1"><a href="#cb207-1" aria-hidden="true" tabindex="-1"></a>A <span class="sc">%*%</span> B</span></code></pre></div>
 <pre><code>## Error in A %*% B: non-conformable arguments</code></pre>
-<div class="sourceCode" id="cb201"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb201-1"><a href="#cb201-1" aria-hidden="true" tabindex="-1"></a>C <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">7</span>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
-<span id="cb201-2"><a href="#cb201-2" aria-hidden="true" tabindex="-1"></a>C</span></code></pre></div>
+<div class="sourceCode" id="cb209"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb209-1"><a href="#cb209-1" aria-hidden="true" tabindex="-1"></a>C <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">7</span>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb209-2"><a href="#cb209-2" aria-hidden="true" tabindex="-1"></a>C</span></code></pre></div>
 <pre><code>##      [,1] [,2]
 ## [1,]    5    3
 ## [2,]    2    7</code></pre>
-<div class="sourceCode" id="cb203"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb203-1"><a href="#cb203-1" aria-hidden="true" tabindex="-1"></a>A <span class="sc">%*%</span> C</span></code></pre></div>
+<div class="sourceCode" id="cb211"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb211-1"><a href="#cb211-1" aria-hidden="true" tabindex="-1"></a>A <span class="sc">%*%</span> C</span></code></pre></div>
 <pre><code>##      [,1] [,2]
 ## [1,]   13   31
 ## [2,]   20   41
@@ -829,7 +864,7 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <div id="fonction-solve" class="section level4" number="5.1.1.2">
 <h4><span class="header-section-number">5.1.1.2</span> Fonction <code>solve</code></h4>
 <p>L’<a href="https://fr.wikipedia.org/wiki/Matrice_inversible">inverse d’une matrice</a> s’obtient avec la fonction <code>solve</code>.</p>
-<div class="sourceCode" id="cb205"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb205-1"><a href="#cb205-1" aria-hidden="true" tabindex="-1"></a><span class="fu">solve</span>(C)</span></code></pre></div>
+<div class="sourceCode" id="cb213"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb213-1"><a href="#cb213-1" aria-hidden="true" tabindex="-1"></a><span class="fu">solve</span>(C)</span></code></pre></div>
 <pre><code>##             [,1]       [,2]
 ## [1,]  0.24137931 -0.1034483
 ## [2,] -0.06896552  0.1724138</code></pre>
@@ -837,12 +872,12 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <div id="fonction-crossprod" class="section level4" number="5.1.1.3">
 <h4><span class="header-section-number">5.1.1.3</span> Fonction <code>crossprod</code></h4>
 <p>La fonction <code>crossprod</code> sert à calculer <span class="math inline">\(A^T B\)</span> ou <span class="math inline">\(A^T A\)</span>.</p>
-<div class="sourceCode" id="cb207"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb207-1"><a href="#cb207-1" aria-hidden="true" tabindex="-1"></a><span class="fu">crossprod</span>(A, B)</span></code></pre></div>
+<div class="sourceCode" id="cb215"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb215-1"><a href="#cb215-1" aria-hidden="true" tabindex="-1"></a><span class="fu">crossprod</span>(A, B)</span></code></pre></div>
 <pre><code>##      [,1] [,2]
 ## [1,]   28   10
 ## [2,]   73   28</code></pre>
-<div class="sourceCode" id="cb209"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb209-1"><a href="#cb209-1" aria-hidden="true" tabindex="-1"></a><span class="co"># équivalent à</span></span>
-<span id="cb209-2"><a href="#cb209-2" aria-hidden="true" tabindex="-1"></a><span class="fu">t</span>(A) <span class="sc">%*%</span> B</span></code></pre></div>
+<div class="sourceCode" id="cb217"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb217-1"><a href="#cb217-1" aria-hidden="true" tabindex="-1"></a><span class="co"># équivalent à</span></span>
+<span id="cb217-2"><a href="#cb217-2" aria-hidden="true" tabindex="-1"></a><span class="fu">t</span>(A) <span class="sc">%*%</span> B</span></code></pre></div>
 <pre><code>##      [,1] [,2]
 ## [1,]   28   10
 ## [2,]   73   28</code></pre>
@@ -850,28 +885,28 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <div id="produits-dyadique-et-de-kronecker" class="section level4" number="5.1.1.4">
 <h4><span class="header-section-number">5.1.1.4</span> Produits dyadique et de Kronecker</h4>
 <p>Parfois, nous avons besoin d’effectuer une opération en prenant toutes les paires de termes possibles entre deux vecteurs ou matrices. C’est ce que font les <a href="https://fr.wikipedia.org/wiki/Produit_dyadique">produits dyadique</a> (<em>outer product</em>) (opérateur <code>%o%</code>) et de <a href="https://fr.wikipedia.org/wiki/Produit_de_Kronecker">Kronecker</a> (opérateur <code>%x%</code>). Cependant, ils n’assemblent pas les résultats de la même façon. Voici des exemples avec des vecteurs.</p>
-<div class="sourceCode" id="cb211"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb211-1"><a href="#cb211-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">:</span><span class="dv">3</span> <span class="sc">%o%</span> <span class="dv">4</span><span class="sc">:</span><span class="dv">5</span></span></code></pre></div>
+<div class="sourceCode" id="cb219"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb219-1"><a href="#cb219-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">:</span><span class="dv">3</span> <span class="sc">%o%</span> <span class="dv">4</span><span class="sc">:</span><span class="dv">5</span></span></code></pre></div>
 <pre><code>##      [,1] [,2]
 ## [1,]    4    5
 ## [2,]    8   10
 ## [3,]   12   15</code></pre>
-<div class="sourceCode" id="cb213"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb213-1"><a href="#cb213-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">:</span><span class="dv">3</span> <span class="sc">%x%</span> <span class="dv">4</span><span class="sc">:</span><span class="dv">5</span></span></code></pre></div>
+<div class="sourceCode" id="cb221"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb221-1"><a href="#cb221-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">:</span><span class="dv">3</span> <span class="sc">%x%</span> <span class="dv">4</span><span class="sc">:</span><span class="dv">5</span></span></code></pre></div>
 <pre><code>## [1]  4  5  8 10 12 15</code></pre>
 <p>Les deux commandes ont permis le calcul des mêmes 6 produits (<span class="math inline">\(1 \times 4 = 4\)</span>, <span class="math inline">\(2 \times 4 = 8\)</span>, <span class="math inline">\(3 \times 4 = 12\)</span>, <span class="math inline">\(1 \times 5 = 5\)</span>, <span class="math inline">\(2 \times 5 = 10\)</span> et <span class="math inline">\(3 \times 5 = 15\)</span>). Cependant, l’opérateur <code>%o%</code> a rassemblé les produits dans une matrice de dimension 3 par 2, et l’opérateur <code>%x%</code> dans un vecteur de longueur <span class="math inline">\(3 \times 2 = 6\)</span>.</p>
 <p>Avec deux matrices en entrée, le résultat de <code>A %o% B</code> est un array à 4 dimensions dont les tailles sont, dans l’ordre, <code>nrow(A)</code>, <code>ncol(A)</code>, <code>nrow(B)</code> et <code>ncol(B)</code>. Le résultat de <code>A %x% B</code> est pour sa part une matrice à 2 dimensions comprenant <code>nrow(A)*nrow(B)</code> lignes et <code>ncol(A)*ncol(B)</code> colonnes.</p>
 <p>Voici des exemples.</p>
-<div class="sourceCode" id="cb215"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb215-1"><a href="#cb215-1" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">12</span><span class="sc">:</span><span class="dv">1</span>, <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">4</span>)</span>
-<span id="cb215-2"><a href="#cb215-2" aria-hidden="true" tabindex="-1"></a>A</span></code></pre></div>
+<div class="sourceCode" id="cb223"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb223-1"><a href="#cb223-1" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">12</span><span class="sc">:</span><span class="dv">1</span>, <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">4</span>)</span>
+<span id="cb223-2"><a href="#cb223-2" aria-hidden="true" tabindex="-1"></a>A</span></code></pre></div>
 <pre><code>##      [,1] [,2] [,3] [,4]
 ## [1,]   12    9    6    3
 ## [2,]   11    8    5    2
 ## [3,]   10    7    4    1</code></pre>
-<div class="sourceCode" id="cb217"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb217-1"><a href="#cb217-1" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">1</span>)</span>
-<span id="cb217-2"><a href="#cb217-2" aria-hidden="true" tabindex="-1"></a>B</span></code></pre></div>
+<div class="sourceCode" id="cb225"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb225-1"><a href="#cb225-1" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">1</span>)</span>
+<span id="cb225-2"><a href="#cb225-2" aria-hidden="true" tabindex="-1"></a>B</span></code></pre></div>
 <pre><code>##      [,1]
 ## [1,]    1
 ## [2,]    2</code></pre>
-<div class="sourceCode" id="cb219"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb219-1"><a href="#cb219-1" aria-hidden="true" tabindex="-1"></a>A <span class="sc">%o%</span> B</span></code></pre></div>
+<div class="sourceCode" id="cb227"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb227-1"><a href="#cb227-1" aria-hidden="true" tabindex="-1"></a>A <span class="sc">%o%</span> B</span></code></pre></div>
 <pre><code>## , , 1, 1
 ## 
 ##      [,1] [,2] [,3] [,4]
@@ -885,7 +920,7 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 ## [1,]   24   18   12    6
 ## [2,]   22   16   10    4
 ## [3,]   20   14    8    2</code></pre>
-<div class="sourceCode" id="cb221"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb221-1"><a href="#cb221-1" aria-hidden="true" tabindex="-1"></a>A <span class="sc">%x%</span> B</span></code></pre></div>
+<div class="sourceCode" id="cb229"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb229-1"><a href="#cb229-1" aria-hidden="true" tabindex="-1"></a>A <span class="sc">%x%</span> B</span></code></pre></div>
 <pre><code>##      [,1] [,2] [,3] [,4]
 ## [1,]   12    9    6    3
 ## [2,]   24   18   12    6
@@ -894,12 +929,12 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 ## [5,]   10    7    4    1
 ## [6,]   20   14    8    2</code></pre>
 <p>Les deux opérations se généralisent à l’emploi d’un autre opérateur que le produit, grâce aux fonctions <code>outer</code> et <code>kronecker</code>.</p>
-<div class="sourceCode" id="cb223"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb223-1"><a href="#cb223-1" aria-hidden="true" tabindex="-1"></a><span class="fu">outer</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">4</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">FUN =</span> <span class="st">&#39;+&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb231"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb231-1"><a href="#cb231-1" aria-hidden="true" tabindex="-1"></a><span class="fu">outer</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">4</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">FUN =</span> <span class="st">&#39;+&#39;</span>)</span></code></pre></div>
 <pre><code>##      [,1] [,2]
 ## [1,]    5    6
 ## [2,]    6    7
 ## [3,]    7    8</code></pre>
-<div class="sourceCode" id="cb225"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb225-1"><a href="#cb225-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kronecker</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">4</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">FUN =</span> <span class="st">&#39;+&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb233"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb233-1"><a href="#cb233-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kronecker</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">4</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">FUN =</span> <span class="st">&#39;+&#39;</span>)</span></code></pre></div>
 <pre><code>## [1] 5 6 6 7 7 8</code></pre>
 </div>
 <div id="fonction-diag" class="section level4" number="5.1.1.5">
@@ -908,16 +943,16 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <ul>
 <li>matrice en entrée : extraire la diagonale de la matrice reçue;</li>
 </ul>
-<div class="sourceCode" id="cb227"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb227-1"><a href="#cb227-1" aria-hidden="true" tabindex="-1"></a>C</span></code></pre></div>
+<div class="sourceCode" id="cb235"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb235-1"><a href="#cb235-1" aria-hidden="true" tabindex="-1"></a>C</span></code></pre></div>
 <pre><code>##      [,1] [,2]
 ## [1,]    5    3
 ## [2,]    2    7</code></pre>
-<div class="sourceCode" id="cb229"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb229-1"><a href="#cb229-1" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(C)</span></code></pre></div>
+<div class="sourceCode" id="cb237"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb237-1"><a href="#cb237-1" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(C)</span></code></pre></div>
 <pre><code>## [1] 5 7</code></pre>
 <ul>
 <li>vecteur en entrée : créer une matrice diagonale à partir du vecteur reçu, qui doit contenir les éléments à mettre sur la diagonale;</li>
 </ul>
-<div class="sourceCode" id="cb231"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb231-1"><a href="#cb231-1" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb239"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb239-1"><a href="#cb239-1" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)</span></code></pre></div>
 <pre><code>##      [,1] [,2] [,3]
 ## [1,]    1    0    0
 ## [2,]    0    2    0
@@ -925,7 +960,7 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <ul>
 <li>un seul nombre en entrée : créer une matrice identité dont la taille commune des dimensions est déterminée par le nombre fourni.</li>
 </ul>
-<div class="sourceCode" id="cb233"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb233-1"><a href="#cb233-1" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(<span class="dv">3</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb241"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb241-1"><a href="#cb241-1" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(<span class="dv">3</span>)</span></code></pre></div>
 <pre><code>##      [,1] [,2] [,3]
 ## [1,]    1    0    0
 ## [2,]    0    1    0
@@ -940,8 +975,8 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <h3><span class="header-section-number">5.2.1</span> Dérivation symbolique : <code>D</code>, <code>deriv</code> et <code>deriv3</code></h3>
 <p>Tout comme les logiciels Maple ou Mathematica, R peut faire du calcul symbolique de dérivées. Cependant, il est loin d’être le meilleur outil pour ces tâches. Pour illustrer les capacités (limitées) de R dans ce domaine, tentons d’abord de calculer la dérivée suivante :</p>
 <p><span class="math inline">\(\frac{d}{dx}( log(x) + sin(x) ).\)</span></p>
-<div class="sourceCode" id="cb235"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb235-1"><a href="#cb235-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">deriv</span>(<span class="at">expr =</span> <span class="sc">~</span> <span class="fu">log</span>(x) <span class="sc">+</span> <span class="fu">sin</span>(x), <span class="at">namevec =</span> <span class="st">&quot;x&quot;</span>)</span>
-<span id="cb235-2"><a href="#cb235-2" aria-hidden="true" tabindex="-1"></a>df</span></code></pre></div>
+<div class="sourceCode" id="cb243"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb243-1"><a href="#cb243-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">deriv</span>(<span class="at">expr =</span> <span class="sc">~</span> <span class="fu">log</span>(x) <span class="sc">+</span> <span class="fu">sin</span>(x), <span class="at">namevec =</span> <span class="st">&quot;x&quot;</span>)</span>
+<span id="cb243-2"><a href="#cb243-2" aria-hidden="true" tabindex="-1"></a>df</span></code></pre></div>
 <pre><code>## expression({
 ##     .value &lt;- log(x) + sin(x)
 ##     .grad &lt;- array(0, c(length(.value), 1L), list(NULL, c(&quot;x&quot;)))
@@ -950,9 +985,9 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 ##     .value
 ## })</code></pre>
 <p>L’objet <code>df</code> est particulier. Il s’agit d’une expression. La ligne <code>.grad[, "x"] &lt;- 1/x + cos(x)</code> permet de constater que R a bien trouvé que la dérivée symbolique de <span class="math inline">\(log(x) + sin(x)\)</span> est <span class="math inline">\(1/x + cos(x)\)</span>. Nous pouvons maintenant utiliser <code>df</code> pour calculer cette dérivée en certains points. Étant donné que nous avons nommé <code>x</code> la variable dans la fonction à dériver, il faut d’abord créer un objet nommé <code>x</code> contenant les valeurs en lesquelles nous souhaitons calculer la dérivée.</p>
-<div class="sourceCode" id="cb237"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb237-1"><a href="#cb237-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">5</span></span></code></pre></div>
+<div class="sourceCode" id="cb245"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb245-1"><a href="#cb245-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">5</span></span></code></pre></div>
 <p>Ensuite, nous soumettons la commande suivante pour obtenir le résultat recherché.</p>
-<div class="sourceCode" id="cb238"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb238-1"><a href="#cb238-1" aria-hidden="true" tabindex="-1"></a><span class="fu">eval</span>(df)</span></code></pre></div>
+<div class="sourceCode" id="cb246"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb246-1"><a href="#cb246-1" aria-hidden="true" tabindex="-1"></a><span class="fu">eval</span>(df)</span></code></pre></div>
 <pre><code>## [1] 1.6024446 1.2397323 0.6294919 0.6505136
 ## attr(,&quot;gradient&quot;)
 ##                x
@@ -961,23 +996,23 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 ## [3,] -0.40364362
 ## [4,]  0.48366219</code></pre>
 <p>Cette sortie contient les valeurs de la fonction d’origine aux points d’intérêt,</p>
-<div class="sourceCode" id="cb240"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb240-1"><a href="#cb240-1" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(x) <span class="sc">+</span> <span class="fu">sin</span>(x)</span></code></pre></div>
+<div class="sourceCode" id="cb248"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb248-1"><a href="#cb248-1" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(x) <span class="sc">+</span> <span class="fu">sin</span>(x)</span></code></pre></div>
 <pre><code>## [1] 1.6024446 1.2397323 0.6294919 0.6505136</code></pre>
 <p>suivies des valeurs de la dérivée de la fonction en ces points.</p>
-<div class="sourceCode" id="cb242"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb242-1"><a href="#cb242-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">/</span>x <span class="sc">+</span> <span class="fu">cos</span>(x)</span></code></pre></div>
+<div class="sourceCode" id="cb250"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb250-1"><a href="#cb250-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">/</span>x <span class="sc">+</span> <span class="fu">cos</span>(x)</span></code></pre></div>
 <pre><code>## [1]  0.08385316 -0.65665916 -0.40364362  0.48366219</code></pre>
 <p>Ainsi, R peut faire du calcul symbolique de dérivée, mais il n’offre pas une façon très conviviale de le faire. Plus d’information peut être trouvée dans la <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/deriv.html">fiche d’aide des fonctions <code>D</code>, <code>deriv</code> et <code>deriv3</code></a>. Le R de base n’offre pas de fonctions pour le calcul symbolique d’intégrales. Cependant, le package <code>Ryacas</code> en offre : <a href="https://CRAN.R-project.org/package=Ryacas" class="uri">https://CRAN.R-project.org/package=Ryacas</a></p>
 </div>
 <div id="dérivation-numérique-numericderiv" class="section level3" number="5.2.2">
 <h3><span class="header-section-number">5.2.2</span> Dérivation numérique : <code>numericDeriv</code></h3>
 <p>Le <a href="https://en.wikipedia.org/wiki/Numerical_differentiation">calcul de dérivées numériques</a> est un peu plus simple. Par exemple, dérivons la fonction de répartition d’une loi normale standard en quelques points avec la fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/numericDeriv.html"><code>numericDeriv</code></a>. Cette fonction de répartition est implémentée dans la fonction R <code>pnorm</code>, qui sera vue dans les <a href="https://stt4230.rbind.io/calculs/calculs_stat_r/">notes sur les calculs statistiques</a>.</p>
-<div class="sourceCode" id="cb244"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb244-1"><a href="#cb244-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Points en lesquels nous allons dériver</span></span>
-<span id="cb244-2"><a href="#cb244-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">as.double</span>(<span class="sc">-</span><span class="dv">3</span><span class="sc">:</span><span class="dv">3</span>)</span>
-<span id="cb244-3"><a href="#cb244-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Valeur de la fonction en ces points</span></span>
-<span id="cb244-4"><a href="#cb244-4" aria-hidden="true" tabindex="-1"></a><span class="fu">pnorm</span>(x)</span></code></pre></div>
+<div class="sourceCode" id="cb252"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb252-1"><a href="#cb252-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Points en lesquels nous allons dériver</span></span>
+<span id="cb252-2"><a href="#cb252-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">as.double</span>(<span class="sc">-</span><span class="dv">3</span><span class="sc">:</span><span class="dv">3</span>)</span>
+<span id="cb252-3"><a href="#cb252-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Valeur de la fonction en ces points</span></span>
+<span id="cb252-4"><a href="#cb252-4" aria-hidden="true" tabindex="-1"></a><span class="fu">pnorm</span>(x)</span></code></pre></div>
 <pre><code>## [1] 0.001349898 0.022750132 0.158655254 0.500000000 0.841344746 0.977249868 0.998650102</code></pre>
-<div class="sourceCode" id="cb246"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb246-1"><a href="#cb246-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcul de la dérivée en ces points</span></span>
-<span id="cb246-2"><a href="#cb246-2" aria-hidden="true" tabindex="-1"></a><span class="fu">numericDeriv</span>(<span class="at">expr =</span> <span class="fu">quote</span>(<span class="fu">pnorm</span>(x)), <span class="at">theta =</span> <span class="st">&quot;x&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb254"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb254-1"><a href="#cb254-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcul de la dérivée en ces points</span></span>
+<span id="cb254-2"><a href="#cb254-2" aria-hidden="true" tabindex="-1"></a><span class="fu">numericDeriv</span>(<span class="at">expr =</span> <span class="fu">quote</span>(<span class="fu">pnorm</span>(x)), <span class="at">theta =</span> <span class="st">&quot;x&quot;</span>)</span></code></pre></div>
 <pre><code>## [1] 0.001349898 0.022750132 0.158655254 0.500000000 0.841344746 0.977249868 0.998650102
 ## attr(,&quot;gradient&quot;)
 ##             [,1]       [,2]      [,3]      [,4]      [,5]       [,6]        [,7]
@@ -989,21 +1024,21 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 ## [6,] 0.000000000 0.00000000 0.0000000 0.0000000 0.0000000 0.05399096 0.000000000
 ## [7,] 0.000000000 0.00000000 0.0000000 0.0000000 0.0000000 0.00000000 0.004431849</code></pre>
 <p>Nous arrivons au bon résultat, soit la fonction de densité de loi normale standard aux mêmes points. Cette fonction de densité est implémentée dans la fonction R <code>dnorm</code>, qui sera aussi vue dans les <a href="https://stt4230.rbind.io/calculs/calculs_stat_r/">notes sur les calculs statistiques</a>.</p>
-<div class="sourceCode" id="cb248"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb248-1"><a href="#cb248-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dnorm</span>(x)</span></code></pre></div>
+<div class="sourceCode" id="cb256"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb256-1"><a href="#cb256-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dnorm</span>(x)</span></code></pre></div>
 <pre><code>## [1] 0.004431848 0.053990967 0.241970725 0.398942280 0.241970725 0.053990967 0.004431848</code></pre>
 <p>L’appel de la fonction <code>numericDeriv</code> n’est pas standard. Il fait intervenir une expression R à créer avec la fonction <code>quote</code>.</p>
 <p>Nous pourrions aussi programmer à la main une version simpliste de la dérivation numérique comme suit :</p>
-<div class="sourceCode" id="cb250"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb250-1"><a href="#cb250-1" aria-hidden="true" tabindex="-1"></a>delta <span class="ot">&lt;-</span> .<span class="dv">000001</span></span>
-<span id="cb250-2"><a href="#cb250-2" aria-hidden="true" tabindex="-1"></a>(<span class="fu">pnorm</span>(x <span class="sc">+</span> delta) <span class="sc">-</span> <span class="fu">pnorm</span>(x <span class="sc">-</span> delta)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> delta)</span></code></pre></div>
+<div class="sourceCode" id="cb258"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb258-1"><a href="#cb258-1" aria-hidden="true" tabindex="-1"></a>delta <span class="ot">&lt;-</span> .<span class="dv">000001</span></span>
+<span id="cb258-2"><a href="#cb258-2" aria-hidden="true" tabindex="-1"></a>(<span class="fu">pnorm</span>(x <span class="sc">+</span> delta) <span class="sc">-</span> <span class="fu">pnorm</span>(x <span class="sc">-</span> delta)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> delta)</span></code></pre></div>
 <pre><code>## [1] 0.004431848 0.053990967 0.241970724 0.398942280 0.241970725 0.053990967 0.004431848</code></pre>
 </div>
 <div id="intégration-numérique-integrate" class="section level3" number="5.2.3">
 <h3><span class="header-section-number">5.2.3</span> Intégration numérique : <code>integrate</code></h3>
 <p>Effectuons maintenant l’opération inverse : intégrons la fonction de densité de la loi normale standard avec la fonction <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/integrate.html"><code>integrate</code></a>.</p>
-<div class="sourceCode" id="cb252"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb252-1"><a href="#cb252-1" aria-hidden="true" tabindex="-1"></a><span class="fu">integrate</span>(<span class="at">f =</span> dnorm, <span class="at">lower =</span> <span class="sc">-</span><span class="cn">Inf</span>, <span class="at">upper =</span> <span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb260"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb260-1"><a href="#cb260-1" aria-hidden="true" tabindex="-1"></a><span class="fu">integrate</span>(<span class="at">f =</span> dnorm, <span class="at">lower =</span> <span class="sc">-</span><span class="cn">Inf</span>, <span class="at">upper =</span> <span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## 0.8413448 with absolute error &lt; 1.5e-05</code></pre>
 <p>Nous arrivons au bon résultat, soit la fonction de répartition de loi normale standard au point 1</p>
-<div class="sourceCode" id="cb254"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb254-1"><a href="#cb254-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pnorm</span>(<span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb262"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb262-1"><a href="#cb262-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pnorm</span>(<span class="dv">1</span>)</span></code></pre></div>
 <pre><code>## [1] 0.8413447</code></pre>
 <p>Remarque : La fonction <code>integrate</code> ne travaille pas de façon vectorielle. Elle ne peut pas calculer des intégrales numériques pour plusieurs intervalles en un seul appel de la fonction.</p>
 </div>
@@ -1019,20 +1054,20 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <li>optimisation sous contrainte : <a href="https://stat.ethz.ch/R-manual/R-patched/library/stats/html/constrOptim.html"><code>constrOptim</code></a>.</li>
 </ul>
 <p>Exemple d’optimisation d’une fonction à une variable en R : trouvons en quel point la fonction de densité de la loi normale atteint son maximum. La théorie nous dit que ce maximum est atteint en la valeur de l’espérance de la loi. Voyons si l’optimisation numérique saura retourner le bon résultat.</p>
-<div class="sourceCode" id="cb256"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb256-1"><a href="#cb256-1" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(</span>
-<span id="cb256-2"><a href="#cb256-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> <span class="fu">dnorm</span>(x, <span class="at">mean =</span> <span class="dv">3</span>), <span class="at">from =</span> <span class="sc">-</span><span class="dv">3</span>, <span class="at">to =</span> <span class="dv">10</span>, </span>
-<span id="cb256-3"><a href="#cb256-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Maximum de la densité normale&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;densité N(3,1)&quot;</span></span>
-<span id="cb256-4"><a href="#cb256-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb256-5"><a href="#cb256-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">3</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>)</span></code></pre></div>
-<p><img src="/calculs/calculs_math_r_2021_files/figure-html/unnamed-chunk-98-1.png" width="70%" style="display: block; margin: auto;" /></p>
-<div class="sourceCode" id="cb257"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb257-1"><a href="#cb257-1" aria-hidden="true" tabindex="-1"></a><span class="fu">optimize</span>(<span class="at">f =</span> dnorm, <span class="at">interval =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">10</span>), <span class="at">mean =</span> <span class="dv">3</span>, <span class="at">maximum =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb264"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb264-1"><a href="#cb264-1" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(</span>
+<span id="cb264-2"><a href="#cb264-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> <span class="fu">dnorm</span>(x, <span class="at">mean =</span> <span class="dv">3</span>), <span class="at">from =</span> <span class="sc">-</span><span class="dv">3</span>, <span class="at">to =</span> <span class="dv">10</span>, </span>
+<span id="cb264-3"><a href="#cb264-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Maximum de la densité normale&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;densité N(3,1)&quot;</span></span>
+<span id="cb264-4"><a href="#cb264-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb264-5"><a href="#cb264-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">3</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">&quot;blue&quot;</span>)</span></code></pre></div>
+<p><img src="/calculs/calculs_math_r_2021_files/figure-html/unnamed-chunk-102-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb265"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb265-1"><a href="#cb265-1" aria-hidden="true" tabindex="-1"></a><span class="fu">optimize</span>(<span class="at">f =</span> dnorm, <span class="at">interval =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">10</span>), <span class="at">mean =</span> <span class="dv">3</span>, <span class="at">maximum =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## $maximum
 ## [1] 3
 ## 
 ## $objective
 ## [1] 0.3989423</code></pre>
 <p>Oui, pour une loi normale d’espérance 3 et de variance 1, nous arrivons bien numériquement au résultat que le maximum de la densité est atteint en la valeur 3. La fonction <code>optimize</code> nous dit aussi que ce maximum vaut :</p>
-<div class="sourceCode" id="cb259"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb259-1"><a href="#cb259-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dnorm</span>(<span class="dv">3</span>, <span class="at">mean =</span> <span class="dv">3</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb267"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb267-1"><a href="#cb267-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dnorm</span>(<span class="dv">3</span>, <span class="at">mean =</span> <span class="dv">3</span>)</span></code></pre></div>
 <pre><code>## [1] 0.3989423</code></pre>
 <p>Les fonctions <code>nlm</code>, <code>optim</code> et <code>constrOptim</code> utilisent des <strong>algorithmes itératifs</strong>. Elles ont besoin de valeurs initiales pour les paramètres (argument <code>par</code> à fournir obligatoirement). À chaque itération de l’algorithme, elles modifient ces valeurs en tentant de se diriger vers l’optimum de la fonction. Elles peuvent :</p>
 <ul>
@@ -1047,24 +1082,24 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 <p>Ces fonctions sont tout de même très utiles pour effectuer une optimisation lorsque celle-ci est difficile ou impossible à réaliser algébriquement.</p>
 <p>Voici un exemple d’optimisation d’une fonction à plusieurs variables. La fonction <code>lm</code> minimise le critère des moindres carrés, en implémentant des formules algébriques. Les estimations des paramètres du modèle linéaire que <code>lm</code> retourne sont les points en lesquelles la fonction des moindres carrés est minimisée. Tentons de minimiser cette fonction de façon numérique. Pour ce faire, nous avons d’abord besoin d’une fonction qui calcule le critère des moindres carrés et qui prend comme premier argument les paramètres du modèle. Nous n’avons pas encore vu dans le cours comment créer des fonctions, mais je me permets tout de même ici d’en créer une, pour illustrer l’optimisation numérique. La syntaxe pour créer des fonctions R sera vue au prochain cours.</p>
 <p>Le <a href="https://en.wikipedia.org/wiki/Least_squares">critère des moindres carrés</a> est calculé en sommant les différences au carré entre les valeurs observées d’une variable et les valeurs prédites par le modèle. Pour un modèle de régression linéaire, la fonction suivante calcule de façon matricielle la valeur du critère.</p>
-<div class="sourceCode" id="cb261"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb261-1"><a href="#cb261-1" aria-hidden="true" tabindex="-1"></a>moindresCarres <span class="ot">&lt;-</span> <span class="cf">function</span>(beta, y, X) {</span>
-<span id="cb261-2"><a href="#cb261-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.vector</span>(<span class="fu">crossprod</span>(y <span class="sc">-</span> X <span class="sc">%*%</span> <span class="fu">matrix</span>(beta, <span class="at">ncol =</span> <span class="dv">1</span>)))</span>
-<span id="cb261-3"><a href="#cb261-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb269"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb269-1"><a href="#cb269-1" aria-hidden="true" tabindex="-1"></a>moindresCarres <span class="ot">&lt;-</span> <span class="cf">function</span>(beta, y, X) {</span>
+<span id="cb269-2"><a href="#cb269-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.vector</span>(<span class="fu">crossprod</span>(y <span class="sc">-</span> X <span class="sc">%*%</span> <span class="fu">matrix</span>(beta, <span class="at">ncol =</span> <span class="dv">1</span>)))</span>
+<span id="cb269-3"><a href="#cb269-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p>Le vecteur <code>y</code> doit contenir les valeurs observées de la variable réponse et la matrice <code>X</code> est la <a href="https://en.wikipedia.org/wiki/Design_matrix">matrice de design du modèle</a>. Cette dernière contient les observations des variables explicatives pour les termes présents dans le modèle. Le vecteur <code>y</code> et la matrice <code>X</code> sont des composantes du modèle supposées connues ici. C’est le vecteur de paramètre <code>beta</code> que nous cherchons à estimer. Nous allons utiliser les données du jeu de données <code>cars</code> dans cet exemple.</p>
 <p>Voyons d’abord le résultat obtenu avec la fonction <code>lm</code> pour un modèle quadratique.</p>
-<div class="sourceCode" id="cb262"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb262-1"><a href="#cb262-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(dist <span class="sc">~</span> speed <span class="sc">+</span> <span class="fu">I</span>(speed<span class="sc">^</span><span class="dv">2</span>), <span class="at">data =</span> cars)</span>
-<span id="cb262-2"><a href="#cb262-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coefficients</span>(reg)</span></code></pre></div>
+<div class="sourceCode" id="cb270"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb270-1"><a href="#cb270-1" aria-hidden="true" tabindex="-1"></a>reg <span class="ot">&lt;-</span> <span class="fu">lm</span>(dist <span class="sc">~</span> speed <span class="sc">+</span> <span class="fu">I</span>(speed<span class="sc">^</span><span class="dv">2</span>), <span class="at">data =</span> cars)</span>
+<span id="cb270-2"><a href="#cb270-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coefficients</span>(reg)</span></code></pre></div>
 <pre><code>## (Intercept)       speed  I(speed^2) 
 ##   2.4701378   0.9132876   0.0999593</code></pre>
 <p>Pour retrouver ce résultat par optimisation numérique, il faut d’abord construire le vecteur <code>y</code> et la matrice <code>X</code> comme suit.</p>
-<div class="sourceCode" id="cb264"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb264-1"><a href="#cb264-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> cars<span class="sc">$</span>dist</span>
-<span id="cb264-2"><a href="#cb264-2" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">intercept =</span> <span class="dv">1</span>, cars<span class="sc">$</span>speed, cars<span class="sc">$</span>speed<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb272"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb272-1"><a href="#cb272-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> cars<span class="sc">$</span>dist</span>
+<span id="cb272-2"><a href="#cb272-2" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">intercept =</span> <span class="dv">1</span>, cars<span class="sc">$</span>speed, cars<span class="sc">$</span>speed<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
 <p>La fonction <code>lm</code> arrive à la valeur minimale des moindres carrés suivante</p>
-<div class="sourceCode" id="cb265"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb265-1"><a href="#cb265-1" aria-hidden="true" tabindex="-1"></a><span class="fu">moindresCarres</span>(<span class="at">beta =</span> <span class="fu">coefficients</span>(reg), <span class="at">y =</span> y, <span class="at">X =</span> X)</span></code></pre></div>
+<div class="sourceCode" id="cb273"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb273-1"><a href="#cb273-1" aria-hidden="true" tabindex="-1"></a><span class="fu">moindresCarres</span>(<span class="at">beta =</span> <span class="fu">coefficients</span>(reg), <span class="at">y =</span> y, <span class="at">X =</span> X)</span></code></pre></div>
 <pre><code>## [1] 10824.72</code></pre>
 <p>pour les valeurs de paramètres <span class="math inline">\(\beta\)</span> = (2.4701378, 0.9132876, 0.0999593). Quel résultat est obtenu avec <code>optim</code>?</p>
-<div class="sourceCode" id="cb267"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb267-1"><a href="#cb267-1" aria-hidden="true" tabindex="-1"></a>op1 <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">3</span>), <span class="at">fn =</span> moindresCarres, <span class="at">y =</span> y, <span class="at">X =</span> X)</span>
-<span id="cb267-2"><a href="#cb267-2" aria-hidden="true" tabindex="-1"></a>op1</span></code></pre></div>
+<div class="sourceCode" id="cb275"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb275-1"><a href="#cb275-1" aria-hidden="true" tabindex="-1"></a>op1 <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">3</span>), <span class="at">fn =</span> moindresCarres, <span class="at">y =</span> y, <span class="at">X =</span> X)</span>
+<span id="cb275-2"><a href="#cb275-2" aria-hidden="true" tabindex="-1"></a>op1</span></code></pre></div>
 <pre><code>## $par
 ## [1] 7.2212674 0.2859028 0.1191485
 ## 
@@ -1082,8 +1117,8 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 ## NULL</code></pre>
 <p>L’algorithme a convergé (car il retourne une valeur de 0 pour l’élément <code>convergence</code> dans la sortie), mais il n’arrive pas au bon résultat.</p>
 <p>Solution potentielle : changer d’algorithme d’optimisation.</p>
-<div class="sourceCode" id="cb269"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb269-1"><a href="#cb269-1" aria-hidden="true" tabindex="-1"></a>op2 <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">3</span>), <span class="at">fn =</span> moindresCarres, <span class="at">y =</span> y, <span class="at">X =</span> X, <span class="at">method =</span> <span class="st">&quot;BFGS&quot;</span>)</span>
-<span id="cb269-2"><a href="#cb269-2" aria-hidden="true" tabindex="-1"></a>op2</span></code></pre></div>
+<div class="sourceCode" id="cb277"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb277-1"><a href="#cb277-1" aria-hidden="true" tabindex="-1"></a>op2 <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">3</span>), <span class="at">fn =</span> moindresCarres, <span class="at">y =</span> y, <span class="at">X =</span> X, <span class="at">method =</span> <span class="st">&quot;BFGS&quot;</span>)</span>
+<span id="cb277-2"><a href="#cb277-2" aria-hidden="true" tabindex="-1"></a>op2</span></code></pre></div>
 <pre><code>## $par
 ## [1] 2.47011519 0.91329056 0.09995889
 ## 
@@ -1100,8 +1135,8 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 ## $message
 ## NULL</code></pre>
 <p>Autre solution potentielle : changer les bornes initiales.</p>
-<div class="sourceCode" id="cb271"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb271-1"><a href="#cb271-1" aria-hidden="true" tabindex="-1"></a>op3 <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="fl">2.5</span>,<span class="dv">1</span>,<span class="fl">0.1</span>), <span class="at">fn =</span> moindresCarres, <span class="at">y =</span> y, <span class="at">X =</span> X)</span>
-<span id="cb271-2"><a href="#cb271-2" aria-hidden="true" tabindex="-1"></a>op3</span></code></pre></div>
+<div class="sourceCode" id="cb279"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb279-1"><a href="#cb279-1" aria-hidden="true" tabindex="-1"></a>op3 <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="at">par =</span> <span class="fu">c</span>(<span class="fl">2.5</span>,<span class="dv">1</span>,<span class="fl">0.1</span>), <span class="at">fn =</span> moindresCarres, <span class="at">y =</span> y, <span class="at">X =</span> X)</span>
+<span id="cb279-2"><a href="#cb279-2" aria-hidden="true" tabindex="-1"></a>op3</span></code></pre></div>
 <pre><code>## $par
 ## [1] 2.46514183 0.91414522 0.09993205
 ## 
@@ -1118,10 +1153,10 @@ nNoOôÔpPqQrRsStTuUùÙûÛüÜvVwWxXyYzZ&quot;</code></pre>
 ## $message
 ## NULL</code></pre>
 <p>Ici, même en partant de valeurs initiales très proches des paramètres optimaux, l’algorithme d’optimisation utilisé par défaut avec <code>optim</code> n’arrive pas tout à fait à trouver l’optimum global de la fonction. Seule la solution de changer l’algorithme d’optimisation nous permet d’arriver approximativement au même résultat que celui trouvé algébriquement par <code>lm</code>.</p>
-<div class="sourceCode" id="cb273"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb273-1"><a href="#cb273-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coefficients</span>(reg)</span></code></pre></div>
+<div class="sourceCode" id="cb281"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb281-1"><a href="#cb281-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coefficients</span>(reg)</span></code></pre></div>
 <pre><code>## (Intercept)       speed  I(speed^2) 
 ##   2.4701378   0.9132876   0.0999593</code></pre>
-<div class="sourceCode" id="cb275"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb275-1"><a href="#cb275-1" aria-hidden="true" tabindex="-1"></a>op2<span class="sc">$</span>par</span></code></pre></div>
+<div class="sourceCode" id="cb283"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb283-1"><a href="#cb283-1" aria-hidden="true" tabindex="-1"></a>op2<span class="sc">$</span>par</span></code></pre></div>
 <pre><code>## [1] 2.47011519 0.91329056 0.09995889</code></pre>
 <p>Cet exemple illustre comment la fonction <code>optim</code> s’emploie. Il faut d’abord lui donner en entrée des valeurs initiales pour les paramètres de la fonction à optimiser (argument <code>par</code>). Ensuite, il faut lui fournir la fonction R qui implémente la fonction mathématique à optimiser (argument <code>fn</code>). Cette fonction doit retourner une seule valeur, numérique. De plus, son premier argument doit obligatoirement être le vecteur des paramètres que nous cherchons à estimer par l’optimisation effectuée. Après les arguments <code>par</code> et <code>fn</code>, il faut fournir, au besoin, des arguments à passer à la fonction donnée en entrée via l’argument <code>fn</code> (les arguments <code>y</code> et <code>X</code> dans l’exemple). Finalement, nous pouvons configurer le fonctionnement de la fonction <code>optim</code> en modifiant les valeurs des arguments <code>method</code>, <code>lower</code>, <code>upper</code>, <code>control</code>, ou <code>hessian</code>.</p>
 <hr />
@@ -1269,7 +1304,7 @@ de l’objet et de ses éléments) : <code>identical(x, y)</code>.</li>
 <h1>Références</h1>
 <p>Les informations présentées dans ces notes proviennent des fiches d’aide du logiciel R :</p>
 <ul>
-<li>R Core Team (2020). <em>R: A language and environment for statistical computing</em>. R Foundation for Statistical Computing, Vienna, Austria. URL <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a></li>
+<li>R Core Team (2020). <em>R: A Language and Environment for Statistical Computing</em>. R Foundation for Statistical Computing, Vienna, Austria. URL <a href="https://www.R-project.org/" class="uri">https://www.R-project.org/</a></li>
 </ul>
 <p>Pour aller plus loin :</p>
 <ul>

@@ -278,8 +278,8 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ##  $ de1    : int  2 3 4 1 2 3 5 6 5 4
 ##  $ de2    : int  1 4 2 3 5 4 NA 2 5 3
 ##  $ lanceur: chr  &quot;Luc&quot; &quot;Luc&quot; NA &quot;Luc&quot; ...</code></pre>
-<p>Nous avons réglé le problème de lecture de la deuxième colonne. Attardons-nous maintenant à la dernière colonne. Elle est enregistrée dans un vecteur de chaînes de caractères. Si nous avions préféré que <code>read.table</code> transforme les colonnes contenant des valeurs caractères en facteur, il aurait fallu assigner la valeur <code>TRUE</code> à l’argument <code>stringsAsFactors</code>. Avant sa version 4.0.0, R avait ce comportement par défaut. Le nouveau comportement par défaut est cependant bien ce que nous désirons ici.</p>
-<p>Nous avons illustré ici deux arguments de la fonction <code>read.table</code>. Elle en possède plusieurs autres, à adapter selon le fichier à lire.</p>
+<p>Nous avons réglé le problème de lecture de la deuxième colonne. Attardons-nous maintenant à la dernière colonne. Elle est enregistrée dans un vecteur de chaînes de caractères. Si nous avions préféré que <code>read.table</code> transforme les colonnes contenant des valeurs caractères en facteur, il aurait fallu assigner la valeur <code>TRUE</code> à l’argument <code>stringsAsFactors</code>. Avant sa version 4.0.0, R avait ce comportement par défaut. Le nouveau comportement par défaut correspond à ce que nous désirons ici.</p>
+<p>Nous avons illustré deux arguments de la fonction <code>read.table</code>. Elle en possède plusieurs autres, à adapter selon le fichier à lire.</p>
 <div id="arguments-de-la-fonction-read.table" class="section level3" number="2.1.1">
 <h3><span class="header-section-number">2.1.1</span> Arguments de la fonction <code>read.table</code></h3>
 <p>Voici un résumé des arguments les plus utiles de la fonction <code>read.table</code>. Chaque argument est en lien avec une question que l’utilisateur doit se poser lors de la lecture d’un fichier de données.</p>
@@ -311,7 +311,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li>Est-ce qu’il y a des caractères spéciaux, par exemple des accents ? Si oui, quel encodage est utilisé ?
 <ul>
-<li>Un des encodages les plus courants est <code>UTF-8</code>. En cas de problèmes avec des accents mal lus, essayer l’argument <code>encoding = "UTF-8"</code>. Ça pourrait régler le problème.</li>
+<li>Un des encodages les plus courants est <code>UTF-8</code>. En cas de problèmes avec des accents mal lus, essayez l’argument <code>encoding = "UTF-8"</code> ou <code>fileEncoding = "UTF-8"</code>. Ça pourrait régler le problème.</li>
 <li>Par défaut l’encodage est supposé inconnu.</li>
 </ul></li>
 <li>Est-ce que les données ou les noms des variables débutent à la ligne 1 ?
@@ -332,7 +332,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <li>Est-ce que les colonnes contenant des chaînes de caractères doivent être converties en facteurs ?
 <ul>
 <li>Si oui, utiliser <code>stringsAsFactors = TRUE</code>, sinon <code>stringsAsFactors = FALSE</code>.</li>
-<li>Par défaut <code>stringsAsFactors = FALSE</code>.</li>
+<li>Par défaut <code>stringsAsFactors = FALSE</code> (depuis la version 4.0.0 de R, pour des versions antérieures de R la valeur par défaut est <code>TRUE</code>).</li>
 </ul></li>
 <li>Est-ce que les données dans les différentes colonnes sont toutes du bon type ?
 <ul>
@@ -543,21 +543,23 @@ Le [package `XLConnect`](https://CRAN.R-project.org/package=XLConnect) offre aus
 <div id="fichier-texte-1" class="section level2" number="3.1">
 <h2><span class="header-section-number">3.1</span> Fichier texte</h2>
 <p>Le format de fichier le plus universel pour exporter des données est le format texte. Un grand nombre de logiciels peuvent lire ce format. Les fonctions de base en R pour écrire dans un fichier texte sont <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/writeLines.html"><code>writeLines</code></a>, <a href="https://stat.ethz.ch/R-manual/R-patched/library/base/html/write.html"><code>write</code></a> et <a href="https://stat.ethz.ch/R-manual/R-patched/library/utils/html/write.table.html"><code>write.table</code></a>. Les fonctions <code>writeLines</code> et <code>write</code> sont l’équivalent de <code>readLines</code> et <code>scan</code>, respectivement, pour l’écriture dans des fichiers au lieu de la lecture. Pour réaliser une tâche d’exportation de jeux de données, la fonction <code>write.table</code> est la mieux adaptée des trois. Par exemple, exportons le contenu du data frame <code>data_ex</code> dans le fichier texte <code>data_ex_export.txt</code></p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write.table</span>(data_ex, <span class="at">file =</span> <span class="st">&quot;data_ex_export.txt&quot;</span>)</span></code></pre></div>
-<p>Il faut spécifier à la fonction l’objet dans lequel se trouvent les données à exporter (typiquement une matrice ou un data frame), ainsi que le fichier dans lequel écrire les données. Tout comme <code>read.table</code>, la fonction <code>write.table</code> possède plusieurs arguments permettant de contrôler le formatage des données, notamment le symbole de décimale (<code>dec</code>), le symbole représentant les valeurs manquantes (<code>na</code>), le séparateur entre les champs (<code>sep</code>), la présence ou non des noms des lignes ou des colonnes (<code>row.names</code> et <code>col.names</code>), etc.</p>
-<p>Il existe aussi deux fonctions enveloppe à la fonction <code>write.table</code> pour les formats CSV, nommées <code>write.csv</code> et <code>write.csv2</code>.</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write.table</span>(<span class="at">x =</span> data_ex, <span class="at">file =</span> <span class="st">&quot;data_ex_export.txt&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span></code></pre></div>
+<p>Il faut spécifier à la fonction l’objet, typiquement une matrice ou un data frame, dans lequel se trouvent les données à exporter (argument <code>x</code>), ainsi que le fichier dans lequel écrire les données (argument <code>file</code>).</p>
+<p>Tout comme <code>read.table</code>, la fonction <code>write.table</code> possède plusieurs arguments permettant de contrôler le formatage des données. Un de ces arguments, nommé <code>fileEncoding</code>, est utilisé dans l’exemple précédent. En fournissant la valeur <code>"UTF-8"</code> à l’argument <code>fileEncoding</code>, on crée un fichier d’encodage <code>UTF-8</code>, dont l’usage est très répandu. Sans cet argument, <code>write.table</code> pourrait par défaut créer un fichier dont l’encodage est spécifique au système d’exploitation utilisé et qui pourrait causer problèmes sous un autre système d’exploitation. Par exemple, si vous travaillez sous Windows, le fichier créé pourrait contenir des lettres accentuées non reconnues sous macOS en raison d’un encodage mal compris. Spécifier l’argument <code>fileEncoding = "UTF-8"</code> permet d’éviter ce genre de souci.</p>
+<p>La fonction <code>write.table</code> possède d’autres arguments, tel que notamment <code>dec</code> pour spécifier le symbole de décimale, <code>na</code> pour spécifier le symbole représentant les valeurs manquantes, <code>sep</code> pour spécifier le séparateur entre les champs, <code>row.names</code> et <code>col.names</code> pour indiquer si les noms des lignes et des colonnes, respectivement, doivent être inclus dans le fichier créé. Tous les informations concernant ces arguments, ainsi que tous les autres arguments non mentionnés ici, se trouvent dans la <a href="https://stat.ethz.ch/R-manual/R-patched/library/utils/html/write.table.html">fiche d’aide de la fonction <code>write.table</code></a>.</p>
+<p>Il existe aussi deux fonctions enveloppe à la fonction <code>write.table</code> pour les formats CSV, nommées <a href="https://stat.ethz.ch/R-manual/R-patched/library/utils/html/write.table.html"><code>write.csv</code> et <code>write.csv2</code></a>.</p>
 </div>
 <div id="fichier-json" class="section level2" number="3.2">
 <h2><span class="header-section-number">3.2</span> Fichier JSON</h2>
 <p>Pour exporter les données dans un data frame en format JSON avec le <a href="https://CRAN.R-project.org/package=jsonlite">package <code>jsonlite</code></a>, il faut d’abord transformer les données au format JSON avec la fonction <code>toJSON</code>. Ensuite, l’objet obtenu doit être écrit dans un fichier externe avec la fonction <code>write</code> du R de base.</p>
 <div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>data_ex_json <span class="ot">&lt;-</span> <span class="fu">toJSON</span>(data_ex, <span class="at">pretty =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write</span>(data_ex_json, <span class="st">&quot;data_ex_export.json&quot;</span>)</span></code></pre></div>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write</span>(<span class="at">x =</span> data_ex_json, <span class="at">file =</span> <span class="st">&quot;data_ex_export.json&quot;</span>)</span></code></pre></div>
 </div>
 <div id="fichier-excel-1" class="section level2" number="3.3">
 <h2><span class="header-section-number">3.3</span> Fichier EXCEL</h2>
 <p>Le <a href="https://ycphs.github.io/openxlsx/index.html">package <code>openxlsx</code></a> offre des fonctions pour exporter des données stockées dans un objet R dans un fichier EXCEL. Par exemple, le contenu du data frame <code>data_ex</code> peut être écrit dans un fichier EXCEL avec la <a href="https://ycphs.github.io/openxlsx/reference/write.xlsx.html">fonction <code>write.xlsx</code></a> comme suit.</p>
 <div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(openxlsx)</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.xlsx</span>(data_ex, <span class="at">file =</span> <span class="st">&quot;data_ex_export.xlsx&quot;</span>)</span></code></pre></div>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.xlsx</span>(<span class="at">x =</span> data_ex, <span class="at">file =</span> <span class="st">&quot;data_ex_export.xlsx&quot;</span>)</span></code></pre></div>
 </div>
 <div id="enregistrement-dobjets-r-dans-un-fichier-externe" class="section level2" number="3.4">
 <h2><span class="header-section-number">3.4</span> Enregistrement d’objets R dans un fichier externe</h2>

@@ -224,7 +224,7 @@ La liste des arguments de la fonction devient la suivante.
 formals(stats_desc)
 ```
 
-Les arguments qui ne possèdent pas de valeur par défaut sont obligatoires. Si une fonction est appelée sans donner de valeur en entrée à un paramètre obligatoire, une erreur est produite. 
+Les arguments qui ne possèdent pas de valeur par défaut sont obligatoires. Si une fonction est appelée sans donner de valeur en entrée à un argument obligatoire, une erreur est produite. 
 
 ```{r, error = TRUE}
 stats_desc(sortie_matrice = FALSE)
@@ -280,6 +280,26 @@ Nous pouvons également constater que la valeur par défaut de l'argument `useHa
 
 Ainsi, la fonction `sample` aurait pu être programmée différemment. La liste de ses arguments aurait pu contenir la valeur par défaut suivante pour l'argument `size` : `if (length(x) == 1L && is.numeric(x) && is.finite(x) && x >= 1) x else length(x)`. Peut-être que les auteurs de la fonction ont trouvé cette expression trop lourde pour la mettre dans la liste des arguments.
 
+
+#### Valeurs par défaut `NULL` {-}
+
+\mbox{}
+
+Pour éviter une valeur par défaut dont l'expression est trop complexe, certains auteurs de fonctions R utilisent `NULL` comme valeur par défaut dans la liste des arguments, puis définissent la vraie valeur par défaut dans le corps de la fonction. Par exemple, la [fonction `cut`](https://stat.ethz.ch/R-manual/R-patched/library/base/html/cut.html) vue dans les [notes sur le prétraitement de données en R](https://stt4230.rbind.io/manipulation_donnees/pretraitement_donnees_r/#fonction-cut) implémente cette pratique pour son argument `labels`. 
+
+```{r}
+args(cut.default)
+```
+
+Si un utilisateur appelle la fonction `cut` sans fournir de valeur à l'argument `labels`, alors celui-ci prend d'abord la valeur `NULL`. Cependant, la valeur de l'objet `labels` est ensuite modifié dans le corps de la fonction par des instructions ayant l'allure suivante.
+
+```{r eval = FALSE}
+if (is.null(labels)) {
+  <instructions>  # comportant une nouvelle assignation de valeur à labels
+}
+```
+
+Ainsi la fonction `is.null` est utilisée pour vérifier si une valeur a été fournie en entrée lors de l'appel de la fonction. Cette façon de faire est une solution de rechange l'utilisation de `missing` en omettant une valeur par défaut dans la liste des arguments. Elle comporte cependant l'avantage d'indiquer plus clairement dans la liste des arguments que l'argument n'est pas obligatoire. 
 
 
 ### Arguments acceptant seulement quelques chaînes de caractères spécifiques
@@ -1031,7 +1051,7 @@ Les composantes d'une fonction R sont\ :
 
 \mbox{}
 
-Les valeurs par défaut sont **définies dans la liste des arguments**, en accompagnant le nom d'un argument d'un **opérateur `=`** et d'une **instruction R retournant la valeur par défaut**.
+Les valeurs par défaut sont **définies dans la liste des arguments**, en accompagnant le nom d'un argument d'un **opérateur `=`** et d'une **expression R retournant la valeur par défaut**.
 
 **Cas particulier**\ : argument qui prend en entrée **une seule chaîne de caractères** et que seulement un **petit nombre de chaînes de caractères distinctes sont acceptées** comme valeur de cet argument\ :
 
@@ -1160,7 +1180,7 @@ Il les cherche dans l'**environnement englobant** de la fonction = *environnemen
 - Wickham, H. (2019). *Advanced R*. 2e édition. Chapman and Hall/CRC.
     + Fonctions\ : Chapitre 6 <https://adv-r.hadley.nz/functions.html>
     + Environnements\ : Chapitre 7 <https://adv-r.hadley.nz/environments.html>
-- Fanara, C. (2019). Tutoriel web intitulé «\ A Tutorial on Using Functions in R!\ ». <https://www.datacamp.com/community/tutorials/functions-in-r-a-tutorial>
+- Fanara, C. (2019). Tutoriel web intitulé «\ *A Tutorial on Using Functions in R!*\ ». <https://www.datacamp.com/community/tutorials/functions-in-r-a-tutorial>
 - Passage d'arguments par valeur versus par référence\ : <http://www.mathwarehouse.com/programming/passing-by-value-vs-by-reference-visual-explanation.php>
 - Pour en apprendre davantage concernant la programmation fonctionnelle\ :
     + <https://adv-r.hadley.nz/fp.html>
