@@ -17,6 +17,7 @@ Ce cours a pour objectif d'amener l'étudiant à une maîtrise avancée de R, de
 
 Le reste du matériel de cours (exercices, tutoriels, exemples supplémentaires, évaluations) n'est pas public. Les étudiants inscrits au cours peuvent accéder à ce matériel à partir du site web du cours, dans l'environnement numérique de l'Université Laval «&nbsp;monPortail&nbsp;» : https://monportail.ulaval.ca.
 
+
 ***
 
 #### Ce site web comprend les pages suivantes : 
@@ -58,4 +59,10 @@ Le reste du matériel de cours (exercices, tutoriels, exemples supplémentaires,
 * [Classement des fiches par semaine de cours]({{< relref "classement_par_semaine" >}})
 
 
+***
 
+#### Licence
+
+Le contenu de ce site web est diffusé sous licence [*Creative Commons Attribution - Pas d'utilisation commerciale - Partage dans les mêmes conditions 4.0 International* (CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr).
+
+[![CC BY-NC-SA 4.0](by-nc-sa.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr)
